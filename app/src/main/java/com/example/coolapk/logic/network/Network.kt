@@ -13,8 +13,12 @@ object Network {
 
     suspend fun getHomeFeed(page: Int, firstLaunch: Int) =
         homeService.getHomeFeed(page, firstLaunch).await()
-    suspend fun getFeedContent(id:String) =
+
+    suspend fun getFeedContent(id: String) =
         homeService.getFeedContent(id).await()
+
+    suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
+        homeService.getFeedContentReply(id, discussMode, listType, page).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.coolapk.R
 import com.example.coolapk.databinding.FragmentFeedBinding
 import com.example.coolapk.util.LinearItemDecoration
@@ -25,6 +26,8 @@ class FeedFragment : Fragment() {
     private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private var firstCompletelyVisibleItemPosition = 0
+    private var lastVisibleItemPosition = 0
 
     companion object {
         @JvmStatic
@@ -63,28 +66,75 @@ class FeedFragment : Fragment() {
         initView()
         initData()
         initRefresh()
+        initScroll()
 
         viewModel.feedData.observe(viewLifecycleOwner) { result ->
             val feed = result.getOrNull()
             if (feed != null) {
-                if (viewModel.isRefreshing)
+                if (viewModel.isRefreshing) {
                     viewModel.feedContentList.clear()
+                    viewModel.getFeedReply()
+                }
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.feedContentList.add(feed)
+                }
+            } else {
+                viewModel.isEnd = true
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
+                Toast.makeText(activity, "加载失败", Toast.LENGTH_SHORT).show()
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.feedReplyData.observe(viewLifecycleOwner) { result ->
+            val reply = result.getOrNull()
+            if (!reply.isNullOrEmpty()) {
+                if (viewModel.isRefreshing) {
+                    viewModel.feedReplyList.clear()
+                }
+                if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                    viewModel.feedReplyList.addAll(reply)
                 }
                 mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
             } else {
+                viewModel.isEnd = true
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
-                Toast.makeText(activity, "null", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
         }
 
+    }
+
+    private fun initScroll() {
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (lastVisibleItemPosition == viewModel.feedReplyList.size) {
+                        if (!viewModel.isEnd) {
+                            viewModel.isLoadMore = true
+                            viewModel.page++
+                            viewModel.getFeedReply()
+                        }
+                    }
+                }
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                firstCompletelyVisibleItemPosition =
+                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+            }
+        })
     }
 
     private fun initRefresh() {
@@ -107,7 +157,8 @@ class FeedFragment : Fragment() {
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
-        viewModel.id = id
+        viewModel.id = id //"49715174"
+        viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         lifecycleScope.launch {
@@ -118,7 +169,11 @@ class FeedFragment : Fragment() {
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = FeedContentAdapter(requireActivity(), viewModel.feedContentList)
+        mAdapter = FeedContentAdapter(
+            requireActivity(),
+            viewModel.feedContentList,
+            viewModel.feedReplyList
+        )
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter

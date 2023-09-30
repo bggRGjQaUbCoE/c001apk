@@ -134,8 +134,8 @@ class HomeFeedAdapter(
                 holder.id = feed.id
                 holder.uname.text = feed.username
                 holder.device.text = feed.deviceTitle
-                holder.from.text = Html.fromHtml(feed.infoHtml, Html.FROM_HTML_MODE_COMPACT)
-                holder.message.text = Html.fromHtml(feed.message, Html.FROM_HTML_MODE_COMPACT)
+                holder.from.text = Html.fromHtml(feed.infoHtml.replace("\n","<br />"), Html.FROM_HTML_MODE_COMPACT)
+                holder.message.text = Html.fromHtml(feed.message.replace("\n","<br />"), Html.FROM_HTML_MODE_COMPACT)
                 if (feed.picArr.isNotEmpty()) {
                     holder.recyclerView.visibility = View.VISIBLE
                     val mAdapter = FeedPicAdapter(feed.picArr)
@@ -183,12 +183,11 @@ class HomeFeedAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        when (homeFeedList[position].entityType) {
-            "imageCarouselCard_1" -> return 0
-            "iconLinkGridCard" -> return 1
-            "feed" -> return 2
-            else -> return 3
-            //"imageTextScrollCard" -> return 3
+        return when (homeFeedList[position].entityType) {
+            "imageCarouselCard_1" -> 0
+            "iconLinkGridCard" -> 1
+            "feed" -> 2
+            else -> 3
         }
     }
 

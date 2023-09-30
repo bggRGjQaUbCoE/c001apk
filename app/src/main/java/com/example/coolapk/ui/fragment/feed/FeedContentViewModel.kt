@@ -10,9 +10,11 @@ import com.example.coolapk.logic.network.Repository
 class FeedContentViewModel : ViewModel() {
 
     val feedContentList = ArrayList<FeedContentResponse>()
+    val feedReplyList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true
     var isLoadMore = false
+    var isEnd = false
 
     var id = ""
 
@@ -25,4 +27,19 @@ class FeedContentViewModel : ViewModel() {
     fun getFeed() {
         getFeedData.value = getFeedData.value
     }
+
+    var page = 1
+    var discussMode = 1
+    var listType = "lastupdate_desc"
+
+    private val getFeedReplyData = MutableLiveData<String>()
+
+    val feedReplyData = getFeedReplyData.switchMap {
+        Repository.getFeedContentReply(id, discussMode, listType, page)
+    }
+
+    fun getFeedReply() {
+        getFeedReplyData.value = getFeedReplyData.value
+    }
+
 }

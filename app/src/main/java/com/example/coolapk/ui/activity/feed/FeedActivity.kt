@@ -23,7 +23,7 @@ class FeedActivity : AppCompatActivity() {
         val uname = intent.getStringExtra("uname")
         val device = intent.getStringExtra("device")
 
-        if (type == "feed") {
+        if (type == "feed" && supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.feedFragment, FeedFragment.newInstance(id!!, uname!!, device))
