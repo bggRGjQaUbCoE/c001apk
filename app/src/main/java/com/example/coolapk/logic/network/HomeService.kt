@@ -2,6 +2,7 @@ package com.example.coolapk.logic.network
 
 import com.example.coolapk.logic.model.FeedContentResponse
 import com.example.coolapk.logic.model.HomeFeedResponse
+import com.example.coolapk.util.CookieUtil
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -43,6 +44,21 @@ interface HomeService {
         @Query("id") id: String,
         @Query("discussMode") discussMode: Int,
         @Query("listType") listType: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
+    @GET("/v6/search?showAnonymous=-1")
+    @Headers(
+        "X-Requested-With: XMLHttpRequest",
+        "X-App-Id: com.coolapk.market",
+        "X-App-Device: wMxASdvl1ciJGbv92QgsDM2gTOH1STTByOn5Wdz1WYzByOn5Wdz1WYzByO3AjO4UjOxkjOCNkOBZkO2kDI7AyOgsjYkRmZ4MmNxADN0YWYllDZ",
+        "X-App-Token: v2JDJhJDEwJE1TNDJPVFl3TXpRNE1rVTUvN2M4MXVDTHMua2NyTWFEV09RbXJVUFZWSm5FTzlCU0ZVOS5T",
+    )
+    fun getSearch(
+        @Query("type") type: String,
+        @Query("feedType") feedType: String,
+        @Query("sort") sort: String,
+        @Query("searchValue") keyWord: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 

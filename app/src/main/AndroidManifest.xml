@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -13,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Coolapk"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".ui.activity.search.SearchActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.activity.feed.FeedActivity"
             android:exported="false" />

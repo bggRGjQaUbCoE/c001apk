@@ -10,6 +10,7 @@ import kotlin.coroutines.suspendCoroutine
 object Network {
 
     private val homeService = ServiceCreator.create<HomeService>()
+    private val searchService = SearchServiceCreator.create<HomeService>()
 
     suspend fun getHomeFeed(page: Int, firstLaunch: Int) =
         homeService.getHomeFeed(page, firstLaunch).await()
@@ -19,6 +20,14 @@ object Network {
 
     suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
         homeService.getFeedContentReply(id, discussMode, listType, page).await()
+
+    suspend fun getSearch(
+        type: String,
+        feedType: String,
+        sort: String,
+        keyWord: String,
+        page: Int
+    ) = searchService.getSearch(type, feedType, sort, keyWord, page).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

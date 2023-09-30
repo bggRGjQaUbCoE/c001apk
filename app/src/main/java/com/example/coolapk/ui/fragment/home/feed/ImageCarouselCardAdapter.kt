@@ -1,4 +1,4 @@
-package com.example.coolapk.ui.fragment.home
+package com.example.coolapk.ui.fragment.home.feed
 
 import android.view.LayoutInflater
 import android.view.View

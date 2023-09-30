@@ -10,7 +10,11 @@ import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.coolapk.R
 import com.example.coolapk.databinding.ActivityMainBinding
 import com.example.coolapk.ui.fragment.BlankFragment
-import com.example.coolapk.ui.fragment.home.HomeFeedFragment
+import com.example.coolapk.ui.fragment.home.HomeFragment
+import com.example.coolapk.util.CookieUtil.SESSID
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
 
@@ -23,15 +27,17 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        requestData()
+
         binding.viewPager.apply {
             adapter = object : FragmentStateAdapter(this@MainActivity) {
                 override fun getItemCount() = 3
                 override fun createFragment(position: Int): Fragment {
                     return when (position) {
-                        0 -> HomeFeedFragment()
+                        0 -> HomeFragment()
                         1 -> BlankFragment()
                         2 -> BlankFragment()
-                        else -> HomeFeedFragment()
+                        else -> HomeFragment()
                     }
                 }
             }
@@ -77,6 +83,36 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
             true
         }
 
+    }
+
+    private fun requestData() {
+        thread {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("https://api.coolapk.com/v6/account/checkLoginInfo")
+                    .addHeader("X-Requested-With", "XMLHttpRequest")
+                    .addHeader("X-App-Id", "com.coolapk.market")
+                    .addHeader(
+                        "X-App-Device",
+                        "wMxASdvl1ciJGbv92QgsDM2gTOH1STTByOn5Wdz1WYzByOn5Wdz1WYzByO3AjO4UjOxkjOCNkOBZkO2kDI7AyOgsjYkRmZ4MmNxADN0YWYllDZ"
+                    )
+                    .addHeader(
+                        "X-App-Token",
+                        "v2JDJhJDEwJE1TNDJPVFl3TXpRNE1rVTUvN2M4MXVDTHMua2NyTWFEV09RbXJVUFZWSm5FTzlCU0ZVOS5T"
+                    )
+                    .build()
+                val response = client.newCall(request).execute()
+                val responseData = response.body
+                val headers = response.headers
+                val cookies = headers.values("Set-Cookie");
+                val session = cookies[0]
+                val sessionID = session.substring(0, session.indexOf(";"))
+                SESSID = sessionID
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
 }
