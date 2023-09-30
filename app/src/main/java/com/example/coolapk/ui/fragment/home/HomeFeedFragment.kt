@@ -11,15 +11,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.bili.ui.fragment.home.minterface.IOnBottomClickContainer
-import com.example.bili.ui.fragment.home.minterface.IOnBottomClickListener
+import cc.shinichi.library.ImagePreview
+import cc.shinichi.library.bean.ImageInfo
+import com.example.coolapk.ui.fragment.minterface.IOnBottomClickContainer
+import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
+import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickContainer
+import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.coolapk.R
 import com.example.coolapk.databinding.FragmentHomeFeedBinding
 import com.example.coolapk.util.LinearItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class HomeFeedFragment : Fragment(), IOnBottomClickListener {
+class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[HomeFeedViewModel::class.java] }
@@ -146,6 +150,19 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener {
     override fun onResume() {
         super.onResume()
         (requireActivity() as IOnBottomClickContainer).controller = this
+        IOnFeedPicClickContainer.controller = this
+    }
+
+    override fun onShowPic(position: Int, urlList: MutableList<ImageInfo>) {
+        ImagePreview.instance
+            .setContext(requireActivity())
+            .setImageInfoList(urlList)
+            .setIndex(position)
+            .setShowCloseButton(true)
+            .setEnableDragClose(true)
+            .setEnableUpDragClose(true)
+            .setFolderName("Bili")
+            .start()
     }
 
 }

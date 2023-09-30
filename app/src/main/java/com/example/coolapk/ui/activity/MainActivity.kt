@@ -5,8 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.example.bili.ui.fragment.home.minterface.IOnBottomClickContainer
-import com.example.bili.ui.fragment.home.minterface.IOnBottomClickListener
+import com.example.coolapk.ui.fragment.minterface.IOnBottomClickContainer
+import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.coolapk.R
 import com.example.coolapk.databinding.ActivityMainBinding
 import com.example.coolapk.ui.fragment.BlankFragment

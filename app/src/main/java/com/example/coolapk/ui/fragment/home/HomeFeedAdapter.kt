@@ -39,6 +39,7 @@ class HomeFeedAdapter(
         val from: TextView = view.findViewById(R.id.from)
         val device: TextView = view.findViewById(R.id.device)
         val message: TextView = view.findViewById(R.id.message)
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -121,6 +122,26 @@ class HomeFeedAdapter(
                 holder.device.text = feed.deviceTitle
                 holder.from.text = feed.infoHtml
                 holder.message.text = feed.message
+                if (feed.picArr.isNotEmpty()) {
+                    holder.recyclerView.visibility = View.VISIBLE
+                    val mAdapter = FeedPicAdapter(feed.picArr)
+                    val mLayoutManager = GridLayoutManager(mContext, 3)
+                    val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                    val spaceValue = HashMap<String, Int>()
+                    spaceValue[SpacesItemDecoration.TOP_SPACE] = 0
+                    spaceValue[SpacesItemDecoration.BOTTOM_SPACE] = space
+                    spaceValue[SpacesItemDecoration.LEFT_SPACE] = space
+                    spaceValue[SpacesItemDecoration.RIGHT_SPACE] = space
+                    holder.recyclerView.apply {
+                        setPadding(space, 0, space, space)
+                        adapter = mAdapter
+                        layoutManager = mLayoutManager
+                        if (itemDecorationCount == 0)
+                            addItemDecoration(SpacesItemDecoration(3, spaceValue, true))
+                    }
+                } else {
+                    holder.recyclerView.visibility = View.GONE
+                }
                 ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
             }
 

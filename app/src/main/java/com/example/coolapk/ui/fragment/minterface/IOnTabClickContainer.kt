@@ -1,4 +1,4 @@
-package com.example.bili.ui.fragment.home.minterface
+package com.example.coolapk.ui.fragment.minterface
 
 interface IOnTabClickContainer {
     var controller: IOnTabClickListener?
