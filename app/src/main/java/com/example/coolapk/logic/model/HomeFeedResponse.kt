@@ -19,6 +19,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val replynum: Int,
         val forwardnum: Int,
         val favnum: Int,
+        val dateline: String,
         @SerializedName("create_time") val createTime: String,
         @SerializedName("device_title") val deviceTitle: String,
         @SerializedName("device_name") val deviceName: String,

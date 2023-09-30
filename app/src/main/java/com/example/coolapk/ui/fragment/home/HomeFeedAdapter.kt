@@ -2,7 +2,9 @@ package com.example.coolapk.ui.fragment.home
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.HomeFeedResponse
+import com.example.coolapk.ui.activity.feed.FeedActivity
 import com.example.coolapk.util.ImageShowUtil
 import com.example.coolapk.util.LinearItemDecoration1
 import com.example.coolapk.util.SpacesItemDecoration
@@ -40,6 +43,7 @@ class HomeFeedAdapter(
         val device: TextView = view.findViewById(R.id.device)
         val message: TextView = view.findViewById(R.id.message)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        var id = ""
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -67,7 +71,16 @@ class HomeFeedAdapter(
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_home_feed, parent, false)
-                return FeedViewHolder(view)
+                val viewHolder = FeedViewHolder(view)
+                viewHolder.itemView.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", "feed")
+                    intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uname", viewHolder.uname.text)
+                    intent.putExtra("device", viewHolder.device.text)
+                    parent.context.startActivity(intent)
+                }
+                return viewHolder
             }
 
             else -> {
@@ -118,26 +131,24 @@ class HomeFeedAdapter(
 
             is FeedViewHolder -> {
                 val feed = homeFeedList[position]
+                holder.id = feed.id
                 holder.uname.text = feed.username
                 holder.device.text = feed.deviceTitle
-                holder.from.text = feed.infoHtml
-                holder.message.text = feed.message
+                holder.from.text = Html.fromHtml(feed.infoHtml, Html.FROM_HTML_MODE_COMPACT)
+                holder.message.text = Html.fromHtml(feed.message, Html.FROM_HTML_MODE_COMPACT)
                 if (feed.picArr.isNotEmpty()) {
                     holder.recyclerView.visibility = View.VISIBLE
                     val mAdapter = FeedPicAdapter(feed.picArr)
-                    val mLayoutManager = GridLayoutManager(mContext, 3)
-                    val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
-                    val spaceValue = HashMap<String, Int>()
-                    spaceValue[SpacesItemDecoration.TOP_SPACE] = 0
-                    spaceValue[SpacesItemDecoration.BOTTOM_SPACE] = space
-                    spaceValue[SpacesItemDecoration.LEFT_SPACE] = space
-                    spaceValue[SpacesItemDecoration.RIGHT_SPACE] = space
+                    val count =
+                        if (feed.picArr.size < 3) feed.picArr.size
+                        else 3
+                    val mLayoutManager = GridLayoutManager(mContext, count)
+                    val minorSpace = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                    val normalSpace = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
                     holder.recyclerView.apply {
-                        setPadding(space, 0, space, space)
+                        setPadding(normalSpace, 0, minorSpace, minorSpace)
                         adapter = mAdapter
                         layoutManager = mLayoutManager
-                        if (itemDecorationCount == 0)
-                            addItemDecoration(SpacesItemDecoration(3, spaceValue, true))
                     }
                 } else {
                     holder.recyclerView.visibility = View.GONE
@@ -180,11 +191,5 @@ class HomeFeedAdapter(
             //"imageTextScrollCard" -> return 3
         }
     }
-
-    private fun http2https(url: String) =
-        if (StringBuilder(url)[4] != 's')
-            StringBuilder(url).insert(4, "s").toString()
-        else url
-
 
 }

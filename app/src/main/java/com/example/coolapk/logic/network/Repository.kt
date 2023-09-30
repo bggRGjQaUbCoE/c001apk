@@ -14,6 +14,14 @@ object Repository {
             Result.failure(RuntimeException("response status is null"))
     }
 
+    fun getFeedContent(id:String) = fire(Dispatchers.IO) {
+        val feedResponse = Network.getFeedContent(id)
+        if (feedResponse.data != null)
+            Result.success(feedResponse)
+        else
+            Result.failure(RuntimeException("response status is null"))
+    }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

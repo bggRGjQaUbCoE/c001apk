@@ -1,4 +1,4 @@
-package com.example.coolapk.ui.fragment.home
+package com.example.coolapk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -12,20 +12,19 @@ import com.example.coolapk.R
 import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.coolapk.util.ImageShowUtil
 
-class FeedPicAdapter(
+class FeedContentPicAdapter(
     private val feedPicList: List<String>
 ) :
-    RecyclerView.Adapter<FeedPicAdapter.ViewHolder>() {
+    RecyclerView.Adapter<FeedContentPicAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val count: TextView = view.findViewById(R.id.count)
         val feedPic: ImageView = view.findViewById(R.id.feedPic)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_home_feed_pic, parent, false)
+                .inflate(R.layout.item_feed_content_pic, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             val position = viewHolder.adapterPosition
@@ -41,32 +40,10 @@ class FeedPicAdapter(
         return viewHolder
     }
 
-    override fun getItemCount() =
-        when (feedPicList.size) {
-            in 4..5 -> 3
-            in 7..8 -> 6
-            else -> feedPicList.size
-        }
+    override fun getItemCount() = feedPicList.size
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        when (feedPicList.size) {
-            in 4..5 -> {
-                if (position == 2) {
-                    holder.count.visibility = View.VISIBLE
-                    holder.count.text = "${feedPicList.size}图"
-                }
-            }
-
-            in 7..8 -> {
-                if (position == 5) {
-                    holder.count.visibility = View.VISIBLE
-                    holder.count.text = "${feedPicList.size}图"
-                }
-            }
-
-            else -> holder.count.visibility = View.GONE
-        }
         ImageShowUtil.showIMG1(holder.feedPic, feedPicList[position] + ".xs.jpg")
     }
 

@@ -44,10 +44,4 @@ class ImageTextScrollCardAdapter(
         ImageShowUtil.showIMG1(holder.imageTextScrollCard, imageTextScrollCard.pic)
     }
 
-    private fun http2https(url: String) =
-        if (StringBuilder(url)[4] != 's')
-            StringBuilder(url).insert(4, "s").toString()
-        else url
-
-
 }

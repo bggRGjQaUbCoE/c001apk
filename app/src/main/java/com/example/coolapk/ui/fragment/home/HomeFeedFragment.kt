@@ -129,7 +129,6 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-
         mAdapter = HomeFeedAdapter(requireActivity(), viewModel.homeFeedList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
