@@ -11,14 +11,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
+import com.example.coolapk.R
+import com.example.coolapk.databinding.FragmentHomeFeedBinding
 import com.example.coolapk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickListener
-import com.example.coolapk.R
-import com.example.coolapk.databinding.FragmentHomeFeedBinding
 import com.example.coolapk.util.LinearItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -131,7 +132,12 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = HomeFeedAdapter(requireActivity(), viewModel.homeFeedList)
         mLayoutManager = LinearLayoutManager(activity)
+        val recycledViewPool = RecycledViewPool()
         binding.recyclerView.apply {
+            setHasFixedSize(true)
+            isNestedScrollingEnabled = false
+            setItemViewCacheSize(200)
+            setRecycledViewPool(recycledViewPool)
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)

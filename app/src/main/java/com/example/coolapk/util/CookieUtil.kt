@@ -4,4 +4,8 @@ object CookieUtil {
 
     var SESSID = ""
 
+    var deviceCode = ""
+
+    var token = ""
+
 }

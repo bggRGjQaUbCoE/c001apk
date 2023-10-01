@@ -57,5 +57,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("com.github.SherlockGougou:BigImageViewPager:androidx-7.2.7")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("org.mindrot:jbcrypt:0.4")
 
 }

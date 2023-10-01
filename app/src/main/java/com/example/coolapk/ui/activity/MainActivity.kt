@@ -1,17 +1,22 @@
 package com.example.coolapk.ui.activity
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.example.coolapk.ui.fragment.minterface.IOnBottomClickContainer
-import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.coolapk.R
 import com.example.coolapk.databinding.ActivityMainBinding
 import com.example.coolapk.ui.fragment.BlankFragment
 import com.example.coolapk.ui.fragment.home.HomeFragment
+import com.example.coolapk.ui.fragment.minterface.IOnBottomClickContainer
+import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.coolapk.util.CookieUtil.SESSID
+import com.example.coolapk.util.CookieUtil.deviceCode
+import com.example.coolapk.util.CookieUtil.token
+import com.example.coolapk.util.TokenDeviceUtils
+import com.example.coolapk.util.TokenDeviceUtils.Companion.getTokenV2
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.concurrent.thread
@@ -27,6 +32,7 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        genData()
         requestData()
 
         binding.viewPager.apply {
@@ -85,6 +91,12 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
 
     }
 
+    private fun genData() {
+        deviceCode = TokenDeviceUtils.getLastingDeviceCode(this)
+
+        token = deviceCode.getTokenV2()
+    }
+
     private fun requestData() {
         thread {
             try {
@@ -101,15 +113,19 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
                         "X-App-Token",
                         "v2JDJhJDEwJE1TNDJPVFl3TXpRNE1rVTUvN2M4MXVDTHMua2NyTWFEV09RbXJVUFZWSm5FTzlCU0ZVOS5T"
                     )
+                    .addHeader("Cookie", SESSID)
+                    .addHeader("Cookie", "token=deleted")
                     .build()
                 val response = client.newCall(request).execute()
-                val responseData = response.body
+                //val responseData = response.body
                 val headers = response.headers
                 val cookies = headers.values("Set-Cookie");
                 val session = cookies[0]
                 val sessionID = session.substring(0, session.indexOf(";"))
                 SESSID = sessionID
+                // Toast.makeText(this, SESSID, Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
+                Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
                 e.printStackTrace()
             }
         }

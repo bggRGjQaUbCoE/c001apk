@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object SearchServiceCreator {
 
     private val client: OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AddCookiesInterceptor()) //这部分
+        .addInterceptor(AddCookiesInterceptor())
         .build()
 
     private const val BASE_URL = "https://api.coolapk.com"

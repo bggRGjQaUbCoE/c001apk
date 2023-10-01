@@ -78,6 +78,7 @@ class FeedFragment : Fragment() {
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.feedContentList.add(feed)
                 }
+                mAdapter.notifyDataSetChanged()
             } else {
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
