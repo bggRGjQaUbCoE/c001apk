@@ -10,12 +10,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bili.util.PubDateUtil
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.FeedContentResponse
 import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.util.ImageShowUtil
+import com.example.coolapk.util.ReplyItemDecoration
 import com.example.coolapk.util.SpacesItemDecoration
 
 class FeedContentAdapter(
@@ -40,6 +42,7 @@ class FeedContentAdapter(
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -107,7 +110,10 @@ class FeedContentAdapter(
             is FeedContentReplyViewHolder -> {
                 val reply = replyList[position - 1]
                 holder.uname.text = reply.username
-                holder.message.text = Html.fromHtml(reply.message, Html.FROM_HTML_MODE_COMPACT)
+                holder.message.text = Html.fromHtml(
+                    reply.message.replace("\n", "<br />"),
+                    Html.FROM_HTML_MODE_COMPACT
+                )
                 holder.pubDate.text = reply.dateline?.let { PubDateUtil.time(reply.dateline) }
                 holder.like.text = reply.likenum
                 val drawable: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
@@ -119,6 +125,20 @@ class FeedContentAdapter(
                 )
                 holder.like.setCompoundDrawables(drawable, null, null, null)
                 ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
+                if (reply.replyRows.isNotEmpty()) {
+                    holder.recyclerView.visibility = View.VISIBLE
+                    val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
+                    val mLayoutManager = LinearLayoutManager(mContext)
+                    val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                    holder.recyclerView.apply {
+                        adapter = mAdapter
+                        layoutManager = mLayoutManager
+                        if (itemDecorationCount == 0)
+                            addItemDecoration(ReplyItemDecoration(space))
+                    }
+                } else {
+                    holder.recyclerView.visibility = View.GONE
+                }
             }
         }
 

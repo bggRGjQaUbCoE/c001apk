@@ -36,7 +36,8 @@ data class HomeFeedResponse(val data: List<Data>) {
 
     data class ReplyRows(
         val id: String, val uid: String, val username: String,
-        val message: String, val likenum: String
+        val message: String, val likenum: String,  val ruid:String,
+        val rusername:String
     )
 
     data class Entities(

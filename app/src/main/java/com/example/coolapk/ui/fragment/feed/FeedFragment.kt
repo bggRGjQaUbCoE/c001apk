@@ -97,16 +97,20 @@ class FeedFragment : Fragment() {
                     viewModel.feedReplyList.clear()
                 }
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    viewModel.feedReplyList.addAll(reply)
+                    /*viewModel.feedReplyList.addAll(reply)
                     for (i in 0 until viewModel.feedReplyList.size) {
                         if (viewModel.feedReplyList[i].entityTemplate != "feed_reply") {
                             viewModel.feedReplyList.removeAt(i)
-                            mAdapter.notifyItemRemoved(i)
+                            //mAdapter.notifyItemRemoved(i)
                             break
                         }
+                    }*/
+                    for (i in 0 until reply.size){
+                        if (reply[i].entityType == "feed_reply")
+                            viewModel.feedReplyList.add(reply[i])
                     }
+                    mAdapter.notifyDataSetChanged()
                 }
-                mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
