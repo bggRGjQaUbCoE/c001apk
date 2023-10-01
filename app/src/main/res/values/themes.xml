@@ -8,4 +8,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="iconMiniScrollCardRadius">
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="Widget.Material3.TabLayout.OnSurface.Trans" parent="Base.Widget.Material3.TabLayout.OnSurface">
+        <item name="android:background">@drawable/tab_background</item>
+    </style>
+
 </resources>

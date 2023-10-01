@@ -14,6 +14,8 @@ interface HomeService {
     fun getHomeFeed(
         @Query("page") page: Int,
         @Query("firstLaunch") firstLaunch: Int,
+        @Query("installTime") installTime: String,
+        @Query("lastItem") lastItem: String,
     ): Call<HomeFeedResponse>
 
     @GET("/v6/feed/detail?tmp=1")

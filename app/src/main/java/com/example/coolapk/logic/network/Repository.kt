@@ -6,13 +6,14 @@ import kotlin.coroutines.CoroutineContext
 
 object Repository {
 
-    fun getHomeFeed(page: Int, firstLaunch: Int) = fire(Dispatchers.IO) {
-        val homeFeedResponse = Network.getHomeFeed(page, firstLaunch)
-        if (homeFeedResponse.data.isNotEmpty())
-            Result.success(homeFeedResponse.data)
-        else
-            Result.failure(RuntimeException("response status is null"))
-    }
+    fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
+        fire(Dispatchers.IO) {
+            val homeFeedResponse = Network.getHomeFeed(page, firstLaunch, installTime, lastItem)
+            if (homeFeedResponse.data.isNotEmpty())
+                Result.success(homeFeedResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
 
     fun getFeedContent(id: String) = fire(Dispatchers.IO) {
         val feedResponse = Network.getFeedContent(id)

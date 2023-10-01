@@ -12,8 +12,8 @@ object Network {
     private val homeService = ServiceCreator.create<HomeService>()
     private val searchService = SearchServiceCreator.create<HomeService>()
 
-    suspend fun getHomeFeed(page: Int, firstLaunch: Int) =
-        homeService.getHomeFeed(page, firstLaunch).await()
+    suspend fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
+        homeService.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
 
     suspend fun getFeedContent(id: String) =
         homeService.getFeedContent(id).await()

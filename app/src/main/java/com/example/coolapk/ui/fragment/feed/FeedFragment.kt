@@ -22,8 +22,9 @@ class FeedFragment : Fragment() {
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
     private var id: String = ""
-    private var uname: String = ""
-    private var device: String? = null
+
+    //private var uname: String = ""
+    //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
@@ -31,12 +32,12 @@ class FeedFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String, uname: String, device: String?) =
+        fun newInstance(id: String) =
             FeedFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
-                    putString("UNAME", uname)
-                    putString("DEVICE", device)
+                    //putString("UNAME", uname)
+                    //putString("DEVICE", device)
                 }
             }
     }
@@ -45,8 +46,8 @@ class FeedFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             id = it.getString("ID")!!
-            uname = it.getString("UNAME")!!
-            device = it.getString("DEVICE")
+            //uname = it.getString("UNAME")!!
+            //device = it.getString("DEVICE")
         }
     }
 
@@ -97,6 +98,13 @@ class FeedFragment : Fragment() {
                 }
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.feedReplyList.addAll(reply)
+                    for (i in 0 until viewModel.feedReplyList.size) {
+                        if (viewModel.feedReplyList[i].entityTemplate != "feed_reply") {
+                            viewModel.feedReplyList.removeAt(i)
+                            mAdapter.notifyItemRemoved(i)
+                            break
+                        }
+                    }
                 }
                 mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false

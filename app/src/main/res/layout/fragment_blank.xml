@@ -6,7 +6,6 @@
     android:orientation="vertical"
     tools:context=".ui.fragment.BlankFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:id="@+id/deviceCode"
         android:layout_width="match_parent"
@@ -20,7 +19,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="hello_blank_fragment"
         android:textSize="20sp" />
 
 </LinearLayout>

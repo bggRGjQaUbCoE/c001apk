@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
 import com.example.coolapk.R
@@ -21,6 +20,7 @@ import com.example.coolapk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.coolapk.util.LinearItemDecoration
+import com.example.coolapk.util.TokenDeviceUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -57,9 +57,16 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
                     viewModel.homeFeedList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.homeFeedList.addAll(feed)
-
+                    for(i in 0 until viewModel.homeFeedList.size){
+                        if (viewModel.homeFeedList[i].entityTemplate == "sponsorCard"){
+                            viewModel.homeFeedList.removeAt(i)
+                            mAdapter.notifyItemRemoved(i)
+                            break
+                        }
+                    }
+                    viewModel.lastItem =
+                        viewModel.homeFeedList[viewModel.homeFeedList.size - 1].entityId
                 }
-
                 mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
@@ -122,6 +129,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
         viewModel.firstLaunch = 1
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
+        viewModel.installTime = TokenDeviceUtils.getLastingInstallTime(requireActivity())
         lifecycleScope.launch {
             delay(500)
             viewModel.getHomeFeed()
@@ -132,12 +140,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = HomeFeedAdapter(requireActivity(), viewModel.homeFeedList)
         mLayoutManager = LinearLayoutManager(activity)
-        val recycledViewPool = RecycledViewPool()
         binding.recyclerView.apply {
-            setHasFixedSize(true)
-            isNestedScrollingEnabled = false
-            setItemViewCacheSize(200)
-            setRecycledViewPool(recycledViewPool)
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)

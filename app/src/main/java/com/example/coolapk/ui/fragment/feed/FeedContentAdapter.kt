@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bili.util.PubDateUtil
@@ -22,7 +21,7 @@ import com.example.coolapk.util.SpacesItemDecoration
 class FeedContentAdapter(
     private val mContext: Context,
     private val feedList: List<FeedContentResponse>,
-    private val replyList: List<HomeFeedResponse.Data>
+    private var replyList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -71,9 +70,13 @@ class FeedContentAdapter(
                     val feed = feedList[position]
                     holder.uname.text = feed.data.username
                     holder.device.text = feed.data.deviceTitle
-                    holder.pubDate.text = PubDateUtil.time(feed.data.dateline)
+                    holder.pubDate.text =
+                        feed.data.dateline?.let { PubDateUtil.time(feed.data.dateline) }
                     holder.message.text =
-                        Html.fromHtml(feed.data.message.replace("\n","<br />"), Html.FROM_HTML_MODE_COMPACT)
+                        Html.fromHtml(
+                            feed.data.message.replace("\n", "<br />"),
+                            Html.FROM_HTML_MODE_COMPACT
+                        )
                     if (feed.data.picArr.isNotEmpty()) {
                         holder.recyclerView.visibility = View.VISIBLE
                         val mAdapter = FeedContentPicAdapter(feed.data.picArr)
@@ -105,7 +108,7 @@ class FeedContentAdapter(
                 val reply = replyList[position - 1]
                 holder.uname.text = reply.username
                 holder.message.text = Html.fromHtml(reply.message, Html.FROM_HTML_MODE_COMPACT)
-                holder.pubDate.text = PubDateUtil.time(reply.dateline)
+                holder.pubDate.text = reply.dateline?.let { PubDateUtil.time(reply.dateline) }
                 holder.like.text = reply.likenum
                 val drawable: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                 drawable.setBounds(

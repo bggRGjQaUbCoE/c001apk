@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.logic.network.Repository
+import com.example.coolapk.util.TokenDeviceUtils
 
 class HomeFeedViewModel : ViewModel() {
 
@@ -15,11 +16,13 @@ class HomeFeedViewModel : ViewModel() {
 
     var page = 1
     var firstLaunch = 1
+    var installTime = ""
+    var lastItem = ""
 
     private val getHomeFeedData = MutableLiveData<String>()
 
     val homeFeedData = getHomeFeedData.switchMap {
-        Repository.getHomeFeed(page, firstLaunch)
+        Repository.getHomeFeed(page, firstLaunch, installTime, lastItem)
     }
 
     fun getHomeFeed() {

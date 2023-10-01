@@ -48,6 +48,12 @@ class HomeFragment : Fragment() {
     }
 
     private fun initMenu() {
+        binding.search.setOnClickListener {
+            startActivity(Intent(activity, SearchActivity::class.java))
+        }
+    }
+
+    /*private fun initMenu() {
         binding.toolBar.inflateMenu(R.menu.home_feed_menu)
         binding.toolBar.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -55,7 +61,7 @@ class HomeFragment : Fragment() {
             }
             return@setOnMenuItemClickListener true
         }
-    }
+    }*/
 
     private fun initView() {
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {

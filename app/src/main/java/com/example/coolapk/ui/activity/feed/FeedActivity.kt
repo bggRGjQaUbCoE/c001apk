@@ -20,13 +20,13 @@ class FeedActivity : AppCompatActivity() {
 
         val type = intent.getStringExtra("type")
         val id = intent.getStringExtra("id")
-        val uname = intent.getStringExtra("uname")
-        val device = intent.getStringExtra("device")
+        //val uname = intent.getStringExtra("uname")
+        //val device = intent.getStringExtra("device")
 
         if (type == "feed" && supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.feedFragment, FeedFragment.newInstance(id!!, uname!!, device))
+                .replace(R.id.feedFragment, FeedFragment.newInstance(id!!))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }

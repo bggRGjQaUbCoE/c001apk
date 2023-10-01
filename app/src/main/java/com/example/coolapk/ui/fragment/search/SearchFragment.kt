@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
@@ -82,13 +83,13 @@ class SearchFragment : Fragment() {
     }
 
     private fun initEditText() {
+        binding.editText.isFocusable = true
+        binding.editText.isFocusableInTouchMode = true
         binding.editText.requestFocus()
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED)
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(binding.editText, 0)
         binding.editText.imeOptions = EditorInfo.IME_ACTION_SEARCH
         binding.editText.inputType = EditorInfo.TYPE_CLASS_TEXT
-        binding.editText.isSingleLine = true
     }
 
     override fun onStart() {

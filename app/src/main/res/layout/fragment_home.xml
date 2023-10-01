@@ -1,37 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|enterAlways" />
+        android:orientation="horizontal">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
+            style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             app:tabRippleColor="@android:color/transparent" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/colorSurfaceVariant" />
-    </com.google.android.material.appbar.AppBarLayout>
+        <ImageButton
+            android:id="@+id/search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="?attr/actionBarItemBackground"
+            android:src="@drawable/ic_search"
+            android:tooltipText="@string/search" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="?attr/colorSurfaceVariant" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:layout_height="match_parent" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

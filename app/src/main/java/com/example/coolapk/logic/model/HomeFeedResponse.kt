@@ -6,6 +6,7 @@ data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
         val entityType: String,
+        val entityTemplate: String,
         val entities: List<Entities>,
         val id: String,
         val uid: String,
@@ -19,7 +20,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val replynum: String,
         val forwardnum: String,
         val favnum: String,
-        val dateline: String,
+        val dateline: String?,
         @SerializedName("create_time") val createTime: String,
         @SerializedName("device_title") val deviceTitle: String,
         @SerializedName("device_name") val deviceName: String,
@@ -41,6 +42,7 @@ data class HomeFeedResponse(val data: List<Data>) {
     data class Entities(
         val pic: String,
         val title: String,
+        val logo: String
     )
 
 }

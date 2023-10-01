@@ -24,7 +24,7 @@ import com.example.coolapk.util.SpacesItemDecoration
 
 class HomeFeedAdapter(
     private val mContext: Context,
-    private val homeFeedList: List<HomeFeedResponse.Data>
+    private val homeFeedList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -47,6 +47,11 @@ class HomeFeedAdapter(
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.title)
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+    }
+
+    class IconMiniScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
@@ -76,18 +81,25 @@ class HomeFeedAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    intent.putExtra("device", viewHolder.device.text)
+                    //intent.putExtra("uname", viewHolder.uname.text)
+                    //intent.putExtra("device", viewHolder.device.text)
                     parent.context.startActivity(intent)
                 }
                 return viewHolder
+            }
+
+            3 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_home_image_text_scroll_card, parent, false)
+                return ImageTextScrollCardViewHolder(view)
             }
 
             else -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_home_image_text_scroll_card, parent, false)
-                return ImageTextScrollCardViewHolder(view)
+                return IconMiniScrollCardViewHolder(view)
             }
         }
 
@@ -134,8 +146,12 @@ class HomeFeedAdapter(
                 holder.id = feed.id
                 holder.uname.text = feed.username
                 holder.device.text = feed.deviceTitle
-                holder.from.text = Html.fromHtml(feed.infoHtml.replace("\n","<br />"), Html.FROM_HTML_MODE_COMPACT)
-                holder.message.text = Html.fromHtml(feed.message.replace("\n","<br />"), Html.FROM_HTML_MODE_COMPACT)
+                holder.from.text = Html.fromHtml(
+                    feed.infoHtml.replace("\n", "<br />"),
+                    Html.FROM_HTML_MODE_COMPACT
+                )
+                holder.message.text =
+                    Html.fromHtml(feed.message.replace("\n", "<br />"), Html.FROM_HTML_MODE_COMPACT)
                 if (feed.picArr.isNotEmpty()) {
                     holder.recyclerView.visibility = View.VISIBLE
                     val mAdapter = FeedPicAdapter(feed.picArr)
@@ -179,15 +195,40 @@ class HomeFeedAdapter(
                         addItemDecoration(LinearItemDecoration1(space))
                 }
             }
+
+            is IconMiniScrollCardViewHolder -> {
+                val imageTextScrollCard = homeFeedList[position].entities
+                val mAdapter = IconMiniScrollCardAdapter(mContext, imageTextScrollCard)
+                val mLayoutManager = LinearLayoutManager(mContext)
+                mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
+                val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
+                holder.title.text = homeFeedList[position].title
+                holder.title.setPadding(space, space, space, space)
+                val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
+                drawable.setBounds(
+                    0,
+                    0,
+                    holder.title.textSize.toInt(),
+                    holder.title.textSize.toInt()
+                )
+                holder.title.setCompoundDrawables(null, null, drawable, null)
+                holder.recyclerView.apply {
+                    adapter = mAdapter
+                    layoutManager = mLayoutManager
+                    if (itemDecorationCount == 0)
+                        addItemDecoration(LinearItemDecoration1(space))
+                }
+            }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (homeFeedList[position].entityType) {
+        return when (homeFeedList[position].entityTemplate) {
             "imageCarouselCard_1" -> 0
             "iconLinkGridCard" -> 1
             "feed" -> 2
-            else -> 3
+            "imageTextScrollCard" -> 3
+            else -> 4
         }
     }
 
