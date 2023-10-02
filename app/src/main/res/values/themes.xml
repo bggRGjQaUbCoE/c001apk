@@ -1,10 +1,10 @@
 <resources>
 
-    <style name="Base.Theme.Coolapk" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.C001apk" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="Theme.Coolapk" parent="Base.Theme.Coolapk">
+    <style name="Theme.C001apk" parent="Base.Theme.C001apk">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 

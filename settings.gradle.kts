@@ -15,6 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "coolapk"
+rootProject.name = "c001apk"
 include(":app")
  

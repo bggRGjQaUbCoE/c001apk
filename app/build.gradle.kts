@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.coolapk"
+    namespace = "com.example.c001apk"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.coolapk"
+        applicationId = "com.example.c001apk"
         minSdk = 31
         targetSdk = 34
         versionCode = 1
@@ -19,7 +19,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -36,6 +36,18 @@ android {
     buildFeatures {
         viewBinding = true
         //buildConfig = true
+    }
+    defaultConfig {
+        ndk {
+            ndk {
+                //abiFilters "arm64-v8a", "armeabi-v7a", "armeabi", "x86", "x86_64"
+                abiFilters.add("arm64-v8a")
+                //abiFilters.add("armeabi-v7a")
+                //abiFilters.add("armeabi")
+                //abiFilters.add("x86")
+                //abiFilters.add("x86_64")
+            }
+        }
     }
 }
 

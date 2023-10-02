@@ -1,4 +1,4 @@
-package com.example.coolapk
+package com.example.c001apk
 
 import org.junit.Test
 

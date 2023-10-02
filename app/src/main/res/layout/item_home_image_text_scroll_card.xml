@@ -18,7 +18,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.example.coolapk.view.NestedScrollableHost
+        <com.example.c001apk.view.NestedScrollableHost
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-        </com.example.coolapk.view.NestedScrollableHost>
+        </com.example.c001apk.view.NestedScrollableHost>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
