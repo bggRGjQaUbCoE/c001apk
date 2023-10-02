@@ -21,13 +21,18 @@ object Network {
     suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
         homeService.getFeedContentReply(id, discussMode, listType, page).await()
 
-    suspend fun getSearch(
+    suspend fun getSearchFeed(
         type: String,
         feedType: String,
         sort: String,
         keyWord: String,
         page: Int
-    ) = searchService.getSearch(type, feedType, sort, keyWord, page).await()
+    ) = searchService.getSearchFeed(type, feedType, sort, keyWord, page).await()
+
+    suspend fun getSearchUser(
+        keyWord: String,
+        page: Int
+    ) = searchService.getSearchUser(keyWord, page).await()
 
     suspend fun getReply2Reply(
         id: String,

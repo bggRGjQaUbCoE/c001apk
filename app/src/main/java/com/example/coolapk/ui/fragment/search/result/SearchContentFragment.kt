@@ -22,7 +22,8 @@ class SearchContentFragment : Fragment() {
     private val viewModel by lazy { ViewModelProvider(this)[SearchContentViewModel::class.java] }
     private var keyWord: String = ""
     private var type: String = ""
-    private lateinit var mAdapter: SearchFeedAdapter
+    private lateinit var feedAdapter: SearchFeedAdapter
+    private lateinit var userAdapter: SearchUserAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
@@ -66,13 +67,32 @@ class SearchContentFragment : Fragment() {
         viewModel.searchData.observe(viewLifecycleOwner) { result ->
             val search = result.getOrNull()
             if (!search.isNullOrEmpty()) {
-                if (viewModel.isRefreshing) {
-                    viewModel.searchList.clear()
-                }
-                if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    viewModel.searchList.addAll(search)
-                }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isRefreshing)
+                    viewModel.searchFeedList.clear()
+                if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    viewModel.searchFeedList.addAll(search)
+                feedAdapter.notifyDataSetChanged()
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
+            } else {
+                viewModel.isEnd = true
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
+                //Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.searchUserData.observe(viewLifecycleOwner) { result ->
+            val search = result.getOrNull()
+            if (!search.isNullOrEmpty()) {
+                if (viewModel.isRefreshing)
+                    viewModel.searchUserList.clear()
+                if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    viewModel.searchUserList.addAll(search)
+                userAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -93,11 +113,17 @@ class SearchContentFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.searchList.size - 1) {
+                    if (lastVisibleItemPosition ==
+                        if (type == "feed") viewModel.searchFeedList.size - 1
+                        else viewModel.searchUserList.size - 1
+                    ) {
                         if (!viewModel.isEnd) {
                             viewModel.isLoadMore = true
                             viewModel.page++
-                            viewModel.getSearch()
+                            if (type == "feed")
+                                viewModel.getSearchFeed()
+                            else
+                                viewModel.getSearchUser()
                         }
                     }
                 }
@@ -126,7 +152,7 @@ class SearchContentFragment : Fragment() {
     }
 
     private fun initData() {
-        if (viewModel.searchList.isEmpty())
+        if (viewModel.searchFeedList.isEmpty())
             refreshData()
     }
 
@@ -140,16 +166,24 @@ class SearchContentFragment : Fragment() {
         viewModel.isLoadMore = false
         lifecycleScope.launch {
             delay(500)
-            viewModel.getSearch()
+            if (type == "feed")
+                viewModel.getSearchFeed()
+            else
+                viewModel.getSearchUser()
         }
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = SearchFeedAdapter(requireActivity(), viewModel.searchList)
+
+        feedAdapter = SearchFeedAdapter(requireActivity(), viewModel.searchFeedList)
+        userAdapter = SearchUserAdapter(requireActivity(), viewModel.searchUserList)
+
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter =
+                if (type == "feed") feedAdapter
+                else userAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))

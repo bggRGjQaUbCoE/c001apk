@@ -13,6 +13,10 @@
     </style>
 
     <style name="Widget.Material3.TabLayout.OnSurface.Trans" parent="Base.Widget.Material3.TabLayout.OnSurface">
+        <item name="android:background">@drawable/tab_background_trans</item>
+    </style>
+
+    <style name="Widget.Material3.TabLayout.OnSurface.Mod" parent="Base.Widget.Material3.TabLayout.OnSurface">
         <item name="android:background">@drawable/tab_background</item>
     </style>
 

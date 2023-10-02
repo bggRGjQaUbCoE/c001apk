@@ -2,10 +2,9 @@ package com.example.coolapk.logic.network
 
 import com.example.coolapk.logic.model.FeedContentResponse
 import com.example.coolapk.logic.model.HomeFeedResponse
-import com.example.coolapk.util.CookieUtil
+import com.example.coolapk.logic.model.SearchUserResponse
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Headers
 import retrofit2.http.Query
 
 interface HomeService {
@@ -32,13 +31,19 @@ interface HomeService {
     ): Call<HomeFeedResponse>
 
     @GET("/v6/search?showAnonymous=-1")
-    fun getSearch(
+    fun getSearchFeed(
         @Query("type") type: String,
         @Query("feedType") feedType: String,
         @Query("sort") sort: String,
         @Query("searchValue") keyWord: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
+
+    @GET("/v6/search?showAnonymous=-1&type=user")
+    fun getSearchUser(
+        @Query("searchValue") keyWord: String,
+        @Query("page") page: Int
+    ): Call<SearchUserResponse>
 
     @GET("/v6/feed/replyList?listType=&discussMode=0&feedType=feed_reply&blockStatus=0&fromFeedAuthor=0")
     fun getReply2Reply(

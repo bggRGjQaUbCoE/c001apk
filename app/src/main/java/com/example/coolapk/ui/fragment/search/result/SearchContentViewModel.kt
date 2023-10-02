@@ -4,11 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.example.coolapk.logic.model.HomeFeedResponse
+import com.example.coolapk.logic.model.SearchUserResponse
 import com.example.coolapk.logic.network.Repository
 
 class SearchContentViewModel : ViewModel() {
 
-    val searchList = ArrayList<HomeFeedResponse.Data>()
+    val searchFeedList = ArrayList<HomeFeedResponse.Data>()
+    val searchUserList = ArrayList<SearchUserResponse.Data>()
 
     var isRefreshing = true
     var isLoadMore = false
@@ -23,10 +25,21 @@ class SearchContentViewModel : ViewModel() {
     private val getSearchData = MutableLiveData<String>()
 
     val searchData = getSearchData.switchMap {
-        Repository.getSearch(type, feedType, sort, keyWord, page)
+        Repository.getSearchFeed(type, feedType, sort, keyWord, page)
     }
 
-    fun getSearch() {
+    fun getSearchFeed() {
         getSearchData.value = getSearchData.value
     }
+
+    private val getSearchUserData = MutableLiveData<String>()
+
+    val searchUserData = getSearchUserData.switchMap {
+        Repository.getSearchUser(keyWord, page)
+    }
+
+    fun getSearchUser() {
+        getSearchUserData.value = getSearchUserData.value
+    }
+
 }
