@@ -19,6 +19,7 @@ import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.util.ImageShowUtil
 import com.example.coolapk.util.ReplyItemDecoration
 import com.example.coolapk.util.SpacesItemDecoration
+import com.google.android.material.card.MaterialCardView
 
 class FeedContentAdapter(
     private val mContext: Context,
@@ -27,6 +28,12 @@ class FeedContentAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private var iOnTotalReplyClickListener: IOnTotalReplyClickListener? = null
+
+    fun setIOnTotalReplyClickListener(iOnTotalReplyClickListener: IOnTotalReplyClickListener) {
+        this.iOnTotalReplyClickListener = iOnTotalReplyClickListener
+    }
+
     class FeedContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val uname: TextView = view.findViewById(R.id.uname)
@@ -34,6 +41,8 @@ class FeedContentAdapter(
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        val like: TextView = view.findViewById(R.id.like)
+        val reply: TextView = view.findViewById(R.id.reply)
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -42,7 +51,12 @@ class FeedContentAdapter(
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
+        val reply: TextView = view.findViewById(R.id.reply)
+        val replyCard: MaterialCardView = view.findViewById(R.id.replyCard)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        val totalReply: TextView = view.findViewById(R.id.totalReply)
+        val picRecyclerView: RecyclerView = view.findViewById(R.id.picRecyclerView)
+        var id = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -58,14 +72,18 @@ class FeedContentAdapter(
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_feed_content_reply_item, parent, false)
-                FeedContentReplyViewHolder(view)
+                val viewHolder = FeedContentReplyViewHolder(view)
+                viewHolder.totalReply.setOnClickListener {
+                    iOnTotalReplyClickListener?.onShowTotalReply(viewHolder.id)
+                }
+                viewHolder
             }
         }
     }
 
     override fun getItemCount() = replyList.size + 1
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is FeedContentViewHolder -> {
@@ -73,8 +91,25 @@ class FeedContentAdapter(
                     val feed = feedList[position]
                     holder.uname.text = feed.data.username
                     holder.device.text = feed.data.deviceTitle
-                    holder.pubDate.text =
-                        feed.data.dateline?.let { PubDateUtil.time(feed.data.dateline) }
+                    holder.pubDate.text = PubDateUtil.time(feed.data.dateline)
+                    holder.like.text = feed.data.likenum
+                    val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                    drawableLike.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                    holder.reply.text = feed.data.replynum
+                    val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
+                    drawableReply.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                     holder.message.text =
                         Html.fromHtml(
                             feed.data.message.replace("\n", "<br />"),
@@ -109,24 +144,35 @@ class FeedContentAdapter(
 
             is FeedContentReplyViewHolder -> {
                 val reply = replyList[position - 1]
+                holder.id = reply.id
                 holder.uname.text = reply.username
                 holder.message.text = Html.fromHtml(
                     reply.message.replace("\n", "<br />"),
                     Html.FROM_HTML_MODE_COMPACT
                 )
-                holder.pubDate.text = reply.dateline?.let { PubDateUtil.time(reply.dateline) }
+                holder.pubDate.text = PubDateUtil.time(reply.dateline)
                 holder.like.text = reply.likenum
-                val drawable: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
-                drawable.setBounds(
+                val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                drawableLike.setBounds(
                     0,
                     0,
                     holder.like.textSize.toInt(),
                     holder.like.textSize.toInt()
                 )
-                holder.like.setCompoundDrawables(drawable, null, null, null)
+                holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                holder.reply.text = reply.replynum
+                val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
+                drawableReply.setBounds(
+                    0,
+                    0,
+                    holder.like.textSize.toInt(),
+                    holder.like.textSize.toInt()
+                )
+                holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                 ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
+
                 if (reply.replyRows.isNotEmpty()) {
-                    holder.recyclerView.visibility = View.VISIBLE
+                    holder.replyCard.visibility = View.VISIBLE
                     val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
                     val mLayoutManager = LinearLayoutManager(mContext)
                     val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
@@ -136,9 +182,27 @@ class FeedContentAdapter(
                         if (itemDecorationCount == 0)
                             addItemDecoration(ReplyItemDecoration(space))
                     }
-                } else {
-                    holder.recyclerView.visibility = View.GONE
-                }
+                } else holder.replyCard.visibility = View.GONE
+
+                if (reply.replyRowsMore != 0) {
+                    holder.totalReply.visibility = View.VISIBLE
+                    val count = reply.replyRowsMore + reply.replyRows.size
+                    holder.totalReply.text = "查看更多回复($count)"
+                } else
+                    holder.totalReply.visibility = View.GONE
+
+                if (reply.picArr != null && reply.picArr.isNotEmpty()) {
+                    holder.picRecyclerView.visibility = View.VISIBLE
+                    val mAdapter = FeedContentPicAdapter(reply.picArr)
+                    val count =
+                        if (reply.picArr.size < 3) reply.picArr.size
+                        else 3
+                    val mLayoutManager = GridLayoutManager(mContext, count)
+                    holder.picRecyclerView.apply {
+                        adapter = mAdapter
+                        layoutManager = mLayoutManager
+                    }
+                } else holder.picRecyclerView.visibility = View.GONE
             }
         }
 

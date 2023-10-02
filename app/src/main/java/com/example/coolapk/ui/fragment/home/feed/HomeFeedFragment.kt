@@ -57,8 +57,8 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
                     viewModel.homeFeedList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.homeFeedList.addAll(feed)
-                    for(i in 0 until viewModel.homeFeedList.size){
-                        if (viewModel.homeFeedList[i].entityTemplate == "sponsorCard"){
+                    for (i in 0 until viewModel.homeFeedList.size) {
+                        if (viewModel.homeFeedList[i].entityTemplate == "sponsorCard") {
                             viewModel.homeFeedList.removeAt(i)
                             mAdapter.notifyItemRemoved(i)
                             break
@@ -151,8 +151,10 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
     override fun onReturnTop() {
         if (firstCompletelyVisibleItemPosition == 0)
             refreshData()
-        else
-            binding.recyclerView.smoothScrollToPosition(0)
+        else {
+            binding.recyclerView.scrollToPosition(0)
+            refreshData()
+        }
     }
 
     override fun onResume() {

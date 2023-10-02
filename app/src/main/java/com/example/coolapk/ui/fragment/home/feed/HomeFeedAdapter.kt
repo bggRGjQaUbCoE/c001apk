@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bili.util.PubDateUtil
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.ui.activity.feed.FeedActivity
@@ -44,6 +45,9 @@ class HomeFeedAdapter(
         val message: TextView = view.findViewById(R.id.message)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
         var id = ""
+        val pubDate: TextView = view.findViewById(R.id.pubDate)
+        val like: TextView = view.findViewById(R.id.like)
+        val reply: TextView = view.findViewById(R.id.reply)
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -146,6 +150,25 @@ class HomeFeedAdapter(
                 holder.id = feed.id
                 holder.uname.text = feed.username
                 holder.device.text = feed.deviceTitle
+                holder.pubDate.text = PubDateUtil.time(feed.dateline)
+                holder.like.text = feed.likenum
+                val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                drawableLike.setBounds(
+                    0,
+                    0,
+                    holder.like.textSize.toInt(),
+                    holder.like.textSize.toInt()
+                )
+                holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                holder.reply.text = feed.replynum
+                val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
+                drawableReply.setBounds(
+                    0,
+                    0,
+                    holder.like.textSize.toInt(),
+                    holder.like.textSize.toInt()
+                )
+                holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                 holder.from.text = Html.fromHtml(
                     feed.infoHtml.replace("\n", "<br />"),
                     Html.FROM_HTML_MODE_COMPACT

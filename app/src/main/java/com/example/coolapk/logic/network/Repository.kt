@@ -41,6 +41,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getReply2Reply(id: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val searchResponse = Network.getReply2Reply(id, page)
+            if (searchResponse.data.isNotEmpty())
+                Result.success(searchResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

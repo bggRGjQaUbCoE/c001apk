@@ -20,7 +20,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val replynum: String,
         val forwardnum: String,
         val favnum: String,
-        val dateline: String?,
+        val dateline: String,
         @SerializedName("create_time") val createTime: String,
         @SerializedName("device_title") val deviceTitle: String,
         @SerializedName("device_name") val deviceName: String,
@@ -31,13 +31,14 @@ data class HomeFeedResponse(val data: List<Data>) {
         val infoHtml: String,
         val title: String,
         val picArr: List<String>,
-        val replyRows: List<ReplyRows>
+        val replyRows: List<ReplyRows>,
+        val replyRowsMore: Int
     )
 
     data class ReplyRows(
         val id: String, val uid: String, val username: String,
-        val message: String, val likenum: String,  val ruid:String,
-        val rusername:String
+        val message: String, val likenum: String, val ruid: String,
+        val rusername: String
     )
 
     data class Entities(

@@ -29,6 +29,11 @@ object Network {
         page: Int
     ) = searchService.getSearch(type, feedType, sort, keyWord, page).await()
 
+    suspend fun getReply2Reply(
+        id: String,
+        page: Int
+    ) = searchService.getReply2Reply(id, page).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

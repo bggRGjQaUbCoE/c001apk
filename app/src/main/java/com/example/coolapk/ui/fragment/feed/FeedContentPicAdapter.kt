@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.bean.ImageInfo
 import com.example.coolapk.R
 import com.example.coolapk.ui.fragment.minterface.IOnFeedPicClickContainer
+import com.example.coolapk.util.DensityTool
 import com.example.coolapk.util.ImageShowUtil
 
 class FeedContentPicAdapter(

@@ -13,11 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolapk.R
 import com.example.coolapk.databinding.FragmentFeedBinding
+import com.example.coolapk.ui.fragment.feed.total.Reply2ReplyBottomSheetDialog
 import com.example.coolapk.util.LinearItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class FeedFragment : Fragment() {
+class FeedFragment : Fragment(), IOnTotalReplyClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
@@ -187,6 +188,7 @@ class FeedFragment : Fragment() {
             viewModel.feedContentList,
             viewModel.feedReplyList
         )
+        mAdapter.setIOnTotalReplyClickListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -206,6 +208,13 @@ class FeedFragment : Fragment() {
                 requireActivity().finish()
             }
         }
+    }
+
+    override fun onShowTotalReply(id: String) {
+        val mBottomSheetDialogFragment: Reply2ReplyBottomSheetDialog =
+            Reply2ReplyBottomSheetDialog.newInstance(id)
+
+        mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 
 }

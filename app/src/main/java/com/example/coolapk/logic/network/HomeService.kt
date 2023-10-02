@@ -40,4 +40,10 @@ interface HomeService {
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
+    @GET("/v6/feed/replyList?listType=&discussMode=0&feedType=feed_reply&blockStatus=0&fromFeedAuthor=0")
+    fun getReply2Reply(
+        @Query("id") id: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
 }

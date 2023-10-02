@@ -2,6 +2,7 @@ package com.example.coolapk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.text.Html
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -30,8 +31,7 @@ class Reply2ReplyAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_feed_content_reply_to_replyitem, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_feed_content_reply_to_reply_item, parent, false)
         return ViewHolder(view)
     }
 
@@ -43,12 +43,23 @@ class Reply2ReplyAdapter(
 
         if (reply.ruid == uid) {
             val uCount = reply.username.length
-            holder.reply.text = setTextFieldColor("${reply.username}: ${reply.message}", 0, uCount)
+            val text = "${reply.username}: ${reply.message}"
+            val builder =
+                SpannableStringBuilder(Html.fromHtml(text.replace("\n", "<br />"), Html.FROM_HTML_MODE_COMPACT))
+            val foregroundColorSpan = ForegroundColorSpan(
+                ThemeUtils.getThemeAttrColor(
+                    mContext,
+                    com.google.android.material.R.attr.colorPrimary
+                )
+            )
+            builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            holder.reply.text = builder
         } else {
             val uCount = reply.username.length
             val urCount = reply.rusername.length
+            val text = "${reply.username}回复${reply.rusername}: ${reply.message}"
             val builder =
-                SpannableStringBuilder("${reply.username}回复${reply.rusername}: ${reply.message}")
+                SpannableStringBuilder(Html.fromHtml(text.replace("\n", "<br />"), Html.FROM_HTML_MODE_COMPACT))
             val foregroundColorSpan = ForegroundColorSpan(
                 ThemeUtils.getThemeAttrColor(
                     mContext,
@@ -69,8 +80,6 @@ class Reply2ReplyAdapter(
                 Spannable.SPAN_INCLUSIVE_INCLUSIVE
             )
             holder.reply.text = builder
-
-
         }
     }
 
