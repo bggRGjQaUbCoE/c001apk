@@ -4,10 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.Html
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,10 +20,11 @@ import com.example.bili.util.PubDateUtil
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.FeedContentResponse
 import com.example.coolapk.logic.model.HomeFeedResponse
+import com.example.coolapk.util.EmojiUtil
 import com.example.coolapk.util.ImageShowUtil
 import com.example.coolapk.util.ReplyItemDecoration
 import com.example.coolapk.util.SpacesItemDecoration
-import com.google.android.material.card.MaterialCardView
+import java.util.regex.Pattern
 
 class FeedContentAdapter(
     private val mContext: Context,
@@ -52,7 +57,7 @@ class FeedContentAdapter(
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
-        val replyCard: MaterialCardView = view.findViewById(R.id.replyCard)
+        val replyLayout: LinearLayout = view.findViewById(R.id.replyLayout)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
         val totalReply: TextView = view.findViewById(R.id.totalReply)
         val picRecyclerView: RecyclerView = view.findViewById(R.id.picRecyclerView)
@@ -92,6 +97,7 @@ class FeedContentAdapter(
                     holder.uname.text = feed.data.username
                     holder.device.text = feed.data.deviceTitle
                     holder.pubDate.text = PubDateUtil.time(feed.data.dateline)
+
                     holder.like.text = feed.data.likenum
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
@@ -101,6 +107,7 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt()
                     )
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)
+
                     holder.reply.text = feed.data.replynum
                     val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
                     drawableReply.setBounds(
@@ -110,11 +117,35 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt()
                     )
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
-                    holder.message.text =
-                        Html.fromHtml(
-                            feed.data.message.replace("\n", "<br />"),
-                            Html.FROM_HTML_MODE_COMPACT
+
+                    val mess = Html.fromHtml(
+                        feed.data.message.replace("\n", "<br />"),
+                        Html.FROM_HTML_MODE_COMPACT
+                    )
+                    val builder = SpannableStringBuilder(mess)
+                    val pattern = Pattern.compile("\\[[^\\]]+\\]")
+                    val matcher = pattern.matcher(mess)
+                    holder.message.text = mess
+                    while (matcher.find()) {
+                        val group = matcher.group()
+                        val emoji: Drawable =
+                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                        emoji.setBounds(
+                            0,
+                            0,
+                            (holder.message.textSize * 1.3).toInt(),
+                            (holder.message.textSize * 1.3).toInt()
                         )
+                        val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                        builder.setSpan(
+                            imageSpan,
+                            matcher.start(),
+                            matcher.end(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                        holder.message.text = builder
+                    }
+
                     if (feed.data.picArr.isNotEmpty()) {
                         holder.recyclerView.visibility = View.VISIBLE
                         val mAdapter = FeedContentPicAdapter(feed.data.picArr)
@@ -138,6 +169,7 @@ class FeedContentAdapter(
                     } else {
                         holder.recyclerView.visibility = View.GONE
                     }
+
                     ImageShowUtil.showAvatar(holder.avatar, feed.data.userAvatar)
                 }
             }
@@ -146,10 +178,35 @@ class FeedContentAdapter(
                 val reply = replyList[position - 1]
                 holder.id = reply.id
                 holder.uname.text = reply.username
-                holder.message.text = Html.fromHtml(
+
+                val mess = Html.fromHtml(
                     reply.message.replace("\n", "<br />"),
                     Html.FROM_HTML_MODE_COMPACT
                 )
+                val builder = SpannableStringBuilder(mess)
+                val pattern = Pattern.compile("\\[[^\\]]+\\]")
+                val matcher = pattern.matcher(mess)
+                holder.message.text = mess
+                while (matcher.find()) {
+                    val group = matcher.group()
+                    val emoji: Drawable =
+                        mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                    emoji.setBounds(
+                        0,
+                        0,
+                        (holder.message.textSize * 1.3).toInt(),
+                        (holder.message.textSize * 1.3).toInt()
+                    )
+                    val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                    builder.setSpan(
+                        imageSpan,
+                        matcher.start(),
+                        matcher.end(),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    holder.message.text = builder
+                }
+
                 holder.pubDate.text = PubDateUtil.time(reply.dateline)
                 holder.like.text = reply.likenum
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
@@ -172,7 +229,7 @@ class FeedContentAdapter(
                 ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                 if (reply.replyRows.isNotEmpty()) {
-                    holder.replyCard.visibility = View.VISIBLE
+                    holder.replyLayout.visibility = View.VISIBLE
                     val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
                     val mLayoutManager = LinearLayoutManager(mContext)
                     val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
@@ -182,7 +239,7 @@ class FeedContentAdapter(
                         if (itemDecorationCount == 0)
                             addItemDecoration(ReplyItemDecoration(space))
                     }
-                } else holder.replyCard.visibility = View.GONE
+                } else holder.replyLayout.visibility = View.GONE
 
                 if (reply.replyRowsMore != 0) {
                     holder.totalReply.visibility = View.VISIBLE

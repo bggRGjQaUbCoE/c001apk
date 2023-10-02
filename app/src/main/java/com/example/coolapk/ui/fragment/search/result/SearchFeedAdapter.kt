@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.Html
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +20,10 @@ import com.example.coolapk.R
 import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.ui.activity.feed.FeedActivity
 import com.example.coolapk.ui.fragment.feed.FeedContentPicAdapter
+import com.example.coolapk.util.EmojiUtil
 import com.example.coolapk.util.ImageShowUtil
 import com.example.coolapk.util.SpacesItemDecoration
+import java.util.regex.Pattern
 
 class SearchFeedAdapter(
     private val mContext: Context,
@@ -60,8 +65,37 @@ class SearchFeedAdapter(
         val feed = searchList[position]
         holder.id = feed.id
         holder.uname.text = feed.username
-        holder.message.text = Html.fromHtml(feed.message, Html.FROM_HTML_MODE_COMPACT)
+
+        val mess = Html.fromHtml(
+            feed.message.replace("\n", "<br />"),
+            Html.FROM_HTML_MODE_COMPACT
+        )
+        val builder = SpannableStringBuilder(mess)
+        val pattern = Pattern.compile("\\[[^\\]]+\\]")
+        val matcher = pattern.matcher(mess)
+        holder.message.text = mess
+        while (matcher.find()) {
+            val group = matcher.group()
+            val emoji: Drawable =
+                mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+            emoji.setBounds(
+                0,
+                0,
+                (holder.message.textSize * 1.3).toInt(),
+                (holder.message.textSize * 1.3).toInt()
+            )
+            val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+            builder.setSpan(
+                imageSpan,
+                matcher.start(),
+                matcher.end(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            holder.message.text = builder
+        }
+
         holder.pubDate.text = PubDateUtil.time(feed.dateline)
+
         holder.like.text = feed.likenum
         val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
         drawableLike.setBounds(
@@ -71,6 +105,7 @@ class SearchFeedAdapter(
             holder.like.textSize.toInt()
         )
         holder.like.setCompoundDrawables(drawableLike, null, null, null)
+
         holder.reply.text = feed.replynum
         val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
         drawableReply.setBounds(

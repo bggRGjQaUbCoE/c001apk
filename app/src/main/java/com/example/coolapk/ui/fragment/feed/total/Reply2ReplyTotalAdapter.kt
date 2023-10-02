@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.Html
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +18,9 @@ import com.example.bili.util.PubDateUtil
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.ui.fragment.feed.FeedContentPicAdapter
+import com.example.coolapk.util.EmojiUtil
 import com.example.coolapk.util.ImageShowUtil
+import java.util.regex.Pattern
 
 
 class Reply2ReplyTotalAdapter(
@@ -45,10 +50,35 @@ class Reply2ReplyTotalAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reply = replyList[position]
         holder.uname.text = reply.username
-        holder.message.text = Html.fromHtml(
+
+        val mess = Html.fromHtml(
             reply.message.replace("\n", "<br />"),
             Html.FROM_HTML_MODE_COMPACT
         )
+        val builder = SpannableStringBuilder(mess)
+        val pattern = Pattern.compile("\\[[^\\]]+\\]")
+        val matcher = pattern.matcher(mess)
+        holder.message.text = mess
+        while (matcher.find()) {
+            val group = matcher.group()
+            val emoji: Drawable =
+                mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+            emoji.setBounds(
+                0,
+                0,
+                (holder.message.textSize * 1.3).toInt(),
+                (holder.message.textSize * 1.3).toInt()
+            )
+            val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+            builder.setSpan(
+                imageSpan,
+                matcher.start(),
+                matcher.end(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            holder.message.text = builder
+        }
+
         holder.pubDate.text = PubDateUtil.time(reply.dateline)
         holder.like.text = reply.likenum
         val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!

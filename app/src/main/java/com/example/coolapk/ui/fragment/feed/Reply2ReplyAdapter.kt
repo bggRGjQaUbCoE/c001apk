@@ -2,12 +2,14 @@ package com.example.coolapk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +18,8 @@ import androidx.appcompat.widget.ThemeUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.HomeFeedResponse
+import com.example.coolapk.util.EmojiUtil
+import java.util.regex.Pattern
 
 
 class Reply2ReplyAdapter(
@@ -37,7 +41,7 @@ class Reply2ReplyAdapter(
 
     override fun getItemCount() = reply2ReplyList.size
 
-    @SuppressLint("SetTextI18n", "RestrictedApi")
+    @SuppressLint("SetTextI18n", "RestrictedApi", "UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reply = reply2ReplyList[position]
 
@@ -54,6 +58,27 @@ class Reply2ReplyAdapter(
             )
             builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             holder.reply.text = builder
+            val pattern = Pattern.compile("\\[[^\\]]+\\]")
+            val matcher = pattern.matcher(text)
+            while (matcher.find()) {
+                val group = matcher.group()
+                val emoji: Drawable =
+                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                emoji.setBounds(
+                    0,
+                    0,
+                    (holder.reply.textSize * 1.3).toInt(),
+                    (holder.reply.textSize * 1.3).toInt()
+                )
+                val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                builder.setSpan(
+                    imageSpan,
+                    matcher.start(),
+                    matcher.end(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                holder.reply.text = builder
+            }
         } else {
             val uCount = reply.username.length
             val urCount = reply.rusername.length
@@ -80,6 +105,27 @@ class Reply2ReplyAdapter(
                 Spannable.SPAN_INCLUSIVE_INCLUSIVE
             )
             holder.reply.text = builder
+            val pattern = Pattern.compile("\\[[^\\]]+\\]")
+            val matcher = pattern.matcher(text)
+            while (matcher.find()) {
+                val group = matcher.group()
+                val emoji: Drawable =
+                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                emoji.setBounds(
+                    0,
+                    0,
+                    (holder.reply.textSize * 1.3).toInt(),
+                    (holder.reply.textSize * 1.3).toInt()
+                )
+                val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                builder.setSpan(
+                    imageSpan,
+                    matcher.start(),
+                    matcher.end(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                holder.reply.text = builder
+            }
         }
     }
 

@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.Html
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +21,11 @@ import com.example.bili.util.PubDateUtil
 import com.example.coolapk.R
 import com.example.coolapk.logic.model.HomeFeedResponse
 import com.example.coolapk.ui.activity.feed.FeedActivity
+import com.example.coolapk.util.EmojiUtil
 import com.example.coolapk.util.ImageShowUtil
 import com.example.coolapk.util.LinearItemDecoration1
 import com.example.coolapk.util.SpacesItemDecoration
+import java.util.regex.Pattern
 
 
 class HomeFeedAdapter(
@@ -173,8 +178,35 @@ class HomeFeedAdapter(
                     feed.infoHtml.replace("\n", "<br />"),
                     Html.FROM_HTML_MODE_COMPACT
                 )
-                holder.message.text =
-                    Html.fromHtml(feed.message.replace("\n", "<br />"), Html.FROM_HTML_MODE_COMPACT)
+
+                val mess = Html.fromHtml(
+                    feed.message.replace("\n", "<br />"),
+                    Html.FROM_HTML_MODE_COMPACT
+                )
+                val builder = SpannableStringBuilder(mess)
+                val pattern = Pattern.compile("\\[[^\\]]+\\]")
+                val matcher = pattern.matcher(mess)
+                holder.message.text = mess
+                while (matcher.find()) {
+                    val group = matcher.group()
+                    val emoji: Drawable =
+                        mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                    emoji.setBounds(
+                        0,
+                        0,
+                        (holder.message.textSize * 1.3).toInt(),
+                        (holder.message.textSize * 1.3).toInt()
+                    )
+                    val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                    builder.setSpan(
+                        imageSpan,
+                        matcher.start(),
+                        matcher.end(),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    holder.message.text = builder
+                }
+
                 if (feed.picArr.isNotEmpty()) {
                     holder.recyclerView.visibility = View.VISIBLE
                     val mAdapter = FeedPicAdapter(feed.picArr)
