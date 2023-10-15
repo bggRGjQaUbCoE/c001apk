@@ -59,6 +59,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getTopicLayout(tag: String) =
+        fire(Dispatchers.IO) {
+            val topicLayoutResponse = Network.getTopicLayout(tag)
+            if (topicLayoutResponse.data != null)
+                Result.success(topicLayoutResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

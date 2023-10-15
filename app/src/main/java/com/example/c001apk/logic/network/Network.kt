@@ -11,6 +11,7 @@ object Network {
 
     private val homeService = ServiceCreator.create<HomeService>()
     private val searchService = SearchServiceCreator.create<HomeService>()
+    private val topicService = SearchServiceCreator.create<TopicService>()
 
     suspend fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
         homeService.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
@@ -38,6 +39,8 @@ object Network {
         id: String,
         page: Int
     ) = searchService.getReply2Reply(id, page).await()
+
+    suspend fun getTopicLayout(tag: String) = topicService.getTopicLayout(tag).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

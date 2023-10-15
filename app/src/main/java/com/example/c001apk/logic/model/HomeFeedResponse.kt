@@ -44,7 +44,8 @@ data class HomeFeedResponse(val data: List<Data>) {
     data class Entities(
         val pic: String,
         val title: String,
-        val logo: String
+        val logo: String,
+        val entityType:String,
     )
 
 }
