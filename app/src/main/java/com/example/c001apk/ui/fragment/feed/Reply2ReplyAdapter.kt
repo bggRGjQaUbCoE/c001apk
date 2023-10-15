@@ -59,7 +59,7 @@ class Reply2ReplyAdapter(
             builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             holder.reply.text = builder
             val pattern = Pattern.compile("\\[[^\\]]+\\]")
-            val matcher = pattern.matcher(text)
+            val matcher = pattern.matcher(builder)
             while (matcher.find()) {
                 val group = matcher.group()
                 val emoji: Drawable =
@@ -106,7 +106,7 @@ class Reply2ReplyAdapter(
             )
             holder.reply.text = builder
             val pattern = Pattern.compile("\\[[^\\]]+\\]")
-            val matcher = pattern.matcher(text)
+            val matcher = pattern.matcher(builder)
             while (matcher.find()) {
                 val group = matcher.group()
                 val emoji: Drawable =

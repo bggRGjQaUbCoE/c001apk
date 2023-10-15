@@ -124,7 +124,7 @@ class FeedContentAdapter(
                     )
                     val builder = SpannableStringBuilder(mess)
                     val pattern = Pattern.compile("\\[[^\\]]+\\]")
-                    val matcher = pattern.matcher(mess)
+                    val matcher = pattern.matcher(builder)
                     holder.message.text = mess
                     while (matcher.find()) {
                         val group = matcher.group()
@@ -185,7 +185,7 @@ class FeedContentAdapter(
                 )
                 val builder = SpannableStringBuilder(mess)
                 val pattern = Pattern.compile("\\[[^\\]]+\\]")
-                val matcher = pattern.matcher(mess)
+                val matcher = pattern.matcher(builder)
                 holder.message.text = mess
                 while (matcher.find()) {
                     val group = matcher.group()

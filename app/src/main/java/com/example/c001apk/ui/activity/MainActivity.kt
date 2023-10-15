@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -12,14 +11,6 @@ import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
-import com.example.c001apk.util.CookieUtil.SESSID
-import com.example.c001apk.util.CookieUtil.deviceCode
-import com.example.c001apk.util.CookieUtil.token
-import com.example.c001apk.util.TokenDeviceUtils
-import com.example.c001apk.util.TokenDeviceUtils.Companion.getTokenV2
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
 
@@ -31,9 +22,6 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        genData()
-        requestData()
 
         binding.viewPager.apply {
             adapter = object : FragmentStateAdapter(this@MainActivity) {
@@ -89,46 +77,6 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
             true
         }
 
-    }
-
-    private fun genData() {
-        deviceCode = TokenDeviceUtils.getLastingDeviceCode(this)
-
-        token = deviceCode.getTokenV2()
-    }
-
-    private fun requestData() {
-        thread {
-            try {
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url("https://api.coolapk.com/v6/account/checkLoginInfo")
-                    .addHeader("X-Requested-With", "XMLHttpRequest")
-                    .addHeader("X-App-Id", "com.coolapk.market")
-                    .addHeader(
-                        "X-App-Device",
-                        "wMxASdvl1ciJGbv92QgsDM2gTOH1STTByOn5Wdz1WYzByOn5Wdz1WYzByO3AjO4UjOxkjOCNkOBZkO2kDI7AyOgsjYkRmZ4MmNxADN0YWYllDZ"
-                    )
-                    .addHeader(
-                        "X-App-Token",
-                        "v2JDJhJDEwJE1TNDJPVFl3TXpRNE1rVTUvN2M4MXVDTHMua2NyTWFEV09RbXJVUFZWSm5FTzlCU0ZVOS5T"
-                    )
-                    //.addHeader("Cookie", SESSID)
-                    //.addHeader("Cookie", "token=deleted")
-                    .build()
-                val response = client.newCall(request).execute()
-                //val responseData = response.body
-                val headers = response.headers
-                val cookies = headers.values("Set-Cookie");
-                val session = cookies[0]
-                val sessionID = session.substring(0, session.indexOf(";"))
-                SESSID = sessionID
-                // Toast.makeText(this, SESSID, Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-                e.printStackTrace()
-            }
-        }
     }
 
 }

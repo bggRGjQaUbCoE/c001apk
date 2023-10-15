@@ -20,6 +20,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
+import com.example.c001apk.ui.fragment.home.feed.FeedPicAdapter
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.SpacesItemDecoration
@@ -74,7 +75,7 @@ class SearchFeedAdapter(
         )
         val builder = SpannableStringBuilder(mess)
         val pattern = Pattern.compile("\\[[^\\]]+\\]")
-        val matcher = pattern.matcher(mess)
+        val matcher = pattern.matcher(builder)
         holder.message.text = mess
         while (matcher.find()) {
             val group = matcher.group()
@@ -121,23 +122,17 @@ class SearchFeedAdapter(
 
         if (feed.picArr.isNotEmpty()) {
             holder.recyclerView.visibility = View.VISIBLE
-            val mAdapter = FeedContentPicAdapter(feed.picArr)
+            val mAdapter = FeedPicAdapter(feed.picArr)
             val count =
                 if (feed.picArr.size < 3) feed.picArr.size
                 else 3
             val mLayoutManager = GridLayoutManager(mContext, count)
-            val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
-            val spaceValue = HashMap<String, Int>()
-            spaceValue[SpacesItemDecoration.TOP_SPACE] = 0
-            spaceValue[SpacesItemDecoration.BOTTOM_SPACE] = space
-            spaceValue[SpacesItemDecoration.LEFT_SPACE] = space
-            spaceValue[SpacesItemDecoration.RIGHT_SPACE] = space
+            val minorSpace = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+            val normalSpace = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
             holder.recyclerView.apply {
-                setPadding(space, 0, space, space)
+                setPadding(normalSpace, 0, minorSpace, minorSpace)
                 adapter = mAdapter
                 layoutManager = mLayoutManager
-                if (itemDecorationCount == 0)
-                    addItemDecoration(SpacesItemDecoration(count, spaceValue, true))
             }
         } else holder.recyclerView.visibility = View.GONE
     }
