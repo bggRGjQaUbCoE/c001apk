@@ -1,8 +1,10 @@
 package com.example.c001apk.ui.fragment.search.result
 
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
+import com.example.c001apk.MyApplication
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.SearchTopicResponse
 import com.example.c001apk.logic.model.SearchUserResponse
@@ -41,6 +43,7 @@ class SearchContentViewModel : ViewModel() {
     }
 
     fun getSearchUser() {
+        Toast.makeText(MyApplication.context, "getSearchUser", Toast.LENGTH_SHORT).show()
         getSearchUserData.value = getSearchUserData.value
     }
 

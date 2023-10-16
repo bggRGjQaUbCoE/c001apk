@@ -11,6 +11,7 @@ import com.example.c001apk.logic.network.Repository
 class TopicViewModel : ViewModel() {
 
     var tag = ""
+    var isInit = true
 
     private val getTopicLayoutLiveData = MutableLiveData<String>()
 

@@ -143,12 +143,11 @@ class SearchContentFragment : Fragment() {
                         if (!viewModel.isEnd) {
                             viewModel.isLoadMore = true
                             viewModel.page++
-                            if (type == "feed")
-                                viewModel.getSearchFeed()
-                            else if (type == "user")
-                                viewModel.getSearchUser()
-                            else
-                                viewModel.getSearchTopic()
+                            when (type) {
+                                "feed" -> viewModel.getSearchFeed()
+                                "user" -> viewModel.getSearchUser()
+                                else -> viewModel.getSearchTopic()
+                            }
                         }
                     }
                 }
@@ -177,8 +176,23 @@ class SearchContentFragment : Fragment() {
     }
 
     private fun initData() {
-        if (viewModel.searchFeedList.isEmpty())
-            refreshData()
+        when (type) {
+            "feed" -> {
+                if (viewModel.searchFeedList.isEmpty())
+                    refreshData()
+            }
+
+            "user" -> {
+                if (viewModel.searchUserList.isEmpty())
+                    refreshData()
+            }
+
+            else -> {
+                if (viewModel.searchTopicList.isEmpty())
+                    refreshData()
+            }
+        }
+
     }
 
     private fun refreshData() {
@@ -191,12 +205,11 @@ class SearchContentFragment : Fragment() {
         viewModel.isLoadMore = false
         lifecycleScope.launch {
             delay(500)
-            if (type == "feed")
-                viewModel.getSearchFeed()
-            else if (type == "user")
-                viewModel.getSearchUser()
-            else
-                viewModel.getSearchTopic()
+            when (type) {
+                "feed" -> viewModel.getSearchFeed()
+                "user" -> viewModel.getSearchUser()
+                else -> viewModel.getSearchTopic()
+            }
         }
     }
 

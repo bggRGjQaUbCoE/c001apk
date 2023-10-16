@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
-import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.topic.content.TopicContentFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -60,40 +59,52 @@ class TopicFragment : Fragment() {
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
             if (data != null) {
-                for (element in data.tabList){
-                    tabList.add(element.title)
-                    fragmentList.add(TopicContentFragment.newInstance(element.url, element.title))
+                if (tabList.isEmpty()) {
+                    binding.toolBar.apply {
+                        title = param1
+                        subtitle = data.intro
+                        //tooltipText = data.intro
+                        setNavigationIcon(R.drawable.ic_back)
+                        setNavigationOnClickListener {
+                            requireActivity().finish()
+                        }
+                    }
+                    for (element in data.tabList) {
+                        tabList.add(element.title)
+                        fragmentList.add(
+                            TopicContentFragment.newInstance(
+                                element.url,
+                                element.title
+                            )
+                        )
+                    }
+                    var tabSelected = 0
+                    for (element in data.tabList) {
+                        if (data.selectedTab == element.pageName) break
+                        else tabSelected++
+                    }
+                    initView(tabSelected)
                 }
                 binding.progress.isIndeterminate = false
-
-                binding.toolBar.apply {
-                    title = param1
-                    subtitle = data.intro
-                    //tooltipText = data.intro
-                    setNavigationIcon(R.drawable.ic_back)
-                    setNavigationOnClickListener {
-                        requireActivity().finish()
-                    }
-                }
-
-                var tabSelected = 0
-                for (element in data.tabList) {
-                    if (data.selectedTab == element.pageName) break
-                    else tabSelected++
-                }
-
-                binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-                    override fun createFragment(position: Int) = fragmentList[position]
-                    override fun getItemCount() = tabList.size
-                }
-                TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-                    tab.text = tabList[position]
-                }.attach()
-                binding.tabLayout.getTabAt(tabSelected)!!.select()
             } else {
                 //binding.progress.isIndeterminate = false
                 result.exceptionOrNull()?.printStackTrace()
             }
+        }
+
+    }
+
+    private fun initView(tabSelected: Int) {
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun createFragment(position: Int) = fragmentList[position]
+            override fun getItemCount() = tabList.size
+        }
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = tabList[position]
+        }.attach()
+        if (viewModel.isInit) {
+            binding.tabLayout.getTabAt(tabSelected)!!.select()
+            viewModel.isInit = false
         }
 
     }
