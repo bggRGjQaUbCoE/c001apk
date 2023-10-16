@@ -35,6 +35,11 @@ object Network {
         page: Int
     ) = searchService.getSearchUser(keyWord, page).await()
 
+    suspend fun getSearchTopic(
+        keyWord: String,
+        page: Int
+    ) = searchService.getSearchTopic(keyWord, page).await()
+
     suspend fun getReply2Reply(
         id: String,
         page: Int

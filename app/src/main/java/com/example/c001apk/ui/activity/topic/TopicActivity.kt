@@ -16,12 +16,12 @@ class TopicActivity : AppCompatActivity() {
         binding = ActivityTopicBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val entityType = intent.getStringExtra("entityType")!!
+        val title = intent.getStringExtra("title")!!
 
         if (supportFragmentManager.findFragmentById(R.id.topicFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.topicFragment, TopicFragment.newInstance(entityType, ""))
+                .replace(R.id.topicFragment, TopicFragment.newInstance(title, ""))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }

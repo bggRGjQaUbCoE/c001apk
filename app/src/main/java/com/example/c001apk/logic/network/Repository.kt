@@ -50,6 +50,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getSearchTopic(keyWord: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val searchResponse = Network.getSearchTopic(keyWord, page)
+            if (searchResponse.data.isNotEmpty())
+                Result.success(searchResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     fun getReply2Reply(id: String, page: Int) =
         fire(Dispatchers.IO) {
             val searchResponse = Network.getReply2Reply(id, page)

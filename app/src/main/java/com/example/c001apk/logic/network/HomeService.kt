@@ -2,6 +2,7 @@ package com.example.c001apk.logic.network
 
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.SearchTopicResponse
 import com.example.c001apk.logic.model.SearchUserResponse
 import retrofit2.Call
 import retrofit2.http.GET
@@ -44,6 +45,12 @@ interface HomeService {
         @Query("searchValue") keyWord: String,
         @Query("page") page: Int
     ): Call<SearchUserResponse>
+
+    @GET("/v6/search?showAnonymous=-1&type=feedTopic")
+    fun getSearchTopic(
+        @Query("searchValue") keyWord: String,
+        @Query("page") page: Int
+    ): Call<SearchTopicResponse>
 
     @GET("/v6/feed/replyList?listType=&discussMode=0&feedType=feed_reply&blockStatus=0&fromFeedAuthor=0")
     fun getReply2Reply(

@@ -24,6 +24,7 @@ class SearchContentFragment : Fragment() {
     private var type: String = ""
     private lateinit var feedAdapter: SearchFeedAdapter
     private lateinit var userAdapter: SearchUserAdapter
+    private lateinit var topicAdapter: SearchTopicAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
@@ -106,6 +107,27 @@ class SearchContentFragment : Fragment() {
             }
         }
 
+        viewModel.searchTopicData.observe(viewLifecycleOwner) { result ->
+            val search = result.getOrNull()
+            if (!search.isNullOrEmpty()) {
+                if (viewModel.isRefreshing)
+                    viewModel.searchTopicList.clear()
+                if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    viewModel.searchTopicList.addAll(search)
+                topicAdapter.notifyDataSetChanged()
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
+            } else {
+                viewModel.isEnd = true
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
+                //Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -115,15 +137,18 @@ class SearchContentFragment : Fragment() {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (lastVisibleItemPosition ==
                         if (type == "feed") viewModel.searchFeedList.size - 1
-                        else viewModel.searchUserList.size - 1
+                        else if (type == "user") viewModel.searchUserList.size - 1
+                        else viewModel.searchTopicList.size - 1
                     ) {
                         if (!viewModel.isEnd) {
                             viewModel.isLoadMore = true
                             viewModel.page++
                             if (type == "feed")
                                 viewModel.getSearchFeed()
-                            else
+                            else if (type == "user")
                                 viewModel.getSearchUser()
+                            else
+                                viewModel.getSearchTopic()
                         }
                     }
                 }
@@ -168,8 +193,10 @@ class SearchContentFragment : Fragment() {
             delay(500)
             if (type == "feed")
                 viewModel.getSearchFeed()
-            else
+            else if (type == "user")
                 viewModel.getSearchUser()
+            else
+                viewModel.getSearchTopic()
         }
     }
 
@@ -178,12 +205,16 @@ class SearchContentFragment : Fragment() {
 
         feedAdapter = SearchFeedAdapter(requireActivity(), viewModel.searchFeedList)
         userAdapter = SearchUserAdapter(requireActivity(), viewModel.searchUserList)
+        topicAdapter = SearchTopicAdapter(viewModel.searchTopicList)
 
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter =
-                if (type == "feed") feedAdapter
-                else userAdapter
+                when (type) {
+                    "feed" -> feedAdapter
+                    "user" -> userAdapter
+                    else -> topicAdapter
+                }
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))

@@ -20,7 +20,7 @@ class TopicFragment : Fragment() {
 
     private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
-    private lateinit var param1: String
+    private lateinit var param1: String //title
     private var param2: String? = null
     private val tabList = ArrayList<String>()
     private var fragmentList = ArrayList<Fragment>()
