@@ -42,6 +42,9 @@ object Network {
 
     suspend fun getTopicLayout(tag: String) = topicService.getTopicLayout(tag).await()
 
+    suspend fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
+        topicService.getTopicData(url, title, subTitle, page).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

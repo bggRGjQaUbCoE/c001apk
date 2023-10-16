@@ -10,6 +10,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
 import com.example.c001apk.ui.fragment.BlankFragment
+import com.example.c001apk.ui.fragment.topic.content.TopicContentFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
 private const val ARG_PARAM1 = "param1"
@@ -59,10 +60,10 @@ class TopicFragment : Fragment() {
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
             if (data != null) {
-                for (element in data.tabList)
+                for (element in data.tabList){
                     tabList.add(element.title)
-                for (i in 0 until data.tabList.size)
-                    fragmentList.add(BlankFragment())
+                    fragmentList.add(TopicContentFragment.newInstance(element.url, element.title))
+                }
                 binding.progress.isIndeterminate = false
 
                 binding.toolBar.apply {
@@ -75,6 +76,12 @@ class TopicFragment : Fragment() {
                     }
                 }
 
+                var tabSelected = 0
+                for (element in data.tabList) {
+                    if (data.selectedTab == element.pageName) break
+                    else tabSelected++
+                }
+
                 binding.viewPager.adapter = object : FragmentStateAdapter(this) {
                     override fun createFragment(position: Int) = fragmentList[position]
                     override fun getItemCount() = tabList.size
@@ -82,6 +89,7 @@ class TopicFragment : Fragment() {
                 TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                     tab.text = tabList[position]
                 }.attach()
+                binding.tabLayout.getTabAt(tabSelected)!!.select()
             } else {
                 //binding.progress.isIndeterminate = false
                 result.exceptionOrNull()?.printStackTrace()

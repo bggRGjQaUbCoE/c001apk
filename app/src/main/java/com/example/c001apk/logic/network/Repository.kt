@@ -68,6 +68,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
+        fire(Dispatchers.IO) {
+            val topicDataResponse = Network.getTopicData(url, title, subTitle, page)
+            if (topicDataResponse.data.isNotEmpty())
+                Result.success(topicDataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {
