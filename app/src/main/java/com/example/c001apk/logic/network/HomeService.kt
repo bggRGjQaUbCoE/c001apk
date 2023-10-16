@@ -46,8 +46,9 @@ interface HomeService {
         @Query("page") page: Int
     ): Call<SearchUserResponse>
 
-    @GET("/v6/search?showAnonymous=-1&type=feedTopic")
+    @GET("/v6/search?showAnonymous=-1")
     fun getSearchTopic(
+        @Query("type") type: String,
         @Query("searchValue") keyWord: String,
         @Query("page") page: Int
     ): Call<SearchTopicResponse>

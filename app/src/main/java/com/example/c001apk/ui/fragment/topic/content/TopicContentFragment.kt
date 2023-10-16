@@ -26,7 +26,7 @@ class TopicContentFragment : Fragment() {
     private val viewModel by lazy { ViewModelProvider(this)[TopicContentViewModel::class.java] }
     private lateinit var param1: String
     private lateinit var param2: String
-    private lateinit var mAdapter: SearchFeedAdapter
+    private lateinit var mAdapter: TopicContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
@@ -74,7 +74,7 @@ class TopicContentFragment : Fragment() {
                     viewModel.topicDataList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore)
                     for (element in data) {
-                        if (element.entityTemplate == "feed")
+                        if (element.entityTemplate == "feed" || element.entityType == "topic")
                             viewModel.topicDataList.add(element)
                     }
                 mAdapter.notifyDataSetChanged()
@@ -132,7 +132,7 @@ class TopicContentFragment : Fragment() {
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = SearchFeedAdapter(requireActivity(), viewModel.topicDataList)
+        mAdapter = TopicContentAdapter(requireActivity(), viewModel.topicDataList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter

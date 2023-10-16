@@ -13,7 +13,7 @@ class SearchResultFragment : Fragment() {
 
     private lateinit var binding: FragmentSearchResultBinding
     private var keyWord: String = ""
-    private val tabList = arrayOf("动态", "用户", "话题")
+    private val tabList = arrayOf("动态", "用户", "话题", "数码")
     private var fragmentList = ArrayList<Fragment>()
 
     companion object {
@@ -53,7 +53,8 @@ class SearchResultFragment : Fragment() {
         fragmentList.run {
             add(SearchContentFragment.newInstance(keyWord, "feed"))
             add(SearchContentFragment.newInstance(keyWord, "user"))
-            add(SearchContentFragment.newInstance(keyWord, "topic"))
+            add(SearchContentFragment.newInstance(keyWord, "feedTopic"))
+            add(SearchContentFragment.newInstance(keyWord, "product"))
         }
     }
 

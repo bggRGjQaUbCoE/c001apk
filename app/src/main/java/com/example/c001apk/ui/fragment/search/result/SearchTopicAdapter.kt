@@ -23,6 +23,8 @@ class SearchTopicAdapter(
         val hotNum: TextView = view.findViewById(R.id.hotNum)
         val commentNum: TextView = view.findViewById(R.id.commentNum)
         val logo: ShapeableImageView = view.findViewById(R.id.logo)
+        var entityType = ""
+        var aliasTitle = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -32,7 +34,12 @@ class SearchTopicAdapter(
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(parent.context, TopicActivity::class.java)
-            intent.putExtra("title", viewHolder.title.text)
+            intent.putExtra(
+                "title",
+                if (viewHolder.entityType == "product")
+                    viewHolder.aliasTitle
+                else viewHolder.title.text
+            )
             parent.context.startActivity(intent)
         }
         return viewHolder
@@ -45,8 +52,13 @@ class SearchTopicAdapter(
         val topic = searchList[position]
         holder.title.text = topic.title
         holder.hotNum.text = topic.hotNum + "热度"
-        holder.commentNum.text = topic.commentnum + "讨论"
+        holder.commentNum.text =
+            if (topic.entityType == "topic") topic.commentnum + "讨论"
+            else topic.feedCommentNum + "讨论"
         ImageShowUtil.showIMG(holder.logo, topic.logo)
+        if (topic.entityType == "product")
+            holder.aliasTitle = topic.aliasTitle
+        holder.entityType = topic.entityType
     }
 
 }
