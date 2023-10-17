@@ -50,6 +50,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val pic: String,
         val title: String,
         val logo: String,
+        val id: String,
         val entityType: String,
         @SerializedName("alias_title") val aliasTitle: String
     )

@@ -13,14 +13,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
+import com.example.c001apk.R
+import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.TokenDeviceUtils
-import com.example.c001apk.R
-import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -56,16 +56,13 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
                 if (viewModel.isRefreshing)
                     viewModel.homeFeedList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    viewModel.homeFeedList.addAll(feed)
-                    for (i in 0 until viewModel.homeFeedList.size) {
-                        if (viewModel.homeFeedList[i].entityTemplate == "sponsorCard") {
-                            viewModel.homeFeedList.removeAt(i)
-                            mAdapter.notifyItemRemoved(i)
-                            break
-                        }
+                    for (element in feed) {
+                        //if (element.entityTemplate == "feed" || element.entityTemplate == "iconMiniScrollCard")
+                        if (element.entityTemplate != "sponsorCard" && element.entityTemplate != "refreshCard")
+
+                            viewModel.homeFeedList.add(element)
                     }
-                    viewModel.lastItem =
-                        viewModel.homeFeedList[viewModel.homeFeedList.size - 1].entityId
+                    viewModel.lastItem = feed[feed.size - 1].entityId
                 }
                 mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false

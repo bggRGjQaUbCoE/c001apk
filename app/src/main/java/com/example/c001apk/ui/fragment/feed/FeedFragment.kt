@@ -98,20 +98,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
                     viewModel.feedReplyList.clear()
                 }
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    /*viewModel.feedReplyList.addAll(reply)
-                    for (i in 0 until viewModel.feedReplyList.size) {
-                        if (viewModel.feedReplyList[i].entityTemplate != "feed_reply") {
-                            viewModel.feedReplyList.removeAt(i)
-                            //mAdapter.notifyItemRemoved(i)
-                            break
-                        }
-                    }*/
-                    for (i in 0 until reply.size){
-                        if (reply[i].entityType == "feed_reply")
-                            viewModel.feedReplyList.add(reply[i])
+                    for (element in reply){
+                        if (element.entityType == "feed_reply")
+                            viewModel.feedReplyList.add(element)
                     }
-                    mAdapter.notifyDataSetChanged()
                 }
+                mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
