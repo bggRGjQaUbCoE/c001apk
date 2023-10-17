@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.fragment.home.feed
+package com.example.c001apk.ui.fragment.home.ranking
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -15,20 +15,20 @@ import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
-import com.example.c001apk.ui.fragment.home.HomeFragment
+import com.example.c001apk.ui.fragment.home.HomeFragment.Companion.current
+import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
-import com.example.c001apk.util.TokenDeviceUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
+class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
-    private val viewModel by lazy { ViewModelProvider(this)[HomeFeedViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[HomeRankingViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
@@ -51,17 +51,15 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
         initRefresh()
         initScroll()
 
-        viewModel.homeFeedData.observe(viewLifecycleOwner) { result ->
+        viewModel.homeRankingData.observe(viewLifecycleOwner) { result ->
             val feed = result.getOrNull()
             if (!feed.isNullOrEmpty()) {
                 if (viewModel.isRefreshing)
-                    viewModel.homeFeedList.clear()
+                    viewModel.homeRankingList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     for (element in feed) {
-                        //if (element.entityTemplate == "feed" || element.entityTemplate == "iconMiniScrollCard")
-                        if (element.entityTemplate != "sponsorCard" && element.entityTemplate != "refreshCard")
-
-                            viewModel.homeFeedList.add(element)
+                        if (element.entityTemplate == "iconLinkGridCard" || element.entityTemplate == "iconMiniGridCard" || element.entityTemplate == "feed")
+                            viewModel.homeRankingList.add(element)
                     }
                     viewModel.lastItem = feed[feed.size - 1].entityId
                 }
@@ -85,11 +83,10 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.homeFeedList.size - 1) {
+                    if (lastVisibleItemPosition == viewModel.homeRankingList.size - 1) {
                         viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.firstLaunch = 0
-                        viewModel.getHomeFeed()
+                        viewModel.getHomeRanking()
                     }
                 }
             }
@@ -117,26 +114,24 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
     }
 
     private fun initData() {
-        if (viewModel.homeFeedList.isEmpty())
+        if (viewModel.homeRankingList.isEmpty())
             refreshData()
     }
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
         viewModel.page = 1
-        viewModel.firstLaunch = 1
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.installTime = TokenDeviceUtils.getLastingInstallTime(requireActivity())
         lifecycleScope.launch {
             delay(500)
-            viewModel.getHomeFeed()
+            viewModel.getHomeRanking()
         }
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = HomeFeedAdapter(requireActivity(), viewModel.homeFeedList)
+        mAdapter = HomeFeedAdapter(requireActivity(), viewModel.homeRankingList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -147,7 +142,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
     }
 
     override fun onReturnTop() {
-        if (HomeFragment.current == 1){
+        if (current == 2){
             if (firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {

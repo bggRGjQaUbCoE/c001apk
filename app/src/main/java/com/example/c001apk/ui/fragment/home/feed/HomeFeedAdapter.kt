@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.util.EmojiUtil
@@ -24,7 +25,6 @@ import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration1
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpacesItemDecoration
-import com.example.c001apk.R
 import java.util.regex.Pattern
 
 
@@ -234,7 +234,7 @@ class HomeFeedAdapter(
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
                 val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
                 holder.title.text = homeFeedList[position].title
-                holder.title.setPadding(space, space, space, space)
+                holder.title.setPadding(space, space, space, 0)
                 val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
                 drawable.setBounds(
                     0,
@@ -257,8 +257,12 @@ class HomeFeedAdapter(
                 val mLayoutManager = LinearLayoutManager(mContext)
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
                 val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
-                holder.title.text = homeFeedList[position].title
-                holder.title.setPadding(space, space, space, space)
+                if (homeFeedList[position].title == "")
+                    holder.title.visibility = View.GONE
+                else {
+                    holder.title.text = homeFeedList[position].title
+                    holder.title.setPadding(space, space, space, 0)
+                }
                 val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
                 drawable.setBounds(
                     0,

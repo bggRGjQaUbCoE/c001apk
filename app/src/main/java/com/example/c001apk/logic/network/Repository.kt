@@ -95,6 +95,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getHomeRanking(page: Int, lastItem: String) =
+        fire(Dispatchers.IO) {
+            val topicDataResponse = Network.getHomeRanking(page, lastItem)
+            if (topicDataResponse.data.isNotEmpty())
+                Result.success(topicDataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

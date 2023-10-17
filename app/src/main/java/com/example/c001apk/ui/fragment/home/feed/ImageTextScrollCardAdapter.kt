@@ -39,8 +39,6 @@ class ImageTextScrollCardAdapter(
             val intent = Intent(parent.context, FeedActivity::class.java)
             intent.putExtra("type", "feed")
             intent.putExtra("id", viewHolder.id)
-            //intent.putExtra("uname", viewHolder.uname.text)
-            //intent.putExtra("device", viewHolder.device.text)
             parent.context.startActivity(intent)
         }
         return viewHolder

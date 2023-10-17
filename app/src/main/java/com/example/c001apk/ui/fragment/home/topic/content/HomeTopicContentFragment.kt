@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicContentBinding
+import com.example.c001apk.ui.fragment.home.HomeFragment
+import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.util.LinearItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,7 +23,7 @@ import kotlinx.coroutines.launch
 private const val URL = "url"
 private const val TITLE = "title"
 
-class HomeTopicContentFragment : Fragment() {
+class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[HomeTopicContentViewModel::class.java] }
@@ -156,6 +160,22 @@ class HomeTopicContentFragment : Fragment() {
         lifecycleScope.launch {
             delay(500)
             viewModel.getTopicData()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as IOnBottomClickContainer).controller = this
+    }
+
+    override fun onReturnTop() {
+        if (HomeFragment.current == 3) {
+            if (firstCompletelyVisibleItemPosition == 0)
+                refreshData()
+            else {
+                binding.recyclerView.scrollToPosition(0)
+                refreshData()
+            }
         }
     }
 

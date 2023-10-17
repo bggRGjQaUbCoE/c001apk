@@ -53,6 +53,9 @@ object Network {
     suspend fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
         topicService.getTopicData(url, title, subTitle, page).await()
 
+    suspend fun getHomeRanking(page: Int, lastItem: String) =
+        searchService.getHomeRanking(page, lastItem).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

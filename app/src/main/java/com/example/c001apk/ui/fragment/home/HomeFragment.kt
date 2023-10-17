@@ -8,11 +8,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.c001apk.ui.activity.search.SearchActivity
 import com.example.c001apk.databinding.FragmentHomeBinding
+import com.example.c001apk.ui.activity.search.SearchActivity
 import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedFragment
+import com.example.c001apk.ui.fragment.home.ranking.HomeRankingFragment
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.Tab
 import com.google.android.material.tabs.TabLayoutMediator
 
 
@@ -23,11 +26,15 @@ class HomeFragment : Fragment() {
     private val tabList = arrayOf("好友关注", "头条", "热榜", "话题")
     private var fragmentList = ArrayList<Fragment>()
 
+    companion object {
+        var current = 1
+    }
+
     init {
         fragmentList.run {
             add(BlankFragment())
             add(HomeFeedFragment())
-            add(BlankFragment())
+            add(HomeRankingFragment())
             add(TopicFragment())
         }
     }
@@ -42,6 +49,19 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: Tab?) {
+                current = tab!!.position
+            }
+
+            override fun onTabUnselected(tab: Tab?) {
+            }
+
+            override fun onTabReselected(tab: Tab?) {
+            }
+
+        })
 
         initView()
         initMenu()
@@ -77,5 +97,6 @@ class HomeFragment : Fragment() {
             viewModel.isInitial = false
         }
     }
+
 
 }

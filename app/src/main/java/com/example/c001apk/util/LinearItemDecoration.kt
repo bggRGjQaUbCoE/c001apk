@@ -35,6 +35,7 @@ class LinearItemDecoration1(private val space: Int) :
         val position: Int = parent.getChildAdapterPosition(view)
         if (position == 0)
             outRect.left = space
+        outRect.top = space
         outRect.right = space
         outRect.bottom = space
     }

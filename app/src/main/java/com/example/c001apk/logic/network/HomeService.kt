@@ -63,4 +63,10 @@ interface HomeService {
     fun getHomeTopicTitle(
     ): Call<HomeFeedResponse>
 
+    @GET("https://api.coolapk.com/v6/page/dataList?url=%2Fpage%3Furl%3DV9_HOME_TAB_RANKING&title=%E7%83%AD%E6%A6%9C&subTitle=")
+    fun getHomeRanking(
+        @Query("page") page: Int,
+        @Query("lastItem") lastItem: String
+    ): Call<HomeFeedResponse>
+
 }
