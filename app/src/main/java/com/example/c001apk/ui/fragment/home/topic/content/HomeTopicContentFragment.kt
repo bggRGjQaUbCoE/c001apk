@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.fragment.topic.content
+package com.example.c001apk.ui.fragment.home.topic.content
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.fragment.home.topic.content.HomeTopicContentViewModel
 import com.example.c001apk.util.LinearItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -20,13 +19,13 @@ import kotlinx.coroutines.launch
 private const val URL = "url"
 private const val TITLE = "title"
 
-class TopicContentFragment : Fragment() {
+class HomeTopicContentFragment : Fragment() {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[HomeTopicContentViewModel::class.java] }
     private lateinit var url: String
     private lateinit var title: String
-    private lateinit var mAdapter: TopicContentAdapter
+    private lateinit var mAdapter: HomeTopicContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
@@ -42,7 +41,7 @@ class TopicContentFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            TopicContentFragment().apply {
+            HomeTopicContentFragment().apply {
                 arguments = Bundle().apply {
                     putString(URL, param1)
                     putString(TITLE, param2)
@@ -132,7 +131,7 @@ class TopicContentFragment : Fragment() {
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = TopicContentAdapter(requireActivity(), viewModel.topicDataList)
+        mAdapter = HomeTopicContentAdapter(requireActivity(), viewModel.topicDataList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter

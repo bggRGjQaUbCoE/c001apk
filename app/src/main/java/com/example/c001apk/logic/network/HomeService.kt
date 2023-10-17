@@ -59,4 +59,8 @@ interface HomeService {
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
+    @GET("/v6/page/dataList?url=%2Fpage%3Furl%3DV11_VERTICAL_TOPIC&title=%E8%AF%9D%E9%A2%98&subTitle=&page=1")
+    fun getHomeTopicTitle(
+    ): Call<HomeFeedResponse>
+
 }

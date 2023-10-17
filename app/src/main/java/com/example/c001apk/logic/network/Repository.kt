@@ -68,6 +68,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getHomeTopicTitle() =
+        fire(Dispatchers.IO) {
+            val searchResponse = Network.getHomeTopicTitle()
+            if (searchResponse.data.isNotEmpty())
+                Result.success(searchResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     fun getTopicLayout(tag: String) =
         fire(Dispatchers.IO) {
             val topicLayoutResponse = Network.getTopicLayout(tag)

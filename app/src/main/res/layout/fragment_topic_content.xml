@@ -4,7 +4,7 @@
     android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragment.topic.content.TopicContentFragment">
+    tools:context=".ui.fragment.home.topic.content.HomeTopicContentFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

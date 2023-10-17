@@ -35,6 +35,8 @@ data class HomeFeedResponse(val data: List<Data>) {
         val replyRowsMore: Int,
         val logo: String,
         @SerializedName("hot_num") val hotNum: String,
+        @SerializedName("feed_comment_num") val feedCommentNum: String,
+        @SerializedName("alias_title") val aliasTitle: String,
     )
 
     data class ReplyRows(
@@ -44,11 +46,12 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class Entities(
+        val url: String,
         val pic: String,
         val title: String,
         val logo: String,
         val entityType: String,
-        @SerializedName("index_title") val indexTitle: String?
+        @SerializedName("alias_title") val aliasTitle: String
     )
 
 }

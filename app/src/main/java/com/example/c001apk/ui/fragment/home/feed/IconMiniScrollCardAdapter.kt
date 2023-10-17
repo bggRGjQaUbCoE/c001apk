@@ -23,7 +23,7 @@ class IconMiniScrollCardAdapter(
         val title: TextView = view.findViewById(R.id.title)
         val iconMiniScrollCard: ImageView = view.findViewById(R.id.iconMiniScrollCard)
         var entityType = ""
-        var indexTitle: String? = null
+        var aliasTitle = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,7 +35,9 @@ class IconMiniScrollCardAdapter(
             val intent = Intent(parent.context, TopicActivity::class.java)
             intent.putExtra(
                 "title",
-                viewHolder.title.text
+                if (viewHolder.entityType == "product")
+                    viewHolder.aliasTitle
+                else viewHolder.title.text
             )
             parent.context.startActivity(intent)
         }
@@ -46,12 +48,11 @@ class IconMiniScrollCardAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val iconMiniScrollCard = iconMiniScrollCardList[position]
-        if (holder.entityType == "product")
-            holder.indexTitle = iconMiniScrollCard.indexTitle
         holder.entityType = iconMiniScrollCard.entityType
-        holder.title.text =
-            if (holder.entityType == "product" && iconMiniScrollCard.indexTitle != null)
-                iconMiniScrollCard.indexTitle else iconMiniScrollCard.title
+        if (iconMiniScrollCard.entityType == "product")
+            holder.aliasTitle = iconMiniScrollCard.aliasTitle
+        holder.entityType = iconMiniScrollCard.entityType
+        holder.title.text = iconMiniScrollCard.title
         ImageShowUtil.showAvatar(holder.iconMiniScrollCard, iconMiniScrollCard.logo)
     }
 

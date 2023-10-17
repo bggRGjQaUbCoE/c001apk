@@ -12,6 +12,7 @@ import com.example.c001apk.ui.activity.search.SearchActivity
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedFragment
+import com.example.c001apk.ui.fragment.home.topic.TopicFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
 
@@ -19,7 +20,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
-    private val tabList = arrayOf("好友关注", "头条", "热榜")
+    private val tabList = arrayOf("好友关注", "头条", "热榜", "话题")
     private var fragmentList = ArrayList<Fragment>()
 
     init {
@@ -27,6 +28,7 @@ class HomeFragment : Fragment() {
             add(BlankFragment())
             add(HomeFeedFragment())
             add(BlankFragment())
+            add(TopicFragment())
         }
     }
 

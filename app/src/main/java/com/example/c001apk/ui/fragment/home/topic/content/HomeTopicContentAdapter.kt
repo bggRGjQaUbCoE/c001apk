@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.fragment.topic.content
+package com.example.c001apk.ui.fragment.home.topic.content
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -27,7 +27,7 @@ import com.example.c001apk.util.PubDateUtil
 import com.google.android.material.imageview.ShapeableImageView
 import java.util.regex.Pattern
 
-class TopicContentAdapter(
+class HomeTopicContentAdapter(
     private val mContext: Context,
     private val searchList: List<HomeFeedResponse.Data>
 ) :
@@ -73,7 +73,7 @@ class TopicContentAdapter(
             else -> {
                 val view =
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_search_topic, parent, false)
+                        .inflate(R.layout.item_home_topic, parent, false)
                 val viewHolder = TopicViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     val intent = Intent(parent.context, TopicActivity::class.java)

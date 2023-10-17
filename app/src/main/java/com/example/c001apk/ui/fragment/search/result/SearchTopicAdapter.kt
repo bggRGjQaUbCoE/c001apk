@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.SearchTopicResponse
 import com.example.c001apk.ui.activity.topic.TopicActivity
+import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.google.android.material.imageview.ShapeableImageView
 
@@ -51,10 +52,10 @@ class SearchTopicAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val topic = searchList[position]
         holder.title.text = topic.title
-        holder.hotNum.text = topic.hotNum + "热度"
+        holder.hotNum.text = CountUtil.view(topic.hotNum) + "热度"
         holder.commentNum.text =
-            if (topic.entityType == "topic") topic.commentnum + "讨论"
-            else topic.feedCommentNum + "讨论"
+            if (topic.entityType == "topic") CountUtil.view(topic.commentnum) + "讨论"
+            else CountUtil.view(topic.feedCommentNum) + "讨论"
         ImageShowUtil.showIMG(holder.logo, topic.logo)
         if (topic.entityType == "product")
             holder.aliasTitle = topic.aliasTitle

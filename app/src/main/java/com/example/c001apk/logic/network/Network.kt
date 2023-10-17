@@ -46,6 +46,8 @@ object Network {
         page: Int
     ) = searchService.getReply2Reply(id, page).await()
 
+    suspend fun getHomeTopicTitle() = searchService.getHomeTopicTitle().await()
+
     suspend fun getTopicLayout(tag: String) = topicService.getTopicLayout(tag).await()
 
     suspend fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
