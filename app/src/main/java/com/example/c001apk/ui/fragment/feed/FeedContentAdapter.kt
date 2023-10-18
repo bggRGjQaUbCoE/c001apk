@@ -24,6 +24,7 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
+import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
@@ -89,6 +90,16 @@ class FeedContentAdapter(
                     parent.context.startActivity(intent)
                     true
                 }
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.uname.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
+                }
                 viewHolder
             }
 
@@ -99,6 +110,16 @@ class FeedContentAdapter(
                 val viewHolder = FeedContentReplyViewHolder(view)
                 viewHolder.totalReply.setOnClickListener {
                     iOnTotalReplyClickListener?.onShowTotalReply(viewHolder.id)
+                }
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.uname.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
                 }
                 viewHolder
             }

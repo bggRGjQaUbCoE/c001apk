@@ -4,6 +4,7 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.SearchTopicResponse
 import com.example.c001apk.logic.model.SearchUserResponse
+import com.example.c001apk.logic.model.UserResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -63,10 +64,21 @@ interface HomeService {
     fun getHomeTopicTitle(
     ): Call<HomeFeedResponse>
 
-    @GET("https://api.coolapk.com/v6/page/dataList?url=%2Fpage%3Furl%3DV9_HOME_TAB_RANKING&title=%E7%83%AD%E6%A6%9C&subTitle=")
+    @GET("/v6/page/dataList?url=%2Fpage%3Furl%3DV9_HOME_TAB_RANKING&title=%E7%83%AD%E6%A6%9C&subTitle=")
     fun getHomeRanking(
         @Query("page") page: Int,
         @Query("lastItem") lastItem: String
+    ): Call<HomeFeedResponse>
+
+    @GET("/v6/user/space?tmp=1")
+    fun getUserSpace(
+        @Query("uid") uid: String,
+    ): Call<UserResponse>
+
+    @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1&showDoing=1")
+    fun getUserFeed(
+        @Query("uid") uid: String,
+        @Query("page") page: Int,
     ): Call<HomeFeedResponse>
 
 }

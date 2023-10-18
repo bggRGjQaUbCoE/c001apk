@@ -56,6 +56,12 @@ object Network {
     suspend fun getHomeRanking(page: Int, lastItem: String) =
         searchService.getHomeRanking(page, lastItem).await()
 
+    suspend fun getUserSpace(uid: String) =
+        searchService.getUserSpace(uid).await()
+
+    suspend fun getUserFeed(uid: String, page: Int) =
+        searchService.getUserFeed(uid, page).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

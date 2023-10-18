@@ -22,6 +22,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
+import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
 import com.example.c001apk.ui.fragment.home.feed.FeedPicAdapter
 import com.example.c001apk.util.EmojiUtil
@@ -76,6 +77,16 @@ class SearchFeedAdapter(
             intent.putExtra("text", viewHolder.message.text.toString())
             parent.context.startActivity(intent)
             true
+        }
+        viewHolder.avatar.setOnClickListener {
+            val intent = Intent(parent.context, UserActivity::class.java)
+            intent.putExtra("id", viewHolder.uname.text)
+            parent.context.startActivity(intent)
+        }
+        viewHolder.uname.setOnClickListener {
+            val intent = Intent(parent.context, UserActivity::class.java)
+            intent.putExtra("id", viewHolder.uname.text)
+            parent.context.startActivity(intent)
         }
         return viewHolder
     }

@@ -104,6 +104,24 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getUserSpace(uid: String) =
+        fire(Dispatchers.IO) {
+            val userResponse = Network.getUserSpace(uid)
+            if (userResponse.data != null)
+                Result.success(userResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getUserFeed(uid: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val userResponse = Network.getUserFeed(uid, page)
+            if (userResponse.data.isNotEmpty())
+                Result.success(userResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.feed.total
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
@@ -16,12 +17,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
-import com.example.c001apk.R
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
 
@@ -44,7 +46,18 @@ class Reply2ReplyTotalAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_reply_to_reply_item, parent, false)
-        return ViewHolder(view)
+        val viewHolder = ViewHolder(view)
+        viewHolder.avatar.setOnClickListener {
+            val intent = Intent(parent.context, UserActivity::class.java)
+            intent.putExtra("id", viewHolder.uname.text)
+            parent.context.startActivity(intent)
+        }
+        viewHolder.uname.setOnClickListener {
+            val intent = Intent(parent.context, UserActivity::class.java)
+            intent.putExtra("id", viewHolder.uname.text)
+            parent.context.startActivity(intent)
+        }
+        return viewHolder
     }
 
     override fun getItemCount() = replyList.size

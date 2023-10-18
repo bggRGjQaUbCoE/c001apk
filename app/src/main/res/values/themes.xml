@@ -24,4 +24,9 @@
         <item name="cornerSize">12dp</item>
     </style>
 
+    <style name="Theme.User" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
 </resources>

@@ -15,6 +15,10 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
+            android:theme="@style/Theme.User"
+            android:name=".ui.activity.user.UserActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.CopyActivity"
             android:exported="false" />
         <activity

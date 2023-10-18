@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.search.result
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.SearchUserResponse
+import com.example.c001apk.ui.activity.feed.FeedActivity
+import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.ImageShowUtil
 
 class SearchUserAdapter(
@@ -33,6 +36,11 @@ class SearchUserAdapter(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_search_user, parent, false)
         val viewHolder = ViewHolder(view)
+        viewHolder.itemView.setOnClickListener {
+            val intent = Intent(parent.context, UserActivity::class.java)
+            intent.putExtra("id", viewHolder.uname.text)
+            parent.context.startActivity(intent)
+        }
         return viewHolder
     }
 
