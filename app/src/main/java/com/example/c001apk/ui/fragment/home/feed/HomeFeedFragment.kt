@@ -147,7 +147,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
     }
 
     override fun onReturnTop() {
-        if (HomeFragment.current == 1){
+        if (HomeFragment.current == 2){
             if (firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {

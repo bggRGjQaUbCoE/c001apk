@@ -11,6 +11,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.ui.activity.search.SearchActivity
 import com.example.c001apk.ui.fragment.BlankFragment
+import com.example.c001apk.ui.fragment.home.app.AppListFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedFragment
 import com.example.c001apk.ui.fragment.home.ranking.HomeRankingFragment
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
@@ -23,7 +24,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
-    private val tabList = arrayOf("好友关注", "头条", "热榜", "话题")
+    private val tabList = arrayOf("关注", "应用", "头条", "热榜", "话题")
     private var fragmentList = ArrayList<Fragment>()
 
     companion object {
@@ -33,6 +34,7 @@ class HomeFragment : Fragment() {
     init {
         fragmentList.run {
             add(BlankFragment())
+            add(AppListFragment())
             add(HomeFeedFragment())
             add(HomeRankingFragment())
             add(TopicFragment())

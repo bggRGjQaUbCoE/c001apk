@@ -30,8 +30,7 @@
                 android:foreground="#5A000000"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"
-                tools:ignore="ContentDescription"
-                tools:src="#607d8b" />
+                tools:ignore="ContentDescription" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -48,8 +47,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription"
-                    tools:src="#123456" />
+                    tools:ignore="ContentDescription" />
 
                 <LinearLayout
                     android:id="@+id/info"
@@ -67,8 +65,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="1321" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/level"
@@ -80,8 +77,7 @@
                         android:paddingStart="4dp"
                         android:paddingEnd="4dp"
                         android:textSize="11sp"
-                        android:visibility="invisible"
-                        tools:text="Lv.666" />
+                        android:visibility="invisible" />
                 </LinearLayout>
 
                 <TextView
@@ -93,8 +89,7 @@
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/info"
-                    tools:text="bio" />
+                    app:layout_constraintTop_toBottomOf="@id/info" />
 
                 <LinearLayout
                     android:id="@+id/info2"
@@ -111,8 +106,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:textSize="14sp"
-                        tools:text="1321 获赞" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/follow"
@@ -120,8 +114,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
-                        android:textSize="14sp"
-                        tools:text="99 关注" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/fans"
@@ -129,8 +122,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
-                        android:textSize="14sp"
-                        tools:text="99 粉丝" />
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <TextView
@@ -141,8 +133,7 @@
                     android:layout_marginStart="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/info2"
-                    tools:text="30分钟前活跃" />
+                    app:layout_constraintTop_toBottomOf="@+id/info2" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -168,5 +159,13 @@
             android:layout_height="match_parent" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

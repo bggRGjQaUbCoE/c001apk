@@ -142,7 +142,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
     }
 
     override fun onReturnTop() {
-        if (current == 2){
+        if (current == 3){
             if (firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {

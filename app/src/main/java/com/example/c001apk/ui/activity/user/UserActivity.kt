@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -14,6 +15,8 @@ import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class UserActivity : AppCompatActivity() {
 
@@ -24,7 +27,9 @@ class UserActivity : AppCompatActivity() {
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
 
-    @SuppressLint("ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged")
+    @SuppressLint("ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged",
+        "UseCompatLoadingForDrawables"
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserBinding.inflate(layoutInflater)
@@ -46,6 +51,7 @@ class UserActivity : AppCompatActivity() {
                 binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
                 binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                 ImageShowUtil.showIMG(binding.cover, user.cover)
+                //binding.cover.foreground = this.getDrawable(R.color.user_cover)
                 ImageShowUtil.showAvatar(binding.avatar, user.userAvatar)
                 binding.name.text = user.username
                 binding.level.text = "Lv.${user.level}"
@@ -56,10 +62,14 @@ class UserActivity : AppCompatActivity() {
                 binding.fans.text = "${user.fans} 粉丝"
                 binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
 
+                binding.progress.isIndeterminate = false
                 viewModel.uid = user.uid
                 viewModel.isRefreh = true
-                viewModel.getUserFeed()
                 binding.swipeRefresh.isRefreshing = true
+                lifecycleScope.launch {
+                    delay(500)
+                    viewModel.getUserFeed()
+                }
             } else {
                 result.exceptionOrNull()?.printStackTrace()
             }

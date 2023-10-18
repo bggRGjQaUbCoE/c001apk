@@ -169,14 +169,14 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
     }
 
     override fun onReturnTop() {
-        if (HomeFragment.current == 3) {
+        /*if (HomeFragment.current == 4) {
             if (firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {
                 binding.recyclerView.scrollToPosition(0)
                 refreshData()
             }
-        }
+        }*/
     }
 
 }

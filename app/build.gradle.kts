@@ -71,4 +71,5 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.drakeet.about:about:2.4.1")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 }
