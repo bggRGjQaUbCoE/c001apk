@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
     <application
@@ -18,9 +19,12 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
-            android:theme="@style/Theme.User"
-            android:name=".ui.activity.user.UserActivity"
+            android:name=".ui.activity.app.AppActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.activity.user.UserActivity"
+            android:exported="false"
+            android:theme="@style/Theme.User" />
         <activity
             android:name=".ui.activity.CopyActivity"
             android:exported="false" />

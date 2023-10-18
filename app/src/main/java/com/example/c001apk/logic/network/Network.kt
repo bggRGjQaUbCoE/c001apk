@@ -62,6 +62,12 @@ object Network {
     suspend fun getUserFeed(uid: String, page: Int) =
         searchService.getUserFeed(uid, page).await()
 
+    suspend fun getAppInfo(id: String) =
+        searchService.getAppInfo(id).await()
+
+    suspend fun getAppComment(url: String, page: Int) =
+        searchService.getAppComment(url, page).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

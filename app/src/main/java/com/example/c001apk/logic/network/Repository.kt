@@ -122,6 +122,24 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getAppInfo(id: String) =
+        fire(Dispatchers.IO) {
+            val appResponse = Network.getAppInfo(id)
+            if (appResponse.data != null)
+                Result.success(appResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getAppComment(url: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val appResponse = Network.getAppComment(url, page)
+            if (appResponse.data != null)
+                Result.success(appResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

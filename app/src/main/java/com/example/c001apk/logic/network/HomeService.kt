@@ -1,5 +1,6 @@
 package com.example.c001apk.logic.network
 
+import com.example.c001apk.logic.model.AppResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.SearchTopicResponse
@@ -79,6 +80,17 @@ interface HomeService {
     fun getUserFeed(
         @Query("uid") uid: String,
         @Query("page") page: Int,
+    ): Call<HomeFeedResponse>
+
+    @GET("/v6/apk/detail?installed=1")
+    fun getAppInfo(
+        @Query("id") id: String,
+    ): Call<AppResponse>
+
+    @GET("/v6/page/dataList?title=%E7%82%B9%E8%AF%84&subTitle=")
+    fun getAppComment(
+        @Query("url") url: String,
+        @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
 }

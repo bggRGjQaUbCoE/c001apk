@@ -95,7 +95,7 @@ class HomeFragment : Fragment() {
             tab.text = tabList[position]
         }.attach()
         if (viewModel.isInitial) {
-            binding.viewPager.setCurrentItem(1, false)
+            binding.viewPager.setCurrentItem(2, false)
             viewModel.isInitial = false
         }
     }
