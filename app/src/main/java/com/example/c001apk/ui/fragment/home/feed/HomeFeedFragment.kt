@@ -171,7 +171,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
             .setShowCloseButton(true)
             .setEnableDragClose(true)
             .setEnableUpDragClose(true)
-            .setFolderName("Bili")
+            .setFolderName("c001apk")
             .start()
     }
 

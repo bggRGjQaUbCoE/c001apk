@@ -2,11 +2,14 @@ package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.text.style.ImageSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,14 +19,17 @@ import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.ui.activity.CopyActivity
+import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.ReplyItemDecoration
 import com.example.c001apk.util.SpacesItemDecoration
+import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
 
 class FeedContentAdapter(
@@ -70,7 +76,20 @@ class FeedContentAdapter(
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_feed_content, parent, false)
-                FeedContentViewHolder(view)
+                val viewHolder = FeedContentViewHolder(view)
+                viewHolder.itemView.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder.message.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder
             }
 
             else -> {
@@ -125,7 +144,20 @@ class FeedContentAdapter(
                     val builder = SpannableStringBuilder(mess)
                     val pattern = Pattern.compile("\\[[^\\]]+\\]")
                     val matcher = pattern.matcher(builder)
-                    holder.message.text = mess
+                    val urls = builder.getSpans(
+                        0, mess.length,
+                        URLSpan::class.java
+                    )
+                    for (url in urls) {
+                        val myURLSpan = MyURLSpan(mContext, "", url.url)
+                        val start = builder.getSpanStart(url)
+                        val end = builder.getSpanEnd(url)
+                        val flags = builder.getSpanFlags(url)
+                        builder.setSpan(myURLSpan, start, end, flags)
+                        builder.removeSpan(url)
+                    }
+                    holder.message.text = builder
+                    holder.message.movementMethod = LinkMovementMethod.getInstance()
                     while (matcher.find()) {
                         val group = matcher.group()
                         val emoji: Drawable =
@@ -186,7 +218,20 @@ class FeedContentAdapter(
                 val builder = SpannableStringBuilder(mess)
                 val pattern = Pattern.compile("\\[[^\\]]+\\]")
                 val matcher = pattern.matcher(builder)
-                holder.message.text = mess
+                val urls = builder.getSpans(
+                    0, mess.length,
+                    URLSpan::class.java
+                )
+                for (url in urls) {
+                    val myURLSpan = MyURLSpan(mContext, "", url.url)
+                    val start = builder.getSpanStart(url)
+                    val end = builder.getSpanEnd(url)
+                    val flags = builder.getSpanFlags(url)
+                    builder.setSpan(myURLSpan, start, end, flags)
+                    builder.removeSpan(url)
+                }
+                holder.message.text = builder
+                holder.message.movementMethod = LinkMovementMethod.getInstance()
                 while (matcher.find()) {
                     val group = matcher.group()
                     val emoji: Drawable =

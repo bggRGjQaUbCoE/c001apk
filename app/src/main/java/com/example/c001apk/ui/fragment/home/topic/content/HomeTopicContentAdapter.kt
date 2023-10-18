@@ -7,7 +7,9 @@ import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.text.style.ImageSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.topic.TopicActivity
 import com.example.c001apk.ui.fragment.home.feed.FeedPicAdapter
@@ -24,6 +27,7 @@ import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
+import com.example.c001apk.view.MyURLSpan
 import com.google.android.material.imageview.ShapeableImageView
 import java.util.regex.Pattern
 
@@ -66,6 +70,24 @@ class HomeTopicContentAdapter(
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
                     parent.context.startActivity(intent)
+                }
+                viewHolder.message.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", "feed")
+                    intent.putExtra("id", viewHolder.id)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.itemView.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder.message.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
                 }
                 return viewHolder
             }
@@ -116,7 +138,20 @@ class HomeTopicContentAdapter(
                 val builder = SpannableStringBuilder(mess)
                 val pattern = Pattern.compile("\\[[^\\]]+\\]")
                 val matcher = pattern.matcher(builder)
-                holder.message.text = mess
+                val urls = builder.getSpans(
+                    0, mess.length,
+                    URLSpan::class.java
+                )
+                for (url in urls) {
+                    val myURLSpan = MyURLSpan(mContext, feed.id, url.url)
+                    val start = builder.getSpanStart(url)
+                    val end = builder.getSpanEnd(url)
+                    val flags = builder.getSpanFlags(url)
+                    builder.setSpan(myURLSpan, start, end, flags)
+                    builder.removeSpan(url)
+                }
+                holder.message.text = builder
+                holder.message.movementMethod = LinkMovementMethod.getInstance()
                 while (matcher.find()) {
                     val group = matcher.group()
                     val emoji: Drawable =

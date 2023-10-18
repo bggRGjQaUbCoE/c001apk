@@ -15,6 +15,12 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.activity.CopyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.webview.WebViewActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.topic.TopicActivity"
             android:exported="false" />
         <activity

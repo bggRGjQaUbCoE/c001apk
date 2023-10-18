@@ -6,7 +6,9 @@ import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.text.style.ImageSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +22,7 @@ import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.R
+import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
 
 
@@ -58,7 +61,20 @@ class Reply2ReplyTotalAdapter(
         val builder = SpannableStringBuilder(mess)
         val pattern = Pattern.compile("\\[[^\\]]+\\]")
         val matcher = pattern.matcher(builder)
-        holder.message.text = mess
+        val urls = builder.getSpans(
+            0, mess.length,
+            URLSpan::class.java
+        )
+        for (url in urls) {
+            val myURLSpan = MyURLSpan(mContext, "", url.url)
+            val start = builder.getSpanStart(url)
+            val end = builder.getSpanEnd(url)
+            val flags = builder.getSpanFlags(url)
+            builder.setSpan(myURLSpan, start, end, flags)
+            builder.removeSpan(url)
+        }
+        holder.message.text = builder
+        holder.message.movementMethod = LinkMovementMethod.getInstance()
         while (matcher.find()) {
             val group = matcher.group()
             val emoji: Drawable =

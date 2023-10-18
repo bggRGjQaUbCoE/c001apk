@@ -166,7 +166,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
             .setShowCloseButton(true)
             .setEnableDragClose(true)
             .setEnableUpDragClose(true)
-            .setFolderName("Bili")
+            .setFolderName("c001apk")
             .start()
     }
 
