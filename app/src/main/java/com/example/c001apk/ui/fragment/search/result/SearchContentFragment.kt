@@ -25,6 +25,7 @@ class SearchContentFragment : Fragment() {
     private lateinit var feedAdapter: SearchFeedAdapter
     private lateinit var userAdapter: SearchUserAdapter
     private lateinit var topicAdapter: SearchTopicAdapter
+    private lateinit var appAdapter: SearchAppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
@@ -114,7 +115,10 @@ class SearchContentFragment : Fragment() {
                     viewModel.searchTopicList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore)
                     viewModel.searchTopicList.addAll(search)
-                topicAdapter.notifyDataSetChanged()
+                if (type == "apk")
+                    appAdapter.notifyDataSetChanged()
+                else
+                    topicAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -219,6 +223,7 @@ class SearchContentFragment : Fragment() {
         feedAdapter = SearchFeedAdapter(requireActivity(), viewModel.searchFeedList)
         userAdapter = SearchUserAdapter(requireActivity(), viewModel.searchUserList)
         topicAdapter = SearchTopicAdapter(viewModel.searchTopicList)
+        appAdapter = SearchAppAdapter(viewModel.searchTopicList)
 
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
@@ -226,6 +231,7 @@ class SearchContentFragment : Fragment() {
                 when (type) {
                     "feed" -> feedAdapter
                     "user" -> userAdapter
+                    "apk" -> appAdapter
                     else -> topicAdapter
                 }
             layoutManager = mLayoutManager

@@ -61,6 +61,7 @@ class UserActivity : AppCompatActivity() {
                 binding.follow.text = "${user.follow} 关注"
                 binding.fans.text = "${user.fans} 粉丝"
                 binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
+                binding.toolBar.setLogo(R.drawable.ic_message)
 
                 binding.progress.isIndeterminate = false
                 viewModel.uid = user.uid
