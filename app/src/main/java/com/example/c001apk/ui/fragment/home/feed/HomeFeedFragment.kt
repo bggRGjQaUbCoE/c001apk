@@ -59,8 +59,10 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     for (element in feed) {
                         //if (element.entityTemplate == "feed" || element.entityTemplate == "iconMiniScrollCard")
-                        if (element.entityTemplate != "sponsorCard" && element.entityTemplate != "refreshCard")
-
+                        if (element.entityTemplate != "sponsorCard"
+                            && element.entityTemplate != "refreshCard"
+                            && element.entityTemplate != "listCard"
+                            )
                             viewModel.homeFeedList.add(element)
                     }
                     viewModel.lastItem = feed[feed.size - 1].entityId

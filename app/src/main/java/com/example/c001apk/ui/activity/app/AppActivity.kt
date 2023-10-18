@@ -3,6 +3,7 @@ package com.example.c001apk.ui.activity.app
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -47,7 +48,10 @@ class AppActivity : AppCompatActivity() {
                 binding.name.text = appInfo.title
                 binding.version.text = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
                 binding.size.text = "大小: ${appInfo.apksize}"
-                binding.updateTime.text = "更新时间: ${PubDateUtil.time(appInfo.lastupdate)}"
+                if (appInfo.lastupdate == null)
+                    binding.updateTime.text = "更新时间: null"
+                else
+                    binding.updateTime.text = "更新时间: ${PubDateUtil.time(appInfo.lastupdate)}"
                 binding.collapsingToolbar.title = appInfo.title
                 binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                 ImageShowUtil.showIMG(binding.logo, appInfo.logo)
