@@ -76,7 +76,7 @@ interface HomeService {
         @Query("uid") uid: String,
     ): Call<UserResponse>
 
-    @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1&showDoing=1")
+    @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1&showDoing=0")
     fun getUserFeed(
         @Query("uid") uid: String,
         @Query("page") page: Int,

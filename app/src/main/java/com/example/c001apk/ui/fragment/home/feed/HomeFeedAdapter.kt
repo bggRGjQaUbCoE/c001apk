@@ -277,7 +277,11 @@ class HomeFeedAdapter(
             }
 
             is ImageTextScrollCardViewHolder -> {
-                val imageTextScrollCard = homeFeedList[position].entities
+                val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
+                for (element in homeFeedList[position].entities){
+                    if (element.entityType == "feed")
+                        imageTextScrollCard.add(element)
+                }
                 val mAdapter = ImageTextScrollCardAdapter(mContext, imageTextScrollCard)
                 val mLayoutManager = LinearLayoutManager(mContext)
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
