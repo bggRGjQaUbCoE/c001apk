@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="false"
-    app:cardElevation="1dp"
+    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+    app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
     <LinearLayout

@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    app:cardElevation="1dp"
+    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+    app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout

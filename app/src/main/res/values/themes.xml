@@ -9,7 +9,7 @@
     </style>
 
     <style name="iconMiniScrollCardRadius">
-        <item name="cornerSize">20dp</item>
+        <item name="cornerSize">18dp</item>
     </style>
 
     <style name="Widget.Material3.TabLayout.OnSurface.Trans" parent="Base.Widget.Material3.TabLayout.OnSurface">
