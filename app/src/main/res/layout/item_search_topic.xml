@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+    app:cardBackgroundColor="@color/home_card_background_color"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
 

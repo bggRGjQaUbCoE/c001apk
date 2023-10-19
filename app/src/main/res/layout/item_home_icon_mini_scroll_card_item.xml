@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:clickable="false"
     app:cardCornerRadius="20dp"
-    app:cardElevation="1dp"
+    app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
-    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+    app:cardBackgroundColor="@android:color/transparent"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
