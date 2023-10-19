@@ -11,4 +11,5 @@
     <string name="search_history">历史搜索</string>
     <string name="clearAll">清除</string>
     <string name="clearAllTitle">确认清除全部历史记录吗？</string>
+    <string name="clear_cache">清理缓存</string>
 </resources>

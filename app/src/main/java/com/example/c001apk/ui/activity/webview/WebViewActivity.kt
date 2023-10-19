@@ -1,21 +1,32 @@
 package com.example.c001apk.ui.activity.webview
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
+import com.google.android.material.snackbar.Snackbar
+import java.net.URISyntaxException
 
 
 class WebViewActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWebViewBinding
+    private lateinit var link: String
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,19 +37,89 @@ class WebViewActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val url = intent.getStringExtra("url")
-        url?.let {
-            binding.webView.apply {
-                settings.javaScriptEnabled = true
-                webViewClient = WebViewClient()
-                webChromeClient = object : WebChromeClient() {
-                    override fun onReceivedTitle(view: WebView, title: String) {
-                        super.onReceivedTitle(view, title)
-                        binding.toolBar.title = title
+        link = intent.getStringExtra("url")!!
+
+        binding.webView.apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.setSupportZoom(true)
+            settings.builtInZoomControls = true
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE
+
+            settings.defaultTextEncodingName = "UTF-8"
+            settings.allowContentAccess = true
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.javaScriptCanOpenWindowsAutomatically = true
+            settings.loadsImagesAutomatically = true
+            settings.allowFileAccess = false
+
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?, request: WebResourceRequest?
+                ): Boolean {
+                    request?.let {
+                        try {
+                            //处理intent协议
+                            if (request.url.toString().startsWith("intent://")) {
+                                val intent: Intent
+                                try {
+                                    intent = Intent.parseUri(
+                                        request.url.toString(), Intent.URI_INTENT_SCHEME
+                                    )
+                                    intent.addCategory("android.intent.category.BROWSABLE")
+                                    intent.component = null
+                                    intent.selector = null
+                                    val resolves =
+                                        context.packageManager.queryIntentActivities(intent, 0)
+                                    if (resolves.size > 0) {
+                                        startActivityIfNeeded(intent, -1)
+                                    }
+                                    return true
+                                } catch (e: URISyntaxException) {
+                                    e.printStackTrace()
+                                }
+                            }
+                            // 处理自定义scheme协议
+                            if (!request.url.toString().startsWith("http")) {
+                                Snackbar.make(
+                                    view!!,
+                                    "当前网页将要打开外部链接，是否打开",
+                                    Snackbar.LENGTH_SHORT
+                                ).setAction("打开") {
+                                    try {
+                                        val intent = Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(request.url.toString())
+                                        )
+                                        intent.flags =
+                                            (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                        startActivity(intent)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(
+                                            this@WebViewActivity,
+                                            "打开失败",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
+                                    }
+                                }.show()
+                                return true
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
+                    return super.shouldOverrideUrlLoading(view, request)
                 }
-                loadUrl(url)
             }
+            webChromeClient = object : WebChromeClient() {
+                override fun onReceivedTitle(view: WebView, title: String) {
+                    super.onReceivedTitle(view, title)
+                    binding.toolBar.title = title
+                }
+            }
+            loadUrl(link)
         }
 
     }
@@ -51,12 +132,39 @@ class WebViewActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
-            R.id.refresh -> Toast.makeText(this, "refresh", Toast.LENGTH_SHORT).show()
-            R.id.copyLink -> Toast.makeText(this, "copy", Toast.LENGTH_SHORT).show()
-            R.id.openInBrowser -> Toast.makeText(this, "open", Toast.LENGTH_SHORT).show()
+
+            R.id.refresh -> binding.webView.reload()
+
+            R.id.copyLink -> {
+                val clipboardManager =
+                    this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                ClipData.newPlainText("link", link)?.let { clipboardManager.setPrimaryClip(it) }
+                Toast.makeText(this, "已复制: $link", Toast.LENGTH_SHORT).show()
+            }
+
+            R.id.openInBrowser -> {
+                val uri = Uri.parse(link)
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                startActivity(intent)
+            }
+
+            R.id.clearCache -> {
+                binding.webView.clearHistory()
+                binding.webView.clearCache(true)
+                binding.webView.clearFormData()
+                Toast.makeText(this, "清除缓存成功", Toast.LENGTH_SHORT).show()
+            }
+
         }
         return true
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+            binding.webView.goBack() //返回上个页面
+            return true
+        }
+        return super.onKeyDown(keyCode, event) //退出H5界面
+    }
 
 }
