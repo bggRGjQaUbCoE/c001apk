@@ -55,11 +55,16 @@ class TopicFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        initData()
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initData()
+        //initData()
 
         viewModel.homeTopicTitleLiveData.observe(viewLifecycleOwner) { result ->
             val topic = result.getOrNull()

@@ -57,22 +57,41 @@ class SearchContentFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
+
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initView()
-        initData()
-        initRefresh()
-        initScroll()
+        if (!viewModel.isInit) {
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
 
         viewModel.searchData.observe(viewLifecycleOwner) { result ->
             val search = result.getOrNull()
             if (!search.isNullOrEmpty()) {
                 if (viewModel.isRefreshing)
                     viewModel.searchFeedList.clear()
-                if (viewModel.isRefreshing || viewModel.isLoadMore)
-                    viewModel.searchFeedList.addAll(search)
+                if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                    for (element in search) {
+                        if (element.entityType == "feed")
+                            viewModel.searchFeedList.add(element)
+                    }
+                }
                 feedAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false

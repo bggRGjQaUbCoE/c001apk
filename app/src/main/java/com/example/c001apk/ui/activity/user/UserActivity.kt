@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,7 +52,6 @@ class UserActivity : AppCompatActivity() {
                 binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
                 binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                 ImageShowUtil.showIMG(binding.cover, user.cover)
-                //binding.cover.foreground = this.getDrawable(R.color.user_cover)
                 ImageShowUtil.showAvatar(binding.avatar, user.userAvatar)
                 binding.name.text = user.username
                 binding.level.text = "Lv.${user.level}"

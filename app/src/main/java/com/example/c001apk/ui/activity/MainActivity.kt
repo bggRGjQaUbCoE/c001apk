@@ -42,27 +42,11 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                binding.bottomNav?.menu?.getItem(position)?.isChecked = true
-                binding.navRail?.menu?.getItem(position)?.isChecked = true
+                binding.bottomNav.menu.getItem(position)?.isChecked = true
             }
         })
 
-        binding.bottomNav?.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.navigation_home -> {
-                    if (binding.viewPager.currentItem == 0)
-                        controller?.onReturnTop()
-                    else
-                        binding.viewPager.setCurrentItem(0, true)
-                }
-
-                R.id.navigation_message -> binding.viewPager.setCurrentItem(1, true)
-                R.id.navigation_setting -> binding.viewPager.setCurrentItem(2, true)
-            }
-            true
-        }
-
-        binding.navRail?.setOnItemSelectedListener {
+        binding.bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.navigation_home -> {
                     if (binding.viewPager.currentItem == 0)

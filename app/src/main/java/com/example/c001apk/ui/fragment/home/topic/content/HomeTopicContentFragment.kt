@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.util.LinearItemDecoration
@@ -65,10 +63,12 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initData()
-        initView()
-        initRefresh()
-        initScroll()
+        if (!viewModel.isInit) {
+            initData()
+            initView()
+            initRefresh()
+            initScroll()
+        }
 
         viewModel.topicDataLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
@@ -121,13 +121,6 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
     }
 
     private fun initRefresh() {
-        //binding.swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.black)
-        /*binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireActivity(),
-                rikka.preference.simplemenu.R.attr.colorPrimary
-            )
-        )*/
         binding.swipeRefresh.setOnRefreshListener {
             refreshData()
         }
@@ -165,6 +158,15 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
 
     override fun onResume() {
         super.onResume()
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initData()
+            initView()
+            initRefresh()
+            initScroll()
+        }
+
         (requireActivity() as IOnBottomClickContainer).controller = this
     }
 

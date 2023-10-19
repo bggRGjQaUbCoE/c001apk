@@ -46,10 +46,12 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initView()
-        initData()
-        initRefresh()
-        initScroll()
+        if (!viewModel.isInit) {
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
 
         viewModel.homeRankingData.observe(viewLifecycleOwner) { result ->
             val feed = result.getOrNull()
@@ -101,13 +103,6 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
     }
 
     private fun initRefresh() {
-        //binding.swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.black)
-        /*binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireActivity(),
-                rikka.preference.simplemenu.R.attr.colorPrimary
-            )
-        )*/
         binding.swipeRefresh.setOnRefreshListener {
             refreshData()
         }
@@ -142,7 +137,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
     }
 
     override fun onReturnTop() {
-        if (current == 3){
+        if (current == 3) {
             if (firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {
@@ -154,6 +149,15 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
 
     override fun onResume() {
         super.onResume()
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
+
         (requireActivity() as IOnBottomClickContainer).controller = this
         IOnFeedPicClickContainer.controller = this
     }

@@ -278,7 +278,7 @@ class HomeFeedAdapter(
 
             is ImageTextScrollCardViewHolder -> {
                 val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
-                for (element in homeFeedList[position].entities){
+                for (element in homeFeedList[position].entities) {
                     if (element.entityType == "feed")
                         imageTextScrollCard.add(element)
                 }
@@ -305,7 +305,11 @@ class HomeFeedAdapter(
             }
 
             is IconMiniScrollCardViewHolder -> {
-                val imageTextScrollCard = homeFeedList[position].entities
+                val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
+                for (element in homeFeedList[position].entities) {
+                    if (element.entityType == "topic" || element.entityType == "product")
+                        imageTextScrollCard.add(element)
+                }
                 val mAdapter = IconMiniScrollCardAdapter(mContext, imageTextScrollCard)
                 val mLayoutManager = LinearLayoutManager(mContext)
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL

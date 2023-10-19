@@ -1,7 +1,9 @@
 package com.example.c001apk.util
 
 import android.content.Context
+import android.content.res.Resources
 import android.util.TypedValue
+
 
 object DensityTool {
 
@@ -15,6 +17,10 @@ object DensityTool {
             dp,
             context.resources.displayMetrics
         )
+    }
+
+    fun px2dp(pxValue: Float): Float {
+        return pxValue / Resources.getSystem().displayMetrics.density
     }
 
 }

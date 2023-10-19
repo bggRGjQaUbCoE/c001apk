@@ -10,6 +10,7 @@ import com.example.c001apk.logic.network.Repository
 
 class SearchContentViewModel : ViewModel() {
 
+    var isInit = true
     val searchFeedList = ArrayList<HomeFeedResponse.Data>()
     val searchUserList = ArrayList<SearchUserResponse.Data>()
     val searchTopicList = ArrayList<SearchTopicResponse.Data>()

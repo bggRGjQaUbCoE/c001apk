@@ -51,6 +51,10 @@ android {
     }
 }
 
+configurations.configureEach {
+    exclude("androidx.appcompat", "appcompat")
+}
+
 dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
@@ -73,4 +77,5 @@ dependencies {
     implementation("com.drakeet.about:about:2.4.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("dev.rikka.rikkax.material:material:2.7.0")
 }

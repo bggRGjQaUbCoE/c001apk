@@ -41,9 +41,11 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initView()
-        initRefresh()
-        initScroll()
+        if (!viewModel.isInit) {
+            initView()
+            initRefresh()
+            initScroll()
+        }
 
     }
 
@@ -87,6 +89,15 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
 
     override fun onResume() {
         super.onResume()
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initView()
+            initRefresh()
+            initScroll()
+        }
+
+
         (requireActivity() as IOnBottomClickContainer).controller = this
     }
 

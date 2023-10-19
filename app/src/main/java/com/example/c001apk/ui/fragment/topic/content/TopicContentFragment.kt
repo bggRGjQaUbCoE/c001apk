@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.fragment.home.topic.content.HomeTopicContentViewModel
 import com.example.c001apk.util.LinearItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -23,7 +22,7 @@ private const val TITLE = "title"
 class TopicContentFragment : Fragment() {
 
     private lateinit var binding: FragmentTopicContentBinding
-    private val viewModel by lazy { ViewModelProvider(this)[HomeTopicContentViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[TopicContentViewModel::class.java] }
     private lateinit var url: String
     private lateinit var title: String
     private lateinit var mAdapter: TopicContentAdapter
@@ -58,14 +57,29 @@ class TopicContentFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initData()
+            initView()
+            initRefresh()
+            initScroll()
+        }
+
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initData()
-        initView()
-        initRefresh()
-        initScroll()
+        if (!viewModel.isInit) {
+            initData()
+            initView()
+            initRefresh()
+            initScroll()
+        }
 
         viewModel.topicDataLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
@@ -118,13 +132,6 @@ class TopicContentFragment : Fragment() {
     }
 
     private fun initRefresh() {
-        //binding.swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.black)
-        /*binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireActivity(),
-                rikka.preference.simplemenu.R.attr.colorPrimary
-            )
-        )*/
         binding.swipeRefresh.setOnRefreshListener {
             refreshData()
         }

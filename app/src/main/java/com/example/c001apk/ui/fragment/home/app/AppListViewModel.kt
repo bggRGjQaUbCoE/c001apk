@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 class AppListViewModel : ViewModel() {
 
+    var isInit = true
     val appList = ArrayList<AppItem>()
     val items: MutableLiveData<ArrayList<AppItem>> = MutableLiveData()
 

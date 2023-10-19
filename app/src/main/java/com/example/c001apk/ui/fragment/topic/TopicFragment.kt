@@ -95,6 +95,7 @@ class TopicFragment : Fragment() {
     }
 
     private fun initView(tabSelected: Int) {
+        binding.viewPager.offscreenPageLimit = tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) = fragmentList[position]
             override fun getItemCount() = tabList.size
@@ -103,6 +104,7 @@ class TopicFragment : Fragment() {
             tab.text = tabList[position]
         }.attach()
         if (viewModel.isInit) {
+            binding.viewPager.currentItem = tabSelected
             binding.tabLayout.getTabAt(tabSelected)!!.select()
             viewModel.isInit = false
         }

@@ -146,29 +146,29 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null)
                 .commit()
-            saveHistory()
+            saveHistory(binding.editText.text.toString())
             binding.editText.text = null
         }
     }
 
     @SuppressLint("Range", "NotifyDataSetChanged")
-    private fun saveHistory() {
+    private fun saveHistory(keyword: String) {
         var isExist = false
         val cursor = db.query("SearchHistory", null, null, null, null, null, null)
         if (cursor.moveToFirst()) {
             do {
                 val history = cursor.getString(cursor.getColumnIndex("keyword"))
-                if (binding.editText.text.toString() == history)
+                if (keyword == history)
                     isExist = true
             } while (cursor.moveToNext())
         }
         cursor.close()
 
         if (!isExist) {
-            viewModel.historyList.add(0, binding.editText.text.toString())
+            viewModel.historyList.add(0, keyword)
             mAdapter.notifyDataSetChanged()
             val value = ContentValues().apply {
-                put("keyword", binding.editText.text.toString())
+                put("keyword", keyword)
             }
             db.insert("SearchHistory", null, value)
         }
@@ -187,7 +187,8 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         binding.editText.isFocusable = true
         binding.editText.isFocusableInTouchMode = true
         binding.editText.requestFocus()
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(binding.editText, 0)
         binding.editText.imeOptions = EditorInfo.IME_ACTION_SEARCH
         binding.editText.inputType = EditorInfo.TYPE_CLASS_TEXT
@@ -201,6 +202,13 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     override fun onItemClick(keyword: String) {
         binding.editText.setText(keyword)
         search()
+        updateHistory(keyword)
+    }
+
+    private fun updateHistory(keyword: String) {
+        viewModel.historyList.remove(keyword)
+        db.delete("SearchHistory", "keyword = ?", arrayOf(keyword))
+        saveHistory(keyword)
     }
 
     @SuppressLint("NotifyDataSetChanged")
