@@ -72,4 +72,5 @@ dependencies {
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.drakeet.about:about:2.4.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }
