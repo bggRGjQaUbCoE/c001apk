@@ -16,14 +16,14 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
+import com.example.c001apk.ui.activity.BaseActivity
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 
 
-class WebViewActivity : AppCompatActivity() {
+class WebViewActivity : BaseActivity() {
 
     private lateinit var binding: ActivityWebViewBinding
     private lateinit var link: String

@@ -1,11 +1,55 @@
 <resources>
 
-    <style name="Base.Theme.C001apk" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.C001apk" parent="Theme.Material3.DynamicColors.Light.Rikka">
         <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimaryVariant">@color/primary_dark_light_light_status_bar</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- Preference title -->
+        <item name="android:textAppearanceListItem">?textAppearanceSubtitle1</item>
+        <!-- Preference category title -->
+        <item name="android:colorAccent">?colorPrimary</item>
+        <!-- Preference switch -->
+        <item name="android:colorControlActivated">?colorPrimary</item>
     </style>
 
     <style name="Theme.C001apk" parent="Base.Theme.C001apk">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3.Mod</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="PreferenceThemeOverlay.Rikka.Material3.Mod" parent="@style/PreferenceThemeOverlay">
+        <item name="preferenceCategoryTitleTextAppearance">
+            @style/TextAppearance.Rikka.CategoryTitle.Material3
+        </item>
+        <item name="preferenceCategoryTitleTextColor">?colorPrimary</item>
+        <item name="preferenceCategoryStyle">@style/Preference.Rikka.Category.Material3.Mod</item>
+        <item name="preferenceStyle">@style/Preference.Rikka.Material3</item>
+        <item name="checkBoxPreferenceStyle">@style/Preference.Rikka.CheckBoxPreference.Material3
+        </item>
+        <item name="dialogPreferenceStyle">@style/Preference.Rikka.Material3</item>
+        <item name="editTextPreferenceStyle">@style/Preference.Rikka.EditTextPreference.Material3
+        </item>
+        <item name="dropdownPreferenceStyle">@style/Preference.Rikka.DropdownPreference.Material3
+        </item>
+        <item name="switchPreferenceStyle">@style/Preference.Rikka.SwitchPreference.Material3</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Rikka.SeekbarPreference.Material3
+        </item>
+        <item name="simpleMenuPreferenceStyle">
+            @style/Preference.Rikka.SimpleMenuPreference.Material3
+        </item>
+        <item name="materialSwitchPreferenceStyle">@style/Preference.Rikka.MateriaSwitchPreference
+        </item>
+    </style>
+
+    <style name="Preference.Rikka.Category.Material3.Mod" parent="@style/Preference.Category.Material">
+        <item name="android:layout">@layout/m3_preference_category</item>
+        <item name="iconSpaceReserved">false</item>
+        <item name="allowDividerAbove">true</item>
+        <item name="allowDividerBelow">true</item>
     </style>
 
     <style name="iconMiniScrollCardRadius">

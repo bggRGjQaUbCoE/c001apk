@@ -1,11 +1,9 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.example.c001apk.databinding.ActivityCopyBinding
 
-class CopyActivity : AppCompatActivity() {
+class CopyActivity : BaseActivity() {
 
     private lateinit var binding: ActivityCopyBinding
 

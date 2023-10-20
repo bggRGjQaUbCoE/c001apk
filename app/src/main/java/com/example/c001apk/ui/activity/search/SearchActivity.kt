@@ -1,13 +1,13 @@
 package com.example.c001apk.ui.activity.search
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivitySearchBinding
+import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.fragment.search.SearchFragment
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySearchBinding
 

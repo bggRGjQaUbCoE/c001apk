@@ -1,7 +1,17 @@
 <resources>
 
-    <style name="Base.Theme.C001apk" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowLightStatusBar">false</item>
+    <style name="Base.Theme.C001apk" parent="Theme.Material3.DynamicColors.Dark.Rikka">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- Preference title -->
+        <item name="android:textAppearanceListItem">?textAppearanceSubtitle1</item>
+        <!-- Preference category title -->
+        <item name="android:colorAccent">?colorPrimary</item>
+        <!-- Preference switch -->
+        <item name="android:colorControlActivated">?colorPrimary</item>
     </style>
 
 </resources>

@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityUserBinding
+import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
@@ -19,7 +19,7 @@ import com.example.c001apk.util.PubDateUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class UserActivity : AppCompatActivity() {
+class UserActivity : BaseActivity() {
 
     private lateinit var binding: ActivityUserBinding
     private val viewModel by lazy { ViewModelProvider(this)[UserViewModel::class.java] }

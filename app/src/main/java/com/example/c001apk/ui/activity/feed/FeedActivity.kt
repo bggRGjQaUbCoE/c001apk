@@ -2,13 +2,13 @@ package com.example.c001apk.ui.activity.feed
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
-import com.example.c001apk.ui.fragment.feed.FeedFragment
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
+import com.example.c001apk.ui.activity.BaseActivity
+import com.example.c001apk.ui.fragment.feed.FeedFragment
 
-class FeedActivity : AppCompatActivity() {
+class FeedActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFeedBinding
 

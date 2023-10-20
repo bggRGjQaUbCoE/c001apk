@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -11,8 +10,9 @@ import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
+import com.example.c001apk.ui.fragment.settings.SettingsPreferenceFragment
 
-class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
+class MainActivity : BaseActivity(), IOnBottomClickContainer {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity(), IOnBottomClickContainer {
                     return when (position) {
                         0 -> HomeFragment()
                         1 -> BlankFragment()
-                        2 -> BlankFragment()
+                        2 -> SettingsPreferenceFragment()
                         else -> HomeFragment()
                     }
                 }

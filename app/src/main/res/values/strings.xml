@@ -12,4 +12,37 @@
     <string name="clearAll">清除</string>
     <string name="clearAllTitle">确认清除全部历史记录吗？</string>
     <string name="clear_cache">清理缓存</string>
+
+    <string name="settings_theme">主题</string>
+    <string name="settings_system_theme_color_summary">系统取色</string>
+    <string name="settings_system_theme_color">系统主题色</string>
+    <string name="settings_theme_color">主题颜色</string>
+    <string name="dark_theme">深色主题</string>
+    <string name="settings_pure_black_dark_theme">纯黑主题</string>
+    <string name="settings_pure_black_dark_theme_summary">当深色主题启用时使用纯黑主题</string>
+    <string name="dark_theme_off">总是关闭</string>
+    <string name="dark_theme_on">总是开启</string>
+    <string name="follow_system">跟随系统</string>
+    <string name="dark_theme_follow_system">@string/follow_system</string>
+
+    <!-- Colors -->
+    <string name="color_sakura">樱花</string>
+    <string name="color_red">红色</string>
+    <string name="color_pink">粉色</string>
+    <string name="color_purple">紫色</string>
+    <string name="color_deep_purple">深紫</string>
+    <string name="color_indigo">靛青</string>
+    <string name="color_blue">蓝色</string>
+    <string name="color_light_blue">浅蓝</string>
+    <string name="color_cyan">青色</string>
+    <string name="color_teal">青绿</string>
+    <string name="color_green">绿色</string>
+    <string name="color_light_green">浅绿</string>
+    <string name="color_lime">黄绿</string>
+    <string name="color_yellow">黄色</string>
+    <string name="color_amber">琥珀</string>
+    <string name="color_orange">橙色</string>
+    <string name="color_deep_orange">深橙</string>
+    <string name="color_brown">棕色</string>
+    <string name="color_blue_grey">灰蓝</string>
 </resources>
