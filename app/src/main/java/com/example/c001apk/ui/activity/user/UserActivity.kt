@@ -1,9 +1,17 @@
 package com.example.c001apk.ui.activity.user
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import androidx.annotation.NonNull
+import androidx.annotation.StyleRes
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -17,8 +25,11 @@ import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
+import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 class UserActivity : BaseActivity() {
 
@@ -30,8 +41,8 @@ class UserActivity : BaseActivity() {
     private var lastVisibleItemPosition = 0
 
     @SuppressLint(
-        "ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged",
-        "UseCompatLoadingForDrawables"
+        "ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged", "UseCompatLoadingForDrawables",
+        "RestrictedApi", "ResourceType"
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,12 +64,13 @@ class UserActivity : BaseActivity() {
                 binding.collapsingToolbar.title = user.username
                 binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
                 binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-                ImageShowUtil.showIMG(binding.cover, user.cover)
+                ImageShowUtil.showUserCover(binding.cover, user.cover)
                 ImageShowUtil.showAvatar(binding.avatar, user.userAvatar)
                 binding.name.text = user.username
                 binding.level.text = "Lv.${user.level}"
                 binding.level.visibility = View.VISIBLE
-                binding.bio.text = user.bio
+                if (user.bio == "") binding.bio.visibility = View.GONE
+                else binding.bio.text = user.bio
                 binding.like.text = "${CountUtil.view(user.beLikeNum)} 获赞"
                 binding.follow.text = "${CountUtil.view(user.follow)} 关注"
                 binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
@@ -80,12 +92,10 @@ class UserActivity : BaseActivity() {
         viewModel.userFeedData.observe(this) { result ->
             val feed = result.getOrNull()
             if (!feed.isNullOrEmpty()) {
-                if (viewModel.isRefreh)
-                    viewModel.feedContentList.clear()
+                if (viewModel.isRefreh) viewModel.feedContentList.clear()
                 if (viewModel.isRefreh || viewModel.isLoadMore) {
                     for (element in feed) {
-                        if (element.entityType == "feed")
-                            viewModel.feedContentList.add(element)
+                        if (element.entityType == "feed") viewModel.feedContentList.add(element)
                     }
                 }
                 mAdapter.notifyDataSetChanged()
@@ -129,8 +139,7 @@ class UserActivity : BaseActivity() {
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
             ThemeUtils.getThemeAttrColor(
-                this,
-                rikka.preference.simplemenu.R.attr.colorPrimary
+                this, rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
@@ -164,8 +173,7 @@ class UserActivity : BaseActivity() {
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+            if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
         }
     }
 

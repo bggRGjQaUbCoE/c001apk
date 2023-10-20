@@ -5,7 +5,6 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -13,6 +12,7 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageShowUtil
+import com.google.android.material.imageview.ShapeableImageView
 
 class ImageTextScrollCardAdapter(
     private val mContext: Context,
@@ -22,7 +22,7 @@ class ImageTextScrollCardAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
-        val imageTextScrollCard: ImageView = view.findViewById(R.id.imageTextScrollCard)
+        val imageTextScrollCard: ShapeableImageView = view.findViewById(R.id.imageTextScrollCard)
         var id = ""
     }
 

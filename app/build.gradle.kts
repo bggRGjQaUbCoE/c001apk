@@ -117,4 +117,5 @@ dependencies {
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("dev.rikka.rikkax.material:material:2.7.0")
     implementation("dev.rikka.rikkax.material:material-preference:2.0.0")
+    implementation("jp.wasabeef:glide-transformations:4.3.0")
 }

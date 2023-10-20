@@ -27,22 +27,6 @@ class AppActivity : BaseActivity() {
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
 
-    /**
-     * 获取状态栏高度
-     * @return
-     */
-    @SuppressLint("DiscouragedApi", "InternalInsetResource")
-    fun getStatusBarHeight(): Int {
-        var result = 0
-        //获取状态栏高度的资源id
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources.getDimensionPixelSize(resourceId)
-        }
-        return result
-    }
-
-
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,22 +36,6 @@ class AppActivity : BaseActivity() {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        /*val tv = TypedValue()
-        var actionBarHeight = 0
-        if (this.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            actionBarHeight =
-                TypedValue.complexToDimensionPixelSize(tv.data, this.resources.displayMetrics)
-        }
-
-        val mediumSpace = resources.getDimensionPixelSize(R.dimen.medium_space)
-        val minorSpace = resources.getDimensionPixelSize(R.dimen.minor_space)
-        binding.appLayout.setPadding(
-            mediumSpace,
-            actionBarHeight,
-            mediumSpace,
-            minorSpace
-        )//px*/
 
         initView()
         initData()
