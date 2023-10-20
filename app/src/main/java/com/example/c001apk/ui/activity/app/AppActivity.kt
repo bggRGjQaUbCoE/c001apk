@@ -3,6 +3,7 @@ package com.example.c001apk.ui.activity.app
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -153,7 +154,14 @@ class AppActivity : BaseActivity() {
         viewModel.isInit = false
     }
 
+    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
+        binding.swipeRefresh.setColorSchemeColors(
+            ThemeUtils.getThemeAttrColor(
+                this,
+                rikka.preference.simplemenu.R.attr.colorPrimary
+            )
+        )
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.page = 1
             viewModel.isRefreh = true

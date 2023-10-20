@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -131,7 +132,14 @@ class TopicContentFragment : Fragment() {
         })
     }
 
+    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
+        binding.swipeRefresh.setColorSchemeColors(
+            ThemeUtils.getThemeAttrColor(
+                requireActivity(),
+                rikka.preference.simplemenu.R.attr.colorPrimary
+            )
+        )
         binding.swipeRefresh.setOnRefreshListener {
             refreshData()
         }

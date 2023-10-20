@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.bean.ImageInfo
-import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
+import com.example.c001apk.util.ImageShowUtil
+import com.google.android.material.imageview.ShapeableImageView
 
 class FeedContentPicAdapter(
     private val feedPicList: List<String>
@@ -17,7 +17,7 @@ class FeedContentPicAdapter(
     RecyclerView.Adapter<FeedContentPicAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val feedPic: ImageView = view.findViewById(R.id.feedPic)
+        val feedPic: ShapeableImageView = view.findViewById(R.id.feedPic)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

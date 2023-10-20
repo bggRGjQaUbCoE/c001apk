@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="false"
-    app:cardBackgroundColor="@color/home_card_background_color"
-    app:cardElevation="0dp"
+    app:cardElevation="1dp"
     app:strokeWidth="0dp">
 
     <com.example.c001apk.view.NestedScrollableHost

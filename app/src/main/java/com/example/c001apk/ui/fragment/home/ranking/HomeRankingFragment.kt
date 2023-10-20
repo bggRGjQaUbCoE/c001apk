@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -102,7 +103,14 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
         })
     }
 
+    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
+        binding.swipeRefresh.setColorSchemeColors(
+            ThemeUtils.getThemeAttrColor(
+                requireActivity(),
+                rikka.preference.simplemenu.R.attr.colorPrimary
+            )
+        )
         binding.swipeRefresh.setOnRefreshListener {
             refreshData()
         }
