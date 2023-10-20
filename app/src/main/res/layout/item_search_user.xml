@@ -39,6 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -48,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/follow"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -57,6 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/fans"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 

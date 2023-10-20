@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
+import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
@@ -28,7 +28,8 @@ class UserActivity : AppCompatActivity() {
     private var firstCompletelyVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
 
-    @SuppressLint("ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged",
+    @SuppressLint(
+        "ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged",
         "UseCompatLoadingForDrawables"
     )
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,9 +58,9 @@ class UserActivity : AppCompatActivity() {
                 binding.level.text = "Lv.${user.level}"
                 binding.level.visibility = View.VISIBLE
                 binding.bio.text = user.bio
-                binding.like.text = "${user.beLikeNum} 获赞"
-                binding.follow.text = "${user.follow} 关注"
-                binding.fans.text = "${user.fans} 粉丝"
+                binding.like.text = "${CountUtil.view(user.beLikeNum)} 获赞"
+                binding.follow.text = "${CountUtil.view(user.follow)} 关注"
+                binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
                 binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
 
                 binding.progress.isIndeterminate = false

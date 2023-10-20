@@ -146,7 +146,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null)
                 .commit()
-            saveHistory(binding.editText.text.toString())
+            updateHistory(binding.editText.text.toString())
             binding.editText.text = null
         }
     }
