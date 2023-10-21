@@ -99,7 +99,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
                     viewModel.feedReplyList.clear()
                 }
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    for (element in reply){
+                    for (element in reply) {
                         if (element.entityType == "feed_reply")
                             viewModel.feedReplyList.add(element)
                     }
@@ -203,9 +203,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
         }
     }
 
-    override fun onShowTotalReply(id: String) {
+    override fun onShowTotalReply(uid: String, id: String) {
         val mBottomSheetDialogFragment: Reply2ReplyBottomSheetDialog =
-            Reply2ReplyBottomSheetDialog.newInstance(id)
+            Reply2ReplyBottomSheetDialog.newInstance(uid, id)
 
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }

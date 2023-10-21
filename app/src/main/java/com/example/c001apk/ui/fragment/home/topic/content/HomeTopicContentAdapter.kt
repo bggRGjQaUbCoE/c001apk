@@ -28,6 +28,7 @@ import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
+import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import com.google.android.material.imageview.ShapeableImageView
 import java.util.regex.Pattern
@@ -173,7 +174,7 @@ class HomeTopicContentAdapter(
                         (holder.message.textSize * 1.3).toInt(),
                         (holder.message.textSize * 1.3).toInt()
                     )
-                    val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                    val imageSpan = CenteredImageSpan(emoji)
                     builder.setSpan(
                         imageSpan,
                         matcher.start(),

@@ -8,7 +8,6 @@ import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
@@ -24,17 +23,20 @@ import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
+import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
 
 
 class Reply2ReplyTotalAdapter(
     private val mContext: Context,
+    private val uid: String,
     private val replyList: List<HomeFeedResponse.Data>
 ) : RecyclerView.Adapter<Reply2ReplyTotalAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val uname: TextView = view.findViewById(R.id.uname)
+        var name = ""
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
@@ -49,12 +51,7 @@ class Reply2ReplyTotalAdapter(
         val viewHolder = ViewHolder(view)
         viewHolder.avatar.setOnClickListener {
             val intent = Intent(parent.context, UserActivity::class.java)
-            intent.putExtra("id", viewHolder.uname.text)
-            parent.context.startActivity(intent)
-        }
-        viewHolder.uname.setOnClickListener {
-            val intent = Intent(parent.context, UserActivity::class.java)
-            intent.putExtra("id", viewHolder.uname.text)
+            intent.putExtra("id", viewHolder.name)
             parent.context.startActivity(intent)
         }
         return viewHolder
@@ -65,7 +62,33 @@ class Reply2ReplyTotalAdapter(
     @SuppressLint("SetTextI18n", "RestrictedApi", "UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reply = replyList[position]
-        holder.uname.text = reply.username
+
+        holder.name = reply.username
+
+        val text =
+            if (uid == reply.ruid)
+                """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>"""
+            else
+                """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>"""
+        val name = Html.fromHtml(
+            text.replace("\n", "<br />"),
+            Html.FROM_HTML_MODE_COMPACT
+        )
+        val nameBuilder = SpannableStringBuilder(name)
+        val nameUrls = nameBuilder.getSpans(
+            0, text.length,
+            URLSpan::class.java
+        )
+        for (url in nameUrls) {
+            val myURLSpan = MyURLSpan(mContext, "name", url.url)
+            val start = nameBuilder.getSpanStart(url)
+            val end = nameBuilder.getSpanEnd(url)
+            val flags = nameBuilder.getSpanFlags(url)
+            nameBuilder.setSpan(myURLSpan, start, end, flags)
+            nameBuilder.removeSpan(url)
+        }
+        holder.uname.text = nameBuilder
+        holder.uname.movementMethod = LinkMovementMethod.getInstance()
 
         val mess = Html.fromHtml(
             reply.message.replace("\n", "<br />"),
@@ -98,7 +121,7 @@ class Reply2ReplyTotalAdapter(
                 (holder.message.textSize * 1.3).toInt(),
                 (holder.message.textSize * 1.3).toInt()
             )
-            val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+            val imageSpan = CenteredImageSpan(emoji)
             builder.setSpan(
                 imageSpan,
                 matcher.start(),
@@ -109,6 +132,14 @@ class Reply2ReplyTotalAdapter(
         }
 
         holder.pubDate.text = PubDateUtil.time(reply.dateline)
+        val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+        drawable1.setBounds(
+            0,
+            0,
+            holder.pubDate.textSize.toInt(),
+            holder.pubDate.textSize.toInt()
+        )
+        holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
         holder.like.text = reply.likenum
         val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
         drawableLike.setBounds(

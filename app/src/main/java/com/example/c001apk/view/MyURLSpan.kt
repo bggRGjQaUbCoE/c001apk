@@ -5,6 +5,7 @@ import android.content.Intent
 import android.text.TextPaint
 import android.text.style.ClickableSpan
 import android.view.View
+import android.widget.Toast
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.ui.activity.feed.FeedActivity

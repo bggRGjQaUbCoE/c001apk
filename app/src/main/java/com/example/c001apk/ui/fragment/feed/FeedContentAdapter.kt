@@ -8,7 +8,6 @@ import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
@@ -23,15 +22,16 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
-import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.ReplyItemDecoration
 import com.example.c001apk.util.SpacesItemDecoration
+import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
+
 
 class FeedContentAdapter(
     private val mContext: Context,
@@ -69,6 +69,7 @@ class FeedContentAdapter(
         val totalReply: TextView = view.findViewById(R.id.totalReply)
         val picRecyclerView: RecyclerView = view.findViewById(R.id.picRecyclerView)
         var id = ""
+        var uid = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -109,7 +110,7 @@ class FeedContentAdapter(
                         .inflate(R.layout.item_feed_content_reply_item, parent, false)
                 val viewHolder = FeedContentReplyViewHolder(view)
                 viewHolder.totalReply.setOnClickListener {
-                    iOnTotalReplyClickListener?.onShowTotalReply(viewHolder.id)
+                    iOnTotalReplyClickListener?.onShowTotalReply(viewHolder.uid, viewHolder.id)
                 }
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
@@ -136,8 +137,27 @@ class FeedContentAdapter(
                     val feed = feedList[position]
                     holder.uname.text = feed.data.username
                     holder.device.text = feed.data.deviceTitle
+                    if (feed.data.deviceTitle != "") {
+                        val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
+                        drawable.setBounds(
+                            0,
+                            0,
+                            holder.device.textSize.toInt(),
+                            holder.device.textSize.toInt()
+                        )
+                        holder.device.setCompoundDrawables(drawable, null, null, null)
+                    } else {
+                        holder.device.visibility = View.GONE
+                    }
                     holder.pubDate.text = PubDateUtil.time(feed.data.dateline)
-
+                    val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                    drawable1.setBounds(
+                        0,
+                        0,
+                        holder.pubDate.textSize.toInt(),
+                        holder.pubDate.textSize.toInt()
+                    )
+                    holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
                     holder.like.text = feed.data.likenum
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
@@ -189,7 +209,7 @@ class FeedContentAdapter(
                             (holder.message.textSize * 1.3).toInt(),
                             (holder.message.textSize * 1.3).toInt()
                         )
-                        val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                        val imageSpan = CenteredImageSpan(emoji)
                         builder.setSpan(
                             imageSpan,
                             matcher.start(),
@@ -230,6 +250,7 @@ class FeedContentAdapter(
             is FeedContentReplyViewHolder -> {
                 val reply = replyList[position - 1]
                 holder.id = reply.id
+                holder.uid = reply.uid
                 holder.uname.text = reply.username
 
                 val mess = Html.fromHtml(
@@ -263,7 +284,7 @@ class FeedContentAdapter(
                         (holder.message.textSize * 1.3).toInt(),
                         (holder.message.textSize * 1.3).toInt()
                     )
-                    val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                    val imageSpan = CenteredImageSpan(emoji)
                     builder.setSpan(
                         imageSpan,
                         matcher.start(),
@@ -274,6 +295,14 @@ class FeedContentAdapter(
                 }
 
                 holder.pubDate.text = PubDateUtil.time(reply.dateline)
+                val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                drawable1.setBounds(
+                    0,
+                    0,
+                    holder.pubDate.textSize.toInt(),
+                    holder.pubDate.textSize.toInt()
+                )
+                holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
                 holder.like.text = reply.likenum
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                 drawableLike.setBounds(

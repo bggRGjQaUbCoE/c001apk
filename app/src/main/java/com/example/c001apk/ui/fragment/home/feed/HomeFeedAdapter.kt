@@ -29,6 +29,7 @@ import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration1
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpacesItemDecoration
+import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
 
@@ -95,8 +96,6 @@ class HomeFeedAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
-                    //intent.putExtra("uname", viewHolder.uname.text)
-                    //intent.putExtra("device", viewHolder.device.text)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.message.setOnClickListener {
@@ -188,7 +187,27 @@ class HomeFeedAdapter(
                 holder.id = feed.id
                 holder.uname.text = feed.username
                 holder.device.text = feed.deviceTitle
+                if (feed.deviceTitle != "") {
+                    val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
+                    drawable.setBounds(
+                        0,
+                        0,
+                        holder.device.textSize.toInt(),
+                        holder.device.textSize.toInt()
+                    )
+                    holder.device.setCompoundDrawables(drawable, null, null, null)
+                } else {
+                    holder.device.visibility = View.GONE
+                }
                 holder.pubDate.text = PubDateUtil.time(feed.dateline)
+                val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                drawable1.setBounds(
+                    0,
+                    0,
+                    holder.pubDate.textSize.toInt(),
+                    holder.pubDate.textSize.toInt()
+                )
+                holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
                 holder.like.text = feed.likenum
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                 drawableLike.setBounds(
@@ -246,7 +265,7 @@ class HomeFeedAdapter(
                         (holder.message.textSize * 1.3).toInt(),
                         (holder.message.textSize * 1.3).toInt()
                     )
-                    val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                    val imageSpan = CenteredImageSpan(emoji)
                     builder.setSpan(
                         imageSpan,
                         matcher.start(),

@@ -35,8 +35,9 @@
                 android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lineSpacingExtra="5dp"
+                android:lineSpacingMultiplier="1.3"
                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
@@ -45,8 +46,7 @@
                 android:id="@+id/pubDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@color/gray_bd"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/message" />
 
@@ -54,7 +54,7 @@
                 android:id="@+id/like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@color/gray_bd"
                 app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -63,7 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@color/gray_bd"
                 app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
                 app:layout_constraintEnd_toStartOf="@id/like" />
 

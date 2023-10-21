@@ -43,7 +43,7 @@
                 android:id="@+id/packageName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@color/gray_75"
                 android:textSize="14sp"
                 tools:text="packageName" />
 
@@ -51,7 +51,7 @@
                 android:id="@+id/appVersion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@color/gray_75"
                 android:textSize="12sp"
                 tools:text="appVersion" />
 

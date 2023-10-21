@@ -9,9 +9,9 @@ import android.widget.FrameLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.R
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
+import com.example.c001apk.util.LinearItemDecoration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -20,13 +20,15 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[ReplyTotalViewModel::class.java] }
     private lateinit var id: String
+    private lateinit var uid: String
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var lastVisibleItemPosition = 0
 
     companion object {
-        fun newInstance(id: String): Reply2ReplyBottomSheetDialog {
+        fun newInstance(uid: String, id: String): Reply2ReplyBottomSheetDialog {
             val args = Bundle()
+            args.putString("UID", uid)
             args.putString("ID", id)
             val fragment = Reply2ReplyBottomSheetDialog()
             fragment.arguments = args
@@ -37,7 +39,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
     private fun setData() {
         val args = arguments
         id = args!!.getString("ID", "")
-
+        uid = args.getString("UID", "")
     }
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,7 +112,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
 
-        mAdapter = Reply2ReplyTotalAdapter(requireActivity(), viewModel.replyTotalList)
+        mAdapter = Reply2ReplyTotalAdapter(requireActivity(), uid, viewModel.replyTotalList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter

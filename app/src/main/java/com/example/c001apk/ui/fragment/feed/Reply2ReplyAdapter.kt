@@ -8,8 +8,9 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.method.LinkMovementMethod
 import android.text.style.ForegroundColorSpan
-import android.text.style.ImageSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.util.EmojiUtil
+import com.example.c001apk.view.CenteredImageSpan
+import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
 
 
@@ -35,7 +38,8 @@ class Reply2ReplyAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_feed_content_reply_to_reply_item, parent, false)
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_feed_content_reply_to_reply_item, parent, false)
         return ViewHolder(view)
     }
 
@@ -47,19 +51,35 @@ class Reply2ReplyAdapter(
 
         if (reply.ruid == uid) {
             val uCount = reply.username.length
-            val text = "${reply.username}: ${reply.message}"
-            val builder =
-                SpannableStringBuilder(Html.fromHtml(text.replace("\n", "<br />"), Html.FROM_HTML_MODE_COMPACT))
-            val foregroundColorSpan = ForegroundColorSpan(
+            val text = """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
+            val mess = Html.fromHtml(
+                text.replace("\n", "<br />"),
+            Html.FROM_HTML_MODE_COMPACT
+            )
+            val builder = SpannableStringBuilder(mess)
+           /* val foregroundColorSpan = ForegroundColorSpan(
                 ThemeUtils.getThemeAttrColor(
                     mContext,
                     com.google.android.material.R.attr.colorPrimary
                 )
-            )
-            builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            holder.reply.text = builder
+            )*/
+            //builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             val pattern = Pattern.compile("\\[[^\\]]+\\]")
             val matcher = pattern.matcher(builder)
+            val urls = builder.getSpans(
+                0, text.length,
+                URLSpan::class.java
+            )
+            for (url in urls) {
+                val myURLSpan = MyURLSpan(mContext, "", url.url)
+                val start = builder.getSpanStart(url)
+                val end = builder.getSpanEnd(url)
+                val flags = builder.getSpanFlags(url)
+                builder.setSpan(myURLSpan, start, end, flags)
+                builder.removeSpan(url)
+            }
+            holder.reply.text = builder
+            holder.reply.movementMethod = LinkMovementMethod.getInstance()
             while (matcher.find()) {
                 val group = matcher.group()
                 val emoji: Drawable =
@@ -70,7 +90,7 @@ class Reply2ReplyAdapter(
                     (holder.reply.textSize * 1.3).toInt(),
                     (holder.reply.textSize * 1.3).toInt()
                 )
-                val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                val imageSpan = CenteredImageSpan(emoji)
                 builder.setSpan(
                     imageSpan,
                     matcher.start(),
@@ -80,33 +100,28 @@ class Reply2ReplyAdapter(
                 holder.reply.text = builder
             }
         } else {
-            val uCount = reply.username.length
-            val urCount = reply.rusername.length
-            val text = "${reply.username}回复${reply.rusername}: ${reply.message}"
-            val builder =
-                SpannableStringBuilder(Html.fromHtml(text.replace("\n", "<br />"), Html.FROM_HTML_MODE_COMPACT))
-            val foregroundColorSpan = ForegroundColorSpan(
-                ThemeUtils.getThemeAttrColor(
-                    mContext,
-                    com.google.android.material.R.attr.colorPrimary
-                )
+            val text = """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
+            val mess = Html.fromHtml(
+                text.replace("\n", "<br />"),
+                Html.FROM_HTML_MODE_COMPACT
             )
-            val foregroundColorSpan1 = ForegroundColorSpan(
-                ThemeUtils.getThemeAttrColor(
-                    mContext,
-                    com.google.android.material.R.attr.colorPrimary
-                )
-            )
-            builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            builder.setSpan(
-                foregroundColorSpan1,
-                uCount + 2,
-                uCount + urCount + 2,
-                Spannable.SPAN_INCLUSIVE_INCLUSIVE
-            )
-            holder.reply.text = builder
+            val builder = SpannableStringBuilder(mess)
             val pattern = Pattern.compile("\\[[^\\]]+\\]")
             val matcher = pattern.matcher(builder)
+            val urls = builder.getSpans(
+                0, text.length,
+                URLSpan::class.java
+            )
+            for (url in urls) {
+                val myURLSpan = MyURLSpan(mContext, "", url.url)
+                val start = builder.getSpanStart(url)
+                val end = builder.getSpanEnd(url)
+                val flags = builder.getSpanFlags(url)
+                builder.setSpan(myURLSpan, start, end, flags)
+                builder.removeSpan(url)
+            }
+            holder.reply.text = builder
+            holder.reply.movementMethod = LinkMovementMethod.getInstance()
             while (matcher.find()) {
                 val group = matcher.group()
                 val emoji: Drawable =
@@ -117,7 +132,7 @@ class Reply2ReplyAdapter(
                     (holder.reply.textSize * 1.3).toInt(),
                     (holder.reply.textSize * 1.3).toInt()
                 )
-                val imageSpan = ImageSpan(emoji, ImageSpan.ALIGN_BASELINE)
+                val imageSpan = CenteredImageSpan(emoji)
                 builder.setSpan(
                     imageSpan,
                     matcher.start(),

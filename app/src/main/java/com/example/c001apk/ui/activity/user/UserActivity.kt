@@ -1,17 +1,9 @@
 package com.example.c001apk.ui.activity.user
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
-import android.view.ContextThemeWrapper
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
-import androidx.annotation.NonNull
-import androidx.annotation.StyleRes
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -21,12 +13,12 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
+import com.example.c001apk.util.AppBarStateChangeListener
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
-import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.color.MaterialColors
+import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,6 +44,24 @@ class UserActivity : BaseActivity() {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
+
+
+        binding.appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
+            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
+                if (state == State.EXPANDED) {
+                    //Toast.makeText(this@UserActivity, "展开状态", Toast.LENGTH_SHORT).show()
+                    //展开状态
+                } else if (state == State.COLLAPSED) {
+                    //binding.toolBar.setNavigationIcon(R.drawable.ic_message)
+                    //Toast.makeText(this@UserActivity, "折叠状态", Toast.LENGTH_SHORT).show()
+                    //折叠状态
+                } else {
+                    //binding.toolBar.setNavigationIcon(R.drawable.ic_close)
+                    //Toast.makeText(this@UserActivity, "中间状态", Toast.LENGTH_SHORT).show()
+                    //中间状态
+                }
+            }
+        })
 
         initView()
         initData()
@@ -160,8 +170,7 @@ class UserActivity : BaseActivity() {
         viewModel.page = 1
         viewModel.isRefreh = true
         viewModel.isEnd = false
-        val id = intent.getStringExtra("id")!!
-        viewModel.id = id
+        viewModel.id = intent.getStringExtra("id")!!
         viewModel.getUser()
         viewModel.isInit = false
     }
