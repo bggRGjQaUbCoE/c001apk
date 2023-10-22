@@ -160,6 +160,7 @@ object EmojiUtil {
                     "[难过]" -> R.drawable.coolapk_emotion_62_huaji
                     "[黑线]" -> R.drawable.coolapk_emotion_62_huaji
                     "[cos滑稽]" -> R.drawable.coolapk_emotion_62_huaji
+                    "[图片]" -> R.drawable.ic_photo
                     else -> -1
                 }
             } else {
@@ -316,6 +317,7 @@ object EmojiUtil {
                     "[难过]" -> R.drawable.coolapk_emotion_46_nanguo
                     "[黑线]" -> R.drawable.coolapk_emotion_43_heixian
                     "[cos滑稽]" -> R.drawable.coolapk_emotion_65_coshuaji
+                    "[图片]" -> R.drawable.ic_photo
                     else -> -1
                 }
             }

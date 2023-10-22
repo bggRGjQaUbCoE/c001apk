@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="login_preference_settings"
+        android:title="@string/login">
+        <Preference
+            android:icon="@drawable/outline_palette_24"
+            android:key="login"
+            android:title="@string/login">
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetClass="com.example.c001apk.ui.activity.login.LoginActivity"
+                android:targetPackage="com.example.c001apk" />
+        </Preference>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/settings_theme">
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
@@ -42,10 +56,19 @@
             android:title="@string/show_emoji" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
+            android:dependency="showEmoji"
             android:icon="@drawable/outline_palette_24"
             android:key="allHuaji"
-            android:dependency="showEmoji"
             android:title="@string/all_huaji" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="logout_preference_settings"
+        android:title="@string/logout">
+        <Preference
+            android:icon="@drawable/outline_palette_24"
+            android:key="logout"
+            android:title="@string/logout" />
     </PreferenceCategory>
 
 </PreferenceScreen>

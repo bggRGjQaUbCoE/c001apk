@@ -119,4 +119,5 @@ dependencies {
     implementation("dev.rikka.rikkax.material:material-preference:2.0.0")
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     implementation("androidx.webkit:webkit:1.8.0")
+    implementation("org.jsoup:jsoup:1.16.2")
 }

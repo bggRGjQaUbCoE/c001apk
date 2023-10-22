@@ -85,7 +85,7 @@ class Reply2ReplyAdapter(
                 if (reply.pic == "")
                     """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
                 else
-                    """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a>"""
+                    """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a> """
             val mess = Html.fromHtml(
                 text.replace("\n", "<br />"),
                 Html.FROM_HTML_MODE_COMPACT
@@ -141,7 +141,7 @@ class Reply2ReplyAdapter(
                 if (reply.pic == "")
                     """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
                 else
-                    """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a>"""
+                    """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a> """
 
             val mess = Html.fromHtml(
                 text.replace("\n", "<br />"),

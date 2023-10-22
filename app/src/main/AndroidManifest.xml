@@ -19,6 +19,9 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.activity.login.LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.app.AppActivity"
             android:exported="false" />
         <activity

@@ -29,7 +29,11 @@ internal class AddCookiesInterceptor : Interceptor {
             addHeader("X-Dark-Mode", "0")
             addHeader("X-App-Channel", "coolapk")
             addHeader("X-App-Mode", "universal")
-            addHeader("Cookie", SESSID)
+            if (PrefManager.isLogin) addHeader(
+                "Cookie",
+                "${PrefManager.uid}; ${PrefManager.name}; ${PrefManager.token}"
+            )
+            else addHeader("Cookie", SESSID)
         }
         return chain.proceed(builder.build())
     }

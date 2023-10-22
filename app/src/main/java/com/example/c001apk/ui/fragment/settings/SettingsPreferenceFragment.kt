@@ -3,6 +3,7 @@ package com.example.c001apk.ui.fragment.settings
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
 import com.example.c001apk.R
@@ -55,6 +56,18 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = SettingsPreferenceDataStore()
         setPreferencesFromResource(R.xml.settings, rootKey)
+
+        if (PrefManager.isLogin) {
+            val displayOptions = findPreference("login_preference_settings") as PreferenceCategory?
+            preferenceScreen.removePreference(displayOptions!!)
+        }else{
+            val displayOptions = findPreference("logout_preference_settings") as PreferenceCategory?
+            preferenceScreen.removePreference(displayOptions!!)
+        }
+
+        //val displayOptions= findPreference("login_preference_settings") as PreferenceCategory?
+        //displayOptions!!.removePreference(findPreference("login")!!)
+
 
         findPreference<SimpleMenuPreference>("darkTheme")?.setOnPreferenceChangeListener { _, newValue ->
             val newMode = (newValue as String).toInt()

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.c001apk.databinding.FragmentBlankBinding
+import com.example.c001apk.util.CookieUtil
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -46,7 +47,7 @@ class BlankFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //binding.deviceCode.text = deviceCode
+        binding.deviceCode.text = CookieUtil.SESSID
         //binding.token.text = token
 
     }
