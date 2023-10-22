@@ -155,7 +155,7 @@ class HomeTopicContentAdapter(
                     URLSpan::class.java
                 )
                 for (url in urls) {
-                    val myURLSpan = MyURLSpan(mContext, feed.id, url.url)
+                    val myURLSpan = MyURLSpan(mContext, feed.id, url.url, null)
                     val start = builder.getSpanStart(url)
                     val end = builder.getSpanEnd(url)
                     val flags = builder.getSpanFlags(url)
@@ -166,22 +166,24 @@ class HomeTopicContentAdapter(
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
                 while (matcher.find()) {
                     val group = matcher.group()
-                    val emoji: Drawable =
-                        mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                    emoji.setBounds(
-                        0,
-                        0,
-                        (holder.message.textSize * 1.3).toInt(),
-                        (holder.message.textSize * 1.3).toInt()
-                    )
-                    val imageSpan = CenteredImageSpan(emoji)
-                    builder.setSpan(
-                        imageSpan,
-                        matcher.start(),
-                        matcher.end(),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    holder.message.text = builder
+                    if (EmojiUtil.getEmoji(group) != -1){
+                        val emoji: Drawable =
+                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                        emoji.setBounds(
+                            0,
+                            0,
+                            (holder.message.textSize * 1.3).toInt(),
+                            (holder.message.textSize * 1.3).toInt()
+                        )
+                        val imageSpan = CenteredImageSpan(emoji)
+                        builder.setSpan(
+                            imageSpan,
+                            matcher.start(),
+                            matcher.end(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                        holder.message.text = builder
+                    }
                 }
 
                 holder.pubDate.text = PubDateUtil.time(feed.dateline)

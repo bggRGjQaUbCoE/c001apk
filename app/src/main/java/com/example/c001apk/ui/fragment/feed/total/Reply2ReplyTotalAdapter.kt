@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
 import com.example.c001apk.util.EmojiUtil
@@ -54,6 +55,12 @@ class Reply2ReplyTotalAdapter(
             intent.putExtra("id", viewHolder.name)
             parent.context.startActivity(intent)
         }
+        viewHolder.message.setOnLongClickListener {
+            val intent = Intent(parent.context, CopyActivity::class.java)
+            intent.putExtra("text", viewHolder.message.text.toString())
+            parent.context.startActivity(intent)
+            true
+        }
         return viewHolder
     }
 
@@ -80,7 +87,7 @@ class Reply2ReplyTotalAdapter(
             URLSpan::class.java
         )
         for (url in nameUrls) {
-            val myURLSpan = MyURLSpan(mContext, "name", url.url)
+            val myURLSpan = MyURLSpan(mContext, "name", url.url, null)
             val start = nameBuilder.getSpanStart(url)
             val end = nameBuilder.getSpanEnd(url)
             val flags = nameBuilder.getSpanFlags(url)
@@ -102,7 +109,7 @@ class Reply2ReplyTotalAdapter(
             URLSpan::class.java
         )
         for (url in urls) {
-            val myURLSpan = MyURLSpan(mContext, "", url.url)
+            val myURLSpan = MyURLSpan(mContext, null, url.url, null)
             val start = builder.getSpanStart(url)
             val end = builder.getSpanEnd(url)
             val flags = builder.getSpanFlags(url)
@@ -113,22 +120,24 @@ class Reply2ReplyTotalAdapter(
         holder.message.movementMethod = LinkMovementMethod.getInstance()
         while (matcher.find()) {
             val group = matcher.group()
-            val emoji: Drawable =
-                mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-            emoji.setBounds(
-                0,
-                0,
-                (holder.message.textSize * 1.3).toInt(),
-                (holder.message.textSize * 1.3).toInt()
-            )
-            val imageSpan = CenteredImageSpan(emoji)
-            builder.setSpan(
-                imageSpan,
-                matcher.start(),
-                matcher.end(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            holder.message.text = builder
+            if (EmojiUtil.getEmoji(group) != -1){
+                val emoji: Drawable =
+                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                emoji.setBounds(
+                    0,
+                    0,
+                    (holder.message.textSize * 1.3).toInt(),
+                    (holder.message.textSize * 1.3).toInt()
+                )
+                val imageSpan = CenteredImageSpan(emoji)
+                builder.setSpan(
+                    imageSpan,
+                    matcher.start(),
+                    matcher.end(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                holder.message.text = builder
+            }
         }
 
         holder.pubDate.text = PubDateUtil.time(reply.dateline)

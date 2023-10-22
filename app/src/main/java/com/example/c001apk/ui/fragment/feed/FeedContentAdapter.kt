@@ -13,7 +13,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,7 +25,6 @@ import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
-import com.example.c001apk.util.ReplyItemDecoration
 import com.example.c001apk.util.SpacesItemDecoration
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
@@ -123,6 +121,12 @@ class FeedContentAdapter(
                     intent.putExtra("id", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
+                viewHolder.message.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
                 viewHolder
             }
         }
@@ -180,7 +184,8 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
                     val mess = Html.fromHtml(
-                        StringBuilder(feed.data.message).append(" ").toString().replace("\n", " <br />"),
+                        StringBuilder(feed.data.message).append(" ").toString()
+                            .replace("\n", " <br />"),
                         Html.FROM_HTML_MODE_COMPACT
                     )
                     val builder = SpannableStringBuilder(mess)
@@ -191,7 +196,7 @@ class FeedContentAdapter(
                         URLSpan::class.java
                     )
                     for (url in urls) {
-                        val myURLSpan = MyURLSpan(mContext, "", url.url)
+                        val myURLSpan = MyURLSpan(mContext, null, url.url, null)
                         val start = builder.getSpanStart(url)
                         val end = builder.getSpanEnd(url)
                         val flags = builder.getSpanFlags(url)
@@ -202,22 +207,24 @@ class FeedContentAdapter(
                     holder.message.movementMethod = LinkMovementMethod.getInstance()
                     while (matcher.find()) {
                         val group = matcher.group()
-                        val emoji: Drawable =
-                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                        emoji.setBounds(
-                            0,
-                            0,
-                            (holder.message.textSize * 1.3).toInt(),
-                            (holder.message.textSize * 1.3).toInt()
-                        )
-                        val imageSpan = CenteredImageSpan(emoji)
-                        builder.setSpan(
-                            imageSpan,
-                            matcher.start(),
-                            matcher.end(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        holder.message.text = builder
+                        if (EmojiUtil.getEmoji(group) != -1) {
+                            val emoji: Drawable =
+                                mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                            emoji.setBounds(
+                                0,
+                                0,
+                                (holder.message.textSize * 1.3).toInt(),
+                                (holder.message.textSize * 1.3).toInt()
+                            )
+                            val imageSpan = CenteredImageSpan(emoji)
+                            builder.setSpan(
+                                imageSpan,
+                                matcher.start(),
+                                matcher.end(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                            holder.message.text = builder
+                        }
                     }
 
                     if (feed.data.picArr.isNotEmpty()) {
@@ -266,7 +273,7 @@ class FeedContentAdapter(
                     URLSpan::class.java
                 )
                 for (url in urls) {
-                    val myURLSpan = MyURLSpan(mContext, "", url.url)
+                    val myURLSpan = MyURLSpan(mContext, null, url.url, null)
                     val start = builder.getSpanStart(url)
                     val end = builder.getSpanEnd(url)
                     val flags = builder.getSpanFlags(url)
@@ -277,22 +284,24 @@ class FeedContentAdapter(
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
                 while (matcher.find()) {
                     val group = matcher.group()
-                    val emoji: Drawable =
-                        mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                    emoji.setBounds(
-                        0,
-                        0,
-                        (holder.message.textSize * 1.3).toInt(),
-                        (holder.message.textSize * 1.3).toInt()
-                    )
-                    val imageSpan = CenteredImageSpan(emoji)
-                    builder.setSpan(
-                        imageSpan,
-                        matcher.start(),
-                        matcher.end(),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    holder.message.text = builder
+                    if (EmojiUtil.getEmoji(group) != -1) {
+                        val emoji: Drawable =
+                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                        emoji.setBounds(
+                            0,
+                            0,
+                            (holder.message.textSize * 1.3).toInt(),
+                            (holder.message.textSize * 1.3).toInt()
+                        )
+                        val imageSpan = CenteredImageSpan(emoji)
+                        builder.setSpan(
+                            imageSpan,
+                            matcher.start(),
+                            matcher.end(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                        holder.message.text = builder
+                    }
                 }
 
                 holder.pubDate.text = PubDateUtil.time(reply.dateline)

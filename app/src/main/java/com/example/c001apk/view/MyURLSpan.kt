@@ -5,7 +5,6 @@ import android.content.Intent
 import android.text.TextPaint
 import android.text.style.ClickableSpan
 import android.view.View
-import android.widget.Toast
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.ui.activity.feed.FeedActivity
@@ -15,12 +14,13 @@ import com.example.c001apk.ui.activity.webview.WebViewActivity
 
 internal class MyURLSpan(
     private val mContext: Context,
-    private val id: String,
-    private val mUrl: String
+    private val id: String?,
+    private val mUrl: String,
+    private val urlList: MutableList<ImageInfo>?
 ) :
     ClickableSpan() {
     override fun onClick(widget: View) {
-        if (mUrl == "") {
+        if (mUrl == "" && id != null) {
             val intent = Intent(mContext, FeedActivity::class.java)
             intent.putExtra("type", "feed")
             intent.putExtra("id", id)
@@ -37,19 +37,31 @@ internal class MyURLSpan(
             mContext.startActivity(intent)
         } else if (mUrl.contains("image.coolapk.com")) {
             //Toast.makeText(mContext, "image", Toast.LENGTH_SHORT).show()
-            val urlList: MutableList<ImageInfo> = ArrayList()
-            val imageInfo = ImageInfo()
-            imageInfo.thumbnailUrl = "$mUrl.s.jpg"
-            imageInfo.originUrl = mUrl
-            urlList.add(imageInfo)
-            ImagePreview.instance
-                .setContext(mContext)
-                .setImageInfoList(urlList)
-                .setShowCloseButton(true)
-                .setEnableDragClose(true)
-                .setEnableUpDragClose(true)
-                .setFolderName("c001apk")
-                .start()
+            if (urlList == null) {
+                val urlList: MutableList<ImageInfo> = ArrayList()
+                val imageInfo = ImageInfo()
+                imageInfo.thumbnailUrl = "$mUrl.s.jpg"
+                imageInfo.originUrl = mUrl
+                urlList.add(imageInfo)
+                ImagePreview.instance
+                    .setContext(mContext)
+                    .setImageInfoList(urlList)
+                    .setShowCloseButton(true)
+                    .setEnableDragClose(true)
+                    .setEnableUpDragClose(true)
+                    .setFolderName("c001apk")
+                    .start()
+            } else {
+                ImagePreview.instance
+                    .setContext(mContext)
+                    .setImageInfoList(urlList)
+                    .setShowCloseButton(true)
+                    .setEnableDragClose(true)
+                    .setEnableUpDragClose(true)
+                    .setFolderName("c001apk")
+                    .start()
+            }
+
         } else {
             //Toast.makeText(mContext, "link", Toast.LENGTH_SHORT).show()
             val intent = Intent(mContext, WebViewActivity::class.java)
