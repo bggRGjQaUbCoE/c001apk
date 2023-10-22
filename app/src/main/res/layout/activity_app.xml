@@ -27,7 +27,7 @@
                 android:paddingStart="20dp"
                 android:paddingTop="?actionBarSize"
                 android:paddingEnd="20dp"
-                android:paddingBottom="5dp"
+                android:paddingBottom="10dp"
                 app:layout_collapseMode="parallax">
 
                 <com.google.android.material.imageview.ShapeableImageView

@@ -1,13 +1,16 @@
 package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
+import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageShowUtil
 import com.google.android.material.imageview.ShapeableImageView
 
@@ -25,6 +28,18 @@ class FeedContentPicAdapter(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_feed_content_pic, parent, false)
         val viewHolder = ViewHolder(view)
+
+        /*if (feedPicList.size == 1) {
+            val padding = 80f
+            val spacePx = (DensityTool.dp2px(parent.context, padding))
+            val imageWidth = DensityTool.getScreenWidth(parent.context) - spacePx
+            val params = LinearLayout.LayoutParams(
+                imageWidth.toInt() - imageWidth.toInt() / 3,
+                imageWidth.toInt() - imageWidth.toInt() / 3
+            )
+            viewHolder.feedPic.layoutParams = params
+        }*/
+
         viewHolder.itemView.setOnClickListener {
             val position = viewHolder.adapterPosition
             val urlList: MutableList<ImageInfo> = ArrayList()

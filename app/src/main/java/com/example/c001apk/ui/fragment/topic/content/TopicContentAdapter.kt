@@ -165,7 +165,7 @@ class TopicContentAdapter(
                 holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
 
                 val mess = Html.fromHtml(
-                    feed.message.replace("\n", "<br />"),
+                    StringBuilder(feed.message).append(" ").toString().replace("\n", " <br />"),
                     Html.FROM_HTML_MODE_COMPACT
                 )
                 val builder = SpannableStringBuilder(mess)

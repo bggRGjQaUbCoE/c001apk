@@ -30,6 +30,7 @@ import com.example.c001apk.util.ReplyItemDecoration
 import com.example.c001apk.util.SpacesItemDecoration
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
+import com.google.android.material.card.MaterialCardView
 import java.util.regex.Pattern
 
 
@@ -64,7 +65,7 @@ class FeedContentAdapter(
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
-        val replyLayout: LinearLayout = view.findViewById(R.id.replyLayout)
+        val replyLayout: MaterialCardView = view.findViewById(R.id.replyLayout)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
         val totalReply: TextView = view.findViewById(R.id.totalReply)
         val picRecyclerView: RecyclerView = view.findViewById(R.id.picRecyclerView)
@@ -179,7 +180,7 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
                     val mess = Html.fromHtml(
-                        feed.data.message.replace("\n", "<br />"),
+                        StringBuilder(feed.data.message).append(" ").toString().replace("\n", " <br />"),
                         Html.FROM_HTML_MODE_COMPACT
                     )
                     val builder = SpannableStringBuilder(mess)
@@ -254,7 +255,7 @@ class FeedContentAdapter(
                 holder.uname.text = reply.username
 
                 val mess = Html.fromHtml(
-                    reply.message.replace("\n", "<br />"),
+                    StringBuilder(reply.message).append(" ").toString().replace("\n", " <br />"),
                     Html.FROM_HTML_MODE_COMPACT
                 )
                 val builder = SpannableStringBuilder(mess)
@@ -327,12 +328,11 @@ class FeedContentAdapter(
                     holder.replyLayout.visibility = View.VISIBLE
                     val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
                     val mLayoutManager = LinearLayoutManager(mContext)
-                    val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                    //val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                     holder.recyclerView.apply {
                         adapter = mAdapter
                         layoutManager = mLayoutManager
-                        if (itemDecorationCount == 0)
-                            addItemDecoration(ReplyItemDecoration(space))
+                        //if (itemDecorationCount == 0) addItemDecoration(ReplyItemDecoration(space))
                     }
                 } else holder.replyLayout.visibility = View.GONE
 

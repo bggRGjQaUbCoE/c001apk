@@ -16,6 +16,10 @@
         <item name="android:colorControlActivated">?colorPrimary</item>
     </style>
 
+    <style name="Theme.ImageView" parent="Theme.C001apk">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <style name="Theme.C001apk" parent="Base.Theme.C001apk">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3.Mod</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

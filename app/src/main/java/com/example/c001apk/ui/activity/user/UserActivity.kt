@@ -105,7 +105,7 @@ class UserActivity : BaseActivity() {
                 if (viewModel.isRefreh) viewModel.feedContentList.clear()
                 if (viewModel.isRefreh || viewModel.isLoadMore) {
                     for (element in feed) {
-                        if (element.entityType == "feed") viewModel.feedContentList.add(element)
+                        if (element.feedType == "feed" || element.feedType == "feedArticle") viewModel.feedContentList.add(element)
                     }
                 }
                 mAdapter.notifyDataSetChanged()

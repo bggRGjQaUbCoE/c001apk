@@ -35,7 +35,7 @@
                 android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lineSpacingMultiplier="1.3"
+                android:lineSpacingMultiplier="1.2"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:textSize="16sp"
@@ -75,32 +75,40 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pubDate" />
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/replyLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/reply2reply_bg"
-                android:orientation="vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/picRecyclerView">
+                app:layout_constraintTop_toBottomOf="@id/picRecyclerView"
+                app:strokeWidth="0dp">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="5dp" />
+                    android:background="@drawable/reply2reply_bg"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/totalReply"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:paddingStart="5dp"
-                    android:textColor="?attr/colorPrimary"
-                    tools:ignore="RtlSymmetry" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/totalReply"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:paddingStart="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="4dp"
+                        android:textColor="?attr/colorPrimary"
+                        tools:ignore="RtlSymmetry" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

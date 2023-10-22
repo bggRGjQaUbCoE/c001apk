@@ -6,6 +6,7 @@ data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
         val entityType: String,
+        val feedType: String,
         val entityTemplate: String,
         val entities: List<Entities>,
         val id: String,

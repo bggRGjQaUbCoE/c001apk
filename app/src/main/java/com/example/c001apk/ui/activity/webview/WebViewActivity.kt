@@ -5,7 +5,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -16,6 +18,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
 import com.example.c001apk.ui.activity.BaseActivity
@@ -39,6 +43,31 @@ class WebViewActivity : BaseActivity() {
 
         link = intent.getStringExtra("url")!!
 
+        if (SDK_INT >= 32) {
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                try {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(
+                        binding.webView.settings,
+                        true
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                val nightModeFlags =
+                    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                    WebSettingsCompat.setForceDark(
+                        binding.webView.settings,
+                        WebSettingsCompat.FORCE_DARK_ON
+                    )
+                }
+            }
+        }
+
+
         binding.webView.apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -53,6 +82,8 @@ class WebViewActivity : BaseActivity() {
             settings.javaScriptCanOpenWindowsAutomatically = true
             settings.loadsImagesAutomatically = true
             settings.allowFileAccess = false
+            //settings.isAlgorithmicDarkeningAllowed = true
+            //WebView.setWebContentsDebuggingEnabled(true)
 
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(

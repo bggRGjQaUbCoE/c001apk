@@ -7,6 +7,7 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/feedPic"
         android:layout_width="match_parent"
+        android:background="@drawable/reply2reply_bg"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="H, 1"
         app:layout_constraintStart_toStartOf="parent"

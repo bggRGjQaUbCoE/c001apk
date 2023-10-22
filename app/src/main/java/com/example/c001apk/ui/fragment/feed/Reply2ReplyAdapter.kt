@@ -49,20 +49,27 @@ class Reply2ReplyAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reply = reply2ReplyList[position]
 
+        /*val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+        if (position == 0)
+            holder.reply.setPadding(space, space, space, space)
+        else
+            holder.reply.setPadding(space, 0, space, space)*/
+
         if (reply.ruid == uid) {
             val uCount = reply.username.length
-            val text = """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
+            val text =
+                """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
             val mess = Html.fromHtml(
                 text.replace("\n", "<br />"),
-            Html.FROM_HTML_MODE_COMPACT
+                Html.FROM_HTML_MODE_COMPACT
             )
             val builder = SpannableStringBuilder(mess)
-           /* val foregroundColorSpan = ForegroundColorSpan(
-                ThemeUtils.getThemeAttrColor(
-                    mContext,
-                    com.google.android.material.R.attr.colorPrimary
-                )
-            )*/
+            /* val foregroundColorSpan = ForegroundColorSpan(
+                 ThemeUtils.getThemeAttrColor(
+                     mContext,
+                     com.google.android.material.R.attr.colorPrimary
+                 )
+             )*/
             //builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             val pattern = Pattern.compile("\\[[^\\]]+\\]")
             val matcher = pattern.matcher(builder)
@@ -100,7 +107,8 @@ class Reply2ReplyAdapter(
                 holder.reply.text = builder
             }
         } else {
-            val text = """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
+            val text =
+                """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
             val mess = Html.fromHtml(
                 text.replace("\n", "<br />"),
                 Html.FROM_HTML_MODE_COMPACT
