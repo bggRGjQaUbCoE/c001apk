@@ -45,4 +45,7 @@
     <string name="color_deep_orange">深橙</string>
     <string name="color_brown">棕色</string>
     <string name="color_blue_grey">灰蓝</string>
+    <string name="emoji">表情</string>
+    <string name="show_emoji">显示表情</string>
+    <string name="all_huaji">全部变成滑稽</string>
 </resources>

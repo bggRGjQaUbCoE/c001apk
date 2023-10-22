@@ -34,6 +34,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             return when (key) {
                 "blackDarkTheme" -> PrefManager.blackDarkTheme
                 "followSystemAccent" -> PrefManager.followSystemAccent
+                "showEmoji" -> PrefManager.showEmoji
+                "allHuaji" -> PrefManager.allHuaji
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -42,6 +44,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             when (key) {
                 "blackDarkTheme" -> PrefManager.blackDarkTheme = value
                 "followSystemAccent" -> PrefManager.followSystemAccent = value
+                "showEmoji" -> PrefManager.showEmoji = value
+                "allHuaji" -> PrefManager.allHuaji = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -73,6 +77,16 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<SimpleMenuPreference>("themeColor")?.setOnPreferenceChangeListener { _, _ ->
+            activity?.recreate()
+            true
+        }
+
+        findPreference<MaterialSwitchPreference>("showEmoji")?.setOnPreferenceChangeListener { _, _ ->
+            activity?.recreate()
+            true
+        }
+
+        findPreference<MaterialSwitchPreference>("allHuaji")?.setOnPreferenceChangeListener { _, _ ->
             activity?.recreate()
             true
         }
