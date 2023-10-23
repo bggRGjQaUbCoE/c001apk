@@ -114,4 +114,11 @@ interface ApiService {
         @Query("uid") uid: String
     ): Call<ProfileResponse>
 
+    @GET("/v6/page/dataList?/page?subTitle=")
+    fun getFollowFeed(
+        @Query("url") url: String,
+        @Query("title") title: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
 }

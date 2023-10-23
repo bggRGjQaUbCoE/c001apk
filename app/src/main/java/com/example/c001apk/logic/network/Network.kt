@@ -9,17 +9,17 @@ import kotlin.coroutines.suspendCoroutine
 
 object Network {
 
-    private val apiService = ServiceCreator.create<ApiService>()
-    private val searchService = SearchServiceCreator.create<ApiService>()
+    private val apiService = ApiServiceCreator.create<ApiService>()
+    private val api2Service = Api2ServiceCreator.create<ApiService>()
 
     suspend fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
-        apiService.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
+        api2Service.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
 
     suspend fun getFeedContent(id: String) =
-        apiService.getFeedContent(id).await()
+        api2Service.getFeedContent(id).await()
 
     suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
-        apiService.getFeedContentReply(id, discussMode, listType, page).await()
+        api2Service.getFeedContentReply(id, discussMode, listType, page).await()
 
     suspend fun getSearchFeed(
         type: String,
@@ -27,48 +27,51 @@ object Network {
         sort: String,
         keyWord: String,
         page: Int
-    ) = searchService.getSearchFeed(type, feedType, sort, keyWord, page).await()
+    ) = apiService.getSearchFeed(type, feedType, sort, keyWord, page).await()
 
     suspend fun getSearchUser(
         keyWord: String,
         page: Int
-    ) = searchService.getSearchUser(keyWord, page).await()
+    ) = apiService.getSearchUser(keyWord, page).await()
 
     suspend fun getSearchTopic(
         type: String,
         keyWord: String,
         page: Int
-    ) = searchService.getSearchTopic(type, keyWord, page).await()
+    ) = apiService.getSearchTopic(type, keyWord, page).await()
 
     suspend fun getReply2Reply(
         id: String,
         page: Int
-    ) = searchService.getReply2Reply(id, page).await()
+    ) = apiService.getReply2Reply(id, page).await()
 
-    suspend fun getHomeTopicTitle() = searchService.getHomeTopicTitle().await()
+    suspend fun getHomeTopicTitle() = apiService.getHomeTopicTitle().await()
 
-    suspend fun getTopicLayout(tag: String) = apiService.getTopicLayout(tag).await()
+    suspend fun getTopicLayout(tag: String) = api2Service.getTopicLayout(tag).await()
 
     suspend fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
-        apiService.getTopicData(url, title, subTitle, page).await()
+        api2Service.getTopicData(url, title, subTitle, page).await()
 
     suspend fun getHomeRanking(page: Int, lastItem: String) =
-        searchService.getHomeRanking(page, lastItem).await()
+        apiService.getHomeRanking(page, lastItem).await()
 
     suspend fun getUserSpace(uid: String) =
-        searchService.getUserSpace(uid).await()
+        apiService.getUserSpace(uid).await()
 
     suspend fun getUserFeed(uid: String, page: Int) =
-        searchService.getUserFeed(uid, page).await()
+        apiService.getUserFeed(uid, page).await()
 
     suspend fun getAppInfo(id: String) =
-        searchService.getAppInfo(id).await()
+        apiService.getAppInfo(id).await()
 
     suspend fun getAppComment(url: String, page: Int) =
-        searchService.getAppComment(url, page).await()
+        apiService.getAppComment(url, page).await()
 
     suspend fun getProfile(uid: String) =
-        apiService.getProfile(uid).await()
+        api2Service.getProfile(uid).await()
+
+    suspend fun getFollowFeed(url: String, title: String, page: Int) =
+        apiService.getFollowFeed(url, title, page).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

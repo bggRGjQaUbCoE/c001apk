@@ -10,9 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.ui.activity.search.SearchActivity
-import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.app.AppListFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedFragment
+import com.example.c001apk.ui.fragment.home.follow.FollowFragment
 import com.example.c001apk.ui.fragment.home.ranking.HomeRankingFragment
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
 import com.google.android.material.tabs.TabLayout
@@ -33,7 +33,7 @@ class HomeFragment : Fragment() {
 
     init {
         fragmentList.run {
-            add(BlankFragment())
+            add(FollowFragment())
             add(AppListFragment())
             add(HomeFeedFragment())
             add(HomeRankingFragment())
