@@ -52,4 +52,6 @@
     <string name="password">密码</string>
     <string name="login">登录</string>
     <string name="logout">退出登录</string>
+    <string name="click_to_login">点击登录</string>
+    <string name="logoutTitle">确定退出登录？</string>
 </resources>

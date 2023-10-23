@@ -9,18 +9,17 @@ import kotlin.coroutines.suspendCoroutine
 
 object Network {
 
-    private val homeService = ServiceCreator.create<HomeService>()
-    private val searchService = SearchServiceCreator.create<HomeService>()
-    private val topicService = SearchServiceCreator.create<TopicService>()
+    private val apiService = ServiceCreator.create<ApiService>()
+    private val searchService = SearchServiceCreator.create<ApiService>()
 
     suspend fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
-        homeService.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
+        apiService.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
 
     suspend fun getFeedContent(id: String) =
-        homeService.getFeedContent(id).await()
+        apiService.getFeedContent(id).await()
 
     suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
-        homeService.getFeedContentReply(id, discussMode, listType, page).await()
+        apiService.getFeedContentReply(id, discussMode, listType, page).await()
 
     suspend fun getSearchFeed(
         type: String,
@@ -48,10 +47,10 @@ object Network {
 
     suspend fun getHomeTopicTitle() = searchService.getHomeTopicTitle().await()
 
-    suspend fun getTopicLayout(tag: String) = topicService.getTopicLayout(tag).await()
+    suspend fun getTopicLayout(tag: String) = apiService.getTopicLayout(tag).await()
 
     suspend fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
-        topicService.getTopicData(url, title, subTitle, page).await()
+        apiService.getTopicData(url, title, subTitle, page).await()
 
     suspend fun getHomeRanking(page: Int, lastItem: String) =
         searchService.getHomeRanking(page, lastItem).await()
@@ -67,6 +66,9 @@ object Network {
 
     suspend fun getAppComment(url: String, page: Int) =
         searchService.getAppComment(url, page).await()
+
+    suspend fun getProfile(uid: String) =
+        apiService.getProfile(uid).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

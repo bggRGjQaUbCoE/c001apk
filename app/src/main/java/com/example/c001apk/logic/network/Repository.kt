@@ -140,6 +140,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getProfile(uid: String) =
+        fire(Dispatchers.IO) {
+            val profileResponse = Network.getProfile(uid)
+            if (profileResponse.data != null)
+                Result.success(profileResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

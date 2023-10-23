@@ -3,14 +3,16 @@ package com.example.c001apk.logic.network
 import com.example.c001apk.logic.model.AppResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.ProfileResponse
 import com.example.c001apk.logic.model.SearchTopicResponse
 import com.example.c001apk.logic.model.SearchUserResponse
+import com.example.c001apk.logic.model.TopicLayoutResponse
 import com.example.c001apk.logic.model.UserResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface HomeService {
+interface ApiService {
 
     @GET("/v6/main/indexV8?ids=")
     fun getHomeFeed(
@@ -20,12 +22,12 @@ interface HomeService {
         @Query("lastItem") lastItem: String,
     ): Call<HomeFeedResponse>
 
-    @GET("/v6/feed/detail?tmp=1")
+    @GET("/v6/feed/detail")
     fun getFeedContent(
         @Query("id") id: String
     ): Call<FeedContentResponse>
 
-    @GET("/v6/feed/replyList?tmp=1")
+    @GET("/v6/feed/replyList")
     fun getFeedContentReply(
         @Query("id") id: String,
         @Query("discussMode") discussMode: Int,
@@ -71,7 +73,7 @@ interface HomeService {
         @Query("lastItem") lastItem: String
     ): Call<HomeFeedResponse>
 
-    @GET("/v6/user/space?tmp=1")
+    @GET("/v6/user/space")
     fun getUserSpace(
         @Query("uid") uid: String,
     ): Call<UserResponse>
@@ -92,5 +94,24 @@ interface HomeService {
         @Query("url") url: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
+
+    @GET("/v6/topic/newTagDetail")
+    fun getTopicLayout(
+        @Query("tag") tag: String
+        //@Path("TAG") TAG: String
+    ): Call<TopicLayoutResponse>
+
+    @GET("/v6/page/dataList")
+    fun getTopicData(
+        @Query("url") url: String,
+        @Query("title") title: String,
+        @Query("subTitle") subTitle: String?,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
+    @GET("/v6/user/profile")
+    fun getProfile(
+        @Query("uid") uid: String
+    ): Call<ProfileResponse>
 
 }

@@ -13,6 +13,7 @@ import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
+import com.example.c001apk.ui.fragment.settings.SettingsFragment
 import com.example.c001apk.ui.fragment.settings.SettingsPreferenceFragment
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.PrefManager
@@ -44,7 +45,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     return when (position) {
                         0 -> HomeFragment()
                         1 -> BlankFragment()
-                        2 -> SettingsPreferenceFragment()
+                        2 -> SettingsFragment()
                         else -> HomeFragment()
                     }
                 }
@@ -108,7 +109,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     addHeader("X-App-Mode", "universal")
                 }
                 val request = builder.build()
-                
+
                 val response = client.newCall(request).execute()
                 val login: CheckResponse = Gson().fromJson(
                     response.body!!.string(),
@@ -117,17 +118,17 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
 
                 if (login.status == null) {
                     PrefManager.isLogin = true
-                    runOnUiThread {
+                    /*runOnUiThread {
                         Toast.makeText(this@MainActivity, "login", Toast.LENGTH_SHORT).show()
-                    }
+                    }*/
                     PrefManager.uid = "uid=${login.data!!.uid}"
                     PrefManager.name = "username=${login.data.username}"
                     PrefManager.token = "token=${login.data.token}"
                 } else {
                     PrefManager.isLogin = false
-                    runOnUiThread {
+                    /*runOnUiThread {
                         Toast.makeText(this@MainActivity, "no login", Toast.LENGTH_SHORT).show()
-                    }
+                    }*/
                     //PrefManager.uid = ""
                     //PrefManager.name = ""
                     //PrefManager.token = ""
