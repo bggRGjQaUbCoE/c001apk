@@ -81,7 +81,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.feedContentList.add(feed)
                 }
-                mAdapter.notifyDataSetChanged()
+                //mAdapter.notifyDataSetChanged()
             } else {
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
@@ -109,6 +109,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
             } else {
+                mAdapter.notifyDataSetChanged()
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false

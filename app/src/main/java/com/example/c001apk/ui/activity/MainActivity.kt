@@ -124,6 +124,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     PrefManager.uid = "uid=${login.data!!.uid}"
                     PrefManager.name = "username=${login.data.username}"
                     PrefManager.token = "token=${login.data.token}"
+                    PrefManager.userAvatar = login.data.userAvatar
                 } else {
                     PrefManager.isLogin = false
                     /*runOnUiThread {

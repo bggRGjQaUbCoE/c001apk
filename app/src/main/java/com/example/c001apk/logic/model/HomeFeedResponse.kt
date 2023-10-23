@@ -40,6 +40,16 @@ data class HomeFeedResponse(val data: List<Data>) {
         @SerializedName("hot_num") val hotNum: String,
         @SerializedName("feed_comment_num") val feedCommentNum: String,
         @SerializedName("alias_title") val aliasTitle: String,
+        val userAction: UserAction
+    )
+
+    data class UserAction(
+        val like: Int,
+        val favorite: Int,
+        val follow: Int,
+        val collect: Int,
+        val followAuthor: Int,
+        val authorFollowYou: Int
     )
 
     data class ReplyRows(

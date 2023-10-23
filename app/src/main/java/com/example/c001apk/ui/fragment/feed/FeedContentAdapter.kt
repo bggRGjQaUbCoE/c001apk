@@ -12,6 +12,7 @@ import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -54,6 +55,7 @@ class FeedContentAdapter(
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
+        val follow: Button = view.findViewById(R.id.follow)
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -142,6 +144,12 @@ class FeedContentAdapter(
                     val feed = feedList[position]
                     holder.uname.text = feed.data.username
                     holder.device.text = feed.data.deviceTitle
+                    if (feed.data.userAction.followAuthor == 1){
+                        holder.follow.text = "已关注"
+                    }else{
+                        holder.follow.text = "关注"
+                    }
+                    holder.follow.visibility = View.VISIBLE
                     if (feed.data.deviceTitle != "") {
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                         drawable.setBounds(

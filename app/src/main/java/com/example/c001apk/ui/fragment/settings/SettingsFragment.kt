@@ -34,6 +34,7 @@ class SettingsFragment : Fragment() {
 
         if (PrefManager.isLogin) {
             binding.clickToLogin.visibility = View.GONE
+            showProfile()
             viewModel.getProfile()
         } else
             binding.clickToLogin.visibility = View.VISIBLE
@@ -62,20 +63,40 @@ class SettingsFragment : Fragment() {
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
             if (data != null) {
-                binding.name.text = data.username
-                binding.name1.text = data.username
-                binding.level.text = "Lv.${data.level}"
-                ImageShowUtil.showAvatar(binding.avatar, data.userAvatar)
-                ImageShowUtil.showAvatar(binding.avatar1, data.userAvatar)
-                binding.exp.text = "${data.experience}/${data.nextLevelExperience}"
-                binding.progress.max = data.nextLevelExperience
-                binding.progress.progress = data.experience
-                binding.progress.visibility = View.VISIBLE
+                PrefManager.apply {
+                    if (nextLevelExperience == "") {
+                        binding.level.text = "Lv.${data.level}"
+                        binding.exp.text = "${data.experience}/${data.nextLevelExperience}"
+                        binding.progress.max = data.nextLevelExperience
+                        binding.progress.progress = data.experience
+                        binding.progress.visibility = View.VISIBLE
+                    }
+                    name = "username=${data.username}"
+                    userAvatar = data.userAvatar
+                    level = data.level
+                    experience = data.experience.toString()
+                    nextLevelExperience = data.nextLevelExperience.toString()
+                }
             } else {
                 result.exceptionOrNull()?.printStackTrace()
             }
         }
 
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun showProfile() {
+        binding.name.text = PrefManager.name.substring(9, PrefManager.name.length)
+        binding.name1.text = PrefManager.name.substring(9, PrefManager.name.length)
+        ImageShowUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
+        ImageShowUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
+        if (PrefManager.nextLevelExperience != "") {
+            binding.level.text = "Lv.${PrefManager.level}"
+            binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
+            binding.progress.max = PrefManager.nextLevelExperience.toInt()
+            binding.progress.progress = PrefManager.experience.toInt()
+            binding.progress.visibility = View.VISIBLE
+        }
     }
 
 }

@@ -184,8 +184,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="10dp"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:textSize="20sp"
                 tools:text="name" />
 
         </LinearLayout>

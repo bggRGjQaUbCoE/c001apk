@@ -2,12 +2,11 @@ package com.example.c001apk.ui.fragment.home.follow
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,20 +15,17 @@ import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentFollowBinding
-import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
-import com.example.c001apk.ui.fragment.home.feed.HomeFeedViewModel
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
-import com.example.c001apk.util.TokenDeviceUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class FollowFragment : Fragment() , IOnBottomClickListener, IOnFeedPicClickListener {
+class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
 
     private lateinit var binding: FragmentFollowBinding
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
@@ -50,10 +46,12 @@ class FollowFragment : Fragment() , IOnBottomClickListener, IOnFeedPicClickListe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initView()
-        initData()
-        initRefresh()
-        initScroll()
+        if (!viewModel.isInit) {
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
 
         viewModel.followFeedData.observe(viewLifecycleOwner) { result ->
             val feed = result.getOrNull()
@@ -146,7 +144,7 @@ class FollowFragment : Fragment() , IOnBottomClickListener, IOnFeedPicClickListe
     }
 
     override fun onReturnTop() {
-        if (HomeFragment.current == 0){
+        if (HomeFragment.current == 0) {
             if (firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {
@@ -160,6 +158,15 @@ class FollowFragment : Fragment() , IOnBottomClickListener, IOnFeedPicClickListe
         super.onResume()
         (requireActivity() as IOnBottomClickContainer).controller = this
         IOnFeedPicClickContainer.controller = this
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
+
     }
 
     override fun onShowPic(position: Int, urlList: MutableList<ImageInfo>) {

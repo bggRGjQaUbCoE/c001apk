@@ -8,6 +8,7 @@ import com.example.c001apk.logic.network.Repository
 
 class FollowViewModel : ViewModel() {
 
+    var isInit = true
     val followFeedList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true

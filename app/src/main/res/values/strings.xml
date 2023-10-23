@@ -54,4 +54,5 @@
     <string name="logout">退出登录</string>
     <string name="click_to_login">点击登录</string>
     <string name="logoutTitle">确定退出登录？</string>
+    <string name="follow">关注</string>
 </resources>

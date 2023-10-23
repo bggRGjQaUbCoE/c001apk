@@ -59,8 +59,20 @@ object PrefManager {
         get() = pref.getString(TOKEN, "")!!
         set(value) = pref.edit().putString(TOKEN, value).apply()
 
-    var test: String
-        get() = pref.getString("test", "")!!
-        set(value) = pref.edit().putString("test", value).apply()
+    var userAvatar: String
+        get() = pref.getString("userAvatar", "")!!
+        set(value) = pref.edit().putString("userAvatar", value).apply()
+
+    var level: String
+        get() = pref.getString("level", "")!!
+        set(value) = pref.edit().putString("level", value).apply()
+
+    var experience: String
+        get() = pref.getString("experience", "")!!
+        set(value) = pref.edit().putString("experience", value).apply()
+
+    var nextLevelExperience: String
+        get() = pref.getString("nextLevelExperience", "")!!
+        set(value) = pref.edit().putString("nextLevelExperience", value).apply()
 
 }
