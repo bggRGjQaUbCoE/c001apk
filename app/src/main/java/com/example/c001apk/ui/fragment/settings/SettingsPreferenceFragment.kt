@@ -3,13 +3,10 @@ package com.example.c001apk.ui.fragment.settings
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
 import com.example.c001apk.R
 import com.example.c001apk.util.PrefManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.core.util.ResourceUtils
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
@@ -59,11 +56,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         preferenceManager.preferenceDataStore = SettingsPreferenceDataStore()
         setPreferencesFromResource(R.xml.settings, rootKey)
 
-        if (!PrefManager.isLogin){
-            val displayOptions = findPreference("logout_preference_settings") as PreferenceCategory?
-            preferenceScreen.removePreference(displayOptions!!)
-        }
-
         /*if (PrefManager.isLogin) {
             val displayOptions = findPreference("login_preference_settings") as PreferenceCategory?
             preferenceScreen.removePreference(displayOptions!!)
@@ -110,22 +102,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             activity?.recreate()
             true
         }
-
-        findPreference<Preference>("logout")?.setOnPreferenceClickListener {
-            MaterialAlertDialogBuilder(requireContext()).apply {
-                setTitle(R.string.logoutTitle)
-                setNegativeButton(android.R.string.cancel, null)
-                setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.isLogin = false
-                    PrefManager.uid = ""
-                    PrefManager.name = ""
-                    PrefManager.token = ""
-                }
-                show()
-            }
-            true
-        }
-
 
     }
 

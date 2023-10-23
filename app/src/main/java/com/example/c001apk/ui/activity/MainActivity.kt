@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -9,8 +8,8 @@ import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityMainBinding
 import com.example.c001apk.logic.model.CheckResponse
-import com.example.c001apk.ui.fragment.BlankFragment
 import com.example.c001apk.ui.fragment.home.HomeFragment
+import com.example.c001apk.ui.fragment.meaasge.MessageFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.settings.SettingsFragment
@@ -44,8 +43,8 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                 override fun createFragment(position: Int): Fragment {
                     return when (position) {
                         0 -> HomeFragment()
-                        1 -> BlankFragment()
-                        2 -> SettingsFragment()
+                        1 -> MessageFragment()
+                        2 -> SettingsPreferenceFragment()
                         else -> HomeFragment()
                     }
                 }

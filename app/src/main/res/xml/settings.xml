@@ -47,13 +47,4 @@
             android:title="@string/all_huaji" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="logout_preference_settings"
-        android:title="@string/logout">
-        <Preference
-            android:icon="@drawable/outline_palette_24"
-            android:key="logout"
-            android:title="@string/logout" />
-    </PreferenceCategory>
-
 </PreferenceScreen>
