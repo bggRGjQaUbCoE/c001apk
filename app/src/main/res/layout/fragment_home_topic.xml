@@ -13,6 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:scrollbars="none"
         android:visibility="visible"
         app:indicator_color="@color/cover"
         app:indicator_gravity="fill"

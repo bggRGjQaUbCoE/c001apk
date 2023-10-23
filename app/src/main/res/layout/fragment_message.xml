@@ -23,8 +23,8 @@
                 android:id="@+id/clickToLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/click_to_login"
                 android:layout_gravity="center"
+                android:text="@string/click_to_login"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -119,7 +119,6 @@
                         android:layout_weight="1" />
                 </LinearLayout>
 
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -139,7 +138,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center_vertical"
-                        android:src="#123456"
+                        tools:src="#123456"
                         tools:ignore="ContentDescription" />
 
                     <TextView
@@ -162,5 +161,18 @@
             android:background="?attr/colorSurfaceVariant" />
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

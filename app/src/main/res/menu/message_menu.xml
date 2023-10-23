@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/more"
+        android:icon="@drawable/ic_more"
+        android:showAsAction="always"
+        android:title="@string/more"
+        tools:ignore="AlwaysShowAction" />
 
     <item
         android:id="@+id/logout"
         android:icon="@drawable/ic_logout"
         android:showAsAction="always"
-        android:title="@string/logout" />
+        android:title="@string/logout"
+        tools:ignore="AlwaysShowAction" />
 
 </menu>

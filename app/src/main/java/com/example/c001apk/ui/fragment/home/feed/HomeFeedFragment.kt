@@ -62,7 +62,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
                         if (element.entityTemplate == "feed"
                             || element.entityTemplate == "iconMiniScrollCard"
                             || element.entityTemplate == "iconLinkGridCard"
-                            || element.entityTemplate == "imageCarouselCard"
+                            || element.entityTemplate == "imageCarouselCard_1"
                             || element.entityTemplate == "imageTextScrollCard")
                         /*if (element.entityTemplate != "sponsorCard"
                             && element.entityTemplate != "refreshCard"
