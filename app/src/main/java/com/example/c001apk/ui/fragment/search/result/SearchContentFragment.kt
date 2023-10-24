@@ -89,7 +89,7 @@ class SearchContentFragment : Fragment() {
                     viewModel.searchFeedList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     for (element in search) {
-                        if (element.entityType == "feed")
+                        if (element.feedType == "feed" || element.feedType == "feedArticle")
                             viewModel.searchFeedList.add(element)
                     }
                 }

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="@string/reply"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" />
+
+        <TextView
+            android:id="@+id/publish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/actionBarItemBackground"
+            android:textColor="@color/gray_bd"
+            android:padding="16dp"
+            android:text="@string/publish"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@null"
+        android:gravity="start"
+        android:lineSpacingMultiplier="1.2"
+        android:maxLength="500"
+        android:maxLines="8"
+        android:minLines="4"
+        android:paddingTop="4dp"
+        android:textSize="14sp" />
+
+</LinearLayout>

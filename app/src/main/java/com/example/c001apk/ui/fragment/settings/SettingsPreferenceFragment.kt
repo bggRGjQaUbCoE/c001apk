@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.settings
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
@@ -12,6 +13,11 @@ import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setDivider(resources.getDrawable(R.drawable.divider, requireActivity().theme))
+    }
 
     class SettingsPreferenceDataStore : PreferenceDataStore() {
         override fun getString(key: String?, defValue: String?): String {

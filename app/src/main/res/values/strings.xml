@@ -59,4 +59,6 @@
     <string name="fans">粉丝</string>
     <string name="notification">通知</string>
     <string name="more">更多</string>
+    <string name="reply">回复</string>
+    <string name="publish">发布</string>
 </resources>

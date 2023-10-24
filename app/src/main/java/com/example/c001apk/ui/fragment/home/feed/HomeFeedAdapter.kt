@@ -186,8 +186,8 @@ class HomeFeedAdapter(
                 val feed = homeFeedList[position]
                 holder.id = feed.id
                 holder.uname.text = feed.username
-                holder.device.text = feed.deviceTitle
                 if (feed.deviceTitle != "") {
+                    holder.device.text = feed.deviceTitle
                     val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                     drawable.setBounds(
                         0,
@@ -196,6 +196,7 @@ class HomeFeedAdapter(
                         holder.device.textSize.toInt()
                     )
                     holder.device.setCompoundDrawables(drawable, null, null, null)
+                    holder.device.visibility = View.VISIBLE
                 } else {
                     holder.device.visibility = View.GONE
                 }

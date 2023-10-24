@@ -143,7 +143,6 @@ class FeedContentAdapter(
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
                     holder.uname.text = feed.data.username
-                    holder.device.text = feed.data.deviceTitle
                     if (feed.data.userAction.followAuthor == 1){
                         holder.follow.text = "已关注"
                     }else{
@@ -151,6 +150,7 @@ class FeedContentAdapter(
                     }
                     holder.follow.visibility = View.VISIBLE
                     if (feed.data.deviceTitle != "") {
+                        holder.device.text = feed.data.deviceTitle
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                         drawable.setBounds(
                             0,
@@ -159,6 +159,7 @@ class FeedContentAdapter(
                             holder.device.textSize.toInt()
                         )
                         holder.device.setCompoundDrawables(drawable, null, null, null)
+                        holder.device.visibility = View.VISIBLE
                     } else {
                         holder.device.visibility = View.GONE
                     }

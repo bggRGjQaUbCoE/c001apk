@@ -75,6 +75,7 @@ class MessageFragment : Fragment() {
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
             if (data != null) {
+                countList.clear()
                 countList.apply {
                     add(data.feed)
                     add(data.follow)
