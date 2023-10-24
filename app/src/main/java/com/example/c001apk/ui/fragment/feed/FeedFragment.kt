@@ -42,14 +42,15 @@ import java.io.IOException
 import kotlin.concurrent.thread
 
 
-class FeedFragment : Fragment(), IOnTotalReplyClickListener {
+class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
     private var id: String = ""
     private lateinit var bottomSheetDialog: BottomSheetDialog
+    private var type = ""
+    private var uname: String = ""
 
-    //private var uname: String = ""
     //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -58,11 +59,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String) =
+        fun newInstance(id: String, uname: String) =
             FeedFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
-                    //putString("UNAME", uname)
+                    putString("UNAME", uname)
                     //putString("DEVICE", device)
                 }
             }
@@ -72,7 +73,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
         super.onCreate(savedInstanceState)
         arguments?.let {
             id = it.getString("ID")!!
-            //uname = it.getString("UNAME")!!
+            uname = it.getString("UNAME")!!
             //device = it.getString("DEVICE")
         }
     }
@@ -94,7 +95,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
         initData()
         initRefresh()
         initScroll()
-        initReply()
+
+        binding.reply.setOnClickListener {
+            type = "feed"
+            initReply()
+        }
 
         viewModel.feedData.observe(viewLifecycleOwner) { result ->
             val feed = result.getOrNull()
@@ -151,53 +156,52 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
 
     @SuppressLint("InflateParams")
     private fun initReply() {
-        binding.reply.setOnClickListener {
-            bottomSheetDialog = BottomSheetDialog(requireActivity())
-            val view = LayoutInflater.from(requireActivity())
-                .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
-            bottomSheetDialog.apply {
-                setContentView(view)
-                setCancelable(false)
-                setCanceledOnTouchOutside(true)
-                show()
-            }
 
-            val editText: EditText = view.findViewById(R.id.editText)
-            val publish: TextView = view.findViewById(R.id.publish)
+        bottomSheetDialog = BottomSheetDialog(requireActivity())
+        val view = LayoutInflater.from(requireActivity())
+            .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
+        bottomSheetDialog.apply {
+            setContentView(view)
+            setCancelable(false)
+            setCanceledOnTouchOutside(true)
+            show()
+        }
 
-            editText.isFocusable = true
-            editText.isFocusableInTouchMode = true
-            editText.requestFocus()
-            val imm =
-                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(editText, 0)
+        val editText: EditText = view.findViewById(R.id.editText)
+        val publish: TextView = view.findViewById(R.id.publish)
 
-            editText.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        editText.hint = "回复: $uname"
+        editText.isFocusable = true
+        editText.isFocusableInTouchMode = true
+        editText.requestFocus()
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(editText, 0)
 
-                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
-                @SuppressLint("RestrictedApi")
-                override fun afterTextChanged(p0: Editable?) {
-                    if (editText.text.toString().replace("\n", "").isEmpty()) {
-                        publish.isClickable = false
-                        publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
-                    } else {
-                        publish.isClickable = true
-                        publish.setTextColor(
-                            ThemeUtils.getThemeAttrColor(
-                                requireActivity(),
-                                com.drakeet.about.R.attr.colorPrimary
-                            )
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            @SuppressLint("RestrictedApi")
+            override fun afterTextChanged(p0: Editable?) {
+                if (editText.text.toString().replace("\n", "").isEmpty()) {
+                    publish.isClickable = false
+                    publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
+                } else {
+                    publish.isClickable = true
+                    publish.setTextColor(
+                        ThemeUtils.getThemeAttrColor(
+                            requireActivity(),
+                            com.drakeet.about.R.attr.colorPrimary
                         )
-                        publish.setOnClickListener {
-                            publish(editText.text.toString())
-                        }
+                    )
+                    publish.setOnClickListener {
+                        publish(editText.text.toString())
                     }
                 }
-            })
-
-        }
+            }
+        })
     }
 
     private fun publish(content: String) {
@@ -226,7 +230,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
                         "Cookie",
                         "${PrefManager.uid}; ${PrefManager.name}; ${PrefManager.token}"
                     )
-                    .url("https://api.coolapk.com/v6/feed/reply?id=$id&type=feed")
+                    .url("https://api.coolapk.com/v6/feed/reply?id=$id&type=$type")
                     .post(formBody)
                     .build()
 
@@ -242,7 +246,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
                             response.body!!.string(),
                             CheckResponse::class.java
                         )
-                        if (reply.data?.status == 1) {
+                        if (reply.data?.messageStatus == 1) {
                             requireActivity().runOnUiThread {
                                 Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
                                 bottomSheetDialog.cancel()
@@ -300,13 +304,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
     }
 
     private fun initData() {
-        if (viewModel.feedContentList.isEmpty())
+        if (viewModel.feedContentList.isEmpty()){
+            viewModel.id = id
             refreshData()
+        }
     }
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
-        viewModel.id = id //"49715174"
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
@@ -350,6 +355,22 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener {
             Reply2ReplyBottomSheetDialog.newInstance(uid, id)
 
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        IOnReplyClickContainer.controller = this
+
+    }
+
+    override fun onReply2Reply(id: String, uname: String, type: String) {
+        if (PrefManager.isLogin) {
+            this.id = id
+            this.uname = uname
+            this.type = type
+            initReply()
+        }
     }
 
 }

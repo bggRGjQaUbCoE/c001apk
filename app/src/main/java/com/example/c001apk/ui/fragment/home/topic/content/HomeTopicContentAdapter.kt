@@ -71,12 +71,14 @@ class HomeTopicContentAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.message.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.itemView.setOnLongClickListener {

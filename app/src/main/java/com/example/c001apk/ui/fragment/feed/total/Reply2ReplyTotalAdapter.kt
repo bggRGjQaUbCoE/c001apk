@@ -21,6 +21,7 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
+import com.example.c001apk.ui.fragment.feed.IOnReplyClickContainer
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
@@ -37,6 +38,7 @@ class Reply2ReplyTotalAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val uname: TextView = view.findViewById(R.id.uname)
+        var id = ""
         var name = ""
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
@@ -61,6 +63,20 @@ class Reply2ReplyTotalAdapter(
             parent.context.startActivity(intent)
             true
         }
+        viewHolder.itemView.setOnClickListener {
+            IOnReplyClickContainer.controller?.onReply2Reply(
+                viewHolder.id,
+                viewHolder.name,
+                "reply"
+            )
+        }
+        viewHolder.message.setOnClickListener {
+            IOnReplyClickContainer.controller?.onReply2Reply(
+                viewHolder.id,
+                viewHolder.name,
+                "reply"
+            )
+        }
         return viewHolder
     }
 
@@ -70,6 +86,7 @@ class Reply2ReplyTotalAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reply = replyList[position]
 
+        holder.id = reply.id
         holder.name = reply.username
 
         val text =

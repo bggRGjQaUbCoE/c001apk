@@ -59,6 +59,7 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class Entities(
+        val username: String,
         val url: String,
         val pic: String,
         val title: String,

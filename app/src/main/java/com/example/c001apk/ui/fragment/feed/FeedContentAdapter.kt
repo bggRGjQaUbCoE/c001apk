@@ -129,6 +129,20 @@ class FeedContentAdapter(
                     parent.context.startActivity(intent)
                     true
                 }
+                viewHolder.message.setOnClickListener {
+                    IOnReplyClickContainer.controller?.onReply2Reply(
+                        viewHolder.id,
+                        viewHolder.uname.text.toString(),
+                        "reply"
+                    )
+                }
+                viewHolder.itemView.setOnClickListener {
+                    IOnReplyClickContainer.controller?.onReply2Reply(
+                        viewHolder.id,
+                        viewHolder.uname.text.toString(),
+                        "reply"
+                    )
+                }
                 viewHolder
             }
         }
@@ -143,9 +157,9 @@ class FeedContentAdapter(
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
                     holder.uname.text = feed.data.username
-                    if (feed.data.userAction.followAuthor == 1){
+                    if (feed.data.userAction.followAuthor == 1) {
                         holder.follow.text = "已关注"
-                    }else{
+                    } else {
                         holder.follow.text = "关注"
                     }
                     holder.follow.visibility = View.VISIBLE

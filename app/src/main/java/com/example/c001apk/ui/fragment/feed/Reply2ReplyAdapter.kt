@@ -37,6 +37,8 @@ class Reply2ReplyAdapter(
     RecyclerView.Adapter<Reply2ReplyAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var id = ""
+        var name = ""
         val reply: TextView = view.findViewById(R.id.reply)
     }
 
@@ -45,6 +47,13 @@ class Reply2ReplyAdapter(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_feed_content_reply_to_reply_item, parent, false)
         val viewHolder = ViewHolder(view)
+        viewHolder.reply.setOnClickListener {
+            IOnReplyClickContainer.controller?.onReply2Reply(
+                viewHolder.id,
+                viewHolder.name,
+                "reply"
+            )
+        }
         viewHolder.reply.setOnLongClickListener {
             val intent = Intent(parent.context, CopyActivity::class.java)
             intent.putExtra("text", viewHolder.reply.text.toString())
@@ -59,6 +68,9 @@ class Reply2ReplyAdapter(
     @SuppressLint("SetTextI18n", "RestrictedApi", "UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reply = reply2ReplyList[position]
+
+        holder.id = reply.id
+        holder.name = reply.username
 
         /*val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
         if (position == 0)
