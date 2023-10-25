@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -31,27 +32,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/actionBarItemBackground"
-            android:textColor="@color/gray_bd"
             android:padding="16dp"
             android:text="@string/publish"
+            android:textColor="@color/gray_bd"
             android:textSize="16sp" />
 
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/editText"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:counterEnabled="true"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
-        android:background="@null"
-        android:gravity="start"
-        android:lineSpacingMultiplier="1.2"
-        android:maxLength="500"
-        android:maxLines="8"
-        android:minLines="4"
-        android:paddingTop="4dp"
-        android:textSize="14sp" />
+        app:counterMaxLength="500">
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:gravity="start"
+            android:lineSpacingMultiplier="1.2"
+            android:maxLength="500"
+            android:maxLines="8"
+            android:minLines="4"
+            android:textSize="14sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

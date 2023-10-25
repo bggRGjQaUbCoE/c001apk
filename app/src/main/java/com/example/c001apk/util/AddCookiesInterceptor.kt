@@ -10,6 +10,7 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
+import java.net.URLEncoder
 
 internal class AddCookiesInterceptor : Interceptor {
     @Throws(IOException::class)
@@ -29,9 +30,10 @@ internal class AddCookiesInterceptor : Interceptor {
             addHeader("X-Dark-Mode", "0")
             addHeader("X-App-Channel", "coolapk")
             addHeader("X-App-Mode", "universal")
-            if (PrefManager.isLogin) addHeader(
+            if (PrefManager.isLogin)
+                addHeader(
                 "Cookie",
-                "${PrefManager.uid}; ${PrefManager.name}; ${PrefManager.token}"
+                    "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
             )
             else addHeader("Cookie", SESSID)
         }

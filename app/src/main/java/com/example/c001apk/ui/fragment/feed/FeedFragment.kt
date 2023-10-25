@@ -39,6 +39,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 
@@ -97,6 +98,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         initScroll()
 
         binding.reply.setOnClickListener {
+            id = arguments?.getString("ID")!!
+            uname = arguments?.getString("UNAME")!!
             type = "feed"
             initReply()
         }
@@ -232,7 +235,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     .addHeader("X-App-Mode", "universal")
                     .addHeader(
                         "Cookie",
-                        "${PrefManager.uid}; ${PrefManager.name}; ${PrefManager.token}"
+                        "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
                     )
                     .url("https://api.coolapk.com/v6/feed/reply?id=$id&type=$type")
                     .post(formBody)

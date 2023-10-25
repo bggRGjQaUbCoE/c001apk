@@ -12,7 +12,6 @@ import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.meaasge.MessageFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
-import com.example.c001apk.ui.fragment.settings.SettingsFragment
 import com.example.c001apk.ui.fragment.settings.SettingsPreferenceFragment
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.PrefManager
@@ -21,6 +20,7 @@ import com.example.c001apk.util.TokenDeviceUtils.Companion.getTokenV2
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 class MainActivity : BaseActivity(), IOnBottomClickContainer {
@@ -91,7 +91,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     if (PrefManager.isLogin)
                         addHeader(
                             "Cookie",
-                            "${PrefManager.uid}; ${PrefManager.name}; ${PrefManager.token}"
+                            "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
                         )
                     addHeader("User-Agent", Constants.USER_AGENT)
                     addHeader("X-Requested-With", Constants.REQUEST_WIDTH)
@@ -117,18 +117,12 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
 
                 if (login.status == null) {
                     PrefManager.isLogin = true
-                    /*runOnUiThread {
-                        Toast.makeText(this@MainActivity, "login", Toast.LENGTH_SHORT).show()
-                    }*/
-                    PrefManager.uid = "uid=${login.data!!.uid}"
-                    PrefManager.name = "username=${login.data.username}"
-                    PrefManager.token = "token=${login.data.token}"
+                    PrefManager.uid = login.data!!.uid
+                    PrefManager.username = URLEncoder.encode(login.data.username, "UTF-8")
+                    PrefManager.token = login.data.token
                     PrefManager.userAvatar = login.data.userAvatar
                 } else {
                     PrefManager.isLogin = false
-                    /*runOnUiThread {
-                        Toast.makeText(this@MainActivity, "no login", Toast.LENGTH_SHORT).show()
-                    }*/
                     //PrefManager.uid = ""
                     //PrefManager.name = ""
                     //PrefManager.token = ""

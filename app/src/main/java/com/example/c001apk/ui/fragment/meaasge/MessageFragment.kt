@@ -21,13 +21,14 @@ import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 
 class MessageFragment : Fragment() {
 
     private lateinit var binding: FragmentMessageBinding
     private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }
-    private val countList = ArrayList<String>()
     private lateinit var mAdapter: MessageAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
@@ -56,7 +57,7 @@ class MessageFragment : Fragment() {
             binding.profileLayout.visibility = View.VISIBLE
             binding.titleProfile.visibility = View.VISIBLE
             showProfile()
-            viewModel.getProfile()
+            getData()
         } else {
             binding.profileLayout.visibility = View.INVISIBLE
             binding.titleProfile.visibility = View.INVISIBLE
@@ -78,21 +79,19 @@ class MessageFragment : Fragment() {
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
             if (data != null) {
-                countList.clear()
-                countList.apply {
+                viewModel.countList.clear()
+                viewModel.countList.apply {
                     add(data.feed)
                     add(data.follow)
                     add(data.fans)
                 }
                 mAdapter.notifyDataSetChanged()
 
-                PrefManager.apply {
-                    name = "username=${data.username}"
-                    userAvatar = data.userAvatar
-                    level = data.level
-                    experience = data.experience.toString()
-                    nextLevelExperience = data.nextLevelExperience.toString()
-                }
+                PrefManager.username = URLEncoder.encode(data.username, "UTF-8")
+                PrefManager.userAvatar = data.userAvatar
+                PrefManager.level = data.level
+                PrefManager.experience = data.experience.toString()
+                PrefManager.nextLevelExperience = data.nextLevelExperience.toString()
                 showProfile()
                 binding.swipeRefresh.isRefreshing = false
             } else {
@@ -105,7 +104,7 @@ class MessageFragment : Fragment() {
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = MessageAdapter(requireActivity(), countList)
+        mAdapter = MessageAdapter(requireActivity(), viewModel.countList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -124,11 +123,22 @@ class MessageFragment : Fragment() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.swipeRefresh.isRefreshing = true
-            viewModel.getProfile()
+            getData()
         }
     }
 
+    private fun getData() {
+        if (PrefManager.isLogin) {
+            binding.swipeRefresh.isRefreshing = true
+            viewModel.uid = PrefManager.uid
+            viewModel.getProfile()
+        } else
+            binding.swipeRefresh.isRefreshing = false
+
+    }
+
+
+    @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
         binding.toolBar.inflateMenu(R.menu.message_menu)
         binding.toolBar.setOnMenuItemClickListener {
@@ -138,12 +148,11 @@ class MessageFragment : Fragment() {
                         setTitle(R.string.logoutTitle)
                         setNegativeButton(android.R.string.cancel, null)
                         setPositiveButton(android.R.string.ok) { _, _ ->
-                            PrefManager.apply {
-                                isLogin = false
-                                uid = ""
-                                name = ""
-                                token = ""
-                            }
+                            PrefManager.isLogin = false
+                            PrefManager.uid = ""
+                            PrefManager.username = ""
+                            PrefManager.token = ""
+                            PrefManager.userAvatar = ""
                             ActivityCollector.recreateActivity(MainActivity::class.java.name)
                         }
                         show()
@@ -156,8 +165,8 @@ class MessageFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun showProfile() {
-        binding.name.text = PrefManager.name.substring(9, PrefManager.name.length)
-        binding.name1.text = PrefManager.name.substring(9, PrefManager.name.length)
+        binding.name.text = URLDecoder.decode(PrefManager.username, "UTF-8")
+        binding.name1.text = URLDecoder.decode(PrefManager.username, "UTF-8")
         binding.level.text = "Lv.${PrefManager.level}"
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
         binding.progress.max = PrefManager.nextLevelExperience.toInt()

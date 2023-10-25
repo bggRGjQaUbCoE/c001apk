@@ -4,7 +4,8 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.Editable
+import android.text.InputFilter
+import android.text.Spanned
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -42,6 +43,14 @@ class LoginActivity : BaseActivity() {
     private var SESSID = ""
     private var isLoginPass = true
 
+    private val filter =
+        InputFilter { source: CharSequence, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int ->
+            if (source == " ")
+                return@InputFilter ""
+            else
+                return@InputFilter null
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
@@ -51,6 +60,14 @@ class LoginActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         getLoginParam()
+
+        binding.apply {
+            account.filters = arrayOf(filter)
+            password.filters = arrayOf(filter)
+            sms.filters = arrayOf(filter)
+            captchaText.filters = arrayOf(filter)
+        }
+
 
         binding.getSMS.setOnClickListener {
             if (binding.account.text.toString() == "")
@@ -154,21 +171,22 @@ class LoginActivity : BaseActivity() {
                             val cookies = headers.values("Set-Cookie");
                             val uid =
                                 cookies[cookies.size - 3].substring(
-                                    0,
+                                    4,
                                     cookies[cookies.size - 3].indexOf(";")
                                 )
                             val name =
                                 cookies[cookies.size - 2].substring(
-                                    0,
+                                    9,
                                     cookies[cookies.size - 2].indexOf(";")
                                 )
                             val token =
                                 cookies[cookies.size - 1].substring(
-                                    0,
+                                    6,
                                     cookies[cookies.size - 1].indexOf(";")
                                 )
+                            PrefManager.isLogin = true
                             PrefManager.uid = uid
-                            PrefManager.name = name
+                            PrefManager.username = name
                             PrefManager.token = token
                             getUserProfile()
                         } else {
@@ -262,7 +280,7 @@ class LoginActivity : BaseActivity() {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("https://api2.coolapk.com/v6/user/profile?${PrefManager.uid}")
+                    .url("https://api2.coolapk.com/v6/user/profile?uid=${PrefManager.uid}")
                     .addHeader("User-Agent", Constants.USER_AGENT)
                     .addHeader("X-Requested-With", Constants.REQUEST_WIDTH)
                     .addHeader("X-Sdk-Int", "33")
@@ -278,7 +296,7 @@ class LoginActivity : BaseActivity() {
                     .addHeader("X-App-Mode", "universal")
                     .addHeader(
                         "Cookie",
-                        "${PrefManager.uid}; ${PrefManager.name}; ${PrefManager.token}"
+                        "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
                     )
                     .build()
                 val response = client.newCall(request).execute()
@@ -286,13 +304,10 @@ class LoginActivity : BaseActivity() {
                     response.body!!.string(),
                     ProfileResponse::class.java
                 )
-                PrefManager.apply {
-                    userAvatar = profile.data.userAvatar
-                    level = profile.data.level
-                    experience = profile.data.experience.toString()
-                    nextLevelExperience = profile.data.nextLevelExperience.toString()
-                    isLogin = true
-                }
+                PrefManager.userAvatar = profile.data.userAvatar
+                PrefManager.level = profile.data.level
+                PrefManager.experience = profile.data.experience.toString()
+                PrefManager.nextLevelExperience = profile.data.nextLevelExperience.toString()
                 afterLogin()
             } catch (e: Exception) {
                 e.printStackTrace()

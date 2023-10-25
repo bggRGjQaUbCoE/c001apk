@@ -12,7 +12,6 @@ object PrefManager {
     private const val PREF_THEME_COLOR = "theme_color"
     private const val SHOW_EMOJI = "show_emoji"
     private const val ALL_HUAJI = "all_huaji"
-    private const val IS_LOGIN = "is_login"
     private const val UID = "uid"
     private const val NAME = "name"
     private const val TOKEN = "token"
@@ -44,14 +43,14 @@ object PrefManager {
         set(value) = pref.edit().putBoolean(ALL_HUAJI, value).apply()
 
     var isLogin: Boolean
-        get() = pref.getBoolean(IS_LOGIN, false)
-        set(value) = pref.edit().putBoolean(IS_LOGIN, value).apply()
+        get() = pref.getBoolean("isLogin", false)
+        set(value) = pref.edit().putBoolean("isLogin", value).apply()
 
     var uid: String
         get() = pref.getString(UID, "")!!
         set(value) = pref.edit().putString(UID, value).apply()
 
-    var name: String
+    var username: String
         get() = pref.getString(NAME, "")!!
         set(value) = pref.edit().putString(NAME, value).apply()
 

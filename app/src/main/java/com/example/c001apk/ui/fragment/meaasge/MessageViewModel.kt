@@ -4,15 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.util.PrefManager
 
 class MessageViewModel : ViewModel() {
 
+    val countList = ArrayList<String>()
+
     private val getProfileDataLiveData = MutableLiveData<String>()
 
-    var uid =
-        if (PrefManager.isLogin) PrefManager.uid.substring(4, PrefManager.uid.length)
-        else ""
+    var uid = ""
 
     val profileDataLiveData = getProfileDataLiveData.switchMap {
         Repository.getProfile(uid)
