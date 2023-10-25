@@ -62,10 +62,10 @@
 
                     <TextView
                         android:id="@+id/name"
+                        style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:textColor="@color/m3_dynamic_dark_default_color_primary_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -85,6 +85,7 @@
 
                 <TextView
                     android:id="@+id/bio"
+                    style="@style/UserTextColor"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -92,7 +93,6 @@
                     android:gravity="center"
                     android:paddingStart="20dp"
                     android:paddingEnd="20dp"
-                    android:textColor="@color/m3_dynamic_dark_default_color_primary_text"
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -110,38 +110,38 @@
 
                     <TextView
                         android:id="@+id/like"
+                        style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:textColor="@color/m3_dynamic_dark_default_color_primary_text"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/follow"
+                        style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
-                        android:textColor="@color/m3_dynamic_dark_default_color_primary_text"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/fans"
+                        style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
-                        android:textColor="@color/m3_dynamic_dark_default_color_primary_text"
                         android:textSize="14sp" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/loginTime"
+                    style="@style/UserTextColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="5dp"
-                    android:textColor="@color/m3_dynamic_dark_default_color_primary_text"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/info2" />

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="false"
     app:cardElevation="1dp"
     app:strokeWidth="0dp">
 
@@ -71,7 +70,7 @@
                 android:id="@+id/picRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:scrollbars="none"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pubDate" />
@@ -86,9 +85,9 @@
                 app:strokeWidth="0dp">
 
                 <LinearLayout
+                    style="@style/cardBG"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/home_card_background_color"
                     android:orientation="vertical">
 
                     <androidx.recyclerview.widget.RecyclerView

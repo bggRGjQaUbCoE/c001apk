@@ -141,8 +141,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
             } else {
-                if (PrefManager.isLogin)
-                    mAdapter.notifyDataSetChanged()
                 binding.reply.visibility = View.VISIBLE
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
@@ -304,7 +302,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     private fun initData() {
-        if (viewModel.feedContentList.isEmpty()){
+        if (viewModel.feedContentList.isEmpty()) {
             viewModel.id = id
             refreshData()
         }
@@ -312,6 +310,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
+        viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false

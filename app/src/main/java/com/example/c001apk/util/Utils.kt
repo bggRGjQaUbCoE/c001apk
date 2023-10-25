@@ -64,7 +64,7 @@ class Utils {
          * @return Base64码
          */
         fun String.getBase64(isRaw: Boolean = true): String {
-            var result = Base64.getEncoder().encodeToString(this.toByteArray())
+            var result = Base64Utils.encode(this.toByteArray())//Base64.getEncoder().encodeToString(this.toByteArray())
             if (isRaw) {
                 result = result.replace("=", "")
             }
