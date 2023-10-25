@@ -137,11 +137,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 mAdapter.notifyDataSetChanged()
                 if (PrefManager.isLogin)
                     binding.reply.visibility = View.VISIBLE
+                else
+                    binding.reply.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
             } else {
-                binding.reply.visibility = View.VISIBLE
+                mAdapter.notifyDataSetChanged()
+                if (PrefManager.isLogin)
+                    binding.reply.visibility = View.VISIBLE
+                else
+                    binding.reply.visibility = View.GONE
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false

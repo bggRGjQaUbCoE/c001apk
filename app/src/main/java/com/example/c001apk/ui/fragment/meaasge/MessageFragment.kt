@@ -53,10 +53,13 @@ class MessageFragment : Fragment() {
         if (PrefManager.isLogin) {
             initMenu()
             binding.clickToLogin.visibility = View.GONE
+            binding.profileLayout.visibility = View.VISIBLE
+            binding.titleProfile.visibility = View.VISIBLE
             showProfile()
             viewModel.getProfile()
         } else {
-            binding.progress.visibility = View.GONE
+            binding.profileLayout.visibility = View.INVISIBLE
+            binding.titleProfile.visibility = View.INVISIBLE
             binding.clickToLogin.visibility = View.VISIBLE
         }
 
@@ -159,7 +162,6 @@ class MessageFragment : Fragment() {
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
         binding.progress.max = PrefManager.nextLevelExperience.toInt()
         binding.progress.progress = PrefManager.experience.toInt()
-        binding.progress.visibility = View.VISIBLE
         ImageShowUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
         ImageShowUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
     }

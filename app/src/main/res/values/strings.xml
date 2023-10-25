@@ -61,4 +61,8 @@
     <string name="more">更多</string>
     <string name="reply">回复</string>
     <string name="publish">发布</string>
+    <string name="loginPhone">短信登录</string>
+    <string name="get_sms_token">获取验证码</string>
+    <string name="sms_token">验证码</string>
+    <string name="loginPass">密码登录</string>
 </resources>

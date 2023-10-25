@@ -1,11 +1,16 @@
 package com.example.c001apk.ui.activity.login
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityLoginBinding
 import com.example.c001apk.logic.model.LoginResponse
@@ -35,6 +40,7 @@ class LoginActivity : BaseActivity() {
     private lateinit var binding: ActivityLoginBinding
     private var requestHash = ""
     private var SESSID = ""
+    private var isLoginPass = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,23 +52,66 @@ class LoginActivity : BaseActivity() {
 
         getLoginParam()
 
+        binding.getSMS.setOnClickListener {
+            if (binding.account.text.toString() == "")
+                Toast.makeText(this, "手机号不能为空", Toast.LENGTH_SHORT).show()
+            else
+                getSMS()
+        }
+
         binding.login.setOnClickListener {
-            if (binding.account.text.toString() == "" || binding.password.text.toString() == "")
-                Toast.makeText(this, "用户名或密码为空", Toast.LENGTH_SHORT).show()
-            else {
-                Toast.makeText(this, "正在登录...", Toast.LENGTH_SHORT).show()
-                tryLogin()
+            if (isLoginPass) {
+                if (binding.account.text.toString() == "" || binding.password.text.toString() == "")
+                    Toast.makeText(this, "用户名或密码为空", Toast.LENGTH_SHORT).show()
+                else {
+                    Toast.makeText(this, "正在登录...", Toast.LENGTH_SHORT).show()
+                    tryLogin()
+                }
+            } else {
+                if (binding.account.text.toString() == "" || binding.sms.text.toString() == "")
+                    Toast.makeText(this, "手机号或验证码为空", Toast.LENGTH_SHORT).show()
+                else {
+                    Toast.makeText(this, "正在登录...", Toast.LENGTH_SHORT).show()
+                    tryLogin()
+                }
             }
 
         }
 
+        binding.captchaImg.setOnClickListener {
+            getCaptcha()
+        }
+
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.login_menu, menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
+
+            R.id.loginPass -> {
+                isLoginPass = true
+                binding.passLayout.visibility = View.VISIBLE
+                binding.smsLayout.visibility = View.GONE
+                binding.getSMS.visibility = View.GONE
+            }
+
+            R.id.loginPhone -> {
+                isLoginPass = false
+                binding.getSMS.visibility = View.VISIBLE
+                binding.smsLayout.visibility = View.VISIBLE
+                binding.passLayout.visibility = View.GONE
+            }
         }
         return true
+    }
+
+    private fun getSMS() {
+
     }
 
     private fun tryLogin() {
@@ -75,7 +124,7 @@ class LoginActivity : BaseActivity() {
                     .add("requestHash", requestHash)
                     .add("login", binding.account.text.toString())
                     .add("password", binding.password.text.toString())
-                    .add("captcha", "")
+                    .add("captcha", binding.captchaText.text.toString())
                     .add("code", "")
                     .build()
 
@@ -124,11 +173,59 @@ class LoginActivity : BaseActivity() {
                             getUserProfile()
                         } else {
                             loginFailed(login.message)
+                            if (login.message == "图形验证码不能为空") {
+                                runOnUiThread {
+                                    binding.captcha.visibility = View.VISIBLE
+                                }
+                                getCaptcha()
+                            } else if (login.message == "图形验证码错误") {
+                                getCaptcha()
+                            } else if (login.message == "密码错误" && binding.captcha.visibility == View.VISIBLE) {
+                                getCaptcha()
+                            }
+
                         }
 
 
                     }
                 })
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun getCaptcha() {
+        thread {
+            try {
+                val timeStamp = System.currentTimeMillis()
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("https://account.coolapk.com/auth/showCaptchaImage?$timeStamp")
+                    .addHeader(
+                        "sec-ch-ua",
+                        """Android WebView";v="117", "Not;A=Brand";v="8", "Chromium";v="117"""
+                    )
+                    .addHeader("sec-ch-ua-mobile", "?1")
+                    .addHeader("User-Agent", Constants.USER_AGENT)
+                    .addHeader("sec-ch-ua-platform", "Android")
+                    .addHeader(
+                        "Accept",
+                        """image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"""
+                    )
+                    .addHeader("X-Requested-With", "com.coolapk.market")
+                    .addHeader("Sec-Fetch-Site", "same-origin")
+                    .addHeader("Sec-Fetch-Mode", "no-cors")
+                    .addHeader("Sec-Fetch-Dest", "image")
+                    .addHeader("Referer", "https://account.coolapk.com/auth/login?type=mobile")
+                    .addHeader("Cookie", "$SESSID; forward=https://www.coolapk.com")
+                    .build()
+                val response = client.newCall(request).execute()
+                val inputStream = response.body!!.byteStream()
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                runOnUiThread {
+                    binding.captchaImg.setImageBitmap(bitmap)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
