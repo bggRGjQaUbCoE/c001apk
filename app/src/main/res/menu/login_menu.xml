@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/loginPass"
-        android:icon="@drawable/ic_phone"
+        android:icon="@drawable/ic_password"
         android:showAsAction="always"
         android:title="@string/loginPass" />
 

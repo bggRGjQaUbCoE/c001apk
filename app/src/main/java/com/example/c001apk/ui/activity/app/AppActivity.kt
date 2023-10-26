@@ -22,8 +22,8 @@ class AppActivity : BaseActivity() {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = 0
-    private var lastVisibleItemPosition = 0
+    private var firstCompletelyVisibleItemPosition = -1
+    private var lastVisibleItemPosition = -1
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,8 +74,10 @@ class AppActivity : BaseActivity() {
                 }
                 mAdapter.notifyDataSetChanged()
                 binding.appLayout.visibility = View.VISIBLE
-                binding.progress.isIndeterminate = false
+                binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
+                mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
@@ -123,6 +125,7 @@ class AppActivity : BaseActivity() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
             viewModel.page = 1
             viewModel.isRefreh = true
             viewModel.isEnd = false
@@ -135,8 +138,9 @@ class AppActivity : BaseActivity() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.appCommentList.size - 1) {
+                    if (lastVisibleItemPosition == viewModel.appCommentList.size) {
                         if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.getAppComment()
@@ -147,9 +151,11 @@ class AppActivity : BaseActivity() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                firstCompletelyVisibleItemPosition =
-                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if (viewModel.appCommentList.isNotEmpty()) {
+                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                }
             }
         })
     }

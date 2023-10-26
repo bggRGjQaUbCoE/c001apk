@@ -47,4 +47,11 @@
             android:title="@string/all_huaji" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/others">
+        <Preference
+            android:icon="@drawable/ic_account"
+            android:key="others"
+            android:title="@string/about" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

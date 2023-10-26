@@ -1,16 +1,22 @@
 package com.example.c001apk.ui.fragment.meaasge
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.text.HtmlCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
+import com.example.c001apk.databinding.DialogAboutBinding
 import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.activity.login.LoginActivity
@@ -21,6 +27,7 @@ import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import rikka.material.app.LocaleDelegate
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -174,6 +181,5 @@ class MessageFragment : Fragment() {
         ImageShowUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
         ImageShowUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
     }
-
 
 }

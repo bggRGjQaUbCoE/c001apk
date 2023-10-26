@@ -28,8 +28,8 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = 0
-    private var lastVisibleItemPosition = 0
+    private var firstCompletelyVisibleItemPosition = -1
+    private var lastVisibleItemPosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -107,9 +107,11 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                firstCompletelyVisibleItemPosition =
-                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if (viewModel.followFeedList.isNotEmpty()) {
+                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                }
             }
         })
     }
@@ -136,6 +138,7 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
             refreshData()
         }
     }

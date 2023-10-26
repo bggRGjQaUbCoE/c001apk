@@ -25,8 +25,8 @@ class TopicContentFragment : Fragment() {
     private lateinit var title: String
     private lateinit var mAdapter: TopicContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = 0
-    private var lastVisibleItemPosition = 0
+    private var firstCompletelyVisibleItemPosition = -1
+    private var lastVisibleItemPosition = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,9 +123,11 @@ class TopicContentFragment : Fragment() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                firstCompletelyVisibleItemPosition =
-                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if (viewModel.topicDataList.isNotEmpty()) {
+                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                }
             }
         })
     }
@@ -139,6 +141,7 @@ class TopicContentFragment : Fragment() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
             refreshData()
         }
     }

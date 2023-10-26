@@ -28,8 +28,8 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
     private val viewModel by lazy { ViewModelProvider(this)[HomeRankingViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = 0
-    private var lastVisibleItemPosition = 0
+    private var firstCompletelyVisibleItemPosition = -1
+    private var lastVisibleItemPosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,7 +83,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (lastVisibleItemPosition == viewModel.homeRankingList.size) {
-                        if (!viewModel.isEnd){
+                        if (!viewModel.isEnd) {
                             mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
@@ -95,9 +95,11 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                firstCompletelyVisibleItemPosition =
-                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if (viewModel.homeRankingList.isNotEmpty()) {
+                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                }
             }
         })
     }
@@ -111,6 +113,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
             refreshData()
         }
     }

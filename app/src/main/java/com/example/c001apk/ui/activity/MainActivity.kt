@@ -12,7 +12,7 @@ import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.meaasge.MessageFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
-import com.example.c001apk.ui.fragment.settings.SettingsPreferenceFragment
+import com.example.c001apk.ui.fragment.settings.SettingsFragment
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
@@ -44,7 +44,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     return when (position) {
                         0 -> HomeFragment()
                         1 -> MessageFragment()
-                        2 -> SettingsPreferenceFragment()
+                        2 -> SettingsFragment()
                         else -> HomeFragment()
                     }
                 }
@@ -115,17 +115,17 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     CheckResponse::class.java
                 )
 
-                if (login.status == null) {
+                if (login.data?.token != null) {
                     PrefManager.isLogin = true
-                    PrefManager.uid = login.data!!.uid
+                    PrefManager.uid = login.data.uid
                     PrefManager.username = URLEncoder.encode(login.data.username, "UTF-8")
                     PrefManager.token = login.data.token
                     PrefManager.userAvatar = login.data.userAvatar
-                } else {
+                } else if (login.message == "登录信息有误"){
                     PrefManager.isLogin = false
-                    //PrefManager.uid = ""
-                    //PrefManager.name = ""
-                    //PrefManager.token = ""
+                    PrefManager.uid = ""
+                    PrefManager.username = ""
+                    PrefManager.token = ""
                 }
 
                 val headers = response.headers

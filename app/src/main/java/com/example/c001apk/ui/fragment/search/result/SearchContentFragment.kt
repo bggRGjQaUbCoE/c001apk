@@ -22,8 +22,8 @@ class SearchContentFragment : Fragment() {
     private var type: String = ""
     private lateinit var mAdapter: SearchAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = 0
-    private var lastVisibleItemPosition = 0
+    private var firstCompletelyVisibleItemPosition = -1
+    private var lastVisibleItemPosition = -1
 
     companion object {
         @JvmStatic
@@ -124,9 +124,11 @@ class SearchContentFragment : Fragment() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                firstCompletelyVisibleItemPosition =
-                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if (viewModel.searchList.isNotEmpty()){
+                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                }
             }
         })
     }
@@ -140,6 +142,7 @@ class SearchContentFragment : Fragment() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
             refreshData()
         }
     }

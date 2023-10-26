@@ -66,4 +66,8 @@
     <string name="sms_token">验证码</string>
     <string name="loginPass">密码登录</string>
     <string name="no_more">没有更多了</string>
+    <string name="feedback">反馈</string>
+    <string name="about">关于</string>
+    <string name="about_view_source_code"><![CDATA[在 %1$s 查看源码]]></string>
+    <string name="others">其他</string>
 </resources>

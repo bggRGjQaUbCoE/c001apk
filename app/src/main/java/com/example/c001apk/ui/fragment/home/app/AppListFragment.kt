@@ -67,6 +67,7 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
             refreshData()
         }
     }
@@ -86,7 +87,7 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
             viewModel.appList.clear()
             viewModel.appList.addAll(it)
             mAdapter.notifyDataSetChanged()
-            binding.progress.isIndeterminate = false
+            binding.indicator.isIndeterminate = false
             binding.swipeRefresh.isRefreshing = false
         })
         viewModel.getItems(requireActivity())

@@ -3,12 +3,13 @@ package com.example.c001apk.ui.fragment.home.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class AppListViewModel : ViewModel() {
@@ -31,7 +32,11 @@ class AppListViewModel : ViewModel() {
                         appName = info.loadLabel(context.packageManager).toString()
                         packageName = info.packageName
                         val packageInfo = context.packageManager.getPackageInfo(info.packageName, 0)
-                        versionName = "${packageInfo.versionName}(${packageInfo.versionCode})"
+                        versionName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            "${packageInfo.versionName}(${packageInfo.longVersionCode})"
+                        else "${packageInfo.versionName}(${packageInfo.versionCode})"
+
+
                     }
 
                     newItems.add(appItem)

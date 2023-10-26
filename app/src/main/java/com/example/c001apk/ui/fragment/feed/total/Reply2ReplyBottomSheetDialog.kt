@@ -23,7 +23,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var uid: String
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var lastVisibleItemPosition = 0
+    private var lastVisibleItemPosition = -1
 
     companion object {
         fun newInstance(uid: String, id: String): Reply2ReplyBottomSheetDialog {
@@ -71,7 +71,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
                 viewModel.replyTotalList.addAll(data)
                 mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
+                mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
@@ -84,8 +86,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.replyTotalList.size - 1) {
+                    if (lastVisibleItemPosition == viewModel.replyTotalList.size) {
                         if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.getReplyTotal()
@@ -96,7 +99,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                if (viewModel.replyTotalList.isNotEmpty())
+                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
             }
         })
     }

@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
+import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.util.PrefManager
 import rikka.core.util.ResourceUtils
@@ -108,6 +110,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             activity?.recreate()
             true
         }
+
+        findPreference<Preference>("others")?.summary =
+            "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
 
     }
 
