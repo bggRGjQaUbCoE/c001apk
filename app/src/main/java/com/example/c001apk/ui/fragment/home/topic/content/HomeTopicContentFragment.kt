@@ -74,16 +74,17 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
                 if (viewModel.isRefreshing)
                     viewModel.topicDataList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore)
-                    for (element in data) {
-                        if (element.entityTemplate == "feed" || element.entityType == "topic" || element.entityType == "product")
+                    for (element in data)
+                        if (element.entityType == "topic" || element.entityType == "product")
                             viewModel.topicDataList.add(element)
-                    }
                 mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
+                mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.indicator.isIndeterminate = false
             viewModel.isLoadMore = false
             viewModel.isRefreshing = false
             binding.swipeRefresh.isRefreshing = false
@@ -96,9 +97,9 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.topicDataList.size - 1
-                    ) {
+                    if (lastVisibleItemPosition == viewModel.topicDataList.size) {
                         if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.getTopicData()
@@ -131,7 +132,7 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = HomeTopicContentAdapter(requireActivity(), viewModel.topicDataList)
+        mAdapter = HomeTopicContentAdapter(viewModel.topicDataList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter

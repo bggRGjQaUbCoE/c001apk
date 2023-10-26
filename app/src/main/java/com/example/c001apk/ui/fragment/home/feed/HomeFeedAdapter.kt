@@ -418,15 +418,14 @@ class HomeFeedAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position >= 0 && position < itemCount - 1)
-            when (homeFeedList[position].entityTemplate) {
-                "imageCarouselCard_1" -> 0
-                "iconLinkGridCard" -> 1
-                "feed" -> 2
-                "imageTextScrollCard" -> 3
-                else -> 4 //"iconMiniScrollCard"
-            }
-        else 5
+        return if (position == itemCount - 1) -1
+        else when (homeFeedList[position].entityTemplate) {
+            "imageCarouselCard_1" -> 0
+            "iconLinkGridCard" -> 1
+            "feed" -> 2
+            "imageTextScrollCard" -> 3
+            else -> 4 //"iconMiniScrollCard"
+        }
 
         /*return when (position) {
             itemCount - 1 -> 5

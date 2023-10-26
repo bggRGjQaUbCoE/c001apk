@@ -99,6 +99,8 @@ class TopicFragment : Fragment() {
         //binding.viewPager.setNoScroll(false)
         binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
         binding.tabLayout.setupWithViewPager(binding.viewPager)
+        binding.indicator.isIndeterminate = false
+        binding.topicLayout.visibility = View.VISIBLE
         //binding.tabLayout.getTabAt(1).isSelected = true
         //binding.viewPager.currentItem = 1
     }
@@ -133,7 +135,8 @@ class TopicFragment : Fragment() {
                     ), ThemeUtils.getThemeAttrColor(
                         requireActivity(),
                         R.attr.colorControlNormal
-                    ))
+                    )
+                )
                 .build()
         }
 

@@ -5,6 +5,32 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        val intro: String,
+        @SerializedName("tag_pics") val tagPics: List<String>,
+        val tabList: List<TabList>,
+        val displayUsername: String,
+        val cover: String,
+        val selectedTab: String,
+        val homeTabCardRows: List<HomeTabCardRows>,
+        @SerializedName("be_like_num") val beLikeNum: String,
+        val version:String,
+        val apkversioncode:String,
+        val apksize:String,
+        val lastupdate:String?,
+        val follow: String,
+        val level: String,
+        val fans: String,
+        val logintime: String,
+        val experience: Int,
+        val regdate: String,
+        @SerializedName("next_level_experience") val nextLevelExperience: Int,
+        val bio: String,
+        val feed: String,
+        val gender: Int,
+        val city: String,
+        val downnum: String,
+        val downCount: String,
+        val apkname: String,
         val entityType: String,
         val feedType: String,
         val entityTemplate: String,
@@ -39,8 +65,29 @@ data class HomeFeedResponse(val data: List<Data>) {
         val logo: String,
         @SerializedName("hot_num") val hotNum: String,
         @SerializedName("feed_comment_num") val feedCommentNum: String,
+        @SerializedName("hot_num_txt") val hotNumTxt: String,
+        @SerializedName("feed_comment_num_txt") val feedCommentNumTxt: String,
+        @SerializedName("commentnum_txt") val commentnumTxt: String,
+        val commentCount: String,
         @SerializedName("alias_title") val aliasTitle: String,
         val userAction: UserAction
+    )
+
+    data class TabList(
+        val title: String,
+        val url: String,
+        @SerializedName("page_name") val pageName: String,
+        val entityType: String,
+        val entityId: Int
+    )
+
+    data class HomeTabCardRows(
+        val entityType: String,
+        val entityTemplate: String,
+        val title: String,
+        val url: String,
+        val entities: List<Entities>,
+        val entityId: String,
     )
 
     data class UserAction(

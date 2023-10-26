@@ -2,8 +2,6 @@ package com.example.c001apk.ui.fragment.topic.content
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,6 +59,7 @@ class TopicContentFragment : Fragment() {
         super.onResume()
 
         if (viewModel.isInit) {
+            binding.indicator.isIndeterminate = true
             viewModel.isInit = false
             initData()
             initView()
@@ -93,7 +92,9 @@ class TopicContentFragment : Fragment() {
                     }
                 mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
+                mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
@@ -109,8 +110,9 @@ class TopicContentFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.topicDataList.size - 1) {
+                    if (lastVisibleItemPosition == viewModel.topicDataList.size) {
                         if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.getTopicData()

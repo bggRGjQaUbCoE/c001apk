@@ -113,6 +113,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.feedContentList.add(feed)
                 }
                 binding.indicator.isIndeterminate = false
+                if (PrefManager.isLogin)
+                    binding.reply.visibility = View.VISIBLE
+                else
+                    binding.reply.visibility = View.GONE
             } else {
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
@@ -142,10 +146,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 result.exceptionOrNull()?.printStackTrace()
             }
             mAdapter.notifyDataSetChanged()
-            if (PrefManager.isLogin)
-                binding.reply.visibility = View.VISIBLE
-            else
-                binding.reply.visibility = View.GONE
             viewModel.isLoadMore = false
             viewModel.isRefreshing = false
             binding.swipeRefresh.isRefreshing = false

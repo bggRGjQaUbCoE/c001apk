@@ -14,8 +14,8 @@ import android.widget.Toast
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityLoginBinding
+import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.LoginResponse
-import com.example.c001apk.logic.model.ProfileResponse
 import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.util.ActivityCollector
@@ -300,9 +300,9 @@ class LoginActivity : BaseActivity() {
                     )
                     .build()
                 val response = client.newCall(request).execute()
-                val profile: ProfileResponse = Gson().fromJson(
+                val profile: FeedContentResponse = Gson().fromJson(
                     response.body!!.string(),
-                    ProfileResponse::class.java
+                    FeedContentResponse::class.java
                 )
                 PrefManager.userAvatar = profile.data.userAvatar
                 PrefManager.level = profile.data.level

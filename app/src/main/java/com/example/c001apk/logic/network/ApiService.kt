@@ -1,13 +1,7 @@
 package com.example.c001apk.logic.network
 
-import com.example.c001apk.logic.model.AppResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.model.ProfileResponse
-import com.example.c001apk.logic.model.SearchTopicResponse
-import com.example.c001apk.logic.model.SearchUserResponse
-import com.example.c001apk.logic.model.TopicLayoutResponse
-import com.example.c001apk.logic.model.UserResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -36,26 +30,13 @@ interface ApiService {
     ): Call<HomeFeedResponse>
 
     @GET("/v6/search?showAnonymous=-1")
-    fun getSearchFeed(
+    fun getSearch(
         @Query("type") type: String,
         @Query("feedType") feedType: String,
         @Query("sort") sort: String,
         @Query("searchValue") keyWord: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
-
-    @GET("/v6/search?showAnonymous=-1&type=user")
-    fun getSearchUser(
-        @Query("searchValue") keyWord: String,
-        @Query("page") page: Int
-    ): Call<SearchUserResponse>
-
-    @GET("/v6/search?showAnonymous=-1")
-    fun getSearchTopic(
-        @Query("type") type: String,
-        @Query("searchValue") keyWord: String,
-        @Query("page") page: Int
-    ): Call<SearchTopicResponse>
 
     @GET("/v6/feed/replyList?listType=&discussMode=0&feedType=feed_reply&blockStatus=0&fromFeedAuthor=0")
     fun getReply2Reply(
@@ -76,7 +57,7 @@ interface ApiService {
     @GET("/v6/user/space")
     fun getUserSpace(
         @Query("uid") uid: String,
-    ): Call<UserResponse>
+    ): Call<FeedContentResponse>
 
     @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1&showDoing=0")
     fun getUserFeed(
@@ -87,7 +68,7 @@ interface ApiService {
     @GET("/v6/apk/detail?installed=1")
     fun getAppInfo(
         @Query("id") id: String,
-    ): Call<AppResponse>
+    ): Call<FeedContentResponse>
 
     @GET("/v6/page/dataList?title=%E7%82%B9%E8%AF%84&subTitle=")
     fun getAppComment(
@@ -99,7 +80,7 @@ interface ApiService {
     fun getTopicLayout(
         @Query("tag") tag: String
         //@Path("TAG") TAG: String
-    ): Call<TopicLayoutResponse>
+    ): Call<FeedContentResponse>
 
     @GET("/v6/page/dataList")
     fun getTopicData(
@@ -112,7 +93,7 @@ interface ApiService {
     @GET("/v6/user/profile")
     fun getProfile(
         @Query("uid") uid: String
-    ): Call<ProfileResponse>
+    ): Call<FeedContentResponse>
 
     @GET("/v6/page/dataList?/page?subTitle=")
     fun getFollowFeed(

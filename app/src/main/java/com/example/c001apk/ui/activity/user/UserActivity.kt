@@ -77,20 +77,19 @@ class UserActivity : BaseActivity() {
                 if (viewModel.isRefreh) viewModel.feedContentList.clear()
                 if (viewModel.isRefreh || viewModel.isLoadMore) {
                     for (element in feed) {
-                        if (element.feedType == "feed" || element.feedType == "feedArticle") viewModel.feedContentList.add(
-                            element
-                        )
+                        if (element.entityTemplate == "feed")
+                            viewModel.feedContentList.add(element)
                     }
                 }
                 mAdapter.notifyDataSetChanged()
-                binding.infoLayout.visibility = View.VISIBLE
-                binding.indicator.isIndeterminate = false
                 mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
                 mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.infoLayout.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = false
             binding.swipeRefresh.isRefreshing = false
             viewModel.isRefreh = false
         }

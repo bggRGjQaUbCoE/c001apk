@@ -40,16 +40,36 @@ materialThemeBuilder {
     generatePalette = true
 }
 
+val gitBuildNumber: Int by lazy {
+    val stdout = org.apache.commons.io.output.ByteArrayOutputStream()
+    rootProject.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+        standardOutput = stdout
+    }
+    stdout.toString().trim().toInt()
+}
+
+val gitBuildName: String by lazy {
+    val stdout = org.apache.commons.io.output.ByteArrayOutputStream()
+    rootProject.exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+        standardOutput = stdout
+    }
+    stdout.toString().trim()
+}
+
 android {
     namespace = "com.example.c001apk"
     compileSdk = 34
+
+
 
     defaultConfig {
         applicationId = "com.example.c001apk"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = gitBuildNumber
+        versionName = gitBuildName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -74,7 +94,8 @@ android {
         }*/
         val signConfig = signingConfigs.getByName("keyStore")
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -83,6 +104,7 @@ android {
         }
         getByName("debug") {
             isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -99,7 +121,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
-        //buildConfig = true
+        buildConfig = true
     }
     defaultConfig {
         ndk {

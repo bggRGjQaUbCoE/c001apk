@@ -21,24 +21,13 @@ object Network {
     suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
         api2Service.getFeedContentReply(id, discussMode, listType, page).await()
 
-    suspend fun getSearchFeed(
+    suspend fun getSearch(
         type: String,
         feedType: String,
         sort: String,
         keyWord: String,
         page: Int
-    ) = apiService.getSearchFeed(type, feedType, sort, keyWord, page).await()
-
-    suspend fun getSearchUser(
-        keyWord: String,
-        page: Int
-    ) = apiService.getSearchUser(keyWord, page).await()
-
-    suspend fun getSearchTopic(
-        type: String,
-        keyWord: String,
-        page: Int
-    ) = apiService.getSearchTopic(type, keyWord, page).await()
+    ) = apiService.getSearch(type, feedType, sort, keyWord, page).await()
 
     suspend fun getReply2Reply(
         id: String,

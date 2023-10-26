@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.fragment.topic.content
+package com.example.c001apk.ui.fragment.search.result
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
+import com.example.c001apk.ui.activity.app.AppActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.topic.TopicActivity
 import com.example.c001apk.ui.activity.user.UserActivity
@@ -34,8 +35,9 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.regex.Pattern
 
-class TopicContentAdapter(
+class SearchAdapter(
     private val mContext: Context,
+    private val type: String,
     private val searchList: List<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -51,7 +53,7 @@ class TopicContentAdapter(
         notifyDataSetChanged()
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class FeedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val uname: TextView = view.findViewById(R.id.uname)
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
@@ -63,7 +65,16 @@ class TopicContentAdapter(
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
 
-    class TopicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class AppViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.title)
+        val hotNum: TextView = view.findViewById(R.id.hotNum)
+        val commentNum: TextView = view.findViewById(R.id.commentNum)
+        val logo: ShapeableImageView = view.findViewById(R.id.logo)
+        var entityType = ""
+        var apkName = ""
+    }
+
+    class ProductTopicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
         val hotNum: TextView = view.findViewById(R.id.hotNum)
         val commentNum: TextView = view.findViewById(R.id.commentNum)
@@ -72,19 +83,30 @@ class TopicContentAdapter(
         var aliasTitle = ""
     }
 
+    class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val uname: TextView = view.findViewById(R.id.uname)
+        val follow: TextView = view.findViewById(R.id.follow)
+        val fans: TextView = view.findViewById(R.id.fans)
+        val act: TextView = view.findViewById(R.id.act)
+        val avatar: ImageView = view.findViewById(R.id.avatar)
+        var uid = ""
+    }
+
     class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
         val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
         val noMore: TextView = view.findViewById(R.id.noMore)
     }
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+
         return when (viewType) {
             0 -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_search_feed, parent, false)
-                val viewHolder = ViewHolder(view)
+                val viewHolder = FeedViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
@@ -128,7 +150,33 @@ class TopicContentAdapter(
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_search_topic, parent, false)
-                val viewHolder = TopicViewHolder(view)
+                val viewHolder = AppViewHolder(view)
+                viewHolder.itemView.setOnClickListener {
+                    val intent = Intent(parent.context, AppActivity::class.java)
+                    intent.putExtra("id", viewHolder.apkName)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder
+            }
+
+            3 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_search_user, parent, false)
+                val viewHolder = UserViewHolder(view)
+                viewHolder.itemView.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder
+            }
+
+            2 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_search_topic, parent, false)
+                val viewHolder = ProductTopicViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     val intent = Intent(parent.context, TopicActivity::class.java)
                     intent.putExtra(
@@ -148,23 +196,15 @@ class TopicContentAdapter(
                 FootViewHolder(view)
             }
 
-
         }
 
     }
 
     override fun getItemCount() = searchList.size + 1
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position == itemCount - 1) -1
-        else when (searchList[position].entityType) {
-            "feed" -> 0
-            else -> 1 //"product"
-        }
-    }
-
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
         when (holder) {
 
             is FootViewHolder -> {
@@ -195,7 +235,7 @@ class TopicContentAdapter(
                 }
             }
 
-            is ViewHolder -> {
+            is FeedViewHolder -> {
                 val feed = searchList[position]
                 holder.id = feed.id
                 holder.uname.text = feed.username
@@ -303,7 +343,26 @@ class TopicContentAdapter(
                 } else holder.recyclerView.visibility = View.GONE
             }
 
-            is TopicViewHolder -> {
+            is AppViewHolder -> {
+                val app = searchList[position]
+                holder.apkName = app.apkname
+                holder.title.text = app.title
+                holder.commentNum.text = app.commentCount + "讨论"
+                holder.hotNum.text = app.downCount + "下载"
+                ImageShowUtil.showIMG(holder.logo, app.logo)
+            }
+
+            is UserViewHolder -> {
+                val user = searchList[position]
+                holder.uid = user.uid
+                holder.uname.text = user.username
+                holder.follow.text = "${user.follow}关注"
+                holder.fans.text = "${user.fans}粉丝"
+                holder.act.text = PubDateUtil.time(user.logintime) + "活跃"
+                ImageShowUtil.showAvatar(holder.avatar, user.userAvatar)
+            }
+
+            is ProductTopicViewHolder -> {
                 val topic = searchList[position]
                 holder.title.text = topic.title
                 holder.hotNum.text = topic.hotNumTxt + "热度"
@@ -317,6 +376,18 @@ class TopicContentAdapter(
             }
         }
 
+
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == itemCount - 1) -1
+        else when (type) {
+            "feed" -> 0
+            "apk" -> 1
+            "product" -> 2
+            "user" -> 3
+            else -> 2 // "topic"
+        }
     }
 
 }
