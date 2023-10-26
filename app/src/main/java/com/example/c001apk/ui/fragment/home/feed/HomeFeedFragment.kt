@@ -5,11 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.ImagePreview
@@ -23,8 +21,6 @@ import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.TokenDeviceUtils
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
 
@@ -63,26 +59,23 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
                             || element.entityTemplate == "iconMiniScrollCard"
                             || element.entityTemplate == "iconLinkGridCard"
                             || element.entityTemplate == "imageCarouselCard_1"
-                            || element.entityTemplate == "imageTextScrollCard")
-                        /*if (element.entityTemplate != "sponsorCard"
-                            && element.entityTemplate != "refreshCard"
-                            && element.entityTemplate != "listCard"
-                            )*/
+                            || element.entityTemplate == "imageTextScrollCard"
+                        )
                             viewModel.homeFeedList.add(element)
                     }
                     viewModel.lastItem = feed[feed.size - 1].entityId
                 }
                 mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-                Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
+                mAdapter.setLoadState(mAdapter.LOADING_END)
+                viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
+            binding.indicator.isIndeterminate = false
         }
 
     }
@@ -92,11 +85,14 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.homeFeedList.size - 1) {
-                        viewModel.isLoadMore = true
-                        viewModel.page++
-                        viewModel.firstLaunch = 0
-                        viewModel.getHomeFeed()
+                    if (lastVisibleItemPosition == viewModel.homeFeedList.size) {
+                        if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
+                            viewModel.isLoadMore = true
+                            viewModel.page++
+                            viewModel.firstLaunch = 0
+                            viewModel.getHomeFeed()
+                        }
                     }
                 }
             }
@@ -129,16 +125,13 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
+        viewModel.isEnd = false
         viewModel.page = 1
         viewModel.firstLaunch = 1
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         viewModel.installTime = TokenDeviceUtils.getLastingInstallTime(requireActivity())
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getHomeFeed()
-        }
+        viewModel.getHomeFeed()
     }
 
     private fun initView() {
@@ -154,11 +147,13 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickList
     }
 
     override fun onReturnTop() {
-        if (HomeFragment.current == 2){
-            if (firstCompletelyVisibleItemPosition == 0)
+        if (HomeFragment.current == 2) {
+            if (firstCompletelyVisibleItemPosition == 0) {
+                binding.swipeRefresh.isRefreshing = true
                 refreshData()
-            else {
+            } else {
                 binding.recyclerView.scrollToPosition(0)
+                binding.swipeRefresh.isRefreshing = true
                 refreshData()
             }
         }

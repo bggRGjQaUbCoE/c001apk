@@ -20,6 +20,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/appLayout"
+                android:visibility="invisible"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"

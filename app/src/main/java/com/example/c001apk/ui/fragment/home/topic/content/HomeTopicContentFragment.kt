@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -16,8 +15,6 @@ import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.util.LinearItemDecoration
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private const val URL = "url"
 private const val TITLE = "title"
@@ -82,16 +79,14 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
                             viewModel.topicDataList.add(element)
                     }
                 mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.isIndeterminate = false
             } else {
                 viewModel.isEnd = true
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
                 result.exceptionOrNull()?.printStackTrace()
             }
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
         }
 
     }
@@ -152,16 +147,12 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         viewModel.url = url
         viewModel.title = title
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getTopicData()
-        }
+        viewModel.getTopicData()
     }
 
     override fun onResume() {

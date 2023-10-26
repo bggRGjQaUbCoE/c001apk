@@ -50,9 +50,9 @@ class ReplyItemDecoration(private val space: Int) :
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        val position: Int = parent.getChildAdapterPosition(view)
-        if (position != 0)
-            outRect.top = space
+        outRect.left = space
+        outRect.right = space
+        outRect.bottom = space
     }
 
 }

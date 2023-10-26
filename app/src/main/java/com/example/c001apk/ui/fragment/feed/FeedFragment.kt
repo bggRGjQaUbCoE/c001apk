@@ -16,7 +16,6 @@ import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -27,10 +26,9 @@ import com.example.c001apk.ui.fragment.feed.total.Reply2ReplyBottomSheetDialog
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -39,7 +37,6 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
-import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 
@@ -109,12 +106,13 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (feed != null) {
                 if (viewModel.isRefreshing) {
                     viewModel.feedContentList.clear()
+                    mAdapter.setLoadState(mAdapter.LOADING)
                     viewModel.getFeedReply()
                 }
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     viewModel.feedContentList.add(feed)
                 }
-                //mAdapter.notifyDataSetChanged()
+                binding.indicator.isIndeterminate = false
             } else {
                 viewModel.isEnd = true
                 viewModel.isLoadMore = false
@@ -137,26 +135,20 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             viewModel.feedReplyList.add(element)
                     }
                 }
-                mAdapter.notifyDataSetChanged()
-                if (PrefManager.isLogin)
-                    binding.reply.visibility = View.VISIBLE
-                else
-                    binding.reply.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
-                mAdapter.notifyDataSetChanged()
-                if (PrefManager.isLogin)
-                    binding.reply.visibility = View.VISIBLE
-                else
-                    binding.reply.visibility = View.GONE
                 viewModel.isEnd = true
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                mAdapter.setLoadState(mAdapter.LOADING_END)
                 result.exceptionOrNull()?.printStackTrace()
             }
+            mAdapter.notifyDataSetChanged()
+            if (PrefManager.isLogin)
+                binding.reply.visibility = View.VISIBLE
+            else
+                binding.reply.visibility = View.GONE
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
         }
 
     }
@@ -167,15 +159,18 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         bottomSheetDialog = BottomSheetDialog(requireActivity())
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
+        val editText: EditText = view.findViewById(R.id.editText)
+        val publish: TextView = view.findViewById(R.id.publish)
+
         bottomSheetDialog.apply {
             setContentView(view)
             setCancelable(false)
             setCanceledOnTouchOutside(true)
             show()
+            window?.apply {
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
-
-        val editText: EditText = view.findViewById(R.id.editText)
-        val publish: TextView = view.findViewById(R.id.publish)
 
         editText.hint = "回复: $uname"
         editText.isFocusable = true
@@ -278,8 +273,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.feedReplyList.size) {
+                    if (lastVisibleItemPosition == viewModel.feedReplyList.size + 1) {
                         if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.getFeedReply()
@@ -293,6 +289,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
                 firstCompletelyVisibleItemPosition =
                     mLayoutManager.findFirstCompletelyVisibleItemPosition()
+
+                /*if (dy > 0 && binding.reply.visibility == View.VISIBLE) {
+                    binding.reply.hide()
+                } else if (dy < 0 && binding.reply.visibility != View.VISIBLE) {
+                    binding.reply.show()
+                }*/
+
+
             }
         })
     }
@@ -318,15 +322,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
         viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getFeed()
-        }
+        viewModel.getFeed()
     }
 
     private fun initView() {
@@ -358,10 +358,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
     }
 
+    @SuppressLint("InflateParams", "NotifyDataSetChanged")
     override fun onShowTotalReply(uid: String, id: String) {
-        val mBottomSheetDialogFragment: Reply2ReplyBottomSheetDialog =
-            Reply2ReplyBottomSheetDialog.newInstance(uid, id)
-
+        val mBottomSheetDialogFragment = Reply2ReplyBottomSheetDialog.newInstance(uid, id)
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 

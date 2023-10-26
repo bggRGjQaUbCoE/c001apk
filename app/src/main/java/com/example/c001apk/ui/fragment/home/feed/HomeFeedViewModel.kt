@@ -8,6 +8,7 @@ import com.example.c001apk.logic.network.Repository
 
 class HomeFeedViewModel : ViewModel() {
 
+    var isEnd = false
     val homeFeedList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true

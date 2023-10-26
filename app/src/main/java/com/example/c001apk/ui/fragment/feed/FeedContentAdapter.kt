@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -30,6 +31,7 @@ import com.example.c001apk.util.SpacesItemDecoration
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.regex.Pattern
 
 
@@ -39,6 +41,20 @@ class FeedContentAdapter(
     private var replyList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val TYPE_CONTENT = 0
+    private val TYPE_FOOTER = 1
+    private val TYPE_REPLY = 2
+    private var loadState = 2
+    val LOADING = 1
+    val LOADING_COMPLETE = 2
+    val LOADING_END = 3
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setLoadState(loadState: Int) {
+        this.loadState = loadState
+        notifyDataSetChanged()
+    }
 
     private var iOnTotalReplyClickListener: IOnTotalReplyClickListener? = null
 
@@ -73,9 +89,15 @@ class FeedContentAdapter(
         var uid = ""
     }
 
+    class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
+        val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
+        val noMore: TextView = view.findViewById(R.id.noMore)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            0 -> {
+            TYPE_CONTENT -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_feed_content, parent, false)
@@ -103,6 +125,12 @@ class FeedContentAdapter(
                     parent.context.startActivity(intent)
                 }
                 viewHolder
+            }
+
+            TYPE_FOOTER -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_rv_footer, parent, false)
+                FootViewHolder(view)
             }
 
             else -> {
@@ -148,11 +176,39 @@ class FeedContentAdapter(
         }
     }
 
-    override fun getItemCount() = replyList.size + 1
+    override fun getItemCount() = replyList.size + 2
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+            is FootViewHolder -> {
+                when (loadState) {
+                    LOADING -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.VISIBLE
+                        holder.indicator.isIndeterminate = true
+                        holder.noMore.visibility = View.GONE
+
+                    }
+
+                    LOADING_COMPLETE -> {
+                        holder.footerLayout.visibility = View.GONE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.GONE
+                    }
+
+                    LOADING_END -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.VISIBLE
+                    }
+
+                    else -> {}
+                }
+            }
+
             is FeedContentViewHolder -> {
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
@@ -250,7 +306,7 @@ class FeedContentAdapter(
                         }
                     }
 
-                    if (feed.data.picArr.isNotEmpty()) {
+                    if (feed.data.picArr?.isNotEmpty() == true) {
                         holder.recyclerView.visibility = View.VISIBLE
                         val mAdapter = FeedContentPicAdapter(feed.data.picArr)
                         val count =
@@ -279,121 +335,128 @@ class FeedContentAdapter(
             }
 
             is FeedContentReplyViewHolder -> {
-                val reply = replyList[position - 1]
-                holder.id = reply.id
-                holder.uid = reply.uid
-                holder.uname.text = reply.username
+                if (replyList.isNotEmpty()) {
+                    val reply = replyList[position - 1]
+                    holder.id = reply.id
+                    holder.uid = reply.uid
+                    holder.uname.text = reply.username
 
-                val mess = Html.fromHtml(
-                    StringBuilder(reply.message).append(" ").toString().replace("\n", " <br />"),
-                    Html.FROM_HTML_MODE_COMPACT
-                )
-                val builder = SpannableStringBuilder(mess)
-                val pattern = Pattern.compile("\\[[^\\]]+\\]")
-                val matcher = pattern.matcher(builder)
-                val urls = builder.getSpans(
-                    0, mess.length,
-                    URLSpan::class.java
-                )
-                for (url in urls) {
-                    val myURLSpan = MyURLSpan(mContext, null, url.url, null)
-                    val start = builder.getSpanStart(url)
-                    val end = builder.getSpanEnd(url)
-                    val flags = builder.getSpanFlags(url)
-                    builder.setSpan(myURLSpan, start, end, flags)
-                    builder.removeSpan(url)
+                    val mess = Html.fromHtml(
+                        StringBuilder(reply.message).append(" ").toString()
+                            .replace("\n", " <br />"),
+                        Html.FROM_HTML_MODE_COMPACT
+                    )
+                    val builder = SpannableStringBuilder(mess)
+                    val pattern = Pattern.compile("\\[[^\\]]+\\]")
+                    val matcher = pattern.matcher(builder)
+                    val urls = builder.getSpans(
+                        0, mess.length,
+                        URLSpan::class.java
+                    )
+                    for (url in urls) {
+                        val myURLSpan = MyURLSpan(mContext, null, url.url, null)
+                        val start = builder.getSpanStart(url)
+                        val end = builder.getSpanEnd(url)
+                        val flags = builder.getSpanFlags(url)
+                        builder.setSpan(myURLSpan, start, end, flags)
+                        builder.removeSpan(url)
+                    }
+                    holder.message.text = builder
+                    holder.message.movementMethod = LinkMovementMethod.getInstance()
+                    while (matcher.find()) {
+                        val group = matcher.group()
+                        if (EmojiUtil.getEmoji(group) != -1) {
+                            val emoji: Drawable =
+                                mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                            emoji.setBounds(
+                                0,
+                                0,
+                                (holder.message.textSize * 1.3).toInt(),
+                                (holder.message.textSize * 1.3).toInt()
+                            )
+                            val imageSpan = CenteredImageSpan(emoji)
+                            builder.setSpan(
+                                imageSpan,
+                                matcher.start(),
+                                matcher.end(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                            holder.message.text = builder
+                        }
+                    }
+
+                    holder.pubDate.text = PubDateUtil.time(reply.dateline)
+                    val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                    drawable1.setBounds(
+                        0,
+                        0,
+                        holder.pubDate.textSize.toInt(),
+                        holder.pubDate.textSize.toInt()
+                    )
+                    holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
+                    holder.like.text = reply.likenum
+                    val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                    drawableLike.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                    holder.reply.text = reply.replynum
+                    val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
+                    drawableReply.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    holder.reply.setCompoundDrawables(drawableReply, null, null, null)
+                    ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
+
+                    if (reply.replyRows.isNotEmpty()) {
+                        holder.replyLayout.visibility = View.VISIBLE
+                        val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
+                        val mLayoutManager = LinearLayoutManager(mContext)
+                        //val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                        holder.recyclerView.apply {
+                            adapter = mAdapter
+                            layoutManager = mLayoutManager
+                            //if (itemDecorationCount == 0) addItemDecoration(ReplyItemDecoration(space))
+                        }
+                    } else holder.replyLayout.visibility = View.GONE
+
+                    if (reply.replyRowsMore != 0) {
+                        holder.totalReply.visibility = View.VISIBLE
+                        val count = reply.replyRowsMore + reply.replyRows.size
+                        holder.totalReply.text = "查看更多回复($count)"
+                    } else
+                        holder.totalReply.visibility = View.GONE
+
+                    if (!reply.picArr.isNullOrEmpty()) {
+                        holder.picRecyclerView.visibility = View.VISIBLE
+                        val mAdapter = FeedContentPicAdapter(reply.picArr)
+                        val count =
+                            if (reply.picArr.size < 3) reply.picArr.size
+                            else 3
+                        val mLayoutManager = GridLayoutManager(mContext, count)
+                        holder.picRecyclerView.apply {
+                            adapter = mAdapter
+                            layoutManager = mLayoutManager
+                        }
+                    } else holder.picRecyclerView.visibility = View.GONE
                 }
-                holder.message.text = builder
-                holder.message.movementMethod = LinkMovementMethod.getInstance()
-                while (matcher.find()) {
-                    val group = matcher.group()
-                    if (EmojiUtil.getEmoji(group) != -1) {
-                        val emoji: Drawable =
-                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                        emoji.setBounds(
-                            0,
-                            0,
-                            (holder.message.textSize * 1.3).toInt(),
-                            (holder.message.textSize * 1.3).toInt()
-                        )
-                        val imageSpan = CenteredImageSpan(emoji)
-                        builder.setSpan(
-                            imageSpan,
-                            matcher.start(),
-                            matcher.end(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        holder.message.text = builder
-                    }
-                }
-
-                holder.pubDate.text = PubDateUtil.time(reply.dateline)
-                val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
-                drawable1.setBounds(
-                    0,
-                    0,
-                    holder.pubDate.textSize.toInt(),
-                    holder.pubDate.textSize.toInt()
-                )
-                holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
-                holder.like.text = reply.likenum
-                val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
-                drawableLike.setBounds(
-                    0,
-                    0,
-                    holder.like.textSize.toInt(),
-                    holder.like.textSize.toInt()
-                )
-                holder.like.setCompoundDrawables(drawableLike, null, null, null)
-                holder.reply.text = reply.replynum
-                val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
-                drawableReply.setBounds(
-                    0,
-                    0,
-                    holder.like.textSize.toInt(),
-                    holder.like.textSize.toInt()
-                )
-                holder.reply.setCompoundDrawables(drawableReply, null, null, null)
-                ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
-
-                if (reply.replyRows.isNotEmpty()) {
-                    holder.replyLayout.visibility = View.VISIBLE
-                    val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
-                    val mLayoutManager = LinearLayoutManager(mContext)
-                    //val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
-                    holder.recyclerView.apply {
-                        adapter = mAdapter
-                        layoutManager = mLayoutManager
-                        //if (itemDecorationCount == 0) addItemDecoration(ReplyItemDecoration(space))
-                    }
-                } else holder.replyLayout.visibility = View.GONE
-
-                if (reply.replyRowsMore != 0) {
-                    holder.totalReply.visibility = View.VISIBLE
-                    val count = reply.replyRowsMore + reply.replyRows.size
-                    holder.totalReply.text = "查看更多回复($count)"
-                } else
-                    holder.totalReply.visibility = View.GONE
-
-                if (reply.picArr != null && reply.picArr.isNotEmpty()) {
-                    holder.picRecyclerView.visibility = View.VISIBLE
-                    val mAdapter = FeedContentPicAdapter(reply.picArr)
-                    val count =
-                        if (reply.picArr.size < 3) reply.picArr.size
-                        else 3
-                    val mLayoutManager = GridLayoutManager(mContext, count)
-                    holder.picRecyclerView.apply {
-                        adapter = mAdapter
-                        layoutManager = mLayoutManager
-                    }
-                } else holder.picRecyclerView.visibility = View.GONE
             }
         }
 
     }
 
     override fun getItemViewType(position: Int): Int {
-        return position
+        return when (position) {
+            0 -> TYPE_CONTENT
+            itemCount - 1 -> TYPE_FOOTER
+            else -> TYPE_REPLY
+        }
     }
 
 }

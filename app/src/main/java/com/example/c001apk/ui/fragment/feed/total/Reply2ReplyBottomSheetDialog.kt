@@ -70,6 +70,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
                     viewModel.replyTotalList.clear()
                 viewModel.replyTotalList.addAll(data)
                 mAdapter.notifyDataSetChanged()
+                binding.indicator.isIndeterminate = false
             } else {
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
@@ -129,7 +130,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
         super.onStart()
         val view: FrameLayout =
             dialog?.findViewById(com.google.android.material.R.id.design_bottom_sheet)!!
+        view.layoutParams.height = -1
+        view.layoutParams.width = -1
         val behavior = BottomSheetBehavior.from(view)
+        //behavior.state = BottomSheetBehavior.STATE_EXPANDED
         behavior.peekHeight = windowHeight
     }
 

@@ -95,7 +95,7 @@ class Reply2ReplyTotalAdapter(
             else
                 """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>"""
         val name = Html.fromHtml(
-            text.replace("\n", "<br />"),
+            text.replace("\n", " <br />"),
             Html.FROM_HTML_MODE_COMPACT
         )
         val nameBuilder = SpannableStringBuilder(name)
@@ -115,7 +115,7 @@ class Reply2ReplyTotalAdapter(
         holder.uname.movementMethod = LinkMovementMethod.getInstance()
 
         val mess = Html.fromHtml(
-            reply.message.replace("\n", "<br />"),
+            reply.message.replace("\n", " <br />"),
             Html.FROM_HTML_MODE_COMPACT
         )
         val builder = SpannableStringBuilder(mess)
@@ -186,7 +186,7 @@ class Reply2ReplyTotalAdapter(
         holder.reply.setCompoundDrawables(drawableReply, null, null, null)
         ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-        if (reply.picArr != null && reply.picArr.isNotEmpty()) {
+        if (!reply.picArr.isNullOrEmpty()) {
             holder.picRecyclerView.visibility = View.VISIBLE
             val mAdapter = FeedContentPicAdapter(reply.picArr)
             val count =

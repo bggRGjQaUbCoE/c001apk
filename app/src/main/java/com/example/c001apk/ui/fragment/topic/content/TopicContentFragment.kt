@@ -2,20 +2,19 @@ package com.example.c001apk.ui.fragment.topic.content
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.util.LinearItemDecoration
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private const val URL = "url"
 private const val TITLE = "title"
@@ -93,16 +92,14 @@ class TopicContentFragment : Fragment() {
                             viewModel.topicDataList.add(element)
                     }
                 mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.isIndeterminate = false
             } else {
                 viewModel.isEnd = true
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
                 result.exceptionOrNull()?.printStackTrace()
             }
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
         }
 
     }
@@ -112,8 +109,7 @@ class TopicContentFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.topicDataList.size - 1
-                    ) {
+                    if (lastVisibleItemPosition == viewModel.topicDataList.size - 1) {
                         if (!viewModel.isEnd) {
                             viewModel.isLoadMore = true
                             viewModel.page++
@@ -163,16 +159,12 @@ class TopicContentFragment : Fragment() {
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         viewModel.url = url
         viewModel.title = title
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getTopicData()
-        }
+        viewModel.getTopicData()
     }
 
 }

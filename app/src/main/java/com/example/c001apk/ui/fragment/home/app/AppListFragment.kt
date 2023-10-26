@@ -2,6 +2,8 @@ package com.example.c001apk.ui.fragment.home.app
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +19,6 @@ import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.util.LinearItemDecoration
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class AppListFragment : Fragment(), IOnBottomClickListener {
 
@@ -122,10 +119,7 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
-        CoroutineScope(Dispatchers.Default).launch {
-            delay(500)
-            viewModel.getItems(requireActivity())
-        }
+        viewModel.getItems(requireActivity())
     }
 
 }

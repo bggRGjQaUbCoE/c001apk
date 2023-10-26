@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/footerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="86dp">
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/noMore"
+        android:layout_width="match_parent"
+        android:layout_height="86dp"
+        android:gravity="center"
+        android:text="@string/no_more"
+        android:textColor="@color/gray_bd"
+        android:textSize="16sp" />
+
+</FrameLayout>

@@ -85,9 +85,8 @@ class TopicFragment : Fragment() {
                     }
                     initView(tabSelected)
                 }
-                binding.progress.isIndeterminate = false
+                binding.indicator.isIndeterminate = false
             } else {
-                //binding.progress.isIndeterminate = false
                 result.exceptionOrNull()?.printStackTrace()
             }
         }

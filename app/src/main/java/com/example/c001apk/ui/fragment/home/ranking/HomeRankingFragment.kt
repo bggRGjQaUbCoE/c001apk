@@ -5,11 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.ImagePreview
@@ -23,8 +21,6 @@ import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
 
@@ -67,16 +63,16 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
                     viewModel.lastItem = feed[feed.size - 1].entityId
                 }
                 mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-                Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
+                mAdapter.setLoadState(mAdapter.LOADING_END)
+                viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
         }
 
     }
@@ -86,10 +82,13 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.homeRankingList.size - 1) {
-                        viewModel.isLoadMore = true
-                        viewModel.page++
-                        viewModel.getHomeRanking()
+                    if (lastVisibleItemPosition == viewModel.homeRankingList.size) {
+                        if (!viewModel.isEnd){
+                            mAdapter.setLoadState(mAdapter.LOADING)
+                            viewModel.isLoadMore = true
+                            viewModel.page++
+                            viewModel.getHomeRanking()
+                        }
                     }
                 }
             }
@@ -122,14 +121,11 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
+        viewModel.isEnd = false
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getHomeRanking()
-        }
+        viewModel.getHomeRanking()
     }
 
     private fun initView() {
@@ -146,9 +142,11 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickL
 
     override fun onReturnTop() {
         if (current == 3) {
-            if (firstCompletelyVisibleItemPosition == 0)
+            if (firstCompletelyVisibleItemPosition == 0) {
+                binding.swipeRefresh.isRefreshing = true
                 refreshData()
-            else {
+            } else {
+                binding.swipeRefresh.isRefreshing = true
                 binding.recyclerView.scrollToPosition(0)
                 refreshData()
             }

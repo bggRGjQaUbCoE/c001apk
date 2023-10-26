@@ -9,7 +9,7 @@ data class AppResponse(val data: Data){
         val version:String,
         val apkversioncode:String,
         val apksize:String,
-        val lastupdate:String,
+        val lastupdate:String?,
     )
 
 }

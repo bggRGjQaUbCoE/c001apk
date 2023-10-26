@@ -50,4 +50,11 @@
         android:visibility="invisible"
         tools:ignore="ContentDescription" />
 
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

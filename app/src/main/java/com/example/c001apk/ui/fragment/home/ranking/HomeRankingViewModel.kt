@@ -8,6 +8,7 @@ import com.example.c001apk.logic.network.Repository
 
 class HomeRankingViewModel : ViewModel() {
 
+    var isEnd = false
     var isInit = true
     val homeRankingList = ArrayList<HomeFeedResponse.Data>()
 

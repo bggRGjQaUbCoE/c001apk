@@ -33,7 +33,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userAvatar: String,
         val infoHtml: String,
         val title: String,
-        val picArr: List<String>,
+        val picArr: List<String>?,
         val replyRows: List<ReplyRows>,
         val replyRowsMore: Int,
         val logo: String,

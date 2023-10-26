@@ -7,17 +7,13 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
-import android.text.SpannableString
 import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
 import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
@@ -90,117 +86,73 @@ class Reply2ReplyAdapter(
             }
         }
 
-        if (reply.ruid == uid) {
-            val uCount = reply.username.length
-            val text =
-                //"""<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
+        val text =
+            if (reply.ruid == uid) {
                 if (reply.pic == "")
                     """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
-                else
-                    """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr.size})</a> """
-            val mess = Html.fromHtml(
-                text.replace("\n", "<br />"),
-                Html.FROM_HTML_MODE_COMPACT
-            )
-            val builder = SpannableStringBuilder(mess)
-            /* val foregroundColorSpan = ForegroundColorSpan(
-                 ThemeUtils.getThemeAttrColor(
-                     mContext,
-                     com.google.android.material.R.attr.colorPrimary
-                 )
-             )*/
-            //builder.setSpan(foregroundColorSpan, 0, uCount, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            val pattern = Pattern.compile("\\[[^\\]]+\\]")
-            val matcher = pattern.matcher(builder)
-            val urls = builder.getSpans(
-                0, text.length,
-                URLSpan::class.java
-            )
-            for (url in urls) {
-                val myURLSpan = MyURLSpan(mContext, null, url.url, urlList)
-                val start = builder.getSpanStart(url)
-                val end = builder.getSpanEnd(url)
-                val flags = builder.getSpanFlags(url)
-                builder.setSpan(myURLSpan, start, end, flags)
-                builder.removeSpan(url)
-            }
-            holder.reply.text = builder
-            holder.reply.movementMethod = LinkMovementMethod.getInstance()
-            while (matcher.find()) {
-                val group = matcher.group()
-                if (EmojiUtil.getEmoji(group) != -1) {
-                    val emoji: Drawable =
-                        mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                    emoji.setBounds(
-                        0,
-                        0,
-                        (holder.reply.textSize * 1.3).toInt(),
-                        (holder.reply.textSize * 1.3).toInt()
-                    )
-                    val imageSpan = CenteredImageSpan(emoji)
-                    builder.setSpan(
-                        imageSpan,
-                        matcher.start(),
-                        matcher.end(),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    holder.reply.text = builder
+                else {
+                    if (reply.message == "[图片]")
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a> """
+                    else
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr.size})</a> """
                 }
-            }
-        } else {
-            val text =
-                //"""<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
+            } else {
                 if (reply.pic == "")
                     """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
-                else
-                    """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr.size})</a> """
-
-            val mess = Html.fromHtml(
-                text.replace("\n", "<br />"),
-                Html.FROM_HTML_MODE_COMPACT
-            )
-            val builder = SpannableStringBuilder(mess)
-            val pattern = Pattern.compile("\\[[^\\]]+\\]")
-            val matcher = pattern.matcher(builder)
-            val urls = builder.getSpans(
-                0, text.length,
-                URLSpan::class.java
-            )
-            for (url in urls) {
-                val myURLSpan = MyURLSpan(mContext, null, url.url, urlList)
-                val start = builder.getSpanStart(url)
-                val end = builder.getSpanEnd(url)
-                val flags = builder.getSpanFlags(url)
-                builder.setSpan(myURLSpan, start, end, flags)
-                builder.removeSpan(url)
-            }
-            holder.reply.text = builder
-            holder.reply.movementMethod = LinkMovementMethod.getInstance()
-            while (matcher.find()) {
-                val group = matcher.group()
-                if (EmojiUtil.getEmoji(group) != -1) {
-                    val emoji: Drawable =
-                        mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                    emoji.setBounds(
-                        0,
-                        0,
-                        (holder.reply.textSize * 1.3).toInt(),
-                        (holder.reply.textSize * 1.3).toInt()
-                    )
-                    val imageSpan = CenteredImageSpan(emoji)
-                    builder.setSpan(
-                        imageSpan,
-                        matcher.start(),
-                        matcher.end(),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    holder.reply.text = builder
+                else {
+                    if (reply.message == "[图片]")
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a> """
+                    else
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr.size})</a> """
                 }
             }
+
+        val mess = Html.fromHtml(
+            text.replace("\n", " <br />"),
+            Html.FROM_HTML_MODE_COMPACT
+        )
+        val builder = SpannableStringBuilder(mess)
+        val pattern = Pattern.compile("\\[[^\\]]+\\]")
+        val matcher = pattern.matcher(builder)
+        val urls = builder.getSpans(
+            0, text.length,
+            URLSpan::class.java
+        )
+        for (url in urls) {
+            val myURLSpan = MyURLSpan(mContext, null, url.url, urlList)
+            val start = builder.getSpanStart(url)
+            val end = builder.getSpanEnd(url)
+            val flags = builder.getSpanFlags(url)
+            builder.setSpan(myURLSpan, start, end, flags)
+            builder.removeSpan(url)
         }
+        holder.reply.text = builder
+        holder.reply.movementMethod = LinkMovementMethod.getInstance()
+        while (matcher.find()) {
+            val group = matcher.group()
+            if (EmojiUtil.getEmoji(group) != -1) {
+                val emoji: Drawable =
+                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
+                emoji.setBounds(
+                    0,
+                    0,
+                    (holder.reply.textSize * 1.3).toInt(),
+                    (holder.reply.textSize * 1.3).toInt()
+                )
+                val imageSpan = CenteredImageSpan(emoji)
+                builder.setSpan(
+                    imageSpan,
+                    matcher.start(),
+                    matcher.end(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                holder.reply.text = builder
+            }
+        }
+
     }
 
-    @SuppressLint("RestrictedApi")
+    /*@SuppressLint("RestrictedApi")
     private fun setTextFieldColor(text: String, start: Int, end: Int): SpannableString {
         val spannableString = SpannableString(text)
         val foregroundColorSpan = ForegroundColorSpan(
@@ -211,6 +163,6 @@ class Reply2ReplyAdapter(
         )
         spannableString.setSpan(foregroundColorSpan, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         return spannableString
-    }
+    }*/
 
 }

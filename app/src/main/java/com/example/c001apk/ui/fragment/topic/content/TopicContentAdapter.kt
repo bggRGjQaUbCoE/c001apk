@@ -230,7 +230,7 @@ class TopicContentAdapter(
                 holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                 ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
 
-                if (feed.picArr.isNotEmpty()) {
+                if (feed.picArr?.isNotEmpty() == true) {
                     holder.recyclerView.visibility = View.VISIBLE
                     val mAdapter = FeedPicAdapter(feed.picArr)
                     val count =

@@ -44,7 +44,7 @@ class LoginActivity : BaseActivity() {
     private var isLoginPass = true
 
     private val filter =
-        InputFilter { source: CharSequence, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int ->
+        InputFilter { source: CharSequence, _: Int, _: Int, _: Spanned?, _: Int, _: Int ->
             if (source == " ")
                 return@InputFilter ""
             else

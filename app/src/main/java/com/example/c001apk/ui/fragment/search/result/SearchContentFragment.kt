@@ -8,14 +8,11 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.util.LinearItemDecoration
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class SearchContentFragment : Fragment() {
 
@@ -94,17 +91,14 @@ class SearchContentFragment : Fragment() {
                     }
                 }
                 feedAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.isIndeterminate = false
             } else {
                 viewModel.isEnd = true
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-                //Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
         }
 
         viewModel.searchUserData.observe(viewLifecycleOwner) { result ->
@@ -220,20 +214,16 @@ class SearchContentFragment : Fragment() {
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
         viewModel.page = 1
         viewModel.keyWord = keyWord
         viewModel.type = type
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        lifecycleScope.launch {
-            delay(500)
-            when (type) {
-                "feed" -> viewModel.getSearchFeed()
-                "user" -> viewModel.getSearchUser()
-                else -> viewModel.getSearchTopic()
-            }
+        when (type) {
+            "feed" -> viewModel.getSearchFeed()
+            "user" -> viewModel.getSearchUser()
+            else -> viewModel.getSearchTopic()
         }
     }
 

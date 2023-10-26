@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.ImagePreview
@@ -22,8 +21,6 @@ import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
 
@@ -66,16 +63,16 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
                     viewModel.lastItem = feed[feed.size - 1].entityId
                 }
                 mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-                //Toast.makeText(activity, "没有更多了", Toast.LENGTH_SHORT).show()
+                mAdapter.setLoadState(mAdapter.LOADING_END)
+                viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
+            viewModel.isLoadMore = false
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false
         }
 
     }
@@ -97,10 +94,13 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.followFeedList.size - 1) {
-                        viewModel.isLoadMore = true
-                        viewModel.page++
-                        viewModel.getFollowFeed()
+                    if (lastVisibleItemPosition == viewModel.followFeedList.size) {
+                        if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
+                            viewModel.isLoadMore = true
+                            viewModel.page++
+                            viewModel.getFollowFeed()
+                        }
                     }
                 }
             }
@@ -120,14 +120,11 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
     }
 
     private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
         viewModel.page = 1
+        viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getFollowFeed()
-        }
+        viewModel.getFollowFeed()
     }
 
     @SuppressLint("RestrictedApi")
@@ -145,9 +142,11 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
 
     override fun onReturnTop() {
         if (HomeFragment.current == 0) {
-            if (firstCompletelyVisibleItemPosition == 0)
+            if (firstCompletelyVisibleItemPosition == 0) {
+                binding.swipeRefresh.isRefreshing = true
                 refreshData()
-            else {
+            } else {
+                binding.swipeRefresh.isRefreshing = true
                 binding.recyclerView.scrollToPosition(0)
                 refreshData()
             }

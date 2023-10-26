@@ -48,7 +48,7 @@
     <string name="emoji">表情</string>
     <string name="show_emoji">显示表情</string>
     <string name="all_huaji">全部变成滑稽</string>
-    <string name="account">账号</string>
+    <string name="account">账号/手机号</string>
     <string name="password">密码</string>
     <string name="login">登录</string>
     <string name="logout">退出登录</string>
@@ -65,4 +65,5 @@
     <string name="get_sms_token">获取验证码</string>
     <string name="sms_token">验证码</string>
     <string name="loginPass">密码登录</string>
+    <string name="no_more">没有更多了</string>
 </resources>

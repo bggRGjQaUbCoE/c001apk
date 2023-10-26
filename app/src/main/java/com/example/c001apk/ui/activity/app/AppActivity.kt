@@ -3,9 +3,9 @@ package com.example.c001apk.ui.activity.app
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -15,8 +15,6 @@ import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class AppActivity : BaseActivity() {
 
@@ -55,15 +53,9 @@ class AppActivity : BaseActivity() {
                 binding.collapsingToolbar.title = appInfo.title
                 binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                 ImageShowUtil.showIMG(binding.logo, appInfo.logo)
-
-                binding.progress.isIndeterminate = false
                 viewModel.appId = appInfo.id
                 viewModel.isRefreh = true
-                binding.swipeRefresh.isRefreshing = true
-                lifecycleScope.launch {
-                    delay(500)
-                    viewModel.getAppComment()
-                }
+                viewModel.getAppComment()
             } else {
                 result.exceptionOrNull()?.printStackTrace()
             }
@@ -81,14 +73,14 @@ class AppActivity : BaseActivity() {
                     }
                 }
                 mAdapter.notifyDataSetChanged()
-                binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreh = false
+                binding.appLayout.visibility = View.VISIBLE
+                binding.progress.isIndeterminate = false
             } else {
-                viewModel.isRefreh = false
                 viewModel.isEnd = true
-                binding.swipeRefresh.isRefreshing = false
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.swipeRefresh.isRefreshing = false
+            viewModel.isRefreh = false
         }
 
 

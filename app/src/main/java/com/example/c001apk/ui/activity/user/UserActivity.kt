@@ -6,21 +6,16 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
-import com.example.c001apk.util.AppBarStateChangeListener
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
-import com.google.android.material.appbar.AppBarLayout
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 class UserActivity : BaseActivity() {
@@ -45,24 +40,6 @@ class UserActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-
-        binding.appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
-            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
-                if (state == State.EXPANDED) {
-                    //Toast.makeText(this@UserActivity, "展开状态", Toast.LENGTH_SHORT).show()
-                    //展开状态
-                } else if (state == State.COLLAPSED) {
-                    //binding.toolBar.setNavigationIcon(R.drawable.ic_message)
-                    //Toast.makeText(this@UserActivity, "折叠状态", Toast.LENGTH_SHORT).show()
-                    //折叠状态
-                } else {
-                    //binding.toolBar.setNavigationIcon(R.drawable.ic_close)
-                    //Toast.makeText(this@UserActivity, "中间状态", Toast.LENGTH_SHORT).show()
-                    //中间状态
-                }
-            }
-        })
-
         initView()
         initData()
         initRefresh()
@@ -86,14 +63,9 @@ class UserActivity : BaseActivity() {
                 binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
                 binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
 
-                binding.progress.isIndeterminate = false
                 viewModel.uid = user.uid
                 viewModel.isRefreh = true
-                binding.swipeRefresh.isRefreshing = true
-                lifecycleScope.launch {
-                    delay(500)
-                    viewModel.getUserFeed()
-                }
+                viewModel.getUserFeed()
             } else {
                 result.exceptionOrNull()?.printStackTrace()
             }
@@ -105,18 +77,22 @@ class UserActivity : BaseActivity() {
                 if (viewModel.isRefreh) viewModel.feedContentList.clear()
                 if (viewModel.isRefreh || viewModel.isLoadMore) {
                     for (element in feed) {
-                        if (element.feedType == "feed" || element.feedType == "feedArticle") viewModel.feedContentList.add(element)
+                        if (element.feedType == "feed" || element.feedType == "feedArticle") viewModel.feedContentList.add(
+                            element
+                        )
                     }
                 }
                 mAdapter.notifyDataSetChanged()
-                binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreh = false
+                binding.infoLayout.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = false
+                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
-                viewModel.isRefreh = false
+                mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
-                binding.swipeRefresh.isRefreshing = false
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.swipeRefresh.isRefreshing = false
+            viewModel.isRefreh = false
         }
 
     }
@@ -126,8 +102,9 @@ class UserActivity : BaseActivity() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.feedContentList.size - 1) {
+                    if (lastVisibleItemPosition == viewModel.feedContentList.size) {
                         if (!viewModel.isEnd) {
+                            mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.getUserFeed()

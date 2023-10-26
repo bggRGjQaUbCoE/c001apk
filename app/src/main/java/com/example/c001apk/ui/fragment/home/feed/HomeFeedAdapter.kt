@@ -8,11 +8,11 @@ import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -31,6 +31,7 @@ import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpacesItemDecoration
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.regex.Pattern
 
 
@@ -39,6 +40,17 @@ class HomeFeedAdapter(
     private val homeFeedList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var loadState = 2
+    val LOADING = 1
+    val LOADING_COMPLETE = 2
+    val LOADING_END = 3
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setLoadState(loadState: Int) {
+        this.loadState = loadState
+        notifyDataSetChanged()
+    }
 
     class ImageCarouselCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
@@ -72,19 +84,19 @@ class HomeFeedAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        when (viewType) {
+        return when (viewType) {
             0 -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_home_image_carousel_card, parent, false)
-                return ImageCarouselCardViewHolder(view)
+                ImageCarouselCardViewHolder(view)
             }
 
             1 -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_home_icon_link_grid_card, parent, false)
-                return IconLinkGridCardViewHolder(view)
+                IconLinkGridCardViewHolder(view)
             }
 
             2 -> {
@@ -128,31 +140,72 @@ class HomeFeedAdapter(
                     intent.putExtra("id", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
-                return viewHolder
+                viewHolder
             }
 
             3 -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_home_image_text_scroll_card, parent, false)
-                return ImageTextScrollCardViewHolder(view)
+                ImageTextScrollCardViewHolder(view)
             }
 
-            else -> {
+            4 -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_home_image_text_scroll_card, parent, false)
-                return IconMiniScrollCardViewHolder(view)
+                IconMiniScrollCardViewHolder(view)
+            }
+
+            else -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_rv_footer, parent, false)
+                FootViewHolder(view)
             }
         }
 
     }
 
-    override fun getItemCount() = homeFeedList.size
+    class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
+        val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
+        val noMore: TextView = view.findViewById(R.id.noMore)
+    }
+
+    override fun getItemCount() = homeFeedList.size + 1
 
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+            is FootViewHolder -> {
+                when (loadState) {
+                    LOADING -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.VISIBLE
+                        holder.indicator.isIndeterminate = true
+                        holder.noMore.visibility = View.GONE
+
+                    }
+
+                    LOADING_COMPLETE -> {
+                        holder.footerLayout.visibility = View.GONE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.GONE
+                    }
+
+                    LOADING_END -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.VISIBLE
+                    }
+
+                    else -> {}
+                }
+            }
+
+
             is ImageCarouselCardViewHolder -> {
                 val imageCarouselCard = homeFeedList[position].entities
                 val mAdapter = ImageCarouselCardAdapter(imageCarouselCard)
@@ -233,7 +286,7 @@ class HomeFeedAdapter(
                     holder.from.visibility = View.GONE
                 else
                     holder.from.text = Html.fromHtml(
-                        feed.infoHtml.replace("\n", "<br />"),
+                        feed.infoHtml.replace("\n", " <br />"),
                         Html.FROM_HTML_MODE_COMPACT
                     )
 
@@ -260,7 +313,7 @@ class HomeFeedAdapter(
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
                 while (matcher.find()) {
                     val group = matcher.group()
-                    if (EmojiUtil.getEmoji(group) != -1){
+                    if (EmojiUtil.getEmoji(group) != -1) {
                         val emoji: Drawable =
                             mContext.getDrawable(EmojiUtil.getEmoji(group))!!
                         emoji.setBounds(
@@ -280,15 +333,17 @@ class HomeFeedAdapter(
                     }
                 }
 
-                if (feed.picArr.isNotEmpty()) {
+                if (feed.picArr?.isNotEmpty() == true) {
                     holder.recyclerView.visibility = View.VISIBLE
                     val mAdapter = FeedPicAdapter(feed.picArr)
                     val count =
                         if (feed.picArr.size < 3) feed.picArr.size
                         else 3
                     val mLayoutManager = GridLayoutManager(mContext, count)
-                    val minorSpace = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
-                    val normalSpace = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
+                    val minorSpace =
+                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                    val normalSpace =
+                        mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
                     holder.recyclerView.apply {
                         setPadding(normalSpace, 0, minorSpace, minorSpace)
                         adapter = mAdapter
@@ -363,13 +418,20 @@ class HomeFeedAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (homeFeedList[position].entityTemplate) {
-            "imageCarouselCard_1" -> 0
-            "iconLinkGridCard" -> 1
-            "feed" -> 2
-            "imageTextScrollCard" -> 3
-            else -> 4
-        }
+        return if (position >= 0 && position < itemCount - 1)
+            when (homeFeedList[position].entityTemplate) {
+                "imageCarouselCard_1" -> 0
+                "iconLinkGridCard" -> 1
+                "feed" -> 2
+                "imageTextScrollCard" -> 3
+                else -> 4 //"iconMiniScrollCard"
+            }
+        else 5
+
+        /*return when (position) {
+            itemCount - 1 -> 5
+            else -> 2
+        }*/
     }
 
 }

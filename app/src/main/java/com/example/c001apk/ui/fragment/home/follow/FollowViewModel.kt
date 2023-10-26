@@ -13,6 +13,7 @@ class FollowViewModel : ViewModel() {
 
     var isRefreshing = true
     var isLoadMore = false
+    var isEnd = false
 
     var page = 1
     var lastItem = ""
