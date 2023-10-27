@@ -84,6 +84,12 @@ class Reply2ReplyTotalAdapter(
                     parent.context.startActivity(intent)
                     true
                 }
+                viewHolder.itemView.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
                 viewHolder.itemView.setOnClickListener {
                     IOnReplyClickContainer.controller?.onReply2Reply(
                         viewHolder.id,

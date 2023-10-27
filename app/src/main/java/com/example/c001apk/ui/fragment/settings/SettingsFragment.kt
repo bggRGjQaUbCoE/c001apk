@@ -45,7 +45,7 @@ class SettingsFragment : Fragment() {
                     startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse("https://github.com/bggRGjQaUbCoE/c001apk")
+                            Uri.parse("https://github.com/bggRGjQaUbCoE/c001apk/issues")
                         )
                     )
 

@@ -15,12 +15,14 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.user.UserActivity
+import com.example.c001apk.ui.fragment.home.feed.FeedPicAdapter
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.ui.fragment.search.result.SearchAdapter
 import com.example.c001apk.util.EmojiUtil
@@ -303,6 +305,27 @@ class FFFListAdapter(
                         holder.message.text = builder
                     }
                 }
+
+                if (feed.picArr?.isNotEmpty() == true) {
+                    holder.recyclerView.visibility = View.VISIBLE
+                    val mAdapter = FeedPicAdapter(feed.picArr)
+                    val count =
+                        if (feed.picArr.size < 3) feed.picArr.size
+                        else 3
+                    val mLayoutManager = GridLayoutManager(mContext, count)
+                    val minorSpace =
+                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                    val normalSpace =
+                        mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
+                    holder.recyclerView.apply {
+                        setPadding(normalSpace, 0, minorSpace, minorSpace)
+                        adapter = mAdapter
+                        layoutManager = mLayoutManager
+                    }
+                } else {
+                    holder.recyclerView.visibility = View.GONE
+                }
+                ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
             }
 
         }

@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.fragment.settings
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
@@ -10,6 +11,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.ui.activity.AboutActivity
 import rikka.core.util.ResourceUtils
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
@@ -113,6 +115,10 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("others")?.summary =
             "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+        findPreference<Preference>("others")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireActivity(), AboutActivity::class.java))
+            true
+        }
 
     }
 

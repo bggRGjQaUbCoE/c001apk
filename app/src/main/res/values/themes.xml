@@ -16,10 +16,6 @@
         <item name="android:colorControlActivated">?colorPrimary</item>
     </style>
 
-    <style name="Theme.ImageView" parent="Theme.C001apk">
-        <item name="android:windowFullscreen">true</item>
-    </style>
-
     <style name="Theme.C001apk" parent="Base.Theme.C001apk">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3.Mod</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -86,7 +82,6 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-
     <style name="circleImageStyle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
@@ -98,6 +93,11 @@
 
     <style name="UserTextColor">
         <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="AppTheme.About" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#6750A4</item>
+        <item name="colorPrimaryDark">#6750A4</item>
     </style>
 
 </resources>
