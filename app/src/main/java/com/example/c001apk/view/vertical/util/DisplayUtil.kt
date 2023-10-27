@@ -1,4 +1,4 @@
-package com.example.c001apk.vertical.util
+package com.example.c001apk.view.vertical.util
 
 import android.content.Context
 

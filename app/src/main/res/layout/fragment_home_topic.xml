@@ -20,7 +20,7 @@
         android:orientation="horizontal"
         android:visibility="invisible">
 
-        <com.example.c001apk.vertical.VerticalTabLayout
+        <com.example.c001apk.view.vertical.VerticalTabLayout
             android:id="@+id/tabLayout"
             android:layout_width="0dp"
             android:layout_height="match_parent"

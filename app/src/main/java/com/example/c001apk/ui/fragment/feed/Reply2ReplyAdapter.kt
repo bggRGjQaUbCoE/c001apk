@@ -28,12 +28,14 @@ import java.util.regex.Pattern
 class Reply2ReplyAdapter(
     private val mContext: Context,
     private val uid: String,
+    private val position: Int,
     private val reply2ReplyList: List<HomeFeedResponse.ReplyRows>
 ) :
     RecyclerView.Adapter<Reply2ReplyAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var id = ""
+        var uid = ""
         var name = ""
         val reply: TextView = view.findViewById(R.id.reply)
     }
@@ -45,7 +47,10 @@ class Reply2ReplyAdapter(
         val viewHolder = ViewHolder(view)
         viewHolder.reply.setOnClickListener {
             IOnReplyClickContainer.controller?.onReply2Reply(
+                position,
+                null,
                 viewHolder.id,
+                viewHolder.uid,
                 viewHolder.name,
                 "reply"
             )
@@ -66,6 +71,7 @@ class Reply2ReplyAdapter(
         val reply = reply2ReplyList[position]
 
         holder.id = reply.id
+        holder.uid = reply.uid
         holder.name = reply.username
 
         /*val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
@@ -78,7 +84,7 @@ class Reply2ReplyAdapter(
 
         val urlList: MutableList<ImageInfo> = ArrayList()
         if (reply.pic != "") {
-            for (url in reply.picArr) {
+            for (url in reply.picArr!!) {
                 val imageInfo = ImageInfo()
                 imageInfo.thumbnailUrl = "$url.s.jpg"
                 imageInfo.originUrl = url
@@ -92,18 +98,18 @@ class Reply2ReplyAdapter(
                     """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message}"""
                 else {
                     if (reply.message == "[图片]")
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a> """
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr?.size})</a> """
                     else
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr.size})</a> """
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr?.size})</a> """
                 }
             } else {
                 if (reply.pic == "")
                     """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message}"""
                 else {
                     if (reply.message == "[图片]")
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr.size})</a> """
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> 查看图片(${reply.picArr?.size})</a> """
                     else
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr.size})</a> """
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>: ${reply.message} <a class=\"feed-forward-pic\" href=${reply.pic}> [图片] 查看图片(${reply.picArr?.size})</a> """
                 }
             }
 

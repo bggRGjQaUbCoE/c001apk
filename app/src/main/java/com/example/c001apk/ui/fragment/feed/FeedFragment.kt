@@ -22,6 +22,8 @@ import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.model.CheckResponse
+import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.feed.total.Reply2ReplyBottomSheetDialog
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.LinearItemDecoration
@@ -37,6 +39,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.net.URLDecoder
 import kotlin.concurrent.thread
 
 
@@ -47,7 +50,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private var id: String = ""
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private var type = ""
-    private var uname: String = ""
+    private var uname = ""
+    private var ruid = ""
+    private var rid = ""
+    private var rPosition = 0
 
     //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
@@ -95,7 +101,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         initScroll()
 
         binding.reply.setOnClickListener {
-            id = arguments?.getString("ID")!!
+            rid = arguments?.getString("ID")!!
             uname = arguments?.getString("UNAME")!!
             type = "feed"
             initReply()
@@ -232,7 +238,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         "Cookie",
                         "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
                     )
-                    .url("https://api.coolapk.com/v6/feed/reply?id=$id&type=$type")
+                    .url("https://api.coolapk.com/v6/feed/reply?id=$rid&type=$type")
                     .post(formBody)
                     .build()
 
@@ -243,6 +249,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         Log.d("Reply", "onFailure: ${e.message}")
                     }
 
+                    @SuppressLint("NotifyDataSetChanged")
                     override fun onResponse(call: Call, response: Response) {
                         val reply: CheckResponse = Gson().fromJson(
                             response.body!!.string(),
@@ -252,7 +259,44 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             requireActivity().runOnUiThread {
                                 Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
                                 bottomSheetDialog.cancel()
-                                refreshData()
+                                if (type == "feed") {
+                                    viewModel.feedReplyList.add(
+                                        0, TotalReplyResponse.Data(
+                                            "feed_reply",
+                                            id,
+                                            ruid,
+                                            PrefManager.uid,
+                                            URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                            uname,
+                                            content,
+                                            "",
+                                            null,
+                                            (System.currentTimeMillis() / 1000).toString(),
+                                            "0",
+                                            "0",
+                                            PrefManager.userAvatar,
+                                            null,
+                                            0
+                                        )
+                                    )
+                                    mAdapter.notifyItemInserted(1)
+                                    binding.recyclerView.scrollToPosition(1)
+                                } else {
+                                    viewModel.feedReplyList[rPosition - 1].replyRows!!.add(
+                                        viewModel.feedReplyList[rPosition - 1].replyRows!!.size,
+                                        HomeFeedResponse.ReplyRows(
+                                            rid,
+                                            PrefManager.uid,
+                                            URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                            content,
+                                            ruid,
+                                            uname,
+                                            null,
+                                            ""
+                                        )
+                                    )
+                                    mAdapter.notifyDataSetChanged()
+                                }
                             }
                         } else {
                             requireActivity().runOnUiThread {
@@ -362,8 +406,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     @SuppressLint("InflateParams", "NotifyDataSetChanged")
-    override fun onShowTotalReply(uid: String, id: String) {
-        val mBottomSheetDialogFragment = Reply2ReplyBottomSheetDialog.newInstance(uid, id)
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {
+        val mBottomSheetDialogFragment = Reply2ReplyBottomSheetDialog.newInstance(position, uid, id)
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 
@@ -374,9 +418,18 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     }
 
-    override fun onReply2Reply(id: String, uname: String, type: String) {
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
         if (PrefManager.isLogin) {
-            this.id = id
+            this.rPosition = rPosition
+            this.rid = id
+            this.ruid = uid
             this.uname = uname
             this.type = type
             initReply()

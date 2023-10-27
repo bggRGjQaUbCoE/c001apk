@@ -60,7 +60,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val infoHtml: String,
         val title: String,
         val picArr: List<String>?,
-        val replyRows: List<ReplyRows>,
+        val replyRows: List<ReplyRows>?,
         val replyRowsMore: Int,
         val logo: String,
         @SerializedName("hot_num") val hotNum: String,
@@ -117,9 +117,14 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class ReplyRows(
-        val id: String, val uid: String, val username: String,
-        val message: String, val likenum: String, val ruid: String,
-        val rusername: String, val picArr: List<String>, val pic: String
+        val id: String,
+        val uid: String,
+        val username: String,
+        val message: String,
+        val ruid: String,
+        val rusername: String,
+        val picArr: List<String>?,
+        val pic: String
     )
 
     data class Entities(

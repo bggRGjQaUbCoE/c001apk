@@ -1,4 +1,4 @@
-package com.example.c001apk.util
+package com.example.c001apk.view
 
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.OnOffsetChangedListener

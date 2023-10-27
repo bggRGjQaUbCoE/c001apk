@@ -40,5 +40,6 @@ class AboutActivity : AbsAboutActivity() {
         items.add(License("flexbox-layout", "google", License.APACHE_2, "https://github.com/google/flexbox-layout"))
         items.add(License("glide-transformations", "wasabeef", License.APACHE_2, "https://github.com/wasabeef/glide-transformations"))
         items.add(License("jsoup", "jhy", License.MIT, "https://github.com/jhy/jsoup"))
+        items.add(License("VerticalTabLayout", "qstumn", License.APACHE_2, "https://github.com/qstumn/VerticalTabLayout"))
     }
 }

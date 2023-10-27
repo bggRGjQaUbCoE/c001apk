@@ -1,11 +1,11 @@
-package com.example.c001apk.vertical.widget;
+package com.example.c001apk.view.vertical.widget;
 
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.example.c001apk.vertical.badgeview.QBadgeView;
+import com.example.c001apk.view.vertical.badgeview.QBadgeView;
 
 
 /**

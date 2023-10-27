@@ -1,11 +1,11 @@
-package com.example.c001apk.vertical.widget;
+package com.example.c001apk.view.vertical.widget;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
 
-import com.example.c001apk.vertical.badgeview.Badge;
+import com.example.c001apk.view.vertical.badgeview.Badge;
 
 /**
  * @author chqiu

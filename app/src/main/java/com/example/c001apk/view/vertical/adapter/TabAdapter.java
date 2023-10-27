@@ -1,6 +1,6 @@
-package com.example.c001apk.vertical.adapter;
+package com.example.c001apk.view.vertical.adapter;
 
-import com.example.c001apk.vertical.widget.TabView;
+import com.example.c001apk.view.vertical.widget.TabView;
 
 /**
  * @author chqiu

@@ -1,7 +1,9 @@
 package com.example.c001apk.logic.network
 
+import androidx.webkit.internal.ApiFeature.T
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.TotalReplyResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -27,7 +29,7 @@ interface ApiService {
         @Query("discussMode") discussMode: Int,
         @Query("listType") listType: String,
         @Query("page") page: Int
-    ): Call<HomeFeedResponse>
+    ): Call<TotalReplyResponse>
 
     @GET("/v6/search?showAnonymous=-1")
     fun getSearch(
@@ -42,7 +44,7 @@ interface ApiService {
     fun getReply2Reply(
         @Query("id") id: String,
         @Query("page") page: Int
-    ): Call<HomeFeedResponse>
+    ): Call<TotalReplyResponse>
 
     @GET("/v6/page/dataList?url=%2Fpage%3Furl%3DV11_VERTICAL_TOPIC&title=%E8%AF%9D%E9%A2%98&subTitle=&page=1")
     fun getHomeTopicTitle(

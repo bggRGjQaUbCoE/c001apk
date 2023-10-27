@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.EmojiUtil
@@ -38,7 +39,7 @@ import java.util.regex.Pattern
 class FeedContentAdapter(
     private val mContext: Context,
     private val feedList: List<FeedContentResponse>,
-    private var replyList: ArrayList<HomeFeedResponse.Data>
+    private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -139,7 +140,11 @@ class FeedContentAdapter(
                         .inflate(R.layout.item_feed_content_reply_item, parent, false)
                 val viewHolder = FeedContentReplyViewHolder(view)
                 viewHolder.totalReply.setOnClickListener {
-                    iOnTotalReplyClickListener?.onShowTotalReply(viewHolder.uid, viewHolder.id)
+                    iOnTotalReplyClickListener?.onShowTotalReply(
+                        viewHolder.adapterPosition,
+                        viewHolder.uid,
+                        viewHolder.id
+                    )
                 }
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
@@ -165,14 +170,20 @@ class FeedContentAdapter(
                 }
                 viewHolder.message.setOnClickListener {
                     IOnReplyClickContainer.controller?.onReply2Reply(
+                        viewHolder.adapterPosition,
+                        null,
                         viewHolder.id,
+                        viewHolder.uid,
                         viewHolder.uname.text.toString(),
                         "reply"
                     )
                 }
                 viewHolder.itemView.setOnClickListener {
                     IOnReplyClickContainer.controller?.onReply2Reply(
+                        viewHolder.adapterPosition,
+                        null,
                         viewHolder.id,
+                        viewHolder.uid,
                         viewHolder.uname.text.toString(),
                         "reply"
                     )
@@ -420,9 +431,10 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                     ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-                    if (reply.replyRows.isNotEmpty()) {
+                    if (reply.replyRows?.isNotEmpty() == true) {
                         holder.replyLayout.visibility = View.VISIBLE
-                        val mAdapter = Reply2ReplyAdapter(mContext, reply.uid, reply.replyRows)
+                        val mAdapter =
+                            Reply2ReplyAdapter(mContext, reply.uid, position, reply.replyRows)
                         val mLayoutManager = LinearLayoutManager(mContext)
                         //val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                         holder.recyclerView.apply {
@@ -434,7 +446,7 @@ class FeedContentAdapter(
 
                     if (reply.replyRowsMore != 0) {
                         holder.totalReply.visibility = View.VISIBLE
-                        val count = reply.replyRowsMore + reply.replyRows.size
+                        val count = reply.replyRowsMore + reply.replyRows!!.size
                         holder.totalReply.text = "查看更多回复($count)"
                     } else
                         holder.totalReply.visibility = View.GONE

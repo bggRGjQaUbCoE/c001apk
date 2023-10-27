@@ -12,8 +12,8 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
 import com.example.c001apk.ui.fragment.home.topic.content.HomeTopicContentFragment
-import com.example.c001apk.vertical.adapter.TabAdapter
-import com.example.c001apk.vertical.widget.ITabView
+import com.example.c001apk.view.vertical.adapter.TabAdapter
+import com.example.c001apk.view.vertical.widget.ITabView
 import com.google.android.material.R
 
 private const val ARG_PARAM1 = "param1"

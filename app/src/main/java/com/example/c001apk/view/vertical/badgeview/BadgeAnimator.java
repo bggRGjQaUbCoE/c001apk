@@ -1,4 +1,4 @@
-package com.example.c001apk.vertical.badgeview;
+package com.example.c001apk.view.vertical.badgeview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

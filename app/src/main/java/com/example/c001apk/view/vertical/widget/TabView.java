@@ -1,4 +1,4 @@
-package com.example.c001apk.vertical.widget;
+package com.example.c001apk.view.vertical.widget;
 
 import android.content.Context;
 import android.widget.Checkable;
@@ -6,7 +6,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.c001apk.vertical.badgeview.Badge;
+import com.example.c001apk.view.vertical.badgeview.Badge;
 
 /**
  * @author chqiu

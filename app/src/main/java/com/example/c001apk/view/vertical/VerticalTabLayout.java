@@ -1,4 +1,4 @@
-package com.example.c001apk.vertical;
+package com.example.c001apk.view.vertical;
 
 import static androidx.viewpager.widget.ViewPager.SCROLL_STATE_IDLE;
 import static androidx.viewpager.widget.ViewPager.SCROLL_STATE_SETTLING;
@@ -23,11 +23,11 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.c001apk.R;
-import com.example.c001apk.vertical.adapter.TabAdapter;
-import com.example.c001apk.vertical.util.DisplayUtil;
-import com.example.c001apk.vertical.util.TabFragmentManager;
-import com.example.c001apk.vertical.widget.QTabView;
-import com.example.c001apk.vertical.widget.TabView;
+import com.example.c001apk.view.vertical.adapter.TabAdapter;
+import com.example.c001apk.view.vertical.util.DisplayUtil;
+import com.example.c001apk.view.vertical.util.TabFragmentManager;
+import com.example.c001apk.view.vertical.widget.QTabView;
+import com.example.c001apk.view.vertical.widget.TabView;
 
 import org.jetbrains.annotations.Nullable;
 

@@ -18,11 +18,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
-import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
-import com.example.c001apk.ui.fragment.feed.IOnReplyClickContainer
+import com.example.c001apk.ui.fragment.feed.IOnReplyClickListener
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
@@ -35,8 +35,16 @@ import java.util.regex.Pattern
 class Reply2ReplyTotalAdapter(
     private val mContext: Context,
     private val uid: String,
-    private val replyList: List<HomeFeedResponse.Data>
+    private val position: Int,
+    private val replyList: List<TotalReplyResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private lateinit var iOnReplyClickListener: IOnReplyClickListener
+
+    fun setIOnReplyClickListener(iOnReplyClickListener: IOnReplyClickListener) {
+        this.iOnReplyClickListener = iOnReplyClickListener
+    }
+
 
     private var loadState = 2
     val LOADING = 1
@@ -52,6 +60,7 @@ class Reply2ReplyTotalAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val uname: TextView = view.findViewById(R.id.uname)
         var id = ""
+        var uid = ""
         var name = ""
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
@@ -91,15 +100,21 @@ class Reply2ReplyTotalAdapter(
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
-                    IOnReplyClickContainer.controller?.onReply2Reply(
+                    iOnReplyClickListener.onReply2Reply(
+                        position,
+                        viewHolder.adapterPosition,
                         viewHolder.id,
+                        viewHolder.uid,
                         viewHolder.name,
                         "reply"
                     )
                 }
                 viewHolder.message.setOnClickListener {
-                    IOnReplyClickContainer.controller?.onReply2Reply(
+                    iOnReplyClickListener.onReply2Reply(
+                        position,
+                        viewHolder.adapterPosition,
                         viewHolder.id,
+                        viewHolder.uid,
                         viewHolder.name,
                         "reply"
                     )
@@ -159,6 +174,7 @@ class Reply2ReplyTotalAdapter(
 
                 val reply = replyList[position]
                 holder.id = reply.id
+                holder.uid = reply.uid
                 holder.name = reply.username
 
                 val text =
@@ -256,6 +272,7 @@ class Reply2ReplyTotalAdapter(
                     holder.like.textSize.toInt()
                 )
                 holder.reply.setCompoundDrawables(drawableReply, null, null, null)
+
                 ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                 if (!reply.picArr.isNullOrEmpty()) {

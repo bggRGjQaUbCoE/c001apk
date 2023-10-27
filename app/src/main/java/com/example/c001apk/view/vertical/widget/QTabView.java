@@ -1,4 +1,4 @@
-package com.example.c001apk.vertical.widget;
+package com.example.c001apk.view.vertical.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -13,8 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.Px;
 import androidx.annotation.RequiresApi;
 
-import com.example.c001apk.vertical.badgeview.Badge;
-import com.example.c001apk.vertical.util.DisplayUtil;
+import com.example.c001apk.view.vertical.badgeview.Badge;
+import com.example.c001apk.view.vertical.util.DisplayUtil;
 
 
 /**

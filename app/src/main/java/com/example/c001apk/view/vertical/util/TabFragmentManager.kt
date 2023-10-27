@@ -1,9 +1,9 @@
-package com.example.c001apk.vertical.util
+package com.example.c001apk.view.vertical.util
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.example.c001apk.vertical.VerticalTabLayout
-import com.example.c001apk.vertical.widget.TabView
+import com.example.c001apk.view.vertical.VerticalTabLayout
+import com.example.c001apk.view.vertical.widget.TabView
 
 /**
  * Created by chqiu on 2017/1/16.

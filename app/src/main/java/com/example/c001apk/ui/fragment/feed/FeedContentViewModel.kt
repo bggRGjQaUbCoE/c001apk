@@ -5,12 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.network.Repository
 
 class FeedContentViewModel : ViewModel() {
 
     val feedContentList = ArrayList<FeedContentResponse>()
-    val feedReplyList = ArrayList<HomeFeedResponse.Data>()
+    val feedReplyList = ArrayList<TotalReplyResponse.Data>()
 
     var isRefreshing = true
     var isLoadMore = false
