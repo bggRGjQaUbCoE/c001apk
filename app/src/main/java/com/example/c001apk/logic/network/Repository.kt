@@ -116,7 +116,7 @@ object Repository {
     fun getAppComment(url: String, page: Int) =
         fire(Dispatchers.IO) {
             val appResponse = Network.getAppComment(url, page)
-            if (appResponse.data != null)
+            if (appResponse.data.isNotEmpty())
                 Result.success(appResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
@@ -134,11 +134,39 @@ object Repository {
     fun getFollowFeed(url: String, title: String, page: Int) =
         fire(Dispatchers.IO) {
             val feedResponse = Network.getFollowFeed(url, title, page)
-            if (feedResponse.data != null)
+            if (feedResponse.data.isNotEmpty())
                 Result.success(feedResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
         }
+
+    fun getFeedList(uid: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val feedResponse = Network.getFeedList(uid, page)
+            if (feedResponse.data.isNotEmpty())
+                Result.success(feedResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getFollowList(uid: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val feedResponse = Network.getFollowList(uid, page)
+            if (feedResponse.data.isNotEmpty())
+                Result.success(feedResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getFansList(uid: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val feedResponse = Network.getFansList(uid, page)
+            if (feedResponse.data.isNotEmpty())
+                Result.success(feedResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
 
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {

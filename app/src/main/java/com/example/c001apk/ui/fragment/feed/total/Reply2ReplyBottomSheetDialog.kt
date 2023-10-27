@@ -68,7 +68,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
             if (!data.isNullOrEmpty()) {
                 if (!viewModel.isLoadMore)
                     viewModel.replyTotalList.clear()
-                viewModel.replyTotalList.addAll(data)
+                for (element in data)
+                    if (element.entityType == "feed_reply")
+                        viewModel.replyTotalList.add(element)
                 mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)

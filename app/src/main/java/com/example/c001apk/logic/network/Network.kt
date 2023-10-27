@@ -62,6 +62,15 @@ object Network {
     suspend fun getFollowFeed(url: String, title: String, page: Int) =
         apiService.getFollowFeed(url, title, page).await()
 
+    suspend fun getFeedList(uid: String, page: Int) =
+        apiService.getFeedList(uid, page).await()
+
+    suspend fun getFollowList(uid: String, page: Int) =
+        apiService.getFollowList(uid, page).await()
+
+    suspend fun getFansList(uid: String, page: Int) =
+        apiService.getFansList(uid, page).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

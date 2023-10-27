@@ -8,7 +8,8 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageCarouselCard"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="H, 3:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearance="@style/searchTopicRadius"

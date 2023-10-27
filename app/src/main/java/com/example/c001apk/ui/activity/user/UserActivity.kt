@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.activity.user
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.activity.BaseActivity
+import com.example.c001apk.ui.activity.fff.FFFListActivity
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
@@ -62,6 +64,17 @@ class UserActivity : BaseActivity() {
                 binding.follow.text = "${CountUtil.view(user.follow)} 关注"
                 binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
                 binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
+
+                val intent = Intent(this, FFFListActivity::class.java)
+                intent.putExtra("uid", user.uid)
+                binding.follow.setOnClickListener {
+                    intent.putExtra("type", "follow")
+                    startActivity(intent)
+                }
+                binding.fans.setOnClickListener {
+                    intent.putExtra("type", "fans")
+                    startActivity(intent)
+                }
 
                 viewModel.uid = user.uid
                 viewModel.isRefreh = true

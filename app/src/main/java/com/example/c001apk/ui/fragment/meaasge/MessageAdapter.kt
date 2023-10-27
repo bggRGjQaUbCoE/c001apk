@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.meaasge
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
+import com.example.c001apk.ui.activity.fff.FFFListActivity
+import com.example.c001apk.util.PrefManager
 import com.google.android.material.imageview.ShapeableImageView
 
 class MessageAdapter(
@@ -80,14 +83,21 @@ class MessageAdapter(
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_message_fff, parent, false)
                 val viewHolder = FFFViewHolder(view)
-                viewHolder.feedLayout.setOnClickListener {
-
-                }
-                viewHolder.followLayout.setOnClickListener {
-
-                }
-                viewHolder.fansLayout.setOnClickListener {
-
+                if (PrefManager.isLogin) {
+                    val intent = Intent(parent.context, FFFListActivity::class.java)
+                    intent.putExtra("uid", PrefManager.uid)
+                    viewHolder.feedLayout.setOnClickListener {
+                        intent.putExtra("type", "feed")
+                        parent.context.startActivity(intent)
+                    }
+                    viewHolder.followLayout.setOnClickListener {
+                        intent.putExtra("type", "follow")
+                        parent.context.startActivity(intent)
+                    }
+                    viewHolder.fansLayout.setOnClickListener {
+                        intent.putExtra("type", "fans")
+                        parent.context.startActivity(intent)
+                    }
                 }
                 return viewHolder
             }

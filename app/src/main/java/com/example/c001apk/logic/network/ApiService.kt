@@ -102,4 +102,22 @@ interface ApiService {
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
+    @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1")
+    fun getFeedList(
+        @Query("uid") uid: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
+    @GET("/v6/user/followList")
+    fun getFollowList(
+        @Query("uid") uid: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
+    @GET("/v6/user/fansList")
+    fun getFansList(
+        @Query("uid") uid: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
 }

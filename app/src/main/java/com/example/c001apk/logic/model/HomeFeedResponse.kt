@@ -13,10 +13,10 @@ data class HomeFeedResponse(val data: List<Data>) {
         val selectedTab: String,
         val homeTabCardRows: List<HomeTabCardRows>,
         @SerializedName("be_like_num") val beLikeNum: String,
-        val version:String,
-        val apkversioncode:String,
-        val apksize:String,
-        val lastupdate:String?,
+        val version: String,
+        val apkversioncode: String,
+        val apksize: String,
+        val lastupdate: String?,
         val follow: String,
         val level: String,
         val fans: String,
@@ -70,7 +70,24 @@ data class HomeFeedResponse(val data: List<Data>) {
         @SerializedName("commentnum_txt") val commentnumTxt: String,
         val commentCount: String,
         @SerializedName("alias_title") val aliasTitle: String,
-        val userAction: UserAction
+        val userAction: UserAction,
+        val userInfo: UserInfo,
+        val fUserInfo: UserInfo,
+    )
+
+    data class UserInfo(
+        val uid: String,
+        val username: String,
+        val level: Int,
+        val logintime: String,
+        val regdate: String,
+        val entityType: String,
+        val displayUsername: String,
+        val userAvatar: String,
+        val cover: String,
+        val fans: String,
+        val follow: String,
+        val bio: String
     )
 
     data class TabList(
