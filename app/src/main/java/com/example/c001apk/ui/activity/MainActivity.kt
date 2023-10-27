@@ -23,6 +23,7 @@ import okhttp3.Request
 import java.net.URLEncoder
 import kotlin.concurrent.thread
 
+
 class MainActivity : BaseActivity(), IOnBottomClickContainer {
 
     private lateinit var binding: ActivityMainBinding
@@ -121,7 +122,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                     PrefManager.username = URLEncoder.encode(login.data.username, "UTF-8")
                     PrefManager.token = login.data.token
                     PrefManager.userAvatar = login.data.userAvatar
-                } else if (login.message == "登录信息有误"){
+                } else if (login.message == "登录信息有误") {
                     PrefManager.isLogin = false
                     PrefManager.uid = ""
                     PrefManager.username = ""

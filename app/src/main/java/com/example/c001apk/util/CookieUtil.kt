@@ -8,6 +8,4 @@ object CookieUtil {
 
     var token = ""
 
-    var RES = ""
-
 }
