@@ -62,6 +62,7 @@ class SearchAdapter(
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val device: TextView = view.findViewById(R.id.device)
         var id = ""
+        var uid = ""
         val multiImage : NineImageView = view.findViewById(R.id.multiImage)
     }
 
@@ -111,6 +112,7 @@ class SearchAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -118,6 +120,7 @@ class SearchAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -238,6 +241,7 @@ class SearchAdapter(
             is FeedViewHolder -> {
                 val feed = searchList[position]
                 holder.id = feed.id
+                holder.uid = feed.uid
                 holder.uname.text = feed.username
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle

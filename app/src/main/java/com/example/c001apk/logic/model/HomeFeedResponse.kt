@@ -135,7 +135,8 @@ data class HomeFeedResponse(val data: List<Data>) {
         val logo: String,
         val id: String,
         val entityType: String,
-        @SerializedName("alias_title") val aliasTitle: String
+        @SerializedName("alias_title") val aliasTitle: String,
+        val userInfo: UserInfo
     )
 
 }

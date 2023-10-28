@@ -24,6 +24,7 @@ class ImageTextScrollCardAdapter(
         val title: TextView = view.findViewById(R.id.title)
         val imageTextScrollCard: ShapeableImageView = view.findViewById(R.id.imageTextScrollCard)
         var id = ""
+        var uid = ""
         var uname = ""
     }
 
@@ -40,6 +41,7 @@ class ImageTextScrollCardAdapter(
             val intent = Intent(parent.context, FeedActivity::class.java)
             intent.putExtra("type", "feed")
             intent.putExtra("id", viewHolder.id)
+            intent.putExtra("uid", viewHolder.uid)
             intent.putExtra("uname", viewHolder.uname)
             parent.context.startActivity(intent)
         }
@@ -51,6 +53,7 @@ class ImageTextScrollCardAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val imageTextScrollCard = imageCarouselCardList[position]
         holder.id = imageTextScrollCard.id
+        holder.uid = imageTextScrollCard.userInfo.uid
         holder.uname = imageTextScrollCard.username
         holder.title.text = imageTextScrollCard.title
         val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)

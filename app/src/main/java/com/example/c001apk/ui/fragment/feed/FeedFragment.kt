@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
@@ -18,7 +17,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
@@ -47,7 +45,6 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
-import java.lang.reflect.Field
 import java.net.URLDecoder
 import kotlin.concurrent.thread
 
@@ -56,7 +53,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
-    private var id: String = ""
+    private var id = ""
+    private var uid = ""
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private var type = ""
     private var uname = ""
@@ -72,12 +70,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private var lastVisibleItemPosition = -1
     private var realKeyboardHeight = 0
 
+
     companion object {
         @JvmStatic
-        fun newInstance(id: String, uname: String) =
+        fun newInstance(id: String, uid: String, uname: String) =
             FeedFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
+                    putString("UID", uid)
                     putString("UNAME", uname)
                     //putString("DEVICE", device)
                 }
@@ -88,6 +88,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         super.onCreate(savedInstanceState)
         arguments?.let {
             id = it.getString("ID")!!
+            uid = it.getString("UID")!!
             uname = it.getString("UNAME")!!
             //device = it.getString("DEVICE")
         }
@@ -105,33 +106,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val context: Context = requireContext()
-        val parentLayout: CoordinatorLayout = view.findViewById(R.id.parent)
-        val myLayout: View = requireActivity().window.decorView
-        parentLayout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-            private var statusBarHeight = 0
-            override fun onGlobalLayout() {
-                val r = Rect()
-                parentLayout.getWindowVisibleDisplayFrame(r)
-                val screenHeight = myLayout.rootView.height
-                val heightDiff = screenHeight - (r.bottom - r.top)
-                if (heightDiff > 100) {
-                    statusBarHeight = 0
-                }
-                try {
-                    val c = Class.forName("com.android.internal.R\$dimen")
-                    val obj = c.newInstance()
-                    val field: Field = c.getField("status_bar_height")
-                    val x: Int = field.get(obj).toString().toInt()
-                    statusBarHeight = context.resources.getDimensionPixelSize(x)
-                } catch (e: java.lang.Exception) {
-                    e.printStackTrace()
-                }
-                realKeyboardHeight = heightDiff - statusBarHeight
-                Log.e("键盘", "keyboard height(单位像素) = $realKeyboardHeight")
-            }
-        })
-
         initBar()
         initView()
         initData()
@@ -140,6 +114,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
         binding.reply.setOnClickListener {
             rid = arguments?.getString("ID")!!
+            ruid = arguments?.getString("UID")!!
             uname = arguments?.getString("UNAME")!!
             type = "feed"
             initReply()
@@ -199,7 +174,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     @SuppressLint("InflateParams")
     private fun initReply() {
-
         bottomSheetDialog = BottomSheetDialog(requireActivity())
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
@@ -211,7 +185,28 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         //val mAdapter = emotionAdapter(emoList)
         //val mLayoutManager = GridLayoutManager(activity, 7)
 
+        @SuppressLint("RestrictedApi")
+        fun checkAndPublish(){
+            if (editText.text.toString().replace("\n", "").isEmpty()) {
+                publish.isClickable = false
+                publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
+            } else {
+                publish.isClickable = true
+                publish.setTextColor(
+                    ThemeUtils.getThemeAttrColor(
+                        requireActivity(),
+                        com.drakeet.about.R.attr.colorPrimary
+                    )
+                )
+                publish.setOnClickListener {
+                    publish(editText.text.toString())
+                }
+            }
+        }
+
         editText.hint = "回复: $uname"
+        editText.setText(viewModel.replyTextMap[rid + ruid])
+        checkAndPublish()
         editText.isFocusable = true
         editText.isFocusableInTouchMode = true
         editText.requestFocus()
@@ -219,24 +214,43 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, 0)
 
-        /*emotion.setOnClickListener {
-            if (recyclerView.visibility == View.GONE) {
+
+        val decorView = requireActivity().window.decorView
+        decorView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            decorView.getWindowVisibleDisplayFrame(rect)
+            val height = decorView.height - rect.bottom
+            if (realKeyboardHeight == 0 && height != 0) {
+                realKeyboardHeight = height
+                recyclerView.layoutParams.height = realKeyboardHeight
+            } else if (realKeyboardHeight == 0) {
+                recyclerView.layoutParams.height = -2
+            }
+        }
+
+        emotion.setOnClickListener {
+            if (recyclerView.visibility != View.VISIBLE) {
                 recyclerView.visibility = View.VISIBLE
                 val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_keyboard)
                 val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
-                DrawableCompat.setTint(drawableKeyboard, ContextCompat.getColor(requireContext(), R.color.gray_75))
+                DrawableCompat.setTint(
+                    drawableKeyboard,
+                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                )
                 emotion.setImageDrawable(drawableKeyboard)
-                recyclerView.layoutParams.height = realKeyboardHeight
                 imm.hideSoftInputFromWindow(view.windowToken, 0)
             } else {
                 recyclerView.visibility = View.GONE
                 val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
                 val drawableFace = DrawableCompat.wrap(face!!)
-                DrawableCompat.setTint(drawableFace, ContextCompat.getColor(requireContext(), R.color.gray_75))
+                DrawableCompat.setTint(
+                    drawableFace,
+                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                )
                 emotion.setImageDrawable(drawableFace)
                 imm.showSoftInput(editText, 0)
             }
-        }*/
+        }
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             replyAndForward = if (isChecked) "1"
@@ -260,23 +274,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
             @SuppressLint("RestrictedApi")
             override fun afterTextChanged(p0: Editable?) {
-                if (editText.text.toString().replace("\n", "").isEmpty()) {
-                    publish.isClickable = false
-                    publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
-                } else {
-                    publish.isClickable = true
-                    publish.setTextColor(
-                        ThemeUtils.getThemeAttrColor(
-                            requireActivity(),
-                            com.drakeet.about.R.attr.colorPrimary
-                        )
-                    )
-                    publish.setOnClickListener {
-                        publish(editText.text.toString())
-                    }
-                }
+                viewModel.replyTextMap[rid + ruid] = editText.text.toString()
+                checkAndPublish()
             }
         })
+
     }
 
     private fun publish(content: String) {
@@ -325,6 +327,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         )
                         if (reply.data?.messageStatus == 1) {
                             requireActivity().runOnUiThread {
+                                viewModel.replyTextMap[rid + ruid] = ""
                                 Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
                                 bottomSheetDialog.cancel()
                                 if (type == "feed") {
@@ -503,5 +506,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             initReply()
         }
     }
+
 
 }

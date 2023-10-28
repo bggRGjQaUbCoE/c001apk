@@ -47,7 +47,8 @@
         app:counterEnabled="true"
         app:counterMaxLength="500">
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
+            android:imeOptions="actionSearch"
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

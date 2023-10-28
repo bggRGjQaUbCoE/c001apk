@@ -71,6 +71,7 @@ class HomeFeedAdapter(
         val message: TextView = view.findViewById(R.id.message)
         val multiImage :NineImageView = view.findViewById(R.id.multiImage)
         var id = ""
+        var uid = ""
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
@@ -111,6 +112,7 @@ class HomeFeedAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -118,6 +120,7 @@ class HomeFeedAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }

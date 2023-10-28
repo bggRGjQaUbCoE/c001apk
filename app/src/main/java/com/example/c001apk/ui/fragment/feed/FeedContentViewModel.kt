@@ -7,7 +7,10 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.network.Repository
 
+
 class FeedContentViewModel : ViewModel() {
+
+    var replyTextMap: MutableMap<String, String> = HashMap()
 
     val feedContentList = ArrayList<FeedContentResponse>()
     val feedReplyList = ArrayList<TotalReplyResponse.Data>()

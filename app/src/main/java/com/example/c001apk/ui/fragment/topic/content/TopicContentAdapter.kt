@@ -60,7 +60,8 @@ class TopicContentAdapter(
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val device: TextView = view.findViewById(R.id.device)
         var id = ""
-        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
+        var uid = ""
+        val multiImage: NineImageView = view.findViewById(R.id.multiImage)
     }
 
     class TopicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -89,6 +90,7 @@ class TopicContentAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -96,6 +98,7 @@ class TopicContentAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -198,6 +201,7 @@ class TopicContentAdapter(
             is ViewHolder -> {
                 val feed = searchList[position]
                 holder.id = feed.id
+                holder.uid = feed.uid
                 holder.uname.text = feed.username
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle
@@ -288,7 +292,7 @@ class TopicContentAdapter(
 
                 if (!feed.picArr.isNullOrEmpty()) {
                     holder.multiImage.visibility = View.VISIBLE
-                    val imageUrls= ArrayList<String>()
+                    val imageUrls = ArrayList<String>()
                     for (element in feed.picArr)
                         imageUrls.add(element)
                     holder.multiImage.setImageUrls(imageUrls)

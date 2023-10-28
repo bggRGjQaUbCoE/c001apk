@@ -83,6 +83,7 @@ class FFFListAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -90,6 +91,7 @@ class FFFListAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
@@ -213,6 +215,7 @@ class FFFListAdapter(
             is HomeFeedAdapter.FeedViewHolder -> {
                 val feed = contentList[position]
                 holder.id = feed.id
+                holder.uid = feed.uid
                 holder.uname.text = feed.username
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle
