@@ -8,6 +8,8 @@ import com.example.c001apk.logic.network.Repository
 
 class ReplyTotalViewModel : ViewModel() {
 
+    var replyTextMap: MutableMap<String, String> = HashMap()
+
     var isEnd = false
     var isLoadMore = false
 

@@ -3,5 +3,4 @@
     <dimen name="normal_space">10dp</dimen>
     <dimen name="minor_space">5dp</dimen>
     <dimen name="medium_space">20dp</dimen>
-    <dimen name="keyboard">310dp</dimen>
 </resources>

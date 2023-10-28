@@ -2,8 +2,11 @@ package com.example.c001apk.ui.fragment.feed.total
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,24 +15,34 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.CheckResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
+import com.example.c001apk.ui.fragment.feed.IOnEmojiClickListener
 import com.example.c001apk.ui.fragment.feed.IOnReplyClickListener
 import com.example.c001apk.util.CookieUtil
+import com.example.c001apk.util.Emoji.initEmoji
+import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.view.CenteredImageSpan
+import com.example.c001apk.view.HorizontalScrollAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.gson.Gson
 import okhttp3.Call
 import okhttp3.Callback
@@ -40,9 +53,11 @@ import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
 import java.net.URLDecoder
+import java.util.regex.Pattern
 import kotlin.concurrent.thread
 
-class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener {
+class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener,
+    IOnEmojiClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[ReplyTotalViewModel::class.java] }
@@ -59,6 +74,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
     private var rid = ""
     private var rPosition = 0
     private var r2rPosition = 0
+    private lateinit var editText: EditText
+    private var replyAndForward = "0"
 
     companion object {
         fun newInstance(position: Int, uid: String, id: String): Reply2ReplyBottomSheetDialog {
@@ -195,14 +212,77 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         }
     }
 
-    @SuppressLint("InflateParams")
+    @SuppressLint("InflateParams", "RestrictedApi")
     private fun initReply() {
 
         bottomSheetDialog = BottomSheetDialog(requireActivity())
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
-        val editText: EditText = view.findViewById(R.id.editText)
+        editText = view.findViewById(R.id.editText)
         val publish: TextView = view.findViewById(R.id.publish)
+        val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
+        val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
+        val emotion: ImageButton = view.findViewById(R.id.emotion)
+        val pageSize = 21
+        val itemBeans = initEmoji(pageSize)
+        val scrollAdapter = HorizontalScrollAdapter(requireActivity(), itemBeans)
+        scrollAdapter.setIOnEmojiClickListener(this)
+        emojiPanel.adapter = scrollAdapter
+
+        fun checkAndPublish(){
+            if (editText.text.toString().replace("\n", "").isEmpty()) {
+                publish.isClickable = false
+                publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
+            } else {
+                publish.isClickable = true
+                publish.setTextColor(
+                    ThemeUtils.getThemeAttrColor(
+                        requireActivity(),
+                        com.drakeet.about.R.attr.colorPrimary
+                    )
+                )
+                publish.setOnClickListener {
+                    publish(editText.text.toString())
+                }
+            }
+        }
+
+        editText.hint = "回复: $uname"
+        editText.setText(viewModel.replyTextMap[rid + ruid])
+        checkAndPublish()
+        editText.isFocusable = true
+        editText.isFocusableInTouchMode = true
+        editText.requestFocus()
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(editText, 0)
+
+        emotion.setOnClickListener {
+            if (emojiPanel.visibility != View.VISIBLE) {
+                emojiPanel.visibility = View.VISIBLE
+                val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_keyboard)
+                val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
+                DrawableCompat.setTint(
+                    drawableKeyboard,
+                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                )
+                emotion.setImageDrawable(drawableKeyboard)
+            } else {
+                emojiPanel.visibility = View.GONE
+                val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
+                val drawableFace = DrawableCompat.wrap(face!!)
+                DrawableCompat.setTint(
+                    drawableFace,
+                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                )
+                emotion.setImageDrawable(drawableFace)
+            }
+        }
+
+        checkBox.setOnCheckedChangeListener { _, isChecked ->
+            replyAndForward = if (isChecked) "1"
+            else "0"
+        }
 
         bottomSheetDialog.apply {
             setContentView(view)
@@ -214,14 +294,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             }
         }
 
-        editText.hint = "回复: $uname"
-        editText.isFocusable = true
-        editText.isFocusableInTouchMode = true
-        editText.requestFocus()
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(editText, 0)
-
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
@@ -229,21 +301,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
 
             @SuppressLint("RestrictedApi")
             override fun afterTextChanged(p0: Editable?) {
-                if (editText.text.toString().replace("\n", "").isEmpty()) {
-                    publish.isClickable = false
-                    publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
-                } else {
-                    publish.isClickable = true
-                    publish.setTextColor(
-                        ThemeUtils.getThemeAttrColor(
-                            requireActivity(),
-                            com.drakeet.about.R.attr.colorPrimary
-                        )
-                    )
-                    publish.setOnClickListener {
-                        publish(editText.text.toString())
-                    }
-                }
+                viewModel.replyTextMap[rid + ruid] = editText.text.toString()
+                checkAndPublish()
             }
         })
     }
@@ -328,6 +387,56 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                 e.printStackTrace()
             }
         }
+    }
+
+    override fun onShowEmoji(name: String) {
+        var text = editText.text.toString()
+
+        if (name == "[c001apk]" && text != "") { //delete
+            if (text.last() == ']') {
+                val start = text.lastIndexOf('[')
+                if (EmojiUtil.getEmoji(text.substring(start, text.length)) == -1) {//not
+                    text = text.substring(0, text.length - 1)
+                } else {//is
+                    text = text.substring(0, start)
+                }
+            } else {//not
+                text = text.substring(0, text.length - 1)
+            }
+        } else if (name != "[c001apk]") {//insert
+            text += name
+        }
+
+        val builder = SpannableStringBuilder(text)
+        val pattern = Pattern.compile("\\[[^\\]]+\\]")
+        val matcher = pattern.matcher(builder)
+        editText.text = builder
+        var totalEmoji = 0
+        while (matcher.find()) {
+            totalEmoji++
+            val group = matcher.group()
+            if (EmojiUtil.getEmoji(group) != -1) {
+                val emoji: Drawable =
+                    requireActivity().getDrawable(EmojiUtil.getEmoji(group))!!
+                emoji.setBounds(
+                    0,
+                    0,
+                    (editText.textSize).toInt(),
+                    (editText.textSize).toInt()
+                )
+                val imageSpan = CenteredImageSpan(emoji)
+                builder.setSpan(
+                    imageSpan,
+                    matcher.start(),
+                    matcher.end(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                editText.text = builder
+            }
+        }
+        if (totalEmoji>20)
+            Toast.makeText(activity, "已超过表情上限${totalEmoji-20}个", Toast.LENGTH_SHORT).show()
+        editText.setSelection(editText.text.toString().length)
     }
 
 

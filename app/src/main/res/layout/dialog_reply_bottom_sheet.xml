@@ -48,7 +48,6 @@
         app:counterMaxLength="500">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:imeOptions="actionSearch"
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -95,16 +94,17 @@
             android:id="@+id/emotion"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:tint="@color/gray_75"
             android:background="?attr/actionBarItemBackground"
-            android:src="@drawable/ic_face" />
+            android:src="@drawable/ic_face"
+            android:tint="@color/gray_75" />
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/recyclerView"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/emojiPanel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="124dp"
+        android:layout_gravity="center_vertical"
         android:visibility="gone" />
 
 </LinearLayout>
