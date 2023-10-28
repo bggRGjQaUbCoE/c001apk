@@ -309,7 +309,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                                         "0",
                                         "0",
                                         PrefManager.userAvatar,
-                                        null,
+                                        ArrayList(),
                                         0
                                     )
                                 )

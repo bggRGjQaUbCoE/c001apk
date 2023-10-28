@@ -10,8 +10,8 @@ import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
-import com.example.c001apk.util.PrefManager
 import com.example.c001apk.ui.activity.AboutActivity
+import com.example.c001apk.util.PrefManager
 import rikka.core.util.ResourceUtils
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference

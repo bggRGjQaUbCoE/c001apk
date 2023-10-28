@@ -169,4 +169,5 @@ dependencies {
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     implementation("androidx.webkit:webkit:1.8.0")
     implementation("org.jsoup:jsoup:1.16.2")
+
 }

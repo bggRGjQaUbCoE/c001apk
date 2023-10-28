@@ -16,7 +16,7 @@ data class TotalReplyResponse(val data: List<Data>) {
         val likenum: String,
         val replynum: String,
         val userAvatar: String,
-        val replyRows: ArrayList<HomeFeedResponse.ReplyRows>?,
+        val replyRows: ArrayList<HomeFeedResponse.ReplyRows>,
         val replyRowsMore: Int,
     )
 

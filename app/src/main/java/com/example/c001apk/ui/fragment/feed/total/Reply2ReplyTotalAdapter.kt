@@ -15,19 +15,20 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import cc.shinichi.library.ImagePreview
+import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
-import com.example.c001apk.ui.fragment.feed.FeedContentPicAdapter
 import com.example.c001apk.ui.fragment.feed.IOnReplyClickListener
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
+import com.example.c001apk.view.NineImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.regex.Pattern
 
@@ -67,7 +68,7 @@ class Reply2ReplyTotalAdapter(
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
-        val picRecyclerView: RecyclerView = view.findViewById(R.id.picRecyclerView)
+        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
     }
 
     class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -276,17 +277,34 @@ class Reply2ReplyTotalAdapter(
                 ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                 if (!reply.picArr.isNullOrEmpty()) {
-                    holder.picRecyclerView.visibility = View.VISIBLE
-                    val mAdapter = FeedContentPicAdapter(reply.picArr)
-                    val count =
-                        if (reply.picArr.size < 3) reply.picArr.size
-                        else 3
-                    val mLayoutManager = GridLayoutManager(mContext, count)
-                    holder.picRecyclerView.apply {
-                        adapter = mAdapter
-                        layoutManager = mLayoutManager
+                    holder.multiImage.visibility = View.VISIBLE
+                    val imageUrls= ArrayList<String>()
+                    for (element in reply.picArr)
+                        imageUrls.add(element)
+                    holder.multiImage.setImageUrls(imageUrls)
+
+                    val urlList: MutableList<ImageInfo> = ArrayList()
+                    for (element in reply.picArr) {
+                        val imageInfo = ImageInfo()
+                        imageInfo.thumbnailUrl = "$element.s.jpg"
+                        imageInfo.originUrl = element
+                        urlList.add(imageInfo)
                     }
-                } else holder.picRecyclerView.visibility = View.GONE
+
+                    holder.multiImage.setOnClickItemListener { i, _ ->
+                        ImagePreview.instance
+                            .setContext(mContext)
+                            .setImageInfoList(urlList)
+                            .setIndex(i)
+                            .setShowCloseButton(true)
+                            .setEnableDragClose(true)
+                            .setEnableUpDragClose(true)
+                            .setFolderName("c001apk")
+                            .start()
+                    }
+                } else {
+                    holder.multiImage.visibility = View.GONE
+                }
             }
         }
     }

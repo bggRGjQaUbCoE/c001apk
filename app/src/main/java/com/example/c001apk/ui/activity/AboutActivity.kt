@@ -41,5 +41,6 @@ class AboutActivity : AbsAboutActivity() {
         items.add(License("glide-transformations", "wasabeef", License.APACHE_2, "https://github.com/wasabeef/glide-transformations"))
         items.add(License("jsoup", "jhy", License.MIT, "https://github.com/jhy/jsoup"))
         items.add(License("VerticalTabLayout", "qstumn", License.APACHE_2, "https://github.com/qstumn/VerticalTabLayout"))
+        items.add(License("NineImageView", "HotBitmapGG", License.APACHE_2, "https://github.com/HotBitmapGG/NineImageView"))
     }
 }

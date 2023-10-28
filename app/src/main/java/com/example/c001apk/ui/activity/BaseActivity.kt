@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.os.Bundle
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.ThemeUtils
-import com.google.android.material.color.DynamicColors
 import rikka.material.app.MaterialActivity
 
 abstract class BaseActivity : MaterialActivity() {

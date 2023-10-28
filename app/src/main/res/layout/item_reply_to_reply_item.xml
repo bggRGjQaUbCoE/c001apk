@@ -66,14 +66,17 @@
                 app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
                 app:layout_constraintEnd_toStartOf="@id/like" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/picRecyclerView"
+            <com.example.c001apk.view.NineImageView
+                android:id="@+id/multiImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:scrollbars="none"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pubDate" />
+                app:layout_constraintTop_toBottomOf="@id/pubDate"
+                app:nineImageHorizontalSpace="5dp"
+                app:nineImageRadius="12dp"
+                app:nineImageRatio="1"
+                app:nineImageVerticalSpace="5dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

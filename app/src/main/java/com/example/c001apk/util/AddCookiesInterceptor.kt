@@ -10,7 +10,6 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-import java.net.URLEncoder
 
 internal class AddCookiesInterceptor : Interceptor {
     @Throws(IOException::class)

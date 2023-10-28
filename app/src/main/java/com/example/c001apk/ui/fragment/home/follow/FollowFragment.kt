@@ -10,19 +10,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cc.shinichi.library.ImagePreview
-import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentFollowBinding
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickContainer
-import com.example.c001apk.ui.fragment.minterface.IOnFeedPicClickListener
 import com.example.c001apk.util.LinearItemDecoration
 
-class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListener {
+class FollowFragment : Fragment(), IOnBottomClickListener {
 
     private lateinit var binding: FragmentFollowBinding
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
@@ -159,7 +155,6 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
     override fun onResume() {
         super.onResume()
         (requireActivity() as IOnBottomClickContainer).controller = this
-        IOnFeedPicClickContainer.controller = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -169,18 +164,6 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnFeedPicClickListen
             initScroll()
         }
 
-    }
-
-    override fun onShowPic(position: Int, urlList: MutableList<ImageInfo>) {
-        ImagePreview.instance
-            .setContext(requireActivity())
-            .setImageInfoList(urlList)
-            .setIndex(position)
-            .setShowCloseButton(true)
-            .setEnableDragClose(true)
-            .setEnableUpDragClose(true)
-            .setFolderName("c001apk")
-            .start()
     }
 
 }

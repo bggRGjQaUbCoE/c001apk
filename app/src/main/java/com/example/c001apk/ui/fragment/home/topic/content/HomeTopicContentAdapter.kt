@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.topic.TopicActivity
-import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator

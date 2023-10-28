@@ -16,21 +16,21 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import cc.shinichi.library.ImagePreview
+import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedContentResponse
-import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
-import com.example.c001apk.util.SpacesItemDecoration
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
+import com.example.c001apk.view.NineImageView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.regex.Pattern
@@ -69,7 +69,7 @@ class FeedContentAdapter(
         val device: TextView = view.findViewById(R.id.device)
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
         val follow: Button = view.findViewById(R.id.follow)
@@ -85,7 +85,7 @@ class FeedContentAdapter(
         val replyLayout: MaterialCardView = view.findViewById(R.id.replyLayout)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
         val totalReply: TextView = view.findViewById(R.id.totalReply)
-        val picRecyclerView: RecyclerView = view.findViewById(R.id.picRecyclerView)
+        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
         var id = ""
         var uid = ""
     }
@@ -323,28 +323,34 @@ class FeedContentAdapter(
                         }
                     }
 
-                    if (feed.data.picArr?.isNotEmpty() == true) {
-                        holder.recyclerView.visibility = View.VISIBLE
-                        val mAdapter = FeedContentPicAdapter(feed.data.picArr)
-                        val count =
-                            if (feed.data.picArr.size < 3) feed.data.picArr.size
-                            else 3
-                        val mLayoutManager = GridLayoutManager(mContext, count)
-                        val space = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
-                        val spaceValue = HashMap<String, Int>()
-                        spaceValue[SpacesItemDecoration.TOP_SPACE] = 0
-                        spaceValue[SpacesItemDecoration.BOTTOM_SPACE] = space
-                        spaceValue[SpacesItemDecoration.LEFT_SPACE] = space
-                        spaceValue[SpacesItemDecoration.RIGHT_SPACE] = space
-                        holder.recyclerView.apply {
-                            setPadding(space, 0, space, space)
-                            adapter = mAdapter
-                            layoutManager = mLayoutManager
-                            if (itemDecorationCount == 0)
-                                addItemDecoration(SpacesItemDecoration(count, spaceValue, true))
+                    if (!feed.data.picArr.isNullOrEmpty()) {
+                        holder.multiImage.visibility = View.VISIBLE
+                        val imageUrls= ArrayList<String>()
+                        for (element in feed.data.picArr)
+                            imageUrls.add(element)
+                        holder.multiImage.setImageUrls(imageUrls)
+
+                        val urlList: MutableList<ImageInfo> = ArrayList()
+                        for (element in feed.data.picArr) {
+                            val imageInfo = ImageInfo()
+                            imageInfo.thumbnailUrl = "$element.s.jpg"
+                            imageInfo.originUrl = element
+                            urlList.add(imageInfo)
+                        }
+
+                        holder.multiImage.setOnClickItemListener { i, _ ->
+                            ImagePreview.instance
+                                .setContext(mContext)
+                                .setImageInfoList(urlList)
+                                .setIndex(i)
+                                .setShowCloseButton(true)
+                                .setEnableDragClose(true)
+                                .setEnableUpDragClose(true)
+                                .setFolderName("c001apk")
+                                .start()
                         }
                     } else {
-                        holder.recyclerView.visibility = View.GONE
+                        holder.multiImage.visibility = View.GONE
                     }
 
                     ImageShowUtil.showAvatar(holder.avatar, feed.data.userAvatar)
@@ -431,7 +437,7 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                     ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-                    if (reply.replyRows?.isNotEmpty() == true) {
+                    if (reply.replyRows.isNotEmpty()) {
                         holder.replyLayout.visibility = View.VISIBLE
                         val mAdapter =
                             Reply2ReplyAdapter(mContext, reply.uid, position, reply.replyRows)
@@ -446,23 +452,40 @@ class FeedContentAdapter(
 
                     if (reply.replyRowsMore != 0) {
                         holder.totalReply.visibility = View.VISIBLE
-                        val count = reply.replyRowsMore + reply.replyRows!!.size
+                        val count = reply.replyRowsMore + reply.replyRows.size
                         holder.totalReply.text = "查看更多回复($count)"
                     } else
                         holder.totalReply.visibility = View.GONE
 
                     if (!reply.picArr.isNullOrEmpty()) {
-                        holder.picRecyclerView.visibility = View.VISIBLE
-                        val mAdapter = FeedContentPicAdapter(reply.picArr)
-                        val count =
-                            if (reply.picArr.size < 3) reply.picArr.size
-                            else 3
-                        val mLayoutManager = GridLayoutManager(mContext, count)
-                        holder.picRecyclerView.apply {
-                            adapter = mAdapter
-                            layoutManager = mLayoutManager
+                        holder.multiImage.visibility = View.VISIBLE
+                        val imageUrls= ArrayList<String>()
+                        for (element in reply.picArr)
+                            imageUrls.add(element)
+                        holder.multiImage.setImageUrls(imageUrls)
+
+                        val urlList: MutableList<ImageInfo> = ArrayList()
+                        for (element in reply.picArr) {
+                            val imageInfo = ImageInfo()
+                            imageInfo.thumbnailUrl = "$element.s.jpg"
+                            imageInfo.originUrl = element
+                            urlList.add(imageInfo)
                         }
-                    } else holder.picRecyclerView.visibility = View.GONE
+
+                        holder.multiImage.setOnClickItemListener { i, _ ->
+                            ImagePreview.instance
+                                .setContext(mContext)
+                                .setImageInfoList(urlList)
+                                .setIndex(i)
+                                .setShowCloseButton(true)
+                                .setEnableDragClose(true)
+                                .setEnableUpDragClose(true)
+                                .setFolderName("c001apk")
+                                .start()
+                        }
+                    } else {
+                        holder.multiImage.visibility = View.GONE
+                    }
                 }
             }
         }

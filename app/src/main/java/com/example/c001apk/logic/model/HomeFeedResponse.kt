@@ -60,7 +60,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val infoHtml: String,
         val title: String,
         val picArr: List<String>?,
-        val replyRows: List<ReplyRows>?,
+        val replyRows: List<ReplyRows>,
         val replyRowsMore: Int,
         val logo: String,
         @SerializedName("hot_num") val hotNum: String,

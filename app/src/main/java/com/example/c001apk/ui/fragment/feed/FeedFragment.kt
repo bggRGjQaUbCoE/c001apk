@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Rect
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,11 +10,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,6 +37,7 @@ import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.gson.Gson
 import okhttp3.Call
 import okhttp3.Callback
@@ -39,6 +47,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.lang.reflect.Field
 import java.net.URLDecoder
 import kotlin.concurrent.thread
 
@@ -54,12 +63,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private var ruid = ""
     private var rid = ""
     private var rPosition = 0
+    private var replyAndForward = "0"
 
     //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var realKeyboardHeight = 0
 
     companion object {
         @JvmStatic
@@ -93,6 +104,33 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val context: Context = requireContext()
+        val parentLayout: CoordinatorLayout = view.findViewById(R.id.parent)
+        val myLayout: View = requireActivity().window.decorView
+        parentLayout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+            private var statusBarHeight = 0
+            override fun onGlobalLayout() {
+                val r = Rect()
+                parentLayout.getWindowVisibleDisplayFrame(r)
+                val screenHeight = myLayout.rootView.height
+                val heightDiff = screenHeight - (r.bottom - r.top)
+                if (heightDiff > 100) {
+                    statusBarHeight = 0
+                }
+                try {
+                    val c = Class.forName("com.android.internal.R\$dimen")
+                    val obj = c.newInstance()
+                    val field: Field = c.getField("status_bar_height")
+                    val x: Int = field.get(obj).toString().toInt()
+                    statusBarHeight = context.resources.getDimensionPixelSize(x)
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+                realKeyboardHeight = heightDiff - statusBarHeight
+                Log.e("键盘", "keyboard height(单位像素) = $realKeyboardHeight")
+            }
+        })
 
         initBar()
         initView()
@@ -167,6 +205,43 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
         val editText: EditText = view.findViewById(R.id.editText)
         val publish: TextView = view.findViewById(R.id.publish)
+        val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
+        val emotion: ImageButton = view.findViewById(R.id.emotion)
+        val recyclerView: ImageView = view.findViewById(R.id.recyclerView)
+        //val mAdapter = emotionAdapter(emoList)
+        //val mLayoutManager = GridLayoutManager(activity, 7)
+
+        editText.hint = "回复: $uname"
+        editText.isFocusable = true
+        editText.isFocusableInTouchMode = true
+        editText.requestFocus()
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(editText, 0)
+
+        /*emotion.setOnClickListener {
+            if (recyclerView.visibility == View.GONE) {
+                recyclerView.visibility = View.VISIBLE
+                val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_keyboard)
+                val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
+                DrawableCompat.setTint(drawableKeyboard, ContextCompat.getColor(requireContext(), R.color.gray_75))
+                emotion.setImageDrawable(drawableKeyboard)
+                recyclerView.layoutParams.height = realKeyboardHeight
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+            } else {
+                recyclerView.visibility = View.GONE
+                val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
+                val drawableFace = DrawableCompat.wrap(face!!)
+                DrawableCompat.setTint(drawableFace, ContextCompat.getColor(requireContext(), R.color.gray_75))
+                emotion.setImageDrawable(drawableFace)
+                imm.showSoftInput(editText, 0)
+            }
+        }*/
+
+        checkBox.setOnCheckedChangeListener { _, isChecked ->
+            replyAndForward = if (isChecked) "1"
+            else "0"
+        }
 
         bottomSheetDialog.apply {
             setContentView(view)
@@ -177,14 +252,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
-
-        editText.hint = "回复: $uname"
-        editText.isFocusable = true
-        editText.isFocusableInTouchMode = true
-        editText.requestFocus()
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(editText, 0)
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
@@ -218,6 +285,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val httpClient = OkHttpClient()
                 val formBody: RequestBody = FormBody.Builder()
                     .add("message", content)
+                    .add("replyAndForward", replyAndForward)
                     .build()
 
                 val getRequest: Request = Request.Builder()
@@ -275,15 +343,15 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                             "0",
                                             "0",
                                             PrefManager.userAvatar,
-                                            null,
+                                            ArrayList(),
                                             0
                                         )
                                     )
                                     mAdapter.notifyItemInserted(1)
                                     binding.recyclerView.scrollToPosition(1)
                                 } else {
-                                    viewModel.feedReplyList[rPosition - 1].replyRows!!.add(
-                                        viewModel.feedReplyList[rPosition - 1].replyRows!!.size,
+                                    viewModel.feedReplyList[rPosition - 1].replyRows.add(
+                                        viewModel.feedReplyList[rPosition - 1].replyRows.size,
                                         HomeFeedResponse.ReplyRows(
                                             rid,
                                             PrefManager.uid,

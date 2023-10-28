@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.core.text.HtmlCompat
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
-import java.util.Base64
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale

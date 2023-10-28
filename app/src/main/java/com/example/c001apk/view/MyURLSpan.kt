@@ -4,12 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.text.TextPaint
 import android.text.style.ClickableSpan
-import android.util.Log
 import android.view.View
-import android.widget.Toast
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
-import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.topic.TopicActivity
 import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.ui.activity.webview.WebViewActivity

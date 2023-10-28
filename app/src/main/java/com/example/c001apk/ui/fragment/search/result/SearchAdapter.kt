@@ -15,8 +15,9 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import cc.shinichi.library.ImagePreview
+import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
@@ -24,13 +25,12 @@ import com.example.c001apk.ui.activity.app.AppActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.topic.TopicActivity
 import com.example.c001apk.ui.activity.user.UserActivity
-import com.example.c001apk.ui.fragment.home.feed.FeedPicAdapter
-import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
+import com.example.c001apk.view.NineImageView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.regex.Pattern
@@ -62,7 +62,7 @@ class SearchAdapter(
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val device: TextView = view.findViewById(R.id.device)
         var id = ""
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
     }
 
     class AppViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -326,21 +326,35 @@ class SearchAdapter(
                 holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                 ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
 
-                if (feed.picArr?.isNotEmpty() == true) {
-                    holder.recyclerView.visibility = View.VISIBLE
-                    val mAdapter = FeedPicAdapter(feed.picArr)
-                    val count =
-                        if (feed.picArr.size < 3) feed.picArr.size
-                        else 3
-                    val mLayoutManager = GridLayoutManager(mContext, count)
-                    val minorSpace = mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
-                    val normalSpace = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
-                    holder.recyclerView.apply {
-                        setPadding(normalSpace, 0, minorSpace, minorSpace)
-                        adapter = mAdapter
-                        layoutManager = mLayoutManager
+                if (!feed.picArr.isNullOrEmpty()) {
+                    holder.multiImage.visibility = View.VISIBLE
+                    val imageUrls= ArrayList<String>()
+                    for (element in feed.picArr)
+                        imageUrls.add(element)
+                    holder.multiImage.setImageUrls(imageUrls)
+
+                    val urlList: MutableList<ImageInfo> = ArrayList()
+                    for (element in feed.picArr) {
+                        val imageInfo = ImageInfo()
+                        imageInfo.thumbnailUrl = "$element.s.jpg"
+                        imageInfo.originUrl = element
+                        urlList.add(imageInfo)
                     }
-                } else holder.recyclerView.visibility = View.GONE
+
+                    holder.multiImage.setOnClickItemListener { i, _ ->
+                        ImagePreview.instance
+                            .setContext(mContext)
+                            .setImageInfoList(urlList)
+                            .setIndex(i)
+                            .setShowCloseButton(true)
+                            .setEnableDragClose(true)
+                            .setEnableUpDragClose(true)
+                            .setFolderName("c001apk")
+                            .start()
+                    }
+                } else {
+                    holder.multiImage.visibility = View.GONE
+                }
             }
 
             is AppViewHolder -> {

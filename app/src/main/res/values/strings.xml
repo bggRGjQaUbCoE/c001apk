@@ -71,4 +71,5 @@
     <string name="about_view_source_code"><![CDATA[在 %1$s 查看源码]]></string>
     <string name="others">其他</string>
     <string name="about_open_source">开放源代码许可证</string>
+    <string name="replyAndForward">回复并转发</string>
 </resources>
