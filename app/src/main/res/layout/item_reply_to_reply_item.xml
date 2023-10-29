@@ -53,6 +53,7 @@
                 android:id="@+id/like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?attr/actionBarItemBackground"
                 android:textColor="@color/gray_bd"
                 app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
                 app:layout_constraintEnd_toEndOf="parent" />

@@ -58,7 +58,7 @@ import java.net.URLDecoder
 import kotlin.concurrent.thread
 
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener,
-    IOnEmojiClickListener {
+    IOnEmojiClickListener, IOnLikeClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[ReplyTotalViewModel::class.java] }
@@ -79,6 +79,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
     private var replyAndForward = "0"
     private var isPaste = false
     private var cursorBefore = -1
+    private var likePosition = -1
 
     companion object {
         fun newInstance(position: Int, uid: String, id: String): Reply2ReplyBottomSheetDialog {
@@ -138,6 +139,34 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             }
         }
 
+        viewModel.likeReplyData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.replyTotalList[likePosition].likenum = response.data
+                    viewModel.replyTotalList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeReplyData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.replyTotalList[likePosition].likenum = response.data
+                    viewModel.replyTotalList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -179,6 +208,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         mAdapter =
             Reply2ReplyTotalAdapter(requireActivity(), uid, position, viewModel.replyTotalList)
         mLayoutManager = LinearLayoutManager(activity)
+        mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setIOnReplyClickListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -419,7 +449,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                                         "0",
                                         PrefManager.userAvatar,
                                         ArrayList(),
-                                        0
+                                        0,
+                                        TotalReplyResponse.UserAction(0)
                                     )
                                 )
                                 mAdapter.notifyItemInserted(r2rPosition + 1)
@@ -492,5 +523,13 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         }
     }
 
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeReplyId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeReply()
+        else
+            viewModel.postLikeReply()
+    }
 
 }

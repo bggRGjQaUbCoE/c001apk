@@ -58,7 +58,7 @@ import kotlin.concurrent.thread
 
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
-    IOnEmojiClickListener {
+    IOnEmojiClickListener, IOnLikeClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
@@ -81,6 +81,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private lateinit var editText: ExtendEditText
     private var isPaste = false
     private var cursorBefore = -1
+    private var likeReplyPosition = -1
 
     companion object {
         @JvmStatic
@@ -181,6 +182,62 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             binding.swipeRefresh.isRefreshing = false
         }
 
+        viewModel.likeReplyData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.feedReplyList[likeReplyPosition].likenum = response.data
+                    viewModel.feedReplyList[likeReplyPosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeReplyData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.feedReplyList[likeReplyPosition].likenum = response.data
+                    viewModel.feedReplyList[likeReplyPosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.feedContentList[0].data.likenum = response.data.count
+                    viewModel.feedContentList[0].data.userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.feedContentList[0].data.likenum = response.data.count
+                    viewModel.feedContentList[0].data.userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     @SuppressLint("InflateParams", "RestrictedApi")
@@ -253,7 +310,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (emojiPanel.visibility != View.VISIBLE) {
                 //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                 emojiPanel.visibility = View.VISIBLE
-                val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_down)
+                val keyboard =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_down)
                 val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
                 DrawableCompat.setTint(
                     drawableKeyboard,
@@ -297,7 +355,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     cursorBefore = editText.selectionStart
                 } else {
                     if (text == "") {//delete
-                        editText.editableText.delete(editText.selectionStart, editText.selectionEnd)
+                        editText.editableText.delete(
+                            editText.selectionStart,
+                            editText.selectionEnd
+                        )
                     } else {
                         val builder = SpannableStringBuilderUtil.setEmoji(
                             requireActivity(),
@@ -409,7 +470,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                             "0",
                                             PrefManager.userAvatar,
                                             ArrayList(),
-                                            0
+                                            0,
+                                            TotalReplyResponse.UserAction(0)
                                         )
                                     )
                                     mAdapter.notifyItemInserted(1)
@@ -433,7 +495,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             }
                         } else {
                             requireActivity().runOnUiThread {
-                                Toast.makeText(activity, reply.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(activity, reply.message, Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         }
                     }
@@ -517,6 +580,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             viewModel.feedReplyList
         )
         mAdapter.setIOnTotalReplyClickListener(this)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -540,7 +604,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     @SuppressLint("InflateParams", "NotifyDataSetChanged")
     override fun onShowTotalReply(position: Int, uid: String, id: String) {
-        val mBottomSheetDialogFragment = Reply2ReplyBottomSheetDialog.newInstance(position, uid, id)
+        val mBottomSheetDialogFragment =
+            Reply2ReplyBottomSheetDialog.newInstance(position, uid, id)
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 
@@ -587,7 +652,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     editText.editableText.delete(i, selectionStart)
                                     return
                                 } else {
-                                    editText.editableText.delete(tempStr.length - 1, selectionStart)
+                                    editText.editableText.delete(
+                                        tempStr.length - 1,
+                                        selectionStart
+                                    )
                                 }
                             } else {
                                 editText.editableText.delete(tempStr.length - 1, selectionStart)
@@ -615,6 +683,23 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             editText.editableText.replace(selectionStart, selectionEnd, spannableStringBuilder)
+        }
+    }
+
+    override fun onPostLike(type: String, isLike: Boolean, id: String, position: Int?) {
+        if (type == "reply") {
+            this.likeReplyPosition = position!!
+            viewModel.likeReplyId = id
+            if (isLike)
+                viewModel.postUnLikeReply()
+            else
+                viewModel.postLikeReply()
+        } else {
+            viewModel.likeFeedId = id
+            if (isLike)
+                viewModel.postUnLikeFeed()
+            else
+                viewModel.postLikeFeed()
         }
     }
 

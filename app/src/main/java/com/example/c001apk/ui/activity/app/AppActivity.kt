@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,11 +13,12 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityAppBinding
 import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
+import com.example.c001apk.ui.fragment.home.feed.IOnLikeClickListener
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
 
-class AppActivity : BaseActivity() {
+class AppActivity : BaseActivity(), IOnLikeClickListener {
 
     private lateinit var binding: ActivityAppBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -24,6 +26,7 @@ class AppActivity : BaseActivity() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var likePosition = -1
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,12 +88,41 @@ class AppActivity : BaseActivity() {
             viewModel.isRefreh = false
         }
 
+        viewModel.likeFeedData.observe(this) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.appCommentList[likePosition].likenum = response.data.count
+                    viewModel.appCommentList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(this) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.appCommentList[likePosition].likenum = response.data.count
+                    viewModel.appCommentList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
 
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = HomeFeedAdapter(this, viewModel.appCommentList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -165,6 +197,15 @@ class AppActivity : BaseActivity() {
             android.R.id.home -> finish()
         }
         return true
+    }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
     }
 
 }

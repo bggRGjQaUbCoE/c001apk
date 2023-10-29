@@ -71,6 +71,18 @@ object Network {
     suspend fun getFansList(uid: String, page: Int) =
         apiService.getFansList(uid, page).await()
 
+    suspend fun postLikeFeed(id: String) =
+        apiService.postLikeFeed(id).await()
+
+    suspend fun postUnLikeFeed(id: String) =
+        apiService.postUnLikeFeed(id).await()
+
+    suspend fun postLikeReply(id: String) =
+        apiService.postLikeReply(id).await()
+
+    suspend fun postUnLikeReply(id: String) =
+        apiService.postUnLikeReply(id).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

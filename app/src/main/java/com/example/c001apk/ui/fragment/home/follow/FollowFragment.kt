@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -14,11 +15,12 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentFollowBinding
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
+import com.example.c001apk.ui.fragment.home.feed.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.util.LinearItemDecoration
 
-class FollowFragment : Fragment(), IOnBottomClickListener {
+class FollowFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener {
 
     private lateinit var binding: FragmentFollowBinding
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
@@ -26,6 +28,7 @@ class FollowFragment : Fragment(), IOnBottomClickListener {
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var likePosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,11 +74,40 @@ class FollowFragment : Fragment(), IOnBottomClickListener {
             binding.swipeRefresh.isRefreshing = false
         }
 
+        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.followFeedList[likePosition].likenum = response.data.count
+                    viewModel.followFeedList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.followFeedList[likePosition].likenum = response.data.count
+                    viewModel.followFeedList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = HomeFeedAdapter(requireActivity(), viewModel.followFeedList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -164,6 +196,15 @@ class FollowFragment : Fragment(), IOnBottomClickListener {
             initScroll()
         }
 
+    }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
     }
 
 }

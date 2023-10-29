@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -14,7 +15,7 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.util.LinearItemDecoration
 
-class SearchContentFragment : Fragment() {
+class SearchContentFragment : Fragment(), IOnLikeClickListener {
 
     private lateinit var binding: FragmentSearchFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[SearchContentViewModel::class.java] }
@@ -24,6 +25,7 @@ class SearchContentFragment : Fragment() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var likePosition = -1
 
     companion object {
         @JvmStatic
@@ -104,6 +106,34 @@ class SearchContentFragment : Fragment() {
             binding.swipeRefresh.isRefreshing = false
         }
 
+        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.searchList[likePosition].likenum = response.data.count
+                    viewModel.searchList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.searchList[likePosition].likenum = response.data.count
+                    viewModel.searchList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -166,6 +196,7 @@ class SearchContentFragment : Fragment() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
 
         mAdapter = SearchAdapter(requireActivity(), type, viewModel.searchList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -173,6 +204,15 @@ class SearchContentFragment : Fragment() {
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
+    }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
     }
 
 }

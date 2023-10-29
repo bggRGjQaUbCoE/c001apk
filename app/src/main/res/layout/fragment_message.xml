@@ -75,25 +75,32 @@
                     app:layout_constraintStart_toEndOf="@+id/avatar"
                     app:layout_constraintTop_toBottomOf="@id/name">
 
-                    <TextView
-                        android:id="@+id/level"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        tools:text="Lv.1" />
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/exp"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="end"
-                        tools:text="500/1000" />
+                        <TextView
+                            android:id="@+id/level"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="Lv.1" />
+
+                        <TextView
+                            android:id="@+id/exp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            tools:text="500/1000"
+                            tools:ignore="NestedWeights" />
+                    </LinearLayout>
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:layout_weight="2" />
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -110,9 +117,9 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        app:trackCornerRadius="20dp"
                         tools:max="1000"
-                        tools:progress="500"
-                        app:trackCornerRadius="20dp" />
+                        tools:progress="500" />
 
                     <View
                         android:layout_width="0dp"
@@ -139,8 +146,8 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center_vertical"
-                        tools:src="#123456"
-                        tools:ignore="ContentDescription" />
+                        tools:ignore="ContentDescription"
+                        tools:src="#123456" />
 
                     <TextView
                         android:id="@+id/name1"

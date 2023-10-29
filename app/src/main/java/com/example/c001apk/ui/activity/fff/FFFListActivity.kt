@@ -3,6 +3,7 @@ package com.example.c001apk.ui.activity.fff
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,7 +14,7 @@ import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 
-class FFFListActivity : BaseActivity() {
+class FFFListActivity : BaseActivity(), IOnLikeClickListener {
 
     private lateinit var binding: ActivityFfflistBinding
     private val viewModel by lazy { ViewModelProvider(this)[FFFListViewModel::class.java] }
@@ -23,6 +24,7 @@ class FFFListActivity : BaseActivity() {
     private var lastVisibleItemPosition = -1
     private lateinit var type: String
     private lateinit var uid: String
+    private var likePosition = -1
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +41,6 @@ class FFFListActivity : BaseActivity() {
         initData()
         initRefresh()
         initScroll()
-
 
         viewModel.listData.observe(this) { result ->
             val feed = result.getOrNull()
@@ -60,6 +61,34 @@ class FFFListActivity : BaseActivity() {
             binding.indicator.isIndeterminate = false
             binding.swipeRefresh.isRefreshing = false
             viewModel.isRefreh = false
+        }
+
+        viewModel.likeFeedData.observe(this) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.dataList[likePosition].likenum = response.data.count
+                    viewModel.dataList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(this) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.dataList[likePosition].likenum = response.data.count
+                    viewModel.dataList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
         }
 
     }
@@ -145,6 +174,7 @@ class FFFListActivity : BaseActivity() {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = FFFListAdapter(this, type, viewModel.dataList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -160,6 +190,15 @@ class FFFListActivity : BaseActivity() {
         viewModel.type = type
         viewModel.uid = uid
         viewModel.getFeedList()
+    }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
     }
 
 

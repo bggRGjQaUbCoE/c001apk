@@ -44,7 +44,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val message: String,
         val pic: String,
         val tags: String,
-        val likenum: String,
+        var likenum: String,
         val commentnum: String,
         val replynum: String,
         val forwardnum: String,
@@ -108,7 +108,7 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class UserAction(
-        val like: Int,
+        var like: Int,
         val favorite: Int,
         val follow: Int,
         val collect: Int,

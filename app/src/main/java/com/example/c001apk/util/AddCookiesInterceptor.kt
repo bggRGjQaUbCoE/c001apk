@@ -29,6 +29,7 @@ internal class AddCookiesInterceptor : Interceptor {
             addHeader("X-Dark-Mode", "0")
             addHeader("X-App-Channel", "coolapk")
             addHeader("X-App-Mode", "universal")
+            addHeader("X-App-Supported", "2307121")
             if (PrefManager.isLogin)
                 addHeader(
                 "Cookie",

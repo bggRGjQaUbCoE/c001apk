@@ -29,21 +29,12 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/from"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/gray_bd"
-            app:layout_constraintStart_toEndOf="@id/avatar"
-            app:layout_constraintTop_toBottomOf="@id/uname" />
-
-        <TextView
             android:id="@+id/device"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:textColor="@color/gray_bd"
-            app:layout_constraintStart_toEndOf="@id/from"
+            app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
         <TextView
@@ -69,6 +60,7 @@
             android:id="@+id/like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="?attr/actionBarItemBackground"
             android:textColor="@color/gray_bd"
             app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
             app:layout_constraintEnd_toEndOf="parent" />

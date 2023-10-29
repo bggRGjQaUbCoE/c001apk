@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -14,11 +15,12 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.home.HomeFragment.Companion.current
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
+import com.example.c001apk.ui.fragment.home.feed.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.util.LinearItemDecoration
 
-class HomeRankingFragment : Fragment(), IOnBottomClickListener {
+class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[HomeRankingViewModel::class.java] }
@@ -26,6 +28,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener {
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var likePosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +56,10 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener {
                     viewModel.homeRankingList.clear()
                 if (viewModel.isRefreshing || viewModel.isLoadMore) {
                     for (element in feed) {
-                        if (element.entityTemplate == "iconLinkGridCard" || element.entityTemplate == "iconMiniGridCard" || element.entityTemplate == "feed")
+                        if (element.entityTemplate == "feed"
+                            || element.entityTemplate == "iconMiniGridCard"
+                            || element.entityTemplate == "iconLinkGridCard"
+                        )
                             viewModel.homeRankingList.add(element)
                     }
                     viewModel.lastItem = feed[feed.size - 1].entityId
@@ -69,6 +75,34 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener {
             viewModel.isLoadMore = false
             viewModel.isRefreshing = false
             binding.swipeRefresh.isRefreshing = false
+        }
+
+        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.homeRankingList[likePosition].likenum = response.data.count
+                    viewModel.homeRankingList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.homeRankingList[likePosition].likenum = response.data.count
+                    viewModel.homeRankingList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
         }
 
     }
@@ -130,6 +164,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = HomeFeedAdapter(requireActivity(), viewModel.homeRankingList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -162,6 +197,15 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener {
             initScroll()
         }
         (requireActivity() as IOnBottomClickContainer).controller = this
+    }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
     }
 
 

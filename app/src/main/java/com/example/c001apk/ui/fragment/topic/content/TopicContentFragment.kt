@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +18,7 @@ import com.example.c001apk.util.LinearItemDecoration
 private const val URL = "url"
 private const val TITLE = "title"
 
-class TopicContentFragment : Fragment() {
+class TopicContentFragment : Fragment(), IOnLikeClickListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[TopicContentViewModel::class.java] }
@@ -27,6 +28,7 @@ class TopicContentFragment : Fragment() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var likePosition = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,6 +105,34 @@ class TopicContentFragment : Fragment() {
             binding.swipeRefresh.isRefreshing = false
         }
 
+        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.topicDataList[likePosition].likenum = response.data.count
+                    viewModel.topicDataList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.topicDataList[likePosition].likenum = response.data.count
+                    viewModel.topicDataList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -149,6 +179,7 @@ class TopicContentFragment : Fragment() {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = TopicContentAdapter(requireActivity(), viewModel.topicDataList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -170,6 +201,15 @@ class TopicContentFragment : Fragment() {
         viewModel.url = url
         viewModel.title = title
         viewModel.getTopicData()
+    }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
     }
 
 }

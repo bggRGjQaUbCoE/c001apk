@@ -167,6 +167,42 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun postLikeFeed(id: String) =
+        fire(Dispatchers.IO) {
+            val response = Network.postLikeFeed(id)
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun postUnLikeFeed(id: String) =
+        fire(Dispatchers.IO) {
+            val response = Network.postUnLikeFeed(id)
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun postLikeReply(id: String) =
+        fire(Dispatchers.IO) {
+            val response = Network.postLikeReply(id)
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun postUnLikeReply(id: String) =
+        fire(Dispatchers.IO) {
+            val response = Network.postUnLikeReply(id)
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
 
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {

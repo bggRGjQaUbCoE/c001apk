@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,13 +15,14 @@ import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.activity.BaseActivity
 import com.example.c001apk.ui.activity.fff.FFFListActivity
 import com.example.c001apk.ui.fragment.home.feed.HomeFeedAdapter
+import com.example.c001apk.ui.fragment.home.feed.IOnLikeClickListener
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
 
 
-class UserActivity : BaseActivity() {
+class UserActivity : BaseActivity(), IOnLikeClickListener {
 
     private lateinit var binding: ActivityUserBinding
     private val viewModel by lazy { ViewModelProvider(this)[UserViewModel::class.java] }
@@ -28,6 +30,7 @@ class UserActivity : BaseActivity() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
+    private var likePosition = -1
 
     @SuppressLint(
         "ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged", "UseCompatLoadingForDrawables",
@@ -107,6 +110,34 @@ class UserActivity : BaseActivity() {
             viewModel.isRefreh = false
         }
 
+        viewModel.likeFeedData.observe(this) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.feedContentList[likePosition].likenum = response.data.count
+                    viewModel.feedContentList[likePosition].userAction.like = 1
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
+        viewModel.unLikeFeedData.observe(this) { result ->
+            val response = result.getOrNull()
+            if (response != null) {
+                if (response.data != null) {
+                    viewModel.feedContentList[likePosition].likenum = response.data.count
+                    viewModel.feedContentList[likePosition].userAction.like = 0
+                    mAdapter.notifyDataSetChanged()
+                } else
+                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -170,6 +201,7 @@ class UserActivity : BaseActivity() {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = HomeFeedAdapter(this, viewModel.feedContentList)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -185,4 +217,14 @@ class UserActivity : BaseActivity() {
         }
         return true
     }
+
+    override fun onPostLike(isLike: Boolean, id: String, position: Int) {
+        viewModel.likeFeedId = id
+        this.likePosition = position
+        if (isLike)
+            viewModel.postUnLikeFeed()
+        else
+            viewModel.postLikeFeed()
+    }
+
 }

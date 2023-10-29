@@ -28,4 +28,23 @@ class ReplyTotalViewModel : ViewModel() {
         getReplyTotalLiveData.value = getReplyTotalLiveData.value
     }
 
+    //like reply
+    var likeReplyId = ""
+    private val postLikeReplyData = MutableLiveData<String>()
+    val likeReplyData = postLikeReplyData.switchMap {
+        Repository.postLikeReply(likeReplyId)
+    }
+    fun postLikeReply() {
+        postLikeReplyData.value = postLikeReplyData.value
+    }
+
+    //unlike reply
+    private val postUnLikeReplyData = MutableLiveData<String>()
+    val unLikeReplyData = postUnLikeReplyData.switchMap {
+        Repository.postUnLikeReply(likeReplyId)
+    }
+    fun postUnLikeReply() {
+        postUnLikeReplyData.value = postUnLikeReplyData.value
+    }
+
 }

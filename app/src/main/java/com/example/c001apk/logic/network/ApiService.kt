@@ -2,9 +2,15 @@ package com.example.c001apk.logic.network
 
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.LikeFeedResponse
+import com.example.c001apk.logic.model.LikeReplyResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import retrofit2.Call
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ApiService {
@@ -120,5 +126,25 @@ interface ApiService {
         @Query("uid") uid: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
+
+    @POST("/v6/feed/like")
+    fun postLikeFeed(
+        @Query("id") id: String,
+    ): Call<LikeFeedResponse>
+
+    @POST("/v6/feed/unlike")
+    fun postUnLikeFeed(
+        @Query("id") id: String,
+    ): Call<LikeFeedResponse>
+
+    @POST("/v6/feed/likeReply")
+    fun postLikeReply(
+        @Query("id") id: String,
+    ): Call<LikeReplyResponse>
+
+    @POST("/v6/feed/unLikeReply")
+    fun postUnLikeReply(
+        @Query("id") id: String,
+    ): Call<LikeReplyResponse>
 
 }

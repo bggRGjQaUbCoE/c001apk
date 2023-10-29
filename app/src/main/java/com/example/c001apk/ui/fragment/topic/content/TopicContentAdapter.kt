@@ -4,17 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.text.Html
-import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.ImagePreview
 import cc.shinichi.library.bean.ImageInfo
@@ -24,22 +22,25 @@ import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.feed.FeedActivity
 import com.example.c001apk.ui.activity.topic.TopicActivity
 import com.example.c001apk.ui.activity.user.UserActivity
-import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.CenteredImageSpan
-import com.example.c001apk.view.MyURLSpan
 import com.example.c001apk.view.NineImageView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import java.util.regex.Pattern
 
 class TopicContentAdapter(
     private val mContext: Context,
     private val searchList: List<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var iOnLikeClickListener: IOnLikeClickListener? = null
+
+    fun setIOnLikeReplyListener(iOnLikeClickListener: IOnLikeClickListener) {
+        this.iOnLikeClickListener = iOnLikeClickListener
+    }
 
     private var loadState = 2
     val LOADING = 1
@@ -62,6 +63,7 @@ class TopicContentAdapter(
         val device: TextView = view.findViewById(R.id.device)
         var id = ""
         var uid = ""
+        var isLike = false
         val multiImage: NineImageView = view.findViewById(R.id.multiImage)
     }
 
@@ -125,6 +127,15 @@ class TopicContentAdapter(
                     intent.putExtra("id", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
+                viewHolder.like.setOnClickListener {
+                    if (PrefManager.isLogin){
+                        iOnLikeClickListener?.onPostLike(
+                            viewHolder.isLike,
+                            viewHolder.id,
+                            viewHolder.adapterPosition
+                        )
+                    }
+                }
                 viewHolder
             }
 
@@ -167,7 +178,7 @@ class TopicContentAdapter(
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
+    @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n", "RestrictedApi")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
 
@@ -203,6 +214,7 @@ class TopicContentAdapter(
                 val feed = searchList[position]
                 holder.id = feed.id
                 holder.uid = feed.uid
+                holder.isLike = feed.userAction.like == 1
                 holder.uname.text = feed.username
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle
@@ -231,7 +243,6 @@ class TopicContentAdapter(
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
                 holder.message.text = SpannableStringBuilderUtil.setText(mContext, feed.message, (holder.message.textSize*1.3).toInt())
 
-                holder.like.text = feed.likenum
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                 drawableLike.setBounds(
                     0,
@@ -239,6 +250,25 @@ class TopicContentAdapter(
                     holder.like.textSize.toInt(),
                     holder.like.textSize.toInt()
                 )
+                if (feed.userAction.like == 1) {
+                    DrawableCompat.setTint(
+                        drawableLike,
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            rikka.preference.simplemenu.R.attr.colorPrimary
+                        )
+                    )
+                    holder.like.setTextColor(
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            rikka.preference.simplemenu.R.attr.colorPrimary
+                        )
+                    )
+                } else {
+                    DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
+                    holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                }
+                holder.like.text = feed.likenum
                 holder.like.setCompoundDrawables(drawableLike, null, null, null)
 
                 holder.reply.text = feed.replynum

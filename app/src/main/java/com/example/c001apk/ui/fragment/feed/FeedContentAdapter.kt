@@ -4,11 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.text.Html
-import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +12,8 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cc.shinichi.library.ImagePreview
@@ -25,16 +23,13 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.user.UserActivity
-import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.CenteredImageSpan
-import com.example.c001apk.view.MyURLSpan
 import com.example.c001apk.view.NineImageView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import java.util.regex.Pattern
 
 
 class FeedContentAdapter(
@@ -58,6 +53,12 @@ class FeedContentAdapter(
         notifyDataSetChanged()
     }
 
+    private var iOnLikeClickListener: IOnLikeClickListener? = null
+
+    fun setIOnLikeReplyListener(iOnLikeClickListener: IOnLikeClickListener) {
+        this.iOnLikeClickListener = iOnLikeClickListener
+    }
+
     private var iOnTotalReplyClickListener: IOnTotalReplyClickListener? = null
 
     fun setIOnTotalReplyClickListener(iOnTotalReplyClickListener: IOnTotalReplyClickListener) {
@@ -70,10 +71,12 @@ class FeedContentAdapter(
         val device: TextView = view.findViewById(R.id.device)
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
-        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
+        val multiImage: NineImageView = view.findViewById(R.id.multiImage)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
         val follow: Button = view.findViewById(R.id.follow)
+        var id = ""
+        var isLike = false
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -86,9 +89,10 @@ class FeedContentAdapter(
         val replyLayout: MaterialCardView = view.findViewById(R.id.replyLayout)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
         val totalReply: TextView = view.findViewById(R.id.totalReply)
-        val multiImage : NineImageView = view.findViewById(R.id.multiImage)
+        val multiImage: NineImageView = view.findViewById(R.id.multiImage)
         var id = ""
         var uid = ""
+        var isLike = false
     }
 
     class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -125,6 +129,16 @@ class FeedContentAdapter(
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uname.text)
                     parent.context.startActivity(intent)
+                }
+                viewHolder.like.setOnClickListener {
+                    if (PrefManager.isLogin) {
+                        iOnLikeClickListener?.onPostLike(
+                            "feed",
+                            viewHolder.isLike,
+                            viewHolder.id,
+                            null
+                        )
+                    }
                 }
                 viewHolder
             }
@@ -189,6 +203,16 @@ class FeedContentAdapter(
                         "reply"
                     )
                 }
+                viewHolder.like.setOnClickListener {
+                    if (PrefManager.isLogin) {
+                        iOnLikeClickListener?.onPostLike(
+                            "reply",
+                            viewHolder.isLike,
+                            viewHolder.id,
+                            viewHolder.adapterPosition - 1
+                        )
+                    }
+                }
                 viewHolder
             }
         }
@@ -196,7 +220,7 @@ class FeedContentAdapter(
 
     override fun getItemCount() = replyList.size + 2
 
-    @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
+    @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n", "RestrictedApi")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is FootViewHolder -> {
@@ -230,6 +254,8 @@ class FeedContentAdapter(
             is FeedContentViewHolder -> {
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
+                    holder.id = feed.data.id
+                    holder.isLike = feed.data.userAction.like == 1
                     holder.uname.text = feed.data.username
                     if (feed.data.userAction.followAuthor == 1) {
                         holder.follow.text = "已关注"
@@ -251,16 +277,18 @@ class FeedContentAdapter(
                     } else {
                         holder.device.visibility = View.GONE
                     }
+
                     holder.pubDate.text = PubDateUtil.time(feed.data.dateline)
-                    val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
-                    drawable1.setBounds(
+                    val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                    drawableDate.setBounds(
                         0,
                         0,
                         holder.pubDate.textSize.toInt(),
                         holder.pubDate.textSize.toInt()
                     )
-                    holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
-                    holder.like.text = feed.data.likenum
+                    holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
+
+
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
                         0,
@@ -268,6 +296,25 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt(),
                         holder.like.textSize.toInt()
                     )
+                    if (feed.data.userAction.like == 1) {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                        holder.like.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
+                        holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                    }
+                    holder.like.text = feed.data.likenum
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)
 
                     holder.reply.text = feed.data.replynum
@@ -281,11 +328,15 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
                     holder.message.movementMethod = LinkMovementMethod.getInstance()
-                    holder.message.text = SpannableStringBuilderUtil.setText(mContext, feed.data.message, (holder.message.textSize*1.3).toInt())
+                    holder.message.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        feed.data.message,
+                        (holder.message.textSize * 1.3).toInt()
+                    )
 
                     if (!feed.data.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
-                        val imageUrls= ArrayList<String>()
+                        val imageUrls = ArrayList<String>()
                         for (element in feed.data.picArr)
                             imageUrls.add(element)
                         holder.multiImage.setImageUrls(imageUrls)
@@ -320,23 +371,28 @@ class FeedContentAdapter(
             is FeedContentReplyViewHolder -> {
                 if (replyList.isNotEmpty()) {
                     val reply = replyList[position - 1]
+                    holder.isLike = reply.userAction.like == 1
                     holder.id = reply.id
                     holder.uid = reply.uid
                     holder.uname.text = reply.username
 
                     holder.message.movementMethod = LinkMovementMethod.getInstance()
-                    holder.message.text = SpannableStringBuilderUtil.setText(mContext, reply.message, (holder.message.textSize*1.3).toInt())
+                    holder.message.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        reply.message,
+                        (holder.message.textSize * 1.3).toInt()
+                    )
 
                     holder.pubDate.text = PubDateUtil.time(reply.dateline)
-                    val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
-                    drawable1.setBounds(
+                    val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                    drawableDate.setBounds(
                         0,
                         0,
                         holder.pubDate.textSize.toInt(),
                         holder.pubDate.textSize.toInt()
                     )
-                    holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
-                    holder.like.text = reply.likenum
+                    holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
+
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
                         0,
@@ -344,7 +400,27 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt(),
                         holder.like.textSize.toInt()
                     )
+                    if (reply.userAction.like == 1) {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                        holder.like.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
+                        holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                    }
+                    holder.like.text = reply.likenum
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)
+
                     holder.reply.text = reply.replynum
                     val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
                     drawableReply.setBounds(
@@ -378,7 +454,7 @@ class FeedContentAdapter(
 
                     if (!reply.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
-                        val imageUrls= ArrayList<String>()
+                        val imageUrls = ArrayList<String>()
                         for (element in reply.picArr)
                             imageUrls.add(element)
                         holder.multiImage.setImageUrls(imageUrls)

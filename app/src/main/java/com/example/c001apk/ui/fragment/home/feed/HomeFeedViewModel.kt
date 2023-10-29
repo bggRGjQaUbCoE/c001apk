@@ -28,4 +28,23 @@ class HomeFeedViewModel : ViewModel() {
     fun getHomeFeed() {
         getHomeFeedData.value = getHomeFeedData.value
     }
+
+    //like feed
+    var likeFeedId = ""
+    private val postLikeFeedData = MutableLiveData<String>()
+    val likeFeedData = postLikeFeedData.switchMap {
+        Repository.postLikeFeed(likeFeedId)
+    }
+    fun postLikeFeed() {
+        postLikeFeedData.value = postLikeFeedData.value
+    }
+
+    //unlike feed
+    private val postUnLikeFeedData = MutableLiveData<String>()
+    val unLikeFeedData = postUnLikeFeedData.switchMap {
+        Repository.postUnLikeFeed(likeFeedId)
+    }
+    fun postUnLikeFeed() {
+        postUnLikeFeedData.value = postUnLikeFeedData.value
+    }
 }
