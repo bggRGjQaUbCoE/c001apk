@@ -79,7 +79,7 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener 
             if (response != null) {
                 if (response.data != null) {
                     viewModel.followFeedList[likePosition].likenum = response.data.count
-                    viewModel.followFeedList[likePosition].userAction.like = 1
+                    viewModel.followFeedList[likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -93,7 +93,7 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener 
             if (response != null) {
                 if (response.data != null) {
                     viewModel.followFeedList[likePosition].likenum = response.data.count
-                    viewModel.followFeedList[likePosition].userAction.like = 0
+                    viewModel.followFeedList[likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

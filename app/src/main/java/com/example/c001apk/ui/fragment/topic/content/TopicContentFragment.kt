@@ -110,7 +110,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
             if (response != null) {
                 if (response.data != null) {
                     viewModel.topicDataList[likePosition].likenum = response.data.count
-                    viewModel.topicDataList[likePosition].userAction.like = 1
+                    viewModel.topicDataList[likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -124,7 +124,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
             if (response != null) {
                 if (response.data != null) {
                     viewModel.topicDataList[likePosition].likenum = response.data.count
-                    viewModel.topicDataList[likePosition].userAction.like = 0
+                    viewModel.topicDataList[likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

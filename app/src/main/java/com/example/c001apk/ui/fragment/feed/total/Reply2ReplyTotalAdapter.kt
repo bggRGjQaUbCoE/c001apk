@@ -192,7 +192,7 @@ class Reply2ReplyTotalAdapter(
                 holder.id = reply.id
                 holder.uid = reply.uid
                 holder.name = reply.username
-                holder.isLike = reply.userAction.like == 1
+                holder.isLike = reply.userAction?.like == 1
 
                 val text =
                     if (uid == reply.ruid)
@@ -245,7 +245,7 @@ class Reply2ReplyTotalAdapter(
                     holder.like.textSize.toInt(),
                     holder.like.textSize.toInt()
                 )
-                if (reply.userAction.like == 1) {
+                if (reply.userAction?.like == 1) {
                     DrawableCompat.setTint(
                         drawableLike,
                         ThemeUtils.getThemeAttrColor(

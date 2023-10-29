@@ -111,7 +111,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
             if (response != null) {
                 if (response.data != null) {
                     viewModel.searchList[likePosition].likenum = response.data.count
-                    viewModel.searchList[likePosition].userAction.like = 1
+                    viewModel.searchList[likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -125,7 +125,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
             if (response != null) {
                 if (response.data != null) {
                     viewModel.searchList[likePosition].likenum = response.data.count
-                    viewModel.searchList[likePosition].userAction.like = 0
+                    viewModel.searchList[likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

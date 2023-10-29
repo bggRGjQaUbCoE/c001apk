@@ -144,7 +144,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             if (response != null) {
                 if (response.data != null) {
                     viewModel.replyTotalList[likePosition].likenum = response.data
-                    viewModel.replyTotalList[likePosition].userAction.like = 1
+                    viewModel.replyTotalList[likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -158,7 +158,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             if (response != null) {
                 if (response.data != null) {
                     viewModel.replyTotalList[likePosition].likenum = response.data
-                    viewModel.replyTotalList[likePosition].userAction.like = 0
+                    viewModel.replyTotalList[likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

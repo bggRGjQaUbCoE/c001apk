@@ -254,7 +254,7 @@ class SearchAdapter(
                 val feed = searchList[position]
                 holder.id = feed.id
                 holder.uid = feed.uid
-                holder.isLike = feed.userAction.like == 1
+                holder.isLike = feed.userAction?.like == 1
                 holder.uname.text = feed.username
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle
@@ -294,7 +294,7 @@ class SearchAdapter(
                     holder.like.textSize.toInt(),
                     holder.like.textSize.toInt()
                 )
-                if (feed.userAction.like == 1) {
+                if (feed.userAction?.like == 1) {
                     DrawableCompat.setTint(
                         drawableLike,
                         ThemeUtils.getThemeAttrColor(

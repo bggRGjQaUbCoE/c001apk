@@ -187,7 +187,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (response != null) {
                 if (response.data != null) {
                     viewModel.feedReplyList[likeReplyPosition].likenum = response.data
-                    viewModel.feedReplyList[likeReplyPosition].userAction.like = 1
+                    viewModel.feedReplyList[likeReplyPosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -201,7 +201,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (response != null) {
                 if (response.data != null) {
                     viewModel.feedReplyList[likeReplyPosition].likenum = response.data
-                    viewModel.feedReplyList[likeReplyPosition].userAction.like = 0
+                    viewModel.feedReplyList[likeReplyPosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -215,7 +215,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (response != null) {
                 if (response.data != null) {
                     viewModel.feedContentList[0].data.likenum = response.data.count
-                    viewModel.feedContentList[0].data.userAction.like = 1
+                    viewModel.feedContentList[0].data.userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -229,7 +229,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (response != null) {
                 if (response.data != null) {
                     viewModel.feedContentList[0].data.likenum = response.data.count
-                    viewModel.feedContentList[0].data.userAction.like = 0
+                    viewModel.feedContentList[0].data.userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

@@ -18,7 +18,7 @@ data class TotalReplyResponse(val data: List<Data>) {
         val userAvatar: String,
         val replyRows: ArrayList<HomeFeedResponse.ReplyRows>,
         val replyRowsMore: Int,
-        val userAction: UserAction
+        val userAction: UserAction?
     )
 
     data class UserAction(var like: Int)

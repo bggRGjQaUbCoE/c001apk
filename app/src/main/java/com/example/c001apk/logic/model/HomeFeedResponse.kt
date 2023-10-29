@@ -70,7 +70,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         @SerializedName("commentnum_txt") val commentnumTxt: String,
         val commentCount: String,
         @SerializedName("alias_title") val aliasTitle: String,
-        val userAction: UserAction,
+        val userAction: UserAction?,
         val userInfo: UserInfo,
         val fUserInfo: UserInfo,
     )

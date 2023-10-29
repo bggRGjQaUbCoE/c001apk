@@ -93,7 +93,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
             if (response != null) {
                 if (response.data != null) {
                     viewModel.appCommentList[likePosition].likenum = response.data.count
-                    viewModel.appCommentList[likePosition].userAction.like = 1
+                    viewModel.appCommentList[likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
@@ -107,7 +107,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
             if (response != null) {
                 if (response.data != null) {
                     viewModel.appCommentList[likePosition].likenum = response.data.count
-                    viewModel.appCommentList[likePosition].userAction.like = 0
+                    viewModel.appCommentList[likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()

@@ -255,9 +255,9 @@ class FeedContentAdapter(
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
                     holder.id = feed.data.id
-                    holder.isLike = feed.data.userAction.like == 1
+                    holder.isLike = feed.data.userAction?.like == 1
                     holder.uname.text = feed.data.username
-                    if (feed.data.userAction.followAuthor == 1) {
+                    if (feed.data.userAction?.followAuthor == 1) {
                         holder.follow.text = "已关注"
                     } else {
                         holder.follow.text = "关注"
@@ -296,7 +296,7 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt(),
                         holder.like.textSize.toInt()
                     )
-                    if (feed.data.userAction.like == 1) {
+                    if (feed.data.userAction?.like == 1) {
                         DrawableCompat.setTint(
                             drawableLike,
                             ThemeUtils.getThemeAttrColor(
@@ -371,7 +371,7 @@ class FeedContentAdapter(
             is FeedContentReplyViewHolder -> {
                 if (replyList.isNotEmpty()) {
                     val reply = replyList[position - 1]
-                    holder.isLike = reply.userAction.like == 1
+                    holder.isLike = reply.userAction?.like == 1
                     holder.id = reply.id
                     holder.uid = reply.uid
                     holder.uname.text = reply.username
@@ -400,7 +400,7 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt(),
                         holder.like.textSize.toInt()
                     )
-                    if (reply.userAction.like == 1) {
+                    if (reply.userAction?.like == 1) {
                         DrawableCompat.setTint(
                             drawableLike,
                             ThemeUtils.getThemeAttrColor(

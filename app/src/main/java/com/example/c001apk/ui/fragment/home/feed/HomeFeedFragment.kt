@@ -81,7 +81,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
             if (response != null) {
                 if (response.data != null) {
                     viewModel.homeFeedList[likePosition].likenum = response.data.count
-                    viewModel.homeFeedList[likePosition].userAction.like = 1
+                    viewModel.homeFeedList[likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -95,7 +95,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
             if (response != null) {
                 if (response.data != null) {
                     viewModel.homeFeedList[likePosition].likenum = response.data.count
-                    viewModel.homeFeedList[likePosition].userAction.like = 0
+                    viewModel.homeFeedList[likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
