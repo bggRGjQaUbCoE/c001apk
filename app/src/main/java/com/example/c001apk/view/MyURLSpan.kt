@@ -28,7 +28,8 @@ internal class MyURLSpan(
         } else if (StringBuilder(mUrl).substring(0, 3) == "/t/") {
             //Toast.makeText(mContext, "topic", Toast.LENGTH_SHORT).show()
             val intent = Intent(mContext, TopicActivity::class.java)
-            intent.putExtra("title", StringBuilder(mUrl).substring(3, mUrl.length - 7).toString())
+            val index = StringBuilder(mUrl).indexOf("?")
+            intent.putExtra("title", StringBuilder(mUrl).substring(3, index).toString())
             mContext.startActivity(intent)
         } else if (StringBuilder(mUrl).substring(0, 3) == "/u/") {
             //Toast.makeText(mContext, "user", Toast.LENGTH_SHORT).show()

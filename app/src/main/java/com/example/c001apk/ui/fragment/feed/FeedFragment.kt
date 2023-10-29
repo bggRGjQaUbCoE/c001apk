@@ -5,15 +5,15 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
-import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -37,7 +37,9 @@ import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.CenteredImageSpan
+import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.HorizontalScrollAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -52,11 +54,11 @@ import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
 import java.net.URLDecoder
-import java.util.regex.Pattern
 import kotlin.concurrent.thread
 
 
-class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener, IOnEmojiClickListener {
+class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
+    IOnEmojiClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
@@ -76,8 +78,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private var firstCompletelyVisibleItemPosition = -1
     private var lastVisibleItemPosition = -1
     private var realKeyboardHeight = 0
-    private lateinit var editText: EditText
-
+    private lateinit var editText: ExtendEditText
+    private var isPaste = false
+    private var cursorBefore = -1
 
     companion object {
         @JvmStatic
@@ -198,7 +201,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         //val mAdapter = emotionAdapter(emoList)
         //val mLayoutManager = GridLayoutManager(activity, 7)
 
-        fun checkAndPublish(){
+        fun checkAndPublish() {
             if (editText.text.toString().replace("\n", "").isEmpty()) {
                 publish.isClickable = false
                 publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
@@ -217,7 +220,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
 
         editText.hint = "回复: $uname"
-        editText.setText(viewModel.replyTextMap[rid + ruid])
+        viewModel.replyTextMap[rid + ruid]?.let {
+            editText.text =
+                SpannableStringBuilderUtil.setEmoji(
+                    requireActivity(),
+                    viewModel.replyTextMap[rid + ruid]!!,
+                    ((editText.textSize) * 1.3).toInt()
+                )
+        }
         checkAndPublish()
         editText.isFocusable = true
         editText.isFocusableInTouchMode = true
@@ -241,15 +251,18 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
         emotion.setOnClickListener {
             if (emojiPanel.visibility != View.VISIBLE) {
+                //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                 emojiPanel.visibility = View.VISIBLE
-                val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_keyboard)
+                val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_down)
                 val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
                 DrawableCompat.setTint(
                     drawableKeyboard,
                     ContextCompat.getColor(requireContext(), R.color.gray_75)
                 )
                 emotion.setImageDrawable(drawableKeyboard)
+                //imm.hideSoftInputFromWindow(view.windowToken, 0)
             } else {
+                //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                 emojiPanel.visibility = View.GONE
                 val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
                 val drawableFace = DrawableCompat.wrap(face!!)
@@ -258,6 +271,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     ContextCompat.getColor(requireContext(), R.color.gray_75)
                 )
                 emotion.setImageDrawable(drawableFace)
+                //imm.showSoftInput(editText, 0)
             }
         }
 
@@ -276,12 +290,51 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
         }
 
+        editText.setOnPasteCallback(object : ExtendEditText.OnPasteCallback {
+            override fun onPaste(text: String?, isPaste: Boolean) {
+                this@FeedFragment.isPaste = isPaste
+                if (isPaste) {
+                    cursorBefore = editText.selectionStart
+                } else {
+                    if (text == "") {//delete
+                        editText.editableText.delete(editText.selectionStart, editText.selectionEnd)
+                    } else {
+                        val builder = SpannableStringBuilderUtil.setEmoji(
+                            requireActivity(),
+                            text!!,
+                            ((editText.textSize) * 1.3).toInt()
+                        )
+                        editText.editableText.replace(
+                            editText.selectionStart,
+                            editText.selectionEnd,
+                            builder
+                        )
+                    }
+                }
+            }
+        })
+
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, start: Int, before: Int, count: Int) {
+                if (isPaste) {
+                    isPaste = false
+                    val cursorNow = editText.selectionStart
+                    val pasteText = editText.text.toString().substring(cursorBefore, cursorNow)
+                    val builder = SpannableStringBuilderUtil.setEmoji(
+                        requireActivity(),
+                        pasteText,
+                        ((editText.textSize) * 1.3).toInt()
+                    )
+                    editText.editableText.replace(
+                        cursorBefore,
+                        cursorNow,
+                        builder
+                    )
+                }
+            }
 
-            @SuppressLint("RestrictedApi")
             override fun afterTextChanged(p0: Editable?) {
                 viewModel.replyTextMap[rid + ruid] = editText.text.toString()
                 checkAndPublish()
@@ -517,54 +570,52 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     override fun onShowEmoji(name: String) {
-        var text = editText.text.toString()
-
-        if (name == "[c001apk]" && text != "") { //delete
-            if (text.last() == ']') {
-                val start = text.lastIndexOf('[')
-                if (EmojiUtil.getEmoji(text.substring(start, text.length)) == -1) {//not
-                    text = text.substring(0, text.length - 1)
-                } else {//is
-                    text = text.substring(0, start)
+        val selectionStart: Int = editText.selectionStart
+        val selectionEnd: Int = editText.selectionEnd
+        if (name == "[c001apk]") { //delete
+            if (selectionStart > 0) {
+                val body: String = editText.text.toString()
+                if (!TextUtils.isEmpty(body)) {
+                    if (selectionStart == selectionEnd) {
+                        val tempStr = body.substring(0, selectionStart)
+                        val lastString = tempStr.substring(selectionStart - 1)
+                        if ("]" == lastString) {
+                            val i = tempStr.lastIndexOf("[")
+                            if (i != -1) {
+                                val cs = tempStr.substring(i, selectionStart)
+                                if (EmojiUtil.getEmoji(cs) != -1) {
+                                    editText.editableText.delete(i, selectionStart)
+                                    return
+                                } else {
+                                    editText.editableText.delete(tempStr.length - 1, selectionStart)
+                                }
+                            } else {
+                                editText.editableText.delete(tempStr.length - 1, selectionStart)
+                            }
+                        } else {
+                            editText.editableText.delete(tempStr.length - 1, selectionStart)
+                        }
+                    } else { //括选
+                        editText.editableText.delete(selectionStart, selectionEnd)
+                    }
                 }
-            } else {//not
-                text = text.substring(0, text.length - 1)
+            } else if (selectionStart == 0 && selectionEnd != 0) {
+                editText.editableText.delete(selectionStart, selectionEnd)
             }
-        } else if (name != "[c001apk]") {//insert
-            text += name
+        } else {//insert
+            val spannableStringBuilder = SpannableStringBuilder(name)
+            val drawable: Drawable = requireActivity().getDrawable(EmojiUtil.getEmoji(name))!!
+            val size = ((editText.textSize) * 1.3).toInt()
+            drawable.setBounds(0, 0, size, size)
+            val imageSpan = CenteredImageSpan(drawable, size)
+            spannableStringBuilder.setSpan(
+                imageSpan,
+                0,
+                name.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            editText.editableText.replace(selectionStart, selectionEnd, spannableStringBuilder)
         }
-
-        val builder = SpannableStringBuilder(text)
-        val pattern = Pattern.compile("\\[[^\\]]+\\]")
-        val matcher = pattern.matcher(builder)
-        editText.text = builder
-        var totalEmoji = 0
-        while (matcher.find()) {
-            totalEmoji++
-            val group = matcher.group()
-            if (EmojiUtil.getEmoji(group) != -1) {
-                val emoji: Drawable =
-                    requireActivity().getDrawable(EmojiUtil.getEmoji(group))!!
-                emoji.setBounds(
-                    0,
-                    0,
-                    (editText.textSize).toInt(),
-                    (editText.textSize).toInt()
-                )
-                val imageSpan = CenteredImageSpan(emoji)
-                builder.setSpan(
-                    imageSpan,
-                    matcher.start(),
-                    matcher.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                editText.text = builder
-            }
-        }
-        if (totalEmoji>20)
-            Toast.makeText(activity, "已超过表情上限${totalEmoji-20}个", Toast.LENGTH_SHORT).show()
-        editText.setSelection(editText.text.toString().length)
     }
-
 
 }

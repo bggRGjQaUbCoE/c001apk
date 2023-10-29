@@ -34,9 +34,8 @@
                 android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:lineSpacingMultiplier="1.2"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
@@ -45,6 +44,7 @@
                 android:id="@+id/pubDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:textColor="@color/gray_bd"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/message" />
@@ -71,12 +71,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pubDate"
                 app:nineImageHorizontalSpace="5dp"
                 app:nineImageRadius="12dp"
                 app:nineImageRatio="1"
-                app:nineImageVerticalSpace="5dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pubDate" />
+                app:nineImageVerticalSpace="5dp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/replyLayout"

@@ -49,7 +49,7 @@
 
     <PreferenceCategory android:title="@string/others">
         <Preference
-            android:icon="@drawable/ic_account"
+            android:icon="@drawable/ic_logo"
             android:key="others"
             android:title="@string/about" />
     </PreferenceCategory>

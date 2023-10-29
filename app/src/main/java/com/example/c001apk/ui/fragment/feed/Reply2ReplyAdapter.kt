@@ -20,6 +20,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.util.EmojiUtil
+import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
@@ -113,48 +114,9 @@ class Reply2ReplyAdapter(
                 }
             }
 
-        val mess = Html.fromHtml(
-            text.replace("\n", " <br />"),
-            Html.FROM_HTML_MODE_COMPACT
-        )
-        val builder = SpannableStringBuilder(mess)
-        val pattern = Pattern.compile("\\[[^\\]]+\\]")
-        val matcher = pattern.matcher(builder)
-        val urls = builder.getSpans(
-            0, text.length,
-            URLSpan::class.java
-        )
-        for (url in urls) {
-            val myURLSpan = MyURLSpan(mContext, null, url.url, urlList)
-            val start = builder.getSpanStart(url)
-            val end = builder.getSpanEnd(url)
-            val flags = builder.getSpanFlags(url)
-            builder.setSpan(myURLSpan, start, end, flags)
-            builder.removeSpan(url)
-        }
-        holder.reply.text = builder
         holder.reply.movementMethod = LinkMovementMethod.getInstance()
-        while (matcher.find()) {
-            val group = matcher.group()
-            if (EmojiUtil.getEmoji(group) != -1) {
-                val emoji: Drawable =
-                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                emoji.setBounds(
-                    0,
-                    0,
-                    (holder.reply.textSize * 1.3).toInt(),
-                    (holder.reply.textSize * 1.3).toInt()
-                )
-                val imageSpan = CenteredImageSpan(emoji)
-                builder.setSpan(
-                    imageSpan,
-                    matcher.start(),
-                    matcher.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                holder.reply.text = builder
-            }
-        }
+        holder.reply.text = SpannableStringBuilderUtil.setText(mContext, text, (holder.reply.textSize*1.3).toInt())
+
 
     }
 

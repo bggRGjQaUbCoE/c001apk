@@ -44,10 +44,12 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="8dp"
+        android:paddingTop="4dp"
         app:counterEnabled="true"
         app:counterMaxLength="500">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <com.example.c001apk.view.ExtendEditText
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

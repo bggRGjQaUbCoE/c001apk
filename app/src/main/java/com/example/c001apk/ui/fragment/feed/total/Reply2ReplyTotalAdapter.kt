@@ -26,6 +26,7 @@ import com.example.c001apk.ui.fragment.feed.IOnReplyClickListener
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
+import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import com.example.c001apk.view.NineImageView
@@ -200,51 +201,13 @@ class Reply2ReplyTotalAdapter(
                     nameBuilder.setSpan(myURLSpan, start, end, flags)
                     nameBuilder.removeSpan(url)
                 }
+
                 holder.uname.text = nameBuilder
                 holder.uname.movementMethod = LinkMovementMethod.getInstance()
 
-                val mess = Html.fromHtml(
-                    reply.message.replace("\n", " <br />"),
-                    Html.FROM_HTML_MODE_COMPACT
-                )
-                val builder = SpannableStringBuilder(mess)
-                val pattern = Pattern.compile("\\[[^\\]]+\\]")
-                val matcher = pattern.matcher(builder)
-                val urls = builder.getSpans(
-                    0, mess.length,
-                    URLSpan::class.java
-                )
-                for (url in urls) {
-                    val myURLSpan = MyURLSpan(mContext, null, url.url, null)
-                    val start = builder.getSpanStart(url)
-                    val end = builder.getSpanEnd(url)
-                    val flags = builder.getSpanFlags(url)
-                    builder.setSpan(myURLSpan, start, end, flags)
-                    builder.removeSpan(url)
-                }
-                holder.message.text = builder
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
-                while (matcher.find()) {
-                    val group = matcher.group()
-                    if (EmojiUtil.getEmoji(group) != -1) {
-                        val emoji: Drawable =
-                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                        emoji.setBounds(
-                            0,
-                            0,
-                            (holder.message.textSize * 1.3).toInt(),
-                            (holder.message.textSize * 1.3).toInt()
-                        )
-                        val imageSpan = CenteredImageSpan(emoji)
-                        builder.setSpan(
-                            imageSpan,
-                            matcher.start(),
-                            matcher.end(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        holder.message.text = builder
-                    }
-                }
+                holder.message.text = SpannableStringBuilderUtil.setText(mContext, reply.message, (holder.message.textSize*1.3).toInt())
+
 
                 holder.pubDate.text = PubDateUtil.time(reply.dateline)
                 val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!

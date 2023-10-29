@@ -96,8 +96,8 @@
     </style>
 
     <style name="AppTheme.About" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#6750A4</item>
-        <item name="colorPrimaryDark">#6750A4</item>
+        <item name="colorPrimary">#465C67</item>
+        <item name="colorPrimaryDark">#465C67</item>
     </style>
 
 </resources>

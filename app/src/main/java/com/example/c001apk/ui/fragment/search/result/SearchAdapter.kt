@@ -28,6 +28,7 @@ import com.example.c001apk.ui.activity.user.UserActivity
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PubDateUtil
+import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import com.example.c001apk.view.NineImageView
@@ -267,48 +268,9 @@ class SearchAdapter(
                 )
                 holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
 
-                val mess = Html.fromHtml(
-                    StringBuilder(feed.message).append(" ").toString().replace("\n", " <br />"),
-                    Html.FROM_HTML_MODE_COMPACT
-                )
-                val builder = SpannableStringBuilder(mess)
-                val pattern = Pattern.compile("\\[[^\\]]+\\]")
-                val matcher = pattern.matcher(builder)
-                val urls = builder.getSpans(
-                    0, mess.length,
-                    URLSpan::class.java
-                )
-                for (url in urls) {
-                    val myURLSpan = MyURLSpan(mContext, feed.id, url.url, null)
-                    val start = builder.getSpanStart(url)
-                    val end = builder.getSpanEnd(url)
-                    val flags = builder.getSpanFlags(url)
-                    builder.setSpan(myURLSpan, start, end, flags)
-                    builder.removeSpan(url)
-                }
-                holder.message.text = builder
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
-                while (matcher.find()) {
-                    val group = matcher.group()
-                    if (EmojiUtil.getEmoji(group) != -1) {
-                        val emoji: Drawable =
-                            mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                        emoji.setBounds(
-                            0,
-                            0,
-                            (holder.message.textSize * 1.3).toInt(),
-                            (holder.message.textSize * 1.3).toInt()
-                        )
-                        val imageSpan = CenteredImageSpan(emoji)
-                        builder.setSpan(
-                            imageSpan,
-                            matcher.start(),
-                            matcher.end(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        holder.message.text = builder
-                    }
-                }
+                holder.message.text = SpannableStringBuilderUtil.setText(mContext, feed.message, (holder.message.textSize*1.3).toInt())
+
                 holder.like.text = feed.likenum
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                 drawableLike.setBounds(

@@ -10,7 +10,7 @@
         android:id="@+id/design_about_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:srcCompat="@drawable/ic_launcher_background" />
+        app:srcCompat="@mipmap/ic_launcher" />
 
     <LinearLayout
         android:orientation="vertical"
