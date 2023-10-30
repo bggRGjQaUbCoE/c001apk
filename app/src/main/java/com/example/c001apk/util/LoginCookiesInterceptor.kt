@@ -8,7 +8,6 @@ import com.example.c001apk.util.CookieUtil.isTryLogin
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import retrofit2.http.Headers
 import java.io.IOException
 
 internal class LoginCookiesInterceptor : Interceptor {

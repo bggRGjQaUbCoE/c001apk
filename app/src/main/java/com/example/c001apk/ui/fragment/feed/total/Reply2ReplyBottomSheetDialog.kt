@@ -2,14 +2,10 @@ package com.example.c001apk.ui.fragment.feed.total
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
-import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,58 +22,32 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
-import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
-import com.example.c001apk.logic.model.CheckResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.feed.IOnEmojiClickListener
 import com.example.c001apk.ui.fragment.feed.IOnReplyClickListener
-import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.HorizontalScrollAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.checkbox.MaterialCheckBox
-import com.google.gson.Gson
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
-import java.io.IOException
 import java.net.URLDecoder
-import kotlin.concurrent.thread
 
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener,
     IOnEmojiClickListener, IOnLikeClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[ReplyTotalViewModel::class.java] }
-    private lateinit var id: String
-    private lateinit var uid: String
-    private var position: Int = 0
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var bottomSheetDialog: BottomSheetDialog
-    private var type = ""
-    private var uname = ""
-    private var ruid = ""
-    private var rid = ""
-    private var rPosition = 0
-    private var r2rPosition = 0
     private lateinit var editText: ExtendEditText
-    private var replyAndForward = "0"
-    private var isPaste = false
-    private var cursorBefore = -1
 
     companion object {
         fun newInstance(position: Int, uid: String, id: String): Reply2ReplyBottomSheetDialog {
@@ -93,9 +63,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
 
     private fun setData() {
         val args = arguments
-        id = args!!.getString("ID", "")
-        uid = args.getString("UID", "")
-        position = args.getInt("POSITION")
+        viewModel.id = args!!.getString("ID", "")
+        viewModel.uid = args.getString("UID", "")
+        viewModel.position = args.getInt("POSITION")
     }
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,48 +90,101 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         initScroll()
 
         viewModel.replyTotalLiveData.observe(viewLifecycleOwner) { result ->
-            val data = result.getOrNull()
-            if (!data.isNullOrEmpty()) {
-                if (!viewModel.isLoadMore)
-                    viewModel.replyTotalList.clear()
-                for (element in data)
-                    if (element.entityType == "feed_reply")
-                        viewModel.replyTotalList.add(element)
-                mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val data = result.getOrNull()
+                if (!data.isNullOrEmpty()) {
+                    if (!viewModel.isLoadMore)
+                        viewModel.replyTotalList.clear()
+                    for (element in data)
+                        if (element.entityType == "feed_reply")
+                            viewModel.replyTotalList.add(element)
+                    mAdapter.notifyDataSetChanged()
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.likeReplyData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
-                    viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeReply) {
+                viewModel.isPostLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
+                        viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeReplyData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
-                    viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeReply) {
+                viewModel.isPostUnLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
+                        viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+        viewModel.postReplyData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isPostReply) {
+                viewModel.isPostReply = false
+
+                val response = result.getOrNull()
+                if (response?.data != null) {
+                    if (response.data.messageStatus == 1) {
+                        viewModel.replyTotalList.add(
+                            viewModel.r2rPosition + 1,
+                            TotalReplyResponse.Data(
+                                "feed_reply",
+                                viewModel.id,
+                                viewModel.ruid,
+                                PrefManager.uid,
+                                URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                viewModel.uname,
+                                editText.text.toString(),
+                                "",
+                                null,
+                                (System.currentTimeMillis() / 1000).toString(),
+                                "0",
+                                "0",
+                                PrefManager.userAvatar,
+                                ArrayList(),
+                                0,
+                                TotalReplyResponse.UserAction(0)
+                            )
+                        )
+                        mAdapter.notifyItemInserted(viewModel.r2rPosition + 1)
+                        Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
+                        bottomSheetDialog.cancel()
+                    } else {
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -178,6 +201,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getReplyTotal()
                     }
                 }
@@ -192,10 +216,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
     }
 
     private fun initData() {
-        viewModel.id = id
         if (viewModel.replyTotalList.isEmpty()) {
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             viewModel.isEnd = false
             viewModel.isLoadMore = false
+            viewModel.isNew = true
             viewModel.getReplyTotal()
         }
     }
@@ -204,7 +230,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
 
         mAdapter =
-            Reply2ReplyTotalAdapter(requireActivity(), uid, position, viewModel.replyTotalList)
+            Reply2ReplyTotalAdapter(
+                requireActivity(),
+                viewModel.uid,
+                viewModel.position,
+                viewModel.replyTotalList
+            )
         mLayoutManager = LinearLayoutManager(activity)
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setIOnReplyClickListener(this)
@@ -242,12 +273,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         type: String
     ) {
         if (PrefManager.isLogin) {
-            this.rPosition = rPosition
-            r2rPosition?.let { this.r2rPosition = r2rPosition }
-            this.rid = id
-            this.ruid = uid
-            this.uname = uname
-            this.type = type
+            viewModel.rPosition = rPosition
+            r2rPosition?.let { viewModel.r2rPosition = r2rPosition }
+            viewModel.rid = id
+            viewModel.ruid = uid
+            viewModel.uname = uname
+            viewModel.type = type
             initReply()
         }
     }
@@ -281,17 +312,20 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                     )
                 )
                 publish.setOnClickListener {
-                    publish(editText.text.toString())
+                    viewModel.replyData["message"] = editText.text.toString()
+                    viewModel.replyData["replyAndForward"] = viewModel.replyAndForward
+                    viewModel.isPostReply = true
+                    viewModel.postReply()
                 }
             }
         }
 
-        editText.hint = "回复: $uname"
-        viewModel.replyTextMap[rid + ruid]?.let {
+        editText.hint = "回复: ${viewModel.uname}"
+        viewModel.replyTextMap[viewModel.rid + viewModel.ruid]?.let {
             editText.text =
                 SpannableStringBuilderUtil.setEmoji(
                     requireActivity(),
-                    viewModel.replyTextMap[rid + ruid]!!,
+                    viewModel.replyTextMap[viewModel.rid + viewModel.ruid]!!,
                     ((editText.textSize) * 1.3).toInt()
                 )
         }
@@ -326,7 +360,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         }
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
-            replyAndForward = if (isChecked) "1"
+            viewModel.replyAndForward = if (isChecked) "1"
             else "0"
         }
 
@@ -342,9 +376,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
 
         editText.setOnPasteCallback(object : ExtendEditText.OnPasteCallback {
             override fun onPaste(text: String?, isPaste: Boolean) {
-                this@Reply2ReplyBottomSheetDialog.isPaste = isPaste
+                viewModel.isPaste = isPaste
                 if (isPaste) {
-                    cursorBefore = editText.selectionStart
+                    viewModel.cursorBefore = editText.selectionStart
                 } else {
                     if (text == "") {//delete
                         editText.editableText.delete(editText.selectionStart, editText.selectionEnd)
@@ -368,17 +402,18 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, start: Int, before: Int, count: Int) {
-                if (isPaste) {
-                    isPaste = false
+                if (viewModel.isPaste) {
+                    viewModel.isPaste = false
                     val cursorNow = editText.selectionStart
-                    val pasteText = editText.text.toString().substring(cursorBefore, cursorNow)
+                    val pasteText =
+                        editText.text.toString().substring(viewModel.cursorBefore, cursorNow)
                     val builder = SpannableStringBuilderUtil.setEmoji(
                         requireActivity(),
                         pasteText,
                         ((editText.textSize) * 1.3).toInt()
                     )
                     editText.editableText.replace(
-                        cursorBefore,
+                        viewModel.cursorBefore,
                         cursorNow,
                         builder
                     )
@@ -386,94 +421,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             }
 
             override fun afterTextChanged(p0: Editable?) {
-                viewModel.replyTextMap[rid + ruid] = editText.text.toString()
+                viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = editText.text.toString()
                 checkAndPublish()
             }
         })
 
-    }
-
-    private fun publish(content: String) {
-        thread {
-            try {
-                val httpClient = OkHttpClient()
-                val formBody: RequestBody = FormBody.Builder()
-                    .add("message", content)
-                    .build()
-
-                val getRequest: Request = Request.Builder()
-                    .addHeader("User-Agent", Constants.USER_AGENT)
-                    .addHeader("X-Requested-With", Constants.REQUEST_WIDTH)
-                    .addHeader("X-Sdk-Int", "33")
-                    .addHeader("X-Sdk-Locale", "zh-CN")
-                    .addHeader("X-App-Id", Constants.APP_ID)
-                    .addHeader("X-App-Token", CookieUtil.token)
-                    .addHeader("X-App-Version", "13.3.1")
-                    .addHeader("X-App-Code", "2307121")
-                    .addHeader("X-Api-Version", "13")
-                    .addHeader("X-App-Device", CookieUtil.deviceCode)
-                    .addHeader("X-Dark-Mode", "0")
-                    .addHeader("X-App-Channel", "coolapk")
-                    .addHeader("X-App-Mode", "universal")
-                    .addHeader(
-                        "Cookie",
-                        "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
-                    )
-                    .url("https://api.coolapk.com/v6/feed/reply?id=$rid&type=$type")
-                    .post(formBody)
-                    .build()
-
-                val call: Call = httpClient.newCall(getRequest)
-
-                call.enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.d("Reply", "onFailure: ${e.message}")
-                    }
-
-                    @SuppressLint("NotifyDataSetChanged")
-                    override fun onResponse(call: Call, response: Response) {
-                        val reply: CheckResponse = Gson().fromJson(
-                            response.body()!!.string(),
-                            CheckResponse::class.java
-                        )
-                        if (reply.data?.messageStatus == 1) {
-                            requireActivity().runOnUiThread {
-                                viewModel.replyTotalList.add(
-                                    r2rPosition + 1,
-                                    TotalReplyResponse.Data(
-                                        "feed_reply",
-                                        id,
-                                        ruid,
-                                        PrefManager.uid,
-                                        URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                        uname,
-                                        content,
-                                        "",
-                                        null,
-                                        (System.currentTimeMillis() / 1000).toString(),
-                                        "0",
-                                        "0",
-                                        PrefManager.userAvatar,
-                                        ArrayList(),
-                                        0,
-                                        TotalReplyResponse.UserAction(0)
-                                    )
-                                )
-                                mAdapter.notifyItemInserted(r2rPosition + 1)
-                                Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
-                                bottomSheetDialog.cancel()
-                            }
-                        } else {
-                            requireActivity().runOnUiThread {
-                                Toast.makeText(activity, reply.message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                })
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
     }
 
     override fun onShowEmoji(name: String) {
@@ -510,32 +462,28 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                 editText.editableText.delete(selectionStart, selectionEnd)
             }
         } else {//insert
-            val spannableStringBuilder = SpannableStringBuilder(name)
-            val drawable: Drawable = requireActivity().getDrawable(EmojiUtil.getEmoji(name))!!
-            val size = ((editText.textSize) * 1.3).toInt()
-            drawable.setBounds(0, 0, size, size)
-            val imageSpan = CenteredImageSpan(drawable, size)
-            spannableStringBuilder.setSpan(
-                imageSpan,
-                0,
-                name.length,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            editText.editableText.replace(
+                selectionStart,
+                selectionEnd,
+                SpannableStringBuilderUtil.setEmoji(
+                    requireActivity(),
+                    name,
+                    ((editText.textSize) * 1.3).toInt()
+                )
             )
-            if (selectionStart == selectionEnd) {
-                editText.editableText.insert(selectionStart, spannableStringBuilder)
-            } else { //括选
-                editText.editableText.replace(selectionStart, selectionEnd, spannableStringBuilder)
-            }
         }
     }
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeReplyId = id
         viewModel.likePosition = position
-        if (isLike)
+        if (isLike) {
+            viewModel.isPostUnLikeReply = true
             viewModel.postUnLikeReply()
-        else
+        } else {
+            viewModel.isPostLikeReply = true
             viewModel.postLikeReply()
+        }
     }
 
 }

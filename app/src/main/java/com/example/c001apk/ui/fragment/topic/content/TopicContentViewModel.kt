@@ -8,11 +8,15 @@ import com.example.c001apk.logic.network.Repository
 
 class TopicContentViewModel : ViewModel() {
 
+    var isPostLikeFeed = false
+    var isPostUnLikeFeed = false
+
     var firstCompletelyVisibleItemPosition = -1
     var lastVisibleItemPosition = -1
     var likePosition = -1
 
     var isInit = true
+    var isNew = true
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true

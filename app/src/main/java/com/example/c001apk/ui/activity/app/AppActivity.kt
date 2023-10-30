@@ -41,79 +41,98 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
         initScroll()
 
         viewModel.appInfoData.observe(this) { result ->
-            val appInfo = result.getOrNull()
-            if (appInfo != null) {
-                binding.name.text = appInfo.title
-                binding.version.text = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
-                binding.size.text = "大小: ${appInfo.apksize}"
-                if (appInfo.lastupdate == null)
-                    binding.updateTime.text = "更新时间: null"
-                else
-                    binding.updateTime.text = "更新时间: ${PubDateUtil.time(appInfo.lastupdate)}"
-                binding.collapsingToolbar.title = appInfo.title
-                binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-                ImageShowUtil.showIMG(binding.logo, appInfo.logo)
-                viewModel.appId = appInfo.id
-                viewModel.isRefreh = true
-                viewModel.getAppComment()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val appInfo = result.getOrNull()
+                if (appInfo != null) {
+                    binding.name.text = appInfo.title
+                    binding.version.text = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
+                    binding.size.text = "大小: ${appInfo.apksize}"
+                    if (appInfo.lastupdate == null)
+                        binding.updateTime.text = "更新时间: null"
+                    else
+                        binding.updateTime.text =
+                            "更新时间: ${PubDateUtil.time(appInfo.lastupdate)}"
+                    binding.collapsingToolbar.title = appInfo.title
+                    binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
+                    ImageShowUtil.showIMG(binding.logo, appInfo.logo)
+                    viewModel.appId = appInfo.id
+                    viewModel.isRefreh = true
+                    viewModel.isNew = true
+                    viewModel.getAppComment()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.appCommentData.observe(this) { result ->
-            val comment = result.getOrNull()
-            if (!comment.isNullOrEmpty()) {
-                if (viewModel.isRefreh)
-                    viewModel.appCommentList.clear()
-                if (viewModel.isRefreh || viewModel.isLoadMore) {
-                    for (element in comment)
-                        if (element.entityType == "feed")
-                            viewModel.appCommentList.add(element)
+            if (viewModel.isNew) {
+                viewModel.isNew = false
 
+                val comment = result.getOrNull()
+                if (!comment.isNullOrEmpty()) {
+                    if (viewModel.isRefreh)
+                        viewModel.appCommentList.clear()
+                    if (viewModel.isRefreh || viewModel.isLoadMore) {
+                        for (element in comment)
+                            if (element.entityType == "feed")
+                                viewModel.appCommentList.add(element)
+
+                    }
+                    mAdapter.notifyDataSetChanged()
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
+                binding.appLayout.visibility = View.VISIBLE
+                binding.swipeRefresh.isRefreshing = false
+                viewModel.isRefreh = false
             }
-            binding.indicator.isIndeterminate = false
-            binding.appLayout.visibility = View.VISIBLE
-            binding.swipeRefresh.isRefreshing = false
-            viewModel.isRefreh = false
         }
 
         viewModel.likeFeedData.observe(this) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.appCommentList[viewModel.likePosition].likenum =
-                        response.data.count
-                    viewModel.appCommentList[viewModel.likePosition].userAction?.like = 1
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
 
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.appCommentList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.appCommentList[viewModel.likePosition].userAction?.like = 1
+
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(this) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.appCommentList[viewModel.likePosition].likenum =
-                        response.data.count
-                    viewModel.appCommentList[viewModel.likePosition].userAction?.like = 0
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
 
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.appCommentList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.appCommentList[viewModel.likePosition].userAction?.like = 0
+
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -135,6 +154,9 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
 
     private fun initData() {
         if (viewModel.isInit) {
+            viewModel.isInit = false
+            binding.indicator.isIndeterminate = true
+            binding.indicator.visibility = View.VISIBLE
             refreshData()
         }
     }
@@ -145,8 +167,8 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
         viewModel.isEnd = false
         val id = intent.getStringExtra("id")!!
         viewModel.id = id
+        viewModel.isNew = true
         viewModel.getAppInfo()
-        viewModel.isInit = false
     }
 
     @SuppressLint("RestrictedApi")
@@ -159,9 +181,11 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             viewModel.page = 1
             viewModel.isRefreh = true
             viewModel.isEnd = false
+            viewModel.isNew = true
             viewModel.getAppComment()
         }
     }
@@ -177,6 +201,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getAppComment()
 
                     }
@@ -204,10 +229,13 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position
-        if (isLike)
+        if (isLike) {
+            viewModel.isPostUnLikeFeed = true
             viewModel.postUnLikeFeed()
-        else
+        } else {
+            viewModel.isPostLikeFeed = true
             viewModel.postLikeFeed()
+        }
     }
 
 }

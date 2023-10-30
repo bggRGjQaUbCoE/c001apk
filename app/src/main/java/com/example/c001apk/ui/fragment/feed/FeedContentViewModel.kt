@@ -10,6 +10,13 @@ import com.example.c001apk.logic.network.Repository
 
 class FeedContentViewModel : ViewModel() {
 
+    var isNew = true
+    var isPostLikeFeed = false
+    var isPostUnLikeFeed = false
+    var isPostLikeReply = false
+    var isPostUnLikeReply = false
+    var isPostReply = false
+
     //feed data
     var id = "" // feed id
     var uid = "" // feed user id
@@ -98,6 +105,18 @@ class FeedContentViewModel : ViewModel() {
 
     fun postUnLikeFeed() {
         postUnLikeFeedData.value = postUnLikeFeedData.value
+    }
+
+    var replyData = HashMap<String, String>()
+
+    private val postReplyLiveData = MutableLiveData<String>()
+
+    val postReplyData = postReplyLiveData.switchMap {
+        Repository.postReply(replyData, rid, type)
+    }
+
+    fun postReply() {
+        postReplyLiveData.value = postReplyLiveData.value
     }
 
 

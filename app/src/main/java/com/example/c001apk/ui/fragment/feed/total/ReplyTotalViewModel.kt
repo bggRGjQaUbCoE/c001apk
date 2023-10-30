@@ -8,6 +8,25 @@ import com.example.c001apk.logic.network.Repository
 
 class ReplyTotalViewModel : ViewModel() {
 
+    var isNew = true
+    var isPostLikeReply = false
+    var isPostUnLikeReply = false
+    var isPostReply = false
+
+    var id = ""
+    var uid = ""
+    var position: Int = 0
+    var type = ""
+    var uname = ""
+    var ruid = ""
+    var rid = ""
+    var rPosition = 0
+    var r2rPosition = 0
+    var replyAndForward = "0"
+    var isPaste = false
+    var cursorBefore = -1
+    var page = 1
+
     var lastVisibleItemPosition = -1
     var likePosition = -1
 
@@ -16,8 +35,6 @@ class ReplyTotalViewModel : ViewModel() {
     var isEnd = false
     var isLoadMore = false
 
-    var page = 1
-    var id = ""
 
     val replyTotalList = ArrayList<TotalReplyResponse.Data>()
 
@@ -37,6 +54,7 @@ class ReplyTotalViewModel : ViewModel() {
     val likeReplyData = postLikeReplyData.switchMap {
         Repository.postLikeReply(likeReplyId)
     }
+
     fun postLikeReply() {
         postLikeReplyData.value = postLikeReplyData.value
     }
@@ -46,8 +64,21 @@ class ReplyTotalViewModel : ViewModel() {
     val unLikeReplyData = postUnLikeReplyData.switchMap {
         Repository.postUnLikeReply(likeReplyId)
     }
+
     fun postUnLikeReply() {
         postUnLikeReplyData.value = postUnLikeReplyData.value
+    }
+
+    var replyData = HashMap<String, String>()
+
+    private val postReplyLiveData = MutableLiveData<String>()
+
+    val postReplyData = postReplyLiveData.switchMap {
+        Repository.postReply(replyData, rid, type)
+    }
+
+    fun postReply() {
+        postReplyLiveData.value = postReplyLiveData.value
     }
 
 }

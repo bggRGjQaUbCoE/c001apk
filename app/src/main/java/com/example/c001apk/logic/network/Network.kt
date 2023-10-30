@@ -1,6 +1,5 @@
 package com.example.c001apk.logic.network
 
-import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -96,6 +95,9 @@ object Network {
 
     suspend fun getCaptcha(url: String) =
         accountService.getCaptcha(url).response()
+
+    suspend fun postReply(data: HashMap<String, String>, id: String, type: String) =
+        apiService.postReply(data, id, type).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

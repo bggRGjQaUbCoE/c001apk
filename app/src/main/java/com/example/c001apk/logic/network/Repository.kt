@@ -2,9 +2,6 @@ package com.example.c001apk.logic.network
 
 import androidx.lifecycle.liveData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import okhttp3.RequestBody
 import kotlin.coroutines.CoroutineContext
 
 object Repository {
@@ -234,8 +231,16 @@ object Repository {
         }
 
     fun getCaptcha(url: String) = fire(Dispatchers.IO) {
-            val captResponse = Network.getCaptcha(url)
-            Result.success(captResponse)
+        val response = Network.getCaptcha(url)
+        if (response != null)
+            Result.success(response)
+        else
+            Result.failure(RuntimeException("response status is null"))
+    }
+
+    fun postReply(data: HashMap<String, String>, id: String, type: String) = fire(Dispatchers.IO) {
+        val captResponse = Network.postReply(data, id, type)
+        Result.success(captResponse)
     }
 
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =

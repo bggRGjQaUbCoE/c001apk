@@ -19,8 +19,6 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
 
     private lateinit var binding: FragmentSearchFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[SearchContentViewModel::class.java] }
-    private var keyWord: String = ""
-    private var type: String = ""
     private lateinit var mAdapter: SearchAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
@@ -38,8 +36,8 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            keyWord = it.getString("KEYWORD")!!
-            type = it.getString("TYPE")!!
+            viewModel.keyWord = it.getString("KEYWORD")!!
+            viewModel.type = it.getString("TYPE")!!
         }
     }
 
@@ -76,57 +74,70 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
         }
 
         viewModel.searchData.observe(viewLifecycleOwner) { result ->
-            val search = result.getOrNull()
-            if (!search.isNullOrEmpty()) {
-                if (viewModel.isRefreshing)
-                    viewModel.searchList.clear()
-                if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    if (type == "feed")
-                        for (element in search) {
-                            if (element.feedType == "feed" || element.feedType == "feedArticle")
-                                viewModel.searchList.add(element)
-                        }
-                    else
-                        viewModel.searchList.addAll(search)
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val search = result.getOrNull()
+                if (!search.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing)
+                        viewModel.searchList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        if (viewModel.type == "feed")
+                            for (element in search) {
+                                if (element.feedType == "feed" || element.feedType == "feedArticle")
+                                    viewModel.searchList.add(element)
+                            }
+                        else
+                            viewModel.searchList.addAll(search)
+                    }
+                    mAdapter.notifyDataSetChanged()
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
-            binding.indicator.isIndeterminate = false
-            viewModel.isLoadMore = false
-            viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = false
         }
 
         viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.searchList[viewModel.likePosition].likenum = response.data.count
-                    viewModel.searchList[viewModel.likePosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.searchList[viewModel.likePosition].likenum = response.data.count
+                        viewModel.searchList[viewModel.likePosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.searchList[viewModel.likePosition].likenum = response.data.count
-                    viewModel.searchList[viewModel.likePosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.searchList[viewModel.likePosition].likenum = response.data.count
+                        viewModel.searchList[viewModel.likePosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -143,6 +154,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getSearch()
 
                     }
@@ -170,29 +182,32 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
-        if (viewModel.searchList.isEmpty())
+        if (viewModel.searchList.isEmpty()) {
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             refreshData()
+        }
     }
 
     private fun refreshData() {
         viewModel.page = 1
-        viewModel.keyWord = keyWord
-        viewModel.type = type
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
+        viewModel.isNew = true
         viewModel.getSearch()
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
 
-        mAdapter = SearchAdapter(requireActivity(), type, viewModel.searchList)
+        mAdapter = SearchAdapter(requireActivity(), viewModel.type, viewModel.searchList)
         mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
@@ -206,10 +221,13 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position
-        if (isLike)
+        if (isLike) {
+            viewModel.isPostUnLikeFeed = true
             viewModel.postUnLikeFeed()
-        else
+        } else {
+            viewModel.isPostLikeFeed = true
             viewModel.postLikeFeed()
+        }
     }
 
 }

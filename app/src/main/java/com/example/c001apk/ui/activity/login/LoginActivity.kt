@@ -2,8 +2,6 @@ package com.example.c001apk.ui.activity.login
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.InputFilter
 import android.text.Spanned
 import android.view.Menu
@@ -70,50 +68,46 @@ class LoginActivity : BaseActivity() {
 
         viewModel.tryLoginData.observe(this) { result ->
             val response = result.getOrNull()
-            response?.let {
-                response.body()?.let {
-                    val login: LoginResponse = Gson().fromJson(
-                        response.body()!!.string(),
-                        LoginResponse::class.java
-                    )
-                    if (login.status == 1) {
-                        val headers = response.headers()
-                        val cookies = headers.values("Set-Cookie")
-                        val uid =
-                            cookies[cookies.size - 3].substring(
-                                4,
-                                cookies[cookies.size - 3].indexOf(";")
-                            )
-                        val name =
-                            cookies[cookies.size - 2].substring(
-                                9,
-                                cookies[cookies.size - 2].indexOf(";")
-                            )
-                        val token =
-                            cookies[cookies.size - 1].substring(
-                                6,
-                                cookies[cookies.size - 1].indexOf(";")
-                            )
-                        PrefManager.isLogin = true
-                        PrefManager.uid = uid
-                        PrefManager.username = name
-                        PrefManager.token = token
-                        viewModel.uid = uid
-                        viewModel.getProfile()
-                    } else {
-                        loginFailed(login.message)
-                        if (login.message == "图形验证码不能为空") {
-                            runOnUiThread {
-                                binding.captcha.visibility = View.VISIBLE
-                            }
-                            getCaptcha()
-                        } else if (login.message == "图形验证码错误") {
-                            getCaptcha()
-                        } else if (login.message == "密码错误" && binding.captcha.visibility == View.VISIBLE) {
-                            getCaptcha()
-                        }
-
+            response?.body()?.let {
+                val login: LoginResponse = Gson().fromJson(
+                    response.body()!!.string(),
+                    LoginResponse::class.java
+                )
+                if (login.status == 1) {
+                    val headers = response.headers()
+                    val cookies = headers.values("Set-Cookie")
+                    val uid =
+                        cookies[cookies.size - 3].substring(
+                            4,
+                            cookies[cookies.size - 3].indexOf(";")
+                        )
+                    val name =
+                        cookies[cookies.size - 2].substring(
+                            9,
+                            cookies[cookies.size - 2].indexOf(";")
+                        )
+                    val token =
+                        cookies[cookies.size - 1].substring(
+                            6,
+                            cookies[cookies.size - 1].indexOf(";")
+                        )
+                    PrefManager.isLogin = true
+                    PrefManager.uid = uid
+                    PrefManager.username = name
+                    PrefManager.token = token
+                    viewModel.uid = uid
+                    viewModel.getProfile()
+                } else {
+                    Toast.makeText(this, login.message, Toast.LENGTH_SHORT).show()
+                    if (login.message == "图形验证码不能为空") {
+                        binding.captcha.visibility = View.VISIBLE
+                        getCaptcha()
+                    } else if (login.message == "图形验证码错误") {
+                        getCaptcha()
+                    } else if (login.message == "密码错误" && binding.captcha.visibility == View.VISIBLE) {
+                        getCaptcha()
                     }
+
                 }
             }
         }
@@ -123,9 +117,7 @@ class LoginActivity : BaseActivity() {
             response?.let {
                 val responseBody = response.body()
                 val bitmap = BitmapFactory.decodeStream(responseBody!!.byteStream())
-                runOnUiThread {
-                    binding.captchaImg.setImageBitmap(bitmap)
-                }
+                binding.captchaImg.setImageBitmap(bitmap)
             }
         }
 
@@ -226,26 +218,10 @@ class LoginActivity : BaseActivity() {
         viewModel.getCaptcha()
     }
 
-    private fun loginFailed(message: String) {
-        runOnUiThread {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun afterLogin() {
-        val handler = Handler(Looper.getMainLooper())
-
-        class MyThread : Runnable {
-            override fun run() {
-                ActivityCollector.recreateActivity(MainActivity::class.java.name)
-            }
-        }
-        handler.post(MyThread())
-
-        runOnUiThread {
-            Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        ActivityCollector.recreateActivity(MainActivity::class.java.name)
+        Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show()
+        finish()
     }
 
 }

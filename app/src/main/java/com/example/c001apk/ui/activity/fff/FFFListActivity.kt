@@ -3,6 +3,7 @@ package com.example.c001apk.ui.activity.fff
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
@@ -20,8 +21,6 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
     private val viewModel by lazy { ViewModelProvider(this)[FFFListViewModel::class.java] }
     private lateinit var mAdapter: FFFListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var type: String
-    private lateinit var uid: String
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,8 +29,8 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
         setContentView(binding.root)
 
 
-        type = intent.getStringExtra("type")!!
-        uid = intent.getStringExtra("uid")!!
+        viewModel.type = intent.getStringExtra("type")!!
+        viewModel.uid = intent.getStringExtra("uid")!!
 
         initBar()
         initView()
@@ -40,51 +39,64 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
         initScroll()
 
         viewModel.listData.observe(this) { result ->
-            val feed = result.getOrNull()
-            if (!feed.isNullOrEmpty()) {
-                if (viewModel.isRefreh) viewModel.dataList.clear()
-                if (viewModel.isRefreh || viewModel.isLoadMore) {
-                    for (element in feed)
-                        if (element.entityTemplate == "feed" || element.entityType == "contacts")
-                            viewModel.dataList.add(element)
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val feed = result.getOrNull()
+                if (!feed.isNullOrEmpty()) {
+                    if (viewModel.isRefreh) viewModel.dataList.clear()
+                    if (viewModel.isRefreh || viewModel.isLoadMore) {
+                        for (element in feed)
+                            if (element.entityTemplate == "feed" || element.entityType == "contacts")
+                                viewModel.dataList.add(element)
+                    }
+                    mAdapter.notifyDataSetChanged()
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
+                binding.swipeRefresh.isRefreshing = false
+                viewModel.isRefreh = false
             }
-            binding.indicator.isIndeterminate = false
-            binding.swipeRefresh.isRefreshing = false
-            viewModel.isRefreh = false
         }
 
         viewModel.likeFeedData.observe(this) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.dataList[viewModel.likePosition].likenum = response.data.count
-                    viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.dataList[viewModel.likePosition].likenum = response.data.count
+                        viewModel.dataList[viewModel.likePosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(this) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.dataList[viewModel.likePosition].likenum = response.data.count
-                    viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.dataList[viewModel.likePosition].likenum = response.data.count
+                        viewModel.dataList[viewModel.likePosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -101,18 +113,18 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        when (type) {
+        when (viewModel.type) {
             "feed" -> binding.toolBar.title = "我的动态"
 
             "follow" -> {
-                if (uid == PrefManager.uid)
+                if (viewModel.uid == PrefManager.uid)
                     binding.toolBar.title = "好友"
                 else
                     binding.toolBar.title = "TA关注的人"
             }
 
             "fans" -> {
-                if (uid == PrefManager.uid)
+                if (viewModel.uid == PrefManager.uid)
                     binding.toolBar.title = "关注我的人"
                 else
                     binding.toolBar.title = "TA的粉丝"
@@ -131,6 +143,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getFeedList()
 
                     }
@@ -157,21 +170,22 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
-            viewModel.page = 1
-            viewModel.isRefreh = true
-            viewModel.isEnd = false
-            viewModel.getFeedList()
+            binding.indicator.visibility = View.GONE
+            refreshData()
         }
     }
 
     private fun initData() {
-        if (viewModel.dataList.isEmpty())
+        if (viewModel.dataList.isEmpty()){
+            binding.indicator.isIndeterminate = true
+            binding.indicator.visibility = View.VISIBLE
             refreshData()
+        }
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = FFFListAdapter(this, type, viewModel.dataList)
+        mAdapter = FFFListAdapter(this, viewModel.type, viewModel.dataList)
         mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
@@ -185,18 +199,20 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener {
         viewModel.page = 1
         viewModel.isRefreh = true
         viewModel.isEnd = false
-        viewModel.type = type
-        viewModel.uid = uid
+        viewModel.isNew = true
         viewModel.getFeedList()
     }
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position
-        if (isLike)
+        if (isLike) {
+            viewModel.isPostUnLikeFeed = true
             viewModel.postUnLikeFeed()
-        else
+        } else {
+            viewModel.isPostLikeFeed = true
             viewModel.postLikeFeed()
+        }
     }
 
 

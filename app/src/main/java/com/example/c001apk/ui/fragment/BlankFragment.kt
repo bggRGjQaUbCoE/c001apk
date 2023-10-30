@@ -47,7 +47,7 @@ class BlankFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.deviceCode.text = CookieUtil.SESSID
+        //binding.deviceCode.text = CookieUtil.SESSID
         //binding.token.text = token
 
     }

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,13 +22,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
-import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.FragmentFeedBinding
-import com.example.c001apk.logic.model.CheckResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.feed.total.Reply2ReplyBottomSheetDialog
-import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.LinearItemDecoration
@@ -40,17 +36,7 @@ import com.example.c001apk.view.HorizontalScrollAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.checkbox.MaterialCheckBox
-import com.google.gson.Gson
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
-import java.io.IOException
 import java.net.URLDecoder
-import kotlin.concurrent.thread
 
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
@@ -119,107 +105,191 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
 
         viewModel.feedData.observe(viewLifecycleOwner) { result ->
-            val feed = result.getOrNull()
-            if (feed != null) {
-                if (viewModel.isRefreshing) {
-                    viewModel.feedContentList.clear()
-                    mAdapter.setLoadState(mAdapter.LOADING)
-                    viewModel.getFeedReply()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val feed = result.getOrNull()
+                if (feed != null) {
+                    if (viewModel.isRefreshing) {
+                        viewModel.feedContentList.clear()
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isNew = true
+                        viewModel.getFeedReply()
+                    }
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.feedContentList.add(feed)
+                    }
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    if (PrefManager.isLogin)
+                        binding.reply.visibility = View.VISIBLE
+                    else
+                        binding.reply.visibility = View.GONE
+                } else {
+                    viewModel.isEnd = true
+                    viewModel.isLoadMore = false
+                    viewModel.isRefreshing = false
+                    binding.swipeRefresh.isRefreshing = false
+                    Toast.makeText(activity, "加载失败", Toast.LENGTH_SHORT).show()
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    viewModel.feedContentList.add(feed)
-                }
-                binding.indicator.isIndeterminate = false
-                if (PrefManager.isLogin)
-                    binding.reply.visibility = View.VISIBLE
-                else
-                    binding.reply.visibility = View.GONE
-            } else {
-                viewModel.isEnd = true
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-                Toast.makeText(activity, "加载失败", Toast.LENGTH_SHORT).show()
-                result.exceptionOrNull()?.printStackTrace()
             }
         }
 
         viewModel.feedReplyData.observe(viewLifecycleOwner) { result ->
-            val reply = result.getOrNull()
-            if (!reply.isNullOrEmpty()) {
-                if (viewModel.isRefreshing) {
-                    viewModel.feedReplyList.clear()
-                }
-                if (viewModel.isRefreshing || viewModel.isLoadMore)
-                    for (element in reply) {
-                        if (element.entityType == "feed_reply")
-                            viewModel.feedReplyList.add(element)
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val reply = result.getOrNull()
+                if (!reply.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing) {
+                        viewModel.feedReplyList.clear()
                     }
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                viewModel.isEnd = true
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                result.exceptionOrNull()?.printStackTrace()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                        for (element in reply) {
+                            if (element.entityType == "feed_reply")
+                                viewModel.feedReplyList.add(element)
+                        }
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    viewModel.isEnd = true
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+                mAdapter.notifyDataSetChanged()
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
-            mAdapter.notifyDataSetChanged()
-            viewModel.isLoadMore = false
-            viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = false
         }
 
         viewModel.likeReplyData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
-                    viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeReply) {
+                viewModel.isPostLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
+                        viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeReplyData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
-                    viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeReply) {
+                viewModel.isPostUnLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
+                        viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.feedContentList[0].data.likenum = response.data.count
-                    viewModel.feedContentList[0].data.userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.feedContentList[0].data.likenum = response.data.count
+                        viewModel.feedContentList[0].data.userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.feedContentList[0].data.likenum = response.data.count
-                    viewModel.feedContentList[0].data.userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.feedContentList[0].data.likenum = response.data.count
+                        viewModel.feedContentList[0].data.userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+        viewModel.postReplyData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isPostReply) {
+                viewModel.isPostReply = false
+
+                val response = result.getOrNull()
+                if (response?.data != null) {
+                    if (response.data.messageStatus == 1) {
+                        viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
+                        Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
+                        bottomSheetDialog.cancel()
+                        if (viewModel.type == "feed") {
+                            viewModel.feedReplyList.add(
+                                0, TotalReplyResponse.Data(
+                                    "feed_reply",
+                                    viewModel.id,
+                                    viewModel.ruid,
+                                    PrefManager.uid,
+                                    URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                    viewModel.uname,
+                                    editText.text.toString(),
+                                    "",
+                                    null,
+                                    (System.currentTimeMillis() / 1000).toString(),
+                                    "0",
+                                    "0",
+                                    PrefManager.userAvatar,
+                                    ArrayList(),
+                                    0,
+                                    TotalReplyResponse.UserAction(0)
+                                )
+                            )
+                            mAdapter.notifyItemInserted(1)
+                            binding.recyclerView.scrollToPosition(1)
+                        } else {
+                            viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.add(
+                                viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.size,
+                                HomeFeedResponse.ReplyRows(
+                                    viewModel.rid,
+                                    PrefManager.uid,
+                                    URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                    editText.text.toString(),
+                                    viewModel.ruid,
+                                    viewModel.uname,
+                                    null,
+                                    ""
+                                )
+                            )
+                            mAdapter.notifyDataSetChanged()
+                        }
+                    } else {
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -253,7 +323,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     )
                 )
                 publish.setOnClickListener {
-                    publish(editText.text.toString())
+                    viewModel.replyData["message"] = editText.text.toString()
+                    viewModel.replyData["replyAndForward"] = viewModel.replyAndForward
+                    viewModel.isPostReply = true
+                    viewModel.postReply()
                 }
             }
         }
@@ -387,110 +460,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     }
 
-    private fun publish(content: String) {
-        thread {
-            try {
-                val httpClient = OkHttpClient()
-                val formBody: RequestBody = FormBody.Builder()
-                    .add("message", content)
-                    .add("replyAndForward", viewModel.replyAndForward)
-                    .build()
-
-                val getRequest: Request = Request.Builder()
-                    .addHeader("User-Agent", Constants.USER_AGENT)
-                    .addHeader("X-Requested-With", Constants.REQUEST_WIDTH)
-                    .addHeader("X-Sdk-Int", "33")
-                    .addHeader("X-Sdk-Locale", "zh-CN")
-                    .addHeader("X-App-Id", Constants.APP_ID)
-                    .addHeader("X-App-Token", CookieUtil.token)
-                    .addHeader("X-App-Version", "13.3.1")
-                    .addHeader("X-App-Code", "2307121")
-                    .addHeader("X-Api-Version", "13")
-                    .addHeader("X-App-Device", CookieUtil.deviceCode)
-                    .addHeader("X-Dark-Mode", "0")
-                    .addHeader("X-App-Channel", "coolapk")
-                    .addHeader("X-App-Mode", "universal")
-                    .addHeader(
-                        "Cookie",
-                        "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
-                    )
-                    .url("https://api.coolapk.com/v6/feed/reply?id=${viewModel.rid}&type=${viewModel.type}")
-                    .post(formBody)
-                    .build()
-
-                val call: Call = httpClient.newCall(getRequest)
-
-                call.enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.d("Reply", "onFailure: ${e.message}")
-                    }
-
-                    @SuppressLint("NotifyDataSetChanged")
-                    override fun onResponse(call: Call, response: Response) {
-                        val reply: CheckResponse = Gson().fromJson(
-                            response.body()!!.string(),
-                            CheckResponse::class.java
-                        )
-                        if (reply.data?.messageStatus == 1) {
-                            requireActivity().runOnUiThread {
-                                viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
-                                Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
-                                bottomSheetDialog.cancel()
-                                if (viewModel.type == "feed") {
-                                    viewModel.feedReplyList.add(
-                                        0, TotalReplyResponse.Data(
-                                            "feed_reply",
-                                            viewModel.id,
-                                            viewModel.ruid,
-                                            PrefManager.uid,
-                                            URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                            viewModel.uname,
-                                            content,
-                                            "",
-                                            null,
-                                            (System.currentTimeMillis() / 1000).toString(),
-                                            "0",
-                                            "0",
-                                            PrefManager.userAvatar,
-                                            ArrayList(),
-                                            0,
-                                            TotalReplyResponse.UserAction(0)
-                                        )
-                                    )
-                                    mAdapter.notifyItemInserted(1)
-                                    binding.recyclerView.scrollToPosition(1)
-                                } else {
-                                    viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.add(
-                                        viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.size,
-                                        HomeFeedResponse.ReplyRows(
-                                            viewModel.rid,
-                                            PrefManager.uid,
-                                            URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                            content,
-                                            viewModel.ruid,
-                                            viewModel.uname,
-                                            null,
-                                            ""
-                                        )
-                                    )
-                                    mAdapter.notifyDataSetChanged()
-                                }
-                            }
-                        } else {
-                            requireActivity().runOnUiThread {
-                                Toast.makeText(activity, reply.message, Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        }
-                    }
-                })
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -502,6 +471,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getFeedReply()
                     }
                 }
@@ -536,13 +506,18 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             refreshData()
+        } else {
+            binding.reply.visibility = View.VISIBLE
         }
     }
 
@@ -551,6 +526,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
+        viewModel.isNew = true
         viewModel.getFeed()
     }
 
@@ -656,7 +632,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             editText.editableText.replace(
                 selectionStart,
                 selectionEnd,
-                SpannableStringBuilderUtil.setEmoji(requireActivity(), name, ((editText.textSize) * 1.3).toInt())
+                SpannableStringBuilderUtil.setEmoji(
+                    requireActivity(),
+                    name,
+                    ((editText.textSize) * 1.3).toInt()
+                )
             )
         }
     }
@@ -665,16 +645,22 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         if (type == "reply") {
             viewModel.likeReplyPosition = position!!
             viewModel.likeReplyId = id
-            if (isLike)
+            if (isLike) {
+                viewModel.isPostUnLikeReply = true
                 viewModel.postUnLikeReply()
-            else
+            } else {
+                viewModel.isPostLikeReply = true
                 viewModel.postLikeReply()
+            }
         } else {
             viewModel.likeFeedId = id
-            if (isLike)
+            if (isLike) {
+                viewModel.isPostUnLikeFeed = true
                 viewModel.postUnLikeFeed()
-            else
+            } else {
+                viewModel.isPostLikeFeed = true
                 viewModel.postLikeFeed()
+            }
         }
     }
 

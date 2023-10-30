@@ -8,11 +8,14 @@ import com.example.c001apk.logic.network.Repository
 
 class TopicViewModel : ViewModel() {
 
+    var param1 = ""
+
     val tabList = ArrayList<String>()
     var fragmentList = ArrayList<Fragment>()
 
     var tag = ""
     var isInit = true
+    var isNew = true
 
     private val getTopicLayoutLiveData = MutableLiveData<String>()
 

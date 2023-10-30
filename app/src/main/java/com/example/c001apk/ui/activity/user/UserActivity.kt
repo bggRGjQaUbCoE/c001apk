@@ -48,92 +48,110 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
         initScroll()
 
         viewModel.userData.observe(this) { result ->
-            val user = result.getOrNull()
-            if (user != null) {
-                binding.collapsingToolbar.title = user.username
-                binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
-                binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-                ImageShowUtil.showUserCover(binding.cover, user.cover)
-                ImageShowUtil.showAvatar(binding.avatar, user.userAvatar)
-                binding.name.text = user.username
-                binding.level.text = "Lv.${user.level}"
-                binding.level.visibility = View.VISIBLE
-                if (user.bio == "") binding.bio.visibility = View.GONE
-                else binding.bio.text = user.bio
-                binding.like.text = "${CountUtil.view(user.beLikeNum)} 获赞"
-                binding.follow.text = "${CountUtil.view(user.follow)} 关注"
-                binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
-                binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
+            if (viewModel.isNew) {
+                viewModel.isNew = false
 
-                val intent = Intent(this, FFFListActivity::class.java)
-                intent.putExtra("uid", user.uid)
-                binding.follow.setOnClickListener {
-                    intent.putExtra("type", "follow")
-                    startActivity(intent)
-                }
-                binding.fans.setOnClickListener {
-                    intent.putExtra("type", "fans")
-                    startActivity(intent)
-                }
+                val user = result.getOrNull()
+                if (user != null) {
+                    binding.collapsingToolbar.title = user.username
+                    binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
+                    binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
+                    ImageShowUtil.showUserCover(binding.cover, user.cover)
+                    ImageShowUtil.showAvatar(binding.avatar, user.userAvatar)
+                    binding.name.text = user.username
+                    binding.level.text = "Lv.${user.level}"
+                    binding.level.visibility = View.VISIBLE
+                    if (user.bio == "") binding.bio.visibility = View.GONE
+                    else binding.bio.text = user.bio
+                    binding.like.text = "${CountUtil.view(user.beLikeNum)} 获赞"
+                    binding.follow.text = "${CountUtil.view(user.follow)} 关注"
+                    binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
+                    binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
 
-                viewModel.uid = user.uid
-                viewModel.isRefreh = true
-                viewModel.getUserFeed()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+                    val intent = Intent(this, FFFListActivity::class.java)
+                    intent.putExtra("uid", user.uid)
+                    binding.follow.setOnClickListener {
+                        intent.putExtra("type", "follow")
+                        startActivity(intent)
+                    }
+                    binding.fans.setOnClickListener {
+                        intent.putExtra("type", "fans")
+                        startActivity(intent)
+                    }
+
+                    viewModel.uid = user.uid
+                    viewModel.isRefreh = true
+                    viewModel.isNew = true
+                    viewModel.getUserFeed()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.userFeedData.observe(this) { result ->
-            val feed = result.getOrNull()
-            if (!feed.isNullOrEmpty()) {
-                if (viewModel.isRefreh) viewModel.feedContentList.clear()
-                if (viewModel.isRefreh || viewModel.isLoadMore) {
-                    for (element in feed) {
-                        if (element.entityTemplate == "feed")
-                            viewModel.feedContentList.add(element)
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val feed = result.getOrNull()
+                if (!feed.isNullOrEmpty()) {
+                    if (viewModel.isRefreh) viewModel.feedContentList.clear()
+                    if (viewModel.isRefreh || viewModel.isLoadMore) {
+                        for (element in feed) {
+                            if (element.entityTemplate == "feed")
+                                viewModel.feedContentList.add(element)
+                        }
                     }
+                    mAdapter.notifyDataSetChanged()
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+                binding.infoLayout.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
+                binding.swipeRefresh.isRefreshing = false
+                viewModel.isRefreh = false
             }
-            binding.infoLayout.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = false
-            binding.swipeRefresh.isRefreshing = false
-            viewModel.isRefreh = false
         }
 
         viewModel.likeFeedData.observe(this) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.feedContentList[viewModel.likePosition].likenum =
-                        response.data.count
-                    viewModel.feedContentList[viewModel.likePosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.feedContentList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.feedContentList[viewModel.likePosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(this) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.feedContentList[viewModel.likePosition].likenum =
-                        response.data.count
-                    viewModel.feedContentList[viewModel.likePosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.feedContentList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.feedContentList[viewModel.likePosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -150,8 +168,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getUserFeed()
-
                     }
                 }
             }
@@ -176,15 +194,16 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
-            viewModel.page = 1
-            viewModel.isRefreh = true
-            viewModel.isEnd = false
-            viewModel.getUserFeed()
+            binding.indicator.visibility = View.GONE
+            refreshData()
         }
     }
 
     private fun initData() {
         if (viewModel.isInit) {
+            viewModel.isInit = false
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             refreshData()
         }
     }
@@ -194,8 +213,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
         viewModel.isRefreh = true
         viewModel.isEnd = false
         viewModel.id = intent.getStringExtra("id")!!
+        viewModel.isNew = true
         viewModel.getUser()
-        viewModel.isInit = false
     }
 
     private fun initView() {
@@ -221,10 +240,13 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position
-        if (isLike)
+        if (isLike) {
+            viewModel.isPostUnLikeFeed = true
             viewModel.postUnLikeFeed()
-        else
+        } else {
+            viewModel.isPostLikeFeed = true
             viewModel.postLikeFeed()
+        }
     }
 
 }

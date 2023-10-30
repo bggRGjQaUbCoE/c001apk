@@ -58,7 +58,6 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
         super.onResume()
 
         if (viewModel.isInit) {
-            binding.indicator.isIndeterminate = true
             viewModel.isInit = false
             initData()
             initView()
@@ -80,54 +79,67 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
         }
 
         viewModel.topicDataLiveData.observe(viewLifecycleOwner) { result ->
-            val data = result.getOrNull()
-            if (!data.isNullOrEmpty()) {
-                if (viewModel.isRefreshing)
-                    viewModel.topicDataList.clear()
-                if (viewModel.isRefreshing || viewModel.isLoadMore)
-                    for (element in data)
-                        if (element.entityTemplate == "feed" || element.entityType == "topic" || element.entityType == "product")
-                            viewModel.topicDataList.add(element)
-                mAdapter.notifyDataSetChanged()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val data = result.getOrNull()
+                if (!data.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing)
+                        viewModel.topicDataList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                        for (element in data)
+                            if (element.entityTemplate == "feed" || element.entityType == "topic" || element.entityType == "product")
+                                viewModel.topicDataList.add(element)
+                    mAdapter.notifyDataSetChanged()
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
+                }
                 binding.indicator.isIndeterminate = false
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+                binding.indicator.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
-            viewModel.isLoadMore = false
-            viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = false
         }
 
         viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.topicDataList[viewModel.likePosition].likenum =
-                        response.data.count
-                    viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.topicDataList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.topicDataList[viewModel.likePosition].likenum =
-                        response.data.count
-                    viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.topicDataList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -144,6 +156,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
+                        viewModel.isNew = true
                         viewModel.getTopicData()
                     }
                 }
@@ -170,6 +183,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             refreshData()
         }
     }
@@ -188,8 +202,11 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
     }
 
     private fun initData() {
-        if (viewModel.topicDataList.isEmpty())
+        if (viewModel.topicDataList.isEmpty()) {
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             refreshData()
+        }
     }
 
     private fun refreshData() {
@@ -198,16 +215,20 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
         viewModel.isLoadMore = false
         viewModel.url = url
         viewModel.title = title
+        viewModel.isNew = true
         viewModel.getTopicData()
     }
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position
-        if (isLike)
+        if (isLike) {
+            viewModel.isPostUnLikeFeed = true
             viewModel.postUnLikeFeed()
-        else
+        } else {
+            viewModel.isPostLikeFeed = true
             viewModel.postLikeFeed()
+        }
     }
 
 }

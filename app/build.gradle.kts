@@ -125,14 +125,11 @@ android {
     }
     defaultConfig {
         ndk {
-            ndk {
-                //abiFilters "arm64-v8a", "armeabi-v7a", "armeabi", "x86", "x86_64"
-                abiFilters.add("arm64-v8a")
-                //abiFilters.add("armeabi-v7a")
-                //abiFilters.add("armeabi")
-                //abiFilters.add("x86")
-                //abiFilters.add("x86_64")
-            }
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("armeabi-v7a")
+            abiFilters.add("armeabi")
+            abiFilters.add("x86")
+            abiFilters.add("x86_64")
         }
     }
 }
@@ -162,7 +159,7 @@ dependencies {
     implementation("com.github.SherlockGougou:BigImageViewPager:androidx-7.2.7")
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.drakeet.about:about:2.4.1")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("dev.rikka.rikkax.material:material:2.7.0")
     implementation("dev.rikka.rikkax.material:material-preference:2.0.0")

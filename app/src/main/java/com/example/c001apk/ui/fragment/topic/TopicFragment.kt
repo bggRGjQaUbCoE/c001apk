@@ -19,7 +19,6 @@ class TopicFragment : Fragment() {
 
     private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
-    private lateinit var param1: String //title
     private var param2: String? = null
 
     companion object {
@@ -36,7 +35,7 @@ class TopicFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)!!
+            viewModel.param1 = it.getString(ARG_PARAM1)!!
             param2 = it.getString(ARG_PARAM2)
         }
     }
@@ -52,47 +51,54 @@ class TopicFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        getViewData()
+        if (viewModel.tabList.isEmpty())
+            getViewData()
+        else
+            initView(null)
 
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
-            val data = result.getOrNull()
-            if (data != null) {
-                if (viewModel.tabList.isEmpty()) {
-                    binding.toolBar.apply {
-                        title = param1
-                        subtitle = data.intro
-                        //tooltipText = data.intro
-                        setNavigationIcon(R.drawable.ic_back)
-                        setNavigationOnClickListener {
-                            requireActivity().finish()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val data = result.getOrNull()
+                if (data != null) {
+                    if (viewModel.tabList.isEmpty()) {
+                        binding.toolBar.apply {
+                            title = viewModel.param1
+                            subtitle = data.intro
+                            //tooltipText = data.intro
+                            setNavigationIcon(R.drawable.ic_back)
+                            setNavigationOnClickListener {
+                                requireActivity().finish()
+                            }
                         }
-                    }
-                    for (element in data.tabList) {
-                        viewModel.tabList.add(element.title)
-                        viewModel.fragmentList.add(
-                            TopicContentFragment.newInstance(
-                                element.url,
-                                element.title
+                        for (element in data.tabList) {
+                            viewModel.tabList.add(element.title)
+                            viewModel.fragmentList.add(
+                                TopicContentFragment.newInstance(
+                                    element.url,
+                                    element.title
+                                )
                             )
-                        )
+                        }
+                        var tabSelected = 0
+                        for (element in data.tabList) {
+                            if (data.selectedTab == element.pageName) break
+                            else tabSelected++
+                        }
+                        initView(tabSelected)
                     }
-                    var tabSelected = 0
-                    for (element in data.tabList) {
-                        if (data.selectedTab == element.pageName) break
-                        else tabSelected++
-                    }
-                    initView(tabSelected)
+                    binding.indicator.isIndeterminate = false
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                binding.indicator.isIndeterminate = false
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
             }
         }
 
     }
 
-    private fun initView(tabSelected: Int) {
-        //binding.viewPager.offscreenPageLimit = tabList.size
+    private fun initView(tabSelected: Int?) {
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) = viewModel.fragmentList[position]
             override fun getItemCount() = viewModel.tabList.size
@@ -100,7 +106,7 @@ class TopicFragment : Fragment() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
-        if (viewModel.isInit) {
+        if (viewModel.isInit && tabSelected != null) {
             binding.viewPager.currentItem = tabSelected
             binding.tabLayout.getTabAt(tabSelected)!!.select()
             viewModel.isInit = false
@@ -109,7 +115,10 @@ class TopicFragment : Fragment() {
     }
 
     private fun getViewData() {
-        viewModel.tag = param1
+        binding.indicator.visibility = View.VISIBLE
+        binding.indicator.isIndeterminate = true
+        viewModel.tag = viewModel.param1
+        viewModel.isNew = true
         viewModel.getTopicLayout()
     }
 
