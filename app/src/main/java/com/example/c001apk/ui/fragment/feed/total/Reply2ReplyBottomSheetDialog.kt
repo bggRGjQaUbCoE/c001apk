@@ -67,7 +67,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
     private var position: Int = 0
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var lastVisibleItemPosition = -1
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private var type = ""
     private var uname = ""
@@ -79,7 +78,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
     private var replyAndForward = "0"
     private var isPaste = false
     private var cursorBefore = -1
-    private var likePosition = -1
 
     companion object {
         fun newInstance(position: Int, uid: String, id: String): Reply2ReplyBottomSheetDialog {
@@ -143,8 +141,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.replyTotalList[likePosition].likenum = response.data
-                    viewModel.replyTotalList[likePosition].userAction?.like = 1
+                    viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
+                    viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -157,8 +155,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.replyTotalList[likePosition].likenum = response.data
-                    viewModel.replyTotalList[likePosition].userAction?.like = 0
+                    viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
+                    viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -174,13 +172,13 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.replyTotalList.size) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.getReplyTotal()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.replyTotalList.size
+                        && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.getReplyTotal()
                     }
                 }
             }
@@ -188,7 +186,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.replyTotalList.isNotEmpty())
-                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
             }
         })
     }
@@ -224,7 +222,16 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             dialog?.findViewById(com.google.android.material.R.id.design_bottom_sheet)!!
         view.layoutParams.height = -1
         view.layoutParams.width = -1
+        val behavior = BottomSheetBehavior.from(view)
+        //behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        behavior.peekHeight = windowHeight
     }
+
+    private val windowHeight: Int
+        get() {
+            val heightPixels = this.resources.displayMetrics.heightPixels
+            return heightPixels - heightPixels / 4
+        }
 
     override fun onReply2Reply(
         rPosition: Int,
@@ -256,8 +263,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
         val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
         val emotion: ImageButton = view.findViewById(R.id.emotion)
-        val pageSize = 21
-        val itemBeans = initEmoji(pageSize)
+        val itemBeans = initEmoji()
         val scrollAdapter = HorizontalScrollAdapter(requireActivity(), itemBeans)
         scrollAdapter.setIOnEmojiClickListener(this)
         emojiPanel.adapter = scrollAdapter
@@ -427,7 +433,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                     @SuppressLint("NotifyDataSetChanged")
                     override fun onResponse(call: Call, response: Response) {
                         val reply: CheckResponse = Gson().fromJson(
-                            response.body!!.string(),
+                            response.body()!!.string(),
                             CheckResponse::class.java
                         )
                         if (reply.data?.messageStatus == 1) {
@@ -525,7 +531,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeReplyId = id
-        this.likePosition = position
+        viewModel.likePosition = position
         if (isLike)
             viewModel.postUnLikeReply()
         else

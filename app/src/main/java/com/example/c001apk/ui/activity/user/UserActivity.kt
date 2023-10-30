@@ -28,9 +28,6 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
     private val viewModel by lazy { ViewModelProvider(this)[UserViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = -1
-    private var lastVisibleItemPosition = -1
-    private var likePosition = -1
 
     @SuppressLint(
         "ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged", "UseCompatLoadingForDrawables",
@@ -114,8 +111,9 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.feedContentList[likePosition].likenum = response.data.count
-                    viewModel.feedContentList[likePosition].userAction?.like = 1
+                    viewModel.feedContentList[viewModel.likePosition].likenum =
+                        response.data.count
+                    viewModel.feedContentList[viewModel.likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
@@ -128,8 +126,9 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.feedContentList[likePosition].likenum = response.data.count
-                    viewModel.feedContentList[likePosition].userAction?.like = 0
+                    viewModel.feedContentList[viewModel.likePosition].likenum =
+                        response.data.count
+                    viewModel.feedContentList[viewModel.likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
@@ -145,13 +144,14 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.feedContentList.size) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.getUserFeed()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.feedContentList.size
+                        && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.getUserFeed()
+
                     }
                 }
             }
@@ -159,8 +159,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.feedContentList.isNotEmpty()) {
-                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    firstCompletelyVisibleItemPosition =
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
             }
@@ -220,7 +220,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener {
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
-        this.likePosition = position
+        viewModel.likePosition = position
         if (isLike)
             viewModel.postUnLikeFeed()
         else

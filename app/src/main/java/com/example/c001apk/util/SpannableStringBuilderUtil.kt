@@ -5,8 +5,8 @@ import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
+import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
@@ -40,7 +40,12 @@ object SpannableStringBuilderUtil {
         return builder
     }
 
-    fun setText(mContext: Context, text: String, size: Int): SpannableStringBuilder {
+    fun setText(
+        mContext: Context,
+        text: String,
+        size: Int,
+        imgList: MutableList<ImageInfo>?
+    ): SpannableStringBuilder {
         val mess = Html.fromHtml(
             StringBuilder(text).append(" ").toString()
                 .replace("\n", " <br />"),
@@ -54,7 +59,7 @@ object SpannableStringBuilderUtil {
             URLSpan::class.java
         )
         for (url in urls) {
-            val myURLSpan = MyURLSpan(mContext, null, url.url, null)
+            val myURLSpan = MyURLSpan(mContext, url.url, imgList)
             val start = builder.getSpanStart(url)
             val end = builder.getSpanEnd(url)
             val flags = builder.getSpanFlags(url)

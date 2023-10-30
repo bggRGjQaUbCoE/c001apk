@@ -8,4 +8,12 @@ object CookieUtil {
 
     var token = ""
 
+    var requestHash = ""
+
+    var isGetLoginParam = false
+
+    var isTryLogin = false
+
+    var isGetCaptcha = false
+
 }

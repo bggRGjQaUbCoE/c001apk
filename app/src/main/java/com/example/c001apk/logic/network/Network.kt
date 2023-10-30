@@ -1,5 +1,6 @@
 package com.example.c001apk.logic.network
 
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -11,6 +12,7 @@ object Network {
 
     private val apiService = ApiServiceCreator.create<ApiService>()
     private val api2Service = Api2ServiceCreator.create<ApiService>()
+    private val accountService = AccountServiceCreator.create<ApiService>()
 
     suspend fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
         api2Service.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
@@ -83,6 +85,18 @@ object Network {
     suspend fun postUnLikeReply(id: String) =
         apiService.postUnLikeReply(id).await()
 
+    suspend fun checkLoginInfo() =
+        apiService.checkLoginInfo().response()
+
+    suspend fun getLoginParam() =
+        accountService.getLoginParam().response()
+
+    suspend fun tryLogin(data: HashMap<String, String?>) =
+        accountService.tryLogin(data).response()
+
+    suspend fun getCaptcha(url: String) =
+        accountService.getCaptcha(url).response()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {
@@ -92,6 +106,20 @@ object Network {
                     else continuation.resumeWithException(
                         RuntimeException("response body is null")
                     )
+                }
+
+                override fun onFailure(call: Call<T>, t: Throwable) {
+                    continuation.resumeWithException(t)
+                }
+            })
+        }
+    }
+
+    private suspend fun <T> Call<T>.response(): Response<T> {
+        return suspendCoroutine { continuation ->
+            enqueue(object : Callback<T> {
+                override fun onResponse(call: Call<T>, response: Response<T>) {
+                    continuation.resume(response)
                 }
 
                 override fun onFailure(call: Call<T>, t: Throwable) {

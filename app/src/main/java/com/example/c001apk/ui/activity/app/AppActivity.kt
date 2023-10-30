@@ -24,9 +24,6 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = -1
-    private var lastVisibleItemPosition = -1
-    private var likePosition = -1
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,20 +67,20 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
                 if (viewModel.isRefreh)
                     viewModel.appCommentList.clear()
                 if (viewModel.isRefreh || viewModel.isLoadMore) {
-                    for (element in comment) {
+                    for (element in comment)
                         if (element.entityType == "feed")
                             viewModel.appCommentList.add(element)
-                    }
+
                 }
                 mAdapter.notifyDataSetChanged()
-                binding.appLayout.visibility = View.VISIBLE
-                binding.indicator.isIndeterminate = false
                 mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
                 mAdapter.setLoadState(mAdapter.LOADING_END)
                 viewModel.isEnd = true
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.indicator.isIndeterminate = false
+            binding.appLayout.visibility = View.VISIBLE
             binding.swipeRefresh.isRefreshing = false
             viewModel.isRefreh = false
         }
@@ -92,8 +89,10 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.appCommentList[likePosition].likenum = response.data.count
-                    viewModel.appCommentList[likePosition].userAction?.like = 1
+                    viewModel.appCommentList[viewModel.likePosition].likenum =
+                        response.data.count
+                    viewModel.appCommentList[viewModel.likePosition].userAction?.like = 1
+
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
@@ -106,8 +105,10 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.appCommentList[likePosition].likenum = response.data.count
-                    viewModel.appCommentList[likePosition].userAction?.like = 0
+                    viewModel.appCommentList[viewModel.likePosition].likenum =
+                        response.data.count
+                    viewModel.appCommentList[viewModel.likePosition].userAction?.like = 0
+
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
@@ -170,13 +171,14 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.appCommentList.size) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.getAppComment()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.appCommentList.size
+                        && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.getAppComment()
+
                     }
                 }
             }
@@ -184,8 +186,8 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.appCommentList.isNotEmpty()) {
-                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    firstCompletelyVisibleItemPosition =
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
             }
@@ -201,7 +203,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener {
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
-        this.likePosition = position
+        viewModel.likePosition = position
         if (isLike)
             viewModel.postUnLikeFeed()
         else

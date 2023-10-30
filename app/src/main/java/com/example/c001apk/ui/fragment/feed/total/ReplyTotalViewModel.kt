@@ -8,6 +8,9 @@ import com.example.c001apk.logic.network.Repository
 
 class ReplyTotalViewModel : ViewModel() {
 
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
     var replyTextMap: MutableMap<String, String> = HashMap()
 
     var isEnd = false

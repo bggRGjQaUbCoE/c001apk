@@ -10,16 +10,28 @@ import com.example.c001apk.logic.network.Repository
 
 class FeedContentViewModel : ViewModel() {
 
-    var replyTextMap: MutableMap<String, String> = HashMap()
+    //feed data
+    var id = "" // feed id
+    var uid = "" // feed user id
+    var uname = "" // feed username //被回复用户name
+    var rid = "" // 回复feed/reply id
+    var ruid = "" // 被回复用户id
+    var type = "" //feed reply
 
+    var rPosition = -1
+    var replyAndForward = "0"
+    var cursorBefore = -1
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likeReplyPosition = -1
+
+    var replyTextMap: MutableMap<String, String> = HashMap()
     val feedContentList = ArrayList<FeedContentResponse>()
     val feedReplyList = ArrayList<TotalReplyResponse.Data>()
 
     var isRefreshing = true
     var isLoadMore = false
     var isEnd = false
-
-    var id = ""
 
     private val getFeedData = MutableLiveData<String>()
 
@@ -52,6 +64,7 @@ class FeedContentViewModel : ViewModel() {
     val likeReplyData = postLikeReplyData.switchMap {
         Repository.postLikeReply(likeReplyId)
     }
+
     fun postLikeReply() {
         postLikeReplyData.value = postLikeReplyData.value
     }
@@ -61,6 +74,7 @@ class FeedContentViewModel : ViewModel() {
     val unLikeReplyData = postUnLikeReplyData.switchMap {
         Repository.postUnLikeReply(likeReplyId)
     }
+
     fun postUnLikeReply() {
         postUnLikeReplyData.value = postUnLikeReplyData.value
     }
@@ -71,6 +85,7 @@ class FeedContentViewModel : ViewModel() {
     val likeFeedData = postLikeFeedData.switchMap {
         Repository.postLikeFeed(likeFeedId)
     }
+
     fun postLikeFeed() {
         postLikeFeedData.value = postLikeFeedData.value
     }
@@ -80,6 +95,7 @@ class FeedContentViewModel : ViewModel() {
     val unLikeFeedData = postUnLikeFeedData.switchMap {
         Repository.postUnLikeFeed(likeFeedId)
     }
+
     fun postUnLikeFeed() {
         postUnLikeFeedData.value = postUnLikeFeedData.value
     }

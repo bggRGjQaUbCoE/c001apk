@@ -128,7 +128,7 @@ class TopicContentAdapter(
                     parent.context.startActivity(intent)
                 }
                 viewHolder.like.setOnClickListener {
-                    if (PrefManager.isLogin){
+                    if (PrefManager.isLogin) {
                         iOnLikeClickListener?.onPostLike(
                             viewHolder.isLike,
                             viewHolder.id,
@@ -241,7 +241,12 @@ class TopicContentAdapter(
                 holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
 
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
-                holder.message.text = SpannableStringBuilderUtil.setText(mContext, feed.message, (holder.message.textSize*1.3).toInt())
+                holder.message.text = SpannableStringBuilderUtil.setText(
+                    mContext,
+                    feed.message,
+                    (holder.message.textSize * 1.3).toInt(),
+                    null
+                )
 
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                 drawableLike.setBounds(

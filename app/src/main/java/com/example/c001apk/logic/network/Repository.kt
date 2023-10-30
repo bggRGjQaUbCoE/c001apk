@@ -2,6 +2,9 @@ package com.example.c001apk.logic.network
 
 import androidx.lifecycle.liveData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import okhttp3.RequestBody
 import kotlin.coroutines.CoroutineContext
 
 object Repository {
@@ -203,6 +206,37 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun checkLoginInfo() =
+        fire(Dispatchers.IO) {
+            val response = Network.checkLoginInfo()
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getLoginParam() =
+        fire(Dispatchers.IO) {
+            val response = Network.getLoginParam()
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun tryLogin(data: HashMap<String, String?>) =
+        fire(Dispatchers.IO) {
+            val response = Network.tryLogin(data)
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getCaptcha(url: String) = fire(Dispatchers.IO) {
+            val captResponse = Network.getCaptcha(url)
+            Result.success(captResponse)
+    }
 
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {

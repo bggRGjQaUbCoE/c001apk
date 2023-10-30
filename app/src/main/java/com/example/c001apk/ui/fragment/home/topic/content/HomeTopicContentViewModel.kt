@@ -9,6 +9,8 @@ import com.example.c001apk.logic.network.Repository
 class HomeTopicContentViewModel : ViewModel() {
 
     var isInit = true
+    var isNew = true
+
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true

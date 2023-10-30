@@ -7,12 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
-import com.example.c001apk.databinding.FragmentHomeAppBinding
+import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.home.HomeFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
@@ -20,17 +19,16 @@ import com.example.c001apk.util.LinearItemDecoration
 
 class AppListFragment : Fragment(), IOnBottomClickListener {
 
-    private lateinit var binding: FragmentHomeAppBinding
+    private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppListViewModel::class.java] }
     private lateinit var mAdapter: AppListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeAppBinding.inflate(inflater, container, false)
+        binding = FragmentHomeFeedBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -50,7 +48,7 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {}
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                firstCompletelyVisibleItemPosition =
+                viewModel.firstCompletelyVisibleItemPosition =
                     mLayoutManager.findFirstCompletelyVisibleItemPosition()
             }
         })
@@ -66,6 +64,7 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             refreshData()
         }
     }
@@ -81,14 +80,20 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
-        viewModel.items.observe(viewLifecycleOwner, Observer {
+        viewModel.items.observe(viewLifecycleOwner) {
             viewModel.appList.clear()
             viewModel.appList.addAll(it)
             mAdapter.notifyDataSetChanged()
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             binding.swipeRefresh.isRefreshing = false
-        })
-        viewModel.getItems(requireActivity())
+        }
+        if (viewModel.appList.isEmpty()){
+            binding.indicator.isIndeterminate = true
+            binding.indicator.visibility = View.VISIBLE
+            viewModel.getItems(requireActivity())
+        }
+
     }
 
     override fun onResume() {
@@ -101,13 +106,12 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
             initScroll()
         }
 
-
         (requireActivity() as IOnBottomClickContainer).controller = this
     }
 
     override fun onReturnTop() {
         if (HomeFragment.current == 1) {
-            if (firstCompletelyVisibleItemPosition == 0)
+            if (viewModel.firstCompletelyVisibleItemPosition == 0)
                 refreshData()
             else {
                 binding.recyclerView.smoothScrollToPosition(0)

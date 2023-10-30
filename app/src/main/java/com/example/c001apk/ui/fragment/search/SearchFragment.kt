@@ -80,7 +80,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
 
     @SuppressLint("NotifyDataSetChanged", "Range")
     private fun queryData() {
-        //Toast.makeText(activity, "queryData", Toast.LENGTH_SHORT).show()
         val cursor = db.query("SearchHistory", null, null, null, null, null, null)
         viewModel.historyList.clear()
         if (cursor.moveToLast()) {
@@ -93,8 +92,8 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 else
                     binding.historyLayout.visibility = View.VISIBLE
             } while (cursor.moveToPrevious())
+            cursor.close()
         }
-        cursor.close()
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -147,7 +146,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 .addToBackStack(null)
                 .commit()
             updateHistory(binding.editText.text.toString())
-            binding.editText.text = null
+            //binding.editText.text = null
         }
     }
 

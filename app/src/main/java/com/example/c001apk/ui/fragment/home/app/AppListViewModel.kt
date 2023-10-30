@@ -15,6 +15,9 @@ import kotlinx.coroutines.withContext
 class AppListViewModel : ViewModel() {
 
     var isInit = true
+
+    var firstCompletelyVisibleItemPosition = 0
+
     val appList = ArrayList<AppItem>()
     val items: MutableLiveData<ArrayList<AppItem>> = MutableLiveData()
 

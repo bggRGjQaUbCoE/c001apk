@@ -69,25 +69,30 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
         }
 
         viewModel.topicDataLiveData.observe(viewLifecycleOwner) { result ->
-            val data = result.getOrNull()
-            if (!data.isNullOrEmpty()) {
-                if (viewModel.isRefreshing)
-                    viewModel.topicDataList.clear()
-                if (viewModel.isRefreshing || viewModel.isLoadMore)
-                    for (element in data)
-                        if (element.entityType == "topic" || element.entityType == "product")
-                            viewModel.topicDataList.add(element)
-                mAdapter.notifyDataSetChanged()
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val data = result.getOrNull()
+                if (!data.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing)
+                        viewModel.topicDataList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                        for (element in data)
+                            if (element.entityType == "topic" || element.entityType == "product")
+                                viewModel.topicDataList.add(element)
+                    mAdapter.notifyDataSetChanged()
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
-            binding.indicator.isIndeterminate = false
-            viewModel.isLoadMore = false
-            viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = false
         }
 
     }
@@ -102,6 +107,7 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
                             mAdapter.setLoadState(mAdapter.LOADING)
                             viewModel.isLoadMore = true
                             viewModel.page++
+                            viewModel.isNew = true
                             viewModel.getTopicData()
                         }
                     }
@@ -129,6 +135,7 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             refreshData()
         }
     }
@@ -146,8 +153,11 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
     }
 
     private fun initData() {
-        if (viewModel.topicDataList.isEmpty())
+        if (viewModel.topicDataList.isEmpty()) {
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             refreshData()
+        }
     }
 
     private fun refreshData() {
@@ -156,6 +166,7 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
         viewModel.isLoadMore = false
         viewModel.url = url
         viewModel.title = title
+        viewModel.isNew = true
         viewModel.getTopicData()
     }
 

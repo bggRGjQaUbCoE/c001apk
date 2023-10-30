@@ -23,9 +23,6 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
     private var type: String = ""
     private lateinit var mAdapter: SearchAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = -1
-    private var lastVisibleItemPosition = -1
-    private var likePosition = -1
 
     companion object {
         @JvmStatic
@@ -91,7 +88,6 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
                         }
                     else
                         viewModel.searchList.addAll(search)
-
                 }
                 mAdapter.notifyDataSetChanged()
                 mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
@@ -110,8 +106,8 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.searchList[likePosition].likenum = response.data.count
-                    viewModel.searchList[likePosition].userAction?.like = 1
+                    viewModel.searchList[viewModel.likePosition].likenum = response.data.count
+                    viewModel.searchList[viewModel.likePosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -124,8 +120,8 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.searchList[likePosition].likenum = response.data.count
-                    viewModel.searchList[likePosition].userAction?.like = 0
+                    viewModel.searchList[viewModel.likePosition].likenum = response.data.count
+                    viewModel.searchList[viewModel.likePosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -141,22 +137,23 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.searchList.size) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.getSearch()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.searchList.size
+                        && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.getSearch()
+
                     }
                 }
             }
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.searchList.isNotEmpty()){
-                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    firstCompletelyVisibleItemPosition =
+                if (viewModel.searchList.isNotEmpty()) {
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
             }
@@ -208,7 +205,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener {
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
-        this.likePosition = position
+        viewModel.likePosition = position
         if (isLike)
             viewModel.postUnLikeFeed()
         else

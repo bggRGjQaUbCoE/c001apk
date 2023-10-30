@@ -331,7 +331,8 @@ class FeedContentAdapter(
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         feed.data.message,
-                        (holder.message.textSize * 1.3).toInt()
+                        (holder.message.textSize * 1.3).toInt(),
+                        null
                     )
 
                     if (!feed.data.picArr.isNullOrEmpty()) {
@@ -380,7 +381,8 @@ class FeedContentAdapter(
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         reply.message,
-                        (holder.message.textSize * 1.3).toInt()
+                        (holder.message.textSize * 1.3).toInt(),
+                        null
                     )
 
                     holder.pubDate.text = PubDateUtil.time(reply.dateline)

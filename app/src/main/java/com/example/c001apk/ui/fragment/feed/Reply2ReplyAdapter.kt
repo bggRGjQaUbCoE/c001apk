@@ -4,12 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.text.Html
-import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,11 +14,7 @@ import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CopyActivity
-import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.CenteredImageSpan
-import com.example.c001apk.view.MyURLSpan
-import java.util.regex.Pattern
 
 
 class Reply2ReplyAdapter(
@@ -83,16 +74,6 @@ class Reply2ReplyAdapter(
 
         holder.reply.highlightColor = Color.TRANSPARENT
 
-        val urlList: MutableList<ImageInfo> = ArrayList()
-        if (reply.pic != "") {
-            for (url in reply.picArr!!) {
-                val imageInfo = ImageInfo()
-                imageInfo.thumbnailUrl = "$url.s.jpg"
-                imageInfo.originUrl = url
-                urlList.add(imageInfo)
-            }
-        }
-
         val text =
             if (reply.ruid == uid) {
                 if (reply.pic == "")
@@ -114,8 +95,23 @@ class Reply2ReplyAdapter(
                 }
             }
 
+        val urlList: MutableList<ImageInfo> = ArrayList()
+        if (!reply.picArr.isNullOrEmpty()){
+            for (element in reply.picArr){
+                val imageInfo = ImageInfo()
+                imageInfo.thumbnailUrl = "$element.s.jpg"
+                imageInfo.originUrl = element
+                urlList.add(imageInfo)
+            }
+        }
+
         holder.reply.movementMethod = LinkMovementMethod.getInstance()
-        holder.reply.text = SpannableStringBuilderUtil.setText(mContext, text, (holder.reply.textSize*1.3).toInt())
+        holder.reply.text = SpannableStringBuilderUtil.setText(
+            mContext,
+            text,
+            (holder.reply.textSize * 1.3).toInt(),
+            urlList
+        )
 
 
     }

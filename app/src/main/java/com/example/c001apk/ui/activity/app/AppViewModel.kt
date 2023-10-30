@@ -8,6 +8,10 @@ import com.example.c001apk.logic.network.Repository
 
 class AppViewModel : ViewModel() {
 
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
     var id = ""
     val baseURL =
         "#/feed/apkCommentList?isIncludeTop=1&withSortCard=1&id="

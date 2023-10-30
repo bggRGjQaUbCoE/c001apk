@@ -8,8 +8,16 @@ import com.example.c001apk.logic.network.Repository
 
 class HomeRankingViewModel : ViewModel() {
 
-    var isEnd = false
     var isInit = true
+    var isNew = true
+    var isPostLikeFeed = false
+    var isPostUnLikeFeed = false
+
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
+    var isEnd = false
     val homeRankingList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true

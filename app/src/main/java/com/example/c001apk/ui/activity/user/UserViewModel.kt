@@ -8,6 +8,10 @@ import com.example.c001apk.logic.network.Repository
 
 class UserViewModel : ViewModel() {
 
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
     var id = ""
     var uid = ""
     var page = 1

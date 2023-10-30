@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.text.Html
-import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +25,6 @@ import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.MyURLSpan
 import com.example.c001apk.view.NineImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
@@ -199,32 +195,21 @@ class Reply2ReplyTotalAdapter(
                         """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>"""
                     else
                         """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>"""
-                val name = Html.fromHtml(
-                    text.replace("\n", " <br />"),
-                    Html.FROM_HTML_MODE_COMPACT
-                )
-                val nameBuilder = SpannableStringBuilder(name)
-                val nameUrls = nameBuilder.getSpans(
-                    0, text.length,
-                    URLSpan::class.java
-                )
-                for (url in nameUrls) {
-                    val myURLSpan = MyURLSpan(mContext, "name", url.url, null)
-                    val start = nameBuilder.getSpanStart(url)
-                    val end = nameBuilder.getSpanEnd(url)
-                    val flags = nameBuilder.getSpanFlags(url)
-                    nameBuilder.setSpan(myURLSpan, start, end, flags)
-                    nameBuilder.removeSpan(url)
-                }
 
-                holder.uname.text = nameBuilder
+                holder.uname.text = SpannableStringBuilderUtil.setText(
+                    mContext,
+                    text,
+                    (holder.uname.textSize * 1.3).toInt(),
+                    null
+                )
                 holder.uname.movementMethod = LinkMovementMethod.getInstance()
 
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     reply.message,
-                    (holder.message.textSize * 1.3).toInt()
+                    (holder.message.textSize * 1.3).toInt(),
+                    null
                 )
 
 

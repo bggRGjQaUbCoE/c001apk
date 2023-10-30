@@ -160,7 +160,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("com.github.SherlockGougou:BigImageViewPager:androidx-7.2.7")
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.drakeet.about:about:2.4.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")

@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentMessageBinding
-import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.activity.login.LoginActivity
+import com.example.c001apk.ui.activity.main.MainActivity
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.LinearItemDecoration
@@ -57,7 +57,10 @@ class MessageFragment : Fragment() {
             binding.profileLayout.visibility = View.VISIBLE
             binding.titleProfile.visibility = View.VISIBLE
             showProfile()
-            getData()
+            if (viewModel.isInit) {
+                viewModel.isInit = false
+                getData()
+            }
         } else {
             binding.profileLayout.visibility = View.INVISIBLE
             binding.titleProfile.visibility = View.INVISIBLE
@@ -77,26 +80,29 @@ class MessageFragment : Fragment() {
         })
 
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
-            val data = result.getOrNull()
-            if (data != null) {
-                viewModel.countList.clear()
-                viewModel.countList.apply {
-                    add(data.feed)
-                    add(data.follow)
-                    add(data.fans)
-                }
-                mAdapter.notifyDataSetChanged()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
 
-                PrefManager.username = URLEncoder.encode(data.username, "UTF-8")
-                PrefManager.userAvatar = data.userAvatar
-                PrefManager.level = data.level
-                PrefManager.experience = data.experience.toString()
-                PrefManager.nextLevelExperience = data.nextLevelExperience.toString()
-                showProfile()
-                binding.swipeRefresh.isRefreshing = false
-            } else {
-                binding.swipeRefresh.isRefreshing = false
-                result.exceptionOrNull()?.printStackTrace()
+                val data = result.getOrNull()
+                if (data != null) {
+                    viewModel.countList.clear()
+                    viewModel.countList.apply {
+                        add(data.feed)
+                        add(data.follow)
+                        add(data.fans)
+                    }
+                    PrefManager.username = URLEncoder.encode(data.username, "UTF-8")
+                    PrefManager.userAvatar = data.userAvatar
+                    PrefManager.level = data.level
+                    PrefManager.experience = data.experience.toString()
+                    PrefManager.nextLevelExperience = data.nextLevelExperience.toString()
+                    mAdapter.notifyDataSetChanged()
+                    showProfile()
+                    binding.swipeRefresh.isRefreshing = false
+                } else {
+                    binding.swipeRefresh.isRefreshing = false
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -131,6 +137,7 @@ class MessageFragment : Fragment() {
         if (PrefManager.isLogin) {
             binding.swipeRefresh.isRefreshing = true
             viewModel.uid = PrefManager.uid
+            viewModel.isNew = true
             viewModel.getProfile()
         } else
             binding.swipeRefresh.isRefreshing = false

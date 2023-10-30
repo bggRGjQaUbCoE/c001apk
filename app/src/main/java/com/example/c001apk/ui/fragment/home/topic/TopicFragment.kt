@@ -25,8 +25,6 @@ class TopicFragment : Fragment() {
     private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
     private var param1: String? = null
     private var param2: String? = null
-    private var titleList = ArrayList<String>()
-    private var fragmentList = ArrayList<Fragment>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,33 +55,42 @@ class TopicFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        initData()
+
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initData()
+        }
+
     }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //initData()
+        if (!viewModel.isInit)
+            initView()
 
         viewModel.homeTopicTitleLiveData.observe(viewLifecycleOwner) { result ->
-            val topic = result.getOrNull()
-            if (!topic.isNullOrEmpty()) {
-                if (titleList.isEmpty()) {
-                    for (element in topic[0].entities) {
-                        titleList.add(element.title)
-                        fragmentList.add(
-                            HomeTopicContentFragment.newInstance(
-                                element.url,
-                                element.title
-                            )
-                        )
-                    }
-                    initView()
-                }
+            if (viewModel.isNew) {
+                viewModel.isNew = false
 
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+                val topic = result.getOrNull()
+                if (!topic.isNullOrEmpty()) {
+                    if (viewModel.titleList.isEmpty()) {
+                        for (element in topic[0].entities) {
+                            viewModel.titleList.add(element.title)
+                            viewModel.fragmentList.add(
+                                HomeTopicContentFragment.newInstance(
+                                    element.url,
+                                    element.title
+                                )
+                            )
+                        }
+                        initView()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -91,8 +98,12 @@ class TopicFragment : Fragment() {
 
 
     private fun initData() {
-        if (viewModel.homeTopicTitleList.isEmpty())
+        if (viewModel.homeTopicTitleList.isEmpty()) {
+            binding.indicator.isIndeterminate = true
+            binding.indicator.visibility = View.VISIBLE
+            viewModel.isNew = true
             viewModel.getHomeTopicTitle()
+        }
     }
 
     private fun initView() {
@@ -100,6 +111,7 @@ class TopicFragment : Fragment() {
         binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
         binding.tabLayout.setupWithViewPager(binding.viewPager)
         binding.indicator.isIndeterminate = false
+        binding.indicator.visibility = View.GONE
         binding.topicLayout.visibility = View.VISIBLE
         //binding.tabLayout.getTabAt(1).isSelected = true
         //binding.viewPager.currentItem = 1
@@ -109,11 +121,11 @@ class TopicFragment : Fragment() {
     private inner class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm), TabAdapter {
 
         override fun getItem(position: Int): Fragment {
-            return fragmentList[position]
+            return viewModel.fragmentList[position]
         }
 
         override fun getCount(): Int {
-            return fragmentList.size
+            return viewModel.fragmentList.size
         }
 
         override fun getBadge(position: Int): ITabView.TabBadge? {
@@ -127,7 +139,7 @@ class TopicFragment : Fragment() {
         @SuppressLint("RestrictedApi")
         override fun getTitle(position: Int): ITabView.TabTitle {
             return ITabView.TabTitle.Builder()
-                .setContent(titleList[position])
+                .setContent(viewModel.titleList[position])
                 .setTextColor(
                     ThemeUtils.getThemeAttrColor(
                         requireActivity(),

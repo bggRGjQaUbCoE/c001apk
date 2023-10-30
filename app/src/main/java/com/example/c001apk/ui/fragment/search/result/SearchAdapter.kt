@@ -284,7 +284,8 @@ class SearchAdapter(
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     feed.message,
-                    (holder.message.textSize * 1.3).toInt()
+                    (holder.message.textSize * 1.3).toInt(),
+                    null
                 )
 
                 val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!

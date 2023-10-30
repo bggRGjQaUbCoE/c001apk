@@ -26,9 +26,6 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
     private val viewModel by lazy { ViewModelProvider(this)[HomeRankingViewModel::class.java] }
     private lateinit var mAdapter: HomeFeedAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = -1
-    private var lastVisibleItemPosition = -1
-    private var likePosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,58 +47,73 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
         }
 
         viewModel.homeRankingData.observe(viewLifecycleOwner) { result ->
-            val feed = result.getOrNull()
-            if (!feed.isNullOrEmpty()) {
-                if (viewModel.isRefreshing)
-                    viewModel.homeRankingList.clear()
-                if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                    for (element in feed) {
-                        if (element.entityTemplate == "feed"
-                            || element.entityTemplate == "iconMiniGridCard"
-                            || element.entityTemplate == "iconLinkGridCard"
-                        )
-                            viewModel.homeRankingList.add(element)
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val feed = result.getOrNull()
+                if (!feed.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing)
+                        viewModel.homeRankingList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        for (element in feed) {
+                            if (element.entityTemplate == "feed"
+                                || element.entityTemplate == "iconMiniGridCard"
+                                || element.entityTemplate == "iconLinkGridCard"
+                            )
+                                viewModel.homeRankingList.add(element)
+                            viewModel.lastItem = feed[feed.size - 1].entityId
+                        }
                     }
-                    viewModel.lastItem = feed[feed.size - 1].entityId
+                    mAdapter.notifyDataSetChanged()
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
-            } else {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
-                viewModel.isEnd = true
-                result.exceptionOrNull()?.printStackTrace()
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
-            viewModel.isLoadMore = false
-            viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = false
         }
 
         viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.homeRankingList[likePosition].likenum = response.data.count
-                    viewModel.homeRankingList[likePosition].userAction?.like = 1
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostLikeFeed) {
+                viewModel.isPostLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.homeRankingList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.homeRankingList[viewModel.likePosition].userAction?.like = 1
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
         viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
-            val response = result.getOrNull()
-            if (response != null) {
-                if (response.data != null) {
-                    viewModel.homeRankingList[likePosition].likenum = response.data.count
-                    viewModel.homeRankingList[likePosition].userAction?.like = 0
-                    mAdapter.notifyDataSetChanged()
-                } else
-                    Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isPostUnLikeFeed) {
+                viewModel.isPostUnLikeFeed = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.homeRankingList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.homeRankingList[viewModel.likePosition].userAction?.like = 0
+                        mAdapter.notifyDataSetChanged()
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
 
@@ -112,13 +124,14 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.homeRankingList.size) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.getHomeRanking()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.homeRankingList.size
+                        && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.isNew = true
+                        viewModel.getHomeRanking()
                     }
                 }
             }
@@ -126,8 +139,8 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.homeRankingList.isNotEmpty()) {
-                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    firstCompletelyVisibleItemPosition =
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
             }
@@ -144,13 +157,17 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
-        if (viewModel.homeRankingList.isEmpty())
+        if (viewModel.homeRankingList.isEmpty()) {
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
             refreshData()
+        }
     }
 
     private fun refreshData() {
@@ -158,6 +175,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
+        viewModel.isNew = true
         viewModel.getHomeRanking()
     }
 
@@ -176,7 +194,7 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
 
     override fun onReturnTop() {
         if (current == 3) {
-            if (firstCompletelyVisibleItemPosition == 0) {
+            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
                 binding.swipeRefresh.isRefreshing = true
                 refreshData()
             } else {
@@ -201,11 +219,14 @@ class HomeRankingFragment : Fragment(), IOnBottomClickListener, IOnLikeClickList
 
     override fun onPostLike(isLike: Boolean, id: String, position: Int) {
         viewModel.likeFeedId = id
-        this.likePosition = position
-        if (isLike)
+        viewModel.likePosition = position
+        if (isLike) {
+            viewModel.isPostUnLikeFeed = true
             viewModel.postUnLikeFeed()
-        else
+        } else {
+            viewModel.isPostLikeFeed = true
             viewModel.postLikeFeed()
+        }
     }
 
 

@@ -8,6 +8,15 @@ import com.example.c001apk.logic.network.Repository
 
 class HomeFeedViewModel : ViewModel() {
 
+    var isInit = true
+    var isNew = true
+    var isPostLikeFeed = false
+    var isPostUnLikeFeed = false
+
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
     var isEnd = false
     val homeFeedList = ArrayList<HomeFeedResponse.Data>()
 
@@ -19,14 +28,24 @@ class HomeFeedViewModel : ViewModel() {
     var installTime = ""
     var lastItem = ""
 
-    private val getHomeFeedData = MutableLiveData<String>()
+    private val getHomeFeedData = MutableLiveData<Data>()
+
+    data class Data(
+        val page: Int,
+        val firstLaunch: Int,
+        val installTime: String,
+        val lastItem: String
+    )
+
 
     val homeFeedData = getHomeFeedData.switchMap {
         Repository.getHomeFeed(page, firstLaunch, installTime, lastItem)
     }
 
-    fun getHomeFeed() {
-        getHomeFeedData.value = getHomeFeedData.value
+    fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) {
+        getHomeFeedData.value = Data(page, firstLaunch, installTime, lastItem)
+
+
     }
 
     //like feed
@@ -35,6 +54,7 @@ class HomeFeedViewModel : ViewModel() {
     val likeFeedData = postLikeFeedData.switchMap {
         Repository.postLikeFeed(likeFeedId)
     }
+
     fun postLikeFeed() {
         postLikeFeedData.value = postLikeFeedData.value
     }
@@ -44,6 +64,7 @@ class HomeFeedViewModel : ViewModel() {
     val unLikeFeedData = postUnLikeFeedData.switchMap {
         Repository.postUnLikeFeed(likeFeedId)
     }
+
     fun postUnLikeFeed() {
         postUnLikeFeedData.value = postUnLikeFeedData.value
     }

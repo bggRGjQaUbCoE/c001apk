@@ -7,6 +7,9 @@ import com.example.c001apk.logic.network.Repository
 
 class MessageViewModel : ViewModel() {
 
+    var isInit = true
+    var isNew = true
+
     val countList = ArrayList<String>()
 
     private val getProfileDataLiveData = MutableLiveData<String>()

@@ -300,11 +300,16 @@ class FFFListAdapter(
                     )
 
                 holder.message.movementMethod = LinkMovementMethod.getInstance()
-                holder.message.text = SpannableStringBuilderUtil.setText(mContext, feed.message, (holder.message.textSize*1.3).toInt())
+                holder.message.text = SpannableStringBuilderUtil.setText(
+                    mContext,
+                    feed.message,
+                    (holder.message.textSize * 1.3).toInt(),
+                    null
+                )
 
                 if (!feed.picArr.isNullOrEmpty()) {
                     holder.multiImage.visibility = View.VISIBLE
-                    val imageUrls= ArrayList<String>()
+                    val imageUrls = ArrayList<String>()
                     for (element in feed.picArr)
                         imageUrls.add(element)
                     holder.multiImage.setImageUrls(imageUrls)

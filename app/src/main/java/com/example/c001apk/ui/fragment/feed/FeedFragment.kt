@@ -2,11 +2,8 @@ package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
-import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
@@ -38,7 +35,6 @@ import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.HorizontalScrollAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -62,26 +58,16 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
-    private var id = ""
-    private var uid = ""
+
     private lateinit var bottomSheetDialog: BottomSheetDialog
-    private var type = ""
-    private var uname = ""
-    private var ruid = ""
-    private var rid = ""
-    private var rPosition = 0
-    private var replyAndForward = "0"
+
 
     //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var firstCompletelyVisibleItemPosition = -1
-    private var lastVisibleItemPosition = -1
-    private var realKeyboardHeight = 0
     private lateinit var editText: ExtendEditText
     private var isPaste = false
-    private var cursorBefore = -1
-    private var likeReplyPosition = -1
+
 
     companion object {
         @JvmStatic
@@ -99,9 +85,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            id = it.getString("ID")!!
-            uid = it.getString("UID")!!
-            uname = it.getString("UNAME")!!
+            viewModel.id = it.getString("ID")!!
+            viewModel.uid = it.getString("UID")!!
+            viewModel.uname = it.getString("UNAME")!!
             //device = it.getString("DEVICE")
         }
     }
@@ -125,10 +111,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         initScroll()
 
         binding.reply.setOnClickListener {
-            rid = arguments?.getString("ID")!!
-            ruid = arguments?.getString("UID")!!
-            uname = arguments?.getString("UNAME")!!
-            type = "feed"
+            viewModel.rid = arguments?.getString("ID")!!
+            viewModel.ruid = arguments?.getString("UID")!!
+            viewModel.uname = arguments?.getString("UNAME")!!
+            viewModel.type = "feed"
             initReply()
         }
 
@@ -164,12 +150,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 if (viewModel.isRefreshing) {
                     viewModel.feedReplyList.clear()
                 }
-                if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                if (viewModel.isRefreshing || viewModel.isLoadMore)
                     for (element in reply) {
                         if (element.entityType == "feed_reply")
                             viewModel.feedReplyList.add(element)
                     }
-                }
                 mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
             } else {
                 viewModel.isEnd = true
@@ -186,8 +171,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.feedReplyList[likeReplyPosition].likenum = response.data
-                    viewModel.feedReplyList[likeReplyPosition].userAction?.like = 1
+                    viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
+                    viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 1
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -200,8 +185,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             val response = result.getOrNull()
             if (response != null) {
                 if (response.data != null) {
-                    viewModel.feedReplyList[likeReplyPosition].likenum = response.data
-                    viewModel.feedReplyList[likeReplyPosition].userAction?.like = 0
+                    viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
+                    viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 0
                     mAdapter.notifyDataSetChanged()
                 } else
                     Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -250,13 +235,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
         val emotion: ImageButton = view.findViewById(R.id.emotion)
         val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
-        val pageSize = 21
-        val itemBeans = initEmoji(pageSize)
+        val itemBeans = initEmoji()
         val scrollAdapter = HorizontalScrollAdapter(requireActivity(), itemBeans)
         scrollAdapter.setIOnEmojiClickListener(this)
         emojiPanel.adapter = scrollAdapter
-        //val mAdapter = emotionAdapter(emoList)
-        //val mLayoutManager = GridLayoutManager(activity, 7)
 
         fun checkAndPublish() {
             if (editText.text.toString().replace("\n", "").isEmpty()) {
@@ -276,12 +258,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
         }
 
-        editText.hint = "回复: $uname"
-        viewModel.replyTextMap[rid + ruid]?.let {
+        editText.hint = "回复: ${viewModel.uname}"
+        viewModel.replyTextMap[viewModel.rid + viewModel.ruid]?.let {
             editText.text =
                 SpannableStringBuilderUtil.setEmoji(
                     requireActivity(),
-                    viewModel.replyTextMap[rid + ruid]!!,
+                    viewModel.replyTextMap[viewModel.rid + viewModel.ruid]!!,
                     ((editText.textSize) * 1.3).toInt()
                 )
         }
@@ -334,7 +316,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
-            replyAndForward = if (isChecked) "1"
+            viewModel.replyAndForward = if (isChecked) "1"
             else "0"
         }
 
@@ -352,7 +334,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             override fun onPaste(text: String?, isPaste: Boolean) {
                 this@FeedFragment.isPaste = isPaste
                 if (isPaste) {
-                    cursorBefore = editText.selectionStart
+                    viewModel.cursorBefore = editText.selectionStart
                 } else {
                     if (text == "") {//delete
                         editText.editableText.delete(
@@ -363,7 +345,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         val builder = SpannableStringBuilderUtil.setEmoji(
                             requireActivity(),
                             text!!,
-                            ((editText.textSize) * 1.3).toInt()
+                            ((editText.textSize) * 1.3).toInt(),
                         )
                         editText.editableText.replace(
                             editText.selectionStart,
@@ -382,14 +364,15 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 if (isPaste) {
                     isPaste = false
                     val cursorNow = editText.selectionStart
-                    val pasteText = editText.text.toString().substring(cursorBefore, cursorNow)
+                    val pasteText =
+                        editText.text.toString().substring(viewModel.cursorBefore, cursorNow)
                     val builder = SpannableStringBuilderUtil.setEmoji(
                         requireActivity(),
                         pasteText,
                         ((editText.textSize) * 1.3).toInt()
                     )
                     editText.editableText.replace(
-                        cursorBefore,
+                        viewModel.cursorBefore,
                         cursorNow,
                         builder
                     )
@@ -397,7 +380,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
 
             override fun afterTextChanged(p0: Editable?) {
-                viewModel.replyTextMap[rid + ruid] = editText.text.toString()
+                viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = editText.text.toString()
                 checkAndPublish()
             }
         })
@@ -410,7 +393,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val httpClient = OkHttpClient()
                 val formBody: RequestBody = FormBody.Builder()
                     .add("message", content)
-                    .add("replyAndForward", replyAndForward)
+                    .add("replyAndForward", viewModel.replyAndForward)
                     .build()
 
                 val getRequest: Request = Request.Builder()
@@ -431,7 +414,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         "Cookie",
                         "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
                     )
-                    .url("https://api.coolapk.com/v6/feed/reply?id=$rid&type=$type")
+                    .url("https://api.coolapk.com/v6/feed/reply?id=${viewModel.rid}&type=${viewModel.type}")
                     .post(formBody)
                     .build()
 
@@ -445,23 +428,23 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     @SuppressLint("NotifyDataSetChanged")
                     override fun onResponse(call: Call, response: Response) {
                         val reply: CheckResponse = Gson().fromJson(
-                            response.body!!.string(),
+                            response.body()!!.string(),
                             CheckResponse::class.java
                         )
                         if (reply.data?.messageStatus == 1) {
                             requireActivity().runOnUiThread {
-                                viewModel.replyTextMap[rid + ruid] = ""
+                                viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
                                 Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
                                 bottomSheetDialog.cancel()
-                                if (type == "feed") {
+                                if (viewModel.type == "feed") {
                                     viewModel.feedReplyList.add(
                                         0, TotalReplyResponse.Data(
                                             "feed_reply",
-                                            id,
-                                            ruid,
+                                            viewModel.id,
+                                            viewModel.ruid,
                                             PrefManager.uid,
                                             URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                            uname,
+                                            viewModel.uname,
                                             content,
                                             "",
                                             null,
@@ -477,15 +460,15 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     mAdapter.notifyItemInserted(1)
                                     binding.recyclerView.scrollToPosition(1)
                                 } else {
-                                    viewModel.feedReplyList[rPosition - 1].replyRows.add(
-                                        viewModel.feedReplyList[rPosition - 1].replyRows.size,
+                                    viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.add(
+                                        viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.size,
                                         HomeFeedResponse.ReplyRows(
-                                            rid,
+                                            viewModel.rid,
                                             PrefManager.uid,
                                             URLDecoder.decode(PrefManager.username, "UTF-8"),
                                             content,
-                                            ruid,
-                                            uname,
+                                            viewModel.ruid,
+                                            viewModel.uname,
                                             null,
                                             ""
                                         )
@@ -513,13 +496,13 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (lastVisibleItemPosition == viewModel.feedReplyList.size + 1) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.getFeedReply()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.feedReplyList.size + 1
+                        && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.getFeedReply()
                     }
                 }
             }
@@ -527,8 +510,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.feedReplyList.isNotEmpty()) {
-                    lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    firstCompletelyVisibleItemPosition =
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
 
@@ -559,7 +542,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
-            viewModel.id = id
             refreshData()
         }
     }
@@ -625,11 +607,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         type: String
     ) {
         if (PrefManager.isLogin) {
-            this.rPosition = rPosition
-            this.rid = id
-            this.ruid = uid
-            this.uname = uname
-            this.type = type
+            viewModel.rPosition = rPosition
+            viewModel.rid = id
+            viewModel.ruid = uid
+            viewModel.uname = uname
+            viewModel.type = type
             initReply()
         }
     }
@@ -671,24 +653,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 editText.editableText.delete(selectionStart, selectionEnd)
             }
         } else {//insert
-            val spannableStringBuilder = SpannableStringBuilder(name)
-            val drawable: Drawable = requireActivity().getDrawable(EmojiUtil.getEmoji(name))!!
-            val size = ((editText.textSize) * 1.3).toInt()
-            drawable.setBounds(0, 0, size, size)
-            val imageSpan = CenteredImageSpan(drawable, size)
-            spannableStringBuilder.setSpan(
-                imageSpan,
-                0,
-                name.length,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            editText.editableText.replace(
+                selectionStart,
+                selectionEnd,
+                SpannableStringBuilderUtil.setEmoji(requireActivity(), name, ((editText.textSize) * 1.3).toInt())
             )
-            editText.editableText.replace(selectionStart, selectionEnd, spannableStringBuilder)
         }
     }
 
     override fun onPostLike(type: String, isLike: Boolean, id: String, position: Int?) {
         if (type == "reply") {
-            this.likeReplyPosition = position!!
+            viewModel.likeReplyPosition = position!!
             viewModel.likeReplyId = id
             if (isLike)
                 viewModel.postUnLikeReply()

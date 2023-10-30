@@ -9,6 +9,14 @@ import com.example.c001apk.logic.network.Repository
 class FollowViewModel : ViewModel() {
 
     var isInit = true
+    var isNew = true
+    var isPostLikeFeed = false
+    var isPostUnLikeFeed = false
+
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
     val followFeedList = ArrayList<HomeFeedResponse.Data>()
 
     var isRefreshing = true

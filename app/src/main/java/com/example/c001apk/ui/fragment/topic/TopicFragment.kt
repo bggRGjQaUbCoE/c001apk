@@ -21,8 +21,6 @@ class TopicFragment : Fragment() {
     private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
     private lateinit var param1: String //title
     private var param2: String? = null
-    private val tabList = ArrayList<String>()
-    private var fragmentList = ArrayList<Fragment>()
 
     companion object {
         @JvmStatic
@@ -59,7 +57,7 @@ class TopicFragment : Fragment() {
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
             val data = result.getOrNull()
             if (data != null) {
-                if (tabList.isEmpty()) {
+                if (viewModel.tabList.isEmpty()) {
                     binding.toolBar.apply {
                         title = param1
                         subtitle = data.intro
@@ -70,8 +68,8 @@ class TopicFragment : Fragment() {
                         }
                     }
                     for (element in data.tabList) {
-                        tabList.add(element.title)
-                        fragmentList.add(
+                        viewModel.tabList.add(element.title)
+                        viewModel.fragmentList.add(
                             TopicContentFragment.newInstance(
                                 element.url,
                                 element.title
@@ -94,13 +92,13 @@ class TopicFragment : Fragment() {
     }
 
     private fun initView(tabSelected: Int) {
-        binding.viewPager.offscreenPageLimit = tabList.size
+        //binding.viewPager.offscreenPageLimit = tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = fragmentList[position]
-            override fun getItemCount() = tabList.size
+            override fun createFragment(position: Int) = viewModel.fragmentList[position]
+            override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = tabList[position]
+            tab.text = viewModel.tabList[position]
         }.attach()
         if (viewModel.isInit) {
             binding.viewPager.currentItem = tabSelected

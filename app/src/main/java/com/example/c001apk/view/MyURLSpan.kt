@@ -13,32 +13,24 @@ import com.example.c001apk.ui.activity.webview.WebViewActivity
 
 internal class MyURLSpan(
     private val mContext: Context,
-    private val id: String?,
     private val mUrl: String,
-    private val urlList: MutableList<ImageInfo>?
+    private val imgList: MutableList<ImageInfo>?
 ) :
     ClickableSpan() {
     override fun onClick(widget: View) {
-        if (mUrl == "" && id != null) {
-            /*val intent = Intent(mContext, FeedActivity::class.java)
-            intent.putExtra("type", "feed")
-            intent.putExtra("id", id)
-            mContext.startActivity(intent)*/
-            //Toast.makeText(mContext, "$mUrl,,$id", Toast.LENGTH_SHORT).show()
+        if (mUrl == "" ||  StringBuilder(mUrl).substring(0, 6) == "/feed/") {
+            return
         } else if (StringBuilder(mUrl).substring(0, 3) == "/t/") {
-            //Toast.makeText(mContext, "topic", Toast.LENGTH_SHORT).show()
             val intent = Intent(mContext, TopicActivity::class.java)
             val index = StringBuilder(mUrl).indexOf("?")
             intent.putExtra("title", StringBuilder(mUrl).substring(3, index).toString())
             mContext.startActivity(intent)
         } else if (StringBuilder(mUrl).substring(0, 3) == "/u/") {
-            //Toast.makeText(mContext, "user", Toast.LENGTH_SHORT).show()
             val intent = Intent(mContext, UserActivity::class.java)
             intent.putExtra("id", StringBuilder(mUrl).delete(0, 3).toString())
             mContext.startActivity(intent)
         } else if (mUrl.contains("image.coolapk.com")) {
-            //Toast.makeText(mContext, "image", Toast.LENGTH_SHORT).show()
-            if (urlList == null) {
+            if (imgList == null) {
                 val urlList: MutableList<ImageInfo> = ArrayList()
                 val imageInfo = ImageInfo()
                 imageInfo.thumbnailUrl = "$mUrl.s.jpg"
@@ -55,7 +47,7 @@ internal class MyURLSpan(
             } else {
                 ImagePreview.instance
                     .setContext(mContext)
-                    .setImageInfoList(urlList)
+                    .setImageInfoList(imgList)
                     .setShowCloseButton(true)
                     .setEnableDragClose(true)
                     .setEnableUpDragClose(true)
@@ -64,7 +56,6 @@ internal class MyURLSpan(
             }
 
         } else {
-            //Toast.makeText(mContext, "link", Toast.LENGTH_SHORT).show()
             val intent = Intent(mContext, WebViewActivity::class.java)
             intent.putExtra("url", mUrl)
             mContext.startActivity(intent)

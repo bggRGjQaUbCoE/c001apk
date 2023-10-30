@@ -8,6 +8,10 @@ import com.example.c001apk.logic.network.Repository
 
 class SearchContentViewModel : ViewModel() {
 
+    var firstCompletelyVisibleItemPosition = -1
+    var lastVisibleItemPosition = -1
+    var likePosition = -1
+
     var isInit = true
     val searchList = ArrayList<HomeFeedResponse.Data>()
 

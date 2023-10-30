@@ -5,7 +5,7 @@ import com.example.c001apk.logic.model.ItemBean
 
 object Emoji {
 
-    fun initEmoji(pageSize: Int): List<List<ItemBean>> {
+    fun initEmoji(): List<List<ItemBean>> {
         val data: MutableList<ItemBean> = ArrayList()
         val maps: MutableList<List<ItemBean>> = ArrayList()
         data.add(ItemBean("[doge]", R.drawable.coolapk_emotion_37_doge))
