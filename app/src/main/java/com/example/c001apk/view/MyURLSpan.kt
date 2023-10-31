@@ -27,7 +27,7 @@ internal class MyURLSpan(
             mContext.startActivity(intent)
         } else if (StringBuilder(mUrl).substring(0, 3) == "/u/") {
             val intent = Intent(mContext, UserActivity::class.java)
-            intent.putExtra("id", StringBuilder(mUrl).delete(0, 3).toString())
+            intent.putExtra("id", mUrl.replace("/u/",""))
             mContext.startActivity(intent)
         } else if (mUrl.contains("image.coolapk.com")) {
             if (imgList == null) {

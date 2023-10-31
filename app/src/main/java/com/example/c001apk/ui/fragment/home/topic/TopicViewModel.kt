@@ -20,7 +20,7 @@ class TopicViewModel : ViewModel() {
     private val getHomeTopicTitleLiveData = MutableLiveData<String>()
 
     val homeTopicTitleLiveData = getHomeTopicTitleLiveData.switchMap {
-        Repository.getHomeTopicTitle()
+        Repository.getDataList("/page?url=V11_VERTICAL_TOPIC", "话题", "", "", 1)
     }
 
     fun getHomeTopicTitle() {

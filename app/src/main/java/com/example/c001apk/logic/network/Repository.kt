@@ -50,38 +50,11 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun getHomeTopicTitle() =
-        fire(Dispatchers.IO) {
-            val searchResponse = Network.getHomeTopicTitle()
-            if (searchResponse.data.isNotEmpty())
-                Result.success(searchResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
     fun getTopicLayout(tag: String) =
         fire(Dispatchers.IO) {
             val topicLayoutResponse = Network.getTopicLayout(tag)
             if (topicLayoutResponse.data != null)
                 Result.success(topicLayoutResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
-    fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
-        fire(Dispatchers.IO) {
-            val topicDataResponse = Network.getTopicData(url, title, subTitle, page)
-            if (topicDataResponse.data.isNotEmpty())
-                Result.success(topicDataResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
-    fun getHomeRanking(page: Int, lastItem: String) =
-        fire(Dispatchers.IO) {
-            val topicDataResponse = Network.getHomeRanking(page, lastItem)
-            if (topicDataResponse.data.isNotEmpty())
-                Result.success(topicDataResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
         }
@@ -113,29 +86,11 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun getAppComment(url: String, page: Int) =
-        fire(Dispatchers.IO) {
-            val appResponse = Network.getAppComment(url, page)
-            if (appResponse.data.isNotEmpty())
-                Result.success(appResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
     fun getProfile(uid: String) =
         fire(Dispatchers.IO) {
             val profileResponse = Network.getProfile(uid)
             if (profileResponse.data != null)
                 Result.success(profileResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
-    fun getFollowFeed(url: String, title: String, page: Int) =
-        fire(Dispatchers.IO) {
-            val feedResponse = Network.getFollowFeed(url, title, page)
-            if (feedResponse.data.isNotEmpty())
-                Result.success(feedResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
         }
@@ -239,9 +194,21 @@ object Repository {
     }
 
     fun postReply(data: HashMap<String, String>, id: String, type: String) = fire(Dispatchers.IO) {
-        val captResponse = Network.postReply(data, id, type)
-        Result.success(captResponse)
+        val replyResponse = Network.postReply(data, id, type)
+        if (replyResponse != null)
+            Result.success(replyResponse)
+        else
+            Result.failure(RuntimeException("response status is null"))
     }
+
+    fun getDataList(url: String, title: String, subTitle: String, lastItem: String, page: Int)  =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getDataList(url, title, subTitle, lastItem, page)
+            if (dataResponse.data.isNotEmpty())
+                Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
 
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {

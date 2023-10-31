@@ -54,16 +54,6 @@ interface ApiService {
         @Query("page") page: Int
     ): Call<TotalReplyResponse>
 
-    @GET("/v6/page/dataList?url=%2Fpage%3Furl%3DV11_VERTICAL_TOPIC&title=%E8%AF%9D%E9%A2%98&subTitle=&page=1")
-    fun getHomeTopicTitle(
-    ): Call<HomeFeedResponse>
-
-    @GET("/v6/page/dataList?url=%2Fpage%3Furl%3DV9_HOME_TAB_RANKING&title=%E7%83%AD%E6%A6%9C&subTitle=")
-    fun getHomeRanking(
-        @Query("page") page: Int,
-        @Query("lastItem") lastItem: String
-    ): Call<HomeFeedResponse>
-
     @GET("/v6/user/space")
     fun getUserSpace(
         @Query("uid") uid: String,
@@ -80,37 +70,18 @@ interface ApiService {
         @Query("id") id: String,
     ): Call<FeedContentResponse>
 
-    @GET("/v6/page/dataList?title=%E7%82%B9%E8%AF%84&subTitle=")
-    fun getAppComment(
-        @Query("url") url: String,
-        @Query("page") page: Int
-    ): Call<HomeFeedResponse>
-
     @GET("/v6/topic/newTagDetail")
     fun getTopicLayout(
         @Query("tag") tag: String
         //@Path("TAG") TAG: String
     ): Call<FeedContentResponse>
 
-    @GET("/v6/page/dataList")
-    fun getTopicData(
-        @Query("url") url: String,
-        @Query("title") title: String,
-        @Query("subTitle") subTitle: String?,
-        @Query("page") page: Int
-    ): Call<HomeFeedResponse>
-
     @GET("/v6/user/profile")
     fun getProfile(
         @Query("uid") uid: String
     ): Call<FeedContentResponse>
 
-    @GET("/v6/page/dataList?/page?subTitle=")
-    fun getFollowFeed(
-        @Query("url") url: String,
-        @Query("title") title: String,
-        @Query("page") page: Int
-    ): Call<HomeFeedResponse>
+
 
     @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1")
     fun getFeedList(
@@ -172,5 +143,14 @@ interface ApiService {
         @Query("id") id: String,
         @Query("type") type: String
     ): Call<CheckResponse>
+
+    @GET("/v6/page/dataList")
+    fun getDataList(
+        @Query("url") url: String,
+        @Query("title") title: String,
+        @Query("subTitle") subTitle: String,
+        @Query("lastItem") lastItem: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
 
 }

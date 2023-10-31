@@ -439,14 +439,11 @@ class HomeFeedAdapter(
             "imageCarouselCard_1" -> 0
             "iconLinkGridCard" -> 1
             "feed" -> 2
+            "articleNews" -> 2
             "imageTextScrollCard" -> 3
-            else -> 4 //"iconMiniScrollCard"
+            "iconMiniScrollCard" -> 4
+            else -> -2
         }
-
-        /*return when (position) {
-            itemCount - 1 -> 5
-            else -> 2
-        }*/
     }
 
 }

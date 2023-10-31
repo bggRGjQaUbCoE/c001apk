@@ -25,13 +25,13 @@ class FollowViewModel : ViewModel() {
 
     var page = 1
     var lastItem = ""
-    val url = "V9_HOME_TAB_FOLLOW"
+    val url = "/page?url=V9_HOME_TAB_FOLLOW"
     val title = "关注"
 
     private val getFollowFeedData = MutableLiveData<String>()
 
     val followFeedData = getFollowFeedData.switchMap {
-        Repository.getFollowFeed(url, title, page)
+        Repository.getDataList(url, title, "", lastItem, page)
     }
 
     fun getFollowFeed() {
@@ -44,6 +44,7 @@ class FollowViewModel : ViewModel() {
     val likeFeedData = postLikeFeedData.switchMap {
         Repository.postLikeFeed(likeFeedId)
     }
+
     fun postLikeFeed() {
         postLikeFeedData.value = postLikeFeedData.value
     }
@@ -53,6 +54,7 @@ class FollowViewModel : ViewModel() {
     val unLikeFeedData = postUnLikeFeedData.switchMap {
         Repository.postUnLikeFeed(likeFeedId)
     }
+
     fun postUnLikeFeed() {
         postUnLikeFeedData.value = postUnLikeFeedData.value
     }

@@ -35,15 +35,7 @@ object Network {
         page: Int
     ) = apiService.getReply2Reply(id, page).await()
 
-    suspend fun getHomeTopicTitle() = apiService.getHomeTopicTitle().await()
-
     suspend fun getTopicLayout(tag: String) = api2Service.getTopicLayout(tag).await()
-
-    suspend fun getTopicData(url: String, title: String, subTitle: String?, page: Int) =
-        api2Service.getTopicData(url, title, subTitle, page).await()
-
-    suspend fun getHomeRanking(page: Int, lastItem: String) =
-        apiService.getHomeRanking(page, lastItem).await()
 
     suspend fun getUserSpace(uid: String) =
         apiService.getUserSpace(uid).await()
@@ -54,14 +46,8 @@ object Network {
     suspend fun getAppInfo(id: String) =
         apiService.getAppInfo(id).await()
 
-    suspend fun getAppComment(url: String, page: Int) =
-        apiService.getAppComment(url, page).await()
-
     suspend fun getProfile(uid: String) =
         api2Service.getProfile(uid).await()
-
-    suspend fun getFollowFeed(url: String, title: String, page: Int) =
-        apiService.getFollowFeed(url, title, page).await()
 
     suspend fun getFeedList(uid: String, page: Int) =
         apiService.getFeedList(uid, page).await()
@@ -98,6 +84,14 @@ object Network {
 
     suspend fun postReply(data: HashMap<String, String>, id: String, type: String) =
         apiService.postReply(data, id, type).await()
+
+    suspend fun getDataList(
+        url: String,
+        title: String,
+        subTitle: String,
+        lastItem: String,
+        page: Int
+    ) = apiService.getDataList(url, title, subTitle, lastItem, page).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

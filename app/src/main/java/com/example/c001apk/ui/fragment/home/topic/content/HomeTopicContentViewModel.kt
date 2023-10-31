@@ -19,13 +19,12 @@ class HomeTopicContentViewModel : ViewModel() {
 
     var url = ""
     var title = ""
-    var subTitle: String? = null
     var page = 1
 
     private val getTopicDataLiveData = MutableLiveData<String>()
 
     val topicDataLiveData = getTopicDataLiveData.switchMap {
-        Repository.getTopicData(url, title, subTitle, page)
+        Repository.getDataList(url, title, "", "", page)
     }
 
     fun getTopicData() {

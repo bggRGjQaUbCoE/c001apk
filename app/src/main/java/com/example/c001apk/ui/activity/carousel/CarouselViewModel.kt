@@ -1,14 +1,14 @@
-package com.example.c001apk.ui.activity.app
+package com.example.c001apk.ui.activity.carousel
 
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.network.Repository
 
-class AppViewModel : ViewModel() {
+class CarouselViewModel : ViewModel() {
 
-    var isNew = true
     var isPostLikeFeed = false
     var isPostUnLikeFeed = false
 
@@ -16,37 +16,31 @@ class AppViewModel : ViewModel() {
     var lastVisibleItemPosition = -1
     var likePosition = -1
 
-    var id = ""
-    private val baseURL =
-        "#/feed/apkCommentList?isIncludeTop=1&withSortCard=1&id="
-    var appId = ""
-    var page = 1
+    val tabList = ArrayList<String>()
+    var fragmentList = ArrayList<Fragment>()
+
+    var isResume = true
+    var isNew = true
     var isInit = true
-    var isRefreh = true
-    var isEnd = false
+    var isRefreshing = true
     var isLoadMore = false
+    var isEnd = false
 
-    private val getAppInfoData = MutableLiveData<String>()
+    var barTitle = ""
+    var url = ""
+    var title = ""
+    var page = 1
 
-    val appInfoData = getAppInfoData.switchMap {
-        Repository.getAppInfo(id)
+    val carouselList = ArrayList<HomeFeedResponse.Data>()
+
+    private val getCarouselData = MutableLiveData<String>()
+
+    val carouselData = getCarouselData.switchMap {
+        Repository.getDataList(url, title, "", "", page)
     }
 
-    fun getAppInfo() {
-        getAppInfoData.value = getAppInfoData.value
-    }
-
-
-    val appCommentList = ArrayList<HomeFeedResponse.Data>()
-
-    private val getAppCommentData = MutableLiveData<String>()
-
-    val appCommentData = getAppCommentData.switchMap {
-        Repository.getDataList(baseURL + appId,"点评","","" ,page)
-    }
-
-    fun getAppComment() {
-        getAppCommentData.value = getAppCommentData.value
+    fun getCarouselList() {
+        getCarouselData.value = getCarouselData.value
     }
 
     //like feed

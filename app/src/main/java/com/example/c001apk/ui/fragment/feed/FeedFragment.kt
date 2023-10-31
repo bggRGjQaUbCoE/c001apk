@@ -97,9 +97,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         initScroll()
 
         binding.reply.setOnClickListener {
-            viewModel.rid = arguments?.getString("ID")!!
-            viewModel.ruid = arguments?.getString("UID")!!
-            viewModel.uname = arguments?.getString("UNAME")!!
+            viewModel.rid = viewModel.id
+            viewModel.ruid = viewModel.uid
+            viewModel.uname = viewModel.uname
             viewModel.type = "feed"
             initReply()
         }
@@ -111,6 +111,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val feed = result.getOrNull()
                 if (feed != null) {
                     if (viewModel.isRefreshing) {
+                        if (viewModel.uid == "") {
+                            viewModel.uid = feed.data.uid
+                            viewModel.uname = feed.data.username
+                        }
                         viewModel.feedContentList.clear()
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isNew = true
@@ -240,55 +244,55 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 viewModel.isPostReply = false
 
                 val response = result.getOrNull()
-                if (response?.data != null) {
-                    if (response.data.messageStatus == 1) {
-                        viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
-                        Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
-                        bottomSheetDialog.cancel()
-                        if (viewModel.type == "feed") {
-                            viewModel.feedReplyList.add(
-                                0, TotalReplyResponse.Data(
-                                    "feed_reply",
-                                    viewModel.id,
-                                    viewModel.ruid,
-                                    PrefManager.uid,
-                                    URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                    viewModel.uname,
-                                    editText.text.toString(),
-                                    "",
-                                    null,
-                                    (System.currentTimeMillis() / 1000).toString(),
-                                    "0",
-                                    "0",
-                                    PrefManager.userAvatar,
-                                    ArrayList(),
-                                    0,
-                                    TotalReplyResponse.UserAction(0)
+                response?.let {
+                    if (response.data != null) {
+                        if (response.data.messageStatus == 1) {
+                            viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
+                            Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
+                            bottomSheetDialog.cancel()
+                            if (viewModel.type == "feed") {
+                                viewModel.feedReplyList.add(
+                                    0, TotalReplyResponse.Data(
+                                        "feed_reply",
+                                        viewModel.id,
+                                        viewModel.ruid,
+                                        PrefManager.uid,
+                                        URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                        viewModel.uname,
+                                        editText.text.toString(),
+                                        "",
+                                        null,
+                                        (System.currentTimeMillis() / 1000).toString(),
+                                        "0",
+                                        "0",
+                                        PrefManager.userAvatar,
+                                        ArrayList(),
+                                        0,
+                                        TotalReplyResponse.UserAction(0)
+                                    )
                                 )
-                            )
-                            mAdapter.notifyItemInserted(1)
-                            binding.recyclerView.scrollToPosition(1)
-                        } else {
-                            viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.add(
-                                viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.size,
-                                HomeFeedResponse.ReplyRows(
-                                    viewModel.rid,
-                                    PrefManager.uid,
-                                    URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                    editText.text.toString(),
-                                    viewModel.ruid,
-                                    viewModel.uname,
-                                    null,
-                                    ""
+                                mAdapter.notifyItemInserted(1)
+                                binding.recyclerView.scrollToPosition(1)
+                            } else {
+                                viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.add(
+                                    viewModel.feedReplyList[viewModel.rPosition - 1].replyRows.size,
+                                    HomeFeedResponse.ReplyRows(
+                                        viewModel.rid,
+                                        PrefManager.uid,
+                                        URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                        editText.text.toString(),
+                                        viewModel.ruid,
+                                        viewModel.uname,
+                                        null,
+                                        ""
+                                    )
                                 )
-                            )
-                            mAdapter.notifyDataSetChanged()
+                                mAdapter.notifyDataSetChanged()
+                            }
                         }
                     } else {
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
                 }
             }
         }

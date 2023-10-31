@@ -18,8 +18,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
-        <meta-data android:name="com.example.c001apk.view.MyAppGlideModule"
-            android:value="AppGlideModule"/>
+        <activity
+            android:name=".ui.activity.carousel.CarouselActivity"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.example.c001apk.view.MyAppGlideModule"
+            android:value="AppGlideModule" />
+
         <activity
             android:name=".ui.activity.AboutActivity"
             android:exported="false"

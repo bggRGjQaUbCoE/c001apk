@@ -164,11 +164,11 @@ class FollowFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener 
             binding.indicator.isIndeterminate = true
             refreshData()
         }
-
     }
 
     private fun refreshData() {
         viewModel.page = 1
+        viewModel.lastItem = ""
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false

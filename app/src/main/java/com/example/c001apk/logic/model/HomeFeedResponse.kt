@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        val extraDataArr:ExtraDataArr,
         val intro: String,
         @SerializedName("tag_pics") val tagPics: List<String>,
         val tabList: List<TabList>,
@@ -73,6 +74,11 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userAction: UserAction?,
         val userInfo: UserInfo,
         val fUserInfo: UserInfo,
+    )
+
+    data class ExtraDataArr(
+        val pageTitle:String,
+        val cardPageName:String
     )
 
     data class UserInfo(

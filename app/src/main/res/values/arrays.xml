@@ -59,31 +59,5 @@
         <item>@string/color_blue_grey</item>
     </string-array>
 
-    <string-array name="card_texts" translatable="false">
-        <item>1列</item>
-        <item>2列</item>
-        <item>3列</item>
-        <item>4列</item>
-        <item>5列</item>
-        <item>6列</item>
-        <item>7列</item>
-        <item>8列</item>
-        <item>9列</item>
-        <item>10列</item>
-    </string-array>
-
-    <string-array name="card_values" translatable="false">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-    </string-array>
-
     <string name="color_default">默认</string>
 </resources>

@@ -29,7 +29,7 @@ class HomeRankingViewModel : ViewModel() {
     private val getHomeRankingData = MutableLiveData<String>()
 
     val homeRankingData = getHomeRankingData.switchMap {
-        Repository.getHomeRanking(page, lastItem)
+        Repository.getDataList("/page?url=V9_HOME_TAB_RANKING", "热榜", "", lastItem, page)
     }
 
     fun getHomeRanking() {
@@ -42,6 +42,7 @@ class HomeRankingViewModel : ViewModel() {
     val likeFeedData = postLikeFeedData.switchMap {
         Repository.postLikeFeed(likeFeedId)
     }
+
     fun postLikeFeed() {
         postLikeFeedData.value = postLikeFeedData.value
     }
@@ -51,6 +52,7 @@ class HomeRankingViewModel : ViewModel() {
     val unLikeFeedData = postUnLikeFeedData.switchMap {
         Repository.postUnLikeFeed(likeFeedId)
     }
+
     fun postUnLikeFeed() {
         postUnLikeFeedData.value = postUnLikeFeedData.value
     }

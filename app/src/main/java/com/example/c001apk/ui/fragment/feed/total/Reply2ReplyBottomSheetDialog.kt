@@ -153,37 +153,37 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                 viewModel.isPostReply = false
 
                 val response = result.getOrNull()
-                if (response?.data != null) {
-                    if (response.data.messageStatus == 1) {
-                        viewModel.replyTotalList.add(
-                            viewModel.r2rPosition + 1,
-                            TotalReplyResponse.Data(
-                                "feed_reply",
-                                viewModel.id,
-                                viewModel.ruid,
-                                PrefManager.uid,
-                                URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                viewModel.uname,
-                                editText.text.toString(),
-                                "",
-                                null,
-                                (System.currentTimeMillis() / 1000).toString(),
-                                "0",
-                                "0",
-                                PrefManager.userAvatar,
-                                ArrayList(),
-                                0,
-                                TotalReplyResponse.UserAction(0)
+                response?.let {
+                    if (response.data != null) {
+                        if (response.data.messageStatus == 1) {
+                            viewModel.replyTotalList.add(
+                                viewModel.r2rPosition + 1,
+                                TotalReplyResponse.Data(
+                                    "feed_reply",
+                                    viewModel.id,
+                                    viewModel.ruid,
+                                    PrefManager.uid,
+                                    URLDecoder.decode(PrefManager.username, "UTF-8"),
+                                    viewModel.uname,
+                                    editText.text.toString(),
+                                    "",
+                                    null,
+                                    (System.currentTimeMillis() / 1000).toString(),
+                                    "0",
+                                    "0",
+                                    PrefManager.userAvatar,
+                                    ArrayList(),
+                                    0,
+                                    TotalReplyResponse.UserAction(0)
+                                )
                             )
-                        )
-                        mAdapter.notifyItemInserted(viewModel.r2rPosition + 1)
-                        Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
-                        bottomSheetDialog.cancel()
+                            mAdapter.notifyItemInserted(viewModel.r2rPosition + 1)
+                            Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
+                            bottomSheetDialog.cancel()
+                        }
                     } else {
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
                 }
             }
         }

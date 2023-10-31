@@ -88,7 +88,11 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener {
                         viewModel.topicDataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in data)
-                            if (element.entityTemplate == "feed" || element.entityType == "topic" || element.entityType == "product")
+                            if (element.entityTemplate == "feed"
+                                || element.entityType == "topic"
+                                || element.entityType == "product"
+                                || element.entityTemplate == "articleNews"
+                                )
                                 viewModel.topicDataList.add(element)
                     mAdapter.notifyDataSetChanged()
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
