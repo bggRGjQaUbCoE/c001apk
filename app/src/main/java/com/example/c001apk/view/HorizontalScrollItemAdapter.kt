@@ -8,7 +8,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.ItemBean
-import com.example.c001apk.ui.fragment.feed.IOnEmojiClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
 
 class HorizontalScrollItemAdapter(
     private val context: Context,

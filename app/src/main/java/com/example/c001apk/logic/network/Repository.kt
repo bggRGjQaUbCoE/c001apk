@@ -6,9 +6,16 @@ import kotlin.coroutines.CoroutineContext
 
 object Repository {
 
-    fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
+    fun getHomeFeed(
+        page: Int,
+        firstLaunch: Int,
+        installTime: String,
+        firstItem: String,
+        lastItem: String
+    ) =
         fire(Dispatchers.IO) {
-            val homeFeedResponse = Network.getHomeFeed(page, firstLaunch, installTime, lastItem)
+            val homeFeedResponse =
+                Network.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
             if (homeFeedResponse.data.isNotEmpty())
                 Result.success(homeFeedResponse.data)
             else
@@ -53,6 +60,15 @@ object Repository {
     fun getTopicLayout(tag: String) =
         fire(Dispatchers.IO) {
             val topicLayoutResponse = Network.getTopicLayout(tag)
+            if (topicLayoutResponse.data != null)
+                Result.success(topicLayoutResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getProductLayout(id: String) =
+        fire(Dispatchers.IO) {
+            val topicLayoutResponse = Network.getProductLayout(id)
             if (topicLayoutResponse.data != null)
                 Result.success(topicLayoutResponse.data)
             else
@@ -201,11 +217,38 @@ object Repository {
             Result.failure(RuntimeException("response status is null"))
     }
 
-    fun getDataList(url: String, title: String, subTitle: String, lastItem: String, page: Int)  =
+    fun getDataList(url: String, title: String, subTitle: String, lastItem: String, page: Int) =
         fire(Dispatchers.IO) {
             val dataResponse = Network.getDataList(url, title, subTitle, lastItem, page)
             if (dataResponse.data.isNotEmpty())
                 Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getDyhDetail(dyhId: String, type: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getDyhDetail(dyhId, type, page)
+            if (dataResponse.data.isNotEmpty())
+                Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getSmsToken(type: String, data: HashMap<String, String?>) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getSmsToken(type, data)
+            if (dataResponse != null)
+                Result.success(dataResponse)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getSmsLoginParam(type: String) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getSmsLoginParam(type)
+            if (dataResponse != null)
+                Result.success(dataResponse)
             else
                 Result.failure(RuntimeException("response status is null"))
         }

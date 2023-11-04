@@ -86,7 +86,8 @@ android {
 
     buildTypes {
         /*release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -156,7 +157,6 @@ dependencies {
     implementation("com.github.bumptech.glide:okhttp3-integration:4.16.0")
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("com.github.SherlockGougou:BigImageViewPager:androidx-7.2.7")
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.drakeet.about:about:2.4.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
@@ -166,5 +166,9 @@ dependencies {
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     implementation("androidx.webkit:webkit:1.8.0")
     implementation("org.jsoup:jsoup:1.16.2")
+    implementation("com.github.zjupure:webpdecoder:2.0.4.11.0")
+    implementation("com.github.mikaelzero.mojito:mojito:1.8.7")
+    implementation("com.github.mikaelzero.mojito:SketchImageViewLoader:1.8.7")
+    implementation("com.github.mikaelzero.mojito:GlideImageLoader:1.8.7")
 
 }

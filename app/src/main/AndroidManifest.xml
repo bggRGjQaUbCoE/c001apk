@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -19,7 +20,10 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".ui.activity.carousel.CarouselActivity"
+            android:name=".ui.activity.DyhActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.CarouselActivity"
             android:exported="false" />
 
         <meta-data
@@ -31,35 +35,35 @@
             android:exported="false"
             android:theme="@style/AppTheme.About" />
         <activity
-            android:name=".ui.activity.fff.FFFListActivity"
+            android:name=".ui.activity.FFFListActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.login.LoginActivity"
+            android:name=".ui.activity.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.app.AppActivity"
+            android:name=".ui.activity.AppActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.user.UserActivity"
+            android:name=".ui.activity.UserActivity"
             android:exported="false"
             android:theme="@style/Theme.User" />
         <activity
             android:name=".ui.activity.CopyActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.webview.WebViewActivity"
+            android:name=".ui.activity.WebViewActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.topic.TopicActivity"
+            android:name=".ui.activity.TopicActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.search.SearchActivity"
+            android:name=".ui.activity.SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.feed.FeedActivity"
+            android:name=".ui.activity.FeedActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.main.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

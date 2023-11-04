@@ -11,21 +11,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
+import com.example.c001apk.adapter.FeedContentAdapter
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
-import com.example.c001apk.ui.fragment.feed.total.Reply2ReplyBottomSheetDialog
+import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.LinearItemDecoration
@@ -33,18 +39,24 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.HorizontalScrollAdapter
+import com.example.c001apk.view.ninegridimageview.NineGridImageView
+import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
+import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
+import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.checkbox.MaterialCheckBox
+import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.impl.DefaultPercentProgress
+import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 import java.net.URLDecoder
 
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
-    IOnEmojiClickListener, IOnLikeClickListener {
+    IOnEmojiClickListener, IOnLikeClickListener, OnImageItemClickListener {
 
     private lateinit var binding: FragmentFeedBinding
-    private val viewModel by lazy { ViewModelProvider(this)[FeedContentViewModel::class.java] }
-
+    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
 
@@ -116,12 +128,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             viewModel.uname = feed.data.username
                         }
                         viewModel.feedContentList.clear()
+                        viewModel.feedReplyList.clear()
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isNew = true
                         viewModel.getFeedReply()
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
+                        if (feed.data.topReplyRows.isNotEmpty()) {
+                            viewModel.haveTop = true
+                            viewModel.feedReplyList.addAll(feed.data.topReplyRows)
+                        }
                     }
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
@@ -146,13 +163,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
                 val reply = result.getOrNull()
                 if (!reply.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing) {
+                    /*if (viewModel.isRefreshing) {
                         viewModel.feedReplyList.clear()
-                    }
+                    }*/
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in reply) {
-                            if (element.entityType == "feed_reply")
-                                viewModel.feedReplyList.add(element)
+                            if (element.entityType == "feed_reply") {
+                                if (viewModel.haveTop && element.id == viewModel.feedReplyList[0].id)
+                                    continue
+                                else
+                                    viewModel.feedReplyList.add(element)
+                            }
                         }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                 } else {
@@ -246,9 +267,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 response?.let {
                     if (response.data != null) {
-                        if (response.data.messageStatus == 1) {
+                        if (response.data.messageStatus == 1 || response.data.messageStatus == 2) {
                             viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
-                            Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
+                            if (response.data.messageStatus == 1)
+                                Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
                             bottomSheetDialog.cancel()
                             if (viewModel.type == "feed") {
                                 viewModel.feedReplyList.add(
@@ -301,8 +323,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     @SuppressLint("InflateParams", "RestrictedApi")
     private fun initReply() {
-        bottomSheetDialog = BottomSheetDialog(requireActivity())
-        val view = LayoutInflater.from(requireActivity())
+        bottomSheetDialog = BottomSheetDialog(requireContext())
+        val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
         editText = view.findViewById(R.id.editText)
         val publish: TextView = view.findViewById(R.id.publish)
@@ -310,19 +332,19 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         val emotion: ImageButton = view.findViewById(R.id.emotion)
         val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
         val itemBeans = initEmoji()
-        val scrollAdapter = HorizontalScrollAdapter(requireActivity(), itemBeans)
+        val scrollAdapter = HorizontalScrollAdapter(requireContext(), itemBeans)
         scrollAdapter.setIOnEmojiClickListener(this)
         emojiPanel.adapter = scrollAdapter
 
         fun checkAndPublish() {
             if (editText.text.toString().replace("\n", "").isEmpty()) {
                 publish.isClickable = false
-                publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
+                publish.setTextColor(requireContext().getColor(R.color.gray_bd))
             } else {
                 publish.isClickable = true
                 publish.setTextColor(
                     ThemeUtils.getThemeAttrColor(
-                        requireActivity(),
+                        requireContext(),
                         com.drakeet.about.R.attr.colorPrimary
                     )
                 )
@@ -339,7 +361,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         viewModel.replyTextMap[viewModel.rid + viewModel.ruid]?.let {
             editText.text =
                 SpannableStringBuilderUtil.setEmoji(
-                    requireActivity(),
+                    requireContext(),
                     viewModel.replyTextMap[viewModel.rid + viewModel.ruid]!!,
                     ((editText.textSize) * 1.3).toInt()
                 )
@@ -420,7 +442,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         )
                     } else {
                         val builder = SpannableStringBuilderUtil.setEmoji(
-                            requireActivity(),
+                            requireContext(),
                             text!!,
                             ((editText.textSize) * 1.3).toInt(),
                         )
@@ -444,7 +466,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     val pasteText =
                         editText.text.toString().substring(viewModel.cursorBefore, cursorNow)
                     val builder = SpannableStringBuilderUtil.setEmoji(
-                        requireActivity(),
+                        requireContext(),
                         pasteText,
                         ((editText.textSize) * 1.3).toInt()
                     )
@@ -504,7 +526,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
             ThemeUtils.getThemeAttrColor(
-                requireActivity(),
+                requireContext(),
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
@@ -521,7 +543,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             binding.indicator.isIndeterminate = true
             refreshData()
         } else {
-            binding.reply.visibility = View.VISIBLE
+            if (PrefManager.isLogin)
+                binding.reply.visibility = View.VISIBLE
+            else
+                binding.reply.visibility = View.GONE
         }
     }
 
@@ -537,12 +562,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = FeedContentAdapter(
-            requireActivity(),
+            requireContext(),
             viewModel.feedContentList,
             viewModel.feedReplyList
         )
+        mAdapter.setIOnReplyClickListener(this)
         mAdapter.setIOnTotalReplyClickListener(this)
         mAdapter.setIOnLikeReplyListener(this)
+        mAdapter.setOnImageItemClickListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -569,13 +596,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         val mBottomSheetDialogFragment =
             Reply2ReplyBottomSheetDialog.newInstance(position, uid, id)
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        IOnReplyClickContainer.controller = this
-
     }
 
     override fun onReply2Reply(
@@ -637,7 +657,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 selectionStart,
                 selectionEnd,
                 SpannableStringBuilderUtil.setEmoji(
-                    requireActivity(),
+                    requireContext(),
                     name,
                     ((editText.textSize) * 1.3).toInt()
                 )
@@ -645,7 +665,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
     }
 
-    override fun onPostLike(type: String, isLike: Boolean, id: String, position: Int?) {
+    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
         if (type == "reply") {
             viewModel.likeReplyPosition = position!!
             viewModel.likeReplyId = id
@@ -665,6 +685,59 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 viewModel.isPostLikeFeed = true
                 viewModel.postLikeFeed()
             }
+        }
+    }
+
+    override fun onClick(
+        nineGridView: NineGridImageView,
+        imageView: ImageView,
+        urlList: List<String>,
+        position: Int
+    ) {
+        val imgList: MutableList<String> = ArrayList()
+        for (img in urlList) {
+            if (img.substring(img.length - 6, img.length) == ".s.jpg")
+                imgList.add(img.replace(".s.jpg", ""))
+            else
+                imgList.add(img)
+        }
+        Mojito.start(imageView.context) {
+            urls(imgList)
+            /*setActivityCoverLoader(ImageViewCoverLoader())
+            fragmentCoverLoader {
+                DefaultTargetFragmentCover()
+            }*/
+            position(position)
+            progressLoader {
+                DefaultPercentProgress()
+            }
+            setIndicator(CircleIndexIndicator())
+            views(nineGridView.getImageViews().toTypedArray())
+            setOnMojitoListener(object : SimpleMojitoViewCallback() {
+                override fun onStartAnim(position: Int) {
+                    nineGridView.getImageViewAt(position)?.apply {
+                        postDelayed(200) {
+                            this.visibility = View.GONE
+                        }
+                    }
+                }
+
+                override fun onMojitoViewFinish(pagePosition: Int) {
+                    nineGridView.getImageViews().forEach {
+                        it.visibility = View.VISIBLE
+                    }
+                }
+
+                override fun onViewPageSelected(position: Int) {
+                    nineGridView.getImageViews().forEachIndexed { index, imageView ->
+                        if (position == index) {
+                            imageView.visibility = View.GONE
+                        } else {
+                            imageView.visibility = View.VISIBLE
+                        }
+                    }
+                }
+            })
         }
     }
 

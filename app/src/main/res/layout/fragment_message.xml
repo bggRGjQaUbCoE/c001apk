@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragment.meaasge.MessageFragment">
+    tools:context=".ui.fragment.MessageFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null">
+        android:background="@null"
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbar"
@@ -18,17 +19,6 @@
             android:layout_height="wrap_content"
             app:contentScrim="?android:windowBackground"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-            <Button
-                android:id="@+id/clickToLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/click_to_login"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/profileLayout"
@@ -41,6 +31,18 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="10dp"
                 app:layout_collapseMode="parallax">
+
+                <Button
+                    android:id="@+id/clickToLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/click_to_login"
+                    android:layout_marginTop="?actionBarSize"
+                    android:layout_gravity="center"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/avatar"
@@ -93,8 +95,8 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:gravity="end"
-                            tools:text="500/1000"
-                            tools:ignore="NestedWeights" />
+                            tools:ignore="NestedWeights"
+                            tools:text="500/1000" />
                     </LinearLayout>
 
                     <View

@@ -1,25 +1,30 @@
 package com.example.c001apk.util
 
 import android.content.Context
-import android.os.Build
 import android.provider.Settings
 import com.example.c001apk.constant.Constants
+import com.example.c001apk.constant.Constants.BRAND
+import com.example.c001apk.constant.Constants.BUILDNUMBER
+import com.example.c001apk.constant.Constants.MANUFACTURER
+import com.example.c001apk.constant.Constants.MODEL
 import com.example.c001apk.logic.model.DeviceInfo
 import com.example.c001apk.util.Utils.Companion.getBase64
 import com.example.c001apk.util.Utils.Companion.getMD5
 
+
 class TokenDeviceUtils {
+
     companion object {
         private fun DeviceInfo.createDeviceCode(isRaw: Boolean = true) =
             "$aid; ; ; $mac; $manuFactor; $brand; $model; $buildNumber".getBase64(isRaw).reversed()
 
         private fun getDeviceCode(context: Context): String {
-            val aid = Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            val aid =  Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
             val mac = Utils.randomMacAddress()
-            val manuFactor = Build.MANUFACTURER
-            val brand = Build.BRAND
-            val model = Build.MODEL
-            val buildNumber = "CoolbbsYou ${Build.VERSION.RELEASE}"
+            val manuFactor = MANUFACTURER
+            val brand = BRAND
+            val model = MODEL
+            val buildNumber = BUILDNUMBER
 
             return DeviceInfo(aid, mac, manuFactor, brand, model, buildNumber).createDeviceCode()
         }

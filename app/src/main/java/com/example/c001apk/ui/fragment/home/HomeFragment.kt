@@ -9,12 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.FragmentHomeBinding
-import com.example.c001apk.ui.activity.search.SearchActivity
-import com.example.c001apk.ui.fragment.home.app.AppListFragment
-import com.example.c001apk.ui.fragment.home.feed.HomeFeedFragment
-import com.example.c001apk.ui.fragment.home.follow.FollowFragment
-import com.example.c001apk.ui.fragment.home.ranking.HomeRankingFragment
+import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
+import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.Tab
 import com.google.android.material.tabs.TabLayoutMediator
@@ -23,20 +20,20 @@ import com.google.android.material.tabs.TabLayoutMediator
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
-    private val viewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private val tabList = arrayOf("关注", "应用", "头条", "热榜", "话题")
     private var fragmentList = ArrayList<Fragment>()
 
     companion object {
-        var current = 1
+        var current = 2
     }
 
     init {
         fragmentList.run {
-            add(FollowFragment())
+            add(HomeFeedFragment.newInstance("follow"))
             add(AppListFragment())
-            add(HomeFeedFragment())
-            add(HomeRankingFragment())
+            add(HomeFeedFragment.newInstance("feed"))
+            add(HomeFeedFragment.newInstance("rank"))
             add(TopicFragment())
         }
     }

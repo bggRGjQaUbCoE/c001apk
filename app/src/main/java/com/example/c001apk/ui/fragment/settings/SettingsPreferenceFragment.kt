@@ -3,24 +3,43 @@ package com.example.c001apk.ui.fragment.settings
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.ui.activity.AboutActivity
 import com.example.c001apk.util.PrefManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.core.util.ResourceUtils
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
+    override fun onCreateRecyclerView(
+        inflater: LayoutInflater,
+        parent: ViewGroup,
+        savedInstanceState: Bundle?
+    ): RecyclerView {
+        val recyclerView =
+            super.onCreateRecyclerView(inflater, parent, savedInstanceState)
+        recyclerView.apply {
+            //overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+            isVerticalScrollBarEnabled = false
+        }
+        return recyclerView
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setDivider(resources.getDrawable(R.drawable.divider, requireActivity().theme))
+        setDivider(resources.getDrawable(R.drawable.divider, requireContext().theme))
     }
 
     class SettingsPreferenceDataStore : PreferenceDataStore() {
@@ -46,6 +65,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "followSystemAccent" -> PrefManager.followSystemAccent
                 "showEmoji" -> PrefManager.showEmoji
                 "allHuaji" -> PrefManager.allHuaji
+                "customToken" -> PrefManager.customToken
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -56,6 +76,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "followSystemAccent" -> PrefManager.followSystemAccent = value
                 "showEmoji" -> PrefManager.showEmoji = value
                 "allHuaji" -> PrefManager.allHuaji = value
+                "customToken" -> PrefManager.customToken = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -113,10 +134,43 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         }
 
-        findPreference<Preference>("others")?.summary =
+        findPreference<Preference>("about")?.summary =
             "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
-        findPreference<Preference>("others")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireActivity(), AboutActivity::class.java))
+        findPreference<Preference>("about")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), AboutActivity::class.java))
+            true
+        }
+
+        findPreference<Preference>("xAppToken")?.setOnPreferenceClickListener {
+            val view = LayoutInflater.from(requireContext())
+                .inflate(R.layout.item_x_app_token, null, false)
+            val editText: EditText = view.findViewById(R.id.editText)
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setView(view)
+                setTitle("X-App-Token")
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    PrefManager.xAppToken = editText.text.toString()
+                }
+                show()
+            }
+            true
+        }
+
+        findPreference<Preference>("xAppDevice")?.setOnPreferenceClickListener {
+            val view = LayoutInflater.from(requireContext())
+                .inflate(R.layout.item_x_app_token, null, false)
+            val editText: EditText = view.findViewById(R.id.editText)
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setView(view)
+                setTitle("X-App-Device")
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    PrefManager.xAppDevice = editText.text.toString()
+
+                }
+                show()
+            }
             true
         }
 

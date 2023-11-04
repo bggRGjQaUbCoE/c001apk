@@ -16,12 +16,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
+import com.example.c001apk.adapter.HistoryAdapter
 import com.example.c001apk.databinding.FragmentSearchBinding
-import com.example.c001apk.ui.fragment.search.history.HistoryAdapter
-import com.example.c001apk.ui.fragment.search.history.HistoryDataBaseHelper
-import com.example.c001apk.ui.fragment.search.history.HistoryViewModel
-import com.example.c001apk.ui.fragment.search.history.IOnItemClickListener
-import com.example.c001apk.ui.fragment.search.result.SearchResultFragment
+import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
+import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -30,7 +28,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 class SearchFragment : Fragment(), IOnItemClickListener {
 
     private lateinit var binding: FragmentSearchBinding
-    private val viewModel by lazy { ViewModelProvider(this)[HistoryViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var dbHelper: HistoryDataBaseHelper
     private lateinit var db: SQLiteDatabase
     private lateinit var mAdapter: HistoryAdapter
@@ -47,7 +45,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dbHelper = HistoryDataBaseHelper(requireActivity(), "SearchHistory.db", 1)
+        dbHelper = HistoryDataBaseHelper(requireContext(), "SearchHistory.db", 1)
         db = dbHelper.writableDatabase
 
         if (viewModel.historyList.isEmpty())
@@ -175,7 +173,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
 
     private fun hideKeyBoard() {
         val im =
-            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         im.hideSoftInputFromWindow(
             requireActivity().currentFocus!!.windowToken,
             InputMethodManager.HIDE_NOT_ALWAYS

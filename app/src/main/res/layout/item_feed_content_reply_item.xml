@@ -67,17 +67,13 @@
                 app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
                 app:layout_constraintEnd_toStartOf="@id/like" />
 
-            <com.example.c001apk.view.NineImageView
+            <com.example.c001apk.view.ninegridimageview.NineGridImageView
                 android:id="@+id/multiImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pubDate"
-                app:nineImageHorizontalSpace="5dp"
-                app:nineImageRadius="12dp"
-                app:nineImageRatio="1"
-                app:nineImageVerticalSpace="5dp" />
+                app:layout_constraintTop_toBottomOf="@id/pubDate" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/replyLayout"
@@ -94,11 +90,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerView"
+                    <com.example.c001apk.view.LinearAdapterLayout
+                        android:id="@+id/linearAdapterLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:scrollbars="none" />
+                        android:orientation="vertical" />
 
                     <TextView
                         android:id="@+id/totalReply"

@@ -3,7 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    app:consumeSystemWindowsInsets="start|end"
+    app:edgeToEdge="true"
+    app:fitsSystemWindowsInsets="start|end">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
@@ -22,6 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            app:tabGravity="center"
+            app:tabMode="scrollable"
             app:tabRippleColor="@android:color/transparent" />
 
         <View
@@ -42,7 +48,6 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
-
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
@@ -51,10 +56,10 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scrollbars="none" />
+                android:scrollbars="none"
+                android:visibility="gone" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </FrameLayout>

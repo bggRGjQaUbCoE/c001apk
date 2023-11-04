@@ -74,4 +74,16 @@ object PrefManager {
         get() = pref.getString("nextLevelExperience", "")!!
         set(value) = pref.edit().putString("nextLevelExperience", value).apply()
 
+    var xAppToken: String
+        get() = pref.getString("xAppToken", "")!!
+        set(value) = pref.edit().putString("xAppToken", value).apply()
+
+    var xAppDevice: String
+        get() = pref.getString("xAppDevice", "")!!
+        set(value) = pref.edit().putString("xAppDevice", value).apply()
+
+    var customToken: Boolean
+        get() = pref.getBoolean("customToken", false)
+        set(value) = pref.edit().putBoolean("customToken", value).apply()
+
 }

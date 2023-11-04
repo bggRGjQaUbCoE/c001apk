@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import com.example.c001apk.logic.model.ItemBean
-import com.example.c001apk.ui.fragment.feed.IOnEmojiClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
 
 class HorizontalScrollAdapter(
     private val context: Context,

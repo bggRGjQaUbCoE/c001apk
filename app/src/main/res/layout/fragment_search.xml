@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context=".ui.fragment.search.SearchFragment">
 
@@ -19,8 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:endIconMode="clear_text"
-            app:startIconDrawable="@drawable/ic_search">
+            app:endIconMode="clear_text">
 
 
             <com.google.android.material.textfield.TextInputEditText
@@ -37,8 +37,9 @@
             android:id="@+id/search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
             android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="@string/search" />
 
     </LinearLayout>
@@ -76,6 +77,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
         android:scrollbars="none"
         tools:itemCount="1"
         tools:listitem="@layout/item_search_history" />

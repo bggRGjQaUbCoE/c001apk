@@ -37,8 +37,7 @@
             android:id="@+id/viewPager"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4"
-            android:background="@color/cover" />
+            android:layout_weight="4" />
     </LinearLayout>
 
 </FrameLayout>

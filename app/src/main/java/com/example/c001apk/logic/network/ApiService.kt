@@ -23,6 +23,7 @@ interface ApiService {
         @Query("page") page: Int,
         @Query("firstLaunch") firstLaunch: Int,
         @Query("installTime") installTime: String,
+        @Query("firstItem") firstItem: String,
         @Query("lastItem") lastItem: String,
     ): Call<HomeFeedResponse>
 
@@ -73,14 +74,17 @@ interface ApiService {
     @GET("/v6/topic/newTagDetail")
     fun getTopicLayout(
         @Query("tag") tag: String
-        //@Path("TAG") TAG: String
+    ): Call<FeedContentResponse>
+
+    @GET("/v6/product/detail")
+    fun getProductLayout(
+        @Query("id") id: String
     ): Call<FeedContentResponse>
 
     @GET("/v6/user/profile")
     fun getProfile(
         @Query("uid") uid: String
     ): Call<FeedContentResponse>
-
 
 
     @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1")
@@ -152,5 +156,24 @@ interface ApiService {
         @Query("lastItem") lastItem: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
+
+    @GET("/v6/dyhArticle/list")
+    fun getDyhDetail(
+        @Query("dyhId") dyhId: String,
+        @Query("type") type: String,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
+
+    @GET("/auth/login")
+    fun getSmsLoginParam(
+        @Query("type") type: String = "mobile",
+    ): Call<ResponseBody>
+
+    @POST("/auth/login")
+    @FormUrlEncoded
+    fun getSmsToken(
+        @Query("type") type: String = "mobile",
+        @FieldMap data: HashMap<String, String?>
+    ): Call<ResponseBody>
 
 }

@@ -6,7 +6,6 @@ import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.URLSpan
-import cc.shinichi.library.bean.ImageInfo
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.MyURLSpan
 import java.util.regex.Pattern
@@ -44,7 +43,7 @@ object SpannableStringBuilderUtil {
         mContext: Context,
         text: String,
         size: Int,
-        imgList: MutableList<ImageInfo>?
+        imgList: List<String>?
     ): SpannableStringBuilder {
         val mess = Html.fromHtml(
             StringBuilder(text).append(" ").toString()

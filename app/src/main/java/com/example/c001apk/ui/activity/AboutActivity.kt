@@ -35,12 +35,13 @@ class AboutActivity : AbsAboutActivity() {
         items.add(License("okhttp", "square", License.APACHE_2, "https://github.com/square/okhttp"))
         items.add(License("retrofit", "square", License.APACHE_2, "https://github.com/square/retrofit"))
         items.add(License("glide", "bumptech", License.APACHE_2, "https://github.com/bumptech/glide"))
-        items.add(License("SherlockGougou", "BigImageViewPager", License.APACHE_2, "https://github.com/SherlockGougou/BigImageViewPager"))
         items.add(License("jBCrypt", "jeremyh", License.APACHE_2, "https://github.com/jeremyh/jBCrypt"))
         items.add(License("flexbox-layout", "google", License.APACHE_2, "https://github.com/google/flexbox-layout"))
         items.add(License("glide-transformations", "wasabeef", License.APACHE_2, "https://github.com/wasabeef/glide-transformations"))
         items.add(License("jsoup", "jhy", License.MIT, "https://github.com/jhy/jsoup"))
         items.add(License("VerticalTabLayout", "qstumn", License.APACHE_2, "https://github.com/qstumn/VerticalTabLayout"))
-        items.add(License("NineImageView", "HotBitmapGG", License.APACHE_2, "https://github.com/HotBitmapGG/NineImageView"))
+        items.add(License("NineGridImageView", "plain-dev", License.MIT, "https://github.com/plain-dev/NineGridImageView"))
+        items.add(License("mojito", "mikaelzero", License.APACHE_2, "https://github.com/mikaelzero/mojito"))
+
     }
 }

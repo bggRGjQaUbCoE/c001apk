@@ -4,8 +4,6 @@ object CookieUtil {
 
     var SESSID = ""
 
-    var deviceCode = ""
-
     var token = ""
 
     var requestHash = ""
@@ -15,5 +13,9 @@ object CookieUtil {
     var isTryLogin = false
 
     var isGetCaptcha = false
+
+    var isGetSmsLoginParam = false
+
+    var isGetSmsToken = false
 
 }

@@ -5,8 +5,15 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
-        val extraDataArr:ExtraDataArr,
-        val intro: String,
+        val relationRows: ArrayList<RelationRows>,
+        val targetRow: TargetRow?,
+        @SerializedName("change_count") val changeCount: Int,
+        val isModified: Int,
+        @SerializedName("ip_location") val ipLocation: String,
+        val isFeedAuthor: Int,
+        val topReplyRows: List<TotalReplyResponse.Data>,
+        val extraDataArr: ExtraDataArr?,
+        val intro: String?,
         @SerializedName("tag_pics") val tagPics: List<String>,
         val tabList: List<TabList>,
         val displayUsername: String,
@@ -37,6 +44,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val entityTemplate: String,
         val entities: List<Entities>,
         val id: String,
+        val url: String,
         val uid: String,
         val ruid: String,
         val username: String,
@@ -72,13 +80,30 @@ data class HomeFeedResponse(val data: List<Data>) {
         val commentCount: String,
         @SerializedName("alias_title") val aliasTitle: String,
         val userAction: UserAction?,
-        val userInfo: UserInfo,
-        val fUserInfo: UserInfo,
+        val userInfo: UserInfo?,
+        val fUserInfo: UserInfo?,
+    )
+
+    data class RelationRows(
+        val id: String,
+        val logo: String,
+        val title: String,
+        val url: String,
+        val entityType: String,
+    )
+
+    data class TargetRow(
+        val id: String,
+        val logo: String,
+        val title: String,
+        val url: String,
+        val entityType: String,
+        val targetType: String?
     )
 
     data class ExtraDataArr(
-        val pageTitle:String,
-        val cardPageName:String
+        val pageTitle: String,
+        val cardPageName: String
     )
 
     data class UserInfo(

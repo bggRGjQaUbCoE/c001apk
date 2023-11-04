@@ -72,4 +72,7 @@
     <string name="others">其他</string>
     <string name="about_open_source">开放源代码许可证</string>
     <string name="replyAndForward">回复并转发</string>
+    <string name="customToken">自定义Token</string>
+    <string name="xAppToken">X-App-Token</string>
+    <string name="xAppDevice">X-App-Device</string>
 </resources>

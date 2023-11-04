@@ -13,8 +13,14 @@ object Network {
     private val api2Service = Api2ServiceCreator.create<ApiService>()
     private val accountService = AccountServiceCreator.create<ApiService>()
 
-    suspend fun getHomeFeed(page: Int, firstLaunch: Int, installTime: String, lastItem: String) =
-        api2Service.getHomeFeed(page, firstLaunch, installTime, lastItem).await()
+    suspend fun getHomeFeed(
+        page: Int,
+        firstLaunch: Int,
+        installTime: String,
+        firstItem: String,
+        lastItem: String
+    ) =
+        api2Service.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem).await()
 
     suspend fun getFeedContent(id: String) =
         api2Service.getFeedContent(id).await()
@@ -36,6 +42,9 @@ object Network {
     ) = apiService.getReply2Reply(id, page).await()
 
     suspend fun getTopicLayout(tag: String) = api2Service.getTopicLayout(tag).await()
+
+    suspend fun getProductLayout(id: String) = apiService.getProductLayout(id).await()
+
 
     suspend fun getUserSpace(uid: String) =
         apiService.getUserSpace(uid).await()
@@ -92,6 +101,15 @@ object Network {
         lastItem: String,
         page: Int
     ) = apiService.getDataList(url, title, subTitle, lastItem, page).await()
+
+    suspend fun getDyhDetail(dyhId: String, type: String, page: Int) =
+        apiService.getDyhDetail(dyhId, type, page).await()
+
+    suspend fun getSmsLoginParam(type: String) =
+        accountService.getSmsLoginParam(type).response()
+
+    suspend fun getSmsToken(type: String, data: HashMap<String, String?>) =
+        accountService.getSmsToken(type, data).response()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

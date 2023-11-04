@@ -11,9 +11,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
-import com.example.c001apk.ui.fragment.home.topic.content.HomeTopicContentFragment
 import com.example.c001apk.view.vertical.adapter.TabAdapter
 import com.example.c001apk.view.vertical.widget.ITabView
+import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.R
 
 private const val ARG_PARAM1 = "param1"
@@ -22,7 +22,7 @@ private const val ARG_PARAM2 = "param2"
 class TopicFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeTopicBinding
-    private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private var param1: String? = null
     private var param2: String? = null
 
@@ -142,10 +142,10 @@ class TopicFragment : Fragment() {
                 .setContent(viewModel.titleList[position])
                 .setTextColor(
                     ThemeUtils.getThemeAttrColor(
-                        requireActivity(),
+                        requireContext(),
                         R.attr.colorPrimary
                     ), ThemeUtils.getThemeAttrColor(
-                        requireActivity(),
+                        requireContext(),
                         R.attr.colorControlNormal
                     )
                 )
