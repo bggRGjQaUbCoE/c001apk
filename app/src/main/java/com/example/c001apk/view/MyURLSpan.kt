@@ -19,7 +19,9 @@ internal class MyURLSpan(
 ) :
     ClickableSpan() {
     override fun onClick(widget: View) {
-        if (mUrl == "" || StringBuilder(mUrl).substring(0, 6) == "/feed/") {
+        if (mUrl == "") {
+            return
+        } else if (mUrl.length >= 6 && StringBuilder(mUrl).substring(0, 6) == "/feed/") {
             return
         } else if (StringBuilder(mUrl).substring(0, 3) == "/t/") {
             val intent = Intent(mContext, TopicActivity::class.java)

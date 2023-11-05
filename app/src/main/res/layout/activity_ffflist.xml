@@ -4,10 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    app:consumeSystemWindowsInsets="start|end"
+    app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
     app:edgeToEdge="true"
-    app:fitsSystemWindowsInsets="start|end"
+    app:fitsSystemWindowsInsets="@integer/internal_fragment_insets"
     tools:context=".ui.fragment.feed.FeedFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -15,7 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="false"
+        app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolBar"

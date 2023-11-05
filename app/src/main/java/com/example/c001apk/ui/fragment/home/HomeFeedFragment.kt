@@ -29,6 +29,7 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
+
 class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener,
     OnImageItemClickListener {
 
@@ -90,7 +91,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
-                            if (element.entityTemplate == "feed"
+                            if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniScrollCard"
                                 || element.entityTemplate == "iconLinkGridCard"
                                 || element.entityTemplate == "imageCarouselCard_1"
@@ -125,16 +126,16 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
                     if (viewModel.isRefreshing)
-                        viewModel.homeRankingList.clear()
+                        viewModel.homeFeedList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
-                            if (element.entityTemplate == "feed"
+                            if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniGridCard"
                                 || element.entityTemplate == "iconLinkGridCard"
                             )
-                                viewModel.homeRankingList.add(element)
+                                viewModel.homeFeedList.add(element)
                         }
-                        //viewModel.lastItem = viewModel.homeRankingList[viewModel.homeRankingList.size - 1].entityId
+                        //viewModel.lastItem = viewModel.homeFeedList[viewModel.homeFeedList.size - 1].entityId
                     }
                     mAdapter.notifyDataSetChanged()
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
@@ -158,11 +159,11 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
                     if (viewModel.isRefreshing)
-                        viewModel.followFeedList.clear()
+                        viewModel.homeFeedList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
-                            if (element.entityTemplate == "feed")
-                                viewModel.followFeedList.add(element)
+                            if (element.entityType == "feed")
+                                viewModel.homeFeedList.add(element)
                             //viewModel.lastItem = feed[feed.size - 1].entityId
                         }
                     }
@@ -188,8 +189,9 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.homeFeedList[viewModel.likePosition].likenum = response.data.count
-                        viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
+                                viewModel.homeFeedList[viewModel.likePosition].likenum =
+                                    response.data.count
+                                viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -206,8 +208,9 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.homeFeedList[viewModel.likePosition].likenum = response.data.count
-                        viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
+                                viewModel.homeFeedList[viewModel.likePosition].likenum =
+                                    response.data.count
+                                viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -294,14 +297,7 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(
-            requireContext(),
-            when (viewModel.type) {
-                "feed" -> viewModel.homeFeedList
-                "rank" -> viewModel.homeRankingList
-                "follow" -> viewModel.followFeedList
-                else -> throw IllegalArgumentException("type error")
-            }
-        )
+            requireContext(),viewModel.homeFeedList)
         mLayoutManager = LinearLayoutManager(activity)
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setOnImageItemClickListener(this)

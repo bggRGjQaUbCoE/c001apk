@@ -11,6 +11,6 @@
         android:id="@+id/verticalImgView"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        tools:src="@mipmap/ic_launcher"/>
+        tools:src="@mipmap/ic_launcher" />
 
 </LinearLayout>

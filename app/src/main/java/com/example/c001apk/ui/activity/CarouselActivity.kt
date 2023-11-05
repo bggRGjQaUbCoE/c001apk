@@ -6,7 +6,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.view.postDelayed
 import androidx.lifecycle.ViewModelProvider
@@ -28,7 +27,7 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
-class CarouselActivity : AppCompatActivity(), IOnLikeClickListener, OnImageItemClickListener {
+class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
 
     private lateinit var binding: ActivityCarouselBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }

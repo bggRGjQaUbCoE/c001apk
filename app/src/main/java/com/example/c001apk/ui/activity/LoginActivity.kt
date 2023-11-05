@@ -207,10 +207,10 @@ class LoginActivity : BaseActivity() {
         viewModel.tryLogin()
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+    /*override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.login_menu, menu)
         return true
-    }
+    }*/
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

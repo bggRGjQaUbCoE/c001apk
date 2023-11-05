@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -472,7 +474,8 @@ class FeedContentAdapter(
                                 )
                                 val replyData = reply.replyRows[position1]
                                 val textView: TextView = view.findViewById(R.id.reply)
-                                textView.highlightColor = Color.TRANSPARENT
+                                //textView.highlightColor = Color.TRANSPARENT
+                                textView.highlightColor = ColorUtils.setAlphaComponent(ThemeUtils.getThemeAttrColor(mContext, rikka.preference.simplemenu.R.attr.colorPrimaryDark), 128)
 
                                 val text =
                                     if (replyData.ruid == reply.uid) {
@@ -515,8 +518,12 @@ class FeedContentAdapter(
                                 }
 
                                 view.setOnLongClickListener {
+                                    val message = Html.fromHtml(
+                                        text,
+                                        Html.FROM_HTML_MODE_COMPACT
+                                    )
                                     val intent = Intent(mContext, CopyActivity::class.java)
-                                    intent.putExtra("text", replyData.message)
+                                    intent.putExtra("text", message.toString())
                                     mContext.startActivity(intent)
                                     true
                                 }
