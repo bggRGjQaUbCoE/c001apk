@@ -27,18 +27,22 @@ SOFTWARE.
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Paint
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
+import com.example.c001apk.util.BitmapCut
 import com.example.c001apk.util.DensityTool
+import com.example.c001apk.util.PrefManager
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
@@ -87,7 +91,11 @@ class NineGridImageView @JvmOverloads constructor(
                     singleWidth = singleHeight * imgWidth / imgHeight
                 } else if (imgHeight > imgWidth) {
                     singleWidth = defaultWidth
-                    singleHeight = singleWidth * imgHeight / imgWidth
+                    singleHeight =
+                        if (imgHeight / imgWidth > 1320 / 540)
+                            singleWidth * 1320 / 540
+                        else
+                            singleWidth * imgHeight / imgWidth
                 } else {
                     singleWidth = defaultWidth
                     singleHeight = defaultWidth
@@ -191,6 +199,7 @@ class NineGridImageView @JvmOverloads constructor(
             this.urlList = urlList
             generateChildrenLayout(urlList.size)
             removeAllViews()
+
             for (i in urlList.indices) {
                 val imageView = ShapeableImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
@@ -198,9 +207,8 @@ class NineGridImageView @JvmOverloads constructor(
                     .setAllCornerSizes(DensityTool.dp2px(context, 12f))
                     .build()
                 imageView.shapeAppearanceModel = shapePathModel
-                imageView.strokeWidth = DensityTool.dp2px(context, 2f)
+                imageView.strokeWidth = DensityTool.dp2px(context, 1f)
                 imageView.strokeColor = context.getColorStateList(R.color.cover)
-                //ThemeUtils.getThemeAttrColorStateList(context, com.google.android.material.R.attr.colorSurfaceVariant)
                 addView(imageView, generateDefaultLayoutParams())
                 /*val options = RequestOptions().transform(
                     RoundedCorners(
@@ -216,12 +224,29 @@ class NineGridImageView @JvmOverloads constructor(
                         urlList[i],
                         LazyHeaders.Builder().addHeader("User-Agent", Constants.USER_AGENT).build()
                     )
-                Glide.with(context)
-                    .load(newUrl)
-                    .centerCrop()
-                    //.apply(options)
-                    .placeholder(backgroundDrawable)
-                    .into(imageView)
+                if (urlList.size == 1 && PrefManager.isFullImageQuality && imgHeight / imgWidth > 1320 / 540) {
+                    Glide.with(context)
+                        .asBitmap()
+                        .load(newUrl)
+                        .into(object : CustomTarget<Bitmap?>() {
+                            override fun onResourceReady(
+                                resource: Bitmap,
+                                transition: Transition<in Bitmap?>?
+                            ) {
+                                val bitmap = BitmapCut.cutBitmap(resource)
+                                if (bitmap != null)
+                                    imageView.setImageBitmap(bitmap)
+                            }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {}
+                        })
+                } else {
+                    Glide.with(context)
+                        .load(newUrl)
+                        .centerCrop()
+                        .placeholder(backgroundDrawable)
+                        .into(imageView)
+                }
             }
         }
     }

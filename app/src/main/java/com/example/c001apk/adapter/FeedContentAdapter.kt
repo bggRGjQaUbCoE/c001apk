@@ -373,11 +373,15 @@ class FeedContentAdapter(
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
-                            for (element in feed.data.picArr)
-                                if (element.substring(element.length - 3, element.length) != "gif")
-                                    urlList.add("$element.s.jpg")
-                                else urlList.add(element)
-                            setUrlList(urlList)
+                            if (PrefManager.isFullImageQuality){
+                                setUrlList(feed.data.picArr)
+                            } else{
+                                for (element in feed.data.picArr)
+                                    if (element.substring(element.length - 3, element.length) != "gif")
+                                        urlList.add("$element.s.jpg")
+                                    else urlList.add(element)
+                                setUrlList(urlList)
+                            }
                         }
                     } else {
                         holder.multiImage.visibility = View.GONE
@@ -542,11 +546,15 @@ class FeedContentAdapter(
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
-                            for (element in reply.picArr)
-                                if (element.substring(element.length - 3, element.length) != "gif")
-                                    urlList.add("$element.s.jpg")
-                                else urlList.add(element)
-                            setUrlList(urlList)
+                            if (PrefManager.isFullImageQuality){
+                                setUrlList(reply.picArr)
+                            } else{
+                                for (element in reply.picArr)
+                                    if (element.substring(element.length - 3, element.length) != "gif")
+                                        urlList.add("$element.s.jpg")
+                                    else urlList.add(element)
+                                setUrlList(urlList)
+                            }
                         }
                     } else {
                         holder.multiImage.visibility = View.GONE

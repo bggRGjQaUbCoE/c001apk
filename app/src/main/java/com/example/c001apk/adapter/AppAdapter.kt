@@ -510,11 +510,15 @@ class AppAdapter(
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
-                        for (element in feed.picArr)
-                            if (element.substring(element.length - 3, element.length) != "gif")
-                                urlList.add("$element.s.jpg")
-                            else urlList.add(element)
-                        setUrlList(urlList)
+                        if (PrefManager.isFullImageQuality){
+                            setUrlList(feed.picArr)
+                        } else{
+                            for (element in feed.picArr)
+                                if (element.substring(element.length - 3, element.length) != "gif")
+                                    urlList.add("$element.s.jpg")
+                                else urlList.add(element)
+                            setUrlList(urlList)
+                        }
                     }
                 } else {
                     holder.multiImage.visibility = View.GONE

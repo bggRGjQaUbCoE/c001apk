@@ -52,7 +52,12 @@
             android:title="@string/settings_pure_black_dark_theme" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/emoji">
+    <PreferenceCategory android:title="@string/display">
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_image"
+            android:key="isFullImageQuality"
+            android:title="@string/full_quality" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="false"

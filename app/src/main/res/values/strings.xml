@@ -75,4 +75,7 @@
     <string name="customToken">自定义Token</string>
     <string name="xAppToken">X-App-Token</string>
     <string name="xAppDevice">X-App-Device</string>
+    <string name="full_quality">默认原图</string>
+    <string name="display">显示</string>
+
 </resources>
