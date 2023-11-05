@@ -75,42 +75,14 @@ android {
     }
 
 
-    signingConfigs {
-        create("keyStore") {
-            keyAlias = "key0"
-            keyPassword = "123456"
-            storeFile = file("keytest.jks")
-            storePassword = "123456"
-        }
-    }
-
     buildTypes {
-        /*release {
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }*/
-        val signConfig = signingConfigs.getByName("keyStore")
-        getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signConfig
-        }
-        getByName("debug") {
-            isMinifyEnabled = false
-            isShrinkResources = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signConfig
         }
     }
     compileOptions {
