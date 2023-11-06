@@ -30,9 +30,25 @@ object Repository {
             Result.failure(RuntimeException("response status is null"))
     }
 
-    fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
+    fun getFeedContentReply(
+        id: String,
+        listType: String,
+        page: Int,
+        discussMode: Int,
+        feedType: String,
+        blockStatus: Int,
+        fromFeedAuthor: Int
+    ) =
         fire(Dispatchers.IO) {
-            val feedReplyResponse = Network.getFeedContentReply(id, discussMode, listType, page)
+            val feedReplyResponse = Network.getFeedContentReply(
+                id,
+                listType,
+                page,
+                discussMode,
+                feedType,
+                blockStatus,
+                fromFeedAuthor
+            )
             if (feedReplyResponse.data.isNotEmpty())
                 Result.success(feedReplyResponse.data)
             else

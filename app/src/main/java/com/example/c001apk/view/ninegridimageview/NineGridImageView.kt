@@ -87,18 +87,26 @@ class NineGridImageView @JvmOverloads constructor(
             val childrenCount = urlList!!.size
             if (childrenCount == 1) {
                 if (imgHeight < imgWidth) {
-                    singleHeight = defaultWidth
+                    singleHeight = defaultWidth * 2
                     singleWidth = singleHeight * imgWidth / imgHeight
+                    if (singleWidth > totalWidth) {
+                        singleWidth = totalWidth
+                        singleHeight = singleWidth * imgHeight / imgWidth
+                    }
                 } else if (imgHeight > imgWidth) {
-                    singleWidth = defaultWidth
-                    singleHeight =
-                        if (imgHeight / imgWidth > 1320 / 540)
-                            singleWidth * 1320 / 540
-                        else
-                            singleWidth * imgHeight / imgWidth
+                    if (imgHeight / imgWidth < 1.5) {
+                        singleWidth = defaultWidth * 2
+                        singleHeight = singleWidth * imgHeight / imgWidth
+                    } else if (imgHeight / imgWidth <= 1320 / 540) {
+                        singleWidth = defaultWidth
+                        singleHeight = singleWidth * imgHeight / imgWidth
+                    } else {
+                        singleWidth = defaultWidth
+                        singleHeight = singleWidth * 1320 / 540
+                    }
                 } else {
-                    singleWidth = defaultWidth
-                    singleHeight = defaultWidth
+                    singleWidth = defaultWidth * 2
+                    singleHeight = defaultWidth * 2
                 }
             } else {
                 singleWidth = defaultWidth

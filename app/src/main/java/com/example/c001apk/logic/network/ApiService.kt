@@ -35,9 +35,12 @@ interface ApiService {
     @GET("/v6/feed/replyList")
     fun getFeedContentReply(
         @Query("id") id: String,
-        @Query("discussMode") discussMode: Int,
         @Query("listType") listType: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("discussMode") discussMode: Int,
+        @Query("feedType") feedType: String,
+        @Query("blockStatus") blockStatus: Int,
+        @Query("fromFeedAuthor") fromFeedAuthor: Int
     ): Call<TotalReplyResponse>
 
     @GET("/v6/search?showAnonymous=-1")

@@ -30,15 +30,16 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
-import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.HorizontalScrollAdapter
+import com.example.c001apk.view.StickyItemDecorator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -53,7 +54,8 @@ import java.net.URLDecoder
 
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
-    IOnEmojiClickListener, IOnLikeClickListener, OnImageItemClickListener {
+    IOnEmojiClickListener, IOnLikeClickListener, OnImageItemClickListener,
+    IOnListTypeClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -98,13 +100,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initBar()
         initView()
         initData()
+        initButton()
         initRefresh()
         initScroll()
 
@@ -128,24 +131,18 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             viewModel.uname = feed.data.username
                         }
                         viewModel.feedContentList.clear()
-                        viewModel.feedReplyList.clear()
+                        //viewModel.feedReplyList.clear()
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isNew = true
                         viewModel.getFeedReply()
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
-                        if (feed.data.topReplyRows.isNotEmpty()) {
-                            viewModel.haveTop = true
-                            viewModel.feedReplyList.addAll(feed.data.topReplyRows)
-                        }
+                        //if (feed.data.topReplyRows.isNotEmpty()) {
+                        //viewModel.haveTop = true
+                        //viewModel.feedReplyList.addAll(feed.data.topReplyRows)
+                        //}
                     }
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
-                    if (PrefManager.isLogin)
-                        binding.reply.visibility = View.VISIBLE
-                    else
-                        binding.reply.visibility = View.GONE
                 } else {
                     viewModel.isEnd = true
                     viewModel.isLoadMore = false
@@ -163,16 +160,13 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
                 val reply = result.getOrNull()
                 if (!reply.isNullOrEmpty()) {
-                    /*if (viewModel.isRefreshing) {
+                    if (viewModel.isRefreshing) {
                         viewModel.feedReplyList.clear()
-                    }*/
+                    }
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in reply) {
                             if (element.entityType == "feed_reply") {
-                                if (viewModel.haveTop && element.id == viewModel.feedReplyList[0].id)
-                                    continue
-                                else
-                                    viewModel.feedReplyList.add(element)
+                                viewModel.feedReplyList.add(element)
                             }
                         }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
@@ -181,7 +175,15 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     mAdapter.setLoadState(mAdapter.LOADING_END)
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                binding.replyCount.text = "共 ${viewModel.feedReplyList.size} 回复"
                 mAdapter.notifyDataSetChanged()
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
+                binding.contentLayout.visibility = View.VISIBLE
+                if (PrefManager.isLogin)
+                    binding.reply.visibility = View.VISIBLE
+                else
+                    binding.reply.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -319,6 +321,43 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
         }
 
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun initButton() {
+        binding.replyCount.text = "共 ${viewModel.feedReplyList.size} 回复"
+        binding.lastUpdate.setOnClickListener {
+            refreshReply("lastupdate_desc")
+        }
+        binding.dateLine.setOnClickListener {
+            refreshReply("dateline_desc")
+        }
+        binding.popular.setOnClickListener {
+            refreshReply("popular")
+        }
+        binding.author.setOnClickListener {
+            refreshReply("")
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun refreshReply(listType: String) {
+        if (listType == "")
+            viewModel.fromFeedAuthor = 1
+        else
+            viewModel.fromFeedAuthor = 0
+        mAdapter.setListType(listType)
+        viewModel.listType = listType
+        viewModel.page = 1
+        viewModel.isEnd = false
+        viewModel.isRefreshing = true
+        viewModel.isLoadMore = false
+        viewModel.isNew = true
+        binding.recyclerView.scrollToPosition(1)
+        viewModel.feedReplyList.clear()
+        mAdapter.notifyDataSetChanged()
+        mAdapter.setLoadState(mAdapter.LOADING)
+        viewModel.getFeedReply()
     }
 
     @SuppressLint("InflateParams", "RestrictedApi")
@@ -491,7 +530,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (viewModel.lastVisibleItemPosition == viewModel.feedReplyList.size + 1
+                    if (viewModel.lastVisibleItemPosition == viewModel.feedReplyList.size + 2
                         && !viewModel.isEnd
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
@@ -543,6 +582,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             binding.indicator.isIndeterminate = true
             refreshData()
         } else {
+            binding.contentLayout.visibility = View.VISIBLE
             if (PrefManager.isLogin)
                 binding.reply.visibility = View.VISIBLE
             else
@@ -570,12 +610,21 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         mAdapter.setIOnTotalReplyClickListener(this)
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setIOnListTypeClickListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(
+                    StickyItemDecorator(
+                        space,
+                        object : StickyItemDecorator.SortShowListener {
+                            override fun showSort(show: Boolean) {
+                                binding.tabLayout.visibility = if (show) View.VISIBLE else View.GONE
+                            }
+                        })
+                )
         }
     }
 
@@ -739,6 +788,16 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 }
             })
         }
+    }
+
+    override fun onRefreshReply(listType: String) {
+        when (listType) {
+            "lastupdate_desc" -> binding.buttonToggle.check(R.id.lastUpdate)
+            "dateline_desc" -> binding.buttonToggle.check(R.id.dateLine)
+            "popular" -> binding.buttonToggle.check(R.id.popular)
+            "" -> binding.buttonToggle.check(R.id.author)
+        }
+        refreshReply(listType)
     }
 
 }

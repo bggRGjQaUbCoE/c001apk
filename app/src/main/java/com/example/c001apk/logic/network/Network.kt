@@ -25,8 +25,24 @@ object Network {
     suspend fun getFeedContent(id: String) =
         api2Service.getFeedContent(id).await()
 
-    suspend fun getFeedContentReply(id: String, discussMode: Int, listType: String, page: Int) =
-        api2Service.getFeedContentReply(id, discussMode, listType, page).await()
+    suspend fun getFeedContentReply(
+        id: String,
+        listType: String,
+        page: Int,
+        discussMode: Int,
+        feedType: String,
+        blockStatus: Int,
+        fromFeedAuthor: Int
+    ) =
+        api2Service.getFeedContentReply(
+            id,
+            listType,
+            page,
+            discussMode,
+            feedType,
+            blockStatus,
+            fromFeedAuthor
+        ).await()
 
     suspend fun getSearch(
         type: String,

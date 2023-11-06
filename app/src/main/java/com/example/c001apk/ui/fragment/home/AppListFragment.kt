@@ -15,7 +15,7 @@ import com.example.c001apk.adapter.AppListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
-import com.example.c001apk.util.LinearItemDecoration
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
 class AppListFragment : Fragment(), IOnBottomClickListener {

@@ -1,12 +1,18 @@
 package com.example.c001apk.ui.fragment
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,11 +23,10 @@ import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.ImageShowUtil
-import com.example.c001apk.util.LinearItemDecoration
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.view.AppBarStateChangeListener
+import com.example.c001apk.view.NestCollapsingToolbarLayout
 import com.example.c001apk.viewmodel.AppViewModel
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -33,6 +38,13 @@ class MessageFragment : Fragment() {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: MessageAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var objectAnimator: ObjectAnimator
+
+    private fun initAnimator() {
+        objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
+        objectAnimator.interpolator = AccelerateInterpolator()
+        objectAnimator.duration = 300
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +62,7 @@ class MessageFragment : Fragment() {
             startActivity(Intent(activity, LoginActivity::class.java))
         }
 
+        initAnimator()
         initRefresh()
         initView()
 
@@ -75,16 +88,27 @@ class MessageFragment : Fragment() {
             binding.progress.visibility = View.INVISIBLE
         }
 
-        binding.appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
-            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
-                if (state == State.EXPANDED) {
-                    binding.titleProfile.visibility = View.GONE
-                } else if (state == State.COLLAPSED) {
+        binding.collapsingToolbar.setOnScrimesShowListener(object :
+            NestCollapsingToolbarLayout.OnScrimsShowListener {
+            override fun onScrimsShowChange(
+                nestCollapsingToolbarLayout: NestCollapsingToolbarLayout,
+                isScrimesShow: Boolean
+            ) {
+                if (isScrimesShow) {
+                    binding.name1.visibility = View.VISIBLE
+                    binding.avatar1.visibility = View.VISIBLE
                     binding.titleProfile.visibility = View.VISIBLE
+                    objectAnimator.start()
                 } else {
-                    binding.titleProfile.visibility = View.GONE
+                    binding.name1.visibility = View.INVISIBLE
+                    binding.avatar1.visibility = View.INVISIBLE
+                    if (objectAnimator.isRunning) {
+                        objectAnimator.cancel()
+                    }
+                    binding.titleProfile.visibility = View.INVISIBLE
                 }
             }
+
         })
 
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->

@@ -19,7 +19,7 @@ import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.util.LinearItemDecoration
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -189,9 +189,9 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                                viewModel.homeFeedList[viewModel.likePosition].likenum =
-                                    response.data.count
-                                viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
+                        viewModel.homeFeedList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -208,9 +208,9 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                                viewModel.homeFeedList[viewModel.likePosition].likenum =
-                                    response.data.count
-                                viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
+                        viewModel.homeFeedList[viewModel.likePosition].likenum =
+                            response.data.count
+                        viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -297,7 +297,8 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(
-            requireContext(),viewModel.homeFeedList)
+            requireContext(), viewModel.homeFeedList
+        )
         mLayoutManager = LinearLayoutManager(activity)
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setOnImageItemClickListener(this)

@@ -18,7 +18,7 @@ import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.ImageShowUtil
-import com.example.c001apk.util.LinearItemDecoration
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener

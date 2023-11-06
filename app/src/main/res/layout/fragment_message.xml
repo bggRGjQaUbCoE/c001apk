@@ -17,7 +17,7 @@
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <com.example.c001apk.view.NestCollapsingToolbarLayout
             android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -152,6 +152,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center_vertical"
+                        android:visibility="invisible"
                         tools:ignore="ContentDescription"
                         tools:src="#123456" />
 
@@ -162,12 +163,13 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:textSize="20sp"
+                        android:visibility="invisible"
                         tools:text="name" />
 
                 </LinearLayout>
 
             </com.google.android.material.appbar.MaterialToolbar>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.example.c001apk.view.NestCollapsingToolbarLayout>
 
         <View
             android:layout_width="match_parent"

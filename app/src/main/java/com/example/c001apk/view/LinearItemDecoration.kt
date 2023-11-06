@@ -1,4 +1,4 @@
-package com.example.c001apk.util
+package com.example.c001apk.view
 
 import android.graphics.Rect
 import android.view.View

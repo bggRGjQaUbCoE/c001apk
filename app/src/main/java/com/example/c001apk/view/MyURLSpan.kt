@@ -5,6 +5,7 @@ import android.content.Intent
 import android.text.TextPaint
 import android.text.style.ClickableSpan
 import android.view.View
+import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
@@ -53,6 +54,18 @@ internal class MyURLSpan(
                     setIndicator(CircleIndexIndicator())
                 }
             }
+        } else if (mUrl.contains("www.coolapk.com/feed/")) {
+            val id = if (mUrl.contains("shareKey")) {
+                mUrl.substring(mUrl.lastIndexOf("/feed/") + 6, mUrl.lastIndexOf("?shareKey"))
+            }else{
+                mUrl.substring(mUrl.lastIndexOf("/feed/") + 6, mUrl.length)
+            }
+            val intent = Intent(mContext, FeedActivity::class.java)
+            intent.putExtra("type", "feed")
+            intent.putExtra("id", id)
+            intent.putExtra("uid", "")
+            intent.putExtra("uname", "")
+            mContext.startActivity(intent)
         } else {
             val intent = Intent(mContext, WebViewActivity::class.java)
             intent.putExtra("url", mUrl)

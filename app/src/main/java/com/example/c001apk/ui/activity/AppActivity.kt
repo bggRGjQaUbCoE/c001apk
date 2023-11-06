@@ -16,8 +16,8 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityAppBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.ImageShowUtil
-import com.example.c001apk.util.LinearItemDecoration
 import com.example.c001apk.util.PubDateUtil
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator

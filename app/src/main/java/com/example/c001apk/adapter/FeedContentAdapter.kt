@@ -3,7 +3,6 @@ package com.example.c001apk.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -25,6 +24,7 @@ import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.util.ImageShowUtil
@@ -34,6 +34,7 @@ import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
@@ -45,6 +46,19 @@ class FeedContentAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+
+    private var iOnListTypeClickListener: IOnListTypeClickListener? = null
+
+    fun setIOnListTypeClickListener(iOnListTypeClickListener: IOnListTypeClickListener) {
+        this.iOnListTypeClickListener = iOnListTypeClickListener
+    }
+
+    private var listType = "lastupdate_desc"
+
+    fun setListType(listType: String) {
+        this.listType = listType
+    }
+
     private var onImageItemClickListener: OnImageItemClickListener? = null
 
     fun setOnImageItemClickListener(onImageItemClickListener: OnImageItemClickListener) {
@@ -54,6 +68,7 @@ class FeedContentAdapter(
     private val TYPE_CONTENT = 0
     private val TYPE_FOOTER = 1
     private val TYPE_REPLY = 2
+    private val TYPE_FIX = 3
     private var loadState = 2
     val LOADING = 1
     val LOADING_COMPLETE = 2
@@ -119,8 +134,37 @@ class FeedContentAdapter(
         val noMore: TextView = view.findViewById(R.id.noMore)
     }
 
+    class TopViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val replyCount: TextView = view.findViewById(R.id.replyCount)
+        val buttonToggle: MaterialButtonToggleGroup = view.findViewById(R.id.buttonToggle)
+        val lastUpdate: Button = view.findViewById(R.id.lastUpdate)
+        val dateLine: Button = view.findViewById(R.id.dateLine)
+        val popular: Button = view.findViewById(R.id.popular)
+        val author: Button = view.findViewById(R.id.author)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
+
+            TYPE_FIX -> {
+                val view: View =
+                    LayoutInflater.from(parent.context).inflate(R.layout.item_top, parent, false)
+                val viewHolder = TopViewHolder(view)
+                viewHolder.lastUpdate.setOnClickListener {
+                    iOnListTypeClickListener?.onRefreshReply("lastupdate_desc")
+                }
+                viewHolder.dateLine.setOnClickListener {
+                    iOnListTypeClickListener?.onRefreshReply("dateline_desc")
+                }
+                viewHolder.popular.setOnClickListener {
+                    iOnListTypeClickListener?.onRefreshReply("popular")
+                }
+                viewHolder.author.setOnClickListener {
+                    iOnListTypeClickListener?.onRefreshReply("")
+                }
+                viewHolder
+            }
+
             TYPE_CONTENT -> {
                 val view =
                     LayoutInflater.from(parent.context)
@@ -244,11 +288,22 @@ class FeedContentAdapter(
         }
     }
 
-    override fun getItemCount() = replyList.size + 2
+    override fun getItemCount() = replyList.size + 3
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n", "RestrictedApi")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+
+            is TopViewHolder -> {
+                holder.replyCount.text = "共 ${replyList.size} 回复"
+                when (listType) {
+                    "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
+                    "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
+                    "popular" -> holder.buttonToggle.check(R.id.popular)
+                    "" -> holder.buttonToggle.check(R.id.author)
+                }
+            }
+
             is FootViewHolder -> {
                 when (loadState) {
                     LOADING -> {
@@ -375,11 +430,15 @@ class FeedContentAdapter(
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
-                            if (PrefManager.isFullImageQuality){
+                            if (PrefManager.isFullImageQuality) {
                                 setUrlList(feed.data.picArr)
-                            } else{
+                            } else {
                                 for (element in feed.data.picArr)
-                                    if (element.substring(element.length - 3, element.length) != "gif")
+                                    if (element.substring(
+                                            element.length - 3,
+                                            element.length
+                                        ) != "gif"
+                                    )
                                         urlList.add("$element.s.jpg")
                                     else urlList.add(element)
                                 setUrlList(urlList)
@@ -393,7 +452,7 @@ class FeedContentAdapter(
 
             is FeedContentReplyViewHolder -> {
                 if (replyList.isNotEmpty()) {
-                    val reply = replyList[position - 1]
+                    val reply = replyList[position - 2]
                     holder.isLike = reply.userAction?.like == 1
                     holder.id = reply.id
                     holder.uid = reply.uid
@@ -475,7 +534,12 @@ class FeedContentAdapter(
                                 val replyData = reply.replyRows[position1]
                                 val textView: TextView = view.findViewById(R.id.reply)
                                 //textView.highlightColor = Color.TRANSPARENT
-                                textView.highlightColor = ColorUtils.setAlphaComponent(ThemeUtils.getThemeAttrColor(mContext, rikka.preference.simplemenu.R.attr.colorPrimaryDark), 128)
+                                textView.highlightColor = ColorUtils.setAlphaComponent(
+                                    ThemeUtils.getThemeAttrColor(
+                                        mContext,
+                                        rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                                    ), 128
+                                )
 
                                 val text =
                                     if (replyData.ruid == reply.uid) {
@@ -553,11 +617,15 @@ class FeedContentAdapter(
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
-                            if (PrefManager.isFullImageQuality){
+                            if (PrefManager.isFullImageQuality) {
                                 setUrlList(reply.picArr)
-                            } else{
+                            } else {
                                 for (element in reply.picArr)
-                                    if (element.substring(element.length - 3, element.length) != "gif")
+                                    if (element.substring(
+                                            element.length - 3,
+                                            element.length
+                                        ) != "gif"
+                                    )
                                         urlList.add("$element.s.jpg")
                                     else urlList.add(element)
                                 setUrlList(urlList)
@@ -575,6 +643,7 @@ class FeedContentAdapter(
     override fun getItemViewType(position: Int): Int {
         return when (position) {
             0 -> TYPE_CONTENT
+            1 -> TYPE_FIX
             itemCount - 1 -> TYPE_FOOTER
             else -> TYPE_REPLY
         }

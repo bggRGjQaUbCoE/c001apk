@@ -64,12 +64,22 @@ class AppViewModel : ViewModel() {
 
     var page = 1
     private var discussMode = 1
-    private var listType = "lastupdate_desc"
+    var listType = "lastupdate_desc"
+    private var blockStatus = 0
+    var fromFeedAuthor = 0
 
     private val getFeedReplyData = MutableLiveData<String>()
 
     val feedReplyData = getFeedReplyData.switchMap {
-        Repository.getFeedContentReply(id, discussMode, listType, page)
+        Repository.getFeedContentReply(
+            id,
+            listType,
+            page,
+            discussMode,
+            "feed",
+            blockStatus,
+            fromFeedAuthor
+        )
     }
 
     fun getFeedReply() {
@@ -152,7 +162,7 @@ class AppViewModel : ViewModel() {
     private val getAppCommentData = MutableLiveData<String>()
 
     val appCommentData = getAppCommentData.switchMap {
-        Repository.getDataList(baseURL + appId,"点评","","" ,page)
+        Repository.getDataList(baseURL + appId, "讨论", "", "", page)
     }
 
     fun getAppComment() {

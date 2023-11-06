@@ -30,12 +30,12 @@ import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.ImageShowUtil
-import com.example.c001apk.util.LinearItemDecoration1
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.PubDateUtil
-import com.example.c001apk.util.SpacesItemDecoration
+import com.example.c001apk.view.SpacesItemDecoration
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
+import com.example.c001apk.view.LinearItemDecoration1
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.imageview.ShapeableImageView
