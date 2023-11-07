@@ -45,6 +45,7 @@
     <string name="color_deep_orange">深橙</string>
     <string name="color_brown">棕色</string>
     <string name="color_blue_grey">灰蓝</string>
+
     <string name="emoji">表情</string>
     <string name="show_emoji">显示表情</string>
     <string name="all_huaji">全部变成滑稽</string>
@@ -77,5 +78,17 @@
     <string name="xAppDevice">X-App-Device</string>
     <string name="full_quality">默认原图</string>
     <string name="display">显示</string>
+    <string name="auto_clear_key_word">自动清除关键词</string>
+    <string name="clear_Key_word">搜索后清除关键词</string>
+    <string name="feed_default">实时</string>
+    <string name="feed_hot">热度</string>
+    <string name="feed_reply">评论数</string>
+    <string name="order">顺序</string>
+    <string name="type">类型</string>
+    <string name="type_all">全部</string>
+    <string name="type_feed">动态</string>
+    <string name="type_article">图文</string>
+    <string name="type_pic">酷图</string>
+    <string name="type_reply">评论</string>
 
 </resources>

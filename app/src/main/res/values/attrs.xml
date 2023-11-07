@@ -21,4 +21,5 @@
         <attr name="tab_paddingEnd" format="dimension"/>
         <attr name="tab_paddingBottom" format="dimension"/>-->
     </declare-styleable>
+
 </resources>

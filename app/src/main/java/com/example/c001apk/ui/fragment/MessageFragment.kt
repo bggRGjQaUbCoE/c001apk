@@ -3,16 +3,12 @@ package com.example.c001apk.ui.fragment
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import androidx.appcompat.widget.ThemeUtils
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,8 +19,8 @@ import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.ImageShowUtil
-import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.NestCollapsingToolbarLayout
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder

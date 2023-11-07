@@ -15,8 +15,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityAppBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
-import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -61,12 +61,12 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         binding.updateTime.text = "更新时间: null"
                     else
                         binding.updateTime.text =
-                            "更新时间: ${PubDateUtil.time(appInfo.lastupdate)}"
+                            "更新时间: ${DateUtils.fromToday(appInfo.lastupdate)}"
                     binding.collapsingToolbar.title = appInfo.title
                     binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                     ImageShowUtil.showIMG(binding.logo, appInfo.logo)
                     viewModel.appId = appInfo.id
-                    viewModel.isRefreh = true
+                    viewModel.isRefreshing = true
                     viewModel.isNew = true
                     viewModel.getAppComment()
                 } else {
@@ -81,9 +81,9 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
                 val comment = result.getOrNull()
                 if (!comment.isNullOrEmpty()) {
-                    if (viewModel.isRefreh)
+                    if (viewModel.isRefreshing)
                         viewModel.appCommentList.clear()
-                    if (viewModel.isRefreh || viewModel.isLoadMore) {
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in comment)
                             if (element.entityType == "feed")
                                 viewModel.appCommentList.add(element)
@@ -100,7 +100,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 binding.indicator.visibility = View.GONE
                 binding.appLayout.visibility = View.VISIBLE
                 binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreh = false
+                viewModel.isRefreshing = false
             }
         }
 
@@ -172,7 +172,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
     private fun refreshData() {
         viewModel.page = 1
-        viewModel.isRefreh = true
+        viewModel.isRefreshing = true
         viewModel.isEnd = false
         val id = intent.getStringExtra("id")!!
         viewModel.id = id
@@ -192,7 +192,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
             binding.indicator.isIndeterminate = false
             binding.indicator.visibility = View.GONE
             viewModel.page = 1
-            viewModel.isRefreh = true
+            viewModel.isRefreshing = true
             viewModel.isEnd = false
             viewModel.isNew = true
             viewModel.getAppComment()

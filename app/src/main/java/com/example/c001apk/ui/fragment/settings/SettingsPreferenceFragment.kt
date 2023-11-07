@@ -67,6 +67,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "allHuaji" -> PrefManager.allHuaji
                 "customToken" -> PrefManager.customToken
                 "isFullImageQuality" -> PrefManager.isFullImageQuality
+                "isClearKeyWord" -> PrefManager.isClearKeyWord
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -79,6 +80,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "allHuaji" -> PrefManager.allHuaji = value
                 "customToken" -> PrefManager.customToken = value
                 "isFullImageQuality" -> PrefManager.isFullImageQuality = value
+                "isClearKeyWord" -> PrefManager.isClearKeyWord = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }

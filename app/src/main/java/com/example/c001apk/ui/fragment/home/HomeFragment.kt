@@ -11,22 +11,24 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
+import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.Tab
 import com.google.android.material.tabs.TabLayoutMediator
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private val tabList = arrayOf("关注", "应用", "头条", "热榜", "话题")
     private var fragmentList = ArrayList<Fragment>()
+    override var controller: IOnTabClickListener? = null
 
-    companion object {
-        var current = 2
-    }
 
     init {
         fragmentList.run {
@@ -50,14 +52,13 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: Tab?) {
-                current = tab!!.position
-            }
+            override fun onTabSelected(tab: Tab?) {}
 
             override fun onTabUnselected(tab: Tab?) {
             }
 
             override fun onTabReselected(tab: Tab?) {
+                controller?.onReturnTop(tab!!.position)
             }
 
         })
@@ -98,5 +99,13 @@ class HomeFragment : Fragment() {
         }
     }
 
+    override fun onReturnTop() {
+        controller?.onReturnTop(binding.viewPager.currentItem)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireContext() as IOnBottomClickContainer).controller = this
+    }
 
 }

@@ -17,6 +17,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -26,7 +28,8 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
-class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener {
+class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener,
+    IOnSearchMenuClickListener {
 
     private lateinit var binding: FragmentSearchFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -63,6 +66,8 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
     override fun onResume() {
         super.onResume()
 
+        (requireParentFragment() as IOnSearchMenuClickContainer).controller = this
+
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
@@ -95,7 +100,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         if (viewModel.type == "feed")
                             for (element in search) {
-                                if (element.feedType == "feed" || element.feedType == "feedArticle")
+                                if (element.entityType == "feed")
                                     viewModel.searchList.add(element)
                             }
                         else
@@ -288,6 +293,29 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     }
                 }
             })
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onSearch(type: String, value: String) {
+        when (type) {
+            "sort" -> {
+                viewModel.sort = value
+                viewModel.searchList.clear()
+                mAdapter.notifyDataSetChanged()
+                binding.indicator.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = true
+                refreshData()
+            }
+
+            "feedType" ->{
+                viewModel.feedType = value
+                viewModel.searchList.clear()
+                mAdapter.notifyDataSetChanged()
+                binding.indicator.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = true
+                refreshData()
+            }
         }
     }
 

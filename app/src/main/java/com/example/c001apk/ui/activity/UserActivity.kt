@@ -17,9 +17,9 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.CountUtil
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -73,7 +73,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     binding.like.text = "${CountUtil.view(user.beLikeNum)} 获赞"
                     binding.follow.text = "${CountUtil.view(user.follow)} 关注"
                     binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
-                    binding.loginTime.text = PubDateUtil.time(user.logintime) + "活跃"
+                    binding.loginTime.text = DateUtils.fromToday(user.logintime) + "活跃"
 
                     val intent = Intent(this, FFFListActivity::class.java)
                     intent.putExtra("uid", user.uid)
@@ -87,7 +87,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     }
 
                     viewModel.uid = user.uid
-                    viewModel.isRefreh = true
+                    viewModel.isRefreshing = true
                     viewModel.isNew = true
                     viewModel.getUserFeed()
                 } else {
@@ -102,8 +102,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
 
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreh) viewModel.feedList.clear()
-                    if (viewModel.isRefreh || viewModel.isLoadMore) {
+                    if (viewModel.isRefreshing) viewModel.feedList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
                             if (element.entityTemplate == "feed")
                                 viewModel.feedList.add(element)
@@ -120,7 +120,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreh = false
+                viewModel.isRefreshing = false
             }
         }
 
@@ -217,7 +217,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
 
     private fun refreshData() {
         viewModel.page = 1
-        viewModel.isRefreh = true
+        viewModel.isRefreshing = true
         viewModel.isEnd = false
         viewModel.id = intent.getStringExtra("id")!!
         viewModel.isNew = true

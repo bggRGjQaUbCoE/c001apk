@@ -20,9 +20,9 @@ import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -224,7 +224,7 @@ class Reply2ReplyTotalAdapter(
                 )
 
 
-                holder.pubDate.text = PubDateUtil.time(reply.dateline)
+                holder.pubDate.text = DateUtils.fromToday(reply.dateline)
                 val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                 drawable1.setBounds(
                     0,

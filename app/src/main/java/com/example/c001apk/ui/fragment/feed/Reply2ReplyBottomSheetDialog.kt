@@ -32,11 +32,11 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
-import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.HorizontalScrollAdapter
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -183,7 +183,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                                     editText.text.toString(),
                                     "",
                                     null,
-                                    (System.currentTimeMillis() / 1000).toString(),
+                                    System.currentTimeMillis() / 1000,
                                     "0",
                                     "0",
                                     PrefManager.userAvatar,

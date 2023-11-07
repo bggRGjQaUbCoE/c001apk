@@ -19,6 +19,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.HistoryAdapter
 import com.example.c001apk.databinding.FragmentSearchBinding
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -144,7 +145,8 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 .addToBackStack(null)
                 .commit()
             updateHistory(binding.editText.text.toString())
-            //binding.editText.text = null
+            if (PrefManager.isClearKeyWord)
+                binding.editText.text = null
         }
     }
 
@@ -198,6 +200,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
 
     override fun onItemClick(keyword: String) {
         binding.editText.setText(keyword)
+        binding.editText.setSelection(keyword.length)
         search()
         updateHistory(keyword)
     }

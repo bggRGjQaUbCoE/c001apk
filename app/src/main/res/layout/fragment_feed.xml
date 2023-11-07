@@ -21,7 +21,47 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolBar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize" />
+            android:layout_height="?attr/actionBarSize">
+
+            <LinearLayout
+                android:id="@+id/titleProfile"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:visibility="gone">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/avatar1"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    tools:ignore="ContentDescription"
+                    tools:src="#123456" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/name1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="name" />
+
+                    <TextView
+                        android:id="@+id/device"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textColor="@color/gray_bd"
+                        tools:text="device" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <View
             android:layout_width="match_parent"
@@ -29,7 +69,6 @@
             android:background="?attr/colorSurfaceVariant" />
 
     </com.google.android.material.appbar.AppBarLayout>
-
 
     <FrameLayout
         android:id="@+id/contentLayout"

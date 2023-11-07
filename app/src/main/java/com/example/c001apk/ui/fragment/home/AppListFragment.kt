@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
-import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
-import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
-class AppListFragment : Fragment(), IOnBottomClickListener {
+class AppListFragment : Fragment(), IOnTabClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -99,7 +99,6 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
 
     override fun onResume() {
         super.onResume()
-
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
@@ -107,23 +106,26 @@ class AppListFragment : Fragment(), IOnBottomClickListener {
             initScroll()
         }
 
-        (requireContext() as IOnBottomClickContainer).controller = this
+        (requireParentFragment() as IOnTabClickContainer).controller = this
+
     }
 
-    override fun onReturnTop() {
-        if (HomeFragment.current == 1) {
-            if (viewModel.firstCompletelyVisibleItemPosition == 0)
-                refreshData()
-            else {
-                binding.recyclerView.smoothScrollToPosition(0)
-                //refreshData()
-            }
-        }
-    }
+
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
         viewModel.getItems(requireContext())
+    }
+
+    override fun onReturnTop(position: Int) {
+        if (position == 1) {
+            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+                refreshData()
+            } else {
+                binding.recyclerView.smoothScrollToPosition(0)
+                //refreshData()
+            }
+        }
     }
 
 }

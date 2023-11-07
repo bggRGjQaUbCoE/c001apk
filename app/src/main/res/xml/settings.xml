@@ -1,25 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="@string/app_name">
-        <rikka.material.preference.MaterialSwitchPreference
-            android:defaultValue="false"
-            android:disableDependentsState="false"
-            android:icon="@drawable/ic_dev_mode"
-            android:key="customToken"
-            android:title="@string/customToken" />
-        <Preference
-            android:dependency="customToken"
-            android:icon="@drawable/ic_token"
-            android:key="xAppToken"
-            android:title="@string/xAppToken" />
-        <Preference
-            android:dependency="customToken"
-            android:icon="@drawable/ic_device1"
-            android:key="xAppDevice"
-            android:title="@string/xAppDevice" />
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/settings_theme">
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
@@ -70,6 +51,32 @@
             android:icon="@drawable/outline_palette_24"
             android:key="allHuaji"
             android:title="@string/all_huaji" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_clear_all"
+            android:key="isClearKeyWord"
+            android:title="@string/auto_clear_key_word"
+            android:summary="@string/clear_Key_word"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/app_name">
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="false"
+            android:disableDependentsState="false"
+            android:icon="@drawable/ic_dev_mode"
+            android:key="customToken"
+            android:title="@string/customToken" />
+        <Preference
+            android:dependency="customToken"
+            android:icon="@drawable/ic_token"
+            android:key="xAppToken"
+            android:title="@string/xAppToken" />
+        <Preference
+            android:dependency="customToken"
+            android:icon="@drawable/ic_device1"
+            android:key="xAppDevice"
+            android:title="@string/xAppDevice" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/others">

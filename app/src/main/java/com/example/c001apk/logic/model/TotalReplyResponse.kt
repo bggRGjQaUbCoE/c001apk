@@ -12,7 +12,7 @@ data class TotalReplyResponse(val data: List<Data>) {
         val message: String,
         val pic: String,
         val picArr: List<String>?,
-        val dateline: String,
+        val dateline: Long,
         var likenum: String,
         val replynum: String,
         val userAvatar: String,

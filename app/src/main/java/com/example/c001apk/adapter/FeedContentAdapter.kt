@@ -27,9 +27,9 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.PubDateUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -360,7 +360,7 @@ class FeedContentAdapter(
                         holder.device.visibility = View.GONE
                     }
 
-                    holder.pubDate.text = PubDateUtil.time(feed.data.dateline)
+                    holder.pubDate.text = DateUtils.fromToday(feed.data.dateline)
                     val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                     drawableDate.setBounds(
                         0,
@@ -467,7 +467,7 @@ class FeedContentAdapter(
                         null
                     )
 
-                    holder.pubDate.text = PubDateUtil.time(reply.dateline)
+                    holder.pubDate.text = DateUtils.fromToday(reply.dateline)
                     val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                     drawableDate.setBounds(
                         0,

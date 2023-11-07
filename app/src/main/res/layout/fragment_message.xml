@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="false"
             app:contentScrim="?android:windowBackground"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/profileLayout"

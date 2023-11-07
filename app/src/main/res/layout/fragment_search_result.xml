@@ -18,6 +18,11 @@
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             style="@style/Widget.Material3.TabLayout.OnSurface.Mod"

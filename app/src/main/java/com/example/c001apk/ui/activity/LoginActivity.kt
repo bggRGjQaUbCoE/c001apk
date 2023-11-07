@@ -6,7 +6,6 @@ import android.text.InputFilter
 import android.text.InputFilter.LengthFilter
 import android.text.InputType
 import android.text.Spanned
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast

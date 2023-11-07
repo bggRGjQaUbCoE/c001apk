@@ -135,5 +135,4 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
         badge.horizontalOffset = 5
     }
 
-
 }

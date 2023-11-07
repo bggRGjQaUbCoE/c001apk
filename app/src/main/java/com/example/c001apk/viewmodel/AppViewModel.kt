@@ -21,6 +21,10 @@ import kotlinx.coroutines.withContext
 
 class AppViewModel : ViewModel() {
 
+    var isRefreshReply = false
+    var device = ""
+    var avatar = ""
+    var totalScrollY = 0
     var haveTop = false
     var isNew = true
     var isPostLikeFeed = false
@@ -156,7 +160,6 @@ class AppViewModel : ViewModel() {
         "#/feed/apkCommentList?isIncludeTop=1&withSortCard=1&id="
     var appId = ""
     var isInit = true
-    var isRefreh = true
     val appCommentList = ArrayList<HomeFeedResponse.Data>()
 
     private val getAppCommentData = MutableLiveData<String>()
@@ -449,8 +452,8 @@ class AppViewModel : ViewModel() {
 
     val searchList = ArrayList<HomeFeedResponse.Data>()
 
-    private var feedType: String = "all"
-    private var sort: String = "default"
+    var feedType: String = "all"
+    var sort: String = "default" //hot // reply
     var keyWord: String = ""
 
     private val getSearchData = MutableLiveData<String>()
@@ -486,5 +489,8 @@ class AppViewModel : ViewModel() {
     fun getProductLayout() {
         getProductLayoutLiveData.value = getProductLayoutLiveData.value
     }
+
+    val searchTabList = arrayOf("动态", "应用", "数码", "用户", "话题")
+    var searchFragmentList = ArrayList<Fragment>()
 
 }

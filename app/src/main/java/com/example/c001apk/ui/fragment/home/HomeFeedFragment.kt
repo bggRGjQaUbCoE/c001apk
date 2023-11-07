@@ -16,11 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
-import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
-import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.TokenDeviceUtils
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -30,8 +30,8 @@ import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
 
-class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListener,
-    OnImageItemClickListener {
+class HomeFeedFragment : Fragment(), IOnLikeClickListener,
+    OnImageItemClickListener, IOnTabClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -310,14 +310,14 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
         }
     }
 
-    override fun onReturnTop() {
-        val position = when (viewModel.type) {
+    override fun onReturnTop(position: Int) {
+        val current = when (viewModel.type) {
             "feed" -> 2
             "rank" -> 3
             "follow" -> 0
             else -> throw IllegalArgumentException("type error")
         }
-        if (HomeFragment.current == position) {
+        if (current == position) {
             if (viewModel.firstCompletelyVisibleItemPosition == 0) {
                 binding.swipeRefresh.isRefreshing = true
                 refreshData()
@@ -331,6 +331,9 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
 
     override fun onResume() {
         super.onResume()
+
+        (requireParentFragment() as IOnTabClickContainer).controller = this
+
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
@@ -338,7 +341,6 @@ class HomeFeedFragment : Fragment(), IOnBottomClickListener, IOnLikeClickListene
             initRefresh()
             initScroll()
         }
-        (requireContext() as IOnBottomClickContainer).controller = this
     }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {

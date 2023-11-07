@@ -15,8 +15,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -54,8 +54,8 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
 
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreh) viewModel.dataList.clear()
-                    if (viewModel.isRefreh || viewModel.isLoadMore) {
+                    if (viewModel.isRefreshing) viewModel.dataList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed)
                             if (element.entityTemplate == "feed" || element.entityType == "contacts")
                                 viewModel.dataList.add(element)
@@ -70,7 +70,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreh = false
+                viewModel.isRefreshing = false
             }
         }
 
@@ -208,7 +208,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
 
     private fun refreshData() {
         viewModel.page = 1
-        viewModel.isRefreh = true
+        viewModel.isRefreshing = true
         viewModel.isEnd = false
         viewModel.isNew = true
         viewModel.getFeedList()

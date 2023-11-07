@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/type"
+        android:showAsAction="never"
+        android:title="@string/type">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/typeAll"
+                    android:title="@string/type_all" />
+
+                <item
+                    android:id="@+id/typeFeed"
+                    android:title="@string/type_feed" />
+
+                <item
+                    android:id="@+id/typeArticle"
+                    android:title="@string/type_article" />
+
+                <item
+                    android:id="@+id/typePic"
+                    android:title="@string/type_pic" />
+
+                <item
+                    android:id="@+id/typeReply"
+                    android:title="@string/type_reply" />
+
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/order"
+        android:showAsAction="never"
+        android:title="@string/order">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/feedDefault"
+                    android:title="@string/feed_default" />
+
+                <item
+                    android:id="@+id/feedHot"
+                    android:title="@string/feed_hot" />
+
+                <item
+                    android:id="@+id/feedReply"
+                    android:title="@string/feed_reply" />
+            </group>
+        </menu>
+    </item>
+
+</menu>

@@ -13,12 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
-import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
-class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
+class HomeTopicContentFragment : Fragment() {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -173,19 +171,6 @@ class HomeTopicContentFragment : Fragment(), IOnBottomClickListener {
             initRefresh()
             initScroll()
         }
-
-        (requireContext() as IOnBottomClickContainer).controller = this
-    }
-
-    override fun onReturnTop() {
-        /*if (HomeFragment.current == 4) {
-            if (firstCompletelyVisibleItemPosition == 0)
-                refreshData()
-            else {
-                binding.recyclerView.scrollToPosition(0)
-                refreshData()
-            }
-        }*/
     }
 
 }

@@ -29,13 +29,13 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.PubDateUtil
-import com.example.c001apk.view.SpacesItemDecoration
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinearItemDecoration1
+import com.example.c001apk.view.SpacesItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.imageview.ShapeableImageView
@@ -331,21 +331,21 @@ class AppAdapter(
                     holder.uname.text = user.userInfo.username
                     holder.follow.text = "${user.userInfo.follow}关注"
                     holder.fans.text = "${user.userInfo.fans}粉丝"
-                    holder.act.text = PubDateUtil.time(user.userInfo.logintime) + "活跃"
+                    holder.act.text = DateUtils.fromToday(user.userInfo.logintime) + "活跃"
                     ImageShowUtil.showAvatar(holder.avatar, user.userInfo.userAvatar)
                 } else if (user.userInfo == null && user.fUserInfo != null) {
                     holder.uid = user.fUserInfo.uid
                     holder.uname.text = user.fUserInfo.username
                     holder.follow.text = "${user.fUserInfo.follow}关注"
                     holder.fans.text = "${user.fUserInfo.fans}粉丝"
-                    holder.act.text = PubDateUtil.time(user.fUserInfo.logintime) + "活跃"
+                    holder.act.text = DateUtils.fromToday(user.fUserInfo.logintime) + "活跃"
                     ImageShowUtil.showAvatar(holder.avatar, user.fUserInfo.userAvatar)
                 } else if (user.userInfo != null && user.fUserInfo == null) {
                     holder.uid = user.uid
                     holder.uname.text = user.username
                     holder.follow.text = "${user.follow}关注"
                     holder.fans.text = "${user.fans}粉丝"
-                    holder.act.text = PubDateUtil.time(user.logintime) + "活跃"
+                    holder.act.text = DateUtils.fromToday(user.logintime) + "活跃"
                     ImageShowUtil.showAvatar(holder.avatar, user.userAvatar)
                 }
             }
@@ -434,7 +434,7 @@ class AppAdapter(
                 } else {
                     holder.device.visibility = View.GONE
                 }
-                holder.pubDate.text = PubDateUtil.time(feed.dateline)
+                holder.pubDate.text = DateUtils.fromToday(feed.dateline)
                 val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                 drawable1.setBounds(
                     0,
@@ -510,9 +510,9 @@ class AppAdapter(
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
-                        if (PrefManager.isFullImageQuality){
+                        if (PrefManager.isFullImageQuality) {
                             setUrlList(feed.picArr)
-                        } else{
+                        } else {
                             for (element in feed.picArr)
                                 if (element.substring(element.length - 3, element.length) != "gif")
                                     urlList.add("$element.s.jpg")
