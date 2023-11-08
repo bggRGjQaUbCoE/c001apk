@@ -2,20 +2,28 @@ package com.example.c001apk.ui.fragment.topic
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
+import com.example.c001apk.ui.activity.TopicActivity
+import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
-class TopicFragment : Fragment() {
+class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
 
     private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    override var controller: IOnSearchMenuClickListener? = null
 
     companion object {
         @JvmStatic
@@ -32,6 +40,7 @@ class TopicFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         arguments?.let {
             viewModel.url = it.getString("url")!!
             viewModel.title = it.getString("title")!!
@@ -56,6 +65,8 @@ class TopicFragment : Fragment() {
         else {
             initView(null)
             initBar()
+            if (viewModel.type == "product")
+                initViewPagerMenu()
         }
 
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
@@ -65,6 +76,7 @@ class TopicFragment : Fragment() {
                 val data = result.getOrNull()
                 if (data != null) {
                     if (viewModel.tabList.isEmpty()) {
+                        viewModel.type = data.entityType
                         viewModel.subtitle = data.intro
                         initBar()
 
@@ -131,12 +143,9 @@ class TopicFragment : Fragment() {
             title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
             else viewModel.title
             viewModel.subtitle?.let { subtitle = viewModel.subtitle }
-            //tooltipText = data.intro
-            setNavigationIcon(R.drawable.ic_back)
-            setNavigationOnClickListener {
-                requireActivity().finish()
-            }
         }
+        (activity as TopicActivity).setSupportActionBar(binding.toolBar)
+        (activity as TopicActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun initView(tabSelected: Int?) {
@@ -149,8 +158,7 @@ class TopicFragment : Fragment() {
             tab.text = viewModel.tabList[position]
         }.attach()
         if (viewModel.isInit && tabSelected != null) {
-            binding.viewPager.currentItem = tabSelected
-            binding.tabLayout.getTabAt(tabSelected)!!.select()
+            binding.viewPager.setCurrentItem(tabSelected, false)
             viewModel.isInit = false
         }
 
@@ -165,7 +173,69 @@ class TopicFragment : Fragment() {
             viewModel.getTopicLayout()
         } else if (viewModel.type == "product") {
             viewModel.getProductLayout()
+            initViewPagerMenu()
         }
+    }
+
+    private fun initViewPagerMenu() {
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageScrollStateChanged(state: Int) {}
+            override fun onPageSelected(position: Int) {}
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                requireActivity().invalidateOptionsMenu()
+            }
+        })
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        if (viewModel.type == "product") {
+            inflater.inflate(R.menu.topic_product_menu, menu)
+            menu.findItem(R.id.order).isVisible = binding.viewPager.currentItem == 1
+        }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+
+        if (viewModel.type == "product") {
+            menu.findItem(
+                when (viewModel.productTitle) {
+                    "最近回复" -> R.id.topicLatestReply
+                    "热度排序" -> R.id.topicHot
+                    "最新发布" -> R.id.topicLatestPublish
+                    else -> throw IllegalArgumentException("type error")
+                }
+            )?.isChecked = true
+        }
+
+        super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> requireActivity().supportFragmentManager.popBackStack()
+
+            R.id.topicLatestReply -> {
+                viewModel.productTitle = "最近回复"
+                controller?.onSearch("title", "最近回复")
+            }
+
+            R.id.topicHot -> {
+                viewModel.productTitle = "热度排序"
+                controller?.onSearch("title", "热度排序")
+            }
+
+            R.id.topicLatestPublish -> {
+                viewModel.productTitle = "最新发布"
+                controller?.onSearch("title", "最新发布")
+            }
+
+        }
+        return super.onOptionsItemSelected(item)
     }
 
 }

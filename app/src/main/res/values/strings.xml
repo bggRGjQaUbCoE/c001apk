@@ -90,5 +90,10 @@
     <string name="type_article">图文</string>
     <string name="type_pic">酷图</string>
     <string name="type_reply">评论</string>
+    <string name="topic_order">排序规则</string>
+    <string name="topic_latest_reply">最近回复</string>
+    <string name="topic_latest_publish">最新发布</string>
+    <string name="topic_hot">热度排序</string>
+    <string name="show_reply">查看评论</string>
 
 </resources>

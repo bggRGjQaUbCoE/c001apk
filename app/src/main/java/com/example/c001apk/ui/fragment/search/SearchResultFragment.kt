@@ -67,10 +67,6 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
             setOnClickListener {
                 requireActivity().supportFragmentManager.popBackStack()
             }
-            setNavigationIcon(R.drawable.ic_back)
-            binding.toolBar.setNavigationOnClickListener {
-                requireActivity().supportFragmentManager.popBackStack()
-            }
         }
         (activity as SearchActivity).setSupportActionBar(binding.toolBar)
         (activity as SearchActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -145,6 +141,8 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            android.R.id.home -> requireActivity().supportFragmentManager.popBackStack()
+
             R.id.feedDefault -> {
                 viewModel.sort = "default"
                 controller?.onSearch("sort", "default")

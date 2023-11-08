@@ -21,6 +21,9 @@ import kotlinx.coroutines.withContext
 
 class AppViewModel : ViewModel() {
 
+    var isViewReply = false
+    var isShowMoreReply = false
+    var replyCount = ""
     var isRefreshReply = false
     var device = ""
     var avatar = ""
@@ -180,6 +183,7 @@ class AppViewModel : ViewModel() {
     var barTitle = ""
     var url = ""
     var title = ""
+    var productTitle = "最近回复"
 
     val carouselList = ArrayList<HomeFeedResponse.Data>()
 
@@ -433,6 +437,7 @@ class AppViewModel : ViewModel() {
         getHomeTopicTitleLiveData.value = getHomeTopicTitleLiveData.value
     }
 
+    var productFilterMap: MutableMap<String, String> = HashMap()
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 
     private val getTopicDataLiveData = MutableLiveData<String>()

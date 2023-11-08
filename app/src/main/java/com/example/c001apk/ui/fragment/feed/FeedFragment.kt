@@ -22,11 +22,11 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
+import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -35,6 +35,8 @@ import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
+import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.Emoji.initEmoji
@@ -43,8 +45,9 @@ import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
-import com.example.c001apk.view.HorizontalScrollAdapter
+import com.example.c001apk.view.OffsetLinearLayoutManager
 import com.example.c001apk.view.StickyItemDecorator
+import com.example.c001apk.view.circleindicator.CircleIndicator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -60,28 +63,30 @@ import java.net.URLDecoder
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
     IOnEmojiClickListener, IOnLikeClickListener, OnImageItemClickListener,
-    IOnListTypeClickListener {
+    IOnListTypeClickListener, IOnShowMoreReplyListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
-
     //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
-    private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var mLayoutManager: OffsetLinearLayoutManager
     private lateinit var editText: ExtendEditText
     private var isPaste = false
 
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String, uid: String, uname: String) =
+        fun newInstance(id: String, uid: String, uname: String, viewReply: Boolean?) =
             FeedFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
                     putString("UID", uid)
                     putString("UNAME", uname)
+                    if (viewReply != null) {
+                        putBoolean("viewReply", viewReply)
+                    }
                     //putString("DEVICE", device)
                 }
             }
@@ -93,7 +98,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             viewModel.id = it.getString("ID")!!
             viewModel.uid = it.getString("UID")!!
             viewModel.uname = it.getString("UNAME")!!
-            //device = it.getString("DEVICE")
+            viewModel.isViewReply = it.getBoolean("viewReply", false)
         }
     }
 
@@ -134,6 +139,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.uname = feed.data.username
                     viewModel.avatar = feed.data.userAvatar
                     viewModel.device = feed.data.deviceTitle
+                    viewModel.replyCount = feed.data.replynum
                     if (viewModel.isRefreshing) {
                         viewModel.feedContentList.clear()
                         mAdapter.setLoadState(mAdapter.LOADING)
@@ -162,7 +168,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
-                if (viewModel.isRefreshReply){
+                if (viewModel.isRefreshReply) {
                     viewModel.feedReplyList.clear()
                     viewModel.isRefreshReply = false
                 }
@@ -183,7 +189,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     mAdapter.setLoadState(mAdapter.LOADING_END)
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                binding.replyCount.text = "共 ${viewModel.feedReplyList.size} 回复"
+                if (viewModel.isViewReply) {
+                    viewModel.isViewReply = false
+                    mLayoutManager.scrollToPositionWithOffset(1, 0)
+                }
+                binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
                 mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
@@ -345,7 +355,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             requireActivity().startActivity(intent)
         }
         mAdapter.setListType(viewModel.listType)
-        binding.replyCount.text = "共 ${viewModel.feedReplyList.size} 回复"
+        binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
         binding.lastUpdate.setOnClickListener {
             refreshReply("lastupdate_desc")
         }
@@ -360,10 +370,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun refreshReply(listType: String) {
+        if (viewModel.firstCompletelyVisibleItemPosition > 1)
+            viewModel.isViewReply = true
         viewModel.totalScrollY = 0
-        viewModel.firstCompletelyVisibleItemPosition = 0
         binding.titleProfile.visibility = View.GONE
         viewModel.fromFeedAuthor = if (listType == "") 1
         else 0
@@ -377,7 +387,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         viewModel.isRefreshReply = true
         binding.indicator.visibility = View.VISIBLE
         binding.indicator.isIndeterminate = true
-        binding.recyclerView.scrollToPosition(1)
         viewModel.getFeedReply()
     }
 
@@ -391,10 +400,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
         val emotion: ImageButton = view.findViewById(R.id.emotion)
         val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
+        val indicator: CircleIndicator = view.findViewById(R.id.indicator)
         val itemBeans = initEmoji()
         val scrollAdapter = HorizontalScrollAdapter(requireContext(), itemBeans)
         scrollAdapter.setIOnEmojiClickListener(this)
         emojiPanel.adapter = scrollAdapter
+        indicator.setViewPager(emojiPanel)
 
         fun checkAndPublish() {
             if (editText.text.toString().replace("\n", "").isEmpty()) {
@@ -451,6 +462,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (emojiPanel.visibility != View.VISIBLE) {
                 //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                 emojiPanel.visibility = View.VISIBLE
+                indicator.visibility = View.VISIBLE
                 val keyboard =
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_down)
                 val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
@@ -463,6 +475,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             } else {
                 //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                 emojiPanel.visibility = View.GONE
+                indicator.visibility = View.GONE
                 val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
                 val drawableFace = DrawableCompat.wrap(face!!)
                 DrawableCompat.setTint(
@@ -572,16 +585,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (viewModel.feedContentList.isNotEmpty()) {
-                    viewModel.totalScrollY += dy
+                    viewModel.totalScrollY = mLayoutManager.computeVerticalOffset()
                     if (viewModel.totalScrollY >= DensityTool.dp2px(requireContext(), 50f)) {
-                        if (binding.titleProfile.visibility != View.VISIBLE) {
+                        if (binding.titleProfile.visibility != View.VISIBLE)
                             showTitleProfile()
-                            binding.titleProfile.visibility = View.VISIBLE
-                        }
                     } else {
-                        binding.titleProfile.visibility = View.GONE
+                        if (binding.titleProfile.visibility != View.GONE)
+                            binding.titleProfile.visibility = View.GONE
                     }
-
                 }
 
                 if (viewModel.feedReplyList.isNotEmpty()) {
@@ -615,6 +626,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         )
         binding.device.setCompoundDrawables(drawable, null, null, null)
         ImageShowUtil.showAvatar(binding.avatar1, viewModel.avatar)
+        binding.titleProfile.visibility = View.VISIBLE
     }
 
     @SuppressLint("RestrictedApi")
@@ -634,13 +646,18 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
+            binding.titleProfile.visibility = View.GONE
             binding.indicator.visibility = View.VISIBLE
             binding.indicator.isIndeterminate = true
             refreshData()
         } else {
             binding.contentLayout.visibility = View.VISIBLE
             if (viewModel.totalScrollY >= DensityTool.dp2px(requireContext(), 50f)) {
-                showTitleProfile()
+                if (binding.titleProfile.visibility != View.VISIBLE)
+                    showTitleProfile()
+            } else {
+                if (binding.titleProfile.visibility != View.GONE)
+                    binding.titleProfile.visibility = View.GONE
             }
             if (PrefManager.isLogin)
                 binding.reply.visibility = View.VISIBLE
@@ -670,7 +687,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setOnImageItemClickListener(this)
         mAdapter.setIOnListTypeClickListener(this)
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = OffsetLinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -696,6 +713,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             setNavigationOnClickListener {
                 requireActivity().finish()
             }
+            inflateMenu(R.menu.feed_menu)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.showReply -> {
+                        binding.recyclerView.stopScroll()
+                        mLayoutManager.scrollToPositionWithOffset(1, 0)
+                        binding.titleProfile.visibility = View.GONE
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
         }
     }
 
@@ -714,7 +742,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         uname: String,
         type: String
     ) {
-        if (PrefManager.isLogin) {
+        if (PrefManager.isLogin && !viewModel.isShowMoreReply) {
             viewModel.rPosition = rPosition
             viewModel.rid = id
             viewModel.ruid = uid
@@ -722,6 +750,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             viewModel.type = type
             initReply()
         }
+        viewModel.isShowMoreReply = false
     }
 
     override fun onShowEmoji(name: String) {
@@ -857,6 +886,20 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             "" -> binding.buttonToggle.check(R.id.author)
         }
         refreshReply(listType)
+    }
+
+    override fun onShowMoreReply(position: Int, uid: String, id: String) {
+        viewModel.isShowMoreReply = true
+        val mBottomSheetDialogFragment =
+            Reply2ReplyBottomSheetDialog.newInstance(position, uid, id)
+        mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        IOnShowMoreReplyContainer.controller = this
+
     }
 
 }

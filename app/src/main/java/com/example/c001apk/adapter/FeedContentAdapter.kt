@@ -46,7 +46,6 @@ class FeedContentAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-
     private var iOnListTypeClickListener: IOnListTypeClickListener? = null
 
     fun setIOnListTypeClickListener(iOnListTypeClickListener: IOnListTypeClickListener) {
@@ -295,12 +294,14 @@ class FeedContentAdapter(
         when (holder) {
 
             is TopViewHolder -> {
-                holder.replyCount.text = "共 ${replyList.size} 回复"
-                when (listType) {
-                    "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
-                    "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
-                    "popular" -> holder.buttonToggle.check(R.id.popular)
-                    "" -> holder.buttonToggle.check(R.id.author)
+                if (feedList.isNotEmpty()) {
+                    holder.replyCount.text = "共 ${feedList[0].data.replynum} 回复"
+                    when (listType) {
+                        "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
+                        "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
+                        "popular" -> holder.buttonToggle.check(R.id.popular)
+                        "" -> holder.buttonToggle.check(R.id.author)
+                    }
                 }
             }
 
@@ -569,6 +570,8 @@ class FeedContentAdapter(
                                     (textView.textSize * 1.3).toInt(),
                                     replyData.picArr
                                 )
+
+                                SpannableStringBuilderUtil.setData(position1, replyData.uid)
 
                                 view.setOnClickListener {
                                     iOnReplyClickContainer?.onReply2Reply(

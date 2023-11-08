@@ -17,6 +17,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -26,7 +28,8 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
-class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener {
+class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener,
+    IOnSearchMenuClickListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -63,6 +66,9 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
     override fun onResume() {
         super.onResume()
 
+        if (viewModel.title == "讨论")
+            (requireParentFragment() as IOnSearchMenuClickContainer).controller = this
+
         if (viewModel.isInit) {
             viewModel.isInit = false
             initData()
@@ -90,8 +96,20 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
 
                 val data = result.getOrNull()
                 if (!data.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
+                    if (viewModel.isRefreshing) {
                         viewModel.topicDataList.clear()
+                        if (viewModel.title == "讨论") {
+                            var index = 0
+                            for (element in data) {
+                                if (element.entityTemplate == "sortSelectCard")
+                                    break
+                                else index++
+                            }
+                            for (element in data[index].entities) {
+                                viewModel.productFilterMap[element.title] = element.url
+                            }
+                        }
+                    }
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in data)
                             if (element.entityType == "feed"
@@ -289,6 +307,21 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                 }
             })
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onSearch(type: String, value: String) {
+        viewModel.title = value
+        when (value) {
+            "最近回复" -> viewModel.url = viewModel.productFilterMap["最近回复"]!!
+            "热度排序" -> viewModel.url = viewModel.productFilterMap["热度排序"]!!
+            "最新发布" -> viewModel.url = viewModel.productFilterMap["最新发布"]!!
+        }
+        viewModel.topicDataList.clear()
+        mAdapter.notifyDataSetChanged()
+        binding.indicator.visibility = View.VISIBLE
+        binding.indicator.isIndeterminate = true
+        refreshData()
     }
 
 }

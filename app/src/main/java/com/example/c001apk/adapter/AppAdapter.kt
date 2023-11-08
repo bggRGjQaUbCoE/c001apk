@@ -16,12 +16,13 @@ import android.widget.TextView
 import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.DyhActivity
@@ -35,7 +36,7 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinearItemDecoration1
-import com.example.c001apk.view.SpacesItemDecoration
+import com.example.c001apk.view.circleindicator.CircleIndicator3
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.imageview.ShapeableImageView
@@ -72,11 +73,12 @@ class AppAdapter(
     }
 
     class ImageCarouselCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        val viewPager: ViewPager2 = view.findViewById(R.id.viewPager)
     }
 
     class IconLinkGridCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        val viewPager: ViewPager2 = view.findViewById(R.id.viewPager)
+        val indicator: CircleIndicator3 = view.findViewById(R.id.indicator)
     }
 
     class FeedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -180,6 +182,15 @@ class AppAdapter(
                     intent.putExtra("id", viewHolder.id)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.reply.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", "feed")
+                    intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
+                    intent.putExtra("uname", viewHolder.uname.text)
+                    intent.putExtra("viewReply", true)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.itemView.setOnLongClickListener {
@@ -382,36 +393,72 @@ class AppAdapter(
                 }
             }
 
-
             is ImageCarouselCardViewHolder -> {
                 val imageCarouselCard = dataList[position].entities
-                val mAdapter = ImageCarouselCardAdapter(imageCarouselCard)
-                val mLayoutManager = LinearLayoutManager(mContext)
-                mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
-                holder.recyclerView.onFlingListener = null
-                PagerSnapHelper().attachToRecyclerView(holder.recyclerView)
-                holder.recyclerView.apply {
-                    adapter = mAdapter
-                    layoutManager = mLayoutManager
+                val data: MutableList<IconLinkGridCardBean> = ArrayList()
+                data.add(
+                    IconLinkGridCardBean(
+                        imageCarouselCard[imageCarouselCard.size - 1].title,
+                        imageCarouselCard[imageCarouselCard.size - 1].pic,
+                        imageCarouselCard[imageCarouselCard.size - 1].url
+                    )
+                )
+                for (element in imageCarouselCard){
+                    data.add(IconLinkGridCardBean(
+                        element.title,
+                        element.pic,
+                        element.url
+                    ))
                 }
+                data.add(
+                    IconLinkGridCardBean(
+                        imageCarouselCard[0].title,
+                        imageCarouselCard[0].pic,
+                        imageCarouselCard[0].url
+                    )
+                )
+                val adapter = ImageCarouselCardAdapter(data)
+                var currentPosition = 0
+                holder.viewPager.adapter = adapter
+                holder.viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        currentPosition = position
+                    }
+
+                    override fun onPageScrollStateChanged(state: Int) {
+                        if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                            if (currentPosition == 0) {
+                                holder.viewPager.setCurrentItem(adapter.itemCount - 2, false)
+                            } else if (currentPosition == adapter.itemCount - 1) {
+                                holder.viewPager.setCurrentItem(1, false)
+                            }
+                        }
+                    }
+                })
+                holder.viewPager.setCurrentItem(1, false)
             }
 
             is IconLinkGridCardViewHolder -> {
-                val iconLinkGridCard = dataList[position].entities
-                val mAdapter = IconLinkGridCardAdapter(iconLinkGridCard)
-                val mLayoutManager = GridLayoutManager(mContext, 5)
-                val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
-                val spaceValue = HashMap<String, Int>()
-                spaceValue[SpacesItemDecoration.TOP_SPACE] = space
-                spaceValue[SpacesItemDecoration.BOTTOM_SPACE] = space
-                spaceValue[SpacesItemDecoration.LEFT_SPACE] = space
-                spaceValue[SpacesItemDecoration.RIGHT_SPACE] = space
-                holder.recyclerView.apply {
-                    adapter = mAdapter
-                    layoutManager = mLayoutManager
-                    if (itemDecorationCount == 0)
-                        addItemDecoration(SpacesItemDecoration(5, spaceValue, true))
+                val iconLinkGridCardList = dataList[position].entities
+                val data: MutableList<IconLinkGridCardBean> = ArrayList()
+                val maps: MutableList<List<IconLinkGridCardBean>> = ArrayList()
+                for (element in iconLinkGridCardList) {
+                    data.add(IconLinkGridCardBean(element.title, element.pic, element.url))
                 }
+                val page = iconLinkGridCardList.size / 5
+                var index = 0
+                repeat(page) {
+                    maps.add(data.subList(index * 5, (index + 1) * 5))
+                    index++
+                }
+                val adapter = IconLinkGridCardAdapter(mContext, maps)
+                holder.viewPager.adapter = adapter
+                if (page < 2) holder.indicator.visibility = View.GONE
+                else {
+                    holder.indicator.visibility = View.VISIBLE
+                    holder.indicator.setViewPager(holder.viewPager)
+                }
+
             }
 
             is FeedViewHolder -> {
@@ -694,6 +741,7 @@ class AppAdapter(
             }
         }
     }
+
 
     override fun getItemViewType(position: Int): Int {
         return if (position == itemCount - 1) -1

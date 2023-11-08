@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
+import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -35,7 +36,6 @@ import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
-import com.example.c001apk.view.HorizontalScrollAdapter
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener

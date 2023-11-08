@@ -39,6 +39,13 @@ object SpannableStringBuilderUtil {
         return builder
     }
 
+    private var position = 0
+    private var uid = ""
+    fun setData(position: Int, uid: String) {
+        this.position = position
+        this.uid = uid
+    }
+
     fun setText(
         mContext: Context,
         text: String,
@@ -59,6 +66,7 @@ object SpannableStringBuilderUtil {
         )
         for (url in urls) {
             val myURLSpan = MyURLSpan(mContext, url.url, imgList)
+            myURLSpan.setData(position, uid)
             val start = builder.getSpanStart(url)
             val end = builder.getSpanEnd(url)
             val flags = builder.getSpanFlags(url)

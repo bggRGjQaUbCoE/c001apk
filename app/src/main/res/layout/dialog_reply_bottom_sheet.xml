@@ -109,4 +109,10 @@
         android:layout_gravity="center_vertical"
         android:visibility="gone" />
 
+    <com.example.c001apk.view.circleindicator.CircleIndicator
+        android:id="@+id/indicator"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:visibility="gone" />
+
 </LinearLayout>

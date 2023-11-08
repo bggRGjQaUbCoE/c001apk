@@ -7,6 +7,8 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
     tools:ignore="UseCompoundDrawables">
 
     <ImageView
@@ -21,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="5sp"
+        android:layout_marginTop="4dp"
         android:gravity="center"
         android:textSize="12sp" />
 

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
-import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.ui.activity.CarouselActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
@@ -17,7 +17,7 @@ import com.example.c001apk.util.ImageShowUtil
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImageCarouselCardAdapter(
-    private val imageCarouselCardList: List<HomeFeedResponse.Entities>
+    private val imageCarouselCardList: List<IconLinkGridCardBean>
 ) :
     RecyclerView.Adapter<ImageCarouselCardAdapter.ViewHolder>() {
 
@@ -69,7 +69,15 @@ class ImageCarouselCardAdapter(
         val imageCarouselCard = imageCarouselCardList[position]
         holder.title = imageCarouselCard.title
         holder.url = imageCarouselCard.url
-        holder.count.text = "${position + 1}/${imageCarouselCardList.size}"
+        if (itemCount == 1) holder.count.text = "1/1"
+        else {
+            if (position == 0)
+                holder.count.text = "${itemCount - 2}/${itemCount - 2}"
+            else if (position == itemCount-1)
+                holder.count.text = "1/${itemCount - 2}"
+            else
+                holder.count.text = "${position}/${itemCount - 2}"
+        }
         ImageShowUtil.showIMG(holder.imageCarouselCard, imageCarouselCard.pic)
     }
 

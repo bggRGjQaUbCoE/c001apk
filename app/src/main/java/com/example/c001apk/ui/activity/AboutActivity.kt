@@ -42,6 +42,7 @@ class AboutActivity : AbsAboutActivity() {
         items.add(License("VerticalTabLayout", "qstumn", License.APACHE_2, "https://github.com/qstumn/VerticalTabLayout"))
         items.add(License("NineGridImageView", "plain-dev", License.MIT, "https://github.com/plain-dev/NineGridImageView"))
         items.add(License("mojito", "mikaelzero", License.APACHE_2, "https://github.com/mikaelzero/mojito"))
+        items.add(License("CircleIndicator", "ongakuer", License.APACHE_2, "https://github.com/ongakuer/CircleIndicator"))
 
     }
 }

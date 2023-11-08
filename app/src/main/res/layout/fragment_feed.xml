@@ -26,8 +26,7 @@
             <LinearLayout
                 android:id="@+id/titleProfile"
                 android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:visibility="gone">
+                android:layout_height="?actionBarSize">
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/avatar1"
@@ -103,6 +102,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:paddingStart="10dp"
+                android:textSize="13sp"
                 app:layout_constraintBottom_toTopOf="@id/divider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -189,6 +189,7 @@
         android:src="@drawable/ic_reply"
         android:tooltipText="@string/reply"
         android:visibility="invisible"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         tools:ignore="ContentDescription" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator

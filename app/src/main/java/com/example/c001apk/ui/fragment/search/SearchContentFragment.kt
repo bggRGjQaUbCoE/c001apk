@@ -299,24 +299,14 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
     @SuppressLint("NotifyDataSetChanged")
     override fun onSearch(type: String, value: String) {
         when (type) {
-            "sort" -> {
-                viewModel.sort = value
-                viewModel.searchList.clear()
-                mAdapter.notifyDataSetChanged()
-                binding.indicator.visibility = View.VISIBLE
-                binding.indicator.isIndeterminate = true
-                refreshData()
-            }
-
-            "feedType" ->{
-                viewModel.feedType = value
-                viewModel.searchList.clear()
-                mAdapter.notifyDataSetChanged()
-                binding.indicator.visibility = View.VISIBLE
-                binding.indicator.isIndeterminate = true
-                refreshData()
-            }
+            "sort" -> viewModel.sort = value
+            "feedType" -> viewModel.feedType = value
         }
+        viewModel.searchList.clear()
+        mAdapter.notifyDataSetChanged()
+        binding.indicator.visibility = View.VISIBLE
+        binding.indicator.isIndeterminate = true
+        refreshData()
     }
 
 }

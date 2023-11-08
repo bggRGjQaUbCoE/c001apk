@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/order"
+        android:showAsAction="never"
+        android:title="@string/topic_order">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/topicLatestReply"
+                    android:title="@string/topic_latest_reply" />
+
+                <item
+                    android:id="@+id/topicHot"
+                    android:title="@string/topic_hot" />
+
+                <item
+                    android:id="@+id/topicLatestPublish"
+                    android:title="@string/topic_latest_publish" />
+            </group>
+        </menu>
+    </item>
+
+</menu>

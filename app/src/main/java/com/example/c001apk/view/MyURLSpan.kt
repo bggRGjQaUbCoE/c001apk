@@ -9,6 +9,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
@@ -19,11 +20,20 @@ internal class MyURLSpan(
     private val imgList: List<String>?
 ) :
     ClickableSpan() {
+
+    private var position = 0
+    private var uid = ""
+    fun setData(position: Int, uid: String) {
+        this.position = position
+        this.uid = uid
+    }
+
     override fun onClick(widget: View) {
         if (mUrl == "") {
             return
-        } else if (mUrl.length >= 6 && StringBuilder(mUrl).substring(0, 6) == "/feed/") {
-            return
+        } else if (mUrl.contains("/feed/replyList")) {
+            val id = mUrl.replace("/feed/replyList?id=", "")
+            IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id)
         } else if (StringBuilder(mUrl).substring(0, 3) == "/t/") {
             val intent = Intent(mContext, TopicActivity::class.java)
             val index = StringBuilder(mUrl).indexOf("?")
@@ -57,7 +67,7 @@ internal class MyURLSpan(
         } else if (mUrl.contains("www.coolapk.com/feed/")) {
             val id = if (mUrl.contains("shareKey")) {
                 mUrl.substring(mUrl.lastIndexOf("/feed/") + 6, mUrl.lastIndexOf("?shareKey"))
-            }else{
+            } else {
                 mUrl.substring(mUrl.lastIndexOf("/feed/") + 6, mUrl.length)
             }
             val intent = Intent(mContext, FeedActivity::class.java)

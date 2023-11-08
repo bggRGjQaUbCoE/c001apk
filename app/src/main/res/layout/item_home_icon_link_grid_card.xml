@@ -7,15 +7,31 @@
     app:cardElevation="1dp"
     app:strokeWidth="0dp">
 
-    <com.example.c001apk.view.NestedScrollableHost
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <com.example.c001apk.view.NestedScrollableHost
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
 
-    </com.example.c001apk.view.NestedScrollableHost>
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none" />
+
+        </com.example.c001apk.view.NestedScrollableHost>
+
+        <com.example.c001apk.view.circleindicator.CircleIndicator3
+            android:id="@+id/indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            app:ci_drawable="@drawable/black_radius_square"
+            app:ci_height="3dp"
+            app:ci_width="8dp" />
+    </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
