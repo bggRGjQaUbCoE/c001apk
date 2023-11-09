@@ -216,7 +216,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> requireActivity().supportFragmentManager.popBackStack()
+            android.R.id.home -> requireActivity().finish()
 
             R.id.topicLatestReply -> {
                 viewModel.productTitle = "最近回复"

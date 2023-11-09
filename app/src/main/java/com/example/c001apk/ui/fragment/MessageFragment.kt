@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
-import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -41,7 +40,7 @@ class MessageFragment : Fragment() {
     private fun initAnimator() {
         objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
         objectAnimator.interpolator = AccelerateInterpolator()
-        objectAnimator.duration = 300
+        objectAnimator.duration = 150
     }
 
     override fun onCreateView(

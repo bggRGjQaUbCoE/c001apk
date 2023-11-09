@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:textColor="@color/gray_bd"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -64,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:textColor="@color/gray_bd"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/forward1" />
 
@@ -73,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/actionBarItemBackground"
-            android:textColor="@color/gray_bd"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -82,7 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
-            android:textColor="@color/gray_bd"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
             app:layout_constraintEnd_toStartOf="@id/like" />
 

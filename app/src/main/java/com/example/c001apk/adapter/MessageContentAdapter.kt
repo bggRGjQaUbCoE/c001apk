@@ -333,8 +333,8 @@ class MessageContentAdapter(
                             )
                         )
                     } else {
-                        DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
-                        holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                        DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                        holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     holder.like.text = message.likenum
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)

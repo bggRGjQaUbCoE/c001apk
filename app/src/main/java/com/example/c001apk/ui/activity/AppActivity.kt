@@ -101,6 +101,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 binding.appLayout.visibility = View.VISIBLE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
+                viewModel.isLoadMore = false
             }
         }
 

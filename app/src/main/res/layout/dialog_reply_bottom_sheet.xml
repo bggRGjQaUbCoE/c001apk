@@ -34,7 +34,7 @@
             android:background="?attr/actionBarItemBackground"
             android:padding="16dp"
             android:text="@string/publish"
-            android:textColor="@color/gray_bd"
+            android:textColor="@android:color/darker_gray"
             android:textSize="16sp" />
 
     </LinearLayout>
@@ -98,7 +98,7 @@
             android:layout_height="40dp"
             android:background="?attr/actionBarItemBackground"
             android:src="@drawable/ic_face"
-            android:tint="@color/gray_75" />
+            android:tint="@android:color/darker_gray" />
 
     </LinearLayout>
 

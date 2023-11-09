@@ -5,6 +5,7 @@ import android.content.Intent
 import android.text.TextPaint
 import android.text.style.ClickableSpan
 import android.view.View
+import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
@@ -34,6 +35,16 @@ internal class MyURLSpan(
         } else if (mUrl.contains("/feed/replyList")) {
             val id = mUrl.replace("/feed/replyList?id=", "")
             IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id)
+        } else if (mUrl.contains("coolapk.com/u/")) {
+            val uid = mUrl.substring(mUrl.lastIndexOf('/') + 1, mUrl.length)
+            val intent = Intent(mContext, UserActivity::class.java)
+            intent.putExtra("id", uid)
+            mContext.startActivity(intent)
+        } else if (mUrl.contains("coolapk.com/apk/")) {
+            val id = mUrl.substring(mUrl.lastIndexOf('/') + 1, mUrl.length)
+            val intent = Intent(mContext, AppActivity::class.java)
+            intent.putExtra("id", id)
+            mContext.startActivity(intent)
         } else if (StringBuilder(mUrl).substring(0, 3) == "/t/") {
             val intent = Intent(mContext, TopicActivity::class.java)
             val index = StringBuilder(mUrl).indexOf("?")
@@ -53,7 +64,6 @@ internal class MyURLSpan(
                     progressLoader {
                         DefaultPercentProgress()
                     }
-                    setIndicator(CircleIndexIndicator())
                 }
             } else {
                 Mojito.start(mContext) {

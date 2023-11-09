@@ -216,12 +216,12 @@ class AppAdapter(
                 }
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.like.setOnClickListener {
@@ -268,7 +268,7 @@ class AppAdapter(
                 val viewHolder = UserViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.followBtn.setOnClickListener {
@@ -384,7 +384,7 @@ class AppAdapter(
                         )
                     } else {
                         holder.followBtn.text = "已关注"
-                        holder.followBtn.setTextColor(mContext.getColor(R.color.gray_bd))
+                        holder.followBtn.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     ImageShowUtil.showAvatar(holder.avatar, user.userAvatar)
                 }
@@ -495,6 +495,7 @@ class AppAdapter(
             is FeedViewHolder -> {
                 val feed = dataList[position]
                 holder.id = feed.id
+                holder.uid = feed.uid
                 holder.isLike = feed.userAction?.like == 1
                 holder.uname.text = feed.username
                 ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
@@ -544,8 +545,8 @@ class AppAdapter(
                         )
                     )
                 } else {
-                    DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
-                    holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                    DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                    holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                 }
                 holder.like.text = feed.likenum
                 holder.like.setCompoundDrawables(drawableLike, null, null, null)
@@ -800,8 +801,6 @@ class AppAdapter(
             "product" -> 7
 
             "apk" -> 8
-
-            "feed_reply" -> 2
 
             else -> throw IllegalArgumentException("entityType error")
         }

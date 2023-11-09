@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.fragment.feed
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -75,7 +77,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private lateinit var mLayoutManager: OffsetLinearLayoutManager
     private lateinit var editText: ExtendEditText
     private var isPaste = false
+    private lateinit var objectAnimator: ObjectAnimator
 
+
+    private fun initAnimator() {
+        objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
+        objectAnimator.interpolator = AccelerateInterpolator()
+        objectAnimator.duration = 150
+    }
 
     companion object {
         @JvmStatic
@@ -115,6 +124,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initAnimator()
         initBar()
         initView()
         initData()
@@ -194,7 +204,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.isViewReply = false
                     mLayoutManager.scrollToPositionWithOffset(1, 0)
                 }
-                binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
+                binding.replyCount.text = "共${viewModel.replyCount}回复"
                 mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
@@ -374,7 +384,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             requireActivity().startActivity(intent)
         }
         mAdapter.setListType(viewModel.listType)
-        binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
+        binding.replyCount.text = "共${viewModel.replyCount}回复"
         binding.lastUpdate.setOnClickListener {
             refreshReply("lastupdate_desc")
         }
@@ -428,7 +438,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         fun checkAndPublish() {
             if (editText.text.toString().replace("\n", "").isEmpty()) {
                 publish.isClickable = false
-                publish.setTextColor(requireContext().getColor(R.color.gray_bd))
+                publish.setTextColor(requireContext().getColor(android.R.color.darker_gray))
             } else {
                 publish.isClickable = true
                 publish.setTextColor(
@@ -486,7 +496,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
                 DrawableCompat.setTint(
                     drawableKeyboard,
-                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                    ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
                 )
                 emotion.setImageDrawable(drawableKeyboard)
                 //imm.hideSoftInputFromWindow(view.windowToken, 0)
@@ -498,7 +508,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val drawableFace = DrawableCompat.wrap(face!!)
                 DrawableCompat.setTint(
                     drawableFace,
-                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                    ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
                 )
                 emotion.setImageDrawable(drawableFace)
                 //imm.showSoftInput(editText, 0)
@@ -608,6 +618,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (viewModel.firstCompletelyVisibleItemPosition == 0) {
                         if (binding.titleProfile.visibility != View.GONE)
                             binding.titleProfile.visibility = View.GONE
+                        if (objectAnimator.isRunning) {
+                            objectAnimator.cancel()
+                        }
                     } else if (viewModel.firstVisibleItemPosition >= 1) {
                         if (binding.titleProfile.visibility != View.VISIBLE)
                             showTitleProfile()
@@ -615,8 +628,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         if (binding.titleProfile.visibility != View.VISIBLE)
                             showTitleProfile()
                     } else {
-                        if (binding.titleProfile.visibility != View.GONE)
+                        if (binding.titleProfile.visibility != View.GONE) {
                             binding.titleProfile.visibility = View.GONE
+                            if (objectAnimator.isRunning) {
+                                objectAnimator.cancel()
+                            }
+                        }
                     }
                 }
 
@@ -634,19 +651,22 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private fun showTitleProfile() {
         if (binding.name1.text == "") {
             binding.name1.text = viewModel.uname
-            binding.device.text = viewModel.device
-            val drawable: Drawable =
-                requireContext().getDrawable(R.drawable.ic_device)!!
-            drawable.setBounds(
-                0,
-                0,
-                binding.device.textSize.toInt(),
-                binding.device.textSize.toInt()
-            )
-            binding.device.setCompoundDrawables(drawable, null, null, null)
+            if (viewModel.device != "") {
+                binding.device.text = viewModel.device
+                val drawable: Drawable =
+                    requireContext().getDrawable(R.drawable.ic_device)!!
+                drawable.setBounds(
+                    0,
+                    0,
+                    binding.device.textSize.toInt(),
+                    binding.device.textSize.toInt()
+                )
+                binding.device.setCompoundDrawables(drawable, null, null, null)
+            }
             ImageShowUtil.showAvatar(binding.avatar1, viewModel.avatar)
         }
         binding.titleProfile.visibility = View.VISIBLE
+        objectAnimator.start()
     }
 
     @SuppressLint("RestrictedApi")
@@ -666,6 +686,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
+            if (objectAnimator.isRunning) {
+                objectAnimator.cancel()
+            }
             binding.titleProfile.visibility = View.GONE
             binding.indicator.visibility = View.VISIBLE
             binding.indicator.isIndeterminate = true
@@ -677,6 +700,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             } else {
                 if (binding.titleProfile.visibility != View.GONE)
                     binding.titleProfile.visibility = View.GONE
+                if (objectAnimator.isRunning) {
+                    objectAnimator.cancel()
+                }
             }
             if (PrefManager.isLogin)
                 binding.reply.visibility = View.VISIBLE

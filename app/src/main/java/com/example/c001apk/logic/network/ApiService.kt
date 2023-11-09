@@ -1,11 +1,11 @@
 package com.example.c001apk.logic.network
 
-import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.CheckResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.LikeFeedResponse
 import com.example.c001apk.logic.model.LikeReplyResponse
+import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import okhttp3.ResponseBody
 import retrofit2.Call

@@ -16,7 +16,7 @@
         android:layout_height="86dp"
         android:gravity="center"
         android:text="@string/no_more"
-        android:textColor="@color/gray_bd"
+        android:textColor="@android:color/darker_gray"
         android:textSize="16sp" />
 
 </FrameLayout>

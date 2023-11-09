@@ -15,6 +15,7 @@ import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.activity.FFFListActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.MessageActivity
+import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
@@ -27,7 +28,7 @@ class MessageAdapter(
     private val notiList: List<MessageResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var loadState = 2
+    private var loadState = 3
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
@@ -150,6 +151,16 @@ class MessageAdapter(
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_feed_content_reply_item, parent, false)
                 val viewHolder = FeedContentAdapter.FeedContentReplyViewHolder(view)
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.uname.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
                 viewHolder.itemView.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")

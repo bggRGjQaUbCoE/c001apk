@@ -192,12 +192,12 @@ class FeedContentAdapter(
                 }
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.like.setOnClickListener {
@@ -243,12 +243,12 @@ class FeedContentAdapter(
                 }
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uname.text)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.message.setOnLongClickListener {
@@ -311,7 +311,7 @@ class FeedContentAdapter(
 
             is TopViewHolder -> {
                 if (feedList.isNotEmpty()) {
-                    holder.replyCount.text = "共 ${feedList[0].data.replynum} 回复"
+                    holder.replyCount.text = "共${feedList[0].data.replynum}回复"
                     when (listType) {
                         "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
                         "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
@@ -368,7 +368,7 @@ class FeedContentAdapter(
                         )
                     } else {
                         holder.follow.text = "已关注"
-                        holder.follow.setTextColor(mContext.getColor(R.color.gray_bd))
+                        holder.follow.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     if (feed.data.deviceTitle != "") {
                         holder.device.text = feed.data.deviceTitle
@@ -418,8 +418,8 @@ class FeedContentAdapter(
                             )
                         )
                     } else {
-                        DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
-                        holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                        DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                        holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     holder.like.text = feed.data.likenum
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)
@@ -524,8 +524,8 @@ class FeedContentAdapter(
                             )
                         )
                     } else {
-                        DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
-                        holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                        DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                        holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     holder.like.text = reply.likenum
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)

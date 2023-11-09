@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
@@ -9,6 +10,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -24,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
+import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -35,8 +38,8 @@ import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
-import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.circleindicator.CircleIndicator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
@@ -120,6 +123,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                viewModel.isRefreshing = false
+                viewModel.isLoadMore = false
             }
         }
 
@@ -268,15 +273,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         view.layoutParams.height = -1
         view.layoutParams.width = -1
         val behavior = BottomSheetBehavior.from(view)
-        //behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        behavior.peekHeight = windowHeight
-    }
-
-    private val windowHeight: Int
-        get() {
-            val heightPixels = this.resources.displayMetrics.heightPixels
-            return heightPixels - heightPixels / 4
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE){
+            behavior.halfExpandedRatio = 0.75F
+            behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
+    }
 
     override fun onReply2Reply(
         rPosition: Int,
@@ -299,7 +300,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
 
     @SuppressLint("InflateParams", "RestrictedApi")
     private fun initReply() {
-
         bottomSheetDialog = BottomSheetDialog(requireContext())
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
@@ -308,15 +308,17 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
         val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
         val emotion: ImageButton = view.findViewById(R.id.emotion)
+        val indicator: CircleIndicator = view.findViewById(R.id.indicator)
         val itemBeans = initEmoji()
         val scrollAdapter = HorizontalScrollAdapter(requireContext(), itemBeans)
         scrollAdapter.setIOnEmojiClickListener(this)
         emojiPanel.adapter = scrollAdapter
+        indicator.setViewPager(emojiPanel)
 
         fun checkAndPublish() {
             if (editText.text.toString().replace("\n", "").isEmpty()) {
                 publish.isClickable = false
-                publish.setTextColor(requireActivity().getColor(R.color.gray_bd))
+                publish.setTextColor(requireActivity().getColor(android.R.color.darker_gray))
             } else {
                 publish.isClickable = true
                 publish.setTextColor(
@@ -354,20 +356,22 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         emotion.setOnClickListener {
             if (emojiPanel.visibility != View.VISIBLE) {
                 emojiPanel.visibility = View.VISIBLE
+                indicator.visibility = View.VISIBLE
                 val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_down)
                 val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
                 DrawableCompat.setTint(
                     drawableKeyboard,
-                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                    ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
                 )
                 emotion.setImageDrawable(drawableKeyboard)
             } else {
                 emojiPanel.visibility = View.GONE
+                indicator.visibility = View.GONE
                 val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
                 val drawableFace = DrawableCompat.wrap(face!!)
                 DrawableCompat.setTint(
                     drawableFace,
-                    ContextCompat.getColor(requireContext(), R.color.gray_75)
+                    ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
                 )
                 emotion.setImageDrawable(drawableFace)
             }

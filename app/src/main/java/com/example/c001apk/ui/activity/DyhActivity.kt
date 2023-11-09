@@ -2,7 +2,6 @@ package com.example.c001apk.ui.activity
 
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.ActivityDyhDetailBinding

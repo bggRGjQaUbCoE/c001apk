@@ -93,7 +93,7 @@ class Reply2ReplyTotalAdapter(
                 val viewHolder = ViewHolder(view)
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.name)
+                    intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
                 viewHolder.message.setOnLongClickListener {
@@ -256,8 +256,8 @@ class Reply2ReplyTotalAdapter(
                         )
                     )
                 } else {
-                    DrawableCompat.setTint(drawableLike, mContext.getColor(R.color.gray_bd))
-                    holder.like.setTextColor(mContext.getColor(R.color.gray_bd))
+                    DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                    holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                 }
                 holder.like.text = reply.likenum
                 holder.like.setCompoundDrawables(drawableLike, null, null, null)

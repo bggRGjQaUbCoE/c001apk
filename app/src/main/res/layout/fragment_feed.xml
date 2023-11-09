@@ -53,7 +53,7 @@
                         android:id="@+id/device"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:textColor="@color/gray_bd"
+                        android:textColor="@android:color/darker_gray"
                         tools:text="device" />
 
                 </LinearLayout>

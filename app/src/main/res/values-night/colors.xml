@@ -2,6 +2,4 @@
 <resources>
     <color name="count_text">@color/black</color>
     <color name="cover">#0DFFFFFF</color>
-    <color name="gray_bd">#FF84837F</color>
-    <color name="gray_75">#FFBbBAB8</color>
 </resources>
