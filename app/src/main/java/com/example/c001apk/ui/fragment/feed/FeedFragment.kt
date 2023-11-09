@@ -38,6 +38,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
@@ -63,7 +64,7 @@ import java.net.URLDecoder
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
     IOnEmojiClickListener, IOnLikeClickListener, OnImageItemClickListener,
-    IOnListTypeClickListener, IOnShowMoreReplyListener {
+    IOnListTypeClickListener, IOnShowMoreReplyListener, OnPostFollowListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -340,6 +341,24 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
         }
 
+        viewModel.postFollowUnFollowData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.postFollowUnFollow) {
+                viewModel.postFollowUnFollow = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (viewModel.followType) {
+                        viewModel.feedContentList[0].data.userAction?.followAuthor = 0
+                    } else {
+                        viewModel.feedContentList[0].data.userAction?.followAuthor = 1
+                    }
+                    mAdapter.notifyDataSetChanged()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -371,10 +390,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     private fun refreshReply(listType: String) {
+        binding.recyclerView.stopScroll()
         if (viewModel.firstCompletelyVisibleItemPosition > 1)
             viewModel.isViewReply = true
-        viewModel.totalScrollY = 0
-        binding.titleProfile.visibility = View.GONE
         viewModel.fromFeedAuthor = if (listType == "") 1
         else 0
         mAdapter.setListType(listType)
@@ -564,12 +582,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-                        viewModel.totalScrollY = 0
-                        binding.titleProfile.visibility = View.GONE
-                    }
                     if (viewModel.lastVisibleItemPosition == viewModel.feedReplyList.size + 2
-                        && !viewModel.isEnd
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
@@ -585,20 +599,25 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (viewModel.feedContentList.isNotEmpty()) {
-                    viewModel.totalScrollY = mLayoutManager.computeVerticalOffset()
-                    if (viewModel.totalScrollY >= DensityTool.dp2px(requireContext(), 50f)) {
+                    viewModel.firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    viewModel.firstVisibleItemPosition =
+                        mLayoutManager.findFirstVisibleItemPosition()
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+
+                    if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+                        if (binding.titleProfile.visibility != View.GONE)
+                            binding.titleProfile.visibility = View.GONE
+                    } else if (viewModel.firstVisibleItemPosition >= 1) {
+                        if (binding.titleProfile.visibility != View.VISIBLE)
+                            showTitleProfile()
+                    } else if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
                         if (binding.titleProfile.visibility != View.VISIBLE)
                             showTitleProfile()
                     } else {
                         if (binding.titleProfile.visibility != View.GONE)
                             binding.titleProfile.visibility = View.GONE
                     }
-                }
-
-                if (viewModel.feedReplyList.isNotEmpty()) {
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
 
 
@@ -608,24 +627,25 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     binding.reply.show()
                 }*/
 
-
             }
         })
     }
 
     private fun showTitleProfile() {
-        binding.name1.text = viewModel.uname
-        binding.device.text = viewModel.device
-        val drawable: Drawable =
-            requireContext().getDrawable(R.drawable.ic_device)!!
-        drawable.setBounds(
-            0,
-            0,
-            binding.device.textSize.toInt(),
-            binding.device.textSize.toInt()
-        )
-        binding.device.setCompoundDrawables(drawable, null, null, null)
-        ImageShowUtil.showAvatar(binding.avatar1, viewModel.avatar)
+        if (binding.name1.text == "") {
+            binding.name1.text = viewModel.uname
+            binding.device.text = viewModel.device
+            val drawable: Drawable =
+                requireContext().getDrawable(R.drawable.ic_device)!!
+            drawable.setBounds(
+                0,
+                0,
+                binding.device.textSize.toInt(),
+                binding.device.textSize.toInt()
+            )
+            binding.device.setCompoundDrawables(drawable, null, null, null)
+            ImageShowUtil.showAvatar(binding.avatar1, viewModel.avatar)
+        }
         binding.titleProfile.visibility = View.VISIBLE
     }
 
@@ -652,9 +672,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             refreshData()
         } else {
             binding.contentLayout.visibility = View.VISIBLE
-            if (viewModel.totalScrollY >= DensityTool.dp2px(requireContext(), 50f)) {
-                if (binding.titleProfile.visibility != View.VISIBLE)
-                    showTitleProfile()
+            if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
+                showTitleProfile()
             } else {
                 if (binding.titleProfile.visibility != View.GONE)
                     binding.titleProfile.visibility = View.GONE
@@ -687,6 +706,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setOnImageItemClickListener(this)
         mAdapter.setIOnListTypeClickListener(this)
+        mAdapter.setOnPostFollowListener(this)
         mLayoutManager = OffsetLinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -719,7 +739,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
                         mLayoutManager.scrollToPositionWithOffset(1, 0)
-                        binding.titleProfile.visibility = View.GONE
                     }
                 }
                 return@setOnMenuItemClickListener true
@@ -897,9 +916,34 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     override fun onResume() {
         super.onResume()
-
         IOnShowMoreReplyContainer.controller = this
+    }
 
+    private fun getScrollYDistance(): Int {
+        val position = mLayoutManager.findFirstVisibleItemPosition()
+        val firstVisibleChildView = mLayoutManager.findViewByPosition(position)
+        var itemHeight = 0
+        var top = 0
+        firstVisibleChildView?.let {
+            itemHeight = firstVisibleChildView.height
+            top = firstVisibleChildView.top
+        }
+        return position * itemHeight - top
+    }
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {
+        viewModel.uid = uid
+        if (isFollow) {
+            viewModel.followType = true
+            viewModel.postFollowUnFollow = true
+            viewModel.url = "/v6/user/unfollow"
+            viewModel.postFollowUnFollow()
+        } else {
+            viewModel.followType = false
+            viewModel.postFollowUnFollow = true
+            viewModel.url = "/v6/user/follow"
+            viewModel.postFollowUnFollow()
+        }
     }
 
 }

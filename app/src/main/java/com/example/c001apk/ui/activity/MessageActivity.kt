@@ -12,11 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
-import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.databinding.ActivityAppBinding
+import com.example.c001apk.adapter.MessageContentAdapter
+import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -26,81 +24,54 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
-class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
+class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
 
-    private lateinit var binding: ActivityAppBinding
+    private lateinit var binding: ActivityFfflistBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var mAdapter: AppAdapter
+    private lateinit var messageContentAdapter: MessageContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
-    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAppBinding.inflate(layoutInflater)
+        binding = ActivityFfflistBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolBar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
+        viewModel.type = intent.getStringExtra("type")!!
 
+        initBar()
         initView()
         initData()
         initRefresh()
         initScroll()
 
-        viewModel.appInfoData.observe(this) { result ->
+        viewModel.messageData.observe(this) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
-                val appInfo = result.getOrNull()
-                if (appInfo != null) {
-                    binding.name.text = appInfo.title
-                    binding.version.text = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
-                    binding.size.text = "大小: ${appInfo.apksize}"
-                    if (appInfo.lastupdate == null)
-                        binding.updateTime.text = "更新时间: null"
-                    else
-                        binding.updateTime.text =
-                            "更新时间: ${DateUtils.fromToday(appInfo.lastupdate)}"
-                    binding.collapsingToolbar.title = appInfo.title
-                    binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-                    ImageShowUtil.showIMG(binding.logo, appInfo.logo)
-                    viewModel.appId = appInfo.id
-                    viewModel.isRefreshing = true
-                    viewModel.isNew = true
-                    viewModel.getAppComment()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.appCommentData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val comment = result.getOrNull()
-                if (!comment.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
-                        viewModel.appCommentList.clear()
+                val feed = result.getOrNull()
+                if (!feed.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing) viewModel.messageList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        for (element in comment)
-                            if (element.entityType == "feed")
-                                viewModel.appCommentList.add(element)
-
+                        for (element in feed)
+                            if (element.entityType == "feed"
+                                || element.entityType == "feed_reply"
+                                || element.entityType == "notification"
+                                )
+                                viewModel.messageList.add(element)
                     }
-                    mAdapter.notifyDataSetChanged()
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    messageContentAdapter.notifyDataSetChanged()
+                    messageContentAdapter.setLoadState(messageContentAdapter.LOADING_COMPLETE)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    messageContentAdapter.setLoadState(messageContentAdapter.LOADING_END)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
-                binding.appLayout.visibility = View.VISIBLE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
+                viewModel.isLoadMore = false
             }
         }
 
@@ -111,11 +82,9 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.appCommentList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.appCommentList[viewModel.likePosition].userAction?.like = 1
-
-                        mAdapter.notifyDataSetChanged()
+                        viewModel.dataList[viewModel.likePosition].likenum = response.data.count
+                        viewModel.dataList[viewModel.likePosition].userAction?.like = 1
+                        messageContentAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -131,11 +100,9 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.appCommentList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.appCommentList[viewModel.likePosition].userAction?.like = 0
-
-                        mAdapter.notifyDataSetChanged()
+                        viewModel.dataList[viewModel.likePosition].likenum = response.data.count
+                        viewModel.dataList[viewModel.likePosition].userAction?.like = 0
+                        messageContentAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -144,58 +111,39 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
             }
         }
 
-
     }
 
-    private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = AppAdapter(this, viewModel.appCommentList)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setOnImageItemClickListener(this)
-        mLayoutManager = LinearLayoutManager(this)
-        binding.recyclerView.apply {
-            adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> finish()
         }
+        return true
     }
 
-    private fun initData() {
-        if (viewModel.isInit) {
-            viewModel.isInit = false
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
-            refreshData()
-        }
-    }
+    private fun initBar() {
+        setSupportActionBar(binding.toolBar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        when (viewModel.type) {
+            "atMe" -> {
+                binding.toolBar.title = "@我的动态"
+            }
 
-    private fun refreshData() {
-        viewModel.page = 1
-        viewModel.isRefreshing = true
-        viewModel.isEnd = false
-        val id = intent.getStringExtra("id")!!
-        viewModel.id = id
-        viewModel.isNew = true
-        viewModel.getAppInfo()
-    }
+            "atCommentMe" -> {
+                binding.toolBar.title = "@我的评论"
+            }
 
-    @SuppressLint("RestrictedApi")
-    private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                this,
-                rikka.preference.simplemenu.R.attr.colorPrimary
-            )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
-            viewModel.page = 1
-            viewModel.isRefreshing = true
-            viewModel.isEnd = false
-            viewModel.isNew = true
-            viewModel.getAppComment()
+            "feedLike" -> {
+                binding.toolBar.title = "我收到的赞"
+            }
+
+            "contactsFollow" -> {
+                binding.toolBar.title = "好友关注"
+            }
+
+            "list" -> {
+                binding.toolBar.title = "私信"
+            }
         }
     }
 
@@ -204,14 +152,14 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (viewModel.lastVisibleItemPosition == viewModel.appCommentList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.messageList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
+                        messageContentAdapter.setLoadState(messageContentAdapter.LOADING)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
-                        viewModel.getAppComment()
+                        viewModel.getMessage()
 
                     }
                 }
@@ -219,7 +167,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.appCommentList.isNotEmpty()) {
+                if (viewModel.messageList.isNotEmpty()) {
                     viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
                     viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
@@ -228,11 +176,55 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         })
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> finish()
+    @SuppressLint("RestrictedApi")
+    private fun initRefresh() {
+        binding.swipeRefresh.setColorSchemeColors(
+            ThemeUtils.getThemeAttrColor(
+                this, rikka.preference.simplemenu.R.attr.colorPrimary
+            )
+        )
+        binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
+            refreshData()
         }
-        return true
+    }
+
+    private fun initData() {
+        if (viewModel.messageList.isEmpty()) {
+            binding.indicator.isIndeterminate = true
+            binding.indicator.visibility = View.VISIBLE
+            refreshData()
+        }
+    }
+
+    private fun initView() {
+        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
+        messageContentAdapter = MessageContentAdapter(this, viewModel.type, viewModel.messageList)
+        //messageContentAdapter.setIOnLikeReplyListener(this)
+        messageContentAdapter.setOnImageItemClickListener(this)
+        mLayoutManager = LinearLayoutManager(this)
+        binding.recyclerView.apply {
+            adapter = messageContentAdapter
+            layoutManager = mLayoutManager
+            if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
+        }
+    }
+
+    private fun refreshData() {
+        viewModel.page = 1
+        viewModel.isRefreshing = true
+        viewModel.isEnd = false
+        viewModel.isNew = true
+        when (viewModel.type) {
+            "atMe" -> viewModel.url = "/v6/notification/atMeList"
+            "atCommentMe" -> viewModel.url = "/v6/notification/atCommentMeList"
+            "feedLike" -> viewModel.url = "/v6/notification/feedLikeList"
+            "contactsFollow" -> viewModel.url = "/v6/notification/contactsFollowList"
+            "list" -> viewModel.url = "/v6/message/list"
+
+        }
+        viewModel.getMessage()
     }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {

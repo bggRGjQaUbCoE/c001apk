@@ -202,7 +202,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.dyhDataList.size
-                        && !viewModel.isEnd
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true

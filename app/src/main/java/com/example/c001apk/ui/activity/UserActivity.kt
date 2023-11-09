@@ -25,6 +25,7 @@ import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import com.example.c001apk.viewmodel.AppViewModel
 import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.ext.mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
@@ -54,6 +55,34 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         initRefresh()
         initScroll()
 
+        binding.avatar.setOnClickListener {
+            binding.avatar.mojito(viewModel.avatar) {
+                progressLoader {
+                    DefaultPercentProgress()
+                }
+            }
+        }
+
+        binding.cover.setOnClickListener {
+            binding.cover.mojito(viewModel.cover) {
+                progressLoader {
+                    DefaultPercentProgress()
+                }
+            }
+        }
+
+        binding.followBtn.setOnClickListener {
+            if (viewModel.followType) {
+                viewModel.postFollowUnFollow = true
+                viewModel.url = "/v6/user/unfollow"
+                viewModel.postFollowUnFollow()
+            } else {
+                viewModel.postFollowUnFollow = true
+                viewModel.url = "/v6/user/follow"
+                viewModel.postFollowUnFollow()
+            }
+        }
+
         viewModel.userData.observe(this) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
@@ -65,6 +94,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                     ImageShowUtil.showUserCover(binding.cover, user.cover)
                     ImageShowUtil.showAvatar(binding.avatar, user.userAvatar)
+                    viewModel.avatar = user.userAvatar
+                    viewModel.cover = user.cover
                     binding.name.text = user.username
                     binding.level.text = "Lv.${user.level}"
                     binding.level.visibility = View.VISIBLE
@@ -74,6 +105,12 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     binding.follow.text = "${CountUtil.view(user.follow)} 关注"
                     binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
                     binding.loginTime.text = DateUtils.fromToday(user.logintime) + "活跃"
+                    viewModel.followType = user.isFollow == 1
+                    if (user.isFollow == 0) {
+                        binding.followBtn.text = "关注"
+                    } else {
+                        binding.followBtn.text = "已关注"
+                    }
 
                     val intent = Intent(this, FFFListActivity::class.java)
                     intent.putExtra("uid", user.uid)
@@ -117,6 +154,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     result.exceptionOrNull()?.printStackTrace()
                 }
                 binding.infoLayout.visibility = View.VISIBLE
+                binding.followBtn.visibility = View.VISIBLE
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
@@ -162,6 +200,24 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
             }
         }
 
+        viewModel.postFollowUnFollowData.observe(this) { result ->
+            if (viewModel.postFollowUnFollow) {
+                viewModel.postFollowUnFollow = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (viewModel.followType) {
+                        binding.followBtn.text = "关注"
+                    } else {
+                        binding.followBtn.text = "已关注"
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+
     }
 
     private fun initScroll() {
@@ -170,7 +226,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.feedList.size
-                        && !viewModel.isEnd
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true

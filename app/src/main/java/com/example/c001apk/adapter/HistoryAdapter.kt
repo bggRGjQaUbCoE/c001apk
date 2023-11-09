@@ -36,12 +36,12 @@ class HistoryAdapter(private var historyList: ArrayList<String>) :
             true
         }
         viewHolder.delete.setOnClickListener {
-            val position = viewHolder.adapterPosition
+            val position = viewHolder.bindingAdapterPosition
             iOnItemClickListener.onItemDeleteClick(historyList[position])
             viewHolder.delete.visibility = View.GONE
         }
         viewHolder.keyWord.setOnClickListener {
-            val position = viewHolder.adapterPosition
+            val position = viewHolder.bindingAdapterPosition
             iOnItemClickListener.onItemClick(historyList[position])
         }
         return viewHolder

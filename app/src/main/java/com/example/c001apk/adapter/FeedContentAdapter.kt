@@ -27,6 +27,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
@@ -45,6 +46,12 @@ class FeedContentAdapter(
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var onPostFollowListener: OnPostFollowListener? = null
+
+    fun setOnPostFollowListener(onPostFollowListener: OnPostFollowListener) {
+        this.onPostFollowListener = onPostFollowListener
+    }
 
     private var iOnListTypeClickListener: IOnListTypeClickListener? = null
 
@@ -106,9 +113,11 @@ class FeedContentAdapter(
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
-        val follow: Button = view.findViewById(R.id.follow)
         var id = ""
         var isLike = false
+        val follow: TextView = view.findViewById(R.id.follow)
+        var isFollow = false
+        var uid = ""
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -204,6 +213,13 @@ class FeedContentAdapter(
                 viewHolder.multiImage.apply {
                     onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
                 }
+                viewHolder.follow.setOnClickListener {
+                    onPostFollowListener?.onPostFollow(
+                        viewHolder.isFollow,
+                        viewHolder.uid,
+                        0
+                    )
+                }
                 viewHolder
             }
 
@@ -220,7 +236,7 @@ class FeedContentAdapter(
                 val viewHolder = FeedContentReplyViewHolder(view)
                 viewHolder.totalReply.setOnClickListener {
                     iOnTotalReplyClickListener?.onShowTotalReply(
-                        viewHolder.adapterPosition,
+                        viewHolder.bindingAdapterPosition,
                         viewHolder.uid,
                         viewHolder.id
                     )
@@ -249,7 +265,7 @@ class FeedContentAdapter(
                 }
                 viewHolder.message.setOnClickListener {
                     iOnReplyClickContainer?.onReply2Reply(
-                        viewHolder.adapterPosition,
+                        viewHolder.bindingAdapterPosition,
                         null,
                         viewHolder.id,
                         viewHolder.uid,
@@ -259,7 +275,7 @@ class FeedContentAdapter(
                 }
                 viewHolder.itemView.setOnClickListener {
                     iOnReplyClickContainer?.onReply2Reply(
-                        viewHolder.adapterPosition,
+                        viewHolder.bindingAdapterPosition,
                         null,
                         viewHolder.id,
                         viewHolder.uid,
@@ -273,7 +289,7 @@ class FeedContentAdapter(
                             "reply",
                             viewHolder.isLike,
                             viewHolder.id,
-                            viewHolder.adapterPosition - 1
+                            viewHolder.bindingAdapterPosition - 1
                         )
                     }
                 }
@@ -337,15 +353,23 @@ class FeedContentAdapter(
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
                     holder.id = feed.data.id
+                    holder.uid = feed.data.uid
                     holder.isLike = feed.data.userAction?.like == 1
                     holder.uname.text = feed.data.username
                     ImageShowUtil.showAvatar(holder.avatar, feed.data.userAvatar)
-                    if (feed.data.userAction?.followAuthor == 1) {
-                        holder.follow.text = "已关注"
-                    } else {
+                    holder.isFollow = feed.data.userAction?.followAuthor == 1
+                    if (feed.data.userAction?.followAuthor == 0) {
                         holder.follow.text = "关注"
+                        holder.follow.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        holder.follow.text = "已关注"
+                        holder.follow.setTextColor(mContext.getColor(R.color.gray_bd))
                     }
-                    holder.follow.visibility = View.VISIBLE
                     if (feed.data.deviceTitle != "") {
                         holder.device.text = feed.data.deviceTitle
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!

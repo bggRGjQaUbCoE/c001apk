@@ -82,6 +82,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userAction: UserAction?,
         val userInfo: UserInfo?,
         val fUserInfo: UserInfo?,
+        var isFollow: Int
     )
 
     data class RelationRows(
@@ -143,7 +144,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val favorite: Int,
         val follow: Int,
         val collect: Int,
-        val followAuthor: Int,
+        var followAuthor: Int,
         val authorFollowYou: Int
     )
 

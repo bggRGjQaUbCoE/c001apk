@@ -30,6 +30,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
@@ -48,6 +49,12 @@ class AppAdapter(
     private val dataList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var onPostFollowListener: OnPostFollowListener? = null
+
+    fun setOnPostFollowListener(onPostFollowListener: OnPostFollowListener) {
+        this.onPostFollowListener = onPostFollowListener
+    }
 
     private var onImageItemClickListener: OnImageItemClickListener? = null
 
@@ -117,7 +124,9 @@ class AppAdapter(
         val fans: TextView = view.findViewById(R.id.fans)
         val act: TextView = view.findViewById(R.id.act)
         val avatar: ImageView = view.findViewById(R.id.avatar)
+        val followBtn: TextView = view.findViewById(R.id.followBtn)
         var uid = ""
+        var isFollow = false
     }
 
     class TopicProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -262,6 +271,13 @@ class AppAdapter(
                     intent.putExtra("id", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
+                viewHolder.followBtn.setOnClickListener {
+                    onPostFollowListener?.onPostFollow(
+                        viewHolder.isFollow,
+                        viewHolder.uid,
+                        viewHolder.bindingAdapterPosition
+                    )
+                }
                 viewHolder
             }
 
@@ -357,6 +373,19 @@ class AppAdapter(
                     holder.follow.text = "${user.follow}关注"
                     holder.fans.text = "${user.fans}粉丝"
                     holder.act.text = DateUtils.fromToday(user.logintime) + "活跃"
+                    holder.isFollow = user.isFollow == 1
+                    if (user.isFollow == 0) {
+                        holder.followBtn.text = "关注"
+                        holder.followBtn.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        holder.followBtn.text = "已关注"
+                        holder.followBtn.setTextColor(mContext.getColor(R.color.gray_bd))
+                    }
                     ImageShowUtil.showAvatar(holder.avatar, user.userAvatar)
                 }
             }
@@ -403,12 +432,14 @@ class AppAdapter(
                         imageCarouselCard[imageCarouselCard.size - 1].url
                     )
                 )
-                for (element in imageCarouselCard){
-                    data.add(IconLinkGridCardBean(
-                        element.title,
-                        element.pic,
-                        element.url
-                    ))
+                for (element in imageCarouselCard) {
+                    data.add(
+                        IconLinkGridCardBean(
+                            element.title,
+                            element.pic,
+                            element.url
+                        )
+                    )
                 }
                 data.add(
                     IconLinkGridCardBean(
@@ -428,8 +459,8 @@ class AppAdapter(
                     override fun onPageScrollStateChanged(state: Int) {
                         if (state == ViewPager2.SCROLL_STATE_IDLE) {
                             if (currentPosition == 0) {
-                                holder.viewPager.setCurrentItem(adapter.itemCount - 2, false)
-                            } else if (currentPosition == adapter.itemCount - 1) {
+                                holder.viewPager.setCurrentItem(data.size - 2, false)
+                            } else if (currentPosition == data.size - 1) {
                                 holder.viewPager.setCurrentItem(1, false)
                             }
                         }
@@ -769,6 +800,8 @@ class AppAdapter(
             "product" -> 7
 
             "apk" -> 8
+
+            "feed_reply" -> 2
 
             else -> throw IllegalArgumentException("entityType error")
         }

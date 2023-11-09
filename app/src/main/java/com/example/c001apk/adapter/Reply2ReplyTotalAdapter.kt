@@ -111,7 +111,7 @@ class Reply2ReplyTotalAdapter(
                 viewHolder.itemView.setOnClickListener {
                     iOnReplyClickListener.onReply2Reply(
                         position,
-                        viewHolder.adapterPosition,
+                        viewHolder.bindingAdapterPosition,
                         viewHolder.id,
                         viewHolder.uid,
                         viewHolder.name,
@@ -121,7 +121,7 @@ class Reply2ReplyTotalAdapter(
                 viewHolder.message.setOnClickListener {
                     iOnReplyClickListener.onReply2Reply(
                         position,
-                        viewHolder.adapterPosition,
+                        viewHolder.bindingAdapterPosition,
                         viewHolder.id,
                         viewHolder.uid,
                         viewHolder.name,
@@ -134,7 +134,7 @@ class Reply2ReplyTotalAdapter(
                             null,
                             viewHolder.isLike,
                             viewHolder.id,
-                            viewHolder.adapterPosition
+                            viewHolder.bindingAdapterPosition
                         )
                     }
                 }

@@ -65,8 +65,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
         else {
             initView(null)
             initBar()
-            if (viewModel.type == "product")
-                initViewPagerMenu()
+            initViewPagerMenu()
         }
 
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
@@ -168,12 +167,12 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
         binding.indicator.visibility = View.VISIBLE
         binding.indicator.isIndeterminate = true
         viewModel.isNew = true
+        initViewPagerMenu()
         if (viewModel.type == "topic") {
             viewModel.url = viewModel.url.replace("/t/", "")
             viewModel.getTopicLayout()
         } else if (viewModel.type == "product") {
             viewModel.getProductLayout()
-            initViewPagerMenu()
         }
     }
 

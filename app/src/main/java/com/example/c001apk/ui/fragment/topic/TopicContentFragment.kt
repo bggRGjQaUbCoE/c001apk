@@ -181,7 +181,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
-                        && !viewModel.isEnd
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true

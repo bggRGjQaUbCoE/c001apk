@@ -1,5 +1,6 @@
 package com.example.c001apk.logic.network
 
+import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.CheckResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
@@ -178,5 +179,17 @@ interface ApiService {
         @Query("type") type: String = "mobile",
         @FieldMap data: HashMap<String, String?>
     ): Call<ResponseBody>
+
+    @GET()
+    fun getMessage(
+        @Url url: String, @Query("page") page: Int
+    ): Call<MessageResponse>
+
+    @POST()
+    fun postFollowUnFollow(
+        @Url url: String,
+        @Query("uid") uid: String
+    ): Call<LikeReplyResponse>
+
 
 }

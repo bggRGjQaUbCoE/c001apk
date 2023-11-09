@@ -8,10 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageAdapter
 import com.example.c001apk.databinding.FragmentMessageBinding
@@ -54,6 +56,8 @@ class MessageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.url = "/v6/notification/list"
+
         binding.clickToLogin.setOnClickListener {
             startActivity(Intent(activity, LoginActivity::class.java))
         }
@@ -61,6 +65,7 @@ class MessageFragment : Fragment() {
         initAnimator()
         initRefresh()
         initView()
+        initScroll()
 
         if (PrefManager.isLogin) {
             initMenu()
@@ -124,21 +129,80 @@ class MessageFragment : Fragment() {
                     PrefManager.level = data.level
                     PrefManager.experience = data.experience.toString()
                     PrefManager.nextLevelExperience = data.nextLevelExperience.toString()
-                    mAdapter.notifyDataSetChanged()
                     showProfile()
-                    binding.swipeRefresh.isRefreshing = false
+
+                    viewModel.isNew = true
+                    viewModel.getMessage()
                 } else {
+                    viewModel.isEnd = true
+                    viewModel.isRefreshing = false
+                    viewModel.isLoadMore = false
                     binding.swipeRefresh.isRefreshing = false
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
         }
 
+        viewModel.messageData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val feed = result.getOrNull()
+                if (!feed.isNullOrEmpty()) {
+                    if (viewModel.isRefreshing) viewModel.messageList.clear()
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        for (element in feed)
+                            if (element.entityType == "notification")
+                                viewModel.messageList.add(element)
+                    }
+
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                } else {
+                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+                mAdapter.notifyDataSetChanged()
+                viewModel.isLoadMore = false
+                binding.swipeRefresh.isRefreshing = false
+                viewModel.isRefreshing = false
+            }
+        }
+
+    }
+
+    private fun initScroll() {
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (viewModel.lastVisibleItemPosition == viewModel.messageList.size + 6
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.isNew = true
+                        viewModel.getMessage()
+
+                    }
+                }
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (viewModel.messageList.isNotEmpty()) {
+                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                }
+            }
+        })
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = MessageAdapter(requireContext(), viewModel.countList)
+        mAdapter = MessageAdapter(requireContext(), viewModel.countList, viewModel.messageList)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -157,6 +221,11 @@ class MessageFragment : Fragment() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
+            viewModel.page = 1
+            viewModel.isRefreshing = true
+            viewModel.isNew = true
+            viewModel.isLoadMore = false
+            viewModel.isEnd = false
             getData()
         }
     }

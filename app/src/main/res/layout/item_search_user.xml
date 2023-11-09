@@ -39,6 +39,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:textColor="@color/gray_75"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -46,9 +47,10 @@
             android:id="@+id/fans"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="5dp"
             android:layout_marginTop="10dp"
             android:textColor="@color/gray_75"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/follow"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -56,11 +58,24 @@
             android:id="@+id/act"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="5dp"
             android:layout_marginTop="10dp"
             android:textColor="@color/gray_75"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/fans"
             app:layout_constraintTop_toBottomOf="@id/uname" />
+
+        <TextView
+            android:id="@+id/followBtn"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/follow" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

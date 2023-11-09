@@ -74,7 +74,12 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                         binding.viewPager.setCurrentItem(0, true)
                 }
 
-                R.id.navigation_message -> binding.viewPager.setCurrentItem(1, true)
+                R.id.navigation_message -> {
+                    binding.viewPager.setCurrentItem(1, true)
+                    if (viewModel.badge != 0)
+                        binding.bottomNav.removeBadge(R.id.navigation_message)
+                }
+
                 R.id.navigation_setting -> binding.viewPager.setCurrentItem(2, true)
             }
             true

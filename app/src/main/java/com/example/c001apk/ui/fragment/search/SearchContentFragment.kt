@@ -19,6 +19,7 @@ import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -29,7 +30,7 @@ import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
 class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener,
-    IOnSearchMenuClickListener {
+    IOnSearchMenuClickListener, OnPostFollowListener {
 
     private lateinit var binding: FragmentSearchFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -157,6 +158,24 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
             }
         }
 
+        viewModel.postFollowUnFollowData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.postFollowUnFollow) {
+                viewModel.postFollowUnFollow = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (viewModel.followType) {
+                        viewModel.searchList[viewModel.position].isFollow = 0
+                    } else {
+                        viewModel.searchList[viewModel.position].isFollow = 1
+                    }
+                    mAdapter.notifyDataSetChanged()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -165,7 +184,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.searchList.size
-                        && !viewModel.isEnd
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true
@@ -226,6 +245,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         mAdapter = AppAdapter(requireContext(), viewModel.searchList)
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setOnPostFollowListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -307,6 +327,22 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         binding.indicator.visibility = View.VISIBLE
         binding.indicator.isIndeterminate = true
         refreshData()
+    }
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position:Int) {
+        viewModel.uid = uid
+        viewModel.position = position
+        if (isFollow) {
+            viewModel.followType = true
+            viewModel.postFollowUnFollow = true
+            viewModel.url = "/v6/user/unfollow"
+            viewModel.postFollowUnFollow()
+        } else {
+            viewModel.followType = false
+            viewModel.postFollowUnFollow = true
+            viewModel.url = "/v6/user/follow"
+            viewModel.postFollowUnFollow()
+        }
     }
 
 }

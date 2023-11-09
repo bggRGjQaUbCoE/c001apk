@@ -11,15 +11,32 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
+import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.activity.FFFListActivity
+import com.example.c001apk.ui.activity.FeedActivity
+import com.example.c001apk.ui.activity.MessageActivity
+import com.example.c001apk.util.DateUtils
+import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.google.android.material.imageview.ShapeableImageView
 
 class MessageAdapter(
     private val mContext: Context,
-    private val countList: List<String>
-) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val countList: List<String>,
+    private val notiList: List<MessageResponse.Data>
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var loadState = 2
+    val LOADING = 1
+    val LOADING_COMPLETE = 2
+    val LOADING_END = 3
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setLoadState(loadState: Int) {
+        this.loadState = loadState
+        notifyDataSetChanged()
+    }
 
     private val messTitle = ArrayList<String>()
     private val fffTitle = ArrayList<String>()
@@ -78,7 +95,14 @@ class MessageAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        when (viewType) {
+        return when (viewType) {
+
+            -1 -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_rv_footer, parent, false)
+                AppAdapter.FootViewHolder(view)
+            }
+
             0 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_message_fff, parent, false)
@@ -99,29 +123,107 @@ class MessageAdapter(
                         parent.context.startActivity(intent)
                     }
                 }
-                return viewHolder
+                viewHolder
             }
 
-            else -> {
+            1 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_message_mess, parent, false)
                 val viewHolder = MessViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-
+                    if (PrefManager.isLogin) {
+                        val intent = Intent(parent.context, MessageActivity::class.java)
+                        when (viewHolder.title.text) {
+                            "@我的动态" -> intent.putExtra("type", "atMe")
+                            "@我的评论" -> intent.putExtra("type", "atCommentMe")
+                            "我收到的赞" -> intent.putExtra("type", "feedLike")
+                            "好友关注" -> intent.putExtra("type", "contactsFollow")
+                            "私信" -> intent.putExtra("type", "list")
+                        }
+                        parent.context.startActivity(intent)
+                    }
                 }
-                return viewHolder
+                viewHolder
             }
+
+            2 -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_feed_content_reply_item, parent, false)
+                val viewHolder = FeedContentAdapter.FeedContentReplyViewHolder(view)
+                viewHolder.itemView.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", "feed")
+                    intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
+                    intent.putExtra("uname", viewHolder.uname.text)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder
+            }
+
+            else -> throw IllegalArgumentException("invalid type")
         }
 
     }
 
-    override fun getItemCount() = 6
+    override fun getItemCount() = notiList.size + 7
 
-    override fun getItemViewType(position: Int) = position
+    override fun getItemViewType(position: Int): Int {
+        return if (position == itemCount - 1) -1
+        else when (position) {
+            0 -> 0
+            in 1..5 -> 1
+            else -> 2
+        }
+    }
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+
+            is AppAdapter.FootViewHolder -> {
+                when (loadState) {
+                    LOADING -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.VISIBLE
+                        holder.indicator.isIndeterminate = true
+                        holder.noMore.visibility = View.GONE
+
+                    }
+
+                    LOADING_COMPLETE -> {
+                        holder.footerLayout.visibility = View.GONE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.GONE
+                    }
+
+                    LOADING_END -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.VISIBLE
+                    }
+
+                    else -> {}
+                }
+            }
+
+            is FeedContentAdapter.FeedContentReplyViewHolder -> {
+                val noti = notiList[position - 6]
+                holder.id = noti.note.substring(
+                    noti.note.lastIndexOf("/feed/") + 6,
+                    noti.note.lastIndexOf("\">") - 2
+                )
+                holder.uid = noti.fromuid
+                holder.uname.text = noti.fromusername
+                holder.message.text = SpannableStringBuilderUtil.setText(
+                    mContext, noti.note, (holder.message.textSize * 1.3).toInt(), null
+                )
+                holder.pubDate.text = DateUtils.fromToday(noti.dateline)
+                ImageShowUtil.showAvatar(holder.avatar, noti.fromUserAvatar)
+            }
+
             is FFFViewHolder -> {
                 if (countList.isNotEmpty()) {
                     holder.apply {

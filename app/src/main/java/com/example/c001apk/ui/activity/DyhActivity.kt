@@ -10,7 +10,7 @@ import com.example.c001apk.ui.fragment.DyhDetailFragment
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
-class DyhActivity : AppCompatActivity() {
+class DyhActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDyhDetailBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }

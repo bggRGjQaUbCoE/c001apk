@@ -127,6 +127,12 @@ object Network {
     suspend fun getSmsToken(type: String, data: HashMap<String, String?>) =
         accountService.getSmsToken(type, data).response()
 
+    suspend fun getMessage(url: String, page: Int) =
+        apiService.getMessage(url, page).await()
+
+    suspend fun postFollowUnFollow(url: String, uid: String) =
+        apiService.postFollowUnFollow(url, uid).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

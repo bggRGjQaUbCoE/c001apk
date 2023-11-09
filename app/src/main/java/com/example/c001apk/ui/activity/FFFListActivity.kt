@@ -57,7 +57,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (viewModel.isRefreshing) viewModel.dataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed)
-                            if (element.entityTemplate == "feed" || element.entityType == "contacts")
+                            if (element.entityType == "feed" || element.entityType == "contacts")
                                 viewModel.dataList.add(element)
                     }
                     mAdapter.notifyDataSetChanged()
@@ -139,6 +139,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                 else
                     binding.toolBar.title = "TA的粉丝"
             }
+
         }
     }
 
@@ -148,7 +149,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.dataList.size
-                        && !viewModel.isEnd
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
                         viewModel.isLoadMore = true

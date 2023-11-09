@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.AppItem
+import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -21,12 +22,14 @@ import kotlinx.coroutines.withContext
 
 class AppViewModel : ViewModel() {
 
+    var followType = false
     var isViewReply = false
     var isShowMoreReply = false
     var replyCount = ""
     var isRefreshReply = false
     var device = ""
     var avatar = ""
+    var cover = ""
     var totalScrollY = 0
     var haveTop = false
     var isNew = true
@@ -35,6 +38,7 @@ class AppViewModel : ViewModel() {
     var isPostLikeReply = false
     var isPostUnLikeReply = false
     var isPostReply = false
+    var postFollowUnFollow = false
 
     //feed data
     var id = "" // feed id
@@ -47,6 +51,7 @@ class AppViewModel : ViewModel() {
     var rPosition = -1
     var replyAndForward = "0"
     var cursorBefore = -1
+    var firstVisibleItemPosition = -1
     var firstCompletelyVisibleItemPosition = -1
     var lastVisibleItemPosition = -1
     var likeReplyPosition = -1
@@ -206,12 +211,25 @@ class AppViewModel : ViewModel() {
         when (type) {
             "feed" -> Repository.getFeedList(uid, page)
             "follow" -> Repository.getFollowList(uid, page)
-            else -> Repository.getFansList(uid, page)
+            "fans" -> Repository.getFansList(uid, page)
+            else -> throw IllegalArgumentException("invalid type")
         }
     }
 
     fun getFeedList() {
         getDataListData.value = getDataListData.value
+    }
+
+    val messageList = ArrayList<MessageResponse.Data>()
+
+    private val getMessageListData = MutableLiveData<String>()
+
+    val messageData = getMessageListData.switchMap {
+        Repository.getMessage(url, page)
+    }
+
+    fun getMessage() {
+        getMessageListData.value = getMessageListData.value
     }
 
     private val getLoginParamData = MutableLiveData<String>()
@@ -497,5 +515,16 @@ class AppViewModel : ViewModel() {
 
     val searchTabList = arrayOf("动态", "应用", "数码", "用户", "话题")
     var searchFragmentList = ArrayList<Fragment>()
+
+
+    private val postFollowUnFollowLiveData = MutableLiveData<String>()
+
+    val postFollowUnFollowData = postFollowUnFollowLiveData.switchMap {
+        Repository.postFollowUnFollow(url, uid)
+    }
+
+    fun postFollowUnFollow() {
+        postFollowUnFollowLiveData.value = postFollowUnFollowLiveData.value
+    }
 
 }

@@ -269,6 +269,24 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getMessage(url: String, page: Int) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getMessage(url, page)
+            if (dataResponse.data.isNotEmpty())
+                Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun postFollowUnFollow(url: String, uid: String) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.postFollowUnFollow(url, uid)
+            if (dataResponse.data != null)
+                Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {
