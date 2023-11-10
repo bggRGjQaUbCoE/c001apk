@@ -180,12 +180,12 @@ interface ApiService {
         @FieldMap data: HashMap<String, String?>
     ): Call<ResponseBody>
 
-    @GET()
+    @GET
     fun getMessage(
         @Url url: String, @Query("page") page: Int
     ): Call<MessageResponse>
 
-    @POST()
+    @POST
     fun postFollowUnFollow(
         @Url url: String,
         @Query("uid") uid: String

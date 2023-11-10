@@ -41,6 +41,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
@@ -151,6 +152,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.avatar = feed.data.userAvatar
                     viewModel.device = feed.data.deviceTitle
                     viewModel.replyCount = feed.data.replynum
+                    viewModel.dateLine = feed.data.dateline
                     if (viewModel.isRefreshing) {
                         viewModel.feedContentList.clear()
                         mAdapter.setLoadState(mAdapter.LOADING)
@@ -226,8 +228,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
-                        viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 1
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].likenum =
+                            response.data
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].userAction?.like =
+                            1
                         mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -244,8 +248,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.feedReplyList[viewModel.likeReplyPosition].likenum = response.data
-                        viewModel.feedReplyList[viewModel.likeReplyPosition].userAction?.like = 0
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].likenum =
+                            response.data
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].userAction?.like =
+                            0
                         mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -651,6 +657,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private fun showTitleProfile() {
         if (binding.name1.text == "") {
             binding.name1.text = viewModel.uname
+            binding.date.text = DateUtils.fromToday(viewModel.dateLine)
             if (viewModel.device != "") {
                 binding.device.text = viewModel.device
                 val drawable: Drawable =
@@ -663,7 +670,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 )
                 binding.device.setCompoundDrawables(drawable, null, null, null)
             }
-            ImageShowUtil.showAvatar(binding.avatar1, viewModel.avatar)
+            ImageShowUtil.showIMG(binding.avatar1, viewModel.avatar)
         }
         binding.titleProfile.visibility = View.VISIBLE
         objectAnimator.start()

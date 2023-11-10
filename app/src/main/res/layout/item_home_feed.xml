@@ -63,7 +63,7 @@
             android:layout_marginTop="10dp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/message" />
+            app:layout_constraintTop_toBottomOf="@id/multiImage" />
 
         <TextView
             android:id="@+id/like"
@@ -86,10 +86,11 @@
         <com.example.c001apk.view.ninegridimageview.NineGridImageView
             android:id="@+id/multiImage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="10dp"
             android:layout_marginTop="10dp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/reply" />
+            app:layout_constraintTop_toBottomOf="@id/message" />
 
         <HorizontalScrollView
             android:layout_width="wrap_content"
@@ -97,7 +98,7 @@
             android:layout_marginTop="10dp"
             android:scrollbars="none"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multiImage">
+            app:layout_constraintTop_toBottomOf="@id/pubDate">
 
             <com.example.c001apk.view.LinearAdapterLayout
                 android:id="@+id/linearAdapterLayout"
@@ -106,7 +107,6 @@
                 android:orientation="horizontal"
                 android:visibility="gone" />
         </HorizontalScrollView>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

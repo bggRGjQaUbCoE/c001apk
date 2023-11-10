@@ -47,7 +47,7 @@
                 android:layout_marginTop="10dp"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/message" />
+                app:layout_constraintTop_toBottomOf="@id/multiImage" />
 
             <TextView
                 android:id="@+id/like"
@@ -74,7 +74,7 @@
                 android:layout_marginTop="10dp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pubDate" />
+                app:layout_constraintTop_toBottomOf="@id/message" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/replyLayout"
@@ -83,7 +83,7 @@
                 android:layout_marginTop="10dp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/multiImage"
+                app:layout_constraintTop_toBottomOf="@id/pubDate"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -111,8 +111,8 @@
                         tools:ignore="RtlSymmetry" />
 
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
+            </com.google.android.material.card.MaterialCardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

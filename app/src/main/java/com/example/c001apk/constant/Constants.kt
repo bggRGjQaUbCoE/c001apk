@@ -8,9 +8,9 @@ object Constants {
     const val CHANNEL = "coolapk"
     const val MODE = "universal"
     const val APP_LABEL = "token://com.coolapk.market/dcf01e569c1e3db93a3d0fcf191a622c"
-    const val VERSION_NAME = "13.0.1"
+    const val VERSION_NAME = "13.3.6"
     const val API_VERSION = "13"
-    const val VERSION_CODE = "2301171"
+    const val VERSION_CODE = "2307067"
     val MANUFACTURER: String = android.os.Build.MANUFACTURER
     val BRAND: String = android.os.Build.BRAND
     val MODEL: String = android.os.Build.MODEL

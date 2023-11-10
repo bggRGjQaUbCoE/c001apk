@@ -71,7 +71,7 @@ class WebViewActivity : BaseActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.setSupportZoom(true)
-            settings.builtInZoomControls = true
+            //settings.builtInZoomControls = true
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
 
             settings.defaultTextEncodingName = "UTF-8"

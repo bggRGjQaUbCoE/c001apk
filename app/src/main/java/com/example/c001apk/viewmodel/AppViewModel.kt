@@ -10,9 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.AppItem
-import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.network.Repository
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 
 class AppViewModel : ViewModel() {
 
+    var dateLine = 0L
     var followType = false
     var isViewReply = false
     var isShowMoreReply = false
