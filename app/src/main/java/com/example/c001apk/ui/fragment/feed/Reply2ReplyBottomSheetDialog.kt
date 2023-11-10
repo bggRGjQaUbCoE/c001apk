@@ -183,6 +183,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                                     viewModel.id,
                                     viewModel.ruid,
                                     PrefManager.uid,
+                                    viewModel.id,
                                     URLDecoder.decode(PrefManager.username, "UTF-8"),
                                     viewModel.uname,
                                     editText.text.toString(),

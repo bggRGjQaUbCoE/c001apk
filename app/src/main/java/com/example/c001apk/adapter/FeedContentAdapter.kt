@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.Html
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -32,6 +34,7 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageShowUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.view.CenteredImageSpan1
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -355,7 +358,7 @@ class FeedContentAdapter(
                     holder.id = feed.data.id
                     holder.uid = feed.data.uid
                     holder.isLike = feed.data.userAction?.like == 1
-                    holder.uname.text = feed.data.username
+                    holder.uname.text = feed.data.userInfo?.username
                     ImageShowUtil.showAvatar(holder.avatar, feed.data.userAvatar)
                     holder.isFollow = feed.data.userAction?.followAuthor == 1
                     if (feed.data.userAction?.followAuthor == 0) {
@@ -418,7 +421,10 @@ class FeedContentAdapter(
                             )
                         )
                     } else {
-                        DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            mContext.getColor(android.R.color.darker_gray)
+                        )
                         holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     holder.like.text = feed.data.likenum
@@ -481,7 +487,24 @@ class FeedContentAdapter(
                     holder.isLike = reply.userAction?.like == 1
                     holder.id = reply.id
                     holder.uid = reply.uid
-                    holder.uname.text = reply.username
+                    if (reply.uid == reply.feedUid) {
+                        val builder = SpannableStringBuilder(reply.username + " [楼主]")
+                        val tag: Drawable = mContext.getDrawable(R.drawable.ic_author)!!
+                        tag.setBounds(
+                            0,
+                            0,
+                            holder.uname.textSize.toInt() * 2,
+                            holder.uname.textSize.toInt()
+                        )
+                        val imageSpan = CenteredImageSpan1(tag)
+                        builder.setSpan(
+                            imageSpan,
+                            reply.username.length + 1,
+                            reply.username.length + 5,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                        holder.uname.text = builder
+                    } else holder.uname.text = reply.username
                     ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                     holder.message.movementMethod = LinkMovementMethod.getInstance()
@@ -524,7 +547,10 @@ class FeedContentAdapter(
                             )
                         )
                     } else {
-                        DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            mContext.getColor(android.R.color.darker_gray)
+                        )
                         holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     holder.like.text = reply.likenum
@@ -566,32 +592,40 @@ class FeedContentAdapter(
                                     ), 128
                                 )
 
-                                val text =
-                                    if (replyData.ruid == reply.uid) {
-                                        if (replyData.pic == "")
-                                            """<a class="feed-link-uname" href="/u/${replyData.username}">${replyData.username}</a>: ${replyData.message}"""
-                                        else {
-                                            if (replyData.message == "[图片]")
-                                                """<a class="feed-link-uname" href="/u/${replyData.username}">${replyData.username}</a>: ${replyData.message} <a class=\"feed-forward-pic\" href=${replyData.pic}> 查看图片(${replyData.picArr?.size})</a> """
-                                            else
-                                                """<a class="feed-link-uname" href="/u/${replyData.username}">${replyData.username}</a>: ${replyData.message} <a class=\"feed-forward-pic\" href=${replyData.pic}> [图片] 查看图片(${replyData.picArr?.size})</a> """
-                                        }
-                                    } else {
-                                        if (replyData.pic == "")
-                                            """<a class="feed-link-uname" href="/u/${replyData.username}">${replyData.username}</a>回复<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}</a>: ${replyData.message}"""
-                                        else {
-                                            if (replyData.message == "[图片]")
-                                                """<a class="feed-link-uname" href="/u/${replyData.username}">${replyData.username}</a>回复<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}</a>: ${replyData.message} <a class=\"feed-forward-pic\" href=${replyData.pic}> 查看图片(${replyData.picArr?.size})</a> """
-                                            else
-                                                """<a class="feed-link-uname" href="/u/${replyData.username}">${replyData.username}</a>回复<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}</a>: ${replyData.message} <a class=\"feed-forward-pic\" href=${replyData.pic}> [图片] 查看图片(${replyData.picArr?.size})</a> """
-                                        }
+                                val replyTag =
+                                    when(replyData.uid){
+                                        replyData.feedUid -> " [楼主] "
+                                        reply.uid -> " [层主] "
+                                        else -> ""
                                     }
 
+                                val rReplyTag =
+                                    when(replyData.ruid){
+                                        replyData.feedUid -> " [楼主] "
+                                        reply.uid -> " [层主] "
+                                        else -> ""
+                                    }
+
+                                val rReplyUser =
+                                    when(replyData.ruid){
+                                        reply.uid -> ""
+                                        else -> """<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}${rReplyTag}</a>"""
+                                    }
+
+                                val replyPic =
+                                    when(replyData.pic){
+                                        "" -> ""
+                                        else -> """ <a class=\"feed-forward-pic\" href=${replyData.pic}>查看图片(${replyData.picArr?.size})</a>"""
+                                    }
+
+                                val mess = """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
+
                                 textView.movementMethod = LinkMovementMethod.getInstance()
-                                textView.text = SpannableStringBuilderUtil.setText(
+
+                                textView.text = SpannableStringBuilderUtil.setReply(
                                     mContext,
-                                    text,
-                                    (textView.textSize * 1.3).toInt(),
+                                    mess,
+                                    textView.textSize.toInt(),
                                     replyData.picArr
                                 )
 
@@ -610,7 +644,7 @@ class FeedContentAdapter(
 
                                 view.setOnLongClickListener {
                                     val message = Html.fromHtml(
-                                        text,
+                                        replyData.message,
                                         Html.FROM_HTML_MODE_COMPACT
                                     )
                                     val intent = Intent(mContext, CopyActivity::class.java)

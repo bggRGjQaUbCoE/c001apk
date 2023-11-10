@@ -151,6 +151,7 @@ data class HomeFeedResponse(val data: List<Data>) {
     data class ReplyRows(
         val id: String,
         val uid: String,
+        val feedUid: String,
         val username: String,
         val message: String,
         val ruid: String,

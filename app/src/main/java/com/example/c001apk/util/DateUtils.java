@@ -1,5 +1,7 @@
 package com.example.c001apk.util;
 
+import android.annotation.SuppressLint;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,9 +16,8 @@ public class DateUtils {
     public static Calendar calendar = Calendar.getInstance();
 
     /**
-     *
      * @return yyyy-mm-dd
-     *  2012-12-25
+     * 2012-12-25
      */
     public static String getDate() {
         return getYear() + "-" + getMonth() + "-" + getDay();
@@ -24,10 +25,8 @@ public class DateUtils {
 
     /**
      * @param format
-     * @return
-     * yyyy年MM月dd HH:mm
+     * @return yyyy年MM月dd HH:mm
      * MM-dd HH:mm 2012-12-25
-     *
      */
     public static String getDate(String format) {
         SimpleDateFormat simple = new SimpleDateFormat(format);
@@ -35,7 +34,6 @@ public class DateUtils {
     }
 
     /**
-     *
      * @return yyyy-MM-dd HH:mm
      * 2012-12-29 23:47
      */
@@ -45,10 +43,8 @@ public class DateUtils {
     }
 
     /**
-     *
-     * @return
-     *  yyyy-MM-dd HH:mm:ss
-     *  2012-12-29 23:47:36
+     * @return yyyy-MM-dd HH:mm:ss
+     * 2012-12-29 23:47:36
      */
     public static String getFullDate() {
         SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -57,10 +53,11 @@ public class DateUtils {
 
     /**
      * 距离今天多久
+     *
      * @param time
      * @return
-     *
      */
+    @SuppressLint("SimpleDateFormat")
     public static String fromToday(Long time) {
         //Calendar calendar = Calendar.getInstance();
         //calendar.setTime(date);
@@ -71,29 +68,32 @@ public class DateUtils {
         if (ago <= ONE_HOUR)
             return ago / ONE_MINUTE + "分钟前";
         else if (ago <= ONE_DAY)
-            return ago / ONE_HOUR + "小时" + (ago % ONE_HOUR / ONE_MINUTE)
-                    + "分钟前";
+            return ago / ONE_HOUR + "小时前";//+ (ago % ONE_HOUR / ONE_MINUTE) + "分钟前";
         else if (ago <= ONE_DAY * 2)
-            return "昨天" + calendar.get(Calendar.HOUR_OF_DAY) + "点"
-                    + calendar.get(Calendar.MINUTE) + "分";
+            return "1天前"; //+ calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
         else if (ago <= ONE_DAY * 3)
-            return "前天" + calendar.get(Calendar.HOUR_OF_DAY) + "点"
-                    + calendar.get(Calendar.MINUTE) + "分";
+            return "2天前"; //+ calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
         else if (ago <= ONE_MONTH) {
             long day = ago / ONE_DAY;
-            return day + "天前" + calendar.get(Calendar.HOUR_OF_DAY) + "点"
-                    + calendar.get(Calendar.MINUTE) + "分";
-        } else if (ago <= ONE_YEAR) {
-            long month = ago / ONE_MONTH;
-            long day = ago % ONE_MONTH / ONE_DAY;
-            return month + "个月" + day + "天前"
-                    + calendar.get(Calendar.HOUR_OF_DAY) + "点"
-                    + calendar.get(Calendar.MINUTE) + "分";
+            return day + "天前"; //+ calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
         } else {
-            long year = ago / ONE_YEAR;
-            int month = calendar.get(Calendar.MONTH) + 1;// JANUARY which is 0 so month+1
-            return year + "年前" + month + "月" + calendar.get(Calendar.DATE)
-                    + "日";
+            long date = Long.parseLong(String.valueOf(time * 1000));
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf;
+            if (ago <= ONE_YEAR) {
+                sdf = new SimpleDateFormat("M月d日");
+                /*long month = ago / ONE_MONTH;
+                long day = ago % ONE_MONTH / ONE_DAY;
+                return month + "个月" + day + "天前"
+                        + calendar.get(Calendar.HOUR_OF_DAY) + "点"
+                        + calendar.get(Calendar.MINUTE) + "分";*/
+            } else {
+                sdf = new SimpleDateFormat("yyyy-MM-dd");
+                /* long year = ago / ONE_YEAR;
+                int month = calendar.get(Calendar.MONTH) + 1;// JANUARY which is 0 so month+1
+                return year + "年前" + month + "月" + calendar.get(Calendar.DATE)
+                        + "日";*/
+            }
+            return sdf.format(new Date(date));
         }
 
     }

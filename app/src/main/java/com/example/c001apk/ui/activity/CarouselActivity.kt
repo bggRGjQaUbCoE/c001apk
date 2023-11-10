@@ -130,14 +130,14 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                         mAdapter.notifyDataSetChanged()
                         mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                     }
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
                 } else {
                     if (::mAdapter.isInitialized)
                         mAdapter.setLoadState(mAdapter.LOADING_END)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false

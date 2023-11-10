@@ -5,21 +5,8 @@ import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.text.style.ImageSpan
 
-class CenteredImageSpan(drawableRes: Drawable, textSize: Int) :
+class CenteredImageSpan1(drawableRes: Drawable) :
     ImageSpan(drawableRes) {
-
-    val size = textSize
-
-    override fun getSize(
-        paint: Paint,
-        text: CharSequence?,
-        start: Int,
-        end: Int,
-        fm: Paint.FontMetricsInt?
-    ): Int {
-        //return super.getSize(paint, text, start, end, fm)
-        return size
-    }
 
     override fun draw(
         canvas: Canvas, text: CharSequence,

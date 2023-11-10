@@ -7,6 +7,7 @@ data class TotalReplyResponse(val data: List<Data>) {
         val id: String,
         val ruid: String,
         val uid: String,
+        val feedUid: String,
         val username: String,
         val rusername: String,
         val message: String,

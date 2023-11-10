@@ -148,7 +148,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val feed = result.getOrNull()
                 if (feed != null) {
                     viewModel.uid = feed.data.uid
-                    viewModel.uname = feed.data.username
+                    viewModel.uname = feed.data.userInfo?.username.toString()
                     viewModel.avatar = feed.data.userAvatar
                     viewModel.device = feed.data.deviceTitle
                     viewModel.replyCount = feed.data.replynum
@@ -317,6 +317,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                         viewModel.id,
                                         viewModel.ruid,
                                         PrefManager.uid,
+                                        viewModel.id,
                                         URLDecoder.decode(PrefManager.username, "UTF-8"),
                                         viewModel.uname,
                                         editText.text.toString(),
@@ -339,6 +340,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     HomeFeedResponse.ReplyRows(
                                         viewModel.rid,
                                         PrefManager.uid,
+                                        viewModel.rid,
                                         URLDecoder.decode(PrefManager.username, "UTF-8"),
                                         editText.text.toString(),
                                         viewModel.ruid,

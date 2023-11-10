@@ -138,7 +138,6 @@ dependencies {
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     implementation("androidx.webkit:webkit:1.8.0")
     implementation("org.jsoup:jsoup:1.16.2")
-    implementation("com.github.zjupure:webpdecoder:2.0.4.11.0")
     implementation("com.github.mikaelzero.mojito:mojito:1.8.7")
     implementation("com.github.mikaelzero.mojito:SketchImageViewLoader:1.8.7")
     implementation("com.github.mikaelzero.mojito:GlideImageLoader:1.8.7")

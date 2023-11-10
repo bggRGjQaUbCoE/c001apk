@@ -497,7 +497,7 @@ class AppAdapter(
                 holder.id = feed.id
                 holder.uid = feed.uid
                 holder.isLike = feed.userAction?.like == 1
-                holder.uname.text = feed.username
+                holder.uname.text = feed.userInfo?.username
                 ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle

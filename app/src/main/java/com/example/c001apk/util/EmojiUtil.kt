@@ -8,6 +8,8 @@ object EmojiUtil {
         if (PrefManager.showEmoji) {
             if (PrefManager.allHuaji) {
                 return when (emoji) {
+                    "[楼主]" -> R.drawable.ic_author
+                    "[层主]" -> R.drawable.ic_subauthor
                     "[doge]" -> R.drawable.coolapk_emotion_62_huaji
                     "[doge原谅ta]" -> R.drawable.coolapk_emotion_62_huaji
                     "[doge呵斥]" -> R.drawable.coolapk_emotion_62_huaji
@@ -165,6 +167,8 @@ object EmojiUtil {
                 }
             } else {
                 return when (emoji) {
+                    "[楼主]" -> R.drawable.ic_author
+                    "[层主]" -> R.drawable.ic_subauthor
                     "[doge]" -> R.drawable.coolapk_emotion_37_doge
                     "[doge原谅ta]" -> R.drawable.coolapk_emotion_58_dogeyuanliangta
                     "[doge呵斥]" -> R.drawable.coolapk_emotion_57_dogehechi
