@@ -24,6 +24,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val version: String,
         val apkversioncode: String,
         val apksize: String,
+        val apkfile: String?,
         val lastupdate: Long?,
         val follow: String,
         val level: String,

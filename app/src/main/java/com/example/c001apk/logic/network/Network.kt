@@ -10,6 +10,7 @@ import kotlin.coroutines.suspendCoroutine
 object Network {
 
     private val apiService = ApiServiceCreator.create<ApiService>()
+    private val apiServiceNoRedirect = ApiServiceCreator.create<ApiService>(true)
     private val api2Service = Api2ServiceCreator.create<ApiService>()
     private val accountService = AccountServiceCreator.create<ApiService>()
 
@@ -70,6 +71,9 @@ object Network {
 
     suspend fun getAppInfo(id: String) =
         apiService.getAppInfo(id).await()
+
+    suspend fun getAppDownloadLink(pn: String, aid: String, vc: String) =
+        apiServiceNoRedirect.getAppDownloadLink(pn, aid, vc).response()
 
     suspend fun getProfile(uid: String) =
         api2Service.getProfile(uid).await()

@@ -164,6 +164,20 @@ class AppViewModel : ViewModel() {
         getAppInfoData.value = getAppInfoData.value
     }
 
+    var packageName = ""
+    var versionCode = ""
+
+    private val getDownloadLinkData = MutableLiveData<String>()
+
+    val downloadLinkData = getDownloadLinkData.switchMap {
+        Repository.getAppDownloadLink(packageName, appId, versionCode)
+    }
+
+    fun getDownloadLink() {
+        getDownloadLinkData.value = getDownloadLinkData.value
+    }
+
+
     var likePosition = -1
     private val baseURL =
         "#/feed/apkCommentList?isIncludeTop=1&withSortCard=1&id="

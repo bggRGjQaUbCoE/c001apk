@@ -1,7 +1,9 @@
 package com.example.c001apk.logic.network
 
+import com.example.c001apk.BuildConfig
 import com.example.c001apk.util.LoginCookiesInterceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -10,6 +12,7 @@ object AccountServiceCreator {
 
     private val client: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(LoginCookiesInterceptor())
+        .addInterceptor(HttpLoggingInterceptor().setLevel(if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE))
         .build()
 
     private const val BASE_URL = "https://account.coolapk.com"

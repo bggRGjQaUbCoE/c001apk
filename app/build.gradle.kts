@@ -83,6 +83,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -99,10 +103,10 @@ android {
     defaultConfig {
         ndk {
             abiFilters.add("arm64-v8a")
-            abiFilters.add("armeabi-v7a")
-            abiFilters.add("armeabi")
-            abiFilters.add("x86")
-            abiFilters.add("x86_64")
+//            abiFilters.add("armeabi-v7a")
+//            abiFilters.add("armeabi")
+//            abiFilters.add("x86")
+//            abiFilters.add("x86_64")
         }
     }
 }
@@ -141,5 +145,5 @@ dependencies {
     implementation("com.github.mikaelzero.mojito:mojito:1.8.7")
     implementation("com.github.mikaelzero.mojito:SketchImageViewLoader:1.8.7")
     implementation("com.github.mikaelzero.mojito:GlideImageLoader:1.8.7")
-
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }

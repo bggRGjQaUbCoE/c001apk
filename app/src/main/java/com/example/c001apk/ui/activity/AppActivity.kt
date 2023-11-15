@@ -1,6 +1,8 @@
 package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -65,6 +67,24 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     binding.collapsingToolbar.title = appInfo.title
                     binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
                     ImageShowUtil.showIMG(binding.logo, appInfo.logo)
+                    binding.btnDownload.apply {
+                        visibility = View.VISIBLE
+                        setOnClickListener {
+                            viewModel.downloadLinkData.observe(this@AppActivity) { result ->
+                                val link = result.getOrNull()
+                                if (link != null) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                                    startActivity(intent)
+                                } else {
+                                    result.exceptionOrNull()?.printStackTrace()
+                                }
+                            }
+                            viewModel.getDownloadLink()
+                        }
+                    }
+                    viewModel.packageName = appInfo.apkname
+                    viewModel.versionCode = appInfo.apkversioncode
+
                     viewModel.appId = appInfo.id
                     viewModel.isRefreshing = true
                     viewModel.isNew = true

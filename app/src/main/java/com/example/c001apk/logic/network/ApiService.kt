@@ -75,6 +75,13 @@ interface ApiService {
         @Query("id") id: String,
     ): Call<FeedContentResponse>
 
+    @POST("/v6/apk/download?extra=")
+    fun getAppDownloadLink(
+        @Query("pn") id: String,
+        @Query("aid") aid: String,
+        @Query("vc") vc: String,
+    ): Call<Any>
+
     @GET("/v6/topic/newTagDetail")
     fun getTopicLayout(
         @Query("tag") tag: String

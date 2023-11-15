@@ -118,6 +118,16 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getAppDownloadLink(pn: String, aid: String, vc: String) =
+        fire(Dispatchers.IO) {
+            val appResponse = Network.getAppDownloadLink(pn, aid, vc)
+            if (appResponse != null) {
+                Result.success(appResponse.headers()["Location"])
+            }
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     fun getProfile(uid: String) =
         fire(Dispatchers.IO) {
             val profileResponse = Network.getProfile(uid)

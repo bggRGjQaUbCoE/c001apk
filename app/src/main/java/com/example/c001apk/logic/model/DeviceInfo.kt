@@ -6,5 +6,6 @@ data class DeviceInfo(
         val manuFactor: String,
         val brand: String,
         val model: String,
+        val display: String,
         val buildNumber: String
 )

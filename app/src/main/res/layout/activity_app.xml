@@ -4,22 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
-    app:edgeToEdge="true"
-    app:fitsSystemWindowsInsets="@integer/internal_fragment_insets">
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="false"
-        app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="false"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,6 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:paddingStart="20dp"
                 android:paddingTop="?actionBarSize"
                 android:paddingEnd="20dp"
@@ -52,7 +49,7 @@
                     android:layout_marginStart="10dp"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/btn_download"
                     app:layout_constraintStart_toEndOf="@+id/logo"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="name" />
@@ -63,7 +60,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/btn_download"
                     app:layout_constraintStart_toEndOf="@+id/logo"
                     app:layout_constraintTop_toBottomOf="@id/name"
                     tools:text="1.0.0(1)" />
@@ -74,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/btn_download"
                     app:layout_constraintStart_toEndOf="@id/logo"
                     app:layout_constraintTop_toBottomOf="@id/version"
                     tools:text="1M" />
@@ -85,10 +82,19 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/btn_download"
                     app:layout_constraintStart_toEndOf="@id/logo"
                     app:layout_constraintTop_toBottomOf="@id/size"
                     tools:text="1天前" />
+
+                <Button
+                    android:id="@+id/btn_download"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="下载"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
