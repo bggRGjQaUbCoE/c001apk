@@ -4,7 +4,7 @@ import android.content.Context
 import android.provider.Settings
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.constant.Constants.BRAND
-import com.example.c001apk.constant.Constants.BUILDNUMBER
+import com.example.c001apk.constant.Constants.DISPLAY
 import com.example.c001apk.constant.Constants.MANUFACTURER
 import com.example.c001apk.constant.Constants.MODEL
 import com.example.c001apk.logic.model.DeviceInfo
@@ -15,18 +15,23 @@ import com.example.c001apk.util.Utils.Companion.getMD5
 class TokenDeviceUtils {
 
     companion object {
-        private fun DeviceInfo.createDeviceCode(isRaw: Boolean = true) =
-            "$aid; ; ; $mac; $manuFactor; $brand; $model; $buildNumber".getBase64(isRaw).reversed()
+        private fun DeviceInfo.createDeviceCode(isRaw: Boolean = true): String {
+            val byte = "$aid; ; ; $mac; $manuFactor; $brand; $model; $display; $buildNumber"
+                .toByteArray(Charsets.UTF_8)
+            val b64 = Base64Utils.encode(byte).reversed()
+            return Regex("\\r\\n|\\r|\\n|=").replace(b64, "")
+        }
 
         private fun getDeviceCode(context: Context): String {
-            val aid =  Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            val aid = "DUZJlvIF9j-" + Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
             val mac = Utils.randomMacAddress()
             val manuFactor = MANUFACTURER
             val brand = BRAND
             val model = MODEL
-            val buildNumber = BUILDNUMBER
+            val display = DISPLAY
+            val buildNumber = "null"
 
-            return DeviceInfo(aid, mac, manuFactor, brand, model, buildNumber).createDeviceCode()
+            return DeviceInfo(aid, mac, manuFactor, brand, model, display, buildNumber).createDeviceCode()
         }
 
         fun String.getTokenV2(): String {
