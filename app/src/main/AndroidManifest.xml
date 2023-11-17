@@ -69,6 +69,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="net.mikaelzero.mojito.ui.ImageMojitoActivity"
+            android:theme="@style/Theme.MaterialTransparent"
+            tools:replace="android:theme" />
     </application>
 
 </manifest>

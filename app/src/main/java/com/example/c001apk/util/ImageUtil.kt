@@ -1,8 +1,9 @@
 package com.example.c001apk.util
 
+import android.content.ContentValues
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -16,10 +17,12 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants.USER_AGENT
+import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import jp.wasabeef.glide.transformations.ColorFilterTransformation
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,7 +31,6 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 import java.io.File
-import java.io.OutputStream
 
 
 object ImageUtil {
@@ -99,8 +101,6 @@ object ImageUtil {
 
     suspend fun saveImageToGallery(ctx: Context, imageUrl: String): Boolean =
         withContext(Dispatchers.IO) {
-            var bitmap: Bitmap? = null
-            var fos: OutputStream? = null
             var success = false
             val imageDir = Environment.DIRECTORY_PICTURES
 
@@ -112,17 +112,6 @@ object ImageUtil {
             val filename = "${System.currentTimeMillis()}.jpg"
 
             try {
-//                val url = URL(imageUrl)
-//                val connection = url.openConnection()
-//                connection.doInput = true
-//                connection.connect()
-//                val input = connection.getInputStream()
-//                bitmap = BitmapFactory.decodeStream(input)
-//
-//                fos = FileOutputStream(image)
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-//                fos.flush()
-
                 val file = Glide.with(ctx)
                     .asFile()
                     .load(imageUrl)
@@ -132,22 +121,33 @@ object ImageUtil {
                 file.copyTo(image, overwrite = true)
 
                 // 将图片插入图库
-                MediaStore.Images.Media.insertImage(
-                    ctx.contentResolver,
-                    image.absolutePath,
-                    image.name,
-                    image.name
-                )
+//                MediaStore.Images.Media.insertImage(
+//                    ctx.contentResolver,
+//                    image.absolutePath,
+//                    image.name,
+//                    image.name
+//                )
+
+                val values = ContentValues().apply {
+                    put(MediaStore.Images.Media.TITLE, image.name)
+                    put(MediaStore.Images.Media.DESCRIPTION, image.name)
+                    // 在 Android 10 及更高版本，需要使用 MediaStore.Images.Media.RELATIVE_PATH
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures")
+                    }
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg") // 根据实际情况设置 MIME 类型
+                }
+                // 将图像插入 MediaStore，并获取插入后的 URI
+                ctx.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+
                 success = true
             } catch (e: Exception) {
                 e.printStackTrace()
-            } finally {
-                bitmap?.recycle()
-                fos?.close()
             }
             success
         }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun startBigImgView(
         nineGridView: NineGridImageView,
         imageView: ImageView,
@@ -205,19 +205,20 @@ object ImageUtil {
                         MaterialAlertDialogBuilder(fragmentActivity)
                             .setTitle("保存图片")
                             .setMessage("是否保存图片到本地？")
-                            .setPositiveButton(android.R.string.ok) {
-                                    dialog, _ ->
+                            .setPositiveButton(android.R.string.ok) { _, _ ->
                                 GlobalScope.launch {
-                                    saveImageToGallery(fragmentActivity, imgList[position])
+                                    if (saveImageToGallery(fragmentActivity, imgList[position])) {
+                                        ToastUtil.toast("保存成功")
+                                    } else {
+                                        ToastUtil.toast("保存失败")
+                                    }
                                 }
                             }
-                            .setNegativeButton(android.R.string.cancel,null)
-                            .setNeutralButton("复制图片地址") {
-                                    dialog, _ ->
-                                val clipboard = fragmentActivity.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                                val clip = android.content.ClipData.newPlainText("simple text", imgList[position])
-                                clipboard.setPrimaryClip(clip)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setNeutralButton("复制图片地址") { _, _ ->
+                                copyText(fragmentActivity, imgList[position])
                             }
+                            .show()
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }

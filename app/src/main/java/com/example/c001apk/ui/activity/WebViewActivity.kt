@@ -1,9 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -22,6 +19,7 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
+import com.example.c001apk.util.ClipboardUtil.copyText
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 
@@ -166,10 +164,7 @@ class WebViewActivity : BaseActivity() {
             R.id.refresh -> binding.webView.reload()
 
             R.id.copyLink -> {
-                val clipboardManager =
-                    this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                ClipData.newPlainText("link", link)?.let { clipboardManager.setPrimaryClip(it) }
-                Toast.makeText(this, "已复制: $link", Toast.LENGTH_SHORT).show()
+                copyText(this, link)
             }
 
             R.id.openInBrowser -> {
