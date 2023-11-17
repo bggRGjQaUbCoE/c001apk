@@ -16,22 +16,22 @@ class TokenDeviceUtils {
 
     companion object {
         private fun DeviceInfo.createDeviceCode(isRaw: Boolean = true): String {
-            val byte = "$aid; ; ; $mac; $manuFactor; $brand; $model; $display; $buildNumber"
+            val byte = "$deviceId; ; ; $mac; $manufacturer; $brand; $model; $display; $oaid"
                 .toByteArray(Charsets.UTF_8)
             val b64 = Base64Utils.encode(byte).reversed()
             return Regex("\\r\\n|\\r|\\n|=").replace(b64, "")
         }
 
         private fun getDeviceCode(context: Context): String {
-            val aid = "DUZJlvIF9j-" + Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            val deviceId = Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
             val mac = Utils.randomMacAddress()
-            val manuFactor = MANUFACTURER
+            val manufacturer = MANUFACTURER
             val brand = BRAND
             val model = MODEL
             val display = DISPLAY
-            val buildNumber = "null"
+            val oaid = Utils.randomOaid()
 
-            return DeviceInfo(aid, mac, manuFactor, brand, model, display, buildNumber).createDeviceCode()
+            return DeviceInfo(deviceId, mac, manufacturer, brand, model, display, oaid).createDeviceCode()
         }
 
         fun String.getTokenV2(): String {
@@ -68,6 +68,13 @@ class TokenDeviceUtils {
                     sp.edit().putString("INSTALL_TIME", this).apply()
                 }
             }
+        }
+
+        fun regenerateDeviceInfo(context: Context) {
+            context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE).edit().apply {
+                putString("DEVICE_CODE", getDeviceCode(context))
+                putString("INSTALL_TIME", System.currentTimeMillis().toString())
+            }.apply()
         }
     }
 }

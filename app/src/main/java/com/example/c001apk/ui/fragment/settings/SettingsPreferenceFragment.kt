@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
@@ -16,6 +17,7 @@ import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.ui.activity.AboutActivity
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TokenDeviceUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.core.util.ResourceUtils
 import rikka.material.preference.MaterialSwitchPreference
@@ -156,6 +158,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.xAppToken = editText.text.toString()
                 }
+                editText.setText(PrefManager.xAppToken)
                 show()
             }
             true
@@ -173,8 +176,15 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.xAppDevice = editText.text.toString()
 
                 }
+                editText.setText(PrefManager.xAppDevice)
                 show()
             }
+            true
+        }
+
+        findPreference<Preference>("regenerateDeviceInfo")?.setOnPreferenceClickListener {
+            TokenDeviceUtils.regenerateDeviceInfo(this.requireContext())
+            Toast.makeText(this.requireActivity(), "已重新生成", Toast.LENGTH_SHORT).show()
             true
         }
 

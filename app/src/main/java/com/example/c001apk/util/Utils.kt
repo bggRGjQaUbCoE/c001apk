@@ -48,9 +48,9 @@ class Utils {
             val data = ByteArray(length / 2)
             for (index in indices step 2) {
                 data[index / 2] = (
-                    (Character.digit(this[index], 16) shl 4) +
-                        Character.digit(this[index + 1], 16)
-                    ).toByte()
+                        (Character.digit(this[index], 16) shl 4) +
+                                Character.digit(this[index + 1], 16)
+                        ).toByte()
             }
             return data
         }
@@ -63,7 +63,8 @@ class Utils {
          * @return Base64码
          */
         fun String.getBase64(isRaw: Boolean = true): String {
-            var result = Base64Utils.encode(this.toByteArray())//Base64.getEncoder().encodeToString(this.toByteArray())
+            var result =
+                Base64Utils.encode(this.toByteArray())//Base64.getEncoder().encodeToString(this.toByteArray())
             if (isRaw) {
                 result = result.replace("=", "")
             }
@@ -117,6 +118,22 @@ class Utils {
             }
 
             return sb.toString().uppercase()
+        }
+
+        /**
+         * 随机生成oaid 32位字符串
+         *
+         * @return oaid
+         */
+        fun randomOaid(): String {
+            val random = Random()
+            val oaidLength = 32
+            val sb = StringBuilder(oaidLength)
+            for (i in 0 until oaidLength) {
+                val randomChar = (random.nextInt(26) + 'a'.code).toChar()
+                sb.append(randomChar)
+            }
+            return sb.toString()
         }
 
         /**

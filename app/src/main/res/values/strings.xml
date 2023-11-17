@@ -76,6 +76,7 @@
     <string name="customToken">自定义Token</string>
     <string name="xAppToken">X-App-Token</string>
     <string name="xAppDevice">X-App-Device</string>
+    <string name="regenerateDeviceInfo">重新生成设备信息</string>
     <string name="full_quality">默认原图</string>
     <string name="display">显示</string>
     <string name="auto_clear_key_word">自动清除关键词</string>

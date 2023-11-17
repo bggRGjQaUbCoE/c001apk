@@ -55,9 +55,8 @@
             android:defaultValue="false"
             android:icon="@drawable/ic_clear_all"
             android:key="isClearKeyWord"
-            android:title="@string/auto_clear_key_word"
             android:summary="@string/clear_Key_word"
-            />
+            android:title="@string/auto_clear_key_word" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/app_name">
@@ -77,6 +76,10 @@
             android:icon="@drawable/ic_device1"
             android:key="xAppDevice"
             android:title="@string/xAppDevice" />
+        <Preference
+            android:icon="@drawable/ic_refresh"
+            android:key="regenerateDeviceInfo"
+            android:title="@string/regenerateDeviceInfo" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/others">
