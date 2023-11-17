@@ -11,7 +11,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.util.DensityTool
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImageTextScrollCardAdapter(
@@ -58,7 +58,7 @@ class ImageTextScrollCardAdapter(
         holder.title.text = imageTextScrollCard.title
         val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
         holder.title.setPadding(space, space, space, space)
-        ImageShowUtil.showIMG1(holder.imageTextScrollCard, imageTextScrollCard.pic)
+        ImageUtil.showIMG1(holder.imageTextScrollCard, imageTextScrollCard.pic)
     }
 
 }

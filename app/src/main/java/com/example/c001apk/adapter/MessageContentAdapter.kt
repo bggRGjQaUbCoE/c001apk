@@ -22,7 +22,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -247,7 +247,7 @@ class MessageContentAdapter(
                 holder.follow.text = DateUtils.fromToday(message.dateline)
                 if (type == "contactsFollow")
                     holder.fans.text = "关注了你"
-                ImageShowUtil.showAvatar(holder.avatar, message.fromUserAvatar)
+                ImageUtil.showAvatar(holder.avatar, message.fromUserAvatar)
             }
 
             is FootViewHolder -> {
@@ -286,7 +286,7 @@ class MessageContentAdapter(
                     holder.uid = message.uid
                     holder.entityType = message.entityType
                     holder.uname.text = message.username
-                    ImageShowUtil.showAvatar(holder.avatar, message.userAvatar)
+                    ImageUtil.showAvatar(holder.avatar, message.userAvatar)
                     if (message.deviceTitle != "") {
                         holder.device.text = message.deviceTitle
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
@@ -360,7 +360,7 @@ class MessageContentAdapter(
                     holder.entityType = message.entityType
                     holder.uname.text = message.likeUsername
                     holder.uid = message.likeUid
-                    ImageShowUtil.showAvatar(holder.avatar, message.likeAvatar)
+                    ImageUtil.showAvatar(holder.avatar, message.likeAvatar)
                     holder.pubDate.text = DateUtils.fromToday(message.likeTime)
                     val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                     drawable1.setBounds(
@@ -444,7 +444,7 @@ class MessageContentAdapter(
                             (holder.forwardMessage.textSize * 1.3).toInt(),
                             null
                         )
-                        ImageShowUtil.showIMG(holder.forward1Pic, message.feed.pic)
+                        ImageUtil.showIMG(holder.forward1Pic, message.feed.pic)
                     } else if (type == "feedLike") {
                         holder.forwardId1 = message.fid
                         holder.forward1Pic.visibility = View.GONE

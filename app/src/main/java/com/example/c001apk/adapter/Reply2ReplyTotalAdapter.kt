@@ -21,7 +21,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -199,7 +199,7 @@ class Reply2ReplyTotalAdapter(
                 holder.uid = reply.uid
                 holder.name = reply.username
                 holder.isLike = reply.userAction?.like == 1
-                ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
+                ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                 val text =
                     if (uid == reply.ruid)

@@ -13,7 +13,7 @@ import com.example.c001apk.ui.activity.CarouselActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.WebViewActivity
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImageCarouselCardAdapter(
@@ -78,7 +78,7 @@ class ImageCarouselCardAdapter(
             else
                 holder.count.text = "${position}/${itemCount - 2}"
         }
-        ImageShowUtil.showIMG(holder.imageCarouselCard, imageCarouselCard.pic)
+        ImageUtil.showIMG(holder.imageCarouselCard, imageCarouselCard.pic)
     }
 
 }

@@ -17,7 +17,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.MessageActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.google.android.material.imageview.ShapeableImageView
@@ -232,7 +232,7 @@ class MessageAdapter(
                     mContext, noti.note, (holder.message.textSize * 1.3).toInt(), null
                 )
                 holder.pubDate.text = DateUtils.fromToday(noti.dateline)
-                ImageShowUtil.showAvatar(holder.avatar, noti.fromUserAvatar)
+                ImageUtil.showAvatar(holder.avatar, noti.fromUserAvatar)
             }
 
             is FFFViewHolder -> {

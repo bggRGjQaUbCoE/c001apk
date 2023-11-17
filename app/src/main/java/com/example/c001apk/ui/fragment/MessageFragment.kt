@@ -19,7 +19,7 @@ import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.util.ActivityCollector
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.NestCollapsingToolbarLayout
@@ -274,8 +274,8 @@ class MessageFragment : Fragment() {
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
         binding.progress.max = PrefManager.nextLevelExperience.toInt()
         binding.progress.progress = PrefManager.experience.toInt()
-        ImageShowUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
-        ImageShowUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
+        ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
+        ImageUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
     }
 
 }

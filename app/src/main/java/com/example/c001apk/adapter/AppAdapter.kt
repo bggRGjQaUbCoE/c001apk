@@ -32,7 +32,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
@@ -333,7 +333,7 @@ class AppAdapter(
                 holder.title.text = app.title
                 holder.commentNum.text = app.commentCount + "讨论"
                 holder.hotNum.text = app.downCount + "下载"
-                ImageShowUtil.showIMG(holder.logo, app.logo)
+                ImageUtil.showIMG(holder.logo, app.logo)
             }
 
             is TopicProductViewHolder -> {
@@ -345,7 +345,7 @@ class AppAdapter(
                 holder.commentNum.text =
                     if (topic.entityType == "topic") topic.commentnumTxt + "讨论"
                     else topic.feedCommentNumTxt + "讨论"
-                ImageShowUtil.showIMG(holder.logo, topic.logo)
+                ImageUtil.showIMG(holder.logo, topic.logo)
                 if (topic.entityType == "product")
                     holder.aliasTitle = topic.aliasTitle
                 holder.entityType = topic.entityType
@@ -359,14 +359,14 @@ class AppAdapter(
                     holder.follow.text = "${user.userInfo.follow}关注"
                     holder.fans.text = "${user.userInfo.fans}粉丝"
                     holder.act.text = DateUtils.fromToday(user.userInfo.logintime) + "活跃"
-                    ImageShowUtil.showAvatar(holder.avatar, user.userInfo.userAvatar)
+                    ImageUtil.showAvatar(holder.avatar, user.userInfo.userAvatar)
                 } else if (user.userInfo == null && user.fUserInfo != null) {
                     holder.uid = user.fUserInfo.uid
                     holder.uname.text = user.fUserInfo.username
                     holder.follow.text = "${user.fUserInfo.follow}关注"
                     holder.fans.text = "${user.fUserInfo.fans}粉丝"
                     holder.act.text = DateUtils.fromToday(user.fUserInfo.logintime) + "活跃"
-                    ImageShowUtil.showAvatar(holder.avatar, user.fUserInfo.userAvatar)
+                    ImageUtil.showAvatar(holder.avatar, user.fUserInfo.userAvatar)
                 } else if (user.userInfo != null && user.fUserInfo == null) {
                     holder.uid = user.uid
                     holder.uname.text = user.username
@@ -386,7 +386,7 @@ class AppAdapter(
                         holder.followBtn.text = "已关注"
                         holder.followBtn.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
-                    ImageShowUtil.showAvatar(holder.avatar, user.userAvatar)
+                    ImageUtil.showAvatar(holder.avatar, user.userAvatar)
                 }
             }
 
@@ -498,7 +498,7 @@ class AppAdapter(
                 holder.uid = feed.uid
                 holder.isLike = feed.userAction?.like == 1
                 holder.uname.text = feed.userInfo?.username
-                ImageShowUtil.showAvatar(holder.avatar, feed.userAvatar)
+                ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle
                     val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
@@ -637,7 +637,7 @@ class AppAdapter(
                                     id = feed.targetRow.id
                                     url = feed.targetRow.url
                                     title.text = feed.targetRow.title
-                                    ImageShowUtil.showIMG(logo, feed.targetRow.logo)
+                                    ImageUtil.showIMG(logo, feed.targetRow.logo)
                                 } else {
                                     val space =
                                         mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
@@ -651,7 +651,7 @@ class AppAdapter(
                                     id = feed.relationRows[position - 1].id
                                     url = feed.relationRows[position - 1].url
                                     title.text = feed.relationRows[position - 1].title
-                                    ImageShowUtil.showIMG(
+                                    ImageUtil.showIMG(
                                         logo,
                                         feed.relationRows[position - 1].logo
                                     )
@@ -662,7 +662,7 @@ class AppAdapter(
                                     id = feed.relationRows[0].id
                                     title.text = feed.relationRows[0].title
                                     url = feed.relationRows[0].url
-                                    ImageShowUtil.showIMG(logo, feed.relationRows[0].logo)
+                                    ImageUtil.showIMG(logo, feed.relationRows[0].logo)
                                 } else {
                                     val space =
                                         mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
@@ -676,7 +676,7 @@ class AppAdapter(
                                     id = feed.relationRows[position].id
                                     url = feed.relationRows[position].url
                                     title.text = feed.relationRows[position].title
-                                    ImageShowUtil.showIMG(
+                                    ImageUtil.showIMG(
                                         logo,
                                         feed.relationRows[position].logo
                                     )

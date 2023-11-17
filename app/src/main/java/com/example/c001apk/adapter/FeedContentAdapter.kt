@@ -31,7 +31,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.CenteredImageSpan1
@@ -359,7 +359,7 @@ class FeedContentAdapter(
                     holder.uid = feed.data.uid
                     holder.isLike = feed.data.userAction?.like == 1
                     holder.uname.text = feed.data.userInfo?.username
-                    ImageShowUtil.showAvatar(holder.avatar, feed.data.userAvatar)
+                    ImageUtil.showAvatar(holder.avatar, feed.data.userAvatar)
                     holder.isFollow = feed.data.userAction?.followAuthor == 1
                     if (feed.data.userAction?.followAuthor == 0) {
                         holder.follow.text = "关注"
@@ -505,7 +505,7 @@ class FeedContentAdapter(
                         )
                         holder.uname.text = builder
                     } else holder.uname.text = reply.username
-                    ImageShowUtil.showAvatar(holder.avatar, reply.userAvatar)
+                    ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                     holder.message.movementMethod = LinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(

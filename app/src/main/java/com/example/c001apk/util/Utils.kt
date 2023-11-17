@@ -2,12 +2,16 @@ package com.example.c001apk.util
 
 import android.content.res.Configuration
 import androidx.core.text.HtmlCompat
+import com.example.c001apk.MyApplication
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.Random
+import java.util.UUID
+import kotlin.random.Random
 
 
 class Utils {
@@ -102,14 +106,13 @@ class Utils {
          * @return Mac地址
          */
         fun randomMacAddress(): String {
-            val random = Random()
             val sb = StringBuilder()
 
             for (i in 0..5) {
                 if (sb.isNotEmpty()) {
                     sb.append(":")
                 }
-                val value = random.nextInt(256)
+                val value = Random.nextInt(256)
                 val element = Integer.toHexString(value)
                 if (element.length < 2) {
                     sb.append(0)
@@ -126,14 +129,115 @@ class Utils {
          * @return oaid
          */
         fun randomOaid(): String {
-            val random = Random()
             val oaidLength = 32
             val sb = StringBuilder(oaidLength)
             for (i in 0 until oaidLength) {
-                val randomChar = (random.nextInt(26) + 'a'.code).toChar()
+                val randomChar = (Random.nextInt(26) + 'a'.code).toChar()
                 sb.append(randomChar)
             }
             return sb.toString()
+        }
+
+
+        fun randomAndroidId(): String {
+            return UUID.randomUUID().toString().replace("-", "")
+        }
+
+        fun randomManufacturer(): String {
+            val manufacturers = listOf(
+                "Samsung",
+                "Google",
+                "Huawei",
+                "Xiaomi",
+                "OnePlus",
+                "Sony",
+                "LG",
+                "Motorola",
+                "HTC",
+                "Nokia",
+                "Lenovo",
+                "Asus",
+                "ZTE",
+                "Alcatel",
+                "OPPO",
+                "Vivo",
+                "Realme"
+                // 添加更多制造商名称
+            )
+
+            return manufacturers[Random.nextInt(manufacturers.size)]
+        }
+
+        fun randomBrand(): String {
+            val brands = listOf(
+                "Samsung",
+                "Google",
+                "Huawei",
+                "Xiaomi",
+                "Redmi",
+                "OnePlus",
+                "Sony",
+                "LG",
+                "Motorola",
+                "HTC",
+                "Nokia",
+                "Lenovo",
+                "Asus",
+                "ZTE",
+                "Alcatel",
+                "OPPO",
+                "Vivo",
+                "Realme"
+                // 添加更多品牌名称
+            )
+
+            return brands[Random.nextInt(brands.size)]
+        }
+
+
+        fun randomDeviceModel(): String {
+            val assetManager = MyApplication.context.assets
+
+            try {
+                val inputStream = assetManager.open("devicemodel.txt")
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                val lines = ArrayList<String>()
+
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    lines.add(line!!)
+                }
+
+                val randomIndex = Random.nextInt(lines.size)
+                return lines[randomIndex]
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            return "null"
+        }
+
+        fun randomSdkInt(): String {
+            return Random.nextInt(21, 34).toString()
+        }
+
+        fun randomAndroidVersionRelease(): String {
+            val androidVersionRelease = listOf(
+                "5.0.1", // Lollipop
+                "6.0",   // Marshmallow
+                "7.0",   // Nougat
+                "7.1.1", // Nougat
+                "8.0.0", // Oreo
+                "8.1.0", // Oreo
+                "9",     // Pie
+                "10",    // Android 10
+                "11",    // Android 11
+                "12",     // Android 12
+                "13",
+                "14",
+            )
+
+            return androidVersionRelease[Random.nextInt(androidVersionRelease.size)]
         }
 
         /**

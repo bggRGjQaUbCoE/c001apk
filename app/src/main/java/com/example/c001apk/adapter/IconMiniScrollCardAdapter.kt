@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.TopicActivity
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 
 class IconMiniScrollCardAdapter(
     private val mContext: Context,
@@ -49,7 +49,7 @@ class IconMiniScrollCardAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val iconMiniScrollCard = iconMiniScrollCardList[position]
         holder.title.text = iconMiniScrollCard.title
-        ImageShowUtil.showIMG(holder.iconMiniScrollCard, iconMiniScrollCard.logo)
+        ImageUtil.showIMG(holder.iconMiniScrollCard, iconMiniScrollCard.logo)
         holder.url = iconMiniScrollCard.url
         holder.id = iconMiniScrollCard.id
         holder.entityType = iconMiniScrollCard.entityType

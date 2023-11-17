@@ -8,7 +8,6 @@ import com.example.c001apk.constant.Constants.DARK_MODE
 import com.example.c001apk.constant.Constants.LOCALE
 import com.example.c001apk.constant.Constants.MODE
 import com.example.c001apk.constant.Constants.REQUEST_WITH
-import com.example.c001apk.constant.Constants.SDK_INT
 import com.example.c001apk.constant.Constants.USER_AGENT
 import com.example.c001apk.constant.Constants.VERSION_CODE
 import com.example.c001apk.constant.Constants.VERSION_NAME
@@ -33,7 +32,7 @@ internal class AddCookiesInterceptor : Interceptor {
         builder.apply {
             addHeader("User-Agent", USER_AGENT)
             addHeader("X-Requested-With", REQUEST_WITH)
-            addHeader("X-Sdk-Int", SDK_INT)
+            addHeader("X-Sdk-Int", TokenDeviceUtils.getLastingSdkInt())
             addHeader("X-Sdk-Locale", LOCALE)
             addHeader("X-App-Id", APP_ID)
             addHeader("X-App-Token", token)

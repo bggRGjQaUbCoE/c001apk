@@ -12,7 +12,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.ui.activity.CarouselActivity
 import com.example.c001apk.ui.activity.TopicActivity
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 
 class IconLinkGridCardItemAdapter(
     private val mContext: Context,
@@ -60,7 +60,7 @@ class IconLinkGridCardItemAdapter(
         val data = dataList[position]
         holder.title.text = data.title
         holder.url = data.url
-        ImageShowUtil.showIMG(holder.iconLinkGridCard, data.pic)
+        ImageUtil.showIMG(holder.iconLinkGridCard, data.pic)
     }
 
     override fun getItemCount() = dataList.size

@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,15 +18,12 @@ import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
-import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import com.example.c001apk.viewmodel.AppViewModel
-import net.mikaelzero.mojito.Mojito
-import net.mikaelzero.mojito.impl.DefaultPercentProgress
-import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 
 
 class HomeFeedFragment : Fragment(), IOnLikeClickListener,
@@ -362,47 +358,12 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         urlList: List<String>,
         position: Int
     ) {
-        val imgList: MutableList<String> = ArrayList()
-        for (img in urlList) {
-            if (img.substring(img.length - 6, img.length) == ".s.jpg")
-                imgList.add(img.replace(".s.jpg", ""))
-            else
-                imgList.add(img)
-        }
-        Mojito.start(imageView.context) {
-            urls(imgList)
-            position(position)
-            progressLoader {
-                DefaultPercentProgress()
-            }
-            setIndicator(CircleIndexIndicator())
-            views(nineGridView.getImageViews().toTypedArray())
-            setOnMojitoListener(object : SimpleMojitoViewCallback() {
-                override fun onStartAnim(position: Int) {
-                    nineGridView.getImageViewAt(position)?.apply {
-                        postDelayed(200) {
-                            this.visibility = View.GONE
-                        }
-                    }
-                }
-
-                override fun onMojitoViewFinish(pagePosition: Int) {
-                    nineGridView.getImageViews().forEach {
-                        it.visibility = View.VISIBLE
-                    }
-                }
-
-                override fun onViewPageSelected(position: Int) {
-                    nineGridView.getImageViews().forEachIndexed { index, imageView ->
-                        if (position == index) {
-                            imageView.visibility = View.GONE
-                        } else {
-                            imageView.visibility = View.VISIBLE
-                        }
-                    }
-                }
-            })
-        }
+        ImageUtil.startBigImgView(
+            nineGridView,
+            imageView,
+            urlList,
+            position
+        )
     }
 
 }

@@ -21,7 +21,6 @@ import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
@@ -45,7 +44,7 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.Emoji.initEmoji
 import com.example.c001apk.util.EmojiUtil
-import com.example.c001apk.util.ImageShowUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.ExtendEditText
@@ -54,14 +53,10 @@ import com.example.c001apk.view.StickyItemDecorator
 import com.example.c001apk.view.circleindicator.CircleIndicator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
-import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.checkbox.MaterialCheckBox
-import net.mikaelzero.mojito.Mojito
-import net.mikaelzero.mojito.impl.DefaultPercentProgress
-import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 import java.net.URLDecoder
 
 
@@ -672,7 +667,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 )
                 binding.device.setCompoundDrawables(drawable, null, null, null)
             }
-            ImageShowUtil.showIMG(binding.avatar1, viewModel.avatar)
+            ImageUtil.showIMG(binding.avatar1, viewModel.avatar)
         }
         binding.titleProfile.visibility = View.VISIBLE
         objectAnimator.start()
@@ -885,51 +880,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         urlList: List<String>,
         position: Int
     ) {
-        val imgList: MutableList<String> = ArrayList()
-        for (img in urlList) {
-            if (img.substring(img.length - 6, img.length) == ".s.jpg")
-                imgList.add(img.replace(".s.jpg", ""))
-            else
-                imgList.add(img)
-        }
-        Mojito.start(imageView.context) {
-            urls(imgList)
-            /*setActivityCoverLoader(ImageViewCoverLoader())
-            fragmentCoverLoader {
-                DefaultTargetFragmentCover()
-            }*/
-            position(position)
-            progressLoader {
-                DefaultPercentProgress()
-            }
-            setIndicator(CircleIndexIndicator())
-            views(nineGridView.getImageViews().toTypedArray())
-            setOnMojitoListener(object : SimpleMojitoViewCallback() {
-                override fun onStartAnim(position: Int) {
-                    nineGridView.getImageViewAt(position)?.apply {
-                        postDelayed(200) {
-                            this.visibility = View.GONE
-                        }
-                    }
-                }
-
-                override fun onMojitoViewFinish(pagePosition: Int) {
-                    nineGridView.getImageViews().forEach {
-                        it.visibility = View.VISIBLE
-                    }
-                }
-
-                override fun onViewPageSelected(position: Int) {
-                    nineGridView.getImageViews().forEachIndexed { index, imageView ->
-                        if (position == index) {
-                            imageView.visibility = View.GONE
-                        } else {
-                            imageView.visibility = View.VISIBLE
-                        }
-                    }
-                }
-            })
-        }
+        ImageUtil.startBigImgView(
+            nineGridView,
+            imageView,
+            urlList,
+            position
+        )
     }
 
     override fun onRefreshReply(listType: String) {
