@@ -1,9 +1,11 @@
 package com.example.c001apk.util
 
+import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import androidx.core.text.HtmlCompat
 import com.example.c001apk.MyApplication
 import java.io.BufferedReader
+import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -98,6 +100,58 @@ class Utils {
             }
 
             return sb.toString().replace("-", "")
+        }
+
+
+        fun getInstalledAppMd5(appInfo: ApplicationInfo): String {
+
+            return generateRandomMD5()
+            // 猜测MD5与增量更新有关，因不计划支持，且获取MD5耗时较长，现随机生成
+
+//            try {
+//                // 获取应用程序的APK文件路径
+//                val apkPath = appInfo.sourceDir
+//
+//                // 计算MD5值
+//                return FileInputStream(File(apkPath)).calculateMd5()
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//            return ""
+        }
+
+        fun FileInputStream.calculateMd5(): String {
+            val md = MessageDigest.getInstance("MD5")
+            val buffer = ByteArray(1024)
+            var length: Int
+            while (read(buffer, 0, 1024).also { length = it } != -1) {
+                md.update(buffer, 0, length)
+            }
+            close()
+
+            val md5Bytes = md.digest()
+            var i: Int
+            val buf = StringBuffer("")
+            for (offset in md5Bytes.indices) {
+                i = md5Bytes[offset].toInt()
+                if (i < 0) i += 256
+                if (i < 16) buf.append("0")
+                buf.append(Integer.toHexString(i))
+            }
+            //32位加密
+            return buf.toString()
+        }
+
+        fun generateRandomMD5(): String {
+            val hexChars = "0123456789abcdef"
+            val stringBuilder = StringBuilder(32)
+
+            repeat(32) {
+                val randomIndex = Random.nextInt(hexChars.length)
+                stringBuilder.append(hexChars[randomIndex])
+            }
+
+            return stringBuilder.toString()
         }
 
         /**

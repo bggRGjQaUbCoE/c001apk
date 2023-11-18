@@ -3,7 +3,6 @@
     <string name="tab_home">首页</string>
     <string name="tab_message">消息</string>
     <string name="tab_setting">设置</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search">搜索</string>
     <string name="refresh">刷新</string>
     <string name="copy_link">复制链接</string>

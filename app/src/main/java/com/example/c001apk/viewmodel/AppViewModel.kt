@@ -3,7 +3,6 @@ package com.example.c001apk.viewmodel
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,10 +13,15 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
+import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.logic.network.Repository
+import com.example.c001apk.util.Utils
+import com.example.c001apk.util.Utils.Companion.getBase64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import rikka.core.content.pm.longVersionCodeCompat
 
 
 class AppViewModel : ViewModel() {
@@ -381,36 +385,50 @@ class AppViewModel : ViewModel() {
 
     val appList = ArrayList<AppItem>()
     val items: MutableLiveData<ArrayList<AppItem>> = MutableLiveData()
+    val updateCheckEncoded: MutableLiveData<String> = MutableLiveData()
 
     fun getItems(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val appList = context.packageManager
                 .getInstalledApplications(PackageManager.GET_SHARED_LIBRARY_FILES)
             val newItems = ArrayList<AppItem>()
+            val updateCheckJsonObject = JSONObject()
 
             for (info in appList) {
                 if (((info.flags and ApplicationInfo.FLAG_SYSTEM) != ApplicationInfo.FLAG_SYSTEM)) {
+                    val packageInfo = context.packageManager.getPackageInfo(info.packageName, 0)
 
                     val appItem = AppItem().apply {
                         icon = info.loadIcon(context.packageManager)
                         appName = info.loadLabel(context.packageManager).toString()
                         packageName = info.packageName
-                        val packageInfo = context.packageManager.getPackageInfo(info.packageName, 0)
-                        versionName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                            "${packageInfo.versionName}(${packageInfo.longVersionCode})"
-                        else "${packageInfo.versionName}(${packageInfo.versionCode})"
-
-
+                        versionName =
+                            "${packageInfo.versionName}(${packageInfo.longVersionCodeCompat})"
                     }
-
                     newItems.add(appItem)
+                        updateCheckJsonObject.put(
+                            info.packageName,
+                            "0,${packageInfo.longVersionCodeCompat},${Utils.getInstalledAppMd5(info)}"
+                        )
                 }
             }
 
             withContext(Dispatchers.Main) {
                 items.value = newItems
+                updateCheckEncoded.value = updateCheckJsonObject.toString().getBase64(false)
             }
         }
+    }
+
+    val appsUpdate = ArrayList<UpdateCheckResponse.Data>()
+    private val getAppsUpdateData = MutableLiveData<String>()
+
+    val appsUpdateData = getAppsUpdateData.switchMap {
+        updateCheckEncoded.value?.let { it1 -> Repository.getAppsUpdate(it1) }
+    }
+
+    fun getAppsUpdate() {
+        getAppsUpdateData.value = getAppsUpdateData.value
     }
 
     val homeFeedList = ArrayList<HomeFeedResponse.Data>()

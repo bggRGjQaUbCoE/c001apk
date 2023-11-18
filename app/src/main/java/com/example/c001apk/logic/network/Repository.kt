@@ -2,6 +2,7 @@ package com.example.c001apk.logic.network
 
 import androidx.lifecycle.liveData
 import kotlinx.coroutines.Dispatchers
+import okhttp3.MultipartBody
 import kotlin.coroutines.CoroutineContext
 
 object Repository {
@@ -124,6 +125,17 @@ object Repository {
             if (appResponse != null) {
                 Result.success(appResponse.headers()["Location"])
             }
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getAppsUpdate(pkgs: String) =
+        fire(Dispatchers.IO) {
+            val multipartBody =
+                MultipartBody.Part.createFormData("pkgs", pkgs)
+            val appResponse = Network.getAppsUpdate(multipartBody)
+            if (appResponse != null)
+                Result.success(appResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
         }

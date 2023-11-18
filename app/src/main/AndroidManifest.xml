@@ -20,6 +20,9 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.activity.AppUpdateActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.MessageActivity"
             android:exported="false" />
         <activity

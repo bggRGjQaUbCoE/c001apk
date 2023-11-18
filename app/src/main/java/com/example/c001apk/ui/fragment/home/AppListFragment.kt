@@ -1,10 +1,14 @@
 package com.example.c001apk.ui.fragment.home
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -13,10 +17,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
+import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class AppListFragment : Fragment(), IOnTabClickListener {
 
@@ -25,11 +32,30 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     private lateinit var mAdapter: AppListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
+    private lateinit var mFAB: FloatingActionButton
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeFeedBinding.inflate(inflater, container, false)
+        mFAB = FloatingActionButton(requireContext()).apply {
+            setImageResource(R.drawable.ic_update)
+            setOnClickListener {
+                val intent = Intent(requireContext(), AppUpdateActivity::class.java)
+                startActivity(intent)
+            }
+            visibility = View.GONE
+        }
+        val lp = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = (Gravity.BOTTOM or Gravity.END)
+            marginEnd = resources.getDimensionPixelSize(R.dimen.normal_space)
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.normal_space)
+        }
+        binding.root.addView(mFAB, lp)
         return binding.root
     }
 
@@ -89,7 +115,18 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             binding.indicator.visibility = View.GONE
             binding.swipeRefresh.isRefreshing = false
         }
-        if (viewModel.appList.isEmpty()){
+        viewModel.appsUpdateData.observe(viewLifecycleOwner) {
+            Log.i("AppListFragment", it.isSuccess.toString())
+            it.getOrNull()?.let { data ->
+                UpdateListUtil.appsUpdate.clear()
+                UpdateListUtil.appsUpdate.addAll(data)
+                mFAB.visibility = View.VISIBLE
+            }
+        }
+        viewModel.updateCheckEncoded.observe(viewLifecycleOwner) {
+            viewModel.getAppsUpdate()
+        }
+        if (viewModel.appList.isEmpty()) {
             binding.indicator.isIndeterminate = true
             binding.indicator.visibility = View.VISIBLE
             viewModel.getItems(requireContext())
@@ -109,7 +146,6 @@ class AppListFragment : Fragment(), IOnTabClickListener {
         (requireParentFragment() as IOnTabClickContainer).controller = this
 
     }
-
 
 
     private fun refreshData() {

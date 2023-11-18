@@ -7,12 +7,16 @@ import com.example.c001apk.logic.model.LikeFeedResponse
 import com.example.c001apk.logic.model.LikeReplyResponse
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
+import com.example.c001apk.logic.model.UpdateCheckResponse
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 import retrofit2.http.Url
 
@@ -81,6 +85,12 @@ interface ApiService {
         @Query("aid") aid: String,
         @Query("vc") vc: String,
     ): Call<Any>
+
+    @Multipart
+    @POST("/v6/apk/checkUpdate?coolmarket_beta=0")
+    fun getAppsUpdate(
+        @Part pkgs: MultipartBody.Part
+    ): Call<UpdateCheckResponse>
 
     @GET("/v6/topic/newTagDetail")
     fun getTopicLayout(
