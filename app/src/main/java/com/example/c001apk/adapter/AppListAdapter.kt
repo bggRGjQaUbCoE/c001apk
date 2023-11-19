@@ -10,6 +10,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.ui.activity.AppActivity
+import com.example.c001apk.util.AppUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AppListAdapter(private val appList: List<AppItem>) :
     RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
@@ -22,9 +27,7 @@ class AppListAdapter(private val appList: List<AppItem>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_app, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(parent.context, AppActivity::class.java)
@@ -38,7 +41,17 @@ class AppListAdapter(private val appList: List<AppItem>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = appList[position]
-        holder.icon.setImageDrawable(app.icon)
+        CoroutineScope(Dispatchers.IO).launch {
+            if (app.icon == null) {
+                app.icon = AppUtils.getIcon(holder.itemView.context, app.packageName)
+            }
+            withContext(Dispatchers.Main) {
+                holder.icon.setImageDrawable(app.icon)
+            }
+        }
+//        Glide.with(holder.icon).load(app.packageName).into(holder.icon)
+        if (app.appName.isEmpty()) app.appName =
+            AppUtils.getAppName(holder.itemView.context, app.packageName)
         holder.appName.text = app.appName
         holder.packageName.text = app.packageName
         holder.versionName.text = app.versionName

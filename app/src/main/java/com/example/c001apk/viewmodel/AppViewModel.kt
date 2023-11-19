@@ -399,22 +399,23 @@ class AppViewModel : ViewModel() {
                     val packageInfo = context.packageManager.getPackageInfo(info.packageName, 0)
 
                     val appItem = AppItem().apply {
-                        icon = info.loadIcon(context.packageManager)
-                        appName = info.loadLabel(context.packageManager).toString()
+//                        icon = info.loadIcon(context.packageManager)
+//                        appName = info.loadLabel(context.packageManager).toString()
                         packageName = info.packageName
                         versionName =
                             "${packageInfo.versionName}(${packageInfo.longVersionCodeCompat})"
+                        lastUpdateTime = packageInfo.lastUpdateTime
                     }
                     newItems.add(appItem)
-                        updateCheckJsonObject.put(
-                            info.packageName,
-                            "0,${packageInfo.longVersionCodeCompat},${Utils.getInstalledAppMd5(info)}"
-                        )
+                    updateCheckJsonObject.put(
+                        info.packageName,
+                        "0,${packageInfo.longVersionCodeCompat},${Utils.getInstalledAppMd5(info)}"
+                    )
                 }
             }
 
             withContext(Dispatchers.Main) {
-                items.value = newItems
+                items.value = newItems.sortedByDescending { it.lastUpdateTime }.toCollection(ArrayList())
                 updateCheckEncoded.value = updateCheckJsonObject.toString().getBase64(false)
             }
         }

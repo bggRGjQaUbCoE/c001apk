@@ -134,7 +134,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("org.mindrot:jbcrypt:0.4")
-    implementation("com.drakeet.about:about:2.4.1")
+    implementation("com.drakeet.about:about:2.5.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("dev.rikka.rikkax.material:material:2.7.0")
