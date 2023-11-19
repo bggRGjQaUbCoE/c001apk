@@ -20,6 +20,7 @@ import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
@@ -52,8 +53,8 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             FrameLayout.LayoutParams.WRAP_CONTENT
         ).apply {
             gravity = (Gravity.BOTTOM or Gravity.END)
-            marginEnd = resources.getDimensionPixelSize(R.dimen.normal_space)
-            bottomMargin = resources.getDimensionPixelSize(R.dimen.normal_space)
+            marginEnd = DensityTool.dp2px(this@AppListFragment.requireContext(),25f).toInt()
+            bottomMargin = DensityTool.dp2px(this@AppListFragment.requireContext(),25f).toInt()
         }
         binding.root.addView(mFAB, lp)
         return binding.root

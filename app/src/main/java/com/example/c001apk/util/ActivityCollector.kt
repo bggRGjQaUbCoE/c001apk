@@ -1,6 +1,7 @@
 package com.example.c001apk.util
 
 import android.app.Activity
+import android.util.Log
 
 object ActivityCollector {
 
@@ -8,6 +9,7 @@ object ActivityCollector {
 
     fun addActivity(activity: Activity) {
         activities.add(activity)
+        Log.i("ActivityCollector", "addActivity: ${activity.javaClass.name}")
     }
 
     fun removeActivity(activity: Activity) {

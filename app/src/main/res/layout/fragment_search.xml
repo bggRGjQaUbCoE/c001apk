@@ -14,6 +14,14 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_height="match_parent"
+            android:background="@color/transparent"
+            android:src="@drawable/ic_back" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/passLayout"
             style="@style/Widget.Design.TextInputLayout"
@@ -21,7 +29,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             app:endIconMode="clear_text">
-
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editText"

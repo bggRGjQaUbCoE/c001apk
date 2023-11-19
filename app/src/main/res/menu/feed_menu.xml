@@ -9,4 +9,10 @@
         android:title="@string/show_reply"
         tools:ignore="AlwaysShowAction" />
 
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_share"
+        android:showAsAction="always"
+        android:title="分享" />
+
 </menu>

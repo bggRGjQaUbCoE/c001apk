@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -618,6 +619,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         mLayoutManager.findFirstVisibleItemPosition()
                     viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
 
+                    Log.i(
+                        "onScrolled",
+                        "firstCompletelyVisibleItemPosition: ${viewModel.firstCompletelyVisibleItemPosition}"
+                    )
                     if (viewModel.firstCompletelyVisibleItemPosition == 0) {
                         if (binding.titleProfile.visibility != View.GONE)
                             binding.titleProfile.visibility = View.GONE
@@ -768,7 +773,21 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 when (it.itemId) {
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
-                        mLayoutManager.scrollToPositionWithOffset(1, 0)
+                        mLayoutManager.scrollToPositionWithOffset(
+                            if (viewModel.firstVisibleItemPosition <= 0) 1 else 0,
+                            0
+                        )
+                    }
+
+                    R.id.share -> {
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.type = "text/plain"
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "分享")
+                        intent.putExtra(
+                            Intent.EXTRA_TEXT, "https://www.coolapk1s.com/feed/${viewModel.id}"
+                        )
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(Intent.createChooser(intent, "分享"))
                     }
                 }
                 return@setOnMenuItemClickListener true

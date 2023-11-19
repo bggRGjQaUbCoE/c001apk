@@ -113,6 +113,9 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     }
 
     private fun initButton() {
+        binding.back.setOnClickListener{
+            requireActivity().finish()
+        }
         binding.search.setOnClickListener {
             search()
         }
