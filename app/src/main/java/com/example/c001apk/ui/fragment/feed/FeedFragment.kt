@@ -30,6 +30,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
 import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.databinding.FragmentFeedBinding
+import com.example.c001apk.logic.database.FeedFavoriteDatabase
+import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.UserActivity
@@ -59,6 +61,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.checkbox.MaterialCheckBox
 import java.net.URLDecoder
+import kotlin.concurrent.thread
 
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
@@ -788,6 +791,31 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         )
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(Intent.createChooser(intent, "分享"))
+                    }
+
+                    R.id.favorite -> {
+                        val feedFavoriteDao =
+                            FeedFavoriteDatabase.getDatabase(this@FeedFragment.requireContext())
+                                .feedFavoriteDao()
+                        thread {
+                            if (feedFavoriteDao.isFavorite(viewModel.id)) {
+                                feedFavoriteDao.delete(viewModel.id)
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "已取消收藏",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } else {
+                                feedFavoriteDao.insert(FeedFavorite(viewModel.id))
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(requireContext(), "已收藏", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            }
+
+                        }
                     }
                 }
                 return@setOnMenuItemClickListener true

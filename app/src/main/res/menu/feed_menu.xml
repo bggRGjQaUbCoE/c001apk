@@ -15,4 +15,8 @@
         android:showAsAction="always"
         android:title="分享" />
 
+    <item
+        android:id="@+id/favorite"
+        android:title="收藏" />
+
 </menu>

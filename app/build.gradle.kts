@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("dev.rikka.tools.materialthemebuilder")
+    id("com.google.devtools.ksp")
 }
 
 materialThemeBuilder {
@@ -129,7 +130,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    ksp("com.github.bumptech.glide:compiler:4.16.0")
     implementation("com.github.bumptech.glide:okhttp3-integration:4.16.0")
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
@@ -146,4 +147,6 @@ dependencies {
     implementation("com.github.mikaelzero.mojito:SketchImageViewLoader:1.8.7")
     implementation("com.github.mikaelzero.mojito:GlideImageLoader:1.8.7")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("androidx.room:room-runtime:2.6.0")
+    ksp("androidx.room:room-compiler:2.6.0")
 }
