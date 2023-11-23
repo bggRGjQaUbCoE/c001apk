@@ -16,9 +16,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageAdapter
 import com.example.c001apk.databinding.FragmentMessageBinding
+import com.example.c001apk.ui.activity.HistoryActivity
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.util.ActivityCollector
+import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.CookieUtil.atcommentme
+import com.example.c001apk.util.CookieUtil.atme
+import com.example.c001apk.util.CookieUtil.contacts_follow
+import com.example.c001apk.util.CookieUtil.feedlike
+import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
@@ -65,9 +72,9 @@ class MessageFragment : Fragment() {
         initRefresh()
         initView()
         initScroll()
+        initMenu()
 
         if (PrefManager.isLogin) {
-            initMenu()
             binding.clickToLogin.visibility = View.GONE
             binding.titleProfile.visibility = View.VISIBLE
             binding.avatar.visibility = View.VISIBLE
@@ -78,6 +85,13 @@ class MessageFragment : Fragment() {
             if (viewModel.isInit) {
                 viewModel.isInit = false
                 getData()
+            }
+            viewModel.messCountList.apply {
+                add(atme)
+                add(atcommentme)
+                add(feedlike)
+                add(contacts_follow)
+                add(message)
             }
         } else {
             binding.clickToLogin.visibility = View.VISIBLE
@@ -152,7 +166,8 @@ class MessageFragment : Fragment() {
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed)
                             if (element.entityType == "notification")
-                                viewModel.messageList.add(element)
+                                if (!BlackListUtil.checkUid(element.fromuid))
+                                    viewModel.messageList.add(element)
                     }
 
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
@@ -165,6 +180,28 @@ class MessageFragment : Fragment() {
                 viewModel.isLoadMore = false
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
+            }
+        }
+
+        viewModel.checkLoginInfoData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isGetCheckLoginInfo) {
+                viewModel.isGetCheckLoginInfo = false
+
+                val response = result.getOrNull()
+                response?.let {
+                    response.body()?.let {
+                        if (response.body()?.data?.token != null) {
+                            val login = response.body()?.data!!
+                            viewModel.messCountList.apply {
+                                add(login.notifyCount.atme)
+                                add(login.notifyCount.atcommentme)
+                                add(login.notifyCount.feedlike)
+                                add(login.notifyCount.contactsFollow)
+                                add(login.notifyCount.message)
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -191,7 +228,8 @@ class MessageFragment : Fragment() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.messageList.isNotEmpty()) {
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    viewModel.lastVisibleItemPosition =
+                        mLayoutManager.findLastVisibleItemPosition()
                     viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
                 }
@@ -201,7 +239,12 @@ class MessageFragment : Fragment() {
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = MessageAdapter(requireContext(), viewModel.countList, viewModel.messageList)
+        mAdapter = MessageAdapter(
+            requireContext(),
+            viewModel.countList,
+            viewModel.messCountList,
+            viewModel.messageList
+        )
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -226,6 +269,11 @@ class MessageFragment : Fragment() {
             viewModel.isLoadMore = false
             viewModel.isEnd = false
             getData()
+            if (PrefManager.isLogin) {
+                viewModel.isGetCheckLoginInfo = true
+                viewModel.messCountList.clear()
+                viewModel.getCheckLoginInfo()
+            }
         }
     }
 
@@ -244,6 +292,8 @@ class MessageFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
         binding.toolBar.inflateMenu(R.menu.message_menu)
+        if (!PrefManager.isLogin)
+            binding.toolBar.menu.findItem(R.id.logout).isVisible = false
         binding.toolBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.logout -> {
@@ -261,6 +311,16 @@ class MessageFragment : Fragment() {
                         show()
                     }
                 }
+
+                R.id.history -> {
+                    requireContext().startActivity(
+                        Intent(
+                            requireContext(),
+                            HistoryActivity::class.java
+                        )
+                    )
+                }
+
             }
             return@setOnMenuItemClickListener true
         }

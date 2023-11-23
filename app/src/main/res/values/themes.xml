@@ -17,6 +17,7 @@
     </style>
 
     <style name="Theme.C001apk" parent="Base.Theme.C001apk">
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3.Mod</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
@@ -103,6 +104,28 @@
     <style name="AppTheme.About" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#465C67</item>
         <item name="colorPrimaryDark">#465C67</item>
+    </style>
+
+    <style name="Widget.Material3.Button.TextButton.Mod" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColor">?attr/colorControlNormal</item>
+        <item name="enforceTextAppearance">false</item>
+        <item name="android:maxWidth">@dimen/m3_btn_max_width</item>
+        <item name="android:paddingLeft">@dimen/m3_btn_text_btn_padding_left</item>
+        <item name="android:paddingRight">@dimen/m3_btn_text_btn_padding_right</item>
+        <item name="android:paddingTop">@dimen/m3_btn_padding_top</item>
+        <item name="android:paddingBottom">@dimen/m3_btn_padding_bottom</item>
+        <item name="android:insetTop">@dimen/m3_btn_inset</item>
+        <item name="android:insetBottom">@dimen/m3_btn_inset</item>
+        <item name="android:textAppearance">@macro/m3_comp_text_button_label_text_type</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.M3.Comp.TextButton.Container.Shape</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.TextButton</item>
+        <item name="iconTint">@color/m3_text_button_foreground_color_selector</item>
+        <item name="backgroundTint">@color/m3_text_button_background_color_selector</item>
+        <item name="rippleColor">@color/m3_text_button_ripple_color_selector</item>
+    </style>
+
+    <style name="OverflowMenu" parent="Widget.Material3.PopupMenu.Overflow">
+        <item name="overlapAnchor">false</item>
     </style>
 
 </resources>

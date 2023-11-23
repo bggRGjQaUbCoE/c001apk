@@ -1,66 +1,54 @@
 package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
-import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.ViewPager
 import com.example.c001apk.R
-import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
-import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
+import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
-import com.example.c001apk.util.Emoji.initEmoji
-import com.example.c001apk.util.EmojiUtil
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.circleindicator.CircleIndicator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.checkbox.MaterialCheckBox
 import java.net.URLDecoder
 
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener,
-    IOnEmojiClickListener, IOnLikeClickListener, OnImageItemClickListener {
+    IOnLikeClickListener, OnImageItemClickListener, IOnPublishClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var bottomSheetDialog: BottomSheetDialog
-    private lateinit var editText: ExtendEditText
+    private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
 
     companion object {
-        fun newInstance(position: Int, uid: String, id: String): Reply2ReplyBottomSheetDialog {
+        fun newInstance(
+            position: Int,
+            fuid: String,
+            uid: String,
+            id: String
+        ): Reply2ReplyBottomSheetDialog {
             val args = Bundle()
+            args.putString("FUID", fuid)
             args.putString("UID", uid)
             args.putString("ID", id)
             args.putInt("POSITION", position)
@@ -73,6 +61,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
     private fun setData() {
         val args = arguments
         viewModel.id = args!!.getString("ID", "")
+        viewModel.fuid = args.getString("FUID", "")
         viewModel.uid = args.getString("UID", "")
         viewModel.position = args.getInt("POSITION")
     }
@@ -98,6 +87,22 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         initData()
         initScroll()
 
+        if (PrefManager.isLogin) {
+            val view1 = LayoutInflater.from(context)
+                .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
+            bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view1)
+            bottomSheetDialog.setIOnPublishClickListener(this)
+            bottomSheetDialog.apply {
+                setContentView(view1)
+                setCancelable(false)
+                setCanceledOnTouchOutside(true)
+                window?.apply {
+                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                }
+                type = "reply"
+            }
+        }
+
         viewModel.replyTotalLiveData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
@@ -108,7 +113,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                         viewModel.replyTotalList.clear()
                     for (element in data)
                         if (element.entityType == "feed_reply")
-                            viewModel.replyTotalList.add(element)
+                            if (!BlackListUtil.checkUid(element.uid))
+                                viewModel.replyTotalList.add(element)
                     mAdapter.notifyDataSetChanged()
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
@@ -167,7 +173,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                 response?.let {
                     if (response.data != null) {
                         if (response.data.messageStatus == 1 || response.data.messageStatus == 2) {
-                            viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = ""
+                            bottomSheetDialog.editText.text = null
                             if (response.data.messageStatus == 1)
                                 Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
                             bottomSheetDialog.cancel()
@@ -181,7 +187,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                                     viewModel.id,
                                     URLDecoder.decode(PrefManager.username, "UTF-8"),
                                     viewModel.uname,
-                                    editText.text.toString(),
+                                    viewModel.replyData["message"].toString(),
                                     "",
                                     null,
                                     System.currentTimeMillis() / 1000,
@@ -246,6 +252,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         mAdapter =
             Reply2ReplyTotalAdapter(
                 requireContext(),
+                viewModel.fuid,
                 viewModel.uid,
                 viewModel.position,
                 viewModel.replyTotalList
@@ -269,7 +276,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         view.layoutParams.height = -1
         view.layoutParams.width = -1
         val behavior = BottomSheetBehavior.from(view)
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE){
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             behavior.halfExpandedRatio = 0.75F
             behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
@@ -284,207 +291,28 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         type: String
     ) {
         if (PrefManager.isLogin) {
-            viewModel.rPosition = rPosition
-            r2rPosition?.let { viewModel.r2rPosition = r2rPosition }
-            viewModel.rid = id
-            viewModel.ruid = uid
-            viewModel.uname = uname
-            viewModel.type = type
-            initReply()
+            if (PrefManager.SZLMID == "") {
+                Toast.makeText(activity, "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
+            } else {
+                viewModel.rPosition = rPosition
+                r2rPosition?.let { viewModel.r2rPosition = r2rPosition }
+                viewModel.rid = id
+                viewModel.ruid = uid
+                viewModel.uname = uname
+                viewModel.type = type
+                initReply()
+            }
         }
     }
 
     @SuppressLint("InflateParams", "RestrictedApi")
     private fun initReply() {
-        bottomSheetDialog = BottomSheetDialog(requireContext())
-        val view = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
-        editText = view.findViewById(R.id.editText)
-        val publish: TextView = view.findViewById(R.id.publish)
-        val checkBox: MaterialCheckBox = view.findViewById(R.id.checkBox)
-        val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
-        val emotion: ImageButton = view.findViewById(R.id.emotion)
-        val indicator: CircleIndicator = view.findViewById(R.id.indicator)
-        val itemBeans = initEmoji()
-        val scrollAdapter = HorizontalScrollAdapter(requireContext(), itemBeans)
-        scrollAdapter.setIOnEmojiClickListener(this)
-        emojiPanel.adapter = scrollAdapter
-        indicator.setViewPager(emojiPanel)
-
-        fun checkAndPublish() {
-            if (editText.text.toString().replace("\n", "").isEmpty()) {
-                publish.isClickable = false
-                publish.setTextColor(requireActivity().getColor(android.R.color.darker_gray))
-            } else {
-                publish.isClickable = true
-                publish.setTextColor(
-                    ThemeUtils.getThemeAttrColor(
-                        requireActivity(),
-                        com.drakeet.about.R.attr.colorPrimary
-                    )
-                )
-                publish.setOnClickListener {
-                    viewModel.replyData["message"] = editText.text.toString()
-                    viewModel.replyData["replyAndForward"] = viewModel.replyAndForward
-                    viewModel.isPostReply = true
-                    viewModel.postReply()
-                }
-            }
-        }
-
-        editText.hint = "回复: ${viewModel.uname}"
-        viewModel.replyTextMap[viewModel.rid + viewModel.ruid]?.let {
-            editText.text =
-                SpannableStringBuilderUtil.setEmoji(
-                    requireActivity(),
-                    viewModel.replyTextMap[viewModel.rid + viewModel.ruid]!!,
-                    ((editText.textSize) * 1.3).toInt()
-                )
-        }
-        checkAndPublish()
-        editText.isFocusable = true
-        editText.isFocusableInTouchMode = true
-        editText.requestFocus()
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(editText, 0)
-
-        emotion.setOnClickListener {
-            if (emojiPanel.visibility != View.VISIBLE) {
-                emojiPanel.visibility = View.VISIBLE
-                indicator.visibility = View.VISIBLE
-                val keyboard = ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_down)
-                val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
-                DrawableCompat.setTint(
-                    drawableKeyboard,
-                    ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
-                )
-                emotion.setImageDrawable(drawableKeyboard)
-            } else {
-                emojiPanel.visibility = View.GONE
-                indicator.visibility = View.GONE
-                val face = ContextCompat.getDrawable(requireContext(), R.drawable.ic_face)
-                val drawableFace = DrawableCompat.wrap(face!!)
-                DrawableCompat.setTint(
-                    drawableFace,
-                    ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
-                )
-                emotion.setImageDrawable(drawableFace)
-            }
-        }
-
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.replyAndForward = if (isChecked) "1"
-            else "0"
-        }
-
         bottomSheetDialog.apply {
-            setContentView(view)
-            setCancelable(false)
-            setCanceledOnTouchOutside(true)
+            rid = viewModel.rid
+            ruid = viewModel.ruid
+            uname = viewModel.uname
+            setData()
             show()
-            window?.apply {
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-
-        editText.setOnPasteCallback(object : ExtendEditText.OnPasteCallback {
-            override fun onPaste(text: String?, isPaste: Boolean) {
-                viewModel.isPaste = isPaste
-                if (isPaste) {
-                    viewModel.cursorBefore = editText.selectionStart
-                } else {
-                    if (text == "") {//delete
-                        editText.editableText.delete(editText.selectionStart, editText.selectionEnd)
-                    } else {
-                        val builder = SpannableStringBuilderUtil.setEmoji(
-                            requireActivity(),
-                            text!!,
-                            ((editText.textSize) * 1.3).toInt()
-                        )
-                        editText.editableText.replace(
-                            editText.selectionStart,
-                            editText.selectionEnd,
-                            builder
-                        )
-                    }
-                }
-            }
-        })
-
-        editText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, start: Int, before: Int, count: Int) {
-                if (viewModel.isPaste) {
-                    viewModel.isPaste = false
-                    val cursorNow = editText.selectionStart
-                    val pasteText =
-                        editText.text.toString().substring(viewModel.cursorBefore, cursorNow)
-                    val builder = SpannableStringBuilderUtil.setEmoji(
-                        requireActivity(),
-                        pasteText,
-                        ((editText.textSize) * 1.3).toInt()
-                    )
-                    editText.editableText.replace(
-                        viewModel.cursorBefore,
-                        cursorNow,
-                        builder
-                    )
-                }
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-                viewModel.replyTextMap[viewModel.rid + viewModel.ruid] = editText.text.toString()
-                checkAndPublish()
-            }
-        })
-
-    }
-
-    override fun onShowEmoji(name: String) {
-        val selectionStart: Int = editText.selectionStart
-        val selectionEnd: Int = editText.selectionEnd
-        if (name == "[c001apk]") { //delete
-            if (selectionStart > 0) {
-                val body: String = editText.text.toString()
-                if (!TextUtils.isEmpty(body)) {
-                    if (selectionStart == selectionEnd) {
-                        val tempStr = body.substring(0, selectionStart)
-                        val lastString = tempStr.substring(selectionStart - 1)
-                        if ("]" == lastString) {
-                            val i = tempStr.lastIndexOf("[")
-                            if (i != -1) {
-                                val cs = tempStr.substring(i, selectionStart)
-                                if (EmojiUtil.getEmoji(cs) != -1) {
-                                    editText.editableText.delete(i, selectionStart)
-                                    return
-                                } else {
-                                    editText.editableText.delete(i, selectionStart)
-                                }
-                            } else {
-                                editText.editableText.delete(tempStr.length - 1, selectionStart)
-                            }
-                        } else {
-                            editText.editableText.delete(tempStr.length - 1, selectionStart)
-                        }
-                    } else { //括选
-                        editText.editableText.delete(selectionStart, selectionEnd)
-                    }
-                }
-            } else if (selectionStart == 0 && selectionEnd != 0) {
-                editText.editableText.delete(selectionStart, selectionEnd)
-            }
-        } else {//insert
-            editText.editableText.replace(
-                selectionStart,
-                selectionEnd,
-                SpannableStringBuilderUtil.setEmoji(
-                    requireContext(),
-                    name,
-                    ((editText.textSize) * 1.3).toInt()
-                )
-            )
         }
     }
 
@@ -512,6 +340,13 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             urlList,
             position
         )
+    }
+
+    override fun onPublish(message: String, replyAndForward: String) {
+        viewModel.replyData["message"] = message
+        viewModel.replyData["replyAndForward"] = replyAndForward
+        viewModel.isPostReply = true
+        viewModel.postReply()
     }
 
 }

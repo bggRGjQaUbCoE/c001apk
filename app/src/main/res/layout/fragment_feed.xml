@@ -41,13 +41,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="5dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/name1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:maxLines="1"
                         tools:text="name" />
 
                     <LinearLayout
@@ -59,7 +60,9 @@
                             android:id="@+id/date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:maxLines="1"
                             android:textColor="@android:color/darker_gray"
+                            android:textSize="13sp"
                             tools:text="date" />
 
                         <TextView
@@ -67,7 +70,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
+                            android:maxLines="1"
                             android:textColor="@android:color/darker_gray"
+                            android:textSize="13sp"
                             tools:text="device" />
                     </LinearLayout>
 
@@ -203,7 +208,7 @@
         android:layout_marginBottom="25dp"
         android:src="@drawable/ic_reply"
         android:tooltipText="@string/reply"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         tools:ignore="ContentDescription" />
 

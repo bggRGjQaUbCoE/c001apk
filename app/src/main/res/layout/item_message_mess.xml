@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    app:cardElevation="1dp"
+    app:cardBackgroundColor="@color/home_card_background_color"
+    app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -59,6 +60,7 @@
             android:includeFontPadding="false"
             android:textColor="@color/white"
             android:visibility="gone"
+            android:textSize="11sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/title"
             app:layout_constraintTop_toTopOf="parent"

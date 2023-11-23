@@ -162,10 +162,13 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class Entities(
+        @SerializedName("device_title") val deviceTitle: String,
+        val dateline: String,
         val username: String,
         val url: String,
         val pic: String,
         val title: String,
+        val message: String,
         val logo: String,
         val id: String,
         val entityType: String,

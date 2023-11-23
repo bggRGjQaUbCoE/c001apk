@@ -15,6 +15,13 @@ import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.settings.SettingsFragment
 import com.example.c001apk.util.CookieUtil.SESSID
+import com.example.c001apk.util.CookieUtil.atcommentme
+import com.example.c001apk.util.CookieUtil.atme
+import com.example.c001apk.util.CookieUtil.badge
+import com.example.c001apk.util.CookieUtil.contacts_follow
+import com.example.c001apk.util.CookieUtil.feedlike
+import com.example.c001apk.util.CookieUtil.message
+import com.example.c001apk.util.CookieUtil.notification
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.badge.BadgeDrawable
@@ -95,6 +102,13 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                         if (response.body()?.data?.token != null) {
                             val login = response.body()?.data!!
                             viewModel.badge = login.notifyCount.badge
+                            notification = login.notifyCount.notification
+                            contacts_follow = login.notifyCount.contactsFollow
+                            message = login.notifyCount.message
+                            atme = login.notifyCount.atme
+                            atcommentme = login.notifyCount.atcommentme
+                            feedlike = login.notifyCount.feedlike
+                            badge = login.notifyCount.badge
                             PrefManager.isLogin = true
                             PrefManager.uid = login.uid
                             PrefManager.username = URLEncoder.encode(login.username, "UTF-8")

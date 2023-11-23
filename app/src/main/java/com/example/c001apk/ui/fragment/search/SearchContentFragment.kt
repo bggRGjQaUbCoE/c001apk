@@ -19,6 +19,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -33,13 +34,16 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
+
     companion object {
         @JvmStatic
-        fun newInstance(keyWord: String, type: String) =
+        fun newInstance(keyWord: String, type: String, pageType: String, pageParam: String) =
             SearchContentFragment().apply {
                 arguments = Bundle().apply {
                     putString("KEYWORD", keyWord)
                     putString("TYPE", type)
+                    putString("pageType", pageType)
+                    putString("pageParam", pageParam)
                 }
             }
     }
@@ -49,6 +53,8 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         arguments?.let {
             viewModel.keyWord = it.getString("KEYWORD")!!
             viewModel.type = it.getString("TYPE")!!
+            viewModel.pageType = it.getString("pageType")!!
+            viewModel.pageParam = it.getString("pageParam")!!
         }
     }
 
@@ -98,7 +104,8 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                         if (viewModel.type == "feed")
                             for (element in search) {
                                 if (element.entityType == "feed")
-                                    viewModel.searchList.add(element)
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                        viewModel.searchList.add(element)
                             }
                         else
                             viewModel.searchList.addAll(search)
@@ -127,7 +134,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     if (response.data != null) {
                         viewModel.searchList[viewModel.likePosition].likenum = response.data.count
                         viewModel.searchList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -145,7 +152,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     if (response.data != null) {
                         viewModel.searchList[viewModel.likePosition].likenum = response.data.count
                         viewModel.searchList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -246,6 +253,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
@@ -290,7 +298,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         refreshData()
     }
 
-    override fun onPostFollow(isFollow: Boolean, uid: String, position:Int) {
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {
         viewModel.uid = uid
         viewModel.position = position
         if (isFollow) {

@@ -4,11 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -20,11 +18,9 @@ import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
-import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class AppListFragment : Fragment(), IOnTabClickListener {
 
@@ -33,30 +29,11 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     private lateinit var mAdapter: AppListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
-    private lateinit var mFAB: FloatingActionButton
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeFeedBinding.inflate(inflater, container, false)
-        mFAB = FloatingActionButton(requireContext()).apply {
-            setImageResource(R.drawable.ic_update)
-            setOnClickListener {
-                val intent = Intent(requireContext(), AppUpdateActivity::class.java)
-                startActivity(intent)
-            }
-            visibility = View.GONE
-        }
-        val lp = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = (Gravity.BOTTOM or Gravity.END)
-            marginEnd = DensityTool.dp2px(this@AppListFragment.requireContext(),25f).toInt()
-            bottomMargin = DensityTool.dp2px(this@AppListFragment.requireContext(),25f).toInt()
-        }
-        binding.root.addView(mFAB, lp)
         return binding.root
     }
 
@@ -64,11 +41,22 @@ class AppListFragment : Fragment(), IOnTabClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isInit) {
+            initFab()
             initView()
             initRefresh()
             initScroll()
         }
 
+    }
+
+    private fun initFab() {
+        binding.fab.apply {
+            setImageResource(R.drawable.ic_update)
+            setOnClickListener {
+                val intent = Intent(requireContext(), AppUpdateActivity::class.java)
+                startActivity(intent)
+            }
+        }
     }
 
     private fun initScroll() {
@@ -121,7 +109,7 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             it.getOrNull()?.let { data ->
                 UpdateListUtil.appsUpdate.clear()
                 UpdateListUtil.appsUpdate.addAll(data)
-                mFAB.visibility = View.VISIBLE
+                binding.fab.visibility = View.VISIBLE
             }
         }
         viewModel.updateCheckEncoded.observe(viewLifecycleOwner) {
@@ -139,6 +127,7 @@ class AppListFragment : Fragment(), IOnTabClickListener {
         super.onResume()
         if (viewModel.isInit) {
             viewModel.isInit = false
+            initFab()
             initView()
             initRefresh()
             initScroll()

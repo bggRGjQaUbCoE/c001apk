@@ -18,8 +18,8 @@ import com.example.c001apk.util.CookieUtil.SESSID
 import com.example.c001apk.util.CookieUtil.isGetCaptcha
 import com.example.c001apk.util.CookieUtil.isGetLoginParam
 import com.example.c001apk.util.CookieUtil.isGetSmsLoginParam
+import com.example.c001apk.util.CookieUtil.isPreGetLoginParam
 import com.example.c001apk.util.CookieUtil.isTryLogin
-import com.example.c001apk.util.CookieUtil.requestHash
 import com.example.c001apk.util.LoginUtils.Companion.createRandomNumber
 import com.example.c001apk.util.LoginUtils.Companion.createRequestHash
 import com.example.c001apk.util.PrefManager
@@ -50,14 +50,14 @@ class LoginActivity : BaseActivity() {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        isGetLoginParam = true
-        viewModel.getLoginParam()
+        isPreGetLoginParam = true
+        viewModel.preGetLoginParam()
 
         viewModel.smsLoginParamData.observe(this) { result ->
             val response = result.getOrNull()
             val body = response?.body()?.string()
             body?.apply {
-                requestHash = Jsoup.parse(this).createRequestHash()
+                viewModel.requestHash = Jsoup.parse(this).createRequestHash()
             }
             response?.apply {
                 val cookies = response.headers().values("Set-Cookie")
@@ -74,11 +74,30 @@ class LoginActivity : BaseActivity() {
             }
         }
 
+        viewModel.preGetLoginParamData.observe(this) { result ->
+            val response = result.getOrNull()
+            val body = response?.body()?.string()
+
+            body?.apply {
+                viewModel.requestHash = Jsoup.parse(this).createRequestHash()
+            }
+            response?.apply {
+                val cookies = response.headers().values("Set-Cookie")
+                val session = cookies[0]
+                val sessionID = session.substring(0, session.indexOf(";"))
+                SESSID = sessionID
+                isGetLoginParam = true
+                viewModel.getLoginParam()
+            }
+            //Log.d("fsdfsdfghhyyy", "requestHash1: ${viewModel.requestHash}")
+            //Log.d("fsdfsdfghhyyy", "sessid1: $SESSID")
+        }
+
         viewModel.loginParamData.observe(this) { result ->
             val response = result.getOrNull()
             val body = response?.body()?.string()
             body?.apply {
-                requestHash = Jsoup.parse(this).createRequestHash()
+                viewModel.requestHash = Jsoup.parse(this).createRequestHash()
             }
             response?.apply {
                 val cookies = response.headers().values("Set-Cookie")
@@ -86,6 +105,8 @@ class LoginActivity : BaseActivity() {
                 val sessionID = session.substring(0, session.indexOf(";"))
                 SESSID = sessionID
             }
+            //Log.d("fsdfsdfghhyyy", "requestHash2: ${viewModel.requestHash}")
+            //Log.d("fsdfsdfghhyyy", "sessid2: $SESSID")
         }
 
         viewModel.tryLoginData.observe(this) { result ->
@@ -198,7 +219,7 @@ class LoginActivity : BaseActivity() {
         isTryLogin = true
         viewModel.loginData["submit"] = "1"
         viewModel.loginData["randomNumber"] = createRandomNumber()
-        viewModel.loginData["requestHash"] = requestHash
+        viewModel.loginData["requestHash"] = viewModel.requestHash
         viewModel.loginData["login"] = binding.account.text.toString()
         viewModel.loginData["password"] = binding.password.text.toString()
         viewModel.loginData["captcha"] = binding.captchaText.text.toString()

@@ -15,10 +15,14 @@ class SearchActivity : BaseActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val pageType = intent.getStringExtra("pageType" )!!
+        val pageParam = intent.getStringExtra("pageParam")!!
+        val title = intent.getStringExtra("title")!!
+
         if (supportFragmentManager.findFragmentById(R.id.searchFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.searchFragment, SearchFragment())
+                .replace(R.id.searchFragment, SearchFragment.newInstance(pageType, pageParam, title))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }

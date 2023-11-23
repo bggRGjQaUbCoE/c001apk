@@ -11,8 +11,8 @@ object Repository {
         page: Int,
         firstLaunch: Int,
         installTime: String,
-        firstItem: String,
-        lastItem: String
+        firstItem: String?,
+        lastItem: String?
     ) =
         fire(Dispatchers.IO) {
             val homeFeedResponse =
@@ -56,9 +56,23 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun getSearch(type: String, feedType: String, sort: String, keyWord: String, page: Int) =
+    fun getSearch(type: String,
+                  feedType: String,
+                  sort: String,
+                  keyWord: String,
+                  pageType: String,
+                  pageParam: String,
+                  page: Int,
+                  showAnonymous: Int) =
         fire(Dispatchers.IO) {
-            val searchResponse = Network.getSearch(type, feedType, sort, keyWord, page)
+            val searchResponse = Network.getSearch(type,
+                feedType,
+                sort,
+                keyWord,
+                pageType,
+                pageParam,
+                page,
+                showAnonymous)
             if (searchResponse.data.isNotEmpty())
                 Result.success(searchResponse.data)
             else
@@ -221,6 +235,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun preGetLoginParam() =
+        fire(Dispatchers.IO) {
+            val response = Network.preGetLoginParam()
+            if (response != null)
+                Result.success(response)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     fun getLoginParam() =
         fire(Dispatchers.IO) {
             val response = Network.getLoginParam()
@@ -247,6 +270,14 @@ object Repository {
             Result.failure(RuntimeException("response status is null"))
     }
 
+    fun getValidateCaptcha(url: String) = fire(Dispatchers.IO) {
+        val response = Network.getValidateCaptcha(url)
+        if (response != null)
+            Result.success(response)
+        else
+            Result.failure(RuntimeException("response status is null"))
+    }
+
     fun postReply(data: HashMap<String, String>, id: String, type: String) = fire(Dispatchers.IO) {
         val replyResponse = Network.postReply(data, id, type)
         if (replyResponse != null)
@@ -255,7 +286,7 @@ object Repository {
             Result.failure(RuntimeException("response status is null"))
     }
 
-    fun getDataList(url: String, title: String, subTitle: String, lastItem: String, page: Int) =
+    fun getDataList(url: String, title: String, subTitle: String, lastItem: String?, page: Int) =
         fire(Dispatchers.IO) {
             val dataResponse = Network.getDataList(url, title, subTitle, lastItem, page)
             if (dataResponse.data.isNotEmpty())
@@ -305,6 +336,24 @@ object Repository {
             val dataResponse = Network.postFollowUnFollow(url, uid)
             if (dataResponse.data != null)
                 Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun postCreateFeed(data: HashMap<String, String?>) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.postCreateFeed(data)
+            if (dataResponse != null)
+                Result.success(dataResponse)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun postRequestValidate(data: HashMap<String, String?>) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.postRequestValidate(data)
+            if (dataResponse != null)
+                Result.success(dataResponse)
             else
                 Result.failure(RuntimeException("response status is null"))
         }

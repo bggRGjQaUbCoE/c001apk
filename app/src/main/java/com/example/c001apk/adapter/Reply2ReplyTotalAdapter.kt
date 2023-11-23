@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +32,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class Reply2ReplyTotalAdapter(
     private val mContext: Context,
+    private val fuid: String,
     private val uid: String,
     private val position: Int,
     private val replyList: List<TotalReplyResponse.Data>
@@ -130,12 +132,17 @@ class Reply2ReplyTotalAdapter(
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        iOnLikeClickListener?.onPostLike(
-                            null,
-                            viewHolder.isLike,
-                            viewHolder.id,
-                            viewHolder.bindingAdapterPosition
-                        )
+                        if (PrefManager.SZLMID == "") {
+                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            iOnLikeClickListener?.onPostLike(
+                                null,
+                                viewHolder.isLike,
+                                viewHolder.id,
+                                viewHolder.bindingAdapterPosition
+                            )
+                        }
                     }
                 }
                 viewHolder.multiImage.apply {
@@ -201,16 +208,32 @@ class Reply2ReplyTotalAdapter(
                 holder.isLike = reply.userAction?.like == 1
                 ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-                val text =
-                    if (uid == reply.ruid)
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>"""
-                    else
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}</a>"""
 
-                holder.uname.text = SpannableStringBuilderUtil.setText(
+                val replyTag =
+                    when (reply.uid) {
+                        fuid -> " [楼主] "
+                        uid -> " [层主] "
+                        else -> ""
+                    }
+
+                val rReplyTag =
+                    when (reply.ruid) {
+                        fuid -> " [楼主] "
+                        uid -> " [层主] "
+                        else -> ""
+                    }
+
+                val text =
+                    if (reply.ruid == "0")
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}$replyTag</a>"""
+                    else
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}$rReplyTag</a>"""
+
+
+                holder.uname.text = SpannableStringBuilderUtil.setReply(
                     mContext,
                     text,
-                    (holder.uname.textSize * 1.3).toInt(),
+                    holder.uname.textSize.toInt(),
                     null
                 )
                 holder.uname.movementMethod = LinkMovementMethod.getInstance()
@@ -256,7 +279,10 @@ class Reply2ReplyTotalAdapter(
                         )
                     )
                 } else {
-                    DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                    DrawableCompat.setTint(
+                        drawableLike,
+                        mContext.getColor(android.R.color.darker_gray)
+                    )
                     holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                 }
                 holder.like.text = reply.likenum
@@ -285,9 +311,9 @@ class Reply2ReplyTotalAdapter(
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
-                        if (PrefManager.isFullImageQuality){
+                        if (PrefManager.isFullImageQuality) {
                             setUrlList(reply.picArr)
-                        } else{
+                        } else {
                             for (element in reply.picArr)
                                 if (element.substring(element.length - 3, element.length) != "gif")
                                     urlList.add("$element.s.jpg")

@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.fragment.topic
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -13,6 +14,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
+import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
@@ -192,24 +194,25 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        if (viewModel.type == "product") {
-            inflater.inflate(R.menu.topic_product_menu, menu)
+        inflater.inflate(R.menu.topic_product_menu, menu)
+        if (viewModel.type == "product")
             menu.findItem(R.id.order).isVisible = binding.viewPager.currentItem == 1
-        }
+        else
+            menu.findItem(R.id.order).isVisible = false
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
 
-        if (viewModel.type == "product") {
-            menu.findItem(
-                when (viewModel.productTitle) {
-                    "最近回复" -> R.id.topicLatestReply
-                    "热度排序" -> R.id.topicHot
-                    "最新发布" -> R.id.topicLatestPublish
-                    else -> throw IllegalArgumentException("type error")
-                }
-            )?.isChecked = true
-        }
+        //if (viewModel.type == "product") {
+        menu.findItem(
+            when (viewModel.productTitle) {
+                "最近回复" -> R.id.topicLatestReply
+                "热度排序" -> R.id.topicHot
+                "最新发布" -> R.id.topicLatestPublish
+                else -> throw IllegalArgumentException("type error")
+            }
+        )?.isChecked = true
+        // }
 
         super.onPrepareOptionsMenu(menu)
     }
@@ -217,6 +220,20 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> requireActivity().finish()
+
+            R.id.search -> {
+                val intent = Intent(activity, SearchActivity::class.java)
+                if (viewModel.type == "topic") {
+                    intent.putExtra("pageType", "tag")
+                    intent.putExtra("pageParam", viewModel.title)
+                    intent.putExtra("title", viewModel.title)
+                } else {
+                    intent.putExtra("pageType", "product_phone")
+                    intent.putExtra("pageParam", viewModel.id)
+                    intent.putExtra("title", viewModel.title)
+                }
+                requireActivity().startActivity(intent)
+            }
 
             R.id.topicLatestReply -> {
                 viewModel.productTitle = "最近回复"

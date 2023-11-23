@@ -9,19 +9,24 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedContentResponse
+import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.UserActivity
@@ -30,6 +35,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
@@ -48,7 +54,9 @@ class FeedContentAdapter(
     private val feedList: List<FeedContentResponse>,
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var uid = ""
 
     private var onPostFollowListener: OnPostFollowListener? = null
 
@@ -134,6 +142,7 @@ class FeedContentAdapter(
         val totalReply: TextView = view.findViewById(R.id.totalReply)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
+        val expand: ImageButton = view.findViewById(R.id.expand)
         var id = ""
         var uid = ""
         var isLike = false
@@ -205,12 +214,17 @@ class FeedContentAdapter(
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        iOnLikeClickListener?.onPostLike(
-                            "feed",
-                            viewHolder.isLike,
-                            viewHolder.id,
-                            null
-                        )
+                        if (PrefManager.SZLMID == "") {
+                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            iOnLikeClickListener?.onPostLike(
+                                "feed",
+                                viewHolder.isLike,
+                                viewHolder.id,
+                                null
+                            )
+                        }
                     }
                 }
                 viewHolder.multiImage.apply {
@@ -288,16 +302,29 @@ class FeedContentAdapter(
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        iOnLikeClickListener?.onPostLike(
-                            "reply",
-                            viewHolder.isLike,
-                            viewHolder.id,
-                            viewHolder.bindingAdapterPosition - 1
-                        )
+                        if (PrefManager.SZLMID == "") {
+                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            iOnLikeClickListener?.onPostLike(
+                                "reply",
+                                viewHolder.isLike,
+                                viewHolder.id,
+                                viewHolder.bindingAdapterPosition - 1
+                            )
+                        }
                     }
                 }
                 viewHolder.multiImage.apply {
                     onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
+                }
+                viewHolder.expand.setOnClickListener {
+                    uid = viewHolder.uid
+                    val popup = PopupMenu(mContext, it)
+                    val inflater = popup.menuInflater
+                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.setOnMenuItemClickListener(this@FeedContentAdapter)
+                    popup.show()
                 }
                 viewHolder
             }
@@ -567,95 +594,104 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
                     if (reply.replyRows.isNotEmpty()) {
-                        holder.replyLayout.visibility = View.VISIBLE
-                        holder.linearAdapterLayout.adapter = object : BaseAdapter() {
-                            override fun getCount(): Int = reply.replyRows.size
-                            override fun getItem(p0: Int): Any = 0
-                            override fun getItemId(p0: Int): Long = 0
-                            override fun getView(
-                                position1: Int,
-                                convertView: View?,
-                                parent: ViewGroup?
-                            ): View {
-                                val view = LayoutInflater.from(mContext).inflate(
-                                    R.layout.item_feed_content_reply_to_reply_item,
-                                    parent,
-                                    false
-                                )
-                                val replyData = reply.replyRows[position1]
-                                val textView: TextView = view.findViewById(R.id.reply)
-                                //textView.highlightColor = Color.TRANSPARENT
-                                textView.highlightColor = ColorUtils.setAlphaComponent(
-                                    ThemeUtils.getThemeAttrColor(
-                                        mContext,
-                                        rikka.preference.simplemenu.R.attr.colorPrimaryDark
-                                    ), 128
-                                )
-
-                                val replyTag =
-                                    when(replyData.uid){
-                                        replyData.feedUid -> " [楼主] "
-                                        reply.uid -> " [层主] "
-                                        else -> ""
-                                    }
-
-                                val rReplyTag =
-                                    when(replyData.ruid){
-                                        replyData.feedUid -> " [楼主] "
-                                        reply.uid -> " [层主] "
-                                        else -> ""
-                                    }
-
-                                val rReplyUser =
-                                    when(replyData.ruid){
-                                        reply.uid -> ""
-                                        else -> """<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}${rReplyTag}</a>"""
-                                    }
-
-                                val replyPic =
-                                    when(replyData.pic){
-                                        "" -> ""
-                                        else -> """ <a class=\"feed-forward-pic\" href=${replyData.pic}>查看图片(${replyData.picArr?.size})</a>"""
-                                    }
-
-                                val mess = """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
-
-                                textView.movementMethod = LinkMovementMethod.getInstance()
-
-                                textView.text = SpannableStringBuilderUtil.setReply(
-                                    mContext,
-                                    mess,
-                                    textView.textSize.toInt(),
-                                    replyData.picArr
-                                )
-
-                                SpannableStringBuilderUtil.setData(position1, replyData.uid)
-
-                                view.setOnClickListener {
-                                    iOnReplyClickContainer?.onReply2Reply(
-                                        holder.bindingAdapterPosition,
-                                        null,
-                                        replyData.id,
-                                        replyData.uid,
-                                        replyData.username,
-                                        "reply"
-                                    )
-                                }
-
-                                view.setOnLongClickListener {
-                                    val message = Html.fromHtml(
-                                        replyData.message,
-                                        Html.FROM_HTML_MODE_COMPACT
-                                    )
-                                    val intent = Intent(mContext, CopyActivity::class.java)
-                                    intent.putExtra("text", message.toString())
-                                    mContext.startActivity(intent)
-                                    true
-                                }
-
-                                return view
-                            }
+                        val sortedList = ArrayList<HomeFeedResponse.ReplyRows>()
+                        for (element in reply.replyRows) {
+                            if (!BlackListUtil.checkUid(element.uid))
+                                sortedList.add(element)
                         }
+                        if (sortedList.isNotEmpty()) {
+                            holder.replyLayout.visibility = View.VISIBLE
+                            holder.linearAdapterLayout.adapter = object : BaseAdapter() {
+                                override fun getCount(): Int = sortedList.size
+                                override fun getItem(p0: Int): Any = 0
+                                override fun getItemId(p0: Int): Long = 0
+                                override fun getView(
+                                    position1: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup?
+                                ): View {
+                                    val view = LayoutInflater.from(mContext).inflate(
+                                        R.layout.item_feed_content_reply_to_reply_item,
+                                        parent,
+                                        false
+                                    )
+
+                                    val replyData = sortedList[position1]
+                                    val textView: TextView = view.findViewById(R.id.reply)
+                                    //textView.highlightColor = Color.TRANSPARENT
+                                    textView.highlightColor = ColorUtils.setAlphaComponent(
+                                        ThemeUtils.getThemeAttrColor(
+                                            mContext,
+                                            rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                                        ), 128
+                                    )
+
+                                    val replyTag =
+                                        when (replyData.uid) {
+                                            replyData.feedUid -> " [楼主] "
+                                            reply.uid -> " [层主] "
+                                            else -> ""
+                                        }
+
+                                    val rReplyTag =
+                                        when (replyData.ruid) {
+                                            replyData.feedUid -> " [楼主] "
+                                            reply.uid -> " [层主] "
+                                            else -> ""
+                                        }
+
+                                    val rReplyUser =
+                                        when (replyData.ruid) {
+                                            reply.uid -> ""
+                                            else -> """<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}${rReplyTag}</a>"""
+                                        }
+
+                                    val replyPic =
+                                        when (replyData.pic) {
+                                            "" -> ""
+                                            else -> """ <a class=\"feed-forward-pic\" href=${replyData.pic}>查看图片(${replyData.picArr?.size})</a>"""
+                                        }
+
+                                    val mess =
+                                        """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
+
+                                    textView.movementMethod = LinkMovementMethod.getInstance()
+
+                                    textView.text = SpannableStringBuilderUtil.setReply(
+                                        mContext,
+                                        mess,
+                                        textView.textSize.toInt(),
+                                        replyData.picArr
+                                    )
+
+                                    SpannableStringBuilderUtil.setData(position1, replyData.uid)
+
+                                    view.setOnClickListener {
+                                        iOnReplyClickContainer?.onReply2Reply(
+                                            holder.bindingAdapterPosition,
+                                            null,
+                                            replyData.id,
+                                            replyData.uid,
+                                            replyData.username,
+                                            "reply"
+                                        )
+                                    }
+
+                                    view.setOnLongClickListener {
+                                        val message = Html.fromHtml(
+                                            replyData.message,
+                                            Html.FROM_HTML_MODE_COMPACT
+                                        )
+                                        val intent = Intent(mContext, CopyActivity::class.java)
+                                        intent.putExtra("text", message.toString())
+                                        mContext.startActivity(intent)
+                                        true
+                                    }
+
+                                    return view
+                                }
+                            }
+                        } else holder.replyLayout.visibility = View.GONE
                     } else holder.replyLayout.visibility = View.GONE
 
                     if (reply.replyRowsMore != 0) {
@@ -708,6 +744,15 @@ class FeedContentAdapter(
             itemCount - 1 -> TYPE_FOOTER
             else -> TYPE_REPLY
         }
+    }
+
+    override fun onMenuItemClick(p0: MenuItem): Boolean {
+        when (p0.itemId) {
+            R.id.block -> {
+                BlackListUtil.saveUid(uid)
+            }
+        }
+        return false
     }
 
 }

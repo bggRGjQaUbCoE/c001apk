@@ -14,6 +14,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
@@ -54,6 +55,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed)
                             if (element.entityType == "feed" || element.entityType == "contacts")
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                 viewModel.dataList.add(element)
                     }
                     mAdapter.notifyDataSetChanged()
@@ -79,7 +81,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -97,7 +99,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -183,7 +185,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
     }
 
     private fun initData() {
-        if (viewModel.dataList.isEmpty()){
+        if (viewModel.dataList.isEmpty()) {
             binding.indicator.isIndeterminate = true
             binding.indicator.visibility = View.VISIBLE
             refreshData()
@@ -199,6 +201,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
         }
     }

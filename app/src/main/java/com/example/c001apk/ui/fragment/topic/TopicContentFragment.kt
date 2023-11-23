@@ -18,6 +18,7 @@ import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -115,7 +116,8 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                             //|| element.entityTemplate == "articleNews"
                             //|| element.entityTemplate == "feedCover"
                             )
-                                viewModel.topicDataList.add(element)
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                    viewModel.topicDataList.add(element)
                     mAdapter.notifyDataSetChanged()
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                 } else {
@@ -141,7 +143,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -160,7 +162,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -223,6 +225,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }

@@ -11,7 +11,9 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.util.DensityTool
+import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.PrefManager
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImageTextScrollCardAdapter(
@@ -26,6 +28,10 @@ class ImageTextScrollCardAdapter(
         var id = ""
         var uid = ""
         var uname = ""
+        var avatarUrl = ""
+        var pubDate = ""
+        var device = ""
+        var message = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,6 +49,16 @@ class ImageTextScrollCardAdapter(
             intent.putExtra("id", viewHolder.id)
             intent.putExtra("uid", viewHolder.uid)
             intent.putExtra("uname", viewHolder.uname)
+            if (PrefManager.isRecordHistory)
+                HistoryUtil.saveHistory(
+                    viewHolder.id,
+                    viewHolder.uid,
+                    viewHolder.uname,
+                    viewHolder.avatarUrl,
+                    viewHolder.device,
+                    viewHolder.message,
+                    viewHolder.pubDate
+                )
             parent.context.startActivity(intent)
         }
         return viewHolder
@@ -52,6 +68,10 @@ class ImageTextScrollCardAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val imageTextScrollCard = imageCarouselCardList[position]
+        holder.avatarUrl = imageTextScrollCard.userInfo.userAvatar
+        holder.pubDate = imageTextScrollCard.dateline
+        holder.device = imageTextScrollCard.deviceTitle
+        holder.message = imageTextScrollCard.message
         holder.id = imageTextScrollCard.id
         holder.uid = imageTextScrollCard.userInfo.uid
         holder.uname = imageTextScrollCard.username

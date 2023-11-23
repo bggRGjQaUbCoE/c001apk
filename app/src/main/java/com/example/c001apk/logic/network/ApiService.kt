@@ -1,6 +1,7 @@
 package com.example.c001apk.logic.network
 
 import com.example.c001apk.logic.model.CheckResponse
+import com.example.c001apk.logic.model.CreateFeedResponse
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.LikeFeedResponse
@@ -23,16 +24,18 @@ import retrofit2.http.Url
 
 interface ApiService {
 
-    @GET("/v6/main/indexV8?ids=")
+    @GET("/v6/main/indexV8")
     fun getHomeFeed(
         @Query("page") page: Int,
         @Query("firstLaunch") firstLaunch: Int,
         @Query("installTime") installTime: String,
-        @Query("firstItem") firstItem: String,
-        @Query("lastItem") lastItem: String,
+        @Query("firstItem") firstItem: String?,
+        @Query("lastItem") lastItem: String?,
+        @Query("ids") ids: String = "",
     ): Call<HomeFeedResponse>
 
     @GET("/v6/feed/detail")
+    //@FormUrlEncoded
     fun getFeedContent(
         @Query("id") id: String
     ): Call<FeedContentResponse>
@@ -54,7 +57,10 @@ interface ApiService {
         @Query("feedType") feedType: String,
         @Query("sort") sort: String,
         @Query("searchValue") keyWord: String,
-        @Query("page") page: Int
+        @Query("pageType") pageType: String,
+        @Query("pageParam") pageParam: String,
+        @Query("page") page: Int,
+        @Query("showAnonymous") showAnonymous: Int
     ): Call<HomeFeedResponse>
 
     @GET("/v6/feed/replyList?listType=&discussMode=0&feedType=feed_reply&blockStatus=0&fromFeedAuthor=0")
@@ -150,6 +156,11 @@ interface ApiService {
     fun checkLoginInfo(
     ): Call<CheckResponse>
 
+    @GET("/auth/login/")
+    fun preGetLoginParam(
+        @Query("type") type: String = "mobile"
+    ): Call<ResponseBody>
+
     @GET("/auth/loginByCoolApk")
     fun getLoginParam(
     ): Call<ResponseBody>
@@ -160,6 +171,9 @@ interface ApiService {
 
     @GET
     fun getCaptcha(@Url url: String): Call<ResponseBody>
+
+    @GET
+    fun getValidateCaptcha(@Url url: String): Call<ResponseBody>
 
     @POST("v6/feed/reply")
     @FormUrlEncoded
@@ -174,7 +188,7 @@ interface ApiService {
         @Query("url") url: String,
         @Query("title") title: String,
         @Query("subTitle") subTitle: String,
-        @Query("lastItem") lastItem: String,
+        @Query("lastItem") lastItem: String?,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
@@ -208,5 +222,16 @@ interface ApiService {
         @Query("uid") uid: String
     ): Call<LikeReplyResponse>
 
+    @POST("/v6/feed/createFeed")
+    @FormUrlEncoded
+    fun postCreateFeed(
+        @FieldMap data: HashMap<String, String?>
+    ): Call<CreateFeedResponse>
+
+    @POST("/v6/account/requestValidate")
+    @FormUrlEncoded
+    fun postRequestValidate(
+        @FieldMap data: HashMap<String, String?>
+    ): Call<LikeReplyResponse>
 
 }

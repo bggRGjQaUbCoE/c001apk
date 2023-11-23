@@ -3,6 +3,9 @@ package com.example.c001apk.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
@@ -15,6 +18,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
@@ -22,6 +27,7 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import net.mikaelzero.mojito.ext.mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 
@@ -46,6 +52,11 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
+        if (viewModel.uname != "") {
+            showUserInfo()
+            binding.followBtn.visibility = View.VISIBLE
+            binding.infoLayout.visibility = View.VISIBLE
+        }
         initView()
         initData()
         initRefresh()
@@ -67,6 +78,10 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
             }
         }
 
+        binding.uid.setOnClickListener {
+            copyText(this, viewModel.uid)
+        }
+
         binding.followBtn.setOnClickListener {
             if (viewModel.followType) {
                 viewModel.postFollowUnFollow = true
@@ -85,39 +100,21 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
 
                 val user = result.getOrNull()
                 if (user != null) {
-                    binding.collapsingToolbar.title = user.username
-                    binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
-                    binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-                    ImageUtil.showUserCover(binding.cover, user.cover)
-                    ImageUtil.showAvatar(binding.avatar, user.userAvatar)
+                    viewModel.uid = user.uid
+                    viewModel.followType = user.isFollow == 1
                     viewModel.avatar = user.userAvatar
                     viewModel.cover = user.cover
-                    binding.name.text = user.username
-                    binding.level.text = "Lv.${user.level}"
-                    binding.level.visibility = View.VISIBLE
-                    if (user.bio == "") binding.bio.visibility = View.GONE
-                    else binding.bio.text = user.bio
-                    binding.like.text = "${CountUtil.view(user.beLikeNum)} 获赞"
-                    binding.follow.text = "${CountUtil.view(user.follow)} 关注"
-                    binding.fans.text = "${CountUtil.view(user.fans)} 粉丝"
-                    binding.loginTime.text = DateUtils.fromToday(user.logintime) + "活跃"
                     viewModel.followType = user.isFollow == 1
-                    if (user.isFollow == 0) {
-                        binding.followBtn.text = "关注"
-                    } else {
-                        binding.followBtn.text = "已关注"
-                    }
-
-                    val intent = Intent(this, FFFListActivity::class.java)
-                    intent.putExtra("uid", user.uid)
-                    binding.follow.setOnClickListener {
-                        intent.putExtra("type", "follow")
-                        startActivity(intent)
-                    }
-                    binding.fans.setOnClickListener {
-                        intent.putExtra("type", "fans")
-                        startActivity(intent)
-                    }
+                    viewModel.uname = user.username
+                    viewModel.avatar = user.userAvatar
+                    viewModel.cover = user.cover
+                    viewModel.level = "Lv.${user.level}"
+                    viewModel.bio = user.bio
+                    viewModel.like = "${CountUtil.view(user.beLikeNum)}获赞"
+                    viewModel.follow = "${CountUtil.view(user.follow)}关注"
+                    viewModel.fans = "${CountUtil.view(user.fans)}粉丝"
+                    viewModel.loginTime = DateUtils.fromToday(user.logintime) + "活跃"
+                    showUserInfo()
 
                     viewModel.uid = user.uid
                     viewModel.isRefreshing = true
@@ -139,7 +136,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
                             if (element.entityTemplate == "feed")
-                                viewModel.feedList.add(element)
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                    viewModel.feedList.add(element)
                         }
                     }
                     mAdapter.notifyDataSetChanged()
@@ -155,6 +153,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                 binding.indicator.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
+                viewModel.isLoadMore = false
             }
         }
 
@@ -168,7 +167,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         viewModel.feedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.feedList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -187,7 +186,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         viewModel.feedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.feedList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -214,6 +213,39 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         }
 
 
+    }
+
+    private fun showUserInfo() {
+        binding.collapsingToolbar.title = viewModel.uname
+        binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
+        binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
+        ImageUtil.showUserCover(binding.cover, viewModel.cover)
+        ImageUtil.showAvatar(binding.avatar, viewModel.avatar)
+        binding.name.text = viewModel.uname
+        binding.uid.text = viewModel.uid
+        binding.level.text = viewModel.level
+        binding.level.visibility = View.VISIBLE
+        if (viewModel.bio == "") binding.bio.visibility = View.GONE
+        else binding.bio.text = viewModel.bio
+        binding.like.text = viewModel.like
+        binding.follow.text = viewModel.follow
+        binding.fans.text = viewModel.fans
+        binding.loginTime.text = viewModel.loginTime
+        if (!viewModel.followType) {
+            binding.followBtn.text = "关注"
+        } else {
+            binding.followBtn.text = "已关注"
+        }
+        val intent = Intent(this, FFFListActivity::class.java)
+        intent.putExtra("uid", viewModel.uid)
+        binding.follow.setOnClickListener {
+            intent.putExtra("type", "follow")
+            startActivity(intent)
+        }
+        binding.fans.setOnClickListener {
+            intent.putExtra("type", "fans")
+            startActivity(intent)
+        }
     }
 
     private fun initScroll() {
@@ -271,7 +303,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
-        viewModel.id = intent.getStringExtra("id")!!
+        if (viewModel.id == "")
+            viewModel.id = intent.getStringExtra("id")!!
         viewModel.isNew = true
         viewModel.getUser()
     }
@@ -285,14 +318,79 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
         }
     }
 
+    @SuppressLint("RestrictedApi")
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.user_menu, menu)
+
+        val itemBlock = menu!!.findItem(R.id.block)
+        val spannableString = SpannableString(itemBlock.title)
+        spannableString.setSpan(
+            ForegroundColorSpan(ThemeUtils.getThemeAttrColor(
+                this,
+                rikka.preference.simplemenu.R.attr.colorControlNormal
+            )),
+            0,
+            spannableString.length,
+            0
+        )
+        itemBlock.title = spannableString
+
+
+        val itemShare = menu.findItem(R.id.share)
+        val spannableString1 = SpannableString(itemShare.title)
+        spannableString1.setSpan(
+            ForegroundColorSpan(ThemeUtils.getThemeAttrColor(
+                this,
+                rikka.preference.simplemenu.R.attr.colorControlNormal
+            )),
+            0,
+            spannableString1.length,
+            0
+        )
+        itemShare.title = spannableString1
+
+        return true
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
+
+            R.id.search -> {
+                val intent = Intent(this, SearchActivity::class.java)
+                intent.putExtra("pageType", "user")
+                intent.putExtra("pageParam", viewModel.uid)
+                intent.putExtra("title", binding.name.text)
+                startActivity(intent)
+            }
+
+            R.id.block -> {
+                MaterialAlertDialogBuilder(this).apply {
+                    setTitle("确定将 ${viewModel.uname} 加入黑名单？")
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        BlackListUtil.saveUid(viewModel.uid)
+                    }
+                    show()
+                }
+            }
+
+            R.id.share -> {
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.type = "text/plain"
+                intent.putExtra(Intent.EXTRA_SUBJECT, "分享")
+                intent.putExtra(
+                    Intent.EXTRA_TEXT, "https://www.coolapk.com/u/${viewModel.uid}"
+                )
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(Intent.createChooser(intent, "分享"))
+            }
+
         }
         return true
     }

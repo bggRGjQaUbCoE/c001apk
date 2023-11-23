@@ -7,8 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.ColorUtils
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.ui.activity.AboutActivity
+import com.example.c001apk.ui.activity.BlackListActivity
+import com.example.c001apk.ui.activity.SBCKActivity
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -70,6 +73,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "customToken" -> PrefManager.customToken
                 "isFullImageQuality" -> PrefManager.isFullImageQuality
                 "isClearKeyWord" -> PrefManager.isClearKeyWord
+                "isKeepFeed" -> PrefManager.isKeepFeed
+                "isRecordHistory" -> PrefManager.isRecordHistory
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -83,12 +88,14 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "customToken" -> PrefManager.customToken = value
                 "isFullImageQuality" -> PrefManager.isFullImageQuality = value
                 "isClearKeyWord" -> PrefManager.isClearKeyWord = value
+                "isKeepFeed" -> PrefManager.isKeepFeed = value
+                "isRecordHistory" -> PrefManager.isRecordHistory = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "RestrictedApi")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = SettingsPreferenceDataStore()
         setPreferencesFromResource(R.xml.settings, rootKey)
@@ -147,44 +154,41 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         }
 
-        findPreference<Preference>("xAppToken")?.setOnPreferenceClickListener {
+
+        findPreference<Preference>("sbparams")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), SBCKActivity::class.java))
+            true
+        }
+
+        findPreference<Preference>("zmlmId")?.setOnPreferenceClickListener {
             val view = LayoutInflater.from(requireContext())
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
+            editText.highlightColor = ColorUtils.setAlphaComponent(
+                ThemeUtils.getThemeAttrColor(
+                    requireContext(),
+                    rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                ), 128
+            )
+            editText.setText(PrefManager.SZLMID)
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
-                setTitle("X-App-Token")
-                setNegativeButton(android.R.string.cancel, null)
-                setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.xAppToken = editText.text.toString()
+                setTitle(requireContext().getString(R.string.zmlmId))
+                setNeutralButton("重新生成DeviceCode"){_, _ ->
+                    PrefManager.SZLMID = editText.text.toString()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
                 }
-                editText.setText(PrefManager.xAppToken)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    PrefManager.SZLMID = editText.text.toString()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                }
                 show()
             }
             true
         }
 
-        findPreference<Preference>("xAppDevice")?.setOnPreferenceClickListener {
-            val view = LayoutInflater.from(requireContext())
-                .inflate(R.layout.item_x_app_token, null, false)
-            val editText: EditText = view.findViewById(R.id.editText)
-            MaterialAlertDialogBuilder(requireContext()).apply {
-                setView(view)
-                setTitle("X-App-Device")
-                setNegativeButton(android.R.string.cancel, null)
-                setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.xAppDevice = editText.text.toString()
-
-                }
-                editText.setText(PrefManager.xAppDevice)
-                show()
-            }
-            true
-        }
-
-        findPreference<Preference>("regenerateDeviceInfo")?.setOnPreferenceClickListener {
-            TokenDeviceUtils.regenerateDeviceInfo(this.requireContext())
-            Toast.makeText(this.requireActivity(), "已重新生成", Toast.LENGTH_SHORT).show()
+        findPreference<Preference>("blackList")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), BlackListActivity::class.java))
             true
         }
 

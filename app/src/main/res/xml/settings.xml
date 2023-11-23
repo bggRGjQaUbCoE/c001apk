@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory android:title="@string/app_name">
+        <Preference
+            android:icon="@drawable/ic_phone"
+            android:dependency="zmlmId"
+            android:key="zmlmId"
+            android:title="@string/zmlmId" />
+        <Preference
+            android:icon="@drawable/ic_dev_mode"
+            android:key="sbparams"
+            android:title="@string/params" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/settings_theme">
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
@@ -34,6 +46,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/display">
+        <Preference
+            android:icon="@drawable/ic_block"
+            android:dependency="zmlmId"
+            android:key="blackList"
+            android:title="@string/black_list" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_history"
+            android:key="isRecordHistory"
+            android:title="@string/record_history" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_feed"
+            android:key="isKeepFeed"
+            android:title="@string/keep_feed" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_image"
@@ -42,44 +69,22 @@
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="false"
-            android:icon="@drawable/outline_palette_24"
+            android:icon="@drawable/ic_emoji"
             android:key="showEmoji"
             android:title="@string/show_emoji" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
             android:dependency="showEmoji"
-            android:icon="@drawable/outline_palette_24"
+            android:icon="@drawable/ic_emoji"
             android:key="allHuaji"
             android:title="@string/all_huaji" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_clear_all"
             android:key="isClearKeyWord"
+            android:title="@string/auto_clear_key_word"
             android:summary="@string/clear_Key_word"
-            android:title="@string/auto_clear_key_word" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/app_name">
-        <rikka.material.preference.MaterialSwitchPreference
-            android:defaultValue="false"
-            android:disableDependentsState="false"
-            android:icon="@drawable/ic_dev_mode"
-            android:key="customToken"
-            android:title="@string/customToken" />
-        <Preference
-            android:dependency="customToken"
-            android:icon="@drawable/ic_token"
-            android:key="xAppToken"
-            android:title="@string/xAppToken" />
-        <Preference
-            android:dependency="customToken"
-            android:icon="@drawable/ic_device1"
-            android:key="xAppDevice"
-            android:title="@string/xAppDevice" />
-        <Preference
-            android:icon="@drawable/ic_refresh"
-            android:key="regenerateDeviceInfo"
-            android:title="@string/regenerateDeviceInfo" />
+            />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/others">

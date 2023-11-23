@@ -70,7 +70,11 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
 
     private fun initMenu() {
         binding.search.setOnClickListener {
-            startActivity(Intent(activity, SearchActivity::class.java))
+            val intent = Intent(activity, SearchActivity::class.java)
+            intent.putExtra("pageType", "")
+            intent.putExtra("pageParam", "")
+            intent.putExtra("title", "")
+            requireActivity().startActivity(intent)
         }
     }
 

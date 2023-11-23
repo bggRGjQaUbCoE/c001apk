@@ -3,6 +3,20 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("dev.rikka.tools.materialthemebuilder")
     id("com.google.devtools.ksp")
+    id("stringfog")
+}
+apply(plugin = "stringfog")
+
+configure<com.github.megatronking.stringfog.plugin.StringFogExtension> {
+    // 必要：加解密库的实现类路径，需和上面配置的加解密算法库一致。
+    implementation = "com.github.megatronking.stringfog.xor.StringFogImpl"
+    // 可选：加密开关，默认开启。
+    enable = true
+    // 可选：指定需加密的代码包路径，可配置多个，未指定将默认全部加密。
+     fogPackages = arrayOf("com.example.c001apk")
+    //kg = com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator()
+    // base64或者bytes
+    mode = com.github.megatronking.stringfog.plugin.StringFogMode.bytes
 }
 
 materialThemeBuilder {
@@ -76,18 +90,42 @@ android {
     }
 
 
+    signingConfigs {
+        create("keyStore") {
+            keyAlias = "c001apk"
+            keyPassword = "123456"
+            storeFile = file("c001apk.jks")
+            storePassword = "123456"
+        }
+    }
+
     buildTypes {
-        release {
+        /*release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+        }*/
+        val signConfig = signingConfigs.getByName("keyStore")
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signConfig
         }
         getByName("debug") {
-            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signConfig
         }
     }
     compileOptions {
@@ -104,7 +142,7 @@ android {
     defaultConfig {
         ndk {
             abiFilters.add("arm64-v8a")
-//            abiFilters.add("armeabi-v7a")
+            abiFilters.add("armeabi-v7a")
 //            abiFilters.add("armeabi")
 //            abiFilters.add("x86")
             abiFilters.add("x86_64")
@@ -117,7 +155,6 @@ configurations.configureEach {
 }
 
 dependencies {
-
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
@@ -149,4 +186,6 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("androidx.room:room-runtime:2.6.0")
     ksp("androidx.room:room-compiler:2.6.0")
+    implementation("com.github.megatronking.stringfog:xor:5.0.0")
+
 }

@@ -6,4 +6,5 @@
     <color name="cover">#0D000000</color>
     <color name="ic_launcher_foreground">#FFFFFF</color>
     <color name="ic_launcher_background">#607D8B</color>
+    <color name="bw">@color/black</color>
 </resources>

@@ -16,6 +16,7 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityCarouselBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.topic.TopicContentFragment
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -112,7 +113,8 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                             binding.recyclerView.visibility = View.VISIBLE
                             for (element in response)
                                 if (element.entityType == "feed")
-                                    viewModel.carouselList.add(element)
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                        viewModel.carouselList.add(element)
                             mAdapter.notifyDataSetChanged()
                             mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                         }
@@ -122,7 +124,8 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                         if (viewModel.isRefreshing || viewModel.isLoadMore)
                             for (element in response)
                                 if (element.entityType == "feed")
-                                    viewModel.carouselList.add(element)
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                        viewModel.carouselList.add(element)
                         mAdapter.notifyDataSetChanged()
                         mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                     }
@@ -150,8 +153,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.carouselList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.carouselList[viewModel.likePosition].userAction?.like = 1
-
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -170,8 +172,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.carouselList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.carouselList[viewModel.likePosition].userAction?.like = 0
-
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -234,6 +235,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }

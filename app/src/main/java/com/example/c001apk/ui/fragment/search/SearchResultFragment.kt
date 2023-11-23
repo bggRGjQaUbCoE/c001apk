@@ -27,10 +27,13 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
 
     companion object {
         @JvmStatic
-        fun newInstance(keyWord: String) =
+        fun newInstance(keyWord: String, pageType: String, pageParam: String, title: String) =
             SearchResultFragment().apply {
                 arguments = Bundle().apply {
                     putString("KEYWORD", keyWord)
+                    putString("pageType", pageType)
+                    putString("pageParam", pageParam)
+                    putString("title", title)
                 }
             }
     }
@@ -40,6 +43,9 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
         setHasOptionsMenu(true)
         arguments?.let {
             viewModel.keyWord = it.getString("KEYWORD")!!
+            viewModel.pageType = it.getString("pageType")!!
+            viewModel.pageParam = it.getString("pageParam")!!
+            viewModel.title = it.getString("title")!!
         }
     }
 
@@ -64,6 +70,14 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
     private fun initBar() {
         binding.toolBar.apply {
             title = viewModel.keyWord
+            if (viewModel.pageType != "")
+                subtitle = when (viewModel.pageType) {
+                    "tag" -> "话题: ${viewModel.title}"
+                    "product_phone" -> "数码: ${viewModel.title}"
+                    "apk" -> "应用: ${viewModel.title}"
+                    "user" -> "用户: ${viewModel.title}"
+                    else -> ""
+                }
             setOnClickListener {
                 requireActivity().supportFragmentManager.popBackStack()
             }
@@ -73,12 +87,27 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
     }
 
     private fun initData() {
-        viewModel.searchFragmentList.run {
-            add(SearchContentFragment.newInstance(viewModel.keyWord, "feed"))
-            add(SearchContentFragment.newInstance(viewModel.keyWord, "apk"))
-            add(SearchContentFragment.newInstance(viewModel.keyWord, "product"))
-            add(SearchContentFragment.newInstance(viewModel.keyWord, "user"))
-            add(SearchContentFragment.newInstance(viewModel.keyWord, "feedTopic"))
+        if (viewModel.pageType == "") {
+            viewModel.searchTabList = arrayOf("动态", "应用", "数码", "用户", "话题")
+            viewModel.searchFragmentList.run {
+                add(SearchContentFragment.newInstance(viewModel.keyWord, "feed", "", ""))
+                add(SearchContentFragment.newInstance(viewModel.keyWord, "apk", "", ""))
+                add(SearchContentFragment.newInstance(viewModel.keyWord, "product", "", ""))
+                add(SearchContentFragment.newInstance(viewModel.keyWord, "user", "", ""))
+                add(SearchContentFragment.newInstance(viewModel.keyWord, "feedTopic", "", ""))
+            }
+        } else {
+            binding.tabLayout.visibility = View.GONE
+            viewModel.searchTabList = arrayOf("null")
+            viewModel.searchFragmentList
+                .add(
+                    SearchContentFragment.newInstance(
+                        viewModel.keyWord,
+                        "feed",
+                        viewModel.pageType,
+                        viewModel.pageParam
+                    )
+                )
         }
     }
 

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.AppItem
+import com.example.c001apk.logic.model.BHistoryBean
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.MessageResponse
@@ -26,6 +27,23 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    val bHistoryList: ArrayList<BHistoryBean> = ArrayList()
+    var requestHash = ""
+    var changeFirstItem = false
+    var isRequestValidate = false
+    var isGetCaptcha = false
+    var isCreateFeed = false
+    var isGetCheckLoginInfo = false
+    var level = ""
+    var bio = ""
+    var loginTime = ""
+    var like = ""
+    var follow = ""
+    var fans = ""
+    var version = ""
+    var logo = ""
+    var size = ""
+    var lastupdate = ""
     var dateLine = 0L
     var followType = false
     var isViewReply = false
@@ -45,9 +63,12 @@ class AppViewModel : ViewModel() {
     var isPostReply = false
     var postFollowUnFollow = false
 
+    var fuid = "" // feed user id
+
     //feed data
     var id = "" // feed id
     var uid = "" // feed user id
+    var funame = ""
     var uname = "" // feed username //被回复用户name
     var rid = "" // 回复feed/reply id
     var ruid = "" // 被回复用户id
@@ -184,15 +205,17 @@ class AppViewModel : ViewModel() {
 
     var likePosition = -1
     private val baseURL =
-        "#/feed/apkCommentList?isIncludeTop=1&withSortCard=1&id="
+        "/page?url=%2Ffeed%2FapkCommentList%3Fid%3D"
     var appId = ""
     var isInit = true
     val appCommentList = ArrayList<HomeFeedResponse.Data>()
+    var appCommentTitle = "最近回复"
+    var appCommentSort = ""
 
     private val getAppCommentData = MutableLiveData<String>()
 
     val appCommentData = getAppCommentData.switchMap {
-        Repository.getDataList(baseURL + appId, "讨论", "", "", page)
+        Repository.getDataList(baseURL + appId + appCommentSort, appCommentTitle, "", "", page)
     }
 
     fun getAppComment() {
@@ -251,6 +274,16 @@ class AppViewModel : ViewModel() {
         getMessageListData.value = getMessageListData.value
     }
 
+    private val preGetLoginParamLiveData = MutableLiveData<String>()
+
+    val preGetLoginParamData = preGetLoginParamLiveData.switchMap {
+        Repository.preGetLoginParam()
+    }
+
+    fun preGetLoginParam() {
+        preGetLoginParamLiveData.value = preGetLoginParamLiveData.value
+    }
+
     private val getLoginParamData = MutableLiveData<String>()
 
     val loginParamData = getLoginParamData.switchMap {
@@ -283,6 +316,17 @@ class AppViewModel : ViewModel() {
 
     fun getCaptcha() {
         getCaptchaData.value = getCaptchaData.value
+    }
+
+    private val getValidateCaptchaLiveData = MutableLiveData<String>()
+
+    private val validateCaptchaBaseUrl = "/v6/account/captchaImage?"
+    val validateCaptchaData = getValidateCaptchaLiveData.switchMap {
+        Repository.getValidateCaptcha("$validateCaptchaBaseUrl${timeStamp}&w=270=&h=113")
+    }
+
+    fun getValidateCaptcha() {
+        getValidateCaptchaLiveData.value = getValidateCaptchaLiveData.value
     }
 
     private val getProfileDataLiveData = MutableLiveData<String>()
@@ -406,16 +450,21 @@ class AppViewModel : ViewModel() {
                             "${packageInfo.versionName}(${packageInfo.longVersionCodeCompat})"
                         lastUpdateTime = packageInfo.lastUpdateTime
                     }
-                    newItems.add(appItem)
-                    updateCheckJsonObject.put(
-                        info.packageName,
-                        "0,${packageInfo.longVersionCodeCompat},${Utils.getInstalledAppMd5(info)}"
-                    )
+
+                    if (appItem.packageName != "com.example.c001apk")
+                        newItems.add(appItem)
+
+                    if (info.packageName != "com.example.c001apk")
+                        updateCheckJsonObject.put(
+                            info.packageName,
+                            "0,${packageInfo.longVersionCodeCompat},${Utils.getInstalledAppMd5(info)}"
+                        )
                 }
             }
 
             withContext(Dispatchers.Main) {
-                items.value = newItems.sortedByDescending { it.lastUpdateTime }.toCollection(ArrayList())
+                items.value =
+                    newItems.sortedByDescending { it.lastUpdateTime }.toCollection(ArrayList())
                 updateCheckEncoded.value = updateCheckJsonObject.toString().getBase64(false)
             }
         }
@@ -435,13 +484,16 @@ class AppViewModel : ViewModel() {
     val homeFeedList = ArrayList<HomeFeedResponse.Data>()
     var firstLaunch = 1
     var installTime = ""
-    var firstItem = ""
-    var lastItem = ""
+    var firstItem: String? = null
+    var lastItem: String? = null
 
     private val getHomeFeedData = MutableLiveData<String>()
 
     val homeFeedData = getHomeFeedData.switchMap {
-        Repository.getHomeFeed(page, firstLaunch, installTime, "", "")
+        if (isRefreshing)
+            Repository.getHomeFeed(page, firstLaunch, installTime, firstItem, null)
+        else //if (isLoadMore)
+            Repository.getHomeFeed(page, firstLaunch, installTime, null, lastItem)
     }
 
     fun getHomeFeed() {
@@ -504,6 +556,7 @@ class AppViewModel : ViewModel() {
 
 
     val countList = ArrayList<String>()
+    val messCountList = ArrayList<Int>()
 
     var historyList = ArrayList<String>()
 
@@ -512,11 +565,23 @@ class AppViewModel : ViewModel() {
     var feedType: String = "all"
     var sort: String = "default" //hot // reply
     var keyWord: String = ""
+    var pageType = ""  //"tag"
+    var pageParam = "" //topic title
+    var showAnonymous = -1
 
     private val getSearchData = MutableLiveData<String>()
 
     val searchData = getSearchData.switchMap {
-        Repository.getSearch(type, feedType, sort, keyWord, page)
+        Repository.getSearch(
+            type,
+            feedType,
+            sort,
+            keyWord,
+            pageType,
+            pageParam,
+            page,
+            showAnonymous
+        )
     }
 
     fun getSearch() {
@@ -547,7 +612,7 @@ class AppViewModel : ViewModel() {
         getProductLayoutLiveData.value = getProductLayoutLiveData.value
     }
 
-    val searchTabList = arrayOf("动态", "应用", "数码", "用户", "话题")
+    var searchTabList = emptyArray<String>()
     var searchFragmentList = ArrayList<Fragment>()
 
 
@@ -557,8 +622,31 @@ class AppViewModel : ViewModel() {
         Repository.postFollowUnFollow(url, uid)
     }
 
+    var createFeedData = HashMap<String, String?>()
+
     fun postFollowUnFollow() {
         postFollowUnFollowLiveData.value = postFollowUnFollowLiveData.value
+    }
+
+    private val postCreateFeedLiveData = MutableLiveData<String>()
+
+    val postCreateFeedData = postCreateFeedLiveData.switchMap {
+        Repository.postCreateFeed(createFeedData)
+    }
+
+    fun postCreateFeed() {
+        postCreateFeedLiveData.value = postCreateFeedLiveData.value
+    }
+
+    var requestValidateData = HashMap<String, String?>()
+    private val postRequestValidateLiveData = MutableLiveData<String>()
+
+    val postRequestValidateData = postCreateFeedLiveData.switchMap {
+        Repository.postRequestValidate(requestValidateData)
+    }
+
+    fun postRequestValidate() {
+        postRequestValidateLiveData.value = postRequestValidateLiveData.value
     }
 
 }

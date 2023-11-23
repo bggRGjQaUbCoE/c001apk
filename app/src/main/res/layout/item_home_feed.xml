@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    app:cardElevation="1dp"
+    app:cardBackgroundColor="@color/home_card_background_color"
+    app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,6 +19,15 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/expand"
+            android:background="?actionBarItemBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_expand_more"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -93,10 +103,12 @@
             app:layout_constraintTop_toBottomOf="@id/message" />
 
         <HorizontalScrollView
+            android:id="@+id/dyhLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:scrollbars="none"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/pubDate">
 
@@ -104,8 +116,7 @@
                 android:id="@+id/linearAdapterLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone" />
+                android:orientation="horizontal" />
         </HorizontalScrollView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -43,7 +43,7 @@ data class MessageResponse(val data: List<Data>) {
         val uid: String,
         val username: String,
         val message: String,
-        val pic: String,
+        val pic: String?,
         val url: String
     )
 

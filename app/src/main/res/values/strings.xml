@@ -75,7 +75,6 @@
     <string name="customToken">自定义Token</string>
     <string name="xAppToken">X-App-Token</string>
     <string name="xAppDevice">X-App-Device</string>
-    <string name="regenerateDeviceInfo">重新生成设备信息</string>
     <string name="full_quality">默认原图</string>
     <string name="display">显示</string>
     <string name="auto_clear_key_word">自动清除关键词</string>
@@ -95,5 +94,17 @@
     <string name="topic_latest_publish">最新发布</string>
     <string name="topic_hot">热度排序</string>
     <string name="show_reply">查看评论</string>
+    <string name="download">下载</string>
+    <string name="zmlmId">数字联盟ID</string>
+    <string name="params">机型参数</string>
+    <string name="black_list">黑名单</string>
+    <string name="add">添加</string>
+    <string name="block">加入黑名单</string>
+    <string name="publishFeed">发动态</string>
+    <string name="keep_feed">头条刷新保留上次的内容</string>
+    <string name="share">分享</string>
+    <string name="history">浏览历史</string>
+    <string name="record_history">记录浏览历史</string>
+    <string name="favorite">收藏</string>
 
 </resources>

@@ -333,7 +333,10 @@ class MessageContentAdapter(
                             )
                         )
                     } else {
-                        DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            mContext.getColor(android.R.color.darker_gray)
+                        )
                         holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
                     holder.like.text = message.likenum
@@ -444,7 +447,10 @@ class MessageContentAdapter(
                             (holder.forwardMessage.textSize * 1.3).toInt(),
                             null
                         )
-                        ImageUtil.showIMG(holder.forward1Pic, message.feed.pic)
+                        if (message.feed.pic.isNullOrEmpty())
+                            holder.forward1Pic.visibility = View.GONE
+                        else
+                            ImageUtil.showIMG(holder.forward1Pic, message.feed.pic)
                     } else if (type == "feedLike") {
                         holder.forwardId1 = message.fid
                         holder.forward1Pic.visibility = View.GONE

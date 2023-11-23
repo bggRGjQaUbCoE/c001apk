@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="VERSION_NAME"
+        android:title="VERSION_NAME" />
+    <Preference
+        android:key="API_VERSION"
+        android:title="API_VERSION" />
+    <Preference
+        android:key="VERSION_CODE"
+        android:title="VERSION_CODE" />
+    <Preference
+        android:key="MANUFACTURER"
+        android:title="MANUFACTURER" />
+    <Preference
+        android:key="BRAND"
+        android:title="BRAND" />
+    <Preference
+        android:key="MODEL"
+        android:title="MODEL" />
+    <Preference
+        android:key="BUILDNUMBER"
+        android:title="BUILDNUMBER" />
+    <Preference
+        android:key="SDK_INT"
+        android:title="SDK_INT" />
+    <Preference
+        android:key="ANDROID_VERSION"
+        android:title="ANDROID_VERSION" />
+    <Preference
+        android:key="USER_AGENT"
+        android:title="USER_AGENT" />
+    <Preference
+        android:enabled="false"
+        android:key="xAppDevice"
+        android:title="@string/xAppDevice" />
+    <Preference
+        android:enabled="false"
+        android:key="xAppToken"
+        android:title="@string/xAppToken" />
+
+</PreferenceScreen>

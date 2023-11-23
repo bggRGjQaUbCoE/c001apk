@@ -7,12 +7,17 @@ import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.DrawableCompat
@@ -31,7 +36,9 @@ import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
+import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
@@ -48,7 +55,10 @@ class AppAdapter(
     private val mContext: Context,
     private val dataList: ArrayList<HomeFeedResponse.Data>
 ) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var uid = ""
+    private var position = -1
 
     private var onPostFollowListener: OnPostFollowListener? = null
 
@@ -90,6 +100,7 @@ class AppAdapter(
 
     class FeedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ImageView = view.findViewById(R.id.avatar)
+        var avatarUrl = ""
         val uname: TextView = view.findViewById(R.id.uname)
         val from: TextView = view.findViewById(R.id.from)
         val device: TextView = view.findViewById(R.id.device)
@@ -98,10 +109,13 @@ class AppAdapter(
         var id = ""
         var uid = ""
         val pubDate: TextView = view.findViewById(R.id.pubDate)
+        var pubDataRaw = ""
         val like: TextView = view.findViewById(R.id.like)
         var isLike = false
         val reply: TextView = view.findViewById(R.id.reply)
+        val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
+        val expand: ImageButton = view.findViewById(R.id.expand)
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -183,6 +197,16 @@ class AppAdapter(
                     intent.putExtra("id", viewHolder.id)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
                     parent.context.startActivity(intent)
                 }
                 viewHolder.message.setOnClickListener {
@@ -191,6 +215,16 @@ class AppAdapter(
                     intent.putExtra("id", viewHolder.id)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
                     parent.context.startActivity(intent)
                 }
                 viewHolder.reply.setOnClickListener {
@@ -200,6 +234,16 @@ class AppAdapter(
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     intent.putExtra("viewReply", true)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
                     parent.context.startActivity(intent)
                 }
                 viewHolder.itemView.setOnLongClickListener {
@@ -226,16 +270,30 @@ class AppAdapter(
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        iOnLikeClickListener?.onPostLike(
-                            null,
-                            viewHolder.isLike,
-                            viewHolder.id,
-                            viewHolder.bindingAdapterPosition
-                        )
+                        if (PrefManager.SZLMID == "") {
+                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            iOnLikeClickListener?.onPostLike(
+                                null,
+                                viewHolder.isLike,
+                                viewHolder.id,
+                                viewHolder.bindingAdapterPosition
+                            )
+                        }
                     }
                 }
                 viewHolder.multiImage.apply {
                     onImageItemClickListener = this@AppAdapter.onImageItemClickListener
+                }
+                viewHolder.expand.setOnClickListener {
+                    uid = viewHolder.uid
+                    position = viewHolder.bindingAdapterPosition
+                    val popup = PopupMenu(mContext, it)
+                    val inflater = popup.menuInflater
+                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.setOnMenuItemClickListener(this@AppAdapter)
+                    popup.show()
                 }
                 viewHolder
             }
@@ -497,6 +555,8 @@ class AppAdapter(
                 holder.id = feed.id
                 holder.uid = feed.uid
                 holder.isLike = feed.userAction?.like == 1
+                holder.avatarUrl = feed.userAvatar
+                holder.pubDataRaw = feed.dateline.toString()
                 holder.uname.text = feed.userInfo?.username
                 ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
                 if (feed.deviceTitle != "") {
@@ -545,7 +605,10 @@ class AppAdapter(
                         )
                     )
                 } else {
-                    DrawableCompat.setTint(drawableLike, mContext.getColor(android.R.color.darker_gray))
+                    DrawableCompat.setTint(
+                        drawableLike,
+                        mContext.getColor(android.R.color.darker_gray)
+                    )
                     holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                 }
                 holder.like.text = feed.likenum
@@ -582,10 +645,15 @@ class AppAdapter(
                         val from = feed.pic.lastIndexOf("@")
                         val middle = feed.pic.lastIndexOf("x")
                         val end = feed.pic.lastIndexOf(".")
-                        val width = feed.pic.substring(from + 1, middle).toInt()
-                        val height = feed.pic.substring(middle + 1, end).toInt()
-                        holder.multiImage.imgHeight = height
-                        holder.multiImage.imgWidth = width
+                        if (from != -1 && middle != -1 && end != -1) {
+                            val width = feed.pic.substring(from + 1, middle).toInt()
+                            val height = feed.pic.substring(middle + 1, end).toInt()
+                            holder.multiImage.imgHeight = height
+                            holder.multiImage.imgWidth = width
+                        } else {
+                            holder.multiImage.imgHeight = -1
+                            holder.multiImage.imgWidth = -1
+                        }
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
@@ -604,9 +672,9 @@ class AppAdapter(
                 }
 
                 if (feed.targetRow?.id == null && feed.relationRows.isEmpty())
-                    holder.linearAdapterLayout.visibility = View.GONE
+                    holder.dyhLayout.visibility = View.GONE
                 else {
-                    holder.linearAdapterLayout.visibility = View.VISIBLE
+                    holder.dyhLayout.visibility = View.VISIBLE
                     holder.linearAdapterLayout.adapter = object : BaseAdapter() {
                         override fun getCount(): Int =
                             if (feed.targetRow?.id == null) feed.relationRows.size
@@ -804,6 +872,17 @@ class AppAdapter(
 
             else -> throw IllegalArgumentException("entityType error")
         }
+    }
+
+    override fun onMenuItemClick(p0: MenuItem): Boolean {
+        when (p0.itemId) {
+            R.id.block -> {
+                BlackListUtil.saveUid(uid)
+                dataList.removeAt(position)
+                notifyItemRemoved(position)
+            }
+        }
+        return false
     }
 
 }

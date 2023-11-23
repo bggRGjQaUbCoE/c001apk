@@ -12,12 +12,15 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.adapter.HistoryAdapter
 import com.example.c001apk.databinding.FragmentSearchBinding
+import com.example.c001apk.logic.database.HistoryDataBaseHelper
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
@@ -34,6 +37,27 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     private lateinit var db: SQLiteDatabase
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            viewModel.pageType = it.getString("pageType")!!
+            viewModel.pageParam = it.getString("pageParam")!!
+            viewModel.title = it.getString("title")!!
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(pageType: String, pageParam: String, title: String) =
+            SearchFragment().apply {
+                arguments = Bundle().apply {
+                    putString("pageType", pageType)
+                    putString("pageParam", pageParam)
+                    putString("title", title)
+                }
+            }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,7 +109,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             do {
                 val history = cursor.getString(cursor.getColumnIndex("keyword"))
                 viewModel.historyList.add(history)
-                mAdapter.notifyDataSetChanged()
                 if (viewModel.historyList.isEmpty())
                     binding.historyLayout.visibility = View.GONE
                 else
@@ -93,6 +116,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             } while (cursor.moveToPrevious())
             cursor.close()
         }
+        mAdapter.notifyDataSetChanged()
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -141,7 +165,12 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 .beginTransaction()
                 .replace(
                     R.id.searchFragment,
-                    SearchResultFragment.newInstance(binding.editText.text.toString()),
+                    SearchResultFragment.newInstance(
+                        binding.editText.text.toString(),
+                        viewModel.pageType,
+                        viewModel.pageParam,
+                        viewModel.title
+                    ),
                     null
                 )
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -160,8 +189,10 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         if (cursor.moveToFirst()) {
             do {
                 val history = cursor.getString(cursor.getColumnIndex("keyword"))
-                if (keyword == history)
+                if (keyword == history) {
                     isExist = true
+                    break
+                }
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -185,7 +216,14 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         )
     }
 
+    @SuppressLint("RestrictedApi")
     private fun initEditText() {
+        binding.editText.highlightColor = ColorUtils.setAlphaComponent(
+            ThemeUtils.getThemeAttrColor(
+                requireContext(),
+                rikka.preference.simplemenu.R.attr.colorPrimaryDark
+            ), 128
+        )
         binding.editText.isFocusable = true
         binding.editText.isFocusableInTouchMode = true
         binding.editText.requestFocus()
@@ -194,6 +232,8 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         imm.showSoftInput(binding.editText, 0)
         binding.editText.imeOptions = EditorInfo.IME_ACTION_SEARCH
         binding.editText.inputType = EditorInfo.TYPE_CLASS_TEXT
+        if (viewModel.pageType != "")
+            binding.editText.hint = "在 ${viewModel.title} 中搜索"
     }
 
     override fun onStart() {

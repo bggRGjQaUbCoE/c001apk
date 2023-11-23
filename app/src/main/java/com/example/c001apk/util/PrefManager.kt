@@ -3,6 +3,7 @@ package com.example.c001apk.util
 import android.content.Context.MODE_PRIVATE
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.c001apk.MyApplication.Companion.context
+import com.example.c001apk.constant.Constants
 
 object PrefManager {
 
@@ -94,4 +95,55 @@ object PrefManager {
         get() = pref.getBoolean("isClearKeyWord", false)
         set(value) = pref.edit().putBoolean("isClearKeyWord", value).apply()
 
+    var VERSION_NAME: String
+        get() = pref.getString("VERSION_NAME", Constants.VERSION_NAME)!!
+        set(value) = pref.edit().putString("VERSION_NAME", value).apply()
+
+    var API_VERSION: String
+        get() = pref.getString("API_VERSION", Constants.API_VERSION)!!
+        set(value) = pref.edit().putString("API_VERSION", value).apply()
+
+    var VERSION_CODE: String
+        get() = pref.getString("VERSION_CODE", Constants.VERSION_CODE)!!
+        set(value) = pref.edit().putString("VERSION_CODE", value).apply()
+
+    var MANUFACTURER: String
+        get() = pref.getString("MANUFACTURER", Constants.MANUFACTURER)!!
+        set(value) = pref.edit().putString("MANUFACTURER", value).apply()
+
+    var BRAND: String
+        get() = pref.getString("BRAND", Constants.BRAND)!!
+        set(value) = pref.edit().putString("BRAND", value).apply()
+
+    var MODEL: String
+        get() = pref.getString("MODEL", Constants.MODEL)!!
+        set(value) = pref.edit().putString("MODEL", value).apply()
+
+    var BUILDNUMBER: String
+        get() = pref.getString("BUILDNUMBER", Constants.BUILDNUMBER)!!
+        set(value) = pref.edit().putString("BUILDNUMBER", value).apply()
+
+    var SDK_INT: String
+        get() = pref.getString("SDK_INT", Constants.SDK_INT)!!
+        set(value) = pref.edit().putString("SDK_INT", value).apply()
+
+    var ANDROID_VERSION: String
+        get() = pref.getString("ANDROID_VERSION", Constants.ANDROID_VERSION)!!
+        set(value) = pref.edit().putString("ANDROID_VERSION", value).apply()
+
+    var USER_AGENT: String
+        get() = pref.getString("USER_AGENT", Constants.USER_AGENT)!!
+        set(value) = pref.edit().putString("USER_AGENT", value).apply()
+
+    var SZLMID: String
+        get() = pref.getString("SZLMID", "")!!
+        set(value) = pref.edit().putString("SZLMID", value).apply()
+
+    var isKeepFeed: Boolean
+        get() = pref.getBoolean("isKeepFeed", true)
+        set(value) = pref.edit().putBoolean("isKeepFeed", value).apply()
+
+    var isRecordHistory: Boolean
+        get() = pref.getBoolean("isRecordHistory", true)
+        set(value) = pref.edit().putBoolean("isRecordHistory", value).apply()
 }

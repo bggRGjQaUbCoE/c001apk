@@ -39,7 +39,6 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
-import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.BitmapCut
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
@@ -230,7 +229,7 @@ class NineGridImageView @JvmOverloads constructor(
                 val newUrl =
                     GlideUrl(
                         urlList[i],
-                        LazyHeaders.Builder().addHeader("User-Agent", Constants.USER_AGENT).build()
+                        LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT).build()
                     )
                 if (urlList.size == 1 && PrefManager.isFullImageQuality && imgHeight / imgWidth > 1320 / 540) {
                     Glide.with(context)

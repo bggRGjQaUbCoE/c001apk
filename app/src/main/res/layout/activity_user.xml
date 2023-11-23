@@ -73,6 +73,17 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/uid"
+                        style="@style/UserTextColor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="10dp"
+                        android:paddingStart="5dp"
+                        android:paddingEnd="5dp"
+                        android:textSize="16sp" />
+
+                    <TextView
                         android:id="@+id/level"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -156,10 +167,12 @@
                 android:id="@+id/toolBar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:theme="@style/OverflowMenu"
                 app:layout_collapseMode="pin">
 
-                <Button
+                <TextView
                     android:id="@+id/followBtn"
+                    style="@style/Widget.Material3.Button.TextButton.Mod"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end|center_vertical"

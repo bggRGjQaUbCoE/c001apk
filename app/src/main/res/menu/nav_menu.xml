@@ -6,11 +6,6 @@
         android:title="@string/tab_home" />
 
     <item
-        android:id="@+id/navigation_favorite"
-        android:icon="@drawable/ic_favorite_border"
-        android:title="收藏" />
-
-    <item
         android:id="@+id/navigation_message"
         android:icon="@drawable/ic_message"
         android:title="@string/tab_message" />

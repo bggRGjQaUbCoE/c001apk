@@ -20,6 +20,15 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.activity.HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.BlackListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.SBCKActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.AppUpdateActivity"
             android:exported="false" />
         <activity
@@ -62,7 +71,18 @@
             android:exported="false" />
         <activity
             android:name=".ui.activity.FeedActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="feed"
+                    android:scheme="coolmarket" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.activity.MainActivity"
             android:exported="true">

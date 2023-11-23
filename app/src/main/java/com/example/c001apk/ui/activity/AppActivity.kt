@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
@@ -16,6 +17,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityAppBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.LinearItemDecoration
@@ -40,6 +42,10 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
+        if (viewModel.title != "") {
+            showAppInfo()
+            binding.appLayout.visibility = View.VISIBLE
+        }
         initView()
         initData()
         initRefresh()
@@ -51,36 +57,17 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
                 val appInfo = result.getOrNull()
                 if (appInfo != null) {
-                    binding.name.text = appInfo.title
-                    binding.version.text = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
-                    binding.size.text = "大小: ${appInfo.apksize}"
-                    if (appInfo.lastupdate == null)
-                        binding.updateTime.text = "更新时间: null"
-                    else
-                        binding.updateTime.text =
-                            "更新时间: ${DateUtils.fromToday(appInfo.lastupdate)}"
-                    binding.collapsingToolbar.title = appInfo.title
-                    binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-                    ImageUtil.showIMG(binding.logo, appInfo.logo)
-                    binding.btnDownload.apply {
-                        visibility = View.VISIBLE
-                        setOnClickListener {
-                            viewModel.downloadLinkData.observe(this@AppActivity) { result ->
-                                val link = result.getOrNull()
-                                if (link != null) {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                                    startActivity(intent)
-                                } else {
-                                    result.exceptionOrNull()?.printStackTrace()
-                                }
-                            }
-                            viewModel.getDownloadLink()
-                        }
-                    }
+                    viewModel.title = appInfo.title
+                    viewModel.version = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
+                    viewModel.size = "大小: ${appInfo.apksize}"
+                    viewModel.lastupdate = if (appInfo.lastupdate == null) "更新时间: null"
+                    else "更新时间: ${DateUtils.fromToday(appInfo.lastupdate)}"
+                    viewModel.logo = appInfo.logo
+                    viewModel.appId = appInfo.id
                     viewModel.packageName = appInfo.apkname
                     viewModel.versionCode = appInfo.apkversioncode
+                    showAppInfo()
 
-                    viewModel.appId = appInfo.id
                     viewModel.isRefreshing = true
                     viewModel.isNew = true
                     viewModel.getAppComment()
@@ -101,6 +88,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in comment)
                             if (element.entityType == "feed")
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                 viewModel.appCommentList.add(element)
 
                     }
@@ -130,8 +118,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         viewModel.appCommentList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.appCommentList[viewModel.likePosition].userAction?.like = 1
-
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -150,8 +137,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         viewModel.appCommentList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.appCommentList[viewModel.likePosition].userAction?.like = 0
-
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -163,6 +149,31 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
     }
 
+    private fun showAppInfo() {
+        binding.name.text = viewModel.title
+        binding.version.text = viewModel.version
+        binding.size.text = viewModel.size
+        binding.updateTime.text = viewModel.lastupdate
+        binding.collapsingToolbar.title = viewModel.title
+        binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
+        ImageUtil.showIMG(binding.logo, viewModel.logo)
+        binding.btnDownload.apply {
+            visibility = View.VISIBLE
+            setOnClickListener {
+                viewModel.downloadLinkData.observe(this@AppActivity) { result ->
+                    val link = result.getOrNull()
+                    if (link != null) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                        startActivity(intent)
+                    } else {
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                }
+                viewModel.getDownloadLink()
+            }
+        }
+    }
+
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(this, viewModel.appCommentList)
@@ -172,6 +183,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
@@ -244,9 +256,80 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         })
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.topic_product_menu, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(
+            when (viewModel.appCommentTitle) {
+                "最近回复" -> R.id.topicLatestReply
+                "热度排序" -> R.id.topicHot
+                "最新发布" -> R.id.topicLatestPublish
+                else -> throw IllegalArgumentException("type error")
+            }
+        )?.isChecked = true
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
+
+            R.id.search -> {
+                val intent = Intent(this, SearchActivity::class.java)
+                intent.putExtra("pageType", "apk")
+                intent.putExtra("pageParam", viewModel.appId)
+                intent.putExtra("title", viewModel.title)
+                startActivity(intent)
+            }
+
+            R.id.topicLatestReply -> {
+                viewModel.appCommentSort = ""
+                viewModel.appCommentTitle = "最近回复"
+                viewModel.appCommentList.clear()
+                mAdapter.notifyDataSetChanged()
+                binding.indicator.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = true
+                viewModel.isNew = true
+                viewModel.isRefreshing = true
+                viewModel.isLoadMore = false
+                viewModel.isEnd = false
+                viewModel.page = 1
+                viewModel.getAppComment()
+            }
+
+            R.id.topicHot -> {
+                viewModel.appCommentSort = "%26sort%3Dpopular"
+                viewModel.appCommentTitle = "热度排序"
+                viewModel.appCommentList.clear()
+                mAdapter.notifyDataSetChanged()
+                binding.indicator.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = true
+                viewModel.isNew = true
+                viewModel.isRefreshing = true
+                viewModel.isLoadMore = false
+                viewModel.isEnd = false
+                viewModel.page = 1
+                viewModel.getAppComment()
+            }
+
+            R.id.topicLatestPublish -> {
+                viewModel.appCommentSort = "%26sort%3Ddateline_desc"
+                viewModel.appCommentTitle = "最新发布"
+                viewModel.appCommentList.clear()
+                mAdapter.notifyDataSetChanged()
+                binding.indicator.visibility = View.VISIBLE
+                binding.indicator.isIndeterminate = true
+                viewModel.isNew = true
+                viewModel.isRefreshing = true
+                viewModel.isLoadMore = false
+                viewModel.isEnd = false
+                viewModel.page = 1
+                viewModel.getAppComment()
+            }
         }
         return true
     }

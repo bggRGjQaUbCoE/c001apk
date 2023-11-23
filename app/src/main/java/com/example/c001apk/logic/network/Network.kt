@@ -19,8 +19,8 @@ object Network {
         page: Int,
         firstLaunch: Int,
         installTime: String,
-        firstItem: String,
-        lastItem: String
+        firstItem: String?,
+        lastItem: String?
     ) =
         api2Service.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem).await()
 
@@ -51,8 +51,20 @@ object Network {
         feedType: String,
         sort: String,
         keyWord: String,
-        page: Int
-    ) = apiService.getSearch(type, feedType, sort, keyWord, page).await()
+        pageType: String,
+        pageParam: String,
+        page: Int,
+        showAnonymous: Int
+    ) = apiService.getSearch(
+        type,
+        feedType,
+        sort,
+        keyWord,
+        pageType,
+        pageParam,
+        page,
+        showAnonymous
+    ).await()
 
     suspend fun getReply2Reply(
         id: String,
@@ -106,6 +118,9 @@ object Network {
     suspend fun checkLoginInfo() =
         apiService.checkLoginInfo().response()
 
+    suspend fun preGetLoginParam() =
+        accountService.preGetLoginParam().response()
+
     suspend fun getLoginParam() =
         accountService.getLoginParam().response()
 
@@ -115,6 +130,9 @@ object Network {
     suspend fun getCaptcha(url: String) =
         accountService.getCaptcha(url).response()
 
+    suspend fun getValidateCaptcha(url: String) =
+        apiService.getValidateCaptcha(url).response()
+
     suspend fun postReply(data: HashMap<String, String>, id: String, type: String) =
         apiService.postReply(data, id, type).await()
 
@@ -122,7 +140,7 @@ object Network {
         url: String,
         title: String,
         subTitle: String,
-        lastItem: String,
+        lastItem: String?,
         page: Int
     ) = apiService.getDataList(url, title, subTitle, lastItem, page).await()
 
@@ -140,6 +158,12 @@ object Network {
 
     suspend fun postFollowUnFollow(url: String, uid: String) =
         apiService.postFollowUnFollow(url, uid).await()
+
+    suspend fun postCreateFeed(data: HashMap<String, String?>) =
+        apiService.postCreateFeed(data).await()
+
+    suspend fun postRequestValidate(data: HashMap<String, String?>) =
+        apiService.postRequestValidate(data).await()
 
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->

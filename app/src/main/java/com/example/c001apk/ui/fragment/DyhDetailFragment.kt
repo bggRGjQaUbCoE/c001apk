@@ -16,6 +16,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentDyhDetailBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -91,6 +92,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in data)
                             if (element.entityType == "feed")
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                 viewModel.dyhDataList.add(element)
                     mAdapter.notifyDataSetChanged()
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
@@ -117,7 +119,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         viewModel.dyhDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -136,7 +138,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         viewModel.dyhDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -172,6 +174,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }

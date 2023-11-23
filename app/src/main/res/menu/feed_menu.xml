@@ -10,13 +10,19 @@
         tools:ignore="AlwaysShowAction" />
 
     <item
-        android:id="@+id/share"
-        android:icon="@drawable/ic_share"
-        android:showAsAction="always"
-        android:title="分享" />
-
-    <item
         android:id="@+id/favorite"
         android:title="收藏" />
+
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_share"
+        android:showAsAction="never"
+        android:title="@string/share" />
+
+    <item
+        android:id="@+id/block"
+        android:icon="@drawable/ic_block"
+        android:showAsAction="never"
+        android:title="@string/block" />
 
 </menu>
