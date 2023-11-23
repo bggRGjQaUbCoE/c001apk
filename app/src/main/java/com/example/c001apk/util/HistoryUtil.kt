@@ -21,17 +21,18 @@ object HistoryUtil {
         pubDate: String
     ) {
         thread {
-            browseHistoryDao.insert(
-                BrowseHistory(
-                    fid,
-                    uid,
-                    uname,
-                    avatar,
-                    device,
-                    message,
-                    pubDate
+            if (!browseHistoryDao.isExist(fid))
+                browseHistoryDao.insert(
+                    BrowseHistory(
+                        fid,
+                        uid,
+                        uname,
+                        avatar,
+                        device,
+                        message,
+                        pubDate
+                    )
                 )
-            )
         }
     }
 

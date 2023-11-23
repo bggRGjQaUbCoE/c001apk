@@ -481,7 +481,13 @@ class AppAdapter(
             }
 
             is ImageCarouselCardViewHolder -> {
-                val imageCarouselCard = dataList[position].entities
+                val imageCarouselCard: MutableList<HomeFeedResponse.Entities> = ArrayList()
+                for (element in dataList[position].entities) {
+                    if (element.url.contains("http"))
+                        continue
+                    else
+                        imageCarouselCard.add(element)
+                }
                 val data: MutableList<IconLinkGridCardBean> = ArrayList()
                 data.add(
                     IconLinkGridCardBean(
