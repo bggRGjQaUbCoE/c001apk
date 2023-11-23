@@ -106,5 +106,6 @@
     <string name="history">浏览历史</string>
     <string name="record_history">记录浏览历史</string>
     <string name="favorite">收藏</string>
+    <string name="delete">删除</string>
 
 </resources>

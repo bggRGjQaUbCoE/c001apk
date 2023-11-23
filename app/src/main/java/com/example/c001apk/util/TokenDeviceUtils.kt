@@ -1,6 +1,8 @@
 package com.example.c001apk.util
 
 import android.content.Context
+import com.example.c001apk.MyApplication
+import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.Utils.Companion.getBase64
 import com.example.c001apk.util.Utils.Companion.getMD5
@@ -10,7 +12,7 @@ import java.util.Random
 class TokenDeviceUtils {
 
     companion object {
-        private fun randHexString(@Suppress("SameParameterValue") n: Int): String {
+        fun randHexString(@Suppress("SameParameterValue") n: Int): String {
             Random().setSeed(System.currentTimeMillis())
             return (0 until n).joinToString("") {
                 Random().nextInt(256).toString(16)
@@ -59,6 +61,53 @@ class TokenDeviceUtils {
                     sp.edit().putString("INSTALL_TIME", this).apply()
                 }
             }
+        }
+
+        fun getLastingBrand(): String {
+            val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+            return sp.getString("BRAND", null).let {
+                it ?: Utils.randomBrand().apply {
+                    sp.edit().putString("BRAND", this).apply()
+                }
+            }
+        }
+
+        fun getLastingModel():String{
+            val sp = context.getSharedPreferences(MyApplication.context.packageName, Context.MODE_PRIVATE)
+            return sp.getString("MODEL", null).let {
+                it ?: Utils.randomDeviceModel().apply {
+                    sp.edit().putString("MODEL", this).apply()
+                }
+            }
+        }
+
+        fun getLastingSdkInt():String{
+            val sp = context.getSharedPreferences(MyApplication.context.packageName, Context.MODE_PRIVATE)
+            return sp.getString("SDK_INT", null).let {
+                it ?: Utils.randomSdkInt().apply {
+                    sp.edit().putString("SDK_INT", this).apply()
+                }
+            }
+        }
+
+        fun getLastingAndroidVersionRelease():String{
+            val sp = context.getSharedPreferences(MyApplication.context.packageName, Context.MODE_PRIVATE)
+            return sp.getString("ANDROID_VERSION_RELEASE", null).let {
+                it ?: Utils.randomAndroidVersionRelease().apply {
+                    sp.edit().putString("ANDROID_VERSION_RELEASE", this).apply()
+                }
+            }
+        }
+
+        fun regenerateDeviceInfo(context: Context) {
+            context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE).edit().apply {
+                putString("DEVICE_CODE", getDeviceCode())
+                putString("INSTALL_TIME", System.currentTimeMillis().toString())
+                putString("BRAND", Utils.randomBrand())
+                putString("MODEL", Utils.randomDeviceModel())
+                putString("SDK_INT", Utils.randomSdkInt())
+                putString("ANDROID_VERSION_RELEASE", Utils.randomAndroidVersionRelease())
+            }.apply()
         }
     }
 }

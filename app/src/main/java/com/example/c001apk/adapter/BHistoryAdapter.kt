@@ -14,6 +14,8 @@ import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
+import com.example.c001apk.logic.database.BrowseHistoryDatabase
+import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.BrowseHistory
 import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.ui.activity.CopyActivity
@@ -23,6 +25,7 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import kotlin.concurrent.thread
 
 
 class BHistoryAdapter(
@@ -30,8 +33,16 @@ class BHistoryAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
-    var dataList = ArrayList<Any>()
-    var type = ""
+    private val browseHistoryDao by lazy {
+        BrowseHistoryDatabase.getDatabase(mContext).browseHistoryDao()
+    }
+    private val feedFavoriteDao by lazy {
+        FeedFavoriteDatabase.getDatabase(mContext).feedFavoriteDao()
+    }
+
+    private var dataList = ArrayList<Any>()
+    private var type = ""
+    private var fid = ""
 
     fun setDataListData(type: String, dataList: ArrayList<Any>) {
         this.type = type
@@ -114,10 +125,11 @@ class BHistoryAdapter(
                 }
                 viewHolder.expand.setOnClickListener {
                     uid = viewHolder.uid
+                    fid = viewHolder.id
                     position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
-                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    inflater.inflate(R.menu.feed_history_menu, popup.menu)
                     popup.setOnMenuItemClickListener(this@BHistoryAdapter)
                     popup.show()
                 }
@@ -207,6 +219,17 @@ class BHistoryAdapter(
                 BlackListUtil.saveUid(uid)
                 dataList.removeAt(position)
                 notifyItemRemoved(position)
+            }
+
+            R.id.delete -> {
+                dataList.removeAt(position)
+                notifyItemRemoved(position)
+                thread {
+                    if (type == "browse")
+                        browseHistoryDao.delete(fid)
+                    else
+                        feedFavoriteDao.delete(fid)
+                }
             }
         }
         return false

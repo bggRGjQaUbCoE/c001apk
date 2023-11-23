@@ -15,6 +15,8 @@ import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
+import com.example.c001apk.util.TokenDeviceUtils.Companion.randHexString
+import com.example.c001apk.util.Utils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ParamsPreferenceFragment : PreferenceFragmentCompat() {
@@ -38,7 +40,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
         setDivider(resources.getDrawable(R.drawable.divider, requireContext().theme))
     }
 
-    @SuppressLint("SetTextI18n", "RestrictedApi")
+    @SuppressLint("SetTextI18n", "RestrictedApi", "InflateParams")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.sb_params, null)
 
@@ -134,10 +136,15 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle("MANUFACTURER")
-                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("使用系统信息") { _, _ ->
+                    PrefManager.MANUFACTURER = android.os.Build.MANUFACTURER
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
+
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.MANUFACTURER =
-                        editText.text.toString().ifEmpty { Constants.MANUFACTURER }
+                        editText.text.toString().ifEmpty { Utils.randomManufacturer() }
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
@@ -161,9 +168,14 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle("BRAND")
-                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("使用系统信息") { _, _ ->
+                    PrefManager.BRAND = android.os.Build.BRAND
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
+
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.BRAND = editText.text.toString().ifEmpty { Constants.BRAND }
+                    PrefManager.BRAND = editText.text.toString().ifEmpty { Utils.randomBrand() }
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
@@ -187,9 +199,14 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle("MODEL")
-                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("使用系统信息") { _, _ ->
+                    PrefManager.MODEL = android.os.Build.MODEL
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
+
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.MODEL = editText.text.toString().ifEmpty { Constants.MODEL }
+                    PrefManager.MODEL = editText.text.toString().ifEmpty { Utils.randomDeviceModel() }
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
@@ -213,10 +230,15 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle("BUILDNUMBER")
-                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("使用系统信息") { _, _ ->
+                    PrefManager.BUILDNUMBER = android.os.Build.DISPLAY
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
+
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.BUILDNUMBER =
-                        editText.text.toString().ifEmpty { Constants.BUILDNUMBER }
+                        editText.text.toString().ifEmpty { randHexString(16) }
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
@@ -240,10 +262,15 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle("SDK_INT")
-                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("使用系统信息") { _, _ ->
+                    PrefManager.SDK_INT = android.os.Build.VERSION.SDK_INT.toString()
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
+
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.SDK_INT = editText.text.toString()
-                        .ifEmpty { Constants.SDK_INT }
+                        .ifEmpty { Utils.randomSdkInt() }
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
@@ -266,10 +293,15 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle("ANDROID_VERSION")
-                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("使用系统信息") { _, _ ->
+                    PrefManager.ANDROID_VERSION = android.os.Build.VERSION.RELEASE
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
+
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.ANDROID_VERSION =
-                        editText.text.toString().ifEmpty { Constants.ANDROID_VERSION }
+                        editText.text.toString().ifEmpty { Utils.randomAndroidVersionRelease() }
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }

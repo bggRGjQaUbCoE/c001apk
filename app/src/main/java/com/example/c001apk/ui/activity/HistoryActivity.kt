@@ -92,9 +92,9 @@ class HistoryActivity : BaseActivity() {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mLayoutManager = LinearLayoutManager(this)
-        when (viewModel.type) {
-            "browse" -> mAdapter = BHistoryAdapter(this)
-            "favorite" -> mAdapter = BHistoryAdapter(this)
+        mAdapter = when (viewModel.type) {
+            "browse" -> BHistoryAdapter(this)
+            "favorite" -> BHistoryAdapter(this)
             else -> throw IllegalArgumentException("error type: ${viewModel.type}")
         }
 
@@ -116,9 +116,9 @@ class HistoryActivity : BaseActivity() {
                 else -> throw IllegalArgumentException("error type: ${viewModel.type}")
             }
             mAdapter.setDataListData(viewModel.type, viewModel.bHistoryList)
-            binding.indicator.visibility = View.GONE
-            binding.indicator.isIndeterminate = false
             runOnUiThread {
+                binding.indicator.visibility = View.GONE
+                binding.indicator.isIndeterminate = false
                 mAdapter.notifyDataSetChanged()
             }
         }

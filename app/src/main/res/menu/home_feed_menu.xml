@@ -5,5 +5,5 @@
         android:id="@+id/search"
         android:icon="@drawable/ic_search"
         android:title="@string/search"
-        app:showAsAction="always" />
+        android:showAsAction="always" />
 </menu>

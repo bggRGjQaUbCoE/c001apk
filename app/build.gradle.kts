@@ -119,7 +119,7 @@ android {
                     val versionName = defaultConfig.versionName
                     val versionCode = defaultConfig.versionCode
                     (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                        "${project.name}_$versionName($versionCode).apk"
+                        "c001apk_$versionName($versionCode).apk"
                 }
             }
         }

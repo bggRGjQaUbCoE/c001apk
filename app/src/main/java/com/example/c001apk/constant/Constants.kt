@@ -1,6 +1,12 @@
 package com.example.c001apk.constant
 
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TokenDeviceUtils.Companion.randHexString
+import com.example.c001apk.util.Utils.Companion.randomAndroidVersionRelease
+import com.example.c001apk.util.Utils.Companion.randomBrand
+import com.example.c001apk.util.Utils.Companion.randomDeviceModel
+import com.example.c001apk.util.Utils.Companion.randomManufacturer
+import com.example.c001apk.util.Utils.Companion.randomSdkInt
 
 object Constants {
     const val REQUEST_WITH = "XMLHttpRequest"
@@ -13,12 +19,6 @@ object Constants {
     const val VERSION_NAME = "13.3.6"
     const val API_VERSION = "13"
     const val VERSION_CODE = "2310232"
-    val MANUFACTURER: String = android.os.Build.MANUFACTURER
-    val BRAND: String = android.os.Build.BRAND
-    val MODEL: String = android.os.Build.MODEL
-    val BUILDNUMBER: String = android.os.Build.DISPLAY
-    val SDK_INT: String = android.os.Build.VERSION.SDK_INT.toString()
-    val ANDROID_VERSION: String = android.os.Build.VERSION.RELEASE
     val USER_AGENT =
         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${MODE}"
     // "${System.getProperty("http.agent")} (#Build; ${android.os.Build.BRAND}; ${android.os.Build.MODEL}; ${android.os.Build.DISPLAY}; ${android.os.Build.VERSION.RELEASE}) +CoolMarket/${VERSION_NAME}-${VERSION_CODE}-${MODE}"
