@@ -82,7 +82,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                        messageContentAdapter.notifyItemChanged(viewModel.likePosition)
+                        messageContentAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -100,7 +100,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                        messageContentAdapter.notifyItemChanged(viewModel.likePosition)
+                        messageContentAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {

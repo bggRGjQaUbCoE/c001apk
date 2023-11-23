@@ -14,7 +14,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
-import com.example.c001apk.logic.model.BHistoryBean
+import com.example.c001apk.logic.model.BrowseHistory
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.UserActivity
@@ -26,7 +26,7 @@ import com.example.c001apk.util.SpannableStringBuilderUtil
 
 class BHistoryAdapter(
     private val mContext: Context,
-    private val dataList: ArrayList<BHistoryBean>
+    private val dataList: ArrayList<BrowseHistory>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 

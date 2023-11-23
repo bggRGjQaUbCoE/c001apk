@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.AppItem
-import com.example.c001apk.logic.model.BHistoryBean
+import com.example.c001apk.logic.model.BrowseHistory
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.MessageResponse
@@ -27,7 +27,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
-    val bHistoryList: ArrayList<BHistoryBean> = ArrayList()
+    val bHistoryList: ArrayList<BrowseHistory> = ArrayList()
     var requestHash = ""
     var changeFirstItem = false
     var isRequestValidate = false

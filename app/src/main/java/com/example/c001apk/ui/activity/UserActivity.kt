@@ -167,7 +167,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         viewModel.feedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.feedList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
+                        mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -186,7 +186,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         viewModel.feedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.feedList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
+                        mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {

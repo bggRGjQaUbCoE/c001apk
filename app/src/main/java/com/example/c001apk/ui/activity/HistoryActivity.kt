@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -11,29 +10,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.BHistoryAdapter
 import com.example.c001apk.databinding.ActivityHistoryBinding
-import com.example.c001apk.logic.database.BHistoryDataBaseHelper
-import com.example.c001apk.logic.model.BHistoryBean
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlin.concurrent.thread
 
 class HistoryActivity : BaseActivity() {
 
     private lateinit var binding: ActivityHistoryBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var dbHelper: BHistoryDataBaseHelper
-    private lateinit var db: SQLiteDatabase
     private lateinit var mAdapter: BHistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private val browseHistoryDao by lazy {
+        BrowseHistoryDatabase.getDatabase(this).browseHistoryDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        dbHelper = BHistoryDataBaseHelper(this, "BHistory.db", 1)
-        db = dbHelper.writableDatabase
 
         initBar()
         initView()
@@ -65,7 +61,9 @@ class HistoryActivity : BaseActivity() {
                     setTitle("确定清除全部浏览历史？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        db.delete("BHistory", "", arrayOf())
+                        thread {
+                            browseHistoryDao.deleteAll()
+                        }
                         viewModel.bHistoryList.clear()
                         mAdapter.notifyDataSetChanged()
                     }
@@ -90,35 +88,15 @@ class HistoryActivity : BaseActivity() {
 
     @SuppressLint("NotifyDataSetChanged", "Range")
     private fun queryData() {
-        val cursor = db.query("BHistory", null, null, null, null, null, null)
-        viewModel.bHistoryList.clear()
-        if (cursor.moveToLast()) {
-            do {
-                val fid = cursor.getString(cursor.getColumnIndex("fid"))
-                val uid = cursor.getString(cursor.getColumnIndex("uid"))
-                val uname = cursor.getString(cursor.getColumnIndex("uname"))
-                val avatar = cursor.getString(cursor.getColumnIndex("avatar"))
-                val device = cursor.getString(cursor.getColumnIndex("device"))
-                val message = cursor.getString(cursor.getColumnIndex("message"))
-                val pubDate = cursor.getString(cursor.getColumnIndex("pubDate"))
-                if (!BlackListUtil.checkUid(uid))
-                    viewModel.bHistoryList.add(
-                        BHistoryBean(
-                            fid,
-                            uid,
-                            uname,
-                            avatar,
-                            device,
-                            message,
-                            pubDate
-                        )
-                    )
-            } while (cursor.moveToPrevious())
-            cursor.close()
+        thread {
+            viewModel.bHistoryList.clear()
+            viewModel.bHistoryList.addAll(browseHistoryDao.loadAllHistory())
+            binding.indicator.visibility = View.GONE
+            binding.indicator.isIndeterminate = false
+            runOnUiThread {
+                mAdapter.notifyDataSetChanged()
+            }
         }
-        binding.indicator.visibility = View.GONE
-        binding.indicator.isIndeterminate = false
-        mAdapter.notifyDataSetChanged()
     }
 
 }

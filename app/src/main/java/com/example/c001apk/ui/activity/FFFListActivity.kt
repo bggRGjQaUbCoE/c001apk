@@ -81,7 +81,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
+                        mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -99,7 +99,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
+                        mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {

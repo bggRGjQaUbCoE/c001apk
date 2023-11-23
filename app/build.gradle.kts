@@ -77,8 +77,6 @@ android {
     namespace = "com.example.c001apk"
     compileSdk = 34
 
-
-
     defaultConfig {
         applicationId = "com.example.c001apk"
         minSdk = 24
@@ -88,7 +86,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
 
     signingConfigs {
         create("keyStore") {
@@ -147,6 +144,9 @@ android {
 //            abiFilters.add("x86")
             abiFilters.add("x86_64")
         }
+    }
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 }
 

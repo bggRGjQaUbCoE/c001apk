@@ -39,10 +39,9 @@ class MessageAdapter(
     private val countList: List<String>,
     private val messCountList: List<Int>,
     private val notiList: ArrayList<MessageResponse.Data>
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener{
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
     private var uid = ""
-    private var position = -1
 
     private var loadState = 3
     val LOADING = 1
@@ -208,7 +207,6 @@ class MessageAdapter(
                 }
                 viewHolder.expand.setOnClickListener {
                     uid = viewHolder.uid
-                    position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
@@ -272,8 +270,7 @@ class MessageAdapter(
                 val links: Elements = doc.select("a[href]")
                 for (link in links) {
                     val href = link.attr("href")
-                    if (holder.id == "")
-                        holder.id = href.replace("/feed/", "")
+                    holder.id = href.replace("/feed/", "")
                 }
                 holder.uid = noti.fromuid
                 holder.uname.text = noti.fromusername

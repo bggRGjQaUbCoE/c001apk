@@ -210,7 +210,7 @@
 -dontwarn org.openjsse.javax.net.ssl.SSLSocket
 -dontwarn org.openjsse.net.ssl.OpenJSSE
 
-#-obfuscationdictionary dictionary.txt       # 混淆字典
-#-classobfuscationdictionary dictionary.txt
-#-packageobfuscationdictionary dictionary.txt
-#-optimizationpasses 5       # 指定代码的压缩级别
+-obfuscationdictionary dictionary.txt       # 混淆字典
+-classobfuscationdictionary dictionary.txt
+-packageobfuscationdictionary dictionary.txt
+-optimizationpasses 5       # 指定代码的压缩级别

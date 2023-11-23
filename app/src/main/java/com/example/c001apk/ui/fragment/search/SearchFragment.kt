@@ -1,9 +1,7 @@
 package com.example.c001apk.ui.fragment.search
 
 import android.annotation.SuppressLint
-import android.content.ContentValues
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +18,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.adapter.HistoryAdapter
 import com.example.c001apk.databinding.FragmentSearchBinding
-import com.example.c001apk.logic.database.HistoryDataBaseHelper
+import com.example.c001apk.logic.database.SearchHistoryDatabase
+import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
@@ -28,15 +27,18 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlin.concurrent.thread
 
 class SearchFragment : Fragment(), IOnItemClickListener {
 
     private lateinit var binding: FragmentSearchBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var dbHelper: HistoryDataBaseHelper
-    private lateinit var db: SQLiteDatabase
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
+    private val searchHistoryDao by lazy {
+        SearchHistoryDatabase.getDatabase(this@SearchFragment.requireContext()).searchHistoryDao()
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,9 +72,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dbHelper = HistoryDataBaseHelper(requireContext(), "SearchHistory.db", 1)
-        db = dbHelper.writableDatabase
-
         if (viewModel.historyList.isEmpty())
             binding.historyLayout.visibility = View.GONE
         else
@@ -101,22 +100,21 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged", "Range")
+    @SuppressLint("NotifyDataSetChanged")
     private fun queryData() {
-        val cursor = db.query("SearchHistory", null, null, null, null, null, null)
         viewModel.historyList.clear()
-        if (cursor.moveToLast()) {
-            do {
-                val history = cursor.getString(cursor.getColumnIndex("keyword"))
-                viewModel.historyList.add(history)
-                if (viewModel.historyList.isEmpty())
-                    binding.historyLayout.visibility = View.GONE
-                else
-                    binding.historyLayout.visibility = View.VISIBLE
-            } while (cursor.moveToPrevious())
-            cursor.close()
+        thread {
+            for (element in searchHistoryDao.loadAllHistory()) {
+                viewModel.historyList.add(element.keyWord)
+            }
+            if (viewModel.historyList.isEmpty())
+                binding.historyLayout.visibility = View.GONE
+            else
+                binding.historyLayout.visibility = View.VISIBLE
+            requireActivity().runOnUiThread {
+                mAdapter.notifyDataSetChanged()
+            }
         }
-        mAdapter.notifyDataSetChanged()
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -126,7 +124,9 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 setTitle(R.string.clearAllTitle)
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    db.delete("SearchHistory", "", arrayOf())
+                    thread {
+                        searchHistoryDao.deleteAll()
+                    }
                     viewModel.historyList.clear()
                     mAdapter.notifyDataSetChanged()
                     binding.historyLayout.visibility = View.GONE
@@ -137,7 +137,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     }
 
     private fun initButton() {
-        binding.back.setOnClickListener{
+        binding.back.setOnClickListener {
             requireActivity().finish()
         }
         binding.search.setOnClickListener {
@@ -182,31 +182,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         }
     }
 
-    @SuppressLint("Range", "NotifyDataSetChanged")
-    private fun saveHistory(keyword: String) {
-        var isExist = false
-        val cursor = db.query("SearchHistory", null, null, null, null, null, null)
-        if (cursor.moveToFirst()) {
-            do {
-                val history = cursor.getString(cursor.getColumnIndex("keyword"))
-                if (keyword == history) {
-                    isExist = true
-                    break
-                }
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-
-        if (!isExist) {
-            viewModel.historyList.add(0, keyword)
-            mAdapter.notifyDataSetChanged()
-            val value = ContentValues().apply {
-                put("keyword", keyword)
-            }
-            db.insert("SearchHistory", null, value)
-        }
-    }
-
     private fun hideKeyBoard() {
         val im =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -245,18 +220,28 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         binding.editText.setText(keyword)
         binding.editText.setSelection(keyword.length)
         search()
-        updateHistory(keyword)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun updateHistory(keyword: String) {
-        viewModel.historyList.remove(keyword)
-        db.delete("SearchHistory", "keyword = ?", arrayOf(keyword))
-        saveHistory(keyword)
+        thread {
+            if (searchHistoryDao.isExist(keyword)) {
+                viewModel.historyList.remove(keyword)
+                searchHistoryDao.delete(keyword)
+            }
+            viewModel.historyList.add(0, keyword)
+            searchHistoryDao.insert(SearchHistory(keyword))
+            requireActivity().runOnUiThread {
+                mAdapter.notifyDataSetChanged()
+            }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onItemDeleteClick(keyword: String) {
-        db.delete("SearchHistory", "keyword = ?", arrayOf(keyword))
+        thread {
+            searchHistoryDao.delete(keyword)
+        }
         viewModel.historyList.remove(keyword)
         mAdapter.notifyDataSetChanged()
     }

@@ -1,6 +1,10 @@
 package com.example.c001apk.logic.model
 
-data class BHistoryBean(
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class BrowseHistory(
     val fid: String,
     val uid: String,
     val uname: String,
@@ -8,4 +12,7 @@ data class BHistoryBean(
     val device: String,
     val message: String,
     val pubDate: String
-)
+) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0
+}

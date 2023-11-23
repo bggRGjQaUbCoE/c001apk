@@ -143,7 +143,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
+                        mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -162,7 +162,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition)
+                        mAdapter.notifyDataSetChanged()
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {

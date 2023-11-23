@@ -180,7 +180,6 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                     viewModel.homeFeedList.add(element)
                             }
-
                         }
                         viewModel.lastItem =
                             viewModel.homeFeedList[viewModel.homeFeedList.size - 1].entityId

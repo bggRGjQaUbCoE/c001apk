@@ -1,53 +1,23 @@
 package com.example.c001apk.util
 
-import android.annotation.SuppressLint
-import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
 import com.example.c001apk.MyApplication.Companion.context
-import com.example.c001apk.logic.database.BlackListDataBaseHelper
+import com.example.c001apk.logic.database.BlackListDatabase
+import com.example.c001apk.logic.model.SearchHistory
+import kotlin.concurrent.thread
 
 object BlackListUtil {
 
-    private val dbHelper = BlackListDataBaseHelper(context, "BlackList.db", 1)
-    private val db: SQLiteDatabase = dbHelper.writableDatabase
-
-    @SuppressLint("Range")
-    fun checkUid(uid: String): Boolean {
-        var isExist = false
-        val cursor = db.query("BlackList", null, null, null, null, null, null)
-        if (cursor.moveToFirst()) {
-            do {
-                val history = cursor.getString(cursor.getColumnIndex("uid"))
-                if (uid == history) {
-                    isExist = true
-                    break
-                }
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        return isExist
+    private val blackListDao by lazy {
+        BlackListDatabase.getDatabase(context).blackListDao()
     }
 
-    @SuppressLint("Range", "NotifyDataSetChanged")
-    fun saveUid(uid: String) {
-        var isExist = false
-        val cursor = db.query("BlackList", null, null, null, null, null, null)
-        if (cursor.moveToFirst()) {
-            do {
-                val history = cursor.getString(cursor.getColumnIndex("uid"))
-                if (uid == history) {
-                    isExist = true
-                    break
-                }
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
+    fun checkUid(uid: String) = blackListDao.isExist(uid)
 
-        if (!isExist) {
-            val value = ContentValues().apply {
-                put("uid", uid)
+    fun saveUid(uid: String) {
+        thread {
+            if (!blackListDao.isExist(uid)) {
+                blackListDao.insert(SearchHistory(uid))
             }
-            db.insert("BlackList", null, value)
         }
     }
 
