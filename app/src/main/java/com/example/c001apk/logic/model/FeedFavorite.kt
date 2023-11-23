@@ -5,7 +5,13 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class FeedFavorite(
-    var feedId: String
+    var feedId: String,
+    val uid: String,
+    val uname: String,
+    val avatar: String,
+    val device: String,
+    val message: String,
+    val pubDate: String
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

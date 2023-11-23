@@ -11,6 +11,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.BHistoryAdapter
 import com.example.c001apk.databinding.ActivityHistoryBinding
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
+import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,11 +26,23 @@ class HistoryActivity : BaseActivity() {
     private val browseHistoryDao by lazy {
         BrowseHistoryDatabase.getDatabase(this).browseHistoryDao()
     }
+    private val feedFavoriteDao by lazy {
+        FeedFavoriteDatabase.getDatabase(this).feedFavoriteDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        viewModel.type = intent.getStringExtra("type")!!
+
+        binding.toolBar.title =
+            when (viewModel.type) {
+                "browse" -> "浏览历史"
+                "favorite" -> "收藏"
+                else -> throw IllegalArgumentException("error type: ${viewModel.type}")
+            }
 
         initBar()
         initView()
@@ -58,11 +71,13 @@ class HistoryActivity : BaseActivity() {
 
             R.id.clearAll -> {
                 MaterialAlertDialogBuilder(this).apply {
-                    setTitle("确定清除全部浏览历史？")
+                    if (viewModel.type == "browse") setTitle("确定清除全部浏览历史？")
+                    else setTitle("确定清除全部收藏？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
                         thread {
-                            browseHistoryDao.deleteAll()
+                            if (viewModel.type == "browse") browseHistoryDao.deleteAll()
+                            else feedFavoriteDao.deleteAll()
                         }
                         viewModel.bHistoryList.clear()
                         mAdapter.notifyDataSetChanged()
@@ -77,7 +92,12 @@ class HistoryActivity : BaseActivity() {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mLayoutManager = LinearLayoutManager(this)
-        mAdapter = BHistoryAdapter(this, viewModel.bHistoryList)
+        when (viewModel.type) {
+            "browse" -> mAdapter = BHistoryAdapter(this)
+            "favorite" -> mAdapter = BHistoryAdapter(this)
+            else -> throw IllegalArgumentException("error type: ${viewModel.type}")
+        }
+
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -90,7 +110,12 @@ class HistoryActivity : BaseActivity() {
     private fun queryData() {
         thread {
             viewModel.bHistoryList.clear()
-            viewModel.bHistoryList.addAll(browseHistoryDao.loadAllHistory())
+            when (viewModel.type) {
+                "browse" -> viewModel.bHistoryList.addAll(browseHistoryDao.loadAllHistory())
+                "favorite" -> viewModel.bHistoryList.addAll(feedFavoriteDao.loadAllHistory())
+                else -> throw IllegalArgumentException("error type: ${viewModel.type}")
+            }
+            mAdapter.setDataListData(viewModel.type, viewModel.bHistoryList)
             binding.indicator.visibility = View.GONE
             binding.indicator.isIndeterminate = false
             runOnUiThread {

@@ -18,8 +18,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolBar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="@string/history" />
+            android:layout_height="?attr/actionBarSize" />
 
         <View
             android:layout_width="match_parent"

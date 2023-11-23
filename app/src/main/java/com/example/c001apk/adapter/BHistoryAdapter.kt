@@ -15,6 +15,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.BrowseHistory
+import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.UserActivity
@@ -26,9 +27,16 @@ import com.example.c001apk.util.SpannableStringBuilderUtil
 
 class BHistoryAdapter(
     private val mContext: Context,
-    private val dataList: ArrayList<BrowseHistory>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    var dataList = ArrayList<Any>()
+    var type = ""
+
+    fun setDataListData(type: String, dataList: ArrayList<Any>) {
+        this.type = type
+        this.dataList = dataList
+    }
 
     private var uid = ""
     private var position = -1
@@ -156,20 +164,39 @@ class BHistoryAdapter(
             }
 
             is HistoryViewHolder -> {
-                val history = dataList[position]
-                holder.id = history.fid
-                holder.uid = history.uid
-                holder.uname.text = history.uname
-                holder.device.text = history.device
-                holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
-                holder.message.movementMethod = LinkMovementMethod.getInstance()
-                holder.message.text = SpannableStringBuilderUtil.setText(
-                    mContext,
-                    history.message,
-                    (holder.message.textSize * 1.3).toInt(),
-                    null
-                )
-                ImageUtil.showAvatar(holder.avatar, history.avatar)
+                if (dataList.isNotEmpty()) {
+                    if (type == "browse") {
+                        val history = dataList[position] as BrowseHistory
+                        holder.id = history.fid
+                        holder.uid = history.uid
+                        holder.uname.text = history.uname
+                        holder.device.text = history.device
+                        holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
+                        holder.message.movementMethod = LinkMovementMethod.getInstance()
+                        holder.message.text = SpannableStringBuilderUtil.setText(
+                            mContext,
+                            history.message,
+                            (holder.message.textSize * 1.3).toInt(),
+                            null
+                        )
+                        ImageUtil.showAvatar(holder.avatar, history.avatar)
+                    } else {
+                        val history = dataList[position] as FeedFavorite
+                        holder.id = history.feedId
+                        holder.uid = history.uid
+                        holder.uname.text = history.uname
+                        holder.device.text = history.device
+                        holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
+                        holder.message.movementMethod = LinkMovementMethod.getInstance()
+                        holder.message.text = SpannableStringBuilderUtil.setText(
+                            mContext,
+                            history.message,
+                            (holder.message.textSize * 1.3).toInt(),
+                            null
+                        )
+                        ImageUtil.showAvatar(holder.avatar, history.avatar)
+                    }
+                }
             }
         }
     }

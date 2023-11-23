@@ -60,6 +60,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: OffsetLinearLayoutManager
     private lateinit var objectAnimator: ObjectAnimator
+    private val feedFavoriteDao by lazy {
+        FeedFavoriteDatabase.getDatabase(this@FeedFragment.requireContext()).feedFavoriteDao()
+    }
 
     private fun initAnimator() {
         objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
@@ -618,6 +621,14 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 mLayoutManager.scrollToPositionWithOffset(0, 0)
             }
             inflateMenu(R.menu.feed_menu)
+            val favorite = menu.findItem(R.id.favorite)
+            thread {
+                if (feedFavoriteDao.isFavorite(viewModel.id)) {
+                    favorite.title = "取消收藏"
+                } else {
+                    favorite.title = "收藏"
+                }
+            }
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.showReply -> {
@@ -649,13 +660,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     }
 
                     R.id.favorite -> {
-                        val feedFavoriteDao =
-                            FeedFavoriteDatabase.getDatabase(this@FeedFragment.requireContext())
-                                .feedFavoriteDao()
                         thread {
                             if (feedFavoriteDao.isFavorite(viewModel.id)) {
                                 feedFavoriteDao.delete(viewModel.id)
                                 requireActivity().runOnUiThread {
+                                    favorite.title = "收藏"
                                     Toast.makeText(
                                         requireContext(),
                                         "已取消收藏",
@@ -663,8 +672,19 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     ).show()
                                 }
                             } else {
-                                feedFavoriteDao.insert(FeedFavorite(viewModel.id))
+                                feedFavoriteDao.insert(
+                                    FeedFavorite(
+                                        viewModel.id,
+                                        viewModel.uid,
+                                        viewModel.funame,
+                                        viewModel.avatar,
+                                        viewModel.device,
+                                        viewModel.feedContentList[0].data.message,
+                                        viewModel.feedContentList[0].data.dateline.toString()
+                                    )
+                                )
                                 requireActivity().runOnUiThread {
+                                    favorite.title = "取消收藏"
                                     Toast.makeText(requireContext(), "已收藏", Toast.LENGTH_SHORT)
                                         .show()
                                 }

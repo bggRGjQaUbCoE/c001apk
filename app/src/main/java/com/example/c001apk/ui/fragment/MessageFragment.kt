@@ -312,13 +312,16 @@ class MessageFragment : Fragment() {
                     }
                 }
 
+                R.id.favorite -> {
+                    val intent = Intent(requireContext(), HistoryActivity::class.java)
+                    intent.putExtra("type", "favorite")
+                    requireContext().startActivity(intent)
+                }
+
                 R.id.history -> {
-                    requireContext().startActivity(
-                        Intent(
-                            requireContext(),
-                            HistoryActivity::class.java
-                        )
-                    )
+                    val intent = Intent(requireContext(), HistoryActivity::class.java)
+                    intent.putExtra("type", "browse")
+                    requireContext().startActivity(intent)
                 }
 
             }

@@ -114,6 +114,14 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signConfig
+            applicationVariants.all {
+                outputs.all {
+                    val versionName = defaultConfig.versionName
+                    val versionCode = defaultConfig.versionCode
+                    (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                        "${project.name}_$versionName($versionCode).apk"
+                }
+            }
         }
         getByName("debug") {
             isMinifyEnabled = false

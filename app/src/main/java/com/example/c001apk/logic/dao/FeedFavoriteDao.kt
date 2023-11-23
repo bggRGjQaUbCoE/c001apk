@@ -18,4 +18,11 @@ interface FeedFavoriteDao {
 
     @Query("delete from FeedFavorite where feedId = :id")
     fun delete(id: String)
+
+    @Query("select * from FeedFavorite ORDER BY id DESC")
+    fun loadAllHistory(): List<FeedFavorite>
+
+    @Query("DELETE FROM FeedFavorite")
+    fun deleteAll()
+
 }
