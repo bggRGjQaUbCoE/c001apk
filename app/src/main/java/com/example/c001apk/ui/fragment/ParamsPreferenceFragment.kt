@@ -145,7 +145,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.MANUFACTURER =
                         editText.text.toString().ifEmpty { Utils.randomManufacturer() }
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
@@ -176,7 +176,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.BRAND = editText.text.toString().ifEmpty { Utils.randomBrand() }
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
@@ -207,7 +207,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.MODEL = editText.text.toString().ifEmpty { Utils.randomDeviceModel() }
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
@@ -239,7 +239,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.BUILDNUMBER =
                         editText.text.toString().ifEmpty { randHexString(16) }
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }

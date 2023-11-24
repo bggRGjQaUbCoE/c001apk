@@ -1,11 +1,15 @@
 package com.example.c001apk.util
 
 import android.content.Context
-import com.example.c001apk.MyApplication
 import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.Utils.Companion.getBase64
 import com.example.c001apk.util.Utils.Companion.getMD5
+import com.example.c001apk.util.Utils.Companion.randomAndroidVersionRelease
+import com.example.c001apk.util.Utils.Companion.randomBrand
+import com.example.c001apk.util.Utils.Companion.randomDeviceModel
+import com.example.c001apk.util.Utils.Companion.randomManufacturer
+import com.example.c001apk.util.Utils.Companion.randomSdkInt
 import java.util.Random
 
 
@@ -19,7 +23,18 @@ class TokenDeviceUtils {
             }.uppercase()
         }
 
-        fun getDeviceCode(): String {
+        fun getDeviceCode(regenerate: Boolean): String {
+            if (regenerate) {
+                PrefManager.apply {
+                    MANUFACTURER = randomManufacturer()
+                    BRAND = randomBrand()
+                    MODEL = randomDeviceModel()
+                    BUILDNUMBER = randHexString(16)
+                    SDK_INT = randomSdkInt()
+                    ANDROID_VERSION = randomAndroidVersionRelease()
+                    USER_AGENT = "Dalvik/2.1.0 (Linux; U; Android $ANDROID_VERSION; ${MODEL} ${BUILDNUMBER}) (#Build; ${BRAND}; ${MODEL}; ${BUILDNUMBER}; $ANDROID_VERSION) +CoolMarket/${VERSION_NAME}-${VERSION_CODE}-${Constants.MODE}"
+                }
+            }
             val szlmId = if (PrefManager.SZLMID == "") randHexString(16) else PrefManager.SZLMID
             val mac = Utils.randomMacAddress()
             val manuFactor = PrefManager.MANUFACTURER
@@ -50,7 +65,7 @@ class TokenDeviceUtils {
 
         fun getLastingDeviceCode(): String {
             if (PrefManager.xAppDevice == "")
-                PrefManager.xAppDevice = getDeviceCode()
+                PrefManager.xAppDevice = getDeviceCode(true)
             return PrefManager.xAppDevice
         }
 
@@ -72,8 +87,8 @@ class TokenDeviceUtils {
             }
         }
 
-        fun getLastingModel():String{
-            val sp = context.getSharedPreferences(MyApplication.context.packageName, Context.MODE_PRIVATE)
+        fun getLastingModel(): String {
+            val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("MODEL", null).let {
                 it ?: Utils.randomDeviceModel().apply {
                     sp.edit().putString("MODEL", this).apply()
@@ -81,8 +96,8 @@ class TokenDeviceUtils {
             }
         }
 
-        fun getLastingSdkInt():String{
-            val sp = context.getSharedPreferences(MyApplication.context.packageName, Context.MODE_PRIVATE)
+        fun getLastingSdkInt(): String {
+            val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("SDK_INT", null).let {
                 it ?: Utils.randomSdkInt().apply {
                     sp.edit().putString("SDK_INT", this).apply()
@@ -90,8 +105,8 @@ class TokenDeviceUtils {
             }
         }
 
-        fun getLastingAndroidVersionRelease():String{
-            val sp = context.getSharedPreferences(MyApplication.context.packageName, Context.MODE_PRIVATE)
+        fun getLastingAndroidVersionRelease(): String {
+            val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("ANDROID_VERSION_RELEASE", null).let {
                 it ?: Utils.randomAndroidVersionRelease().apply {
                     sp.edit().putString("ANDROID_VERSION_RELEASE", this).apply()
@@ -101,7 +116,7 @@ class TokenDeviceUtils {
 
         fun regenerateDeviceInfo(context: Context) {
             context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE).edit().apply {
-                putString("DEVICE_CODE", getDeviceCode())
+                putString("DEVICE_CODE", getDeviceCode(false))
                 putString("INSTALL_TIME", System.currentTimeMillis().toString())
                 putString("BRAND", Utils.randomBrand())
                 putString("MODEL", Utils.randomDeviceModel())

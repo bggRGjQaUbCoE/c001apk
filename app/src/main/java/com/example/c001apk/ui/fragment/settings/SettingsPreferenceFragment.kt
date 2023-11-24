@@ -176,11 +176,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 setTitle(requireContext().getString(R.string.zmlmId))
                 setNeutralButton("重新生成DeviceCode"){_, _ ->
                     PrefManager.SZLMID = editText.text.toString()
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(true)
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.SZLMID = editText.text.toString()
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                 }
                 show()
             }
