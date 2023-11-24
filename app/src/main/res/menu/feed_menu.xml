@@ -15,7 +15,6 @@
 
     <item
         android:id="@+id/share"
-        android:icon="@drawable/ic_share"
         android:showAsAction="never"
         android:title="@string/share" />
 
@@ -25,8 +24,12 @@
         android:title="@string/copyLink" />
 
     <item
+        android:id="@+id/report"
+        android:showAsAction="never"
+        android:title="@string/report" />
+
+    <item
         android:id="@+id/block"
-        android:icon="@drawable/ic_block"
         android:showAsAction="never"
         android:title="@string/block" />
 

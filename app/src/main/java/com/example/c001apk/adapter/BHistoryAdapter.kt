@@ -21,6 +21,7 @@ import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.UserActivity
+import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
@@ -219,6 +220,15 @@ class BHistoryAdapter(
                 BlackListUtil.saveUid(uid)
                 dataList.removeAt(position)
                 notifyItemRemoved(position)
+            }
+
+            R.id.report -> {
+                val intent = Intent(mContext, WebViewActivity::class.java)
+                intent.putExtra(
+                    "url",
+                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
+                )
+                mContext.startActivity(intent)
             }
 
             R.id.delete -> {

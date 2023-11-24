@@ -131,6 +131,12 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signConfig
+            applicationVariants.all {
+                outputs.all {
+                    (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                        "app-debug.apk"
+                }
+            }
         }
     }
     compileOptions {

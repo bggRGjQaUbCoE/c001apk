@@ -34,6 +34,7 @@ import com.example.c001apk.ui.activity.DyhActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
+import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
@@ -57,6 +58,7 @@ class AppAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
+    private var fid = ""
     private var uid = ""
     private var position = -1
 
@@ -287,6 +289,7 @@ class AppAdapter(
                     onImageItemClickListener = this@AppAdapter.onImageItemClickListener
                 }
                 viewHolder.expand.setOnClickListener {
+                    fid = viewHolder.id
                     uid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
@@ -886,6 +889,15 @@ class AppAdapter(
                 BlackListUtil.saveUid(uid)
                 dataList.removeAt(position)
                 notifyItemRemoved(position)
+            }
+
+            R.id.report -> {
+                val intent = Intent(mContext, WebViewActivity::class.java)
+                intent.putExtra(
+                    "url",
+                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
+                )
+                mContext.startActivity(intent)
             }
         }
         return false

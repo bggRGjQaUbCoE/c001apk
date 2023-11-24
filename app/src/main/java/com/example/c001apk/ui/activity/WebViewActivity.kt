@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -20,6 +21,7 @@ import androidx.webkit.WebViewFeature
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
 import com.example.c001apk.util.ClipboardUtil.copyText
+import com.example.c001apk.util.PrefManager
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 
@@ -39,6 +41,7 @@ class WebViewActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         link = intent.getStringExtra("url")!!
+        loadUrlInWebView()
 
         if (SDK_INT >= 32) {
             if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
@@ -63,25 +66,38 @@ class WebViewActivity : BaseActivity() {
                 }
             }
         }
+    }
 
-
-        binding.webView.apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.setSupportZoom(true)
-            //settings.builtInZoomControls = true
-            settings.cacheMode = WebSettings.LOAD_NO_CACHE
-
-            settings.defaultTextEncodingName = "UTF-8"
-            settings.allowContentAccess = true
-            settings.useWideViewPort = true
-            settings.loadWithOverviewMode = true
-            settings.javaScriptCanOpenWindowsAutomatically = true
-            settings.loadsImagesAutomatically = true
-            settings.allowFileAccess = false
-            //settings.isAlgorithmicDarkeningAllowed = true
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun loadUrlInWebView() {
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            setSupportZoom(true)
+            builtInZoomControls = true
+            cacheMode = WebSettings.LOAD_NO_CACHE
+            defaultTextEncodingName = "UTF-8"
+            allowContentAccess = true
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            javaScriptCanOpenWindowsAutomatically = true
+            loadsImagesAutomatically = true
+            allowFileAccess = false
+            //isAlgorithmicDarkeningAllowed = true
             //WebView.setWebContentsDebuggingEnabled(true)
-
+            userAgentString = PrefManager.USER_AGENT
+        }
+        CookieManager.getInstance().apply {
+            setAcceptThirdPartyCookies(binding.webView, false)
+            removeAllCookies { }
+            setCookie("m.coolapk.com", "DID=${PrefManager.SZLMID}")
+            setCookie("m.coolapk.com", "forward=https://www.coolapk.com")
+            setCookie("m.coolapk.com", "displayVersion=v14")
+            setCookie("m.coolapk.com", "uid=${PrefManager.uid}")
+            setCookie("m.coolapk.com", "username=${PrefManager.username}")
+            setCookie("m.coolapk.com", "token=${PrefManager.token}")
+        }
+        binding.webView.apply {
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(
                     view: WebView?, request: WebResourceRequest?
@@ -147,10 +163,10 @@ class WebViewActivity : BaseActivity() {
                     binding.toolBar.title = title
                 }
             }
-            loadUrl(link)
+            loadUrl(link, mutableMapOf("X-Requested-With" to "com.coolapk.market"))
         }
-
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.webview_menu, menu)

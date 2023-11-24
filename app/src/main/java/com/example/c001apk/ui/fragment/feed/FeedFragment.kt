@@ -23,6 +23,7 @@ import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.UserActivity
+import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
@@ -667,6 +668,16 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             "https://www.coolapk1s.com/feed/${viewModel.id}"
                         )
                     }
+
+                    R.id.report -> {
+                        val intent = Intent(requireContext(), WebViewActivity::class.java)
+                        intent.putExtra(
+                            "url",
+                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=${viewModel.id}"
+                        )
+                        requireContext().startActivity(intent)
+                    }
+
 
                     R.id.favorite -> {
                         thread {

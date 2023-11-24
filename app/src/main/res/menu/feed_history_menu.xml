@@ -7,6 +7,11 @@
         android:title="@string/delete" />
 
     <item
+        android:id="@+id/report"
+        android:showAsAction="never"
+        android:title="@string/report" />
+
+    <item
         android:id="@+id/block"
         android:showAsAction="never"
         android:title="@string/block" />

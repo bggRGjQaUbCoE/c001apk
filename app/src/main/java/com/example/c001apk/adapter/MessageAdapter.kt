@@ -18,6 +18,7 @@ import com.example.c001apk.ui.activity.FFFListActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.MessageActivity
 import com.example.c001apk.ui.activity.UserActivity
+import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.CookieUtil.atcommentme
 import com.example.c001apk.util.CookieUtil.atme
@@ -316,6 +317,15 @@ class MessageAdapter(
         when (p0.itemId) {
             R.id.block -> {
                 BlackListUtil.saveUid(uid)
+            }
+
+            R.id.report -> {
+                val intent = Intent(mContext, WebViewActivity::class.java)
+                intent.putExtra(
+                    "url",
+                    "https://m.coolapk.com/mp/do?c=user&m=report&id=$uid"
+                )
+                mContext.startActivity(intent)
             }
         }
         return false

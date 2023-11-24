@@ -108,5 +108,6 @@
     <string name="favorite">收藏</string>
     <string name="delete">删除</string>
     <string name="copyLink">复制链接</string>
+    <string name="report">举报</string>
 
 </resources>

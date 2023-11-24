@@ -359,6 +359,19 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         )
         itemShare.title = spannableString1
 
+        val itemReport = menu.findItem(R.id.report)
+        val spannableString2 = SpannableString(itemReport.title)
+        spannableString2.setSpan(
+            ForegroundColorSpan(ThemeUtils.getThemeAttrColor(
+                this,
+                rikka.preference.simplemenu.R.attr.colorControlNormal
+            )),
+            0,
+            spannableString2.length,
+            0
+        )
+        itemReport.title = spannableString2
+
         return true
     }
 
@@ -387,6 +400,15 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
 
             R.id.share -> {
                 IntentUtil.shareText(this, "https://www.coolapk.com/u/${viewModel.uid}")
+            }
+
+            R.id.report -> {
+                val intent = Intent(this, WebViewActivity::class.java)
+                intent.putExtra(
+                    "url",
+                    "https://m.coolapk.com/mp/do?c=user&m=report&id=${viewModel.uid}"
+                )
+                this.startActivity(intent)
             }
 
         }
