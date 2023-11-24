@@ -33,10 +33,13 @@ import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.OffsetLinearLayoutManager
 import com.example.c001apk.view.StickyItemDecorator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -633,7 +636,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 when (it.itemId) {
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
-                        mLayoutManager.scrollToPositionWithOffset(1, 0)
+                        mLayoutManager.scrollToPositionWithOffset(
+                            if (viewModel.firstVisibleItemPosition <= 0) 1 else 0,
+                            0
+                        )
                     }
 
                     R.id.block -> {
@@ -649,14 +655,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     }
 
                     R.id.share -> {
-                        val intent = Intent(Intent.ACTION_SEND)
-                        intent.type = "text/plain"
-                        intent.putExtra(Intent.EXTRA_SUBJECT, "分享")
-                        intent.putExtra(
-                            Intent.EXTRA_TEXT, "https://www.coolapk1s.com/feed/${viewModel.id}"
+                        IntentUtil.shareText(
+                            this@FeedFragment.requireContext(),
+                            "https://www.coolapk1s.com/feed/${viewModel.id}"
                         )
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(Intent.createChooser(intent, "分享"))
+                    }
+
+                    R.id.copyLink -> {
+                        ClipboardUtil.copyText(
+                            this@FeedFragment.requireContext(),
+                            "https://www.coolapk1s.com/feed/${viewModel.id}"
+                        )
                     }
 
                     R.id.favorite -> {
@@ -665,28 +674,27 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                 feedFavoriteDao.delete(viewModel.id)
                                 requireActivity().runOnUiThread {
                                     favorite.title = "收藏"
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "已取消收藏",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    ToastUtil.toast("已取消收藏")
                                 }
                             } else {
-                                feedFavoriteDao.insert(
-                                    FeedFavorite(
+                                try {
+                                    val fav = FeedFavorite(
                                         viewModel.id,
                                         viewModel.uid,
                                         viewModel.funame,
                                         viewModel.avatar,
                                         viewModel.device,
-                                        viewModel.feedContentList[0].data.message,
+                                        viewModel.feedContentList[0].data.message, // 还未加载完会空指针
                                         viewModel.feedContentList[0].data.dateline.toString()
                                     )
-                                )
-                                requireActivity().runOnUiThread {
-                                    favorite.title = "取消收藏"
-                                    Toast.makeText(requireContext(), "已收藏", Toast.LENGTH_SHORT)
-                                        .show()
+                                    feedFavoriteDao.insert(fav)
+                                    requireActivity().runOnUiThread {
+                                        favorite.title = "取消收藏"
+                                        ToastUtil.toast("已收藏")
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    ToastUtil.toast("请稍后再试")
                                 }
                             }
 

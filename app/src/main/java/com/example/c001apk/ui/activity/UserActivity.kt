@@ -23,6 +23,7 @@ import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -330,10 +331,12 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         val itemBlock = menu!!.findItem(R.id.block)
         val spannableString = SpannableString(itemBlock.title)
         spannableString.setSpan(
-            ForegroundColorSpan(ThemeUtils.getThemeAttrColor(
-                this,
-                rikka.preference.simplemenu.R.attr.colorControlNormal
-            )),
+            ForegroundColorSpan(
+                ThemeUtils.getThemeAttrColor(
+                    this,
+                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                )
+            ),
             0,
             spannableString.length,
             0
@@ -344,10 +347,12 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         val itemShare = menu.findItem(R.id.share)
         val spannableString1 = SpannableString(itemShare.title)
         spannableString1.setSpan(
-            ForegroundColorSpan(ThemeUtils.getThemeAttrColor(
-                this,
-                rikka.preference.simplemenu.R.attr.colorControlNormal
-            )),
+            ForegroundColorSpan(
+                ThemeUtils.getThemeAttrColor(
+                    this,
+                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                )
+            ),
             0,
             spannableString1.length,
             0
@@ -381,14 +386,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
             }
 
             R.id.share -> {
-                val intent = Intent(Intent.ACTION_SEND)
-                intent.type = "text/plain"
-                intent.putExtra(Intent.EXTRA_SUBJECT, "分享")
-                intent.putExtra(
-                    Intent.EXTRA_TEXT, "https://www.coolapk.com/u/${viewModel.uid}"
-                )
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(Intent.createChooser(intent, "分享"))
+                IntentUtil.shareText(this, "https://www.coolapk.com/u/${viewModel.uid}")
             }
 
         }
