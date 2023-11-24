@@ -45,6 +45,8 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         if (viewModel.title != "") {
             showAppInfo()
             binding.appLayout.visibility = View.VISIBLE
+        } else if (viewModel.errorMessage != null) {
+            showErrorMessage()
         }
         initView()
         initData()
@@ -56,21 +58,42 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 viewModel.isNew = false
 
                 val appInfo = result.getOrNull()
-                if (appInfo != null) {
-                    viewModel.title = appInfo.title
-                    viewModel.version = "版本: ${appInfo.version}(${appInfo.apkversioncode})"
-                    viewModel.size = "大小: ${appInfo.apksize}"
-                    viewModel.lastupdate = if (appInfo.lastupdate == null) "更新时间: null"
-                    else "更新时间: ${DateUtils.fromToday(appInfo.lastupdate)}"
-                    viewModel.logo = appInfo.logo
-                    viewModel.appId = appInfo.id
-                    viewModel.packageName = appInfo.apkname
-                    viewModel.versionCode = appInfo.apkversioncode
+                if (appInfo?.error != null) {
+                    viewModel.errorMessage = appInfo.message
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    showErrorMessage()
+                    return@observe
+                } else if (appInfo?.data != null) {
+                    viewModel.commentStatusText = appInfo.data.commentStatusText
+                    viewModel.title = appInfo.data.title
+                    viewModel.version =
+                        "版本: ${appInfo.data.version}(${appInfo.data.apkversioncode})"
+                    viewModel.size = "大小: ${appInfo.data.apksize}"
+                    viewModel.lastupdate = if (appInfo.data.lastupdate == null) "更新时间: null"
+                    else "更新时间: ${DateUtils.fromToday(appInfo.data.lastupdate)}"
+                    viewModel.logo = appInfo.data.logo
+                    viewModel.appId = appInfo.data.id
+                    viewModel.packageName = appInfo.data.apkname
+                    viewModel.versionCode = appInfo.data.apkversioncode
                     showAppInfo()
 
-                    viewModel.isRefreshing = true
-                    viewModel.isNew = true
-                    viewModel.getAppComment()
+                    if (viewModel.commentStatusText == "允许评论") {
+                        viewModel.isRefreshing = true
+                        viewModel.isNew = true
+                        viewModel.getAppComment()
+                    } else {
+                        viewModel.isEnd = true
+                        binding.indicator.isIndeterminate = false
+                        binding.indicator.visibility = View.GONE
+                        binding.appLayout.visibility = View.VISIBLE
+                        binding.swipeRefresh.isEnabled = false
+                        binding.swipeRefresh.isRefreshing = false
+                        viewModel.isRefreshing = false
+                        viewModel.isLoadMore = false
+                        mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.commentStatusText)
+                        mAdapter.notifyDataSetChanged()
+                    }
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -89,13 +112,13 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         for (element in comment)
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
-                                viewModel.appCommentList.add(element)
+                                    viewModel.appCommentList.add(element)
 
                     }
                     mAdapter.notifyDataSetChanged()
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -149,6 +172,12 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
     }
 
+    private fun showErrorMessage() {
+        binding.swipeRefresh.isEnabled = false
+        binding.errorMessage.visibility = View.VISIBLE
+        binding.errorMessage.text = viewModel.errorMessage
+    }
+
     private fun showAppInfo() {
         binding.name.text = viewModel.title
         binding.version.text = viewModel.version
@@ -189,12 +218,17 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun initData() {
         if (viewModel.isInit) {
             viewModel.isInit = false
             binding.indicator.isIndeterminate = true
             binding.indicator.visibility = View.VISIBLE
             refreshData()
+        } else if (viewModel.commentStatusText != "允许评论") {
+            binding.swipeRefresh.isEnabled = false
+            mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.commentStatusText)
+            mAdapter.notifyDataSetChanged()
         }
     }
 
@@ -235,7 +269,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     if (viewModel.lastVisibleItemPosition == viewModel.appCommentList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
+                        mAdapter.setLoadState(mAdapter.LOADING, null)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

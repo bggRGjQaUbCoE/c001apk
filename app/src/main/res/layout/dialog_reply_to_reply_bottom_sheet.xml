@@ -27,4 +27,12 @@
             android:scrollbars="none" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/replyErrorMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        android:visibility="gone" />
+
 </FrameLayout>

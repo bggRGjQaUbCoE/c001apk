@@ -108,7 +108,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n", "InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -153,29 +153,31 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (feed != null) {
-                    if (feed.data != null) {
-                        viewModel.uid = feed.data.uid
-                        viewModel.funame = feed.data.userInfo?.username.toString()
-                        viewModel.avatar = feed.data.userAvatar
-                        viewModel.device = feed.data.deviceTitle
-                        viewModel.replyCount = feed.data.replynum
-                        viewModel.dateLine = feed.data.dateline
-                        if (viewModel.isRefreshing) {
-                            viewModel.feedContentList.clear()
-                            mAdapter.setLoadState(mAdapter.LOADING)
-                            viewModel.isNew = true
-                            viewModel.getFeedReply()
-                        }
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.feedContentList.add(feed)
-                            //if (feed.data.topReplyRows.isNotEmpty()) {
-                            //viewModel.haveTop = true
-                            //viewModel.feedReplyList.addAll(feed.data.topReplyRows)
-                            //}
-                        }
-                    } else {
-                        Toast.makeText(activity, feed.message, Toast.LENGTH_SHORT).show()
+                if (feed?.error != null) {
+                    viewModel.errorMessage = feed.message
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    showErrorMessage()
+                    return@observe
+                } else if (feed?.data != null) {
+                    viewModel.uid = feed.data.uid
+                    viewModel.funame = feed.data.userInfo?.username.toString()
+                    viewModel.avatar = feed.data.userAvatar
+                    viewModel.device = feed.data.deviceTitle
+                    viewModel.replyCount = feed.data.replynum
+                    viewModel.dateLine = feed.data.dateline
+                    if (viewModel.isRefreshing) {
+                        viewModel.feedContentList.clear()
+                        mAdapter.setLoadState(mAdapter.LOADING, null)
+                        viewModel.isNew = true
+                        viewModel.getFeedReply()
+                    }
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.feedContentList.add(feed)
+                        //if (feed.data.topReplyRows.isNotEmpty()) {
+                        //viewModel.haveTop = true
+                        //viewModel.feedReplyList.addAll(feed.data.topReplyRows)
+                        //}
                     }
                 } else {
                     viewModel.isEnd = true
@@ -197,21 +199,33 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.isRefreshReply = false
                 }
                 val reply = result.getOrNull()
-                if (!reply.isNullOrEmpty()) {
+                if (reply?.message != null) {
+                    viewModel.errorMessage = reply.message
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    binding.contentLayout.visibility = View.VISIBLE
+                    viewModel.isEnd = true
+                    viewModel.isLoadMore = false
+                    viewModel.isRefreshing = false
+                    binding.swipeRefresh.isRefreshing = false
+                    mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
+                    mAdapter.notifyDataSetChanged()
+                    return@observe
+                } else if (!reply?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         viewModel.feedReplyList.clear()
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
-                        for (element in reply) {
+                        for (element in reply?.data!!) {
                             if (element.entityType == "feed_reply") {
                                 if (!BlackListUtil.checkUid(element.uid))
                                     viewModel.feedReplyList.add(element)
                             }
                         }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     viewModel.isEnd = true
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     result.exceptionOrNull()?.printStackTrace()
                 }
                 if (viewModel.isViewReply) {
@@ -280,8 +294,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.feedContentList[0].data.likenum = response.data.count
-                        viewModel.feedContentList[0].data.userAction?.like = 1
+                        viewModel.feedContentList[0].data?.likenum = response.data.count
+                        viewModel.feedContentList[0].data?.userAction?.like = 1
                         mAdapter.notifyItemChanged(0)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -298,8 +312,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.feedContentList[0].data.likenum = response.data.count
-                        viewModel.feedContentList[0].data.userAction?.like = 0
+                        viewModel.feedContentList[0].data?.likenum = response.data.count
+                        viewModel.feedContentList[0].data?.userAction?.like = 0
                         mAdapter.notifyItemChanged(0)
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -377,9 +391,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 if (response != null) {
                     if (viewModel.followType) {
-                        viewModel.feedContentList[0].data.userAction?.followAuthor = 0
+                        viewModel.feedContentList[0].data?.userAction?.followAuthor = 0
                     } else {
-                        viewModel.feedContentList[0].data.userAction?.followAuthor = 1
+                        viewModel.feedContentList[0].data?.userAction?.followAuthor = 1
                     }
                     mAdapter.notifyDataSetChanged()
                 } else {
@@ -388,6 +402,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
         }
 
+    }
+
+    private fun showErrorMessage() {
+        binding.errorMessage.visibility = View.VISIBLE
+        binding.errorMessage.text = viewModel.errorMessage
     }
 
     @SuppressLint("SetTextI18n")
@@ -455,7 +474,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (viewModel.lastVisibleItemPosition == viewModel.feedReplyList.size + 2
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
+                        mAdapter.setLoadState(mAdapter.LOADING, null)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
@@ -545,6 +564,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
             if (objectAnimator.isRunning) {
@@ -556,6 +576,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             refreshData()
         } else {
             binding.contentLayout.visibility = View.VISIBLE
+            if (viewModel.errorMessage != null) {
+                mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
+                mAdapter.notifyDataSetChanged()
+            }
             if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
                 showTitleProfile()
             } else {
@@ -695,8 +719,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                         viewModel.funame,
                                         viewModel.avatar,
                                         viewModel.device,
-                                        viewModel.feedContentList[0].data.message, // 还未加载完会空指针
-                                        viewModel.feedContentList[0].data.dateline.toString()
+                                        viewModel.feedContentList[0].data?.message.toString(), // 还未加载完会空指针
+                                        viewModel.feedContentList[0].data?.dateline.toString()
                                     )
                                     feedFavoriteDao.insert(fav)
                                     requireActivity().runOnUiThread {

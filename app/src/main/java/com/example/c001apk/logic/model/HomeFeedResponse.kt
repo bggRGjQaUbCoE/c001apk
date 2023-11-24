@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
-        val relationRows: ArrayList<RelationRows>,
+        val relationRows: ArrayList<RelationRows>?,
         val targetRow: TargetRow?,
         @SerializedName("change_count") val changeCount: Int,
         val isModified: Int,
@@ -69,6 +69,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userAvatar: String,
         val infoHtml: String,
         val title: String,
+        val commentStatusText: String,
         val picArr: List<String>?,
         val replyRows: List<ReplyRows>,
         val replyRowsMore: Int,

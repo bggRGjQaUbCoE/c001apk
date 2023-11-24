@@ -78,7 +78,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -107,11 +107,17 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
-                val data = result.getOrNull()
-                if (!data.isNullOrEmpty()) {
+                val reply = result.getOrNull()
+                if (reply?.error != null) {
+                    viewModel.errorMessage = reply.message
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    showReplyErrorMessage()
+                    return@observe
+                } else if (!reply?.data.isNullOrEmpty()) {
                     if (!viewModel.isLoadMore)
                         viewModel.replyTotalList.clear()
-                    for (element in data)
+                    for (element in reply?.data!!)
                         if (element.entityType == "feed_reply")
                             if (!BlackListUtil.checkUid(element.uid))
                                 viewModel.replyTotalList.add(element)
@@ -208,6 +214,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             }
         }
 
+    }
+
+    private fun showReplyErrorMessage() {
+        binding.replyErrorMessage.visibility = View.VISIBLE
+        binding.replyErrorMessage.text = viewModel.errorMessage
     }
 
     private fun initScroll() {

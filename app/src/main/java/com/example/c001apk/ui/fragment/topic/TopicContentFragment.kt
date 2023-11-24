@@ -119,9 +119,9 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                     viewModel.topicDataList.add(element)
                     mAdapter.notifyDataSetChanged()
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -181,7 +181,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                     if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
+                        mAdapter.setLoadState(mAdapter.LOADING, null)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

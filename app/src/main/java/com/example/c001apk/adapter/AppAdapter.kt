@@ -84,10 +84,13 @@ class AppAdapter(
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
+    val LOADING_ERROR = 4
+    private var errorMessage: String? = null
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setLoadState(loadState: Int) {
+    fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
+        this.errorMessage = errorMessage
         notifyDataSetChanged()
     }
 
@@ -479,6 +482,14 @@ class AppAdapter(
                         holder.noMore.visibility = View.VISIBLE
                     }
 
+                    LOADING_ERROR -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.text = errorMessage
+                        holder.noMore.visibility = View.VISIBLE
+                    }
+
                     else -> {}
                 }
             }
@@ -680,14 +691,14 @@ class AppAdapter(
                     holder.multiImage.visibility = View.GONE
                 }
 
-                if (feed.targetRow?.id == null && feed.relationRows.isEmpty())
+                if (feed.targetRow?.id == null && feed.relationRows.isNullOrEmpty())
                     holder.dyhLayout.visibility = View.GONE
                 else {
                     holder.dyhLayout.visibility = View.VISIBLE
                     holder.linearAdapterLayout.adapter = object : BaseAdapter() {
                         override fun getCount(): Int =
-                            if (feed.targetRow?.id == null) feed.relationRows.size
-                            else 1 + feed.relationRows.size
+                            if (feed.targetRow?.id == null) feed.relationRows!!.size
+                            else 1 + feed.relationRows!!.size
 
                         override fun getItem(p0: Int): Any = 0
 
@@ -724,7 +735,7 @@ class AppAdapter(
                                     )
                                     layoutParams.setMargins(space, 0, 0, 0)
                                     view.layoutParams = layoutParams
-                                    type = feed.relationRows[position - 1].entityType
+                                    type = feed.relationRows!![position - 1].entityType
                                     id = feed.relationRows[position - 1].id
                                     url = feed.relationRows[position - 1].url
                                     title.text = feed.relationRows[position - 1].title
@@ -735,7 +746,7 @@ class AppAdapter(
                                 }
                             } else {
                                 if (position == 0) {
-                                    type = feed.relationRows[0].entityType
+                                    type = feed.relationRows!![0].entityType
                                     id = feed.relationRows[0].id
                                     title.text = feed.relationRows[0].title
                                     url = feed.relationRows[0].url
@@ -749,7 +760,7 @@ class AppAdapter(
                                     )
                                     layoutParams.setMargins(space, 0, 0, 0)
                                     view.layoutParams = layoutParams
-                                    type = feed.relationRows[position].entityType
+                                    type = feed.relationRows!![position].entityType
                                     id = feed.relationRows[position].id
                                     url = feed.relationRows[position].url
                                     title.text = feed.relationRows[position].title

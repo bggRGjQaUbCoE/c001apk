@@ -90,10 +90,13 @@ class FeedContentAdapter(
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
+    val LOADING_ERROR = 4
+    private var errorMessage: String? = null
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setLoadState(loadState: Int) {
+    fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
+        this.errorMessage = errorMessage
         notifyDataSetChanged()
     }
 
@@ -341,7 +344,7 @@ class FeedContentAdapter(
 
             is TopViewHolder -> {
                 if (feedList.isNotEmpty()) {
-                    holder.replyCount.text = "共${feedList[0].data.replynum}回复"
+                    holder.replyCount.text = "共${feedList[0].data?.replynum}回复"
                     when (listType) {
                         "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
                         "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
@@ -375,6 +378,14 @@ class FeedContentAdapter(
                         holder.noMore.visibility = View.VISIBLE
                     }
 
+                    LOADING_ERROR -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.text = errorMessage
+                        holder.noMore.visibility = View.VISIBLE
+                    }
+
                     else -> {}
                 }
             }
@@ -382,13 +393,13 @@ class FeedContentAdapter(
             is FeedContentViewHolder -> {
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
-                    holder.id = feed.data.id
-                    holder.uid = feed.data.uid
-                    holder.isLike = feed.data.userAction?.like == 1
-                    holder.uname.text = feed.data.userInfo?.username
-                    ImageUtil.showAvatar(holder.avatar, feed.data.userAvatar)
-                    holder.isFollow = feed.data.userAction?.followAuthor == 1
-                    if (feed.data.userAction?.followAuthor == 0) {
+                    holder.id = feed.data?.id.toString()
+                    holder.uid = feed.data?.uid.toString()
+                    holder.isLike = feed.data?.userAction?.like == 1
+                    holder.uname.text = feed.data?.userInfo?.username
+                    ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
+                    holder.isFollow = feed.data?.userAction?.followAuthor == 1
+                    if (feed.data?.userAction?.followAuthor == 0) {
                         holder.follow.text = "关注"
                         holder.follow.setTextColor(
                             ThemeUtils.getThemeAttrColor(
@@ -400,8 +411,8 @@ class FeedContentAdapter(
                         holder.follow.text = "已关注"
                         holder.follow.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
-                    if (feed.data.deviceTitle != "") {
-                        holder.device.text = feed.data.deviceTitle
+                    if (feed.data?.deviceTitle != "") {
+                        holder.device.text = feed.data?.deviceTitle
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                         drawable.setBounds(
                             0,
@@ -415,7 +426,7 @@ class FeedContentAdapter(
                         holder.device.visibility = View.GONE
                     }
 
-                    holder.pubDate.text = DateUtils.fromToday(feed.data.dateline)
+                    holder.pubDate.text = DateUtils.fromToday(feed.data?.dateline)
                     val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                     drawableDate.setBounds(
                         0,
@@ -433,7 +444,7 @@ class FeedContentAdapter(
                         holder.like.textSize.toInt(),
                         holder.like.textSize.toInt()
                     )
-                    if (feed.data.userAction?.like == 1) {
+                    if (feed.data?.userAction?.like == 1) {
                         DrawableCompat.setTint(
                             drawableLike,
                             ThemeUtils.getThemeAttrColor(
@@ -454,10 +465,10 @@ class FeedContentAdapter(
                         )
                         holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
-                    holder.like.text = feed.data.likenum
+                    holder.like.text = feed.data?.likenum
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)
 
-                    holder.reply.text = feed.data.replynum
+                    holder.reply.text = feed.data?.replynum
                     val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
                     drawableReply.setBounds(
                         0,
@@ -470,14 +481,14 @@ class FeedContentAdapter(
                     holder.message.movementMethod = LinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
-                        feed.data.message,
+                        feed.data?.message.toString(),
                         (holder.message.textSize * 1.3).toInt(),
                         null
                     )
 
-                    if (!feed.data.picArr.isNullOrEmpty()) {
+                    if (!feed.data?.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
-                        if (feed.data.picArr.size == 1) {
+                        if (feed.data?.picArr?.size == 1) {
                             val from = feed.data.pic.lastIndexOf("@")
                             val middle = feed.data.pic.lastIndexOf("x")
                             val end = feed.data.pic.lastIndexOf(".")
@@ -489,9 +500,9 @@ class FeedContentAdapter(
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
                             if (PrefManager.isFullImageQuality) {
-                                setUrlList(feed.data.picArr)
+                                setUrlList(feed.data?.picArr)
                             } else {
-                                for (element in feed.data.picArr)
+                                for (element in feed.data?.picArr!!)
                                     if (element.substring(
                                             element.length - 3,
                                             element.length

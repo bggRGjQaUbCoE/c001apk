@@ -100,7 +100,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                     mAdapter.notifyItemInserted(3)
                                 }
                             }
-                            mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                            mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                             viewModel.isLoadMore = false
                             viewModel.isRefreshing = false
                             binding.swipeRefresh.isRefreshing = false
@@ -149,9 +149,9 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         }
                     }
                     mAdapter.notifyDataSetChanged()
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -185,9 +185,9 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                             viewModel.homeFeedList[viewModel.homeFeedList.size - 1].entityId
                     }
                     mAdapter.notifyDataSetChanged()
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -216,9 +216,9 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         }
                     }
                     mAdapter.notifyDataSetChanged()
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -395,7 +395,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     if (viewModel.lastVisibleItemPosition == viewModel.homeFeedList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
+                        mAdapter.setLoadState(mAdapter.LOADING, null)
                         viewModel.isLoadMore = true
                         //viewModel.firstItem = null
                         viewModel.page++

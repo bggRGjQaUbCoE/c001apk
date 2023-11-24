@@ -1,6 +1,11 @@
 package com.example.c001apk.logic.model
 
-data class TotalReplyResponse(val data: List<Data>) {
+data class TotalReplyResponse(
+    val status: Int?,
+    val error: Int?,
+    val message: String?,
+    val data: List<Data>?
+) {
 
     data class Data(
         val entityType: String,
