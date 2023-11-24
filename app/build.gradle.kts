@@ -13,7 +13,7 @@ configure<com.github.megatronking.stringfog.plugin.StringFogExtension> {
     // 可选：加密开关，默认开启。
     enable = true
     // 可选：指定需加密的代码包路径，可配置多个，未指定将默认全部加密。
-     fogPackages = arrayOf("com.example.c001apk")
+    fogPackages = arrayOf("com.example.c001apk")
     //kg = com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator()
     // base64或者bytes
     mode = com.github.megatronking.stringfog.plugin.StringFogMode.bytes
@@ -114,14 +114,6 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signConfig
-            applicationVariants.all {
-                outputs.all {
-                    val versionName = defaultConfig.versionName
-                    val versionCode = defaultConfig.versionCode
-                    (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                        "c001apk_$versionName($versionCode).apk"
-                }
-            }
         }
         getByName("debug") {
             isMinifyEnabled = false
@@ -131,12 +123,6 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signConfig
-            applicationVariants.all {
-                outputs.all {
-                    (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                        "app-debug.apk"
-                }
-            }
         }
     }
     compileOptions {
@@ -161,6 +147,15 @@ android {
     }
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
+    }
+    applicationVariants.all {
+        outputs.all {
+            val versionName = defaultConfig.versionName
+            val versionCode = defaultConfig.versionCode
+            if (buildType.name == "release")
+                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                    "c001apk_$versionName($versionCode).apk"
+        }
     }
 }
 
