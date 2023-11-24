@@ -9,6 +9,7 @@ import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.data.DataFetcher
+import com.bumptech.glide.load.engine.executor.GlideExecutor
 import com.bumptech.glide.load.model.ModelLoader
 import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
@@ -51,8 +52,10 @@ class IconModelLoader(private val context: Context) : ModelLoader<String, Drawab
 class IconDataFetcher(private val context: Context, private val packageName: String) :
     DataFetcher<Drawable> {
     override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in Drawable>) {
-        val icon = AppUtils.getIcon(context, packageName)
-        callback.onDataReady(icon)
+        GlideExecutor.newAnimationExecutor().execute {
+            val icon = AppUtils.getIcon(context, packageName)
+            callback.onDataReady(icon)
+        }
     }
 
     override fun cleanup() {
