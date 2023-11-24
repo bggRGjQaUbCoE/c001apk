@@ -12,6 +12,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.util.AppUtils
+import com.example.c001apk.util.LocalAppIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ class AppListAdapter(private val appList: List<AppItem>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = appList[position]
-        Glide.with(holder.icon).load(app.packageName).into(holder.icon)
+        Glide.with(holder.icon).load(LocalAppIcon(app.packageName)).into(holder.icon)
         CoroutineScope(Dispatchers.IO).launch {
             if (app.appName.isEmpty()) app.appName =
                 AppUtils.getAppName(holder.itemView.context, app.packageName)

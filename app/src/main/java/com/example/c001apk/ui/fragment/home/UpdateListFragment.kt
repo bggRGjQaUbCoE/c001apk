@@ -17,7 +17,7 @@ import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
-class UpdateListFragment : Fragment(){//, IOnTabClickListener {
+class UpdateListFragment : Fragment() {//, IOnTabClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -72,9 +72,12 @@ class UpdateListFragment : Fragment(){//, IOnTabClickListener {
     @SuppressLint("NotifyDataSetChanged")
     private fun initView() {
         Log.i("UpdateListFragment", "initView!!!")
-        Log.i("UpdateListFragment", "UpdateListUtil.appsUpdate.size = ${UpdateListUtil.appsUpdate.size}")
+        Log.i(
+            "UpdateListFragment",
+            "UpdateListUtil.appsUpdate.size = ${UpdateListUtil.appsUpdate.size}"
+        )
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate,viewModel,this.requireActivity())
+        mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate, viewModel, this.requireActivity())
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -111,7 +114,6 @@ class UpdateListFragment : Fragment(){//, IOnTabClickListener {
 //        (requireParentFragment() as IOnTabClickContainer).controller = this
 
     }
-
 
 
     private fun refreshData() {

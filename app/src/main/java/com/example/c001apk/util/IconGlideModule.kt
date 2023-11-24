@@ -19,14 +19,18 @@ import com.bumptech.glide.signature.ObjectKey
 @GlideModule
 class IconGlideModule : AppGlideModule() {
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-        registry.prepend(String::class.java, Drawable::class.java, IconModelLoaderFactory(context))
+        registry.prepend(LocalAppIcon::class.java, Drawable::class.java, IconModelLoaderFactory(context))
     }
 
 
 }
 
-class IconModelLoaderFactory(private val context: Context) : ModelLoaderFactory<String, Drawable> {
-    override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<String, Drawable> {
+data class LocalAppIcon(
+    val packageName: String
+)
+
+class IconModelLoaderFactory(private val context: Context) : ModelLoaderFactory<LocalAppIcon, Drawable> {
+    override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<LocalAppIcon, Drawable> {
         return IconModelLoader(context)
     }
 
@@ -36,16 +40,16 @@ class IconModelLoaderFactory(private val context: Context) : ModelLoaderFactory<
 
 }
 
-class IconModelLoader(private val context: Context) : ModelLoader<String, Drawable> {
+class IconModelLoader(private val context: Context) : ModelLoader<LocalAppIcon, Drawable> {
     override fun buildLoadData(
-        model: String, width: Int, height: Int, options: Options
+        model: LocalAppIcon, width: Int, height: Int, options: Options
     ): ModelLoader.LoadData<Drawable> {
         return ModelLoader.LoadData(
-            ObjectKey(model), IconDataFetcher(context = context, packageName = model)
+            ObjectKey(model), IconDataFetcher(context = context, packageName = model.packageName)
         )
     }
 
-    override fun handles(model: String) = true
+    override fun handles(model: LocalAppIcon) = true
 
 }
 
