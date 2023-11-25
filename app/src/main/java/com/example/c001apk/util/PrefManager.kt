@@ -146,8 +146,4 @@ object PrefManager {
     var isRecordHistory: Boolean
         get() = pref.getBoolean("isRecordHistory", true)
         set(value) = pref.edit().putBoolean("isRecordHistory", value).apply()
-
-    var isHomeFeedAddCookie: Boolean
-        get() = pref.getBoolean("isHomeFeedAddCookie", true)
-        set(value) = pref.edit().putBoolean("isHomeFeedAddCookie", value).apply()
 }
