@@ -30,6 +30,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var topReplyId: String? = null
     var commentStatusText = ""
     var errorMessage: String? = null
     val bHistoryList: ArrayList<Any> = ArrayList()

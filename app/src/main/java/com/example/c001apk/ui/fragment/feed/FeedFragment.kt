@@ -179,6 +179,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         viewModel.feedContentList.add(feed)
                         if (feed.data.topReplyRows.isNotEmpty()) {
                             mAdapter.setHaveTop(true)
+                            viewModel.topReplyId = feed.data.topReplyRows[0].id
                             viewModel.feedTopReplyList.clear()
                             viewModel.feedTopReplyList.addAll(feed.data.topReplyRows)
                         }
@@ -224,6 +225,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in reply?.data!!) {
                             if (element.entityType == "feed_reply") {
+                                if (viewModel.topReplyId != null && element.id == viewModel.topReplyId)
+                                    continue
                                 if (!BlackListUtil.checkUid(element.uid))
                                     viewModel.feedReplyList.add(element)
                             }
@@ -662,9 +665,13 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             val favorite = menu.findItem(R.id.favorite)
             CoroutineScope(Dispatchers.IO).launch {
                 if (feedFavoriteDao.isFavorite(viewModel.id)) {
-                    favorite.title = "取消收藏"
+                    withContext(Dispatchers.Main) {
+                        favorite.title = "取消收藏"
+                    }
                 } else {
-                    favorite.title = "收藏"
+                    withContext(Dispatchers.Main) {
+                        favorite.title = "收藏"
+                    }
                 }
             }
             setOnMenuItemClickListener {
