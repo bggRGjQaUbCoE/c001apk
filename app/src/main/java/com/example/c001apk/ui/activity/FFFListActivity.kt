@@ -69,6 +69,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                 binding.indicator.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
+                viewModel.isLoadMore = false
             }
         }
 
