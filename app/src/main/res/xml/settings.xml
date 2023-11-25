@@ -59,6 +59,12 @@
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_feed"
+            android:key="isHomeFeedAddCookie"
+            android:summary="@string/home_feed_tip"
+            android:title="@string/is_home_feed_add_cookie" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_feed"
             android:key="isKeepFeed"
             android:title="@string/keep_feed" />
         <rikka.material.preference.MaterialSwitchPreference

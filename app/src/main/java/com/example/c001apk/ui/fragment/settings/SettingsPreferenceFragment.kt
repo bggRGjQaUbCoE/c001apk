@@ -75,6 +75,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isClearKeyWord" -> PrefManager.isClearKeyWord
                 "isKeepFeed" -> PrefManager.isKeepFeed
                 "isRecordHistory" -> PrefManager.isRecordHistory
+                "isHomeFeedAddCookie" -> PrefManager.isHomeFeedAddCookie
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -90,6 +91,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isClearKeyWord" -> PrefManager.isClearKeyWord = value
                 "isKeepFeed" -> PrefManager.isKeepFeed = value
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
+                "isHomeFeedAddCookie" -> PrefManager.isHomeFeedAddCookie = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }

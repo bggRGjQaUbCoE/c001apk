@@ -26,4 +26,6 @@ object CookieUtil {
     var feedlike = 0
     var badge = 0
 
+    var isHomeFeedAddCookie = true
+
 }

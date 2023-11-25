@@ -24,6 +24,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.CookieUtil.isHomeFeedAddCookie
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
@@ -402,7 +403,11 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         viewModel.firstLaunch = 0
                         viewModel.isNew = true
                         when (viewModel.type) {
-                            "feed" -> viewModel.getHomeFeed()
+                            "feed" -> {
+                                isHomeFeedAddCookie = PrefManager.isHomeFeedAddCookie
+                                viewModel.getHomeFeed()
+                            }
+
                             "rank" -> viewModel.getHomeRanking()
                             "follow" -> viewModel.getFollowFeed()
                         }
@@ -456,7 +461,11 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         viewModel.installTime = TokenDeviceUtils.getLastingInstallTime(requireContext())
         viewModel.isNew = true
         when (viewModel.type) {
-            "feed" -> viewModel.getHomeFeed()
+            "feed" -> {
+                isHomeFeedAddCookie = PrefManager.isHomeFeedAddCookie
+                viewModel.getHomeFeed()
+            }
+
             "rank" -> viewModel.getHomeRanking()
             "follow" -> viewModel.getFollowFeed()
         }

@@ -109,5 +109,7 @@
     <string name="delete">删除</string>
     <string name="copyLink">复制链接</string>
     <string name="report">举报</string>
+    <string name="is_home_feed_add_cookie">头条刷新添加Cookie</string>
+    <string name="home_feed_tip">获取不到头条可以尝试关闭</string>
 
 </resources>
