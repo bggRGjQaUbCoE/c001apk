@@ -21,7 +21,10 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class BlackListActivity : BaseActivity(), IOnItemClickListener {
 
@@ -33,6 +36,7 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
         BlackListDatabase.getDatabase(this@BlackListActivity).blackListDao()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBlackListBinding.inflate(layoutInflater)
@@ -40,12 +44,22 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
 
         initView()
         if (viewModel.historyList.isEmpty())
-            queryData()
+            viewModel.getBlackList("blacklist", this)
 
         initButton()
         initEditText()
         initEdit()
         initClearHistory()
+
+        viewModel.blackListLiveData.observe(this) {
+            viewModel.historyList.clear()
+            viewModel.historyList.addAll(it)
+            if (viewModel.historyList.isEmpty())
+                binding.clearAll.visibility = View.GONE
+            else
+                binding.clearAll.visibility = View.VISIBLE
+            mAdapter.notifyDataSetChanged()
+        }
 
     }
 
@@ -62,7 +76,7 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
                 setTitle("确定清除全部黑名单？")
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    thread {
+                    CoroutineScope(Dispatchers.IO).launch {
                         blackListDao.deleteAll()
                     }
                     viewModel.historyList.clear()
@@ -83,23 +97,6 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged", "Range")
-    private fun queryData() {
-        viewModel.historyList.clear()
-        thread {
-            for (element in blackListDao.loadAllList()) {
-                viewModel.historyList.add(element.keyWord)
-            }
-            if (viewModel.historyList.isEmpty())
-                binding.clearAll.visibility = View.GONE
-            else
-                binding.clearAll.visibility = View.VISIBLE
-            runOnUiThread {
-                mAdapter.notifyDataSetChanged()
-            }
         }
     }
 
@@ -145,16 +142,17 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateUid(uid: String) {
-        thread {
+        CoroutineScope(Dispatchers.IO).launch {
             if (blackListDao.isExist(uid)) {
                 viewModel.historyList.remove(uid)
                 blackListDao.delete(uid)
             }
             viewModel.historyList.add(0, uid)
             blackListDao.insert(SearchHistory(uid))
-            runOnUiThread {
+            withContext(Dispatchers.Main) {
                 mAdapter.notifyDataSetChanged()
-                binding.clearAll.visibility = View.VISIBLE
+                if (binding.clearAll.visibility != View.VISIBLE)
+                    binding.clearAll.visibility = View.VISIBLE
             }
         }
     }
@@ -167,7 +165,7 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onItemDeleteClick(keyword: String) {
-        thread {
+        CoroutineScope(Dispatchers.IO).launch {
             blackListDao.delete(keyword)
         }
         viewModel.historyList.remove(keyword)

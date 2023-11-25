@@ -24,6 +24,15 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp">
 
+            <ImageButton
+                android:id="@+id/expand"
+                android:background="?actionBarItemBackground"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_expand_more"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/uname"
                 android:layout_width="wrap_content"

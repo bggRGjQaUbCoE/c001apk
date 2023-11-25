@@ -1,12 +1,6 @@
 package com.example.c001apk.constant
 
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TokenDeviceUtils.Companion.randHexString
-import com.example.c001apk.util.Utils.Companion.randomAndroidVersionRelease
-import com.example.c001apk.util.Utils.Companion.randomBrand
-import com.example.c001apk.util.Utils.Companion.randomDeviceModel
-import com.example.c001apk.util.Utils.Companion.randomManufacturer
-import com.example.c001apk.util.Utils.Companion.randomSdkInt
 
 object Constants {
     const val REQUEST_WITH = "XMLHttpRequest"

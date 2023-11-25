@@ -15,7 +15,9 @@ import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class HistoryActivity : BaseActivity() {
 
@@ -30,6 +32,7 @@ class HistoryActivity : BaseActivity() {
         FeedFavoriteDatabase.getDatabase(this).feedFavoriteDao()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
@@ -49,7 +52,16 @@ class HistoryActivity : BaseActivity() {
         if (viewModel.bHistoryList.isEmpty()) {
             binding.indicator.visibility = View.VISIBLE
             binding.indicator.isIndeterminate = true
-            queryData()
+            viewModel.getBrowseList(viewModel.type, this)
+        }
+
+        viewModel.browseLiveData.observe(this) {
+            viewModel.bHistoryList.clear()
+            viewModel.bHistoryList.addAll(it)
+            mAdapter.setDataListData(viewModel.type, viewModel.bHistoryList)
+            binding.indicator.visibility = View.GONE
+            binding.indicator.isIndeterminate = false
+            mAdapter.notifyDataSetChanged()
         }
 
     }
@@ -75,7 +87,7 @@ class HistoryActivity : BaseActivity() {
                     else setTitle("确定清除全部收藏？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        thread {
+                        CoroutineScope(Dispatchers.IO).launch {
                             if (viewModel.type == "browse") browseHistoryDao.deleteAll()
                             else feedFavoriteDao.deleteAll()
                         }
@@ -103,24 +115,6 @@ class HistoryActivity : BaseActivity() {
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged", "Range")
-    private fun queryData() {
-        thread {
-            viewModel.bHistoryList.clear()
-            when (viewModel.type) {
-                "browse" -> viewModel.bHistoryList.addAll(browseHistoryDao.loadAllHistory())
-                "favorite" -> viewModel.bHistoryList.addAll(feedFavoriteDao.loadAllHistory())
-                else -> throw IllegalArgumentException("error type: ${viewModel.type}")
-            }
-            mAdapter.setDataListData(viewModel.type, viewModel.bHistoryList)
-            runOnUiThread {
-                binding.indicator.visibility = View.GONE
-                binding.indicator.isIndeterminate = false
-                mAdapter.notifyDataSetChanged()
-            }
         }
     }
 

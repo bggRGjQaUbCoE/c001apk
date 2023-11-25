@@ -48,8 +48,11 @@ import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URLDecoder
-import kotlin.concurrent.thread
 
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
@@ -650,7 +653,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
             inflateMenu(R.menu.feed_menu)
             val favorite = menu.findItem(R.id.favorite)
-            thread {
+            CoroutineScope(Dispatchers.IO).launch {
                 if (feedFavoriteDao.isFavorite(viewModel.id)) {
                     favorite.title = "取消收藏"
                 } else {
@@ -661,10 +664,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 when (it.itemId) {
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
-                        mLayoutManager.scrollToPositionWithOffset(
-                            if (viewModel.firstVisibleItemPosition <= 0) 1 else 0,
-                            0
-                        )
+                        if (viewModel.firstVisibleItemPosition <= 0)
+                            mLayoutManager.scrollToPositionWithOffset(1, 0)
+                        else {
+                            binding.titleProfile.visibility = View.GONE
+                            mLayoutManager.scrollToPositionWithOffset(0, 0)
+                        }
                     }
 
                     R.id.block -> {
@@ -704,10 +709,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
 
                     R.id.favorite -> {
-                        thread {
+                        CoroutineScope(Dispatchers.IO).launch {
                             if (feedFavoriteDao.isFavorite(viewModel.id)) {
                                 feedFavoriteDao.delete(viewModel.id)
-                                requireActivity().runOnUiThread {
+                                withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
                                     ToastUtil.toast("已取消收藏")
                                 }
@@ -723,7 +728,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                         viewModel.feedContentList[0].data?.dateline.toString()
                                     )
                                     feedFavoriteDao.insert(fav)
-                                    requireActivity().runOnUiThread {
+                                    withContext(Dispatchers.Main) {
                                         favorite.title = "取消收藏"
                                         ToastUtil.toast("已收藏")
                                     }

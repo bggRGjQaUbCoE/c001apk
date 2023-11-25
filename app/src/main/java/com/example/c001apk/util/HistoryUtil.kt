@@ -3,7 +3,9 @@ package com.example.c001apk.util
 import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.logic.model.BrowseHistory
-import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object HistoryUtil {
 
@@ -20,7 +22,7 @@ object HistoryUtil {
         message: String,
         pubDate: String
     ) {
-        thread {
+        CoroutineScope(Dispatchers.IO).launch {
             if (!browseHistoryDao.isExist(fid))
                 browseHistoryDao.insert(
                     BrowseHistory(

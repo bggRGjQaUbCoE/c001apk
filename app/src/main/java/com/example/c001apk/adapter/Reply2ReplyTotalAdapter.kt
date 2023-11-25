@@ -6,12 +6,15 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +22,10 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.UserActivity
+import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
@@ -35,8 +40,12 @@ class Reply2ReplyTotalAdapter(
     private val fuid: String,
     private val uid: String,
     private val position: Int,
-    private val replyList: List<TotalReplyResponse.Data>
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val replyList: ArrayList<TotalReplyResponse.Data>
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var rid = ""
+    private var ruid = ""
+    private var rposition = -1
 
     private var onImageItemClickListener: OnImageItemClickListener? = null
 
@@ -79,6 +88,7 @@ class Reply2ReplyTotalAdapter(
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
+        val expand: ImageButton = view.findViewById(R.id.expand)
     }
 
     class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -147,6 +157,16 @@ class Reply2ReplyTotalAdapter(
                 }
                 viewHolder.multiImage.apply {
                     onImageItemClickListener = this@Reply2ReplyTotalAdapter.onImageItemClickListener
+                }
+                viewHolder.expand.setOnClickListener {
+                    rid = viewHolder.id
+                    ruid = viewHolder.uid
+                    rposition = viewHolder.bindingAdapterPosition
+                    val popup = PopupMenu(mContext, it)
+                    val inflater = popup.menuInflater
+                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.setOnMenuItemClickListener(this@Reply2ReplyTotalAdapter)
+                    popup.show()
                 }
                 viewHolder
             }
@@ -326,6 +346,26 @@ class Reply2ReplyTotalAdapter(
                 }
             }
         }
+    }
+
+    override fun onMenuItemClick(p0: MenuItem): Boolean {
+        when (p0.itemId) {
+            R.id.block -> {
+                BlackListUtil.saveUid(ruid)
+                replyList.removeAt(rposition)
+                notifyItemRemoved(rposition)
+            }
+
+            R.id.report -> {
+                val intent = Intent(mContext, WebViewActivity::class.java)
+                intent.putExtra(
+                    "url",
+                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$rid"
+                )
+                mContext.startActivity(intent)
+            }
+        }
+        return false
     }
 
 }

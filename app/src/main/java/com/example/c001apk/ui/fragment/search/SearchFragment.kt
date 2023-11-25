@@ -27,7 +27,10 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SearchFragment : Fragment(), IOnItemClickListener {
 
@@ -69,6 +72,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         return binding.root
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -78,13 +82,29 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             binding.historyLayout.visibility = View.VISIBLE
 
         initView()
-        if (viewModel.historyList.isEmpty())
-            queryData()
+        if (viewModel.historyList.isEmpty()) {
+            viewModel.isNew = true
+            viewModel.getBlackList("history", requireContext())
+        }
 
         initEditText()
         initEdit()
         initButton()
         initClearHistory()
+
+        viewModel.blackListLiveData.observe(viewLifecycleOwner) {
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                viewModel.historyList.clear()
+                viewModel.historyList.addAll(it)
+                if (viewModel.historyList.isEmpty())
+                    binding.historyLayout.visibility = View.GONE
+                else
+                    binding.historyLayout.visibility = View.VISIBLE
+                mAdapter.notifyDataSetChanged()
+            }
+        }
 
     }
 
@@ -101,30 +121,13 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun queryData() {
-        viewModel.historyList.clear()
-        thread {
-            for (element in searchHistoryDao.loadAllHistory()) {
-                viewModel.historyList.add(element.keyWord)
-            }
-            if (viewModel.historyList.isEmpty())
-                binding.historyLayout.visibility = View.GONE
-            else
-                binding.historyLayout.visibility = View.VISIBLE
-            requireActivity().runOnUiThread {
-                mAdapter.notifyDataSetChanged()
-            }
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
     private fun initClearHistory() {
         binding.clearAll.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setTitle(R.string.clearAllTitle)
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    thread {
+                    CoroutineScope(Dispatchers.IO).launch {
                         searchHistoryDao.deleteAll()
                     }
                     viewModel.historyList.clear()
@@ -160,7 +163,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             Toast.makeText(activity, "请输入关键词", Toast.LENGTH_SHORT).show()
             //hideKeyBoard()
         } else {
-            hideKeyBoard()
+            //hideKeyBoard()
             requireActivity().supportFragmentManager
                 .beginTransaction()
                 .replace(
@@ -211,11 +214,11 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             binding.editText.hint = "在 ${viewModel.title} 中搜索"
     }
 
-    override fun onStart() {
+    /*override fun onStart() {
         super.onStart()
         initEditText()
     }
-
+*/
     override fun onItemClick(keyword: String) {
         binding.editText.setText(keyword)
         binding.editText.setSelection(keyword.length)
@@ -224,14 +227,14 @@ class SearchFragment : Fragment(), IOnItemClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateHistory(keyword: String) {
-        thread {
+        CoroutineScope(Dispatchers.IO).launch {
             if (searchHistoryDao.isExist(keyword)) {
                 viewModel.historyList.remove(keyword)
                 searchHistoryDao.delete(keyword)
             }
             viewModel.historyList.add(0, keyword)
             searchHistoryDao.insert(SearchHistory(keyword))
-            requireActivity().runOnUiThread {
+            withContext(Dispatchers.Main) {
                 mAdapter.notifyDataSetChanged()
             }
         }
@@ -239,7 +242,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onItemDeleteClick(keyword: String) {
-        thread {
+        CoroutineScope(Dispatchers.IO).launch {
             searchHistoryDao.delete(keyword)
         }
         viewModel.historyList.remove(keyword)

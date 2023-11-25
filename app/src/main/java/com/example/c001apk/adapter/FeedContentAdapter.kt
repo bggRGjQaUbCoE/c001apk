@@ -30,6 +30,7 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.UserActivity
+import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
@@ -57,6 +58,8 @@ class FeedContentAdapter(
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
     private var uid = ""
+    private var id = ""
+    private var position = -1
 
     private var onPostFollowListener: OnPostFollowListener? = null
 
@@ -322,7 +325,9 @@ class FeedContentAdapter(
                     onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
                 }
                 viewHolder.expand.setOnClickListener {
+                    id = viewHolder.id
                     uid = viewHolder.uid
+                    position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
@@ -761,6 +766,17 @@ class FeedContentAdapter(
         when (p0.itemId) {
             R.id.block -> {
                 BlackListUtil.saveUid(uid)
+                replyList.removeAt(position - 2)
+                notifyItemRemoved(position)
+            }
+
+            R.id.report -> {
+                val intent = Intent(mContext, WebViewActivity::class.java)
+                intent.putExtra(
+                    "url",
+                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$id"
+                )
+                mContext.startActivity(intent)
             }
         }
         return false

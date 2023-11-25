@@ -8,6 +8,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.logic.database.BlackListDatabase
+import com.example.c001apk.logic.database.BrowseHistoryDatabase
+import com.example.c001apk.logic.database.FeedFavoriteDatabase
+import com.example.c001apk.logic.database.SearchHistoryDatabase
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
@@ -648,6 +652,47 @@ class AppViewModel : ViewModel() {
 
     fun postRequestValidate() {
         postRequestValidateLiveData.value = postRequestValidateLiveData.value
+    }
+
+
+    val blackListLiveData: MutableLiveData<ArrayList<String>> = MutableLiveData()
+    fun getBlackList(type: String, context: Context) {
+        val searchHistoryDao = SearchHistoryDatabase.getDatabase(context).searchHistoryDao()
+        val blackListDao = BlackListDatabase.getDatabase(context).blackListDao()
+        val newList = ArrayList<String>()
+        viewModelScope.launch(Dispatchers.IO) {
+            if (type == "history")
+                for (element in searchHistoryDao.loadAllHistory()) {
+                    newList.add(element.keyWord)
+                }
+            else
+                for (element in blackListDao.loadAllList()) {
+                    newList.add(element.keyWord)
+                }
+            withContext(Dispatchers.Main) {
+                blackListLiveData.value = newList
+            }
+        }
+    }
+
+    val browseLiveData: MutableLiveData<ArrayList<Any>> = MutableLiveData()
+    fun getBrowseList(type: String, context: Context) {
+        val browseHistoryDao = BrowseHistoryDatabase.getDatabase(context).browseHistoryDao()
+        val feedFavoriteDao = FeedFavoriteDatabase.getDatabase(context).feedFavoriteDao()
+        val newList = ArrayList<Any>()
+        viewModelScope.launch(Dispatchers.IO) {
+            if (type == "browse")
+                for (element in browseHistoryDao.loadAllHistory()) {
+                    newList.add(element)
+                }
+            else
+                for (element in feedFavoriteDao.loadAllHistory()) {
+                    newList.add(element)
+                }
+            withContext(Dispatchers.Main) {
+                browseLiveData.value = newList
+            }
+        }
     }
 
 }
