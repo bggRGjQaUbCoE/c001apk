@@ -129,7 +129,7 @@ object SpannableStringBuilderUtil {
             if (EmojiUtil.getEmoji(group) != -1) {
                 val emoji: Drawable =
                     mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                if (group == "[楼主]" || group == "[层主]")
+                if (group == "[楼主]" || group == "[层主]" || group == "[置顶]")
                     emoji.setBounds(
                         0,
                         0,

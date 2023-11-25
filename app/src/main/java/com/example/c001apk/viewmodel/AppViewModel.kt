@@ -90,6 +90,7 @@ class AppViewModel : ViewModel() {
     var replyTextMap: MutableMap<String, String> = HashMap()
     val feedContentList = ArrayList<FeedContentResponse>()
     val feedReplyList = ArrayList<TotalReplyResponse.Data>()
+    val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
 
     var isRefreshing = true
     var isLoadMore = false

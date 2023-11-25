@@ -8,6 +8,7 @@ object EmojiUtil {
         if (PrefManager.showEmoji) {
             if (PrefManager.allHuaji) {
                 return when (emoji) {
+                    "[置顶]" -> R.drawable.ic_feed_top
                     "[楼主]" -> R.drawable.ic_author
                     "[层主]" -> R.drawable.ic_subauthor
                     "[doge]" -> R.drawable.coolapk_emotion_62_huaji
@@ -167,6 +168,7 @@ object EmojiUtil {
                 }
             } else {
                 return when (emoji) {
+                    "[置顶]" -> R.drawable.ic_feed_top
                     "[楼主]" -> R.drawable.ic_author
                     "[层主]" -> R.drawable.ic_subauthor
                     "[doge]" -> R.drawable.coolapk_emotion_37_doge

@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.Html
-import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -41,7 +39,6 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.CenteredImageSpan1
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -56,6 +53,14 @@ class FeedContentAdapter(
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+
+    private var haveTop = false
+
+    fun setHaveTop(haveTop: Boolean) {
+        this.haveTop = haveTop
+    }
+
 
     private var uid = ""
     private var id = ""
@@ -530,24 +535,28 @@ class FeedContentAdapter(
                     holder.isLike = reply.userAction?.like == 1
                     holder.id = reply.id
                     holder.uid = reply.uid
-                    if (reply.uid == reply.feedUid) {
-                        val builder = SpannableStringBuilder(reply.username + " [楼主]")
-                        val tag: Drawable = mContext.getDrawable(R.drawable.ic_author)!!
-                        tag.setBounds(
-                            0,
-                            0,
-                            holder.uname.textSize.toInt() * 2,
-                            holder.uname.textSize.toInt()
-                        )
-                        val imageSpan = CenteredImageSpan1(tag)
-                        builder.setSpan(
-                            imageSpan,
-                            reply.username.length + 1,
-                            reply.username.length + 5,
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        holder.uname.text = builder
-                    } else holder.uname.text = reply.username
+
+                    val unameTag =
+                        when (reply.uid) {
+                            reply.feedUid -> " [楼主]"
+                            else -> ""
+                        }
+                    val replyTag =
+                        when (haveTop) {
+                            true -> {
+                                if (position == 2)
+                                    " [置顶]"
+                                else ""
+                            }
+                            else -> ""
+                        }
+                    holder.uname.text = SpannableStringBuilderUtil.setReply(
+                        mContext,
+                        "${reply.username}$unameTag$replyTag",
+                        holder.uname.textSize.toInt(),
+                        null
+                    )
+
                     ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                     holder.message.movementMethod = LinkMovementMethod.getInstance()

@@ -177,10 +177,11 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
-                        //if (feed.data.topReplyRows.isNotEmpty()) {
-                        //viewModel.haveTop = true
-                        //viewModel.feedReplyList.addAll(feed.data.topReplyRows)
-                        //}
+                        if (feed.data.topReplyRows.isNotEmpty()) {
+                            mAdapter.setHaveTop(true)
+                            viewModel.feedTopReplyList.clear()
+                            viewModel.feedTopReplyList.addAll(feed.data.topReplyRows)
+                        }
                     }
                 } else {
                     viewModel.isEnd = true
@@ -217,6 +218,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 } else if (!reply?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         viewModel.feedReplyList.clear()
+                        if (viewModel.listType == "lastupdate_desc" && viewModel.feedTopReplyList.isNotEmpty())
+                            viewModel.feedReplyList.addAll(viewModel.feedTopReplyList)
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in reply?.data!!) {
@@ -441,6 +444,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     private fun refreshReply(listType: String) {
+        if (listType == "lastupdate_desc" && viewModel.feedTopReplyList.isNotEmpty())
+            mAdapter.setHaveTop(true)
+        else
+            mAdapter.setHaveTop(false)
         binding.recyclerView.stopScroll()
         if (viewModel.firstCompletelyVisibleItemPosition > 1)
             viewModel.isViewReply = true
