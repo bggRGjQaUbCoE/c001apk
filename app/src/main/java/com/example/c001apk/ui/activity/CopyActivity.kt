@@ -1,20 +1,88 @@
 package com.example.c001apk.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
+import androidx.recyclerview.widget.ItemTouchHelper
+import com.example.c001apk.adapter.HomeMenuAdapter
+import com.example.c001apk.adapter.ItemTouchHelperCallback
 import com.example.c001apk.databinding.ActivityCopyBinding
+import com.example.c001apk.logic.database.HomeMenuDatabase
+import com.example.c001apk.logic.model.HomeMenu
+import com.example.c001apk.ui.fragment.minterface.IOnHomeMenuChangedListener
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class CopyActivity : BaseActivity() {
+
+class CopyActivity : BaseActivity(), IOnHomeMenuChangedListener {
 
     private lateinit var binding: ActivityCopyBinding
+    private lateinit var mAdapter: HomeMenuAdapter
+    private lateinit var mLayoutManager: FlexboxLayoutManager
+    private var menuList: ArrayList<HomeMenu> = ArrayList()
+    private val homeMenuDao by lazy {
+        HomeMenuDatabase.getDatabase(this).homeMenuDao()
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCopyBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val text = intent.getStringExtra("text")
-        binding.textView.text = text
+        val text: String? = intent.getStringExtra("text")
+        text?.let {
+            binding.textView.text = it
+        }
 
+        val type: String? = intent.getStringExtra("type")
+
+        if (type != null && type == "homeMenu") {
+            CoroutineScope(Dispatchers.IO).launch {
+                menuList.addAll(homeMenuDao.loadAll())
+                withContext(Dispatchers.Main) {
+                    initView()
+                }
+            }
+        }
+
+        binding.done.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                homeMenuDao.deleteAll()
+                for (element in menuList) {
+                    homeMenuDao.insert(element)
+                }
+                withContext(Dispatchers.Main) {
+                    val intent = packageManager.getLaunchIntentForPackage(packageName)
+                    intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivity(intent)
+                }
+            }
+        }
+
+    }
+
+    private fun initView() {
+        mLayoutManager = FlexboxLayoutManager(this)
+        mLayoutManager.flexDirection = FlexDirection.ROW
+        mLayoutManager.flexWrap = FlexWrap.WRAP
+        mAdapter = HomeMenuAdapter(menuList)
+        mAdapter.setIOnHomeMenuChangedListener(this)
+        binding.recyclerView.apply {
+            adapter = mAdapter
+            layoutManager = mLayoutManager
+        }
+        val callback: ItemTouchHelper.Callback = ItemTouchHelperCallback(mAdapter)
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+    }
+
+    override fun onMenuChanged(menuList: ArrayList<HomeMenu>) {
+        this.menuList = menuList
     }
 
 
