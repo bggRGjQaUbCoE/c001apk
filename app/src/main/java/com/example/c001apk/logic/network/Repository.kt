@@ -113,8 +113,8 @@ object Repository {
     fun getUserSpace(uid: String) =
         fire(Dispatchers.IO) {
             val userResponse = Network.getUserSpace(uid)
-            if (userResponse.data != null)
-                Result.success(userResponse.data)
+            if (userResponse != null)
+                Result.success(userResponse)
             else
                 Result.failure(RuntimeException("response status is null"))
         }

@@ -65,7 +65,9 @@ public class DateUtils {
         //long time = date.getTime() / 1000;
         long now = new Date().getTime() / 1000;
         long ago = now - time;
-        if (ago <= ONE_HOUR)
+        if (ago == 0) {
+            return "刚刚";
+        } else if (ago <= ONE_HOUR)
             return ago / ONE_MINUTE + "分钟前";
         else if (ago <= ONE_DAY)
             return ago / ONE_HOUR + "小时前";//+ (ago % ONE_HOUR / ONE_MINUTE) + "分钟前";

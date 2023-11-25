@@ -57,6 +57,8 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
             showUserInfo()
             binding.followBtn.visibility = View.VISIBLE
             binding.infoLayout.visibility = View.VISIBLE
+        } else if (viewModel.errorMessage != null) {
+            showErrorMessage()
         }
         initView()
         initData()
@@ -100,24 +102,30 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                 viewModel.isNew = false
 
                 val user = result.getOrNull()
-                if (user != null) {
-                    viewModel.uid = user.uid
-                    viewModel.followType = user.isFollow == 1
-                    viewModel.avatar = user.userAvatar
-                    viewModel.cover = user.cover
-                    viewModel.followType = user.isFollow == 1
-                    viewModel.uname = user.username
-                    viewModel.avatar = user.userAvatar
-                    viewModel.cover = user.cover
-                    viewModel.level = "Lv.${user.level}"
-                    viewModel.bio = user.bio
-                    viewModel.like = "${CountUtil.view(user.beLikeNum)}获赞"
-                    viewModel.follow = "${CountUtil.view(user.follow)}关注"
-                    viewModel.fans = "${CountUtil.view(user.fans)}粉丝"
-                    viewModel.loginTime = DateUtils.fromToday(user.logintime) + "活跃"
+                if (user?.error != null) {
+                    viewModel.errorMessage = user.message
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    showErrorMessage()
+                    return@observe
+                } else if (user?.data != null) {
+                    viewModel.uid = user.data.uid
+                    viewModel.followType = user.data.isFollow == 1
+                    viewModel.avatar = user.data.userAvatar
+                    viewModel.cover = user.data.cover
+                    viewModel.followType = user.data.isFollow == 1
+                    viewModel.uname = user.data.username
+                    viewModel.avatar = user.data.userAvatar
+                    viewModel.cover = user.data.cover
+                    viewModel.level = "Lv.${user.data.level}"
+                    viewModel.bio = user.data.bio
+                    viewModel.like = "${CountUtil.view(user.data.beLikeNum)}获赞"
+                    viewModel.follow = "${CountUtil.view(user.data.follow)}关注"
+                    viewModel.fans = "${CountUtil.view(user.data.fans)}粉丝"
+                    viewModel.loginTime = DateUtils.fromToday(user.data.logintime) + "活跃"
                     showUserInfo()
 
-                    viewModel.uid = user.uid
+                    viewModel.uid = user.data.uid
                     viewModel.isRefreshing = true
                     viewModel.isNew = true
                     viewModel.getUserFeed()
@@ -249,6 +257,12 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         }
     }
 
+    private fun showErrorMessage() {
+        binding.swipeRefresh.isEnabled = false
+        binding.errorMessage.visibility = View.VISIBLE
+        binding.errorMessage.text = viewModel.errorMessage
+    }
+
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -362,10 +376,12 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         val itemReport = menu.findItem(R.id.report)
         val spannableString2 = SpannableString(itemReport.title)
         spannableString2.setSpan(
-            ForegroundColorSpan(ThemeUtils.getThemeAttrColor(
-                this,
-                rikka.preference.simplemenu.R.attr.colorControlNormal
-            )),
+            ForegroundColorSpan(
+                ThemeUtils.getThemeAttrColor(
+                    this,
+                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                )
+            ),
             0,
             spannableString2.length,
             0
