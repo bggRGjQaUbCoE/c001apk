@@ -521,22 +521,14 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         )
     }
 
-    override fun onReturnTop(position: Int) {
-        val current = when (viewModel.type) {
-            "feed" -> 2
-            "rank" -> 3
-            "follow" -> 0
-            else -> throw IllegalArgumentException("type error")
-        }
-        if (current == position) {
-            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-                binding.swipeRefresh.isRefreshing = true
-                refreshData()
-            } else {
-                binding.recyclerView.scrollToPosition(0)
-                binding.swipeRefresh.isRefreshing = true
-                refreshData()
-            }
+    override fun onReturnTop() {
+        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+            binding.swipeRefresh.isRefreshing = true
+            refreshData()
+        } else {
+            binding.recyclerView.scrollToPosition(0)
+            binding.swipeRefresh.isRefreshing = true
+            refreshData()
         }
     }
 

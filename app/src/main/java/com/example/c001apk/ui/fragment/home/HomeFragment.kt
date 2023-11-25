@@ -61,7 +61,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
             }
 
             override fun onTabReselected(tab: Tab?) {
-                controller?.onReturnTop(tab!!.position)
+                controller?.onReturnTop()
             }
 
         })
@@ -164,7 +164,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
     }
 
     override fun onReturnTop() {
-        controller?.onReturnTop(binding.viewPager.currentItem)
+        controller?.onReturnTop()
     }
 
     override fun onResume() {

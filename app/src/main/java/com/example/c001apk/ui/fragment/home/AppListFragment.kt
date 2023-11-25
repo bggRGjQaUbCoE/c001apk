@@ -143,14 +143,12 @@ class AppListFragment : Fragment(), IOnTabClickListener {
         viewModel.getItems(requireContext())
     }
 
-    override fun onReturnTop(position: Int) {
-        if (position == 1) {
-            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-                refreshData()
-            } else {
-                binding.recyclerView.smoothScrollToPosition(0)
-                //refreshData()
-            }
+    override fun onReturnTop() {
+        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+            refreshData()
+        } else {
+            binding.recyclerView.smoothScrollToPosition(0)
+            //refreshData()
         }
     }
 

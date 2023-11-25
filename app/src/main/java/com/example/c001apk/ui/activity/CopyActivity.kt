@@ -2,6 +2,7 @@ package com.example.c001apk.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.c001apk.adapter.HomeMenuAdapter
 import com.example.c001apk.adapter.ItemTouchHelperCallback
@@ -42,6 +43,7 @@ class CopyActivity : BaseActivity(), IOnHomeMenuChangedListener {
         val type: String? = intent.getStringExtra("type")
 
         if (type != null && type == "homeMenu") {
+            binding.done.visibility = View.VISIBLE
             CoroutineScope(Dispatchers.IO).launch {
                 menuList.addAll(homeMenuDao.loadAll())
                 withContext(Dispatchers.Main) {
