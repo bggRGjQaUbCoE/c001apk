@@ -11,9 +11,7 @@ import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
-import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
-import net.mikaelzero.mojito.Mojito
-import net.mikaelzero.mojito.impl.DefaultPercentProgress
+import com.example.c001apk.util.ImageUtil
 
 internal class MyURLSpan(
     private val mContext: Context,
@@ -59,20 +57,9 @@ internal class MyURLSpan(
             mContext.startActivity(intent)
         } else if (mUrl.contains("image.coolapk.com")) {
             if (imgList == null) {
-                Mojito.start(mContext) {
-                    urls(mUrl)
-                    progressLoader {
-                        DefaultPercentProgress()
-                    }
-                }
+                ImageUtil.startBigImgViewSimple(mContext, mUrl)
             } else {
-                Mojito.start(mContext) {
-                    urls(imgList)
-                    progressLoader {
-                        DefaultPercentProgress()
-                    }
-                    setIndicator(CircleIndexIndicator())
-                }
+                ImageUtil.startBigImgViewSimple(mContext, imgList)
             }
         } else if (mUrl.contains("www.coolapk.com/feed/")) {
             val id = if (mUrl.contains("shareKey")) {

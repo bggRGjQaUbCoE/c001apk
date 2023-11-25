@@ -148,6 +148,26 @@ object ImageUtil {
         }
 
     @OptIn(DelicateCoroutinesApi::class)
+    private fun showSaveImgDialog(context: Context, url: String) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle("保存图片")
+            .setMessage("是否保存图片到本地？")
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                GlobalScope.launch {
+                    if (saveImageToGallery(context, url)) {
+                        ToastUtil.toast("保存成功")
+                    } else {
+                        ToastUtil.toast("保存失败")
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setNeutralButton("复制图片地址") { _, _ ->
+                copyText(context, url)
+            }
+            .show()
+    }
+
     fun startBigImgView(
         nineGridView: NineGridImageView,
         imageView: ImageView,
@@ -202,23 +222,7 @@ object ImageUtil {
                     position: Int
                 ) {
                     if (fragmentActivity != null) {
-                        MaterialAlertDialogBuilder(fragmentActivity)
-                            .setTitle("保存图片")
-                            .setMessage("是否保存图片到本地？")
-                            .setPositiveButton(android.R.string.ok) { _, _ ->
-                                GlobalScope.launch {
-                                    if (saveImageToGallery(fragmentActivity, imgList[position])) {
-                                        ToastUtil.toast("保存成功")
-                                    } else {
-                                        ToastUtil.toast("保存失败")
-                                    }
-                                }
-                            }
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .setNeutralButton("复制图片地址") { _, _ ->
-                                copyText(fragmentActivity, imgList[position])
-                            }
-                            .show()
+                        showSaveImgDialog(fragmentActivity, imgList[position])
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }
@@ -228,5 +232,41 @@ object ImageUtil {
 
     }
 
+    fun startBigImgViewSimple(
+        context: Context,
+        imgList: List<String>
+    ) {
+        Mojito.start(context) {
+            urls(imgList)
+            progressLoader {
+                DefaultPercentProgress()
+            }
+            if (imgList.size > 1) {
+                setIndicator(CircleIndexIndicator())
+            }
+            setOnMojitoListener(object : SimpleMojitoViewCallback() {
+                override fun onLongClick(
+                    fragmentActivity: FragmentActivity?,
+                    view: View,
+                    x: Float,
+                    y: Float,
+                    position: Int
+                ) {
+                    if (fragmentActivity != null) {
+                        showSaveImgDialog(fragmentActivity, imgList[position])
+                    } else {
+                        Log.i("Mojito", "fragmentActivity is null, skip save image")
+                    }
+                }
+            })
+        }
+    }
+
+    fun startBigImgViewSimple(
+        context: Context,
+        url: String
+    ) {
+        startBigImgViewSimple(context, listOf(url))
+    }
 
 }
