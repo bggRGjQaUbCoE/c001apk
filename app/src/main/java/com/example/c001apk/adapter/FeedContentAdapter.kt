@@ -1030,7 +1030,8 @@ class FeedContentAdapter(
                 if (feedList.isNotEmpty()) when (feedList[position].data?.feedType) {
                     "feed" -> TYPE_CONTENT
                     "feedArticle" -> TYPE_CONTENT_ARTICLE
-                    else -> throw IllegalArgumentException("feedType error: ${feedList[position].data?.feedType}")
+                    else -> TYPE_CONTENT // comment 
+                // throw IllegalArgumentException("feedType error: ${feedList[position].data?.feedType}")
                 }
                 else 0
             }
