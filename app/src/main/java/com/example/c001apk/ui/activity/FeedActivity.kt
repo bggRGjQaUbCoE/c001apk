@@ -17,7 +17,7 @@ class FeedActivity : BaseActivity() {
         binding = ActivityFeedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        var type = intent.getStringExtra("type")
+        //var type = intent.getStringExtra("type")
         var id = intent.getStringExtra("id")
         val uid = intent.getStringExtra("uid")
         val uname = intent.getStringExtra("uname")
@@ -25,11 +25,11 @@ class FeedActivity : BaseActivity() {
 
         val data = intent.data
         if (data.toString().contains("coolmarket://feed/")) {
-            type = "feed"
+            //type = "feed"
             id = data.toString().replace("coolmarket://feed/", "")
         }
 
-        if (type == "feed" && supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
+        if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
                 .replace(

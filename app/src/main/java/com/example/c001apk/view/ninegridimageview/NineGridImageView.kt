@@ -229,7 +229,8 @@ class NineGridImageView @JvmOverloads constructor(
                 val newUrl =
                     GlideUrl(
                         urlList[i],
-                        LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT).build()
+                        LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT)
+                            .build()
                     )
                 if (urlList.size == 1 && PrefManager.isFullImageQuality && imgHeight / imgWidth > 1320 / 540) {
                     Glide.with(context)

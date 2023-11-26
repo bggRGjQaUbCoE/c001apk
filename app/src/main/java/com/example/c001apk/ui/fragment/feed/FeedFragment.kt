@@ -171,7 +171,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.dateLine = feed.data.dateline
                     if (viewModel.isRefreshing) {
                         viewModel.feedContentList.clear()
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
                         viewModel.isNew = true
                         viewModel.getFeedReply()
                     }
@@ -481,6 +480,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -488,6 +488,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
+                        mAdapter.notifyDataSetChanged()
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
@@ -635,7 +636,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(
                     StickyItemDecorator(

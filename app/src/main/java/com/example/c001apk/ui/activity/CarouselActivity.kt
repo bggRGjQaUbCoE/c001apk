@@ -115,8 +115,8 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                         viewModel.carouselList.add(element)
-                            mAdapter.notifyDataSetChanged()
                             mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                            mAdapter.notifyDataSetChanged()
                         }
                     } else {
                         if (viewModel.isRefreshing)
@@ -126,14 +126,16 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
                                         viewModel.carouselList.add(element)
-                        mAdapter.notifyDataSetChanged()
                         mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                        mAdapter.notifyDataSetChanged()
                     }
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
                 } else {
-                    if (::mAdapter.isInitialized)
+                    if (::mAdapter.isInitialized) {
                         mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                        mAdapter.notifyDataSetChanged()
+                    }
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -185,6 +187,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -192,6 +195,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
+                        mAdapter.notifyDataSetChanged()
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        @SerializedName("message_raw_output") val messageRawOutput:String?,
         val relationRows: ArrayList<RelationRows>?,
         val targetRow: TargetRow?,
         @SerializedName("change_count") val changeCount: Int,

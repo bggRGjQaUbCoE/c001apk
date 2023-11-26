@@ -121,7 +121,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                         if (element.entityType == "feed_reply")
                             if (!BlackListUtil.checkUid(element.uid))
                                 viewModel.replyTotalList.add(element)
-                    mAdapter.notifyDataSetChanged()
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
@@ -130,6 +129,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                mAdapter.notifyDataSetChanged()
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
             }
@@ -230,6 +230,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
+                        mAdapter.notifyDataSetChanged()
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

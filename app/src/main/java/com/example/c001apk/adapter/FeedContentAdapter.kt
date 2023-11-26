@@ -23,6 +23,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
+import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -45,6 +46,7 @@ import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.gson.Gson
 
 
 class FeedContentAdapter(
@@ -53,7 +55,6 @@ class FeedContentAdapter(
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
-
 
     private var haveTop = false
 
@@ -94,6 +95,7 @@ class FeedContentAdapter(
     private val TYPE_FOOTER = 1
     private val TYPE_REPLY = 2
     private val TYPE_FIX = 3
+    private val TYPE_CONTENT_ARTICLE = 4
     private var loadState = 2
     val LOADING = 1
     val LOADING_COMPLETE = 2
@@ -105,7 +107,7 @@ class FeedContentAdapter(
     fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
-        notifyDataSetChanged()
+        // notifyDataSetChanged()
     }
 
     private var iOnReplyClickContainer: IOnReplyClickListener? = null
@@ -133,6 +135,21 @@ class FeedContentAdapter(
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
+        val like: TextView = view.findViewById(R.id.like)
+        val reply: TextView = view.findViewById(R.id.reply)
+        var id = ""
+        var isLike = false
+        val follow: TextView = view.findViewById(R.id.follow)
+        var isFollow = false
+        var uid = ""
+    }
+
+    class FeedArticleContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val uname: TextView = view.findViewById(R.id.uname)
+        val device: TextView = view.findViewById(R.id.device)
+        val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.message)
+        val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
         var id = ""
@@ -196,10 +213,48 @@ class FeedContentAdapter(
                 viewHolder
             }
 
+            TYPE_CONTENT_ARTICLE -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_feed_article_content, parent, false)
+                val viewHolder = FeedArticleContentViewHolder(view)
+                viewHolder.follow.setOnClickListener {
+                    onPostFollowListener?.onPostFollow(
+                        viewHolder.isFollow,
+                        viewHolder.uid,
+                        0
+                    )
+                }
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.uname.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.like.setOnClickListener {
+                    if (PrefManager.isLogin) {
+                        if (PrefManager.SZLMID == "") {
+                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            iOnLikeClickListener?.onPostLike(
+                                "feed",
+                                viewHolder.isLike,
+                                viewHolder.id,
+                                null
+                            )
+                        }
+                    }
+                }
+                viewHolder
+            }
+
             TYPE_CONTENT -> {
-                val view =
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_feed_content, parent, false)
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_feed_content, parent, false)
                 val viewHolder = FeedContentViewHolder(view)
                 viewHolder.itemView.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
@@ -400,6 +455,191 @@ class FeedContentAdapter(
                 }
             }
 
+            is FeedArticleContentViewHolder -> {
+                if (feedList.isNotEmpty()) {
+                    val feed = feedList[position]
+
+                    holder.id = feed.data?.id.toString()
+                    holder.uid = feed.data?.uid.toString()
+                    holder.isLike = feed.data?.userAction?.like == 1
+                    holder.uname.text = feed.data?.userInfo?.username
+                    ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
+                    holder.isFollow = feed.data?.userAction?.followAuthor == 1
+                    if (feed.data?.userAction?.followAuthor == 0) {
+                        holder.follow.text = "关注"
+                        holder.follow.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        holder.follow.text = "已关注"
+                        holder.follow.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                    }
+                    if (feed.data?.deviceTitle != "") {
+                        holder.device.text = feed.data?.deviceTitle
+                        val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
+                        drawable.setBounds(
+                            0,
+                            0,
+                            holder.device.textSize.toInt(),
+                            holder.device.textSize.toInt()
+                        )
+                        holder.device.setCompoundDrawables(drawable, null, null, null)
+                        holder.device.visibility = View.VISIBLE
+                    } else {
+                        holder.device.visibility = View.GONE
+                    }
+
+                    holder.pubDate.text = DateUtils.fromToday(feed.data?.dateline)
+                    val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                    drawableDate.setBounds(
+                        0,
+                        0,
+                        holder.pubDate.textSize.toInt(),
+                        holder.pubDate.textSize.toInt()
+                    )
+                    holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
+
+                    val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                    drawableLike.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    if (feed.data?.userAction?.like == 1) {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                        holder.like.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            mContext.getColor(android.R.color.darker_gray)
+                        )
+                        holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                    }
+                    holder.like.text = feed.data?.likenum
+                    holder.like.setCompoundDrawables(drawableLike, null, null, null)
+
+                    holder.reply.text = feed.data?.replynum
+                    val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
+                    drawableReply.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    holder.reply.setCompoundDrawables(drawableReply, null, null, null)
+
+                    val feedRaw = """{"data":${feed.data?.messageRawOutput}}"""
+                    val feedJson: FeedArticleContentBean = Gson().fromJson(
+                        feedRaw,
+                        FeedArticleContentBean::class.java
+                    )
+                    holder.linearAdapterLayout.adapter = object : BaseAdapter() {
+                        override fun getCount() = feedJson.data.size
+                        override fun getItem(p0: Int): Any = 0
+                        override fun getItemId(p0: Int): Long = 0
+                        override fun getView(
+                            position1: Int,
+                            convertView: View?,
+                            parent: ViewGroup?
+                        ): View {
+                            val view = LayoutInflater.from(mContext)
+                                .inflate(R.layout.item_feed_article_content_item, parent, false)
+                            val textView: TextView = view.findViewById(R.id.textView)
+                            val imageView: NineGridImageView = view.findViewById(R.id.imageView)
+                            val description: TextView = view.findViewById(R.id.description)
+                            when (feedJson.data[position1].type) {
+                                "text" -> {
+                                    textView.visibility = View.VISIBLE
+                                    imageView.visibility = View.GONE
+                                    description.visibility = View.GONE
+                                    textView.movementMethod = LinkMovementMethod.getInstance()
+                                    textView.text = SpannableStringBuilderUtil.setText(
+                                        mContext,
+                                        feedJson.data[position1].message.toString(),
+                                        textView.textSize.toInt(),
+                                        null
+                                    )
+                                    textView.setOnLongClickListener {
+                                        val intent = Intent(mContext, CopyActivity::class.java)
+                                        intent.putExtra(
+                                            "text",
+                                            textView.text.toString()
+                                        )
+                                        mContext.startActivity(intent)
+                                        true
+                                    }
+                                    return view
+                                }
+
+                                "image" -> {
+                                    textView.visibility = View.GONE
+                                    imageView.visibility = View.VISIBLE
+                                    val urlList = ArrayList<String>()
+                                    urlList.add("${feedJson.data[position1].url}.s2x.jpg")
+                                    val from = feedJson.data[position1].url!!.lastIndexOf("@")
+                                    val middle = feedJson.data[position1].url!!.lastIndexOf("x")
+                                    val end = feedJson.data[position1].url!!.lastIndexOf(".")
+                                    if (from != -1 && middle != -1 && end != -1) {
+                                        val width = feedJson.data[position1].url?.substring(
+                                            from + 1,
+                                            middle
+                                        )?.toInt()
+                                        val height =
+                                            feedJson.data[position1].url?.substring(middle + 1, end)
+                                                ?.toInt()
+                                        imageView.imgHeight = height!!
+                                        imageView.imgWidth = width!!
+                                    }
+                                    imageView.setUrlList(urlList)
+                                    imageView.apply {
+                                        onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
+                                    }
+                                    if (feedJson.data[position1].description == "")
+                                        description.visibility = View.GONE
+                                    else
+                                        description.visibility = View.VISIBLE
+                                    description.text = SpannableStringBuilderUtil.setText(
+                                        mContext,
+                                        feedJson.data[position1].description.toString(),
+                                        description.textSize.toInt(),
+                                        null
+                                    )
+                                    description.setOnLongClickListener {
+                                        val intent = Intent(mContext, CopyActivity::class.java)
+                                        intent.putExtra(
+                                            "text",
+                                            description.text.toString()
+                                        )
+                                        mContext.startActivity(intent)
+                                        true
+                                    }
+                                    return view
+                                }
+
+                                else -> throw IllegalArgumentException("error feed article type: ${feedJson.data[position1].type}")
+                            }
+
+                        }
+                    }
+
+                }
+            }
+
             is FeedContentViewHolder -> {
                 if (feedList.isNotEmpty()) {
                     val feed = feedList[position]
@@ -445,7 +685,6 @@ class FeedContentAdapter(
                         holder.pubDate.textSize.toInt()
                     )
                     holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
-
 
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
@@ -548,6 +787,7 @@ class FeedContentAdapter(
                                     " [置顶]"
                                 else ""
                             }
+
                             else -> ""
                         }
                     holder.uname.text = SpannableStringBuilderUtil.setReply(
@@ -764,7 +1004,15 @@ class FeedContentAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {
-            0 -> TYPE_CONTENT
+            0 -> {
+                if (feedList.isNotEmpty()) when (feedList[position].data?.feedType) {
+                    "feed" -> TYPE_CONTENT
+                    "feedArticle" -> TYPE_CONTENT_ARTICLE
+                    else -> throw IllegalArgumentException("feedType error: ${feedList[position].data?.feedType}")
+                }
+                else 0
+            }
+
             1 -> TYPE_FIX
             itemCount - 1 -> TYPE_FOOTER
             else -> TYPE_REPLY

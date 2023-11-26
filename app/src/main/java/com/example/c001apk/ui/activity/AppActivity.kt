@@ -115,13 +115,13 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                                     viewModel.appCommentList.add(element)
 
                     }
-                    mAdapter.notifyDataSetChanged()
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.appLayout.visibility = View.VISIBLE
@@ -263,6 +263,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -270,6 +271,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
+                        mAdapter.notifyDataSetChanged()
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

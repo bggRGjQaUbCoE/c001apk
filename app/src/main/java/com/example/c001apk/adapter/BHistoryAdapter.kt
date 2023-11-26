@@ -60,7 +60,7 @@ class BHistoryAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        notifyDataSetChanged()
+        //notifyDataSetChanged()
     }
 
     class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {

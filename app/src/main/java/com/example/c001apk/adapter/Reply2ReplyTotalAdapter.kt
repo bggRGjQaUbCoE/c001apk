@@ -73,7 +73,7 @@ class Reply2ReplyTotalAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        notifyDataSetChanged()
+       //notifyDataSetChanged()
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

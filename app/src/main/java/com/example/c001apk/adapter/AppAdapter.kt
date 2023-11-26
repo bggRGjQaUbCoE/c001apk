@@ -91,7 +91,7 @@ class AppAdapter(
     fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
-        notifyDataSetChanged()
+        //notifyDataSetChanged()
     }
 
     class ImageCarouselCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -104,6 +104,7 @@ class AppAdapter(
     }
 
     class FeedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var feedType = ""
         val avatar: ImageView = view.findViewById(R.id.avatar)
         var avatarUrl = ""
         val uname: TextView = view.findViewById(R.id.uname)
@@ -198,7 +199,7 @@ class AppAdapter(
                 val viewHolder = FeedViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
+                    intent.putExtra("type", viewHolder.feedType)
                     intent.putExtra("id", viewHolder.id)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
@@ -216,7 +217,7 @@ class AppAdapter(
                 }
                 viewHolder.message.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
+                    intent.putExtra("type", viewHolder.feedType)
                     intent.putExtra("id", viewHolder.id)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
@@ -234,7 +235,7 @@ class AppAdapter(
                 }
                 viewHolder.reply.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
+                    intent.putExtra("type", viewHolder.feedType)
                     intent.putExtra("id", viewHolder.id)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
@@ -572,6 +573,7 @@ class AppAdapter(
 
             is FeedViewHolder -> {
                 val feed = dataList[position]
+                holder.feedType = feed.feedType
                 holder.id = feed.id
                 holder.uid = feed.uid
                 holder.isLike = feed.userAction?.like == 1
@@ -876,7 +878,7 @@ class AppAdapter(
                     "iconMiniGridCard" -> 4
 
                     "refreshCard" -> 5
-                    else -> throw IllegalArgumentException("entityType error")
+                    else -> throw IllegalArgumentException("entityType error: ${dataList[position].entityTemplate}")
                 }
             }
 
@@ -890,7 +892,7 @@ class AppAdapter(
 
             "apk" -> 8
 
-            else -> throw IllegalArgumentException("entityType error")
+            else -> throw IllegalArgumentException("entityType error: ${dataList[position].entityType}")
         }
     }
 

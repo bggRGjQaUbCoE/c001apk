@@ -52,7 +52,7 @@ class MessageAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        notifyDataSetChanged()
+        //notifyDataSetChanged()
     }
 
     private val messTitle = ArrayList<String>()
