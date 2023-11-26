@@ -548,8 +548,13 @@ class FeedContentAdapter(
                         feedRaw,
                         FeedArticleContentBean::class.java
                     )
+                    val articleList = ArrayList<FeedArticleContentBean.Data>()
+                    for (element in feedJson.data) {
+                        if (element.type == "text" || element.type == "image" || element.type == "shareUrl")
+                            articleList.add(element)
+                    }
                     holder.linearAdapterLayout.adapter = object : BaseAdapter() {
-                        override fun getCount() = feedJson.data.size
+                        override fun getCount() = articleList.size
                         override fun getItem(p0: Int): Any = 0
                         override fun getItemId(p0: Int): Long = 0
                         override fun getView(
@@ -564,7 +569,7 @@ class FeedContentAdapter(
                             val description: TextView = view.findViewById(R.id.description)
                             val shareUrl: MaterialCardView = view.findViewById(R.id.shareUrl)
                             val urlTitle: TextView = view.findViewById(R.id.urlTitle)
-                            when (feedJson.data[position1].type) {
+                            when (articleList[position1].type) {
                                 "text" -> {
                                     textView.visibility = View.VISIBLE
                                     imageView.visibility = View.GONE
@@ -573,7 +578,7 @@ class FeedContentAdapter(
                                     textView.movementMethod = LinkMovementMethod.getInstance()
                                     textView.text = SpannableStringBuilderUtil.setText(
                                         mContext,
-                                        feedJson.data[position1].message.toString(),
+                                        articleList[position1].message.toString(),
                                         textView.textSize.toInt(),
                                         null
                                     )
@@ -594,17 +599,17 @@ class FeedContentAdapter(
                                     imageView.visibility = View.VISIBLE
                                     shareUrl.visibility = View.GONE
                                     val urlList = ArrayList<String>()
-                                    urlList.add("${feedJson.data[position1].url}.s2x.jpg")
-                                    val from = feedJson.data[position1].url!!.lastIndexOf("@")
-                                    val middle = feedJson.data[position1].url!!.lastIndexOf("x")
-                                    val end = feedJson.data[position1].url!!.lastIndexOf(".")
+                                    urlList.add("${articleList[position1].url}.s2x.jpg")
+                                    val from = articleList[position1].url!!.lastIndexOf("@")
+                                    val middle = articleList[position1].url!!.lastIndexOf("x")
+                                    val end = articleList[position1].url!!.lastIndexOf(".")
                                     if (from != -1 && middle != -1 && end != -1) {
-                                        val width = feedJson.data[position1].url?.substring(
+                                        val width = articleList[position1].url?.substring(
                                             from + 1,
                                             middle
                                         )?.toInt()
                                         val height =
-                                            feedJson.data[position1].url?.substring(middle + 1, end)
+                                            articleList[position1].url?.substring(middle + 1, end)
                                                 ?.toInt()
                                         imageView.imgHeight = height!!
                                         imageView.imgWidth = width!!
@@ -614,13 +619,13 @@ class FeedContentAdapter(
                                         onImageItemClickListener =
                                             this@FeedContentAdapter.onImageItemClickListener
                                     }
-                                    if (feedJson.data[position1].description == "")
+                                    if (articleList[position1].description == "")
                                         description.visibility = View.GONE
                                     else
                                         description.visibility = View.VISIBLE
                                     description.text = SpannableStringBuilderUtil.setText(
                                         mContext,
-                                        feedJson.data[position1].description.toString(),
+                                        articleList[position1].description.toString(),
                                         description.textSize.toInt(),
                                         null
                                     )
@@ -641,19 +646,19 @@ class FeedContentAdapter(
                                     imageView.visibility = View.GONE
                                     description.visibility = View.GONE
                                     shareUrl.visibility = View.VISIBLE
-                                    urlTitle.text = feedJson.data[position1].title.toString()
+                                    urlTitle.text = articleList[position1].title.toString()
                                     shareUrl.setOnClickListener {
                                         val intent = Intent(mContext, WebViewActivity::class.java)
                                         intent.putExtra(
                                             "url",
-                                            feedJson.data[position1].url.toString()
+                                            articleList[position1].url.toString()
                                         )
                                         mContext.startActivity(intent)
                                     }
                                     return view
                                 }
 
-                                else -> throw IllegalArgumentException("error feed article type: ${feedJson.data[position1].type}")
+                                else -> throw IllegalArgumentException("error feed article type: ${articleList[position1].type}")
                             }
 
                         }
@@ -1030,8 +1035,8 @@ class FeedContentAdapter(
                 if (feedList.isNotEmpty()) when (feedList[position].data?.feedType) {
                     "feed" -> TYPE_CONTENT
                     "feedArticle" -> TYPE_CONTENT_ARTICLE
-                    else -> TYPE_CONTENT // comment 
-                // throw IllegalArgumentException("feedType error: ${feedList[position].data?.feedType}")
+                    else -> TYPE_CONTENT // comment
+                    // throw IllegalArgumentException("feedType error: ${feedList[position].data?.feedType}")
                 }
                 else 0
             }
