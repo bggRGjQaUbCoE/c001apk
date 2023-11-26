@@ -28,6 +28,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.ext.mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 import java.io.File
@@ -254,6 +255,32 @@ object ImageUtil {
                 ) {
                     if (fragmentActivity != null) {
                         showSaveImgDialog(fragmentActivity, imgList[position])
+                    } else {
+                        Log.i("Mojito", "fragmentActivity is null, skip save image")
+                    }
+                }
+            })
+        }
+    }
+
+    fun startBigImgViewSimple(
+        imageView: ImageView,
+        url: String
+    ) {
+        imageView.mojito(url) {
+            progressLoader {
+                DefaultPercentProgress()
+            }
+            setOnMojitoListener(object : SimpleMojitoViewCallback() {
+                override fun onLongClick(
+                    fragmentActivity: FragmentActivity?,
+                    view: View,
+                    x: Float,
+                    y: Float,
+                    position: Int
+                ) {
+                    if (fragmentActivity != null) {
+                        showSaveImgDialog(fragmentActivity, url)
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }

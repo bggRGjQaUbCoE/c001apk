@@ -562,11 +562,14 @@ class FeedContentAdapter(
                             val textView: TextView = view.findViewById(R.id.textView)
                             val imageView: NineGridImageView = view.findViewById(R.id.imageView)
                             val description: TextView = view.findViewById(R.id.description)
+                            val shareUrl: MaterialCardView = view.findViewById(R.id.shareUrl)
+                            val urlTitle: TextView = view.findViewById(R.id.urlTitle)
                             when (feedJson.data[position1].type) {
                                 "text" -> {
                                     textView.visibility = View.VISIBLE
                                     imageView.visibility = View.GONE
                                     description.visibility = View.GONE
+                                    shareUrl.visibility = View.GONE
                                     textView.movementMethod = LinkMovementMethod.getInstance()
                                     textView.text = SpannableStringBuilderUtil.setText(
                                         mContext,
@@ -589,6 +592,7 @@ class FeedContentAdapter(
                                 "image" -> {
                                     textView.visibility = View.GONE
                                     imageView.visibility = View.VISIBLE
+                                    shareUrl.visibility = View.GONE
                                     val urlList = ArrayList<String>()
                                     urlList.add("${feedJson.data[position1].url}.s2x.jpg")
                                     val from = feedJson.data[position1].url!!.lastIndexOf("@")
@@ -607,7 +611,8 @@ class FeedContentAdapter(
                                     }
                                     imageView.setUrlList(urlList)
                                     imageView.apply {
-                                        onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
+                                        onImageItemClickListener =
+                                            this@FeedContentAdapter.onImageItemClickListener
                                     }
                                     if (feedJson.data[position1].description == "")
                                         description.visibility = View.GONE
@@ -627,6 +632,23 @@ class FeedContentAdapter(
                                         )
                                         mContext.startActivity(intent)
                                         true
+                                    }
+                                    return view
+                                }
+
+                                "shareUrl" -> {
+                                    textView.visibility = View.GONE
+                                    imageView.visibility = View.GONE
+                                    description.visibility = View.GONE
+                                    shareUrl.visibility = View.VISIBLE
+                                    urlTitle.text = feedJson.data[position1].title.toString()
+                                    shareUrl.setOnClickListener {
+                                        val intent = Intent(mContext, WebViewActivity::class.java)
+                                        intent.putExtra(
+                                            "url",
+                                            feedJson.data[position1].url.toString()
+                                        )
+                                        mContext.startActivity(intent)
                                     }
                                     return view
                                 }

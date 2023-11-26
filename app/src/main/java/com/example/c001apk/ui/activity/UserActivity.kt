@@ -66,11 +66,11 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         initScroll()
 
         binding.avatar.setOnClickListener {
-            ImageUtil.startBigImgViewSimple(this, viewModel.avatar)
+            ImageUtil.startBigImgViewSimple(binding.avatar, viewModel.avatar)
         }
 
         binding.cover.setOnClickListener {
-            ImageUtil.startBigImgViewSimple(this, viewModel.cover)
+            ImageUtil.startBigImgViewSimple(binding.cover, viewModel.cover)
         }
 
         binding.uid.setOnClickListener {
