@@ -66,19 +66,11 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         initScroll()
 
         binding.avatar.setOnClickListener {
-            binding.avatar.mojito(viewModel.avatar) {
-                progressLoader {
-                    DefaultPercentProgress()
-                }
-            }
+            ImageUtil.startBigImgViewSimple(this, viewModel.avatar)
         }
 
         binding.cover.setOnClickListener {
-            binding.cover.mojito(viewModel.cover) {
-                progressLoader {
-                    DefaultPercentProgress()
-                }
-            }
+            ImageUtil.startBigImgViewSimple(this, viewModel.cover)
         }
 
         binding.uid.setOnClickListener {
