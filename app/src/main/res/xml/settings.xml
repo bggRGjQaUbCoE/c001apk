@@ -4,7 +4,6 @@
     <PreferenceCategory android:title="@string/app_name">
         <Preference
             android:icon="@drawable/ic_phone"
-            android:dependency="zmlmId"
             android:key="zmlmId"
             android:title="@string/zmlmId" />
         <Preference
@@ -48,9 +47,12 @@
     <PreferenceCategory android:title="@string/display">
         <Preference
             android:icon="@drawable/ic_block"
-            android:dependency="zmlmId"
-            android:key="blackList"
-            android:title="@string/black_list" />
+            android:key="userBlackList"
+            android:title="@string/user_black_list" />
+        <Preference
+            android:icon="@drawable/ic_block"
+            android:key="topicBlackList"
+            android:title="@string/topic_black_list" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_history"

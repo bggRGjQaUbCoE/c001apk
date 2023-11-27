@@ -12,6 +12,7 @@ import com.example.c001apk.logic.database.BlackListDatabase
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.database.SearchHistoryDatabase
+import com.example.c001apk.logic.database.TopicBlackListDatabase
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
@@ -661,14 +662,19 @@ class AppViewModel : ViewModel() {
     fun getBlackList(type: String, context: Context) {
         val searchHistoryDao = SearchHistoryDatabase.getDatabase(context).searchHistoryDao()
         val blackListDao = BlackListDatabase.getDatabase(context).blackListDao()
+        val topicBlacklist = TopicBlackListDatabase.getDatabase(context).blackListDao()
         val newList = ArrayList<String>()
         viewModelScope.launch(Dispatchers.IO) {
             if (type == "history")
                 for (element in searchHistoryDao.loadAllHistory()) {
                     newList.add(element.keyWord)
                 }
-            else
+            else if (type == "blacklist")
                 for (element in blackListDao.loadAllList()) {
+                    newList.add(element.keyWord)
+                }
+            else if (type == "topicBlacklist")
+                for (element in topicBlacklist.loadAllList()) {
                     newList.add(element.keyWord)
                 }
             withContext(Dispatchers.Main) {

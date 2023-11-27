@@ -56,7 +56,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val tpic: String,
         val message: String,
         val pic: String,
-        val tags: String,
+        val tags: String?,
         var likenum: String,
         val commentnum: String,
         val replynum: String,

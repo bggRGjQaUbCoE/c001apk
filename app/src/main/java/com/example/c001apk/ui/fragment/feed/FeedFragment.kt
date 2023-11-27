@@ -706,7 +706,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
                                 BlackListUtil.saveUid(viewModel.uid)
-                                requireActivity().finish()
+                                //requireActivity().finish()
                             }
                             show()
                         }

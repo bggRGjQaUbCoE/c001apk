@@ -97,7 +97,7 @@
     <string name="download">下载</string>
     <string name="zmlmId">数字联盟ID</string>
     <string name="params">机型参数</string>
-    <string name="black_list">黑名单</string>
+    <string name="user_black_list">用户黑名单</string>
     <string name="add">添加</string>
     <string name="block">加入黑名单</string>
     <string name="publishFeed">发动态</string>
@@ -109,5 +109,6 @@
     <string name="delete">删除</string>
     <string name="copyLink">复制链接</string>
     <string name="report">举报</string>
+    <string name="topic_black_list">话题黑名单</string>
 
 </resources>

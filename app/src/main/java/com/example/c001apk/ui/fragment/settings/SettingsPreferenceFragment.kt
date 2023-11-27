@@ -95,7 +95,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
     }
 
-    @SuppressLint("SetTextI18n", "RestrictedApi")
+    @SuppressLint("SetTextI18n", "RestrictedApi", "InflateParams")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = SettingsPreferenceDataStore()
         setPreferencesFromResource(R.xml.settings, rootKey)
@@ -187,8 +187,17 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         }
 
-        findPreference<Preference>("blackList")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), BlackListActivity::class.java))
+        findPreference<Preference>("userBlackList")?.setOnPreferenceClickListener {
+            val intent = Intent(requireContext(), BlackListActivity::class.java)
+            intent.putExtra("type", "user")
+            startActivity(intent)
+            true
+        }
+
+        findPreference<Preference>("topicBlackList")?.setOnPreferenceClickListener {
+            val intent = Intent(requireContext(), BlackListActivity::class.java)
+            intent.putExtra("type", "topic")
+            startActivity(intent)
             true
         }
 

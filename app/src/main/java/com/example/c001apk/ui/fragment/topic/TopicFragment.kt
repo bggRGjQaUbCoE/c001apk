@@ -14,18 +14,28 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
+import com.example.c001apk.logic.database.TopicBlackListDatabase
+import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
 
     private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
+    private val topicBlackListDao by lazy {
+        TopicBlackListDatabase.getDatabase(requireContext()).blackListDao()
+    }
 
     companion object {
         @JvmStatic
@@ -248,6 +258,21 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
             R.id.topicLatestPublish -> {
                 viewModel.productTitle = "最新发布"
                 controller?.onSearch("title", "最新发布")
+            }
+
+            R.id.block -> {
+                MaterialAlertDialogBuilder(requireContext()).apply {
+                    setTitle("确定将 ${viewModel.title} 加入黑名单？")
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            if (!topicBlackListDao.isExist(viewModel.title)) {
+                                topicBlackListDao.insert(SearchHistory(viewModel.title))
+                            }
+                        }
+                    }
+                    show()
+                }
             }
 
         }

@@ -22,7 +22,6 @@
             android:layout_weight="1"
             app:endIconMode="clear_text">
 
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editText"
                 android:layout_width="match_parent"
@@ -30,7 +29,6 @@
                 android:layout_weight="1"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:hint="uid"
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,7 +55,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:paddingStart="10dp"
-            android:text="@string/black_list"
+            android:id="@+id/title"
             android:textSize="16sp"
             android:textStyle="bold" />
 
