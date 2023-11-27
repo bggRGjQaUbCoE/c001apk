@@ -13,12 +13,14 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -27,7 +29,10 @@ import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
+import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CopyActivity
+import com.example.c001apk.ui.activity.DyhActivity
+import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
@@ -134,6 +139,7 @@ class FeedContentAdapter(
         val device: TextView = view.findViewById(R.id.device)
         val message: TextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
+        val ip: TextView = view.findViewById(R.id.ip)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
@@ -142,6 +148,8 @@ class FeedContentAdapter(
         val follow: TextView = view.findViewById(R.id.follow)
         var isFollow = false
         var uid = ""
+        val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
+        val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
     }
 
     class FeedArticleContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -150,6 +158,7 @@ class FeedContentAdapter(
         val device: TextView = view.findViewById(R.id.device)
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
+        val ip: TextView = view.findViewById(R.id.ip)
         val like: TextView = view.findViewById(R.id.like)
         val reply: TextView = view.findViewById(R.id.reply)
         var id = ""
@@ -157,6 +166,8 @@ class FeedContentAdapter(
         val follow: TextView = view.findViewById(R.id.follow)
         var isFollow = false
         var uid = ""
+        val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
+        val dyhLinearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -463,6 +474,8 @@ class FeedContentAdapter(
                     holder.uid = feed.data?.uid.toString()
                     holder.isLike = feed.data?.userAction?.like == 1
                     holder.uname.text = feed.data?.userInfo?.username
+                    if (!feed.data?.ipLocation.isNullOrEmpty())
+                        holder.ip.text = "发布于 ${feed.data?.ipLocation}"
                     ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
                     holder.isFollow = feed.data?.userAction?.followAuthor == 1
                     if (feed.data?.userAction?.followAuthor == 0) {
@@ -493,14 +506,6 @@ class FeedContentAdapter(
                     }
 
                     holder.pubDate.text = DateUtils.fromToday(feed.data?.dateline)
-                    val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
-                    drawableDate.setBounds(
-                        0,
-                        0,
-                        holder.pubDate.textSize.toInt(),
-                        holder.pubDate.textSize.toInt()
-                    )
-                    holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
 
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
@@ -726,7 +731,112 @@ class FeedContentAdapter(
 
                         }
                     }
+                    if (feed.data?.targetRow?.id == null && feed.data?.relationRows.isNullOrEmpty())
+                        holder.dyhLayout.visibility = View.GONE
+                    else {
+                        holder.dyhLayout.visibility = View.VISIBLE
+                        holder.dyhLinearAdapterLayout.adapter = object : BaseAdapter() {
+                            override fun getCount(): Int =
+                                if (feed.data?.targetRow?.id == null) feed.data?.relationRows!!.size
+                                else 1 + feed.data.relationRows!!.size
 
+                            override fun getItem(p0: Int): Any = 0
+
+                            override fun getItemId(p0: Int): Long = 0
+
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup?
+                            ): View {
+                                val view = LayoutInflater.from(mContext).inflate(
+                                    R.layout.item_feed_tag,
+                                    parent,
+                                    false
+                                )
+                                val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
+                                val title: TextView = view.findViewById(R.id.title)
+                                val type: String
+                                val id: String
+                                val url: String
+                                if (feed.data?.targetRow?.id != null) {
+                                    if (position == 0) {
+                                        type = feed.data.targetRow.targetType.toString()
+                                        id = feed.data.targetRow.id
+                                        url = feed.data.targetRow.url
+                                        title.text = feed.data.targetRow.title
+                                        ImageUtil.showIMG(logo, feed.data.targetRow.logo)
+                                    } else {
+                                        val space =
+                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                        val layoutParams = ConstraintLayout.LayoutParams(
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                        )
+                                        layoutParams.setMargins(space, 0, 0, 0)
+                                        view.layoutParams = layoutParams
+                                        type = feed.data.relationRows!![position - 1].entityType
+                                        id = feed.data.relationRows[position - 1].id
+                                        url = feed.data.relationRows[position - 1].url
+                                        title.text = feed.data.relationRows[position - 1].title
+                                        ImageUtil.showIMG(
+                                            logo,
+                                            feed.data.relationRows[position - 1].logo
+                                        )
+                                    }
+                                } else {
+                                    if (position == 0) {
+                                        type = feed.data?.relationRows!![0].entityType
+                                        id = feed.data.relationRows[0].id
+                                        title.text = feed.data.relationRows[0].title
+                                        url = feed.data.relationRows[0].url
+                                        ImageUtil.showIMG(logo, feed.data.relationRows[0].logo)
+                                    } else {
+                                        val space =
+                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                        val layoutParams = ConstraintLayout.LayoutParams(
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                        )
+                                        layoutParams.setMargins(space, 0, 0, 0)
+                                        view.layoutParams = layoutParams
+                                        type = feed.data?.relationRows!![position].entityType
+                                        id = feed.data.relationRows[position].id
+                                        url = feed.data.relationRows[position].url
+                                        title.text = feed.data.relationRows[position].title
+                                        ImageUtil.showIMG(
+                                            logo,
+                                            feed.data.relationRows[position].logo
+                                        )
+                                    }
+                                }
+                                view.setOnClickListener {
+                                    if (url.contains("/apk/")) {
+                                        val intent = Intent(mContext, AppActivity::class.java)
+                                        intent.putExtra("id", url.replace("/apk/", ""))
+                                        mContext.startActivity(intent)
+                                    } else if (url.contains("/game/")) {
+                                        val intent = Intent(mContext, AppActivity::class.java)
+                                        intent.putExtra("id", url.replace("/game/", ""))
+                                        mContext.startActivity(intent)
+                                    } else if (type == "feedRelation") {
+                                        val intent = Intent(mContext, DyhActivity::class.java)
+                                        intent.putExtra("id", id)
+                                        intent.putExtra("title", title.text)
+                                        mContext.startActivity(intent)
+                                    } else if (type == "topic" || type == "product") {
+                                        val intent = Intent(mContext, TopicActivity::class.java)
+                                        intent.putExtra("type", type)
+                                        intent.putExtra("title", title.text)
+                                        intent.putExtra("url", url)
+                                        intent.putExtra("id", id)
+                                        mContext.startActivity(intent)
+                                    }
+                                }
+                                return view
+                            }
+                        }
+                    }
                 }
             }
 
@@ -737,6 +847,8 @@ class FeedContentAdapter(
                     holder.uid = feed.data?.uid.toString()
                     holder.isLike = feed.data?.userAction?.like == 1
                     holder.uname.text = feed.data?.userInfo?.username
+                    if (!feed.data?.ipLocation.isNullOrEmpty())
+                        holder.ip.text = "发布于 ${feed.data?.ipLocation}"
                     ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
                     holder.isFollow = feed.data?.userAction?.followAuthor == 1
                     if (feed.data?.userAction?.followAuthor == 0) {
@@ -767,14 +879,6 @@ class FeedContentAdapter(
                     }
 
                     holder.pubDate.text = DateUtils.fromToday(feed.data?.dateline)
-                    val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
-                    drawableDate.setBounds(
-                        0,
-                        0,
-                        holder.pubDate.textSize.toInt(),
-                        holder.pubDate.textSize.toInt()
-                    )
-                    holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
 
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
@@ -854,6 +958,112 @@ class FeedContentAdapter(
                         }
                     } else {
                         holder.multiImage.visibility = View.GONE
+                    }
+                    if (feed.data?.targetRow?.id == null && feed.data?.relationRows.isNullOrEmpty())
+                        holder.dyhLayout.visibility = View.GONE
+                    else {
+                        holder.dyhLayout.visibility = View.VISIBLE
+                        holder.linearAdapterLayout.adapter = object : BaseAdapter() {
+                            override fun getCount(): Int =
+                                if (feed.data?.targetRow?.id == null) feed.data?.relationRows!!.size
+                                else 1 + feed.data.relationRows!!.size
+
+                            override fun getItem(p0: Int): Any = 0
+
+                            override fun getItemId(p0: Int): Long = 0
+
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup?
+                            ): View {
+                                val view = LayoutInflater.from(mContext).inflate(
+                                    R.layout.item_feed_tag,
+                                    parent,
+                                    false
+                                )
+                                val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
+                                val title: TextView = view.findViewById(R.id.title)
+                                val type: String
+                                val id: String
+                                val url: String
+                                if (feed.data?.targetRow?.id != null) {
+                                    if (position == 0) {
+                                        type = feed.data.targetRow.targetType.toString()
+                                        id = feed.data.targetRow.id
+                                        url = feed.data.targetRow.url
+                                        title.text = feed.data.targetRow.title
+                                        ImageUtil.showIMG(logo, feed.data.targetRow.logo)
+                                    } else {
+                                        val space =
+                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                        val layoutParams = ConstraintLayout.LayoutParams(
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                        )
+                                        layoutParams.setMargins(space, 0, 0, 0)
+                                        view.layoutParams = layoutParams
+                                        type = feed.data.relationRows!![position - 1].entityType
+                                        id = feed.data.relationRows[position - 1].id
+                                        url = feed.data.relationRows[position - 1].url
+                                        title.text = feed.data.relationRows[position - 1].title
+                                        ImageUtil.showIMG(
+                                            logo,
+                                            feed.data.relationRows[position - 1].logo
+                                        )
+                                    }
+                                } else {
+                                    if (position == 0) {
+                                        type = feed.data?.relationRows!![0].entityType
+                                        id = feed.data.relationRows[0].id
+                                        title.text = feed.data.relationRows[0].title
+                                        url = feed.data.relationRows[0].url
+                                        ImageUtil.showIMG(logo, feed.data.relationRows[0].logo)
+                                    } else {
+                                        val space =
+                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                        val layoutParams = ConstraintLayout.LayoutParams(
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                        )
+                                        layoutParams.setMargins(space, 0, 0, 0)
+                                        view.layoutParams = layoutParams
+                                        type = feed.data?.relationRows!![position].entityType
+                                        id = feed.data.relationRows[position].id
+                                        url = feed.data.relationRows[position].url
+                                        title.text = feed.data.relationRows[position].title
+                                        ImageUtil.showIMG(
+                                            logo,
+                                            feed.data.relationRows[position].logo
+                                        )
+                                    }
+                                }
+                                view.setOnClickListener {
+                                    if (url.contains("/apk/")) {
+                                        val intent = Intent(mContext, AppActivity::class.java)
+                                        intent.putExtra("id", url.replace("/apk/", ""))
+                                        mContext.startActivity(intent)
+                                    } else if (url.contains("/game/")) {
+                                        val intent = Intent(mContext, AppActivity::class.java)
+                                        intent.putExtra("id", url.replace("/game/", ""))
+                                        mContext.startActivity(intent)
+                                    } else if (type == "feedRelation") {
+                                        val intent = Intent(mContext, DyhActivity::class.java)
+                                        intent.putExtra("id", id)
+                                        intent.putExtra("title", title.text)
+                                        mContext.startActivity(intent)
+                                    } else if (type == "topic" || type == "product") {
+                                        val intent = Intent(mContext, TopicActivity::class.java)
+                                        intent.putExtra("type", type)
+                                        intent.putExtra("title", title.text)
+                                        intent.putExtra("url", url)
+                                        intent.putExtra("id", id)
+                                        mContext.startActivity(intent)
+                                    }
+                                }
+                                return view
+                            }
+                        }
                     }
                 }
             }

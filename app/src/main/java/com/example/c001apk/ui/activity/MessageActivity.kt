@@ -58,13 +58,13 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                                 if (!BlackListUtil.checkUid(element.uid))
                                     viewModel.messageList.add(element)
                     }
-                    messageContentAdapter.notifyDataSetChanged()
                     messageContentAdapter.setLoadState(messageContentAdapter.LOADING_COMPLETE)
                 } else {
                     messageContentAdapter.setLoadState(messageContentAdapter.LOADING_END)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                messageContentAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
@@ -147,6 +147,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -154,6 +155,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         messageContentAdapter.setLoadState(messageContentAdapter.LOADING)
+                        messageContentAdapter.notifyDataSetChanged()
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

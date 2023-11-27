@@ -12,7 +12,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val targetRow: TargetRow?,
         @SerializedName("change_count") val changeCount: Int,
         val isModified: Int,
-        @SerializedName("ip_location") val ipLocation: String,
+        @SerializedName("ip_location") val ipLocation: String?,
         val isFeedAuthor: Int,
         val topReplyRows: List<TotalReplyResponse.Data>,
         val extraDataArr: ExtraDataArr?,

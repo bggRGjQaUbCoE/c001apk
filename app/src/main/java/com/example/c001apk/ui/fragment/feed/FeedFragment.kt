@@ -644,6 +644,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(
                     StickyItemDecorator(
