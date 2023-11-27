@@ -20,6 +20,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -111,7 +112,10 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in comment)
                             if (element.entityType == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
                                     viewModel.appCommentList.add(element)
 
                     }

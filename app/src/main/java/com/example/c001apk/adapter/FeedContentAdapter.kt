@@ -167,7 +167,8 @@ class FeedContentAdapter(
         var isFollow = false
         var uid = ""
         val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
-        val dyhLinearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
+        val dyhLinearAdapterLayout: LinearAdapterLayout =
+            view.findViewById(R.id.linearAdapterLayout)
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {

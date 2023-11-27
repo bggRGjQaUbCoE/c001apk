@@ -17,6 +17,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -55,8 +56,11 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed)
                             if (element.entityType == "feed" || element.entityType == "contacts")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
-                                viewModel.dataList.add(element)
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
+                                    viewModel.dataList.add(element)
                     }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {

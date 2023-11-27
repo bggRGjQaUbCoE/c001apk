@@ -133,7 +133,10 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                     viewModel.changeFirstItem = false
                                     viewModel.firstItem = element.id
                                 }
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
                                     viewModel.homeFeedList.add(element)
                             }
 
@@ -214,7 +217,10 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
                             if (element.entityType == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
                                     viewModel.homeFeedList.add(element)
                             //viewModel.lastItem = feed[feed.size - 1].entityId
                         }

@@ -18,6 +18,7 @@ import com.example.c001apk.databinding.FragmentDyhDetailBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -32,7 +33,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String, type:String) =
+        fun newInstance(id: String, type: String) =
             DyhDetailFragment().apply {
                 arguments = Bundle().apply {
                     putString("id", id)
@@ -92,8 +93,11 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                     if (viewModel.isRefreshing || viewModel.isLoadMore)
                         for (element in data)
                             if (element.entityType == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
-                                viewModel.dyhDataList.add(element)
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
+                                    viewModel.dyhDataList.add(element)
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END, null)

@@ -20,6 +20,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -116,7 +117,10 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                             //|| element.entityTemplate == "articleNews"
                             //|| element.entityTemplate == "feedCover"
                             )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
                                     viewModel.topicDataList.add(element)
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {

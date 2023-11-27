@@ -21,6 +21,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -104,7 +105,10 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                         if (viewModel.type == "feed")
                             for (element in search) {
                                 if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                            element.tags
+                                        )
+                                    )
                                         viewModel.searchList.add(element)
                             }
                         else

@@ -24,13 +24,12 @@ import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import net.mikaelzero.mojito.ext.mojito
-import net.mikaelzero.mojito.impl.DefaultPercentProgress
 
 
 class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
@@ -137,7 +136,10 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         for (element in feed) {
                             if (element.entityTemplate == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()))
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                        element.tags
+                                    )
+                                )
                                     viewModel.feedList.add(element)
                         }
                     }

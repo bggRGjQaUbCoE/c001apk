@@ -169,7 +169,6 @@ class MessageFragment : Fragment() {
                                 if (!BlackListUtil.checkUid(element.fromuid))
                                     viewModel.messageList.add(element)
                     }
-
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END)
