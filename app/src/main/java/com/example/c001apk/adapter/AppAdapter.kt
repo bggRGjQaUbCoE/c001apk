@@ -111,6 +111,7 @@ class AppAdapter(
         val from: TextView = view.findViewById(R.id.from)
         val device: TextView = view.findViewById(R.id.device)
         val message: TextView = view.findViewById(R.id.message)
+        val messageTitle: TextView = view.findViewById(R.id.messageTitle)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         var id = ""
         var uid = ""
@@ -581,6 +582,11 @@ class AppAdapter(
                 holder.pubDataRaw = feed.dateline.toString()
                 holder.uname.text = feed.userInfo?.username
                 ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
+                if (feed.feedType == "feedArticle") {
+                    holder.messageTitle.visibility = View.VISIBLE
+                    holder.messageTitle.text = feed.messageTitle
+                } else
+                    holder.messageTitle.visibility = View.GONE
                 if (feed.deviceTitle != "") {
                     holder.device.text = feed.deviceTitle
                     val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!

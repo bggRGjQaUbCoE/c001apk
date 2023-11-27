@@ -79,9 +79,16 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String, uid: String?, uname: String?, viewReply: Boolean?) =
+        fun newInstance(
+            type: String?,
+            id: String,
+            uid: String?,
+            uname: String?,
+            viewReply: Boolean?
+        ) =
             FeedFragment().apply {
                 arguments = Bundle().apply {
+                    putString("TYPE", type)
                     putString("ID", id)
                     putString("UID", uid)
                     putString("UNAME", uname)
@@ -96,6 +103,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
+            viewModel.feedType = it.getString("TYPE", "feed")
             viewModel.id = it.getString("ID", "")
             viewModel.uid = it.getString("UID", "")
             viewModel.funame = it.getString("UNAME", "")
@@ -651,7 +659,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initBar() {
         binding.toolBar.apply {
-            title = "动态"
+            title = when (viewModel.feedType) {
+                "feed" -> "动态"
+                "feedArticle" -> "图文"
+                "comment" -> "评论"
+                else -> "动态"
+            }
             setNavigationIcon(R.drawable.ic_back)
             setNavigationOnClickListener {
                 requireActivity().finish()

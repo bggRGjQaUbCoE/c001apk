@@ -554,7 +554,7 @@ class FeedContentAdapter(
                             articleList.add(element)
                     }
                     holder.linearAdapterLayout.adapter = object : BaseAdapter() {
-                        override fun getCount() = articleList.size
+                        override fun getCount() = articleList.size + 2
                         override fun getItem(p0: Int): Any = 0
                         override fun getItemId(p0: Int): Long = 0
                         override fun getView(
@@ -569,7 +569,60 @@ class FeedContentAdapter(
                             val description: TextView = view.findViewById(R.id.description)
                             val shareUrl: MaterialCardView = view.findViewById(R.id.shareUrl)
                             val urlTitle: TextView = view.findViewById(R.id.urlTitle)
-                            when (articleList[position1].type) {
+                            if (position1 == 0) {
+                                textView.visibility = View.GONE
+                                shareUrl.visibility = View.GONE
+                                description.visibility = View.GONE
+                                if (feed.data?.messageCover.isNullOrEmpty())
+                                    imageView.visibility = View.GONE
+                                else {
+                                    imageView.visibility = View.VISIBLE
+                                    val urlList = ArrayList<String>()
+                                    urlList.add("${feed.data?.messageCover}.s2x.jpg")
+                                    val from = feed.data?.messageCover!!.lastIndexOf("@")
+                                    val middle = feed.data.messageCover.lastIndexOf("x")
+                                    val end = feed.data.messageCover.lastIndexOf(".")
+                                    if (from != -1 && middle != -1 && end != -1) {
+                                        val width =
+                                            feed.data.messageCover.substring(from + 1, middle)
+                                                .toInt()
+                                        val height =
+                                            feed.data.messageCover.substring(middle + 1, end)
+                                                .toInt()
+                                        imageView.imgHeight = height
+                                        imageView.imgWidth = width
+                                    }
+                                    imageView.setUrlList(urlList)
+                                    imageView.apply {
+                                        onImageItemClickListener =
+                                            this@FeedContentAdapter.onImageItemClickListener
+                                    }
+                                }
+                                return view
+                            } else if (position1 == 1) {
+                                textView.visibility = View.VISIBLE
+                                imageView.visibility = View.GONE
+                                description.visibility = View.GONE
+                                shareUrl.visibility = View.GONE
+                                textView.movementMethod = LinkMovementMethod.getInstance()
+                                textView.text = SpannableStringBuilderUtil.setText(
+                                    mContext,
+                                    feed.data?.messageTitle.toString(),
+                                    textView.textSize.toInt(),
+                                    null
+                                )
+                                textView.paint.isFakeBoldText = true
+                                textView.setOnLongClickListener {
+                                    val intent = Intent(mContext, CopyActivity::class.java)
+                                    intent.putExtra(
+                                        "text",
+                                        textView.text.toString()
+                                    )
+                                    mContext.startActivity(intent)
+                                    true
+                                }
+                                return view
+                            } else when (articleList[position1 - 2].type) {
                                 "text" -> {
                                     textView.visibility = View.VISIBLE
                                     imageView.visibility = View.GONE
@@ -578,7 +631,7 @@ class FeedContentAdapter(
                                     textView.movementMethod = LinkMovementMethod.getInstance()
                                     textView.text = SpannableStringBuilderUtil.setText(
                                         mContext,
-                                        articleList[position1].message.toString(),
+                                        articleList[position1 - 2].message.toString(),
                                         textView.textSize.toInt(),
                                         null
                                     )
@@ -599,17 +652,27 @@ class FeedContentAdapter(
                                     imageView.visibility = View.VISIBLE
                                     shareUrl.visibility = View.GONE
                                     val urlList = ArrayList<String>()
-                                    urlList.add("${articleList[position1].url}.s2x.jpg")
-                                    val from = articleList[position1].url!!.lastIndexOf("@")
-                                    val middle = articleList[position1].url!!.lastIndexOf("x")
-                                    val end = articleList[position1].url!!.lastIndexOf(".")
+                                    if (articleList[position1 - 2].url!!.substring(
+                                            articleList[position1 - 2].url!!.length - 3,
+                                            articleList[position1 - 2].url!!.length
+                                        ) != "gif"
+                                    )
+                                        urlList.add("${articleList[position1 - 2].url}.s2x.jpg")
+                                    else
+                                        urlList.add(articleList[position1 - 2].url!!)
+                                    val from = articleList[position1 - 2].url!!.lastIndexOf("@")
+                                    val middle = articleList[position1 - 2].url!!.lastIndexOf("x")
+                                    val end = articleList[position1 - 2].url!!.lastIndexOf(".")
                                     if (from != -1 && middle != -1 && end != -1) {
-                                        val width = articleList[position1].url?.substring(
+                                        val width = articleList[position1 - 2].url?.substring(
                                             from + 1,
                                             middle
                                         )?.toInt()
                                         val height =
-                                            articleList[position1].url?.substring(middle + 1, end)
+                                            articleList[position1 - 2].url?.substring(
+                                                middle + 1,
+                                                end
+                                            )
                                                 ?.toInt()
                                         imageView.imgHeight = height!!
                                         imageView.imgWidth = width!!
@@ -619,13 +682,13 @@ class FeedContentAdapter(
                                         onImageItemClickListener =
                                             this@FeedContentAdapter.onImageItemClickListener
                                     }
-                                    if (articleList[position1].description == "")
+                                    if (articleList[position1 - 2].description == "")
                                         description.visibility = View.GONE
                                     else
                                         description.visibility = View.VISIBLE
                                     description.text = SpannableStringBuilderUtil.setText(
                                         mContext,
-                                        articleList[position1].description.toString(),
+                                        articleList[position1 - 2].description.toString(),
                                         description.textSize.toInt(),
                                         null
                                     )
@@ -646,19 +709,19 @@ class FeedContentAdapter(
                                     imageView.visibility = View.GONE
                                     description.visibility = View.GONE
                                     shareUrl.visibility = View.VISIBLE
-                                    urlTitle.text = articleList[position1].title.toString()
+                                    urlTitle.text = articleList[position1 - 2].title.toString()
                                     shareUrl.setOnClickListener {
                                         val intent = Intent(mContext, WebViewActivity::class.java)
                                         intent.putExtra(
                                             "url",
-                                            articleList[position1].url.toString()
+                                            articleList[position1 - 2].url.toString()
                                         )
                                         mContext.startActivity(intent)
                                     }
                                     return view
                                 }
 
-                                else -> throw IllegalArgumentException("error feed article type: ${articleList[position1].type}")
+                                else -> throw IllegalArgumentException("error feed article type: ${articleList[position1 - 2].type}")
                             }
 
                         }

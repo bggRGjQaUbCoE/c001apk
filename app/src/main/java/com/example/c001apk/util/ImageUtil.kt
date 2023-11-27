@@ -179,6 +179,8 @@ object ImageUtil {
         for (img in urlList) {
             if (img.substring(img.length - 6, img.length) == ".s.jpg")
                 imgList.add(img.replace(".s.jpg", ""))
+            else if (img.substring(img.length - 8, img.length) == ".s2x.jpg")
+                imgList.add(img.replace(".s2x.jpg", ""))
             else
                 imgList.add(img)
         }

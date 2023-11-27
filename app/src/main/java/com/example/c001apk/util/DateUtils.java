@@ -67,6 +67,8 @@ public class DateUtils {
         long ago = now - time;
         if (ago == 0) {
             return "刚刚";
+        } else if (ago < 60) {
+            return ago + "秒前";
         } else if (ago <= ONE_HOUR)
             return ago / ONE_MINUTE + "分钟前";
         else if (ago <= ONE_DAY)
