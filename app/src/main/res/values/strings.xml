@@ -110,5 +110,6 @@
     <string name="copyLink">复制链接</string>
     <string name="report">举报</string>
     <string name="topic_black_list">话题黑名单</string>
+    <string name="font_scale">字体调节</string>
 
 </resources>

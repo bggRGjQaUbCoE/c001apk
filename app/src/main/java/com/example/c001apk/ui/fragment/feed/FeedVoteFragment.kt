@@ -120,7 +120,6 @@ class FeedVoteFragment : Fragment() {
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
-                        mAdapter.setFeedList(viewModel.feedContentList)
                     }
                 } else {
                     viewModel.isEnd = true
@@ -181,7 +180,6 @@ class FeedVoteFragment : Fragment() {
                             viewModel.voteCommentList = viewModel.leftVoteCommentList
                         else if (viewModel.rightVoteCommentList.isNotEmpty())
                             viewModel.voteCommentList = viewModel.rightVoteCommentList
-                        mAdapter.setReplyList(viewModel.voteCommentList)
                         mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                         mAdapter.notifyDataSetChanged()
                         binding.indicator.isIndeterminate = false
@@ -189,7 +187,6 @@ class FeedVoteFragment : Fragment() {
                         binding.contentLayout.visibility = View.VISIBLE
                     } else {
                         viewModel.voteCommentList.addAll(voteComment.data)
-                        mAdapter.setReplyList(viewModel.voteCommentList)
                         mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                         mAdapter.notifyDataSetChanged()
                         binding.indicator.isIndeterminate = false
@@ -223,6 +220,7 @@ class FeedVoteFragment : Fragment() {
             refreshData()
         }
     }
+
     private fun initBar() {
         binding.toolBar.apply {
             title = viewModel.feedTypeName
@@ -363,7 +361,11 @@ class FeedVoteFragment : Fragment() {
     private fun initView() {
         binding.tabLayout.visibility = View.GONE
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = FeedContentAdapter(requireContext())
+        mAdapter = FeedContentAdapter(
+            requireContext(),
+            viewModel.feedContentList,
+            viewModel.voteCommentList
+        )
         mLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.recyclerView.apply {
             adapter = mAdapter

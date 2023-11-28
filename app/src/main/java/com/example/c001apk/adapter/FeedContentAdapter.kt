@@ -57,20 +57,12 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 
 
-class FeedContentAdapter(private val mContext: Context) :
+class FeedContentAdapter(
+    private val mContext: Context,
+    private val feedList: List<FeedContentResponse>,
+    private var replyList: ArrayList<TotalReplyResponse.Data>
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
-
-    private var feedList: List<FeedContentResponse> = ArrayList()
-
-    fun setFeedList(feedList: List<FeedContentResponse>) {
-        this.feedList = feedList
-    }
-
-    private var replyList: ArrayList<TotalReplyResponse.Data> = ArrayList()
-
-    fun setReplyList(replyList: ArrayList<TotalReplyResponse.Data>) {
-        this.replyList = replyList
-    }
 
     private var haveTop = false
 

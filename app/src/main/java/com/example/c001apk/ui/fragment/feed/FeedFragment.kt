@@ -184,7 +184,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
-                        mAdapter.setFeedList(viewModel.feedContentList)
                         if (feed.data.topReplyRows.isNotEmpty()) {
                             mAdapter.setHaveTop(true)
                             viewModel.topReplyId = feed.data.topReplyRows[0].id
@@ -239,7 +238,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     viewModel.feedReplyList.add(element)
                             }
                         }
-                    mAdapter.setReplyList(viewModel.feedReplyList)
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     viewModel.isEnd = true
@@ -631,7 +629,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = FeedContentAdapter(requireContext())
+        mAdapter =
+            FeedContentAdapter(requireContext(), viewModel.feedContentList, viewModel.feedReplyList)
         mAdapter.setIOnReplyClickListener(this)
         mAdapter.setIOnTotalReplyClickListener(this)
         mAdapter.setIOnLikeReplyListener(this)

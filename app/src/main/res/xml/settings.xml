@@ -53,6 +53,10 @@
             android:icon="@drawable/ic_block"
             android:key="topicBlackList"
             android:title="@string/topic_black_list" />
+        <Preference
+            android:icon="@drawable/ic_text_fields"
+            android:key="fontScale"
+            android:title="@string/font_scale" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_history"

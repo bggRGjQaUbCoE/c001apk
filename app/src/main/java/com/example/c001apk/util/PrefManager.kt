@@ -146,4 +146,8 @@ object PrefManager {
     var isRecordHistory: Boolean
         get() = pref.getBoolean("isRecordHistory", true)
         set(value) = pref.edit().putBoolean("isRecordHistory", value).apply()
+
+    var FONTSCALE: String
+        get() = pref.getString("FONTSCALE", "1.00")!!
+        set(value) = pref.edit().putString("FONTSCALE", value).apply()
 }

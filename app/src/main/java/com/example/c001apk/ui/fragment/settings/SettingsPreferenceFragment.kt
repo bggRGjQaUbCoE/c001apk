@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
@@ -18,10 +19,13 @@ import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.ui.activity.AboutActivity
 import com.example.c001apk.ui.activity.BlackListActivity
+import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.activity.SBCKActivity
+import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import rikka.core.util.ResourceUtils
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
@@ -174,7 +178,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle(requireContext().getString(R.string.zmlmId))
-                setNeutralButton("重新生成DeviceCode"){_, _ ->
+                setNeutralButton("重新生成DeviceCode") { _, _ ->
                     PrefManager.SZLMID = editText.text.toString()
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(true)
                 }
@@ -198,6 +202,42 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             val intent = Intent(requireContext(), BlackListActivity::class.java)
             intent.putExtra("type", "topic")
             startActivity(intent)
+            true
+        }
+
+        findPreference<Preference>("fontScale")?.setOnPreferenceClickListener {
+            val view = LayoutInflater.from(requireContext())
+                .inflate(R.layout.item_font_scale, null, false)
+            val slider: Slider = view.findViewById(R.id.slider)
+            val fontScale: TextView = view.findViewById(R.id.fontScale)
+            slider.apply {
+                valueFrom = 0.80f
+                valueTo = 1.30f
+                value = PrefManager.FONTSCALE.toFloat()
+                setLabelFormatter { value ->
+                    String.format("%.2f", value)
+                }
+            }
+            slider.addOnChangeListener { _, value, _ ->
+                fontScale.text = "字体大小: ${String.format("%.2f", value)}"
+                fontScale.textSize = 16f * value
+            }
+            fontScale.text = "字体大小: ${PrefManager.FONTSCALE}"
+            fontScale.textSize = 16f * PrefManager.FONTSCALE.toFloat()
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setView(view)
+                setTitle(R.string.font_scale)
+                setNegativeButton(android.R.string.cancel, null)
+                setNeutralButton("重置") { _, _ ->
+                    PrefManager.FONTSCALE = "1.00"
+                    ActivityCollector.recreateActivity(MainActivity::class.java.name)
+                }
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    PrefManager.FONTSCALE = String.format("%.2f", slider.value)
+                    ActivityCollector.recreateActivity(MainActivity::class.java.name)
+                }
+                show()
+            }
             true
         }
 
