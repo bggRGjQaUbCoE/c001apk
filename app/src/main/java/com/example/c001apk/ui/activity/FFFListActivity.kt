@@ -57,7 +57,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                         for (element in feed)
                             if (element.entityType == "feed" || element.entityType == "contacts")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dataList.add(element)

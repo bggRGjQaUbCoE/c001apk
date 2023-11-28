@@ -234,4 +234,13 @@ interface ApiService {
         @FieldMap data: HashMap<String, String?>
     ): Call<LikeReplyResponse>
 
+    @GET("/v6/vote/commentList")
+    fun getVoteComment(
+        @Query("fid") fid :String,
+        @Query("extra_key") extraKey :String,
+        @Query("page") page :Int,
+        @Query("firstItem") firstItem :String?,
+        @Query("lastItem") lastItem :String?,
+    ): Call<TotalReplyResponse>
+
 }

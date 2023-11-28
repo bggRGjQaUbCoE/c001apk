@@ -118,7 +118,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                             //|| element.entityTemplate == "feedCover"
                             )
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.topicDataList.add(element)

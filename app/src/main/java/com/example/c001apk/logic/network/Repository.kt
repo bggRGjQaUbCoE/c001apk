@@ -361,6 +361,17 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getVoteComment(
+        fid: String, extraKey: String, page: Int, firstItem: String?, lastItem: String?,
+    ) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getVoteComment(fid, extraKey, page, firstItem, lastItem)
+            if (dataResponse != null)
+                Result.success(dataResponse)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

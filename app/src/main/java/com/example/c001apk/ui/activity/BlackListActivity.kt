@@ -200,9 +200,23 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
     }
 
     override fun onItemClick(keyword: String) {
-        val intent = Intent(this, UserActivity::class.java)
-        intent.putExtra("id", keyword)
-        this.startActivity(intent)
+        when (viewModel.type) {
+            "user" -> {
+                val intent = Intent(this, UserActivity::class.java)
+                intent.putExtra("id", keyword)
+                this.startActivity(intent)
+            }
+
+            "topic" -> {
+                val intent = Intent(this, TopicActivity::class.java)
+                intent.putExtra("type", "topic")
+                intent.putExtra("title", keyword)
+                intent.putExtra("url", keyword)
+                intent.putExtra("id", "")
+                this.startActivity(intent)
+            }
+        }
+
     }
 
     @SuppressLint("NotifyDataSetChanged")

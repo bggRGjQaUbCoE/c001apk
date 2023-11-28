@@ -59,7 +59,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 viewModel.isNew = false
 
                 val appInfo = result.getOrNull()
-                if (appInfo?.error != null) {
+                if (appInfo?.message != null) {
                     viewModel.errorMessage = appInfo.message
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
@@ -113,7 +113,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         for (element in comment)
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.appCommentList.add(element)

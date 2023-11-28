@@ -134,7 +134,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                     viewModel.firstItem = element.id
                                 }
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.homeFeedList.add(element)
@@ -182,7 +182,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                 || element.entityTemplate == "iconLinkGridCard"
                             ) {
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.homeFeedList.add(element)
@@ -218,7 +218,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         for (element in feed) {
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.homeFeedList.add(element)

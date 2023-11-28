@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.fragment.feed.FeedFragment
+import com.example.c001apk.ui.fragment.feed.FeedVoteFragment
 
 class FeedActivity : BaseActivity() {
 
@@ -24,12 +25,23 @@ class FeedActivity : BaseActivity() {
         val viewReply = intent.getBooleanExtra("viewReply", false)
 
         val data = intent.data
-        if (data.toString().contains("coolmarket://feed/")) {
+        if (data.toString().startsWith("coolmarket://feed/")) {
             type = "feed"
             id = data.toString().replace("coolmarket://feed/", "")
         }
 
-        if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
+        if (type == "vote"){
+            if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(
+                        R.id.feedFragment,
+                        FeedVoteFragment.newInstance(id!!)
+                    )
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .commit()
+            }
+        } else if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
                 .replace(

@@ -94,7 +94,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         for (element in data)
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dyhDataList.add(element)

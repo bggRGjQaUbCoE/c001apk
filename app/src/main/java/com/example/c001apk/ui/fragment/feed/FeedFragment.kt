@@ -62,8 +62,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
-
-    //private var device: String? = null
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: OffsetLinearLayoutManager
     private lateinit var objectAnimator: ObjectAnimator
@@ -95,7 +93,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (viewReply != null) {
                         putBoolean("viewReply", viewReply)
                     }
-                    //putString("DEVICE", device)
                 }
             }
     }
@@ -164,7 +161,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (feed?.error != null) {
+                if (feed?.message != null) {
                     viewModel.errorMessage = feed.message
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
@@ -177,6 +174,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.device = feed.data.deviceTitle
                     viewModel.replyCount = feed.data.replynum
                     viewModel.dateLine = feed.data.dateline
+                    viewModel.feedTypeName = feed.data.feedTypeName
+                    viewModel.feedType = feed.data.feedType
+                    binding.toolBar.title = viewModel.feedTypeName
                     if (viewModel.isRefreshing) {
                         viewModel.feedContentList.clear()
                         viewModel.isNew = true
@@ -184,6 +184,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
+                        mAdapter.setFeedList(viewModel.feedContentList)
                         if (feed.data.topReplyRows.isNotEmpty()) {
                             mAdapter.setHaveTop(true)
                             viewModel.topReplyId = feed.data.topReplyRows[0].id
@@ -238,6 +239,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     viewModel.feedReplyList.add(element)
                             }
                         }
+                    mAdapter.setReplyList(viewModel.feedReplyList)
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     viewModel.isEnd = true
@@ -629,11 +631,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = FeedContentAdapter(
-            requireContext(),
-            viewModel.feedContentList,
-            viewModel.feedReplyList
-        )
+        mAdapter = FeedContentAdapter(requireContext())
         mAdapter.setIOnReplyClickListener(this)
         mAdapter.setIOnTotalReplyClickListener(this)
         mAdapter.setIOnLikeReplyListener(this)
@@ -660,12 +658,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
 
     private fun initBar() {
         binding.toolBar.apply {
-            title = when (viewModel.feedType) {
-                "feed" -> "动态"
-                "feedArticle" -> "图文"
-                "comment" -> "评论"
-                else -> "动态"
-            }
+            title = viewModel.feedTypeName
             setNavigationIcon(R.drawable.ic_back)
             setNavigationOnClickListener {
                 requireActivity().finish()

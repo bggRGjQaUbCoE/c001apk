@@ -11,10 +11,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
@@ -101,6 +103,29 @@ class AppAdapter(
     class IconLinkGridCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val viewPager: ViewPager2 = view.findViewById(R.id.viewPager)
         val indicator: CircleIndicator3 = view.findViewById(R.id.indicator)
+    }
+
+    class FeedVoteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val uname: TextView = view.findViewById(R.id.uname)
+        val expand: ImageButton = view.findViewById(R.id.expand)
+        val device: TextView = view.findViewById(R.id.device)
+        val message: TextView = view.findViewById(R.id.message)
+        val messageTitle: TextView = view.findViewById(R.id.messageTitle)
+        val pubDate: TextView = view.findViewById(R.id.pubDate)
+        val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
+        val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
+        val voteNum: TextView = view.findViewById(R.id.voteNum)
+        val optionNum: TextView = view.findViewById(R.id.optionNum)
+        val twoOptionsLayout: LinearLayout = view.findViewById(R.id.twoOptionsLayout)
+        val leftOption: Button = view.findViewById(R.id.leftOption)
+        val rightOption: Button = view.findViewById(R.id.rightOption)
+        val voteOptions: LinearAdapterLayout = view.findViewById(R.id.voteOptions)
+        var feedType = ""
+        var avatarUrl = ""
+        var id = ""
+        var uid = ""
+        var pubDataRaw = ""
     }
 
     class FeedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -376,6 +401,82 @@ class AppAdapter(
                 viewHolder
             }
 
+            9 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_feed_vote, parent, false)
+                val viewHolder = FeedVoteViewHolder(view)
+                viewHolder.itemView.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", viewHolder.feedType)
+                    intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
+                    intent.putExtra("uname", viewHolder.uname.text)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.message.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", viewHolder.feedType)
+                    intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
+                    intent.putExtra("uname", viewHolder.uname.text)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.itemView.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder.message.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.uname.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.expand.setOnClickListener {
+                    fid = viewHolder.id
+                    uid = viewHolder.uid
+                    position = viewHolder.bindingAdapterPosition
+                    val popup = PopupMenu(mContext, it)
+                    val inflater = popup.menuInflater
+                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.setOnMenuItemClickListener(this@AppAdapter)
+                    popup.show()
+                }
+                viewHolder
+            }
+
             else -> throw IllegalArgumentException("entityType error")
         }
 
@@ -392,6 +493,211 @@ class AppAdapter(
     @SuppressLint("UseCompatLoadingForDrawables", "RestrictedApi", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+
+            is FeedVoteViewHolder -> {
+                val feed = dataList[position]
+
+                holder.feedType = feed.feedType
+                holder.id = feed.id
+                holder.uid = feed.uid
+                holder.avatarUrl = feed.userAvatar
+                holder.pubDataRaw = feed.dateline.toString()
+                holder.uname.text = feed.userInfo?.username
+                ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
+                if (feed.vote?.totalOptionNum == 2) {
+                    holder.optionNum.visibility = View.GONE
+                    holder.voteNum.text =
+                        "${feed.vote.totalVoteNum}人投票 · ${feed.vote.totalCommentNum}个观点"
+                } else {
+                    holder.optionNum.visibility = View.VISIBLE
+                    holder.voteNum.text =
+                        "${feed.vote!!.totalVoteNum}人投票 · ${feed.vote.totalCommentNum}个观点"
+                    holder.optionNum.text = "共${feed.vote.totalOptionNum}个选项"
+                }
+                if (!feed.messageTitle.isNullOrEmpty()) {
+                    holder.messageTitle.visibility = View.VISIBLE
+                    holder.messageTitle.text = feed.messageTitle
+                } else
+                    holder.messageTitle.visibility = View.GONE
+                if (feed.deviceTitle != "") {
+                    holder.device.text = feed.deviceTitle
+                    val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
+                    drawable.setBounds(
+                        0,
+                        0,
+                        holder.device.textSize.toInt(),
+                        holder.device.textSize.toInt()
+                    )
+                    holder.device.setCompoundDrawables(drawable, null, null, null)
+                    holder.device.visibility = View.VISIBLE
+                } else {
+                    holder.device.visibility = View.GONE
+                }
+                holder.pubDate.text = DateUtils.fromToday(feed.dateline)
+
+                if (feed.message == "") {
+                    holder.message.visibility = View.GONE
+                } else {
+                    holder.message.visibility = View.VISIBLE
+                    holder.message.movementMethod = LinkMovementMethod.getInstance()
+                    holder.message.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        feed.message,
+                        (holder.message.textSize * 1.3).toInt(),
+                        null
+                    )
+                }
+
+                if (feed.vote.totalOptionNum == 2) {
+                    holder.twoOptionsLayout.visibility = View.VISIBLE
+                    holder.voteOptions.visibility = View.GONE
+                    holder.leftOption.text = feed.vote.options[0].title
+                    holder.rightOption.text = feed.vote.options[1].title
+                } else {
+                    holder.twoOptionsLayout.visibility = View.GONE
+                    holder.voteOptions.visibility = View.VISIBLE
+
+                    val optionList = ArrayList<String>()
+                    repeat(3) {
+                        optionList.add(feed.vote.options[0].title)
+                        optionList.add(feed.vote.options[1].title)
+                        optionList.add(feed.vote.options[2].title)
+                    }
+                    holder.voteOptions.adapter = object : BaseAdapter() {
+                        override fun getCount() = 3
+                        override fun getItem(p0: Int): Any = 0
+                        override fun getItemId(p0: Int): Long = 0
+                        override fun getView(
+                            position1: Int,
+                            convertView: View?,
+                            parent: ViewGroup?
+                        ): View {
+                            val view = LayoutInflater.from(mContext)
+                                .inflate(R.layout.item_feed_vote_item, parent, false)
+                            val title: TextView = view.findViewById(R.id.title)
+                            title.text = optionList[position1]
+                            if (position1 != 0) {
+                                val space =
+                                    mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                val layoutParams = ConstraintLayout.LayoutParams(
+                                    ConstraintLayout.LayoutParams.MATCH_PARENT,
+                                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                layoutParams.setMargins(0, space, 0, 0)
+                                view.layoutParams = layoutParams
+                            }
+                            return view
+                        }
+                    }
+                }
+
+                if (feed.targetRow?.id == null && feed.relationRows.isNullOrEmpty())
+                    holder.dyhLayout.visibility = View.GONE
+                else {
+                    holder.dyhLayout.visibility = View.VISIBLE
+                    holder.linearAdapterLayout.adapter = object : BaseAdapter() {
+                        override fun getCount(): Int =
+                            if (feed.targetRow?.id == null) feed.relationRows!!.size
+                            else 1 + feed.relationRows!!.size
+
+                        override fun getItem(p0: Int): Any = 0
+
+                        override fun getItemId(p0: Int): Long = 0
+
+                        override fun getView(
+                            position: Int,
+                            convertView: View?,
+                            parent: ViewGroup?
+                        ): View {
+                            val view = LayoutInflater.from(mContext).inflate(
+                                R.layout.item_feed_tag,
+                                parent,
+                                false
+                            )
+                            val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
+                            val title: TextView = view.findViewById(R.id.title)
+                            val type: String
+                            val id: String
+                            val url: String
+                            if (feed.targetRow?.id != null) {
+                                if (position == 0) {
+                                    type = feed.targetRow.targetType.toString()
+                                    id = feed.targetRow.id
+                                    url = feed.targetRow.url
+                                    title.text = feed.targetRow.title
+                                    ImageUtil.showIMG(logo, feed.targetRow.logo)
+                                } else {
+                                    val space =
+                                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                    val layoutParams = ConstraintLayout.LayoutParams(
+                                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                    )
+                                    layoutParams.setMargins(space, 0, 0, 0)
+                                    view.layoutParams = layoutParams
+                                    type = feed.relationRows!![position - 1].entityType
+                                    id = feed.relationRows[position - 1].id
+                                    url = feed.relationRows[position - 1].url
+                                    title.text = feed.relationRows[position - 1].title
+                                    ImageUtil.showIMG(
+                                        logo,
+                                        feed.relationRows[position - 1].logo
+                                    )
+                                }
+                            } else {
+                                if (position == 0) {
+                                    type = feed.relationRows!![0].entityType
+                                    id = feed.relationRows[0].id
+                                    title.text = feed.relationRows[0].title
+                                    url = feed.relationRows[0].url
+                                    ImageUtil.showIMG(logo, feed.relationRows[0].logo)
+                                } else {
+                                    val space =
+                                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
+                                    val layoutParams = ConstraintLayout.LayoutParams(
+                                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                                    )
+                                    layoutParams.setMargins(space, 0, 0, 0)
+                                    view.layoutParams = layoutParams
+                                    type = feed.relationRows!![position].entityType
+                                    id = feed.relationRows[position].id
+                                    url = feed.relationRows[position].url
+                                    title.text = feed.relationRows[position].title
+                                    ImageUtil.showIMG(
+                                        logo,
+                                        feed.relationRows[position].logo
+                                    )
+                                }
+                            }
+                            view.setOnClickListener {
+                                if (url.contains("/apk/")) {
+                                    val intent = Intent(mContext, AppActivity::class.java)
+                                    intent.putExtra("id", url.replace("/apk/", ""))
+                                    mContext.startActivity(intent)
+                                } else if (url.contains("/game/")) {
+                                    val intent = Intent(mContext, AppActivity::class.java)
+                                    intent.putExtra("id", url.replace("/game/", ""))
+                                    mContext.startActivity(intent)
+                                } else if (type == "feedRelation") {
+                                    val intent = Intent(mContext, DyhActivity::class.java)
+                                    intent.putExtra("id", id)
+                                    intent.putExtra("title", title.text)
+                                    mContext.startActivity(intent)
+                                } else if (type == "topic" || type == "product") {
+                                    val intent = Intent(mContext, TopicActivity::class.java)
+                                    intent.putExtra("type", type)
+                                    intent.putExtra("title", title.text)
+                                    intent.putExtra("url", url)
+                                    intent.putExtra("id", id)
+                                    mContext.startActivity(intent)
+                                }
+                            }
+                            return view
+                        }
+                    }
+                }
+            }
 
             is AppViewHolder -> {
                 val app = dataList[position]
@@ -582,7 +888,7 @@ class AppAdapter(
                 holder.pubDataRaw = feed.dateline.toString()
                 holder.uname.text = feed.userInfo?.username
                 ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
-                if (feed.feedType == "feedArticle") {
+                if (feed.feedType == "feedArticle" || feed.feedType == "vote") {
                     holder.messageTitle.visibility = View.VISIBLE
                     holder.messageTitle.text = feed.messageTitle
                 } else
@@ -888,7 +1194,10 @@ class AppAdapter(
                 }
             }
 
-            "feed" -> 2
+            "feed" -> when (dataList[position].feedType) {
+                "vote" -> 9
+                else -> 2
+            }
 
             "contacts" -> 6
             "user" -> 6

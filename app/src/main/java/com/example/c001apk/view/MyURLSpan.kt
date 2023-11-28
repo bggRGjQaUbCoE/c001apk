@@ -43,7 +43,7 @@ internal class MyURLSpan(
             val intent = Intent(mContext, AppActivity::class.java)
             intent.putExtra("id", id)
             mContext.startActivity(intent)
-        } else if (StringBuilder(mUrl).substring(0, 3) == "/t/") {
+        } else if (StringBuilder(mUrl).startsWith("/t/")) {
             val intent = Intent(mContext, TopicActivity::class.java)
             val index = StringBuilder(mUrl).indexOf("?")
             intent.putExtra("url", StringBuilder(mUrl).substring(3, index).toString())
@@ -51,7 +51,7 @@ internal class MyURLSpan(
             intent.putExtra("type", "topic")
             intent.putExtra("id", "")
             mContext.startActivity(intent)
-        } else if (StringBuilder(mUrl).substring(0, 3) == "/u/") {
+        } else if (StringBuilder(mUrl).startsWith("/u/")) {
             val intent = Intent(mContext, UserActivity::class.java)
             intent.putExtra("id", mUrl.replace("/u/", ""))
             mContext.startActivity(intent)

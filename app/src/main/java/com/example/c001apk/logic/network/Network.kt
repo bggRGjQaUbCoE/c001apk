@@ -165,6 +165,15 @@ object Network {
     suspend fun postRequestValidate(data: HashMap<String, String?>) =
         apiService.postRequestValidate(data).await()
 
+    suspend fun getVoteComment(
+        fid: String,
+        extraKey: String,
+        page: Int,
+        firstItem: String?,
+        lastItem: String?,
+    ) =
+        apiService.getVoteComment(fid, extraKey, page, firstItem, lastItem).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

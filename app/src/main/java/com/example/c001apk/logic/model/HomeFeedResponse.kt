@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        val feedTypeName: String?,
+        val vote: Vote?,
         @SerializedName("message_cover") val messageCover: String?,
         @SerializedName("message_title") val messageTitle: String?,
         @SerializedName("message_raw_output") val messageRawOutput: String?,
@@ -57,6 +59,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val message: String,
         val pic: String,
         val tags: String?,
+        val ttitle: String?,
         var likenum: String,
         val commentnum: String,
         val replynum: String,
@@ -88,6 +91,28 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userInfo: UserInfo?,
         val fUserInfo: UserInfo?,
         var isFollow: Int
+    )
+
+    data class Vote(
+        val id: String,
+        @SerializedName("start_time") val startTime: String,
+        @SerializedName("end_time") val endTime: String,
+        @SerializedName("total_vote_num") val totalVoteNum: Int,
+        @SerializedName("total_comment_num") val totalCommentNum: Int,
+        @SerializedName("total_option_num") val totalOptionNum: Int,
+        @SerializedName("max_select_num") val maxSelectNum: Int,
+        @SerializedName("min_select_num") val minSelectNum: Int,
+        @SerializedName("message_title") val messageTitle: String,
+        val options: List<Option>,
+    )
+
+    data class Option(
+        val id: String,
+        @SerializedName("vote_id") val voteId: String,
+        val title: String,
+        val status: Int,
+        val order: Int,
+        val color: String
     )
 
     data class RelationRows(

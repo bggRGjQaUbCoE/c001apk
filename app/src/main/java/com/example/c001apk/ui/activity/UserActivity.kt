@@ -93,7 +93,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                 viewModel.isNew = false
 
                 val user = result.getOrNull()
-                if (user?.error != null) {
+                if (user?.message != null) {
                     viewModel.errorMessage = user.message
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
@@ -137,7 +137,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         for (element in feed) {
                             if (element.entityTemplate == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags
+                                        element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.feedList.add(element)

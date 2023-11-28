@@ -106,7 +106,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                             for (element in search) {
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                            element.tags
+                                            element.tags + element.ttitle
                                         )
                                     )
                                         viewModel.searchList.add(element)

@@ -213,6 +213,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:padding="20dp"
         android:textSize="18sp"
         android:visibility="gone" />
 

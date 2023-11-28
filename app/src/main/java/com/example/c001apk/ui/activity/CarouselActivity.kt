@@ -115,7 +115,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                             for (element in response)
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                            element.tags
+                                            element.tags + element.ttitle
                                         )
                                     )
                                         viewModel.carouselList.add(element)
@@ -129,7 +129,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                             for (element in response)
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                            element.tags
+                                            element.tags + element.ttitle
                                         )
                                     )
                                         viewModel.carouselList.add(element)

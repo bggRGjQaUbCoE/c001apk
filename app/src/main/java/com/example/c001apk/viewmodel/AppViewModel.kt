@@ -31,6 +31,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var feedTypeName: String? = null
     var topReplyId: String? = null
     var commentStatusText = ""
     var errorMessage: String? = null
@@ -701,6 +702,24 @@ class AppViewModel : ViewModel() {
                 browseLiveData.value = newList
             }
         }
+    }
+
+    var totalOptionNum = -1
+    var currentOption = 0
+    var extraKey = ""
+
+    val leftVoteCommentList = ArrayList<TotalReplyResponse.Data>()
+    val rightVoteCommentList = ArrayList<TotalReplyResponse.Data>()
+    var voteCommentList = ArrayList<TotalReplyResponse.Data>()
+
+    private val getVoteCommentListData = MutableLiveData<String>()
+
+    val voteCommentData = getVoteCommentListData.switchMap {
+        Repository.getVoteComment(id, extraKey, page, firstItem, lastItem)
+    }
+
+    fun getVoteComment() {
+        getVoteCommentListData.value = getVoteCommentListData.value
     }
 
 }

@@ -108,7 +108,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                 viewModel.isNew = false
 
                 val reply = result.getOrNull()
-                if (reply?.error != null) {
+                if (reply?.message != null) {
                     viewModel.errorMessage = reply.message
                     binding.indicator.isIndeterminate = false
                     binding.indicator.visibility = View.GONE
