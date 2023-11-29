@@ -2,7 +2,9 @@ package com.example.c001apk.util
 
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -10,11 +12,15 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.FragmentActivity
+import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants.USER_AGENT
 import com.example.c001apk.util.ClipboardUtil.copyText
@@ -296,6 +302,39 @@ object ImageUtil {
         url: String
     ) {
         startBigImgViewSimple(context, listOf(url))
+    }
+
+    fun showPaletteColor(imageView: ImageView, url: String?) {
+        val newUrl = GlideUrl(
+            url,
+            LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
+        )
+        Glide.with(context)
+            .asBitmap()
+            .load(newUrl)
+            .into(object : CustomTarget<Bitmap?>() {
+                override fun onResourceReady(
+                    resource: Bitmap,
+                    transition: Transition<in Bitmap?>?
+                ) {
+                    Palette.from(resource).generate { palette ->
+                            if (palette != null) {
+                                val vibrantSwatch = palette.vibrantSwatch
+                                val darkVibrantSwatch = palette.darkVibrantSwatch
+                                val lightVibrantSwatch = palette.lightVibrantSwatch
+                                val mutedSwatch = palette.mutedSwatch
+                                val darkMutedSwatch = palette.darkMutedSwatch
+                                val lightMutedSwatch = palette.lightMutedSwatch
+
+                                if (darkVibrantSwatch != null) {
+                                    imageView.setBackgroundColor(darkVibrantSwatch.rgb)
+                                }
+                            }
+                        }
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {}
+            })
     }
 
 }

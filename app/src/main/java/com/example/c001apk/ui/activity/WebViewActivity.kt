@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -158,6 +159,15 @@ class WebViewActivity : BaseActivity() {
                 }
             }
             webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    if (newProgress == 100) {
+                        binding.progressBar.visibility = View.GONE
+                    } else {
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.progressBar.progress = newProgress
+                    }
+                }
+
                 override fun onReceivedTitle(view: WebView, title: String) {
                     super.onReceivedTitle(view, title)
                     binding.toolBar.title = title

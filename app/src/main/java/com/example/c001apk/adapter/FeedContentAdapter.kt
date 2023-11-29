@@ -44,7 +44,6 @@ import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
@@ -63,6 +62,12 @@ class FeedContentAdapter(
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var extraKey = ""
+
+    fun setExtraKey(extraKey: String) {
+        this.extraKey = extraKey
+    }
 
     private var haveTop = false
 
@@ -175,6 +180,7 @@ class FeedContentAdapter(
         var id = ""
         var uid = ""
         var isLike = false
+        var vote: TextView = view.findViewById(R.id.vote)
     }
 
     class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -373,10 +379,12 @@ class FeedContentAdapter(
                 val lp = holder.itemView.layoutParams
                 if (lp is StaggeredGridLayoutManager.LayoutParams) {
                     lp.isFullSpan = true
-                }
-
-                if (feedList.isNotEmpty()) {
+                    holder.replyCount.text = "观点"
+                    holder.replyCount.textSize = 16f
+                    holder.buttonToggle.visibility = View.GONE
+                } else if (feedList.isNotEmpty()) {
                     holder.replyCount.text = "共${feedList[0].data?.replynum}回复"
+                    holder.buttonToggle.visibility = View.VISIBLE
                     when (listType) {
                         "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
                         "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
@@ -387,6 +395,11 @@ class FeedContentAdapter(
             }
 
             is FootViewHolder -> {
+                val lp = holder.itemView.layoutParams
+                if (lp is StaggeredGridLayoutManager.LayoutParams) {
+                    lp.isFullSpan = true
+                }
+
                 when (loadState) {
                     LOADING -> {
                         holder.footerLayout.visibility = View.VISIBLE
@@ -704,30 +717,34 @@ class FeedContentAdapter(
                             holder.messageTitle.text = feed.data?.messageTitle
                         }
 
-                        if (!feed.message.isNullOrEmpty()) {
+                        if (feed.message != "") {
                             holder.message.visibility = View.VISIBLE
                             holder.message.movementMethod = LinkMovementMethod.getInstance()
                             holder.message.text = SpannableStringBuilderUtil.setText(
                                 mContext,
-                                feed.message.toString(),
+                                feed.data?.message.toString(),
                                 (holder.message.textSize * 1.3).toInt(),
                                 null
                             )
                         }
 
-                        if (feed.data!!.vote?.totalOptionNum == 2) {
-                            holder.like.text =
-                                "${feed.data.vote!!.totalVoteNum}人投票 · ${feed.data.vote.totalCommentNum}个观点"
-                        } else {
-                            holder.reply.text =
-                                "${feed.data.vote!!.totalVoteNum}人投票 · ${feed.data.vote.totalCommentNum}个观点"
-                            holder.like.text = "共${feed.data.vote.totalOptionNum}个选项"
-                        }
+                        holder.reply.text =
+                            "${feed.data!!.vote!!.totalVoteNum}人投票 · ${feed.data.vote!!.totalCommentNum}个观点"
+                        holder.like.text = "${DateUtils.getDate(feed.data.vote.endTime)}截止"
 
                         if (feed.data.vote.totalOptionNum == 2) {
                             holder.twoOptionsLayout.visibility = View.VISIBLE
-                            holder.leftOption.text = feed.data.vote.options[0].title
-                            holder.rightOption.text = feed.data.vote.options[1].title
+                            if (System.currentTimeMillis() / 1000 > feed.data.vote.endTime) {
+                                val percent: Int =
+                                    ((feed.data.vote.options[0].totalSelectNum.toFloat() / (feed.data.vote.options[0].totalSelectNum.toFloat() + feed.data.vote.options[1].totalSelectNum.toFloat())) * 100).toInt()
+                                holder.leftOption.text =
+                                    "${feed.data.vote.options[0].title} $percent%"
+                                holder.rightOption.text =
+                                    "${feed.data.vote.options[1].title} ${100 - percent}%"
+                            } else {
+                                holder.leftOption.text = feed.data.vote.options[0].title
+                                holder.rightOption.text = feed.data.vote.options[1].title
+                            }
                         } else {
                             holder.voteOptions.visibility = View.VISIBLE
 
@@ -920,6 +937,18 @@ class FeedContentAdapter(
                 if (replyList.isNotEmpty()) {
 
                     val reply = replyList[position - 2]
+
+                    if (feedList[0].data!!.feedType == "vote" && extraKey != "") {
+                        holder.vote.visibility = View.VISIBLE
+
+                        if (reply.extraKey == extraKey) {
+                            holder.vote.text = "正方"
+                        } else {
+                            holder.vote.text = "反方"
+                        }
+                    } else
+                        holder.vote.visibility = View.GONE
+
                     holder.isLike = reply.userAction?.like == 1
                     holder.id = reply.id
                     holder.uid = reply.uid

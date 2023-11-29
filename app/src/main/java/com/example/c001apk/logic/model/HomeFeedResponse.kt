@@ -95,8 +95,8 @@ data class HomeFeedResponse(val data: List<Data>) {
 
     data class Vote(
         val id: String,
-        @SerializedName("start_time") val startTime: String,
-        @SerializedName("end_time") val endTime: String,
+        @SerializedName("start_time") val startTime: Long,
+        @SerializedName("end_time") val endTime: Long,
         @SerializedName("total_vote_num") val totalVoteNum: Int,
         @SerializedName("total_comment_num") val totalCommentNum: Int,
         @SerializedName("total_option_num") val totalOptionNum: Int,
@@ -107,6 +107,7 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class Option(
+        @SerializedName("total_select_num") val totalSelectNum:Long,
         val id: String,
         @SerializedName("vote_id") val voteId: String,
         val title: String,

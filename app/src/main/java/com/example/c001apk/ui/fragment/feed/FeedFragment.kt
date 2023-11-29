@@ -354,6 +354,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             if (viewModel.type == "feed") {
                                 viewModel.feedReplyList.add(
                                     0, TotalReplyResponse.Data(
+                                        null,
                                         "feed_reply",
                                         viewModel.id,
                                         viewModel.ruid,

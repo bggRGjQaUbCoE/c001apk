@@ -186,6 +186,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                             viewModel.replyTotalList.add(
                                 viewModel.r2rPosition + 1,
                                 TotalReplyResponse.Data(
+                                    null,
                                     "feed_reply",
                                     viewModel.id,
                                     viewModel.ruid,

@@ -102,6 +102,14 @@ public class DateUtils {
 
     }
 
+    @SuppressLint("SimpleDateFormat")
+    public static String getDate(Long time) {
+        long date = Long.parseLong(String.valueOf(time * 1000));
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(new Date(date));
+    }
+
     /**
      * 距离截止日期还有多长时间
      *

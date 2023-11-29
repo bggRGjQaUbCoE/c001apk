@@ -1,5 +1,7 @@
 package com.example.c001apk.logic.model
 
+import com.google.gson.annotations.SerializedName
+
 data class TotalReplyResponse(
     val status: Int?,
     val error: Int?,
@@ -8,6 +10,7 @@ data class TotalReplyResponse(
 ) {
 
     data class Data(
+        @SerializedName("extra_key") val extraKey: String?,
         val entityType: String,
         val id: String,
         val ruid: String,

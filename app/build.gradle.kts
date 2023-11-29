@@ -196,5 +196,6 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.0")
     ksp("androidx.room:room-compiler:2.6.0")
     implementation("com.github.megatronking.stringfog:xor:5.0.0")
+    implementation("androidx.palette:palette:1.0.0")
 
 }

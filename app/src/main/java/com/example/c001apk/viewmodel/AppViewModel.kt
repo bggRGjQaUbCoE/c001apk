@@ -31,6 +31,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var VoteCommentSize = -1
     var feedTypeName: String? = null
     var topReplyId: String? = null
     var commentStatusText = ""
@@ -61,8 +62,6 @@ class AppViewModel : ViewModel() {
     var device = ""
     var avatar = ""
     var cover = ""
-    var totalScrollY = 0
-    var haveTop = false
     var isNew = true
     var isPostLikeFeed = false
     var isPostUnLikeFeed = false
@@ -83,14 +82,11 @@ class AppViewModel : ViewModel() {
     var type = "" //feed reply
 
     var rPosition = -1
-    var replyAndForward = "0"
-    var cursorBefore = -1
     var firstVisibleItemPosition = -1
     var firstCompletelyVisibleItemPosition = -1
     var lastVisibleItemPosition = -1
     var likeReplyPosition = -1
 
-    var replyTextMap: MutableMap<String, String> = HashMap()
     val feedContentList = ArrayList<FeedContentResponse>()
     val feedReplyList = ArrayList<TotalReplyResponse.Data>()
     val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
@@ -422,7 +418,6 @@ class AppViewModel : ViewModel() {
 
     var position: Int = 0
     var r2rPosition = 0
-    var isPaste = false
 
     val replyTotalList = ArrayList<TotalReplyResponse.Data>()
 
@@ -509,8 +504,6 @@ class AppViewModel : ViewModel() {
         getHomeFeedData.value = getHomeFeedData.value
     }
 
-    val followFeedList = ArrayList<HomeFeedResponse.Data>()
-
     private val getFollowFeedData = MutableLiveData<String>()
 
     val followFeedData = getFollowFeedData.switchMap {
@@ -520,8 +513,6 @@ class AppViewModel : ViewModel() {
     fun getFollowFeed() {
         getFollowFeedData.value = getFollowFeedData.value
     }
-
-    val homeRankingList = ArrayList<HomeFeedResponse.Data>()
 
     private val getHomeRankingData = MutableLiveData<String>()
 
@@ -576,7 +567,7 @@ class AppViewModel : ViewModel() {
     var keyWord: String = ""
     var pageType = ""  //"tag"
     var pageParam = "" //topic title
-    var showAnonymous = -1
+    private var showAnonymous = -1
 
     private val getSearchData = MutableLiveData<String>()
 
@@ -598,8 +589,6 @@ class AppViewModel : ViewModel() {
     }
 
     var subtitle: String? = null
-
-    var tag = ""
 
     private val getTopicLayoutLiveData = MutableLiveData<String>()
 
@@ -707,6 +696,8 @@ class AppViewModel : ViewModel() {
     var totalOptionNum = -1
     var currentOption = 0
     var extraKey = ""
+    var leftEnd = false
+    var rightEnd = false
 
     val leftVoteCommentList = ArrayList<TotalReplyResponse.Data>()
     val rightVoteCommentList = ArrayList<TotalReplyResponse.Data>()
