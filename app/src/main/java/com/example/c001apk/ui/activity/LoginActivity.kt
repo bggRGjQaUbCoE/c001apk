@@ -18,6 +18,7 @@ import com.example.c001apk.util.CookieUtil.SESSID
 import com.example.c001apk.util.CookieUtil.isGetCaptcha
 import com.example.c001apk.util.CookieUtil.isGetLoginParam
 import com.example.c001apk.util.CookieUtil.isGetSmsLoginParam
+import com.example.c001apk.util.CookieUtil.isGetSmsToken
 import com.example.c001apk.util.CookieUtil.isPreGetLoginParam
 import com.example.c001apk.util.CookieUtil.isTryLogin
 import com.example.c001apk.util.LoginUtils.Companion.createRandomNumber
@@ -260,14 +261,14 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun getSMS() {
-        /*isGetSmsToken = true
+        isGetSmsToken = true
         viewModel.getSmsData["submit"] = "1"
-        viewModel.getSmsData["requestHash"] = requestHash
+        viewModel.getSmsData["requestHash"] = viewModel.requestHash
         viewModel.getSmsData["country"] = "86"
         viewModel.getSmsData["mobile"] = binding.account.text.toString()
         viewModel.getSmsData["captcha"] = binding.captchaText.text.toString()
         viewModel.getSmsData["randomNumber"] = createRandomNumber()
-        viewModel.getSmsToken()*/
+        viewModel.getSmsToken()
     }
 
     private fun getCaptcha() {

@@ -148,6 +148,7 @@ class AppAdapter(
         val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
         val expand: ImageButton = view.findViewById(R.id.expand)
+        val hotReply: TextView = view.findViewById(R.id.hotReply)
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -277,6 +278,31 @@ class AppAdapter(
                             viewHolder.pubDataRaw
                         )
                     parent.context.startActivity(intent)
+                }
+                viewHolder.hotReply.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", viewHolder.feedType)
+                    intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("uid", viewHolder.uid)
+                    intent.putExtra("uname", viewHolder.uname.text)
+                    intent.putExtra("viewReply", true)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.hotReply.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.hotReply.text.toString())
+                    parent.context.startActivity(intent)
+                    true
                 }
                 viewHolder.itemView.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
@@ -1056,6 +1082,23 @@ class AppAdapter(
                 } else {
                     holder.multiImage.visibility = View.GONE
                 }
+
+                if (!feed.replyRows.isNullOrEmpty()) {
+                    holder.hotReply.visibility = View.VISIBLE
+                    val mess =
+                        if (feed.replyRows[0].picArr.isNullOrEmpty())
+                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].username}\">${feed.replyRows[0].username}</a>: ${feed.replyRows[0].message}"
+                        else
+                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].username}\">${feed.replyRows[0].username}</a>: ${feed.replyRows[0].message} [图片] <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
+                    holder.hotReply.movementMethod = LinkMovementMethod.getInstance()
+                    holder.hotReply.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        mess,
+                        (holder.hotReply.textSize * 1.3).toInt(),
+                        feed.replyRows[0].picArr
+                    )
+                } else
+                    holder.hotReply.visibility = View.GONE
 
                 if (feed.targetRow?.id == null && feed.relationRows.isNullOrEmpty())
                     holder.dyhLayout.visibility = View.GONE

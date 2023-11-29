@@ -64,8 +64,8 @@
             android:layout_marginTop="10dp"
             android:lineSpacingMultiplier="1.3"
             android:textSize="16sp"
-            android:visibility="gone"
             android:textStyle="bold"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/avatar" />
 
@@ -86,7 +86,7 @@
             android:layout_marginTop="10dp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multiImage" />
+            app:layout_constraintTop_toBottomOf="@id/hotReply" />
 
         <TextView
             android:id="@+id/like"
@@ -114,6 +114,16 @@
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/message" />
+
+        <TextView
+            android:id="@+id/hotReply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/text_scroll_bg"
+            android:padding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/multiImage" />
 
         <HorizontalScrollView
             android:id="@+id/dyhLayout"
