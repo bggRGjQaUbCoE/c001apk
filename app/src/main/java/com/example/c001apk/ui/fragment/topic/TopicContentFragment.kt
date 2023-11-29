@@ -96,39 +96,37 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                 if (!data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         viewModel.topicDataList.clear()
-                        if (viewModel.title == "讨论") {
-                            var index = 0
-                            for (element in data) {
-                                if (element.entityTemplate == "sortSelectCard")
-                                    break
-                                else index++
-                            }
-                            for (element in data[index].entities) {
-                                viewModel.productFilterMap[element.title] = element.url
-                            }
-                        }
                     }
-                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.topicDataList.size
                         for (element in data)
                             if (element.entityType == "feed"
                                 || element.entityType == "topic"
                                 || element.entityType == "product"
                                 || element.entityType == "user"
-                            //|| element.entityTemplate == "articleNews"
-                            //|| element.entityTemplate == "feedCover"
                             )
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.topicDataList.add(element)
+                    }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.topicDataList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 viewModel.isLoadMore = false
@@ -147,7 +145,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -166,7 +164,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -187,7 +185,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
@@ -231,7 +229,6 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
@@ -280,12 +277,17 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    override fun onSearch(type: String, value: String) {
+    override fun onSearch(type: String, value: String, id: String?) {
         viewModel.title = value
         when (value) {
-            "最近回复" -> viewModel.url = viewModel.productFilterMap["最近回复"]!!
-            "热度排序" -> viewModel.url = viewModel.productFilterMap["热度排序"]!!
-            "最新发布" -> viewModel.url = viewModel.productFilterMap["最新发布"]!!
+            "最近回复" -> viewModel.url =
+                "/page?url=/product/feedList?type=feed&id=$id&ignoreEntityById=1"
+
+            "热度排序" -> viewModel.url =
+                "/page?url=/product/feedList?type=feed&id=$id&listType=rank_score"
+
+            "最新发布" -> viewModel.url =
+                "/page?url=/product/feedList?type=feed&id=$id&ignoreEntityById=1&listType=dateline_desc"
         }
         viewModel.topicDataList.clear()
         mAdapter.notifyDataSetChanged()

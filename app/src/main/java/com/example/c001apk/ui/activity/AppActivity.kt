@@ -93,7 +93,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         viewModel.isRefreshing = false
                         viewModel.isLoadMore = false
                         mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.commentStatusText)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(0)
                     }
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
@@ -110,6 +110,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     if (viewModel.isRefreshing)
                         viewModel.appCommentList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.appCommentList.size
                         for (element in comment)
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
@@ -125,7 +126,16 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.appCommentList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.appCommentList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.appLayout.visibility = View.VISIBLE
@@ -145,7 +155,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         viewModel.appCommentList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.appCommentList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -164,7 +174,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         viewModel.appCommentList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.appCommentList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -216,7 +226,6 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
@@ -232,7 +241,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
         } else if (viewModel.commentStatusText != "允许评论") {
             binding.swipeRefresh.isEnabled = false
             mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.commentStatusText)
-            mAdapter.notifyDataSetChanged()
+            mAdapter.notifyItemChanged(0)
         }
     }
 
@@ -275,7 +284,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.appCommentList.size)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

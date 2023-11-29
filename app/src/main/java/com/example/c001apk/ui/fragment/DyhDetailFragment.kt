@@ -90,7 +90,8 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                 if (!data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing)
                         viewModel.dyhDataList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.dyhDataList.size
                         for (element in data)
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
@@ -98,13 +99,23 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                                     )
                                 )
                                     viewModel.dyhDataList.add(element)
+                    }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.dyhDataList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 viewModel.isLoadMore = false
@@ -123,7 +134,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         viewModel.dyhDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -142,7 +153,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         viewModel.dyhDataList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -178,7 +189,6 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
@@ -209,7 +219,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

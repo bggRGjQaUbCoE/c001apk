@@ -102,6 +102,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     if (viewModel.isRefreshing)
                         viewModel.searchList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.searchList.size
                         if (viewModel.type == "feed")
                             for (element in search) {
                                 if (element.entityType == "feed")
@@ -120,7 +121,16 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.searchList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.searchList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 viewModel.isLoadMore = false
@@ -138,7 +148,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     if (response.data != null) {
                         viewModel.searchList[viewModel.likePosition].likenum = response.data.count
                         viewModel.searchList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -156,7 +166,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     if (response.data != null) {
                         viewModel.searchList[viewModel.likePosition].likenum = response.data.count
                         viewModel.searchList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -176,7 +186,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                     } else {
                         viewModel.searchList[viewModel.position].isFollow = 1
                     }
-                    mAdapter.notifyDataSetChanged()
+                    mAdapter.notifyItemChanged(viewModel.position)
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -195,7 +205,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.searchList.size)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
@@ -259,7 +269,6 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
@@ -292,7 +301,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    override fun onSearch(type: String, value: String) {
+    override fun onSearch(type: String, value: String, id: String?) {
         when (type) {
             "sort" -> viewModel.sort = value
             "feedType" -> viewModel.feedType = value

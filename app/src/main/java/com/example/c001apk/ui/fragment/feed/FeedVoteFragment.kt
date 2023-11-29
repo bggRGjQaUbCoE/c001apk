@@ -28,6 +28,7 @@ import com.example.c001apk.view.VoteItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
+import com.github.megatronking.stringfog.annotation.StringFogIgnore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Method
 
-
+@StringFogIgnore
 class FeedVoteFragment : Fragment(), OnImageItemClickListener {
 
     private lateinit var binding: FragmentFeedVoteBinding
@@ -162,7 +163,7 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
                             viewModel.rightEnd = true
                         else
                             viewModel.rightVoteCommentList.addAll(voteComment.data)
-                        viewModel.VoteCommentSize = viewModel.voteCommentList.size
+                        viewModel.listSize = viewModel.voteCommentList.size
                         if (viewModel.leftVoteCommentList.isNotEmpty() && viewModel.rightVoteCommentList.isNotEmpty()) {
                             if (viewModel.leftVoteCommentList.size >= viewModel.rightVoteCommentList.size) {
                                 for (index in 0 until viewModel.rightVoteCommentList.size) {
@@ -198,11 +199,14 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
                             mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                         if (viewModel.isLoadMore)
                             mAdapter.notifyItemRangeChanged(
-                                viewModel.VoteCommentSize + 2,
+                                viewModel.listSize + 2,
                                 viewModel.leftVoteCommentList.size + viewModel.rightVoteCommentList.size + 1
                             )
                         else {
-                            mAdapter.notifyDataSetChanged()
+                            mAdapter.notifyItemRangeChanged(
+                                0,
+                                viewModel.voteCommentList.size + 3
+                            )
                         }
                         binding.indicator.isIndeterminate = false
                         binding.indicator.visibility = View.GONE
@@ -211,7 +215,7 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
                         viewModel.isLoadMore = false
                         viewModel.isRefreshing = false
                     } else {
-                        viewModel.VoteCommentSize = viewModel.voteCommentList.size
+                        viewModel.listSize = viewModel.voteCommentList.size
                         if (voteComment.data.isEmpty()) {
                             viewModel.isEnd = true
                             mAdapter.setLoadState(mAdapter.LOADING_END, null)
@@ -221,11 +225,14 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
                         }
                         if (viewModel.isLoadMore) {
                             mAdapter.notifyItemRangeChanged(
-                                viewModel.VoteCommentSize + 2,
+                                viewModel.listSize + 2,
                                 voteComment.data.size + 1
                             )
                         } else {
-                            mAdapter.notifyDataSetChanged()
+                            mAdapter.notifyItemRangeChanged(
+                                0,
+                                viewModel.voteCommentList.size + 3
+                            )
                         }
                         binding.indicator.isIndeterminate = false
                         binding.indicator.visibility = View.GONE
@@ -254,7 +261,7 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemRangeChanged(viewModel.voteCommentList.size + 2, 1)
+                        mAdapter.notifyItemChanged(viewModel.voteCommentList.size + 2)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

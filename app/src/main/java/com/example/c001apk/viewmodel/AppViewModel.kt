@@ -31,7 +31,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
-    var VoteCommentSize = -1
+    var listSize = -1
     var feedTypeName: String? = null
     var topReplyId: String? = null
     var commentStatusText = ""
@@ -541,7 +541,6 @@ class AppViewModel : ViewModel() {
         getHomeTopicTitleLiveData.value = getHomeTopicTitleLiveData.value
     }
 
-    var productFilterMap: MutableMap<String, String> = HashMap()
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 
     private val getTopicDataLiveData = MutableLiveData<String>()

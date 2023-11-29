@@ -20,7 +20,6 @@ import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
-import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
@@ -247,17 +246,17 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
 
             R.id.topicLatestReply -> {
                 viewModel.productTitle = "最近回复"
-                controller?.onSearch("title", "最近回复")
+                controller?.onSearch("title", "最近回复", viewModel.id)
             }
 
             R.id.topicHot -> {
                 viewModel.productTitle = "热度排序"
-                controller?.onSearch("title", "热度排序")
+                controller?.onSearch("title", "热度排序", viewModel.id)
             }
 
             R.id.topicLatestPublish -> {
                 viewModel.productTitle = "最新发布"
-                controller?.onSearch("title", "最新发布")
+                controller?.onSearch("title", "最新发布", viewModel.id)
             }
 
             R.id.block -> {

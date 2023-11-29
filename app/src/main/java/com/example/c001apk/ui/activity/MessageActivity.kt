@@ -82,7 +82,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                        messageContentAdapter.notifyDataSetChanged()
+                        messageContentAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -100,7 +100,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                        messageContentAdapter.notifyDataSetChanged()
+                        messageContentAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -201,13 +201,11 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         messageContentAdapter = MessageContentAdapter(this, viewModel.type, viewModel.messageList)
-        //messageContentAdapter.setIOnLikeReplyListener(this)
         messageContentAdapter.setOnImageItemClickListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             adapter = messageContentAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
         }
     }

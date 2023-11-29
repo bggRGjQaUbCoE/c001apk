@@ -73,11 +73,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "blackDarkTheme" -> PrefManager.blackDarkTheme
                 "followSystemAccent" -> PrefManager.followSystemAccent
                 "showEmoji" -> PrefManager.showEmoji
-                "allHuaji" -> PrefManager.allHuaji
                 "customToken" -> PrefManager.customToken
                 "isFullImageQuality" -> PrefManager.isFullImageQuality
                 "isClearKeyWord" -> PrefManager.isClearKeyWord
-                "isKeepFeed" -> PrefManager.isKeepFeed
                 "isRecordHistory" -> PrefManager.isRecordHistory
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
@@ -88,11 +86,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "blackDarkTheme" -> PrefManager.blackDarkTheme = value
                 "followSystemAccent" -> PrefManager.followSystemAccent = value
                 "showEmoji" -> PrefManager.showEmoji = value
-                "allHuaji" -> PrefManager.allHuaji = value
                 "customToken" -> PrefManager.customToken = value
                 "isFullImageQuality" -> PrefManager.isFullImageQuality = value
                 "isClearKeyWord" -> PrefManager.isClearKeyWord = value
-                "isKeepFeed" -> PrefManager.isKeepFeed = value
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }

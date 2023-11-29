@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
-class VoteItemDecoration(private val space:Int) : ItemDecoration() {
+class VoteItemDecoration(private val space: Int) : ItemDecoration() {
 
     override fun getItemOffsets(
         outRect: Rect,

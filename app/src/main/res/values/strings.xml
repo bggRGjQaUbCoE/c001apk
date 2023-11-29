@@ -101,7 +101,6 @@
     <string name="add">添加</string>
     <string name="block">加入黑名单</string>
     <string name="publishFeed">发动态</string>
-    <string name="keep_feed">头条刷新保留上次的内容</string>
     <string name="share">分享</string>
     <string name="history">浏览历史</string>
     <string name="record_history">记录浏览历史</string>

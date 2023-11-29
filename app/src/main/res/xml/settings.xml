@@ -63,11 +63,6 @@
             android:key="isRecordHistory"
             android:title="@string/record_history" />
         <rikka.material.preference.MaterialSwitchPreference
-            android:defaultValue="true"
-            android:icon="@drawable/ic_feed"
-            android:key="isKeepFeed"
-            android:title="@string/keep_feed" />
-        <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_image"
             android:key="isFullImageQuality"
@@ -80,16 +75,9 @@
             android:title="@string/show_emoji" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
-            android:dependency="showEmoji"
-            android:icon="@drawable/ic_emoji"
-            android:key="allHuaji"
-            android:title="@string/all_huaji" />
-        <rikka.material.preference.MaterialSwitchPreference
-            android:defaultValue="false"
             android:icon="@drawable/ic_clear_all"
             android:key="isClearKeyWord"
-            android:title="@string/auto_clear_key_word"
-            android:summary="@string/clear_Key_word"
+            android:title="@string/clear_Key_word"
             />
     </PreferenceCategory>
 

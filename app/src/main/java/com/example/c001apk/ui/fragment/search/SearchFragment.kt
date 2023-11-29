@@ -235,7 +235,7 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             viewModel.historyList.add(0, keyword)
             searchHistoryDao.insert(SearchHistory(keyword))
             withContext(Dispatchers.Main) {
-                mAdapter.notifyDataSetChanged()
+                mAdapter.notifyItemInserted(0)
             }
         }
     }
@@ -245,8 +245,9 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         CoroutineScope(Dispatchers.IO).launch {
             searchHistoryDao.delete(keyword)
         }
-        viewModel.historyList.remove(keyword)
-        mAdapter.notifyDataSetChanged()
+        val position = viewModel.historyList.indexOf(keyword)
+        viewModel.historyList.removeAt(position)
+        mAdapter.notifyItemRemoved(position)
     }
 
 }

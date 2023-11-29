@@ -192,7 +192,7 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
                 "topic" -> topicBlackListDao.insert(SearchHistory(uid))
             }
             withContext(Dispatchers.Main) {
-                mAdapter.notifyDataSetChanged()
+                mAdapter.notifyItemInserted(0)
                 if (binding.clearAll.visibility != View.VISIBLE)
                     binding.clearAll.visibility = View.VISIBLE
             }
@@ -227,9 +227,9 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
                 "topic" -> topicBlackListDao.delete(keyword)
             }
         }
-        viewModel.historyList.remove(keyword)
-        mAdapter.notifyDataSetChanged()
+        val position = viewModel.historyList.indexOf(keyword)
+        viewModel.historyList.removeAt(position)
+        mAdapter.notifyItemRemoved(position)
     }
-
 
 }

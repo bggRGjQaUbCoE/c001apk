@@ -39,10 +39,6 @@ object PrefManager {
         get() = pref.getBoolean(SHOW_EMOJI, true)
         set(value) = pref.edit().putBoolean(SHOW_EMOJI, value).apply()
 
-    var allHuaji: Boolean
-        get() = pref.getBoolean(ALL_HUAJI, false)
-        set(value) = pref.edit().putBoolean(ALL_HUAJI, value).apply()
-
     var isLogin: Boolean
         get() = pref.getBoolean("isLogin", false)
         set(value) = pref.edit().putBoolean("isLogin", value).apply()
@@ -138,10 +134,6 @@ object PrefManager {
     var SZLMID: String
         get() = pref.getString("SZLMID", "")!!
         set(value) = pref.edit().putString("SZLMID", value).apply()
-
-    var isKeepFeed: Boolean
-        get() = pref.getBoolean("isKeepFeed", true)
-        set(value) = pref.edit().putBoolean("isKeepFeed", value).apply()
 
     var isRecordHistory: Boolean
         get() = pref.getBoolean("isRecordHistory", true)

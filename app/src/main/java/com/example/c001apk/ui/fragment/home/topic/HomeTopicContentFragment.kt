@@ -69,17 +69,28 @@ class HomeTopicContentFragment : Fragment() {
                 if (!data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing)
                         viewModel.topicDataList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.topicDataList.size
                         for (element in data)
                             if (element.entityType == "topic" || element.entityType == "product")
                                 viewModel.topicDataList.add(element)
+                    }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END, null)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.topicDataList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 viewModel.isLoadMore = false
@@ -99,7 +110,7 @@ class HomeTopicContentFragment : Fragment() {
                     if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size) {
                         if (!viewModel.isEnd) {
                             mAdapter.setLoadState(mAdapter.LOADING, null)
-                            mAdapter.notifyDataSetChanged()
+                            mAdapter.notifyItemChanged(viewModel.topicDataList.size)
                             viewModel.isLoadMore = true
                             viewModel.page++
                             viewModel.isNew = true

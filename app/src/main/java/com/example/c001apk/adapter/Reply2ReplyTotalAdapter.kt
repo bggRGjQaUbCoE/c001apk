@@ -187,6 +187,57 @@ class Reply2ReplyTotalAdapter(
         else 0
     }
 
+    @SuppressLint("RestrictedApi")
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+
+            val viewType = getItemViewType(position)
+
+            if (viewType == 0) {
+                if (payloads[0] == "like") {
+                    (holder as ViewHolder).like.text = replyList[position].likenum
+                    holder.isLike = replyList[position].userAction?.like == 1
+                    val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                    drawableLike.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    if (replyList[position].userAction?.like == 1) {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                        holder.like.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            mContext.getColor(android.R.color.darker_gray)
+                        )
+                        holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                    }
+                    holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                }
+            }
+
+        }
+    }
+
     @SuppressLint("SetTextI18n", "RestrictedApi", "UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {

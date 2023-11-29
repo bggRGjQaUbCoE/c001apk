@@ -44,7 +44,7 @@ class MessageAdapter(
 
     private var uid = ""
 
-    private var loadState = 3
+    private var loadState = 2
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3

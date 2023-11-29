@@ -221,7 +221,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.isRefreshing = false
                     binding.swipeRefresh.isRefreshing = false
                     mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
-                    mAdapter.notifyDataSetChanged()
+                    mAdapter.notifyItemRangeChanged(0, 3)
                     return@observe
                 } else if (!reply?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
@@ -229,7 +229,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         if (viewModel.listType == "lastupdate_desc" && viewModel.feedTopReplyList.isNotEmpty())
                             viewModel.feedReplyList.addAll(viewModel.feedTopReplyList)
                     }
-                    if (viewModel.isRefreshing || viewModel.isLoadMore)
+                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.feedReplyList.size
                         for (element in reply?.data!!) {
                             if (element.entityType == "feed_reply") {
                                 if (viewModel.topReplyId != null && element.id == viewModel.topReplyId)
@@ -238,6 +239,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                     viewModel.feedReplyList.add(element)
                             }
                         }
+                    }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     viewModel.isEnd = true
@@ -249,7 +251,16 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     mLayoutManager.scrollToPositionWithOffset(1, 0)
                 }
                 binding.replyCount.text = "共${viewModel.replyCount}回复"
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 2,
+                            viewModel.feedReplyList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 binding.contentLayout.visibility = View.VISIBLE
@@ -274,7 +285,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             response.data
                         viewModel.feedReplyList[viewModel.likeReplyPosition - 1].userAction?.like =
                             1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -294,7 +305,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             response.data
                         viewModel.feedReplyList[viewModel.likeReplyPosition - 1].userAction?.like =
                             0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -312,7 +323,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (response.data != null) {
                         viewModel.feedContentList[0].data?.likenum = response.data.count
                         viewModel.feedContentList[0].data?.userAction?.like = 1
-                        mAdapter.notifyItemChanged(0)
+                        mAdapter.notifyItemChanged(0, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -330,7 +341,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (response.data != null) {
                         viewModel.feedContentList[0].data?.likenum = response.data.count
                         viewModel.feedContentList[0].data?.userAction?.like = 0
-                        mAdapter.notifyItemChanged(0)
+                        mAdapter.notifyItemChanged(0, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -391,7 +402,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                         ""
                                     )
                                 )
-                                mAdapter.notifyDataSetChanged()
+                                mAdapter.notifyItemChanged(viewModel.rPosition)
                             }
                         }
                     } else {
@@ -412,7 +423,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     } else {
                         viewModel.feedContentList[0].data?.userAction?.followAuthor = 1
                     }
-                    mAdapter.notifyDataSetChanged()
+                    mAdapter.notifyItemChanged(0)
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -497,7 +508,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
@@ -601,7 +612,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             binding.contentLayout.visibility = View.VISIBLE
             if (viewModel.errorMessage != null) {
                 mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
-                mAdapter.notifyDataSetChanged()
+                mAdapter.notifyItemChanged(2)
             }
             if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
                 showTitleProfile()
@@ -642,7 +653,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(
                     StickyItemDecorator(
@@ -767,7 +777,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
     }
 
-    @SuppressLint("InflateParams", "NotifyDataSetChanged")
     override fun onShowTotalReply(position: Int, uid: String, id: String) {
         val mBottomSheetDialogFragment =
             Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid, uid, id)

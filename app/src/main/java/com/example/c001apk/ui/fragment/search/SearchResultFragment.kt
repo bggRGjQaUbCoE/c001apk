@@ -174,42 +174,42 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
 
             R.id.feedDefault -> {
                 viewModel.sort = "default"
-                controller?.onSearch("sort", "default")
+                controller?.onSearch("sort", "default", null)
             }
 
             R.id.feedHot -> {
                 viewModel.sort = "hot"
-                controller?.onSearch("sort", "hot")
+                controller?.onSearch("sort", "hot", null)
             }
 
             R.id.feedReply -> {
                 viewModel.sort = "reply"
-                controller?.onSearch("sort", "reply")
+                controller?.onSearch("sort", "reply", null)
             }
 
             R.id.typeAll -> {
                 viewModel.feedType = "all"
-                controller?.onSearch("feedType", "all")
+                controller?.onSearch("feedType", "all", null)
             }
 
             R.id.typeFeed -> {
                 viewModel.feedType = "feed"
-                controller?.onSearch("feedType", "feed")
+                controller?.onSearch("feedType", "feed", null)
             }
 
             R.id.typeArticle -> {
                 viewModel.feedType = "feedArticle"
-                controller?.onSearch("feedType", "feedArticle")
+                controller?.onSearch("feedType", "feedArticle", null)
             }
 
             R.id.typePic -> {
                 viewModel.feedType = "picture"
-                controller?.onSearch("feedType", "picture")
+                controller?.onSearch("feedType", "picture", null)
             }
 
             R.id.typeReply -> {
                 viewModel.feedType = "comment"
-                controller?.onSearch("feedType", "comment")
+                controller?.onSearch("feedType", "comment", null)
             }
 
         }

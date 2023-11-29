@@ -134,6 +134,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                 if (!feed.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) viewModel.feedList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.feedList.size
                         for (element in feed) {
                             if (element.entityTemplate == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
@@ -149,7 +150,16 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.feedList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.feedList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 binding.infoLayout.visibility = View.VISIBLE
                 binding.followBtn.visibility = View.VISIBLE
                 binding.indicator.isIndeterminate = false
@@ -170,7 +180,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         viewModel.feedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.feedList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -189,7 +199,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         viewModel.feedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.feedList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -267,7 +277,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.feedList.size)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true
@@ -329,7 +339,6 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
         }
     }

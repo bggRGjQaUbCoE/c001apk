@@ -162,8 +162,10 @@ class MessageFragment : Fragment() {
 
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing) viewModel.messageList.clear()
+                    if (viewModel.isRefreshing)
+                        viewModel.messageList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.messageList.size
                         for (element in feed)
                             if (element.entityType == "notification")
                                 if (!BlackListUtil.checkUid(element.fromuid))
@@ -175,7 +177,16 @@ class MessageFragment : Fragment() {
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 7,
+                            viewModel.messageList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
@@ -215,6 +226,7 @@ class MessageFragment : Fragment() {
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
+                        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

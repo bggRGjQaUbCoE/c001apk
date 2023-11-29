@@ -71,7 +71,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged", "RestrictedApi")
+    @SuppressLint("NotifyDataSetChanged", "RestrictedApi", "InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -93,7 +93,6 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
-
                         if (feed.size <= 4 && feed.last().entityTemplate == "refreshCard") {
                             if (viewModel.homeFeedList.size >= 4) {
                                 if (viewModel.homeFeedList[3].entityTemplate != "refreshCard") {
@@ -109,18 +108,11 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                             binding.indicator.visibility = View.GONE
                             return@observe
                         } else {
-                            if (PrefManager.isKeepFeed)
-                                if (viewModel.homeFeedList.size in 3..50) {
-                                    repeat(3) {
-                                        viewModel.homeFeedList.removeAt(0)
-                                    }
-                                    newList.addAll(viewModel.homeFeedList)
-                                }
                             viewModel.homeFeedList.clear()
                         }
-
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.homeFeedList.size
                         for (element in feed) {
                             if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniScrollCard"
@@ -139,11 +131,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                 )
                                     viewModel.homeFeedList.add(element)
                             }
-
                         }
-                        if (PrefManager.isKeepFeed)
-                            if (viewModel.isRefreshing && newList.isNotEmpty())
-                                viewModel.homeFeedList.addAll(newList)
                         if (viewModel.homeFeedList.last().entityTemplate == "refreshCard") {
                             viewModel.lastItem =
                                 viewModel.homeFeedList[viewModel.homeFeedList.size - 2].entityId
@@ -158,7 +146,16 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.homeFeedList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -176,6 +173,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     if (viewModel.isRefreshing)
                         viewModel.homeFeedList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.homeFeedList.size
                         for (element in feed) {
                             if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniGridCard"
@@ -197,7 +195,16 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.homeFeedList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -215,6 +222,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     if (viewModel.isRefreshing)
                         viewModel.homeFeedList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.homeFeedList.size
                         for (element in feed) {
                             if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
@@ -231,7 +239,16 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize + 1,
+                            viewModel.homeFeedList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -250,7 +267,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         viewModel.homeFeedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition)
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -269,7 +286,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         viewModel.homeFeedList[viewModel.likePosition].likenum =
                             response.data.count
                         viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition)
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -370,6 +387,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
 
     }
 
+    @SuppressLint("InflateParams")
     private fun initPublish() {
         if (viewModel.type == "feed" && PrefManager.isLogin) {
             val view = LayoutInflater.from(context)
@@ -407,7 +425,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
                         viewModel.isLoadMore = true
                         //viewModel.firstItem = null
                         viewModel.page++
@@ -485,7 +503,6 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            itemAnimator = null
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
