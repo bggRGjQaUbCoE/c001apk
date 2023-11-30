@@ -27,10 +27,14 @@ internal class MyURLSpan(
         this.uid = uid
     }
 
+    var isReturn = false
+
     override fun onClick(widget: View) {
         if (mUrl == "") {
             return
         } else if (mUrl.contains("/feed/replyList")) {
+            if (isReturn)
+                return
             val id = mUrl.replace("/feed/replyList?id=", "")
             IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id)
         } else if (mUrl.contains("coolapk.com/u/")) {

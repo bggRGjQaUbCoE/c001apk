@@ -18,7 +18,10 @@ import com.example.c001apk.adapter.FeedContentAdapter
 import com.example.c001apk.databinding.FragmentFeedVoteBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
+import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.ImageUtil
@@ -37,7 +40,8 @@ import kotlinx.coroutines.withContext
 import java.lang.reflect.Method
 
 @StringFogIgnore
-class FeedVoteFragment : Fragment(), OnImageItemClickListener {
+class FeedVoteFragment : Fragment(), OnImageItemClickListener, IOnReplyClickListener,
+    IOnLikeClickListener {
 
     private lateinit var binding: FragmentFeedVoteBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -250,6 +254,46 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
             }
         }
 
+        viewModel.likeReplyData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isPostLikeReply) {
+                viewModel.isPostLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.voteCommentList[viewModel.likeReplyPosition - 1].likenum =
+                            response.data
+                        viewModel.voteCommentList[viewModel.likeReplyPosition - 1].userAction?.like =
+                            1
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+        viewModel.unLikeReplyData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isPostUnLikeReply) {
+                viewModel.isPostUnLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.voteCommentList[viewModel.likeReplyPosition - 1].likenum =
+                            response.data
+                        viewModel.voteCommentList[viewModel.likeReplyPosition - 1].userAction?.like =
+                            0
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
+                    } else
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -257,6 +301,11 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    Toast.makeText(
+                        requireContext(),
+                        "${viewModel.lastVisibleItemPosition},,${viewModel.voteCommentList.size}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     if (viewModel.lastVisibleItemPosition == viewModel.voteCommentList.size + 2
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
@@ -443,6 +492,7 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
     }
 
     private fun refreshData() {
+        viewModel.lastVisibleItemPosition = -1
         viewModel.currentOption = 0
         viewModel.page = 1
         viewModel.isEnd = false
@@ -463,6 +513,8 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
             viewModel.voteCommentList
         )
         mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setIOnReplyClickListener(this)
+        mAdapter.setIOnLikeReplyListener(this)
         mLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         // https://codeantenna.com/a/2NDTnG37Vg
@@ -493,6 +545,45 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener {
             urlList,
             position
         )
+    }
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
+        val intent = Intent(requireContext(), FeedActivity::class.java)
+        intent.putExtra("type", "feed")
+        intent.putExtra("id", id)
+        intent.putExtra("uid", uid)
+        intent.putExtra("uname", uname)
+        requireContext().startActivity(intent)
+    }
+
+    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
+        if (type == "reply") {
+            viewModel.likeReplyPosition = position!!
+            viewModel.likeReplyId = id
+            if (isLike) {
+                viewModel.isPostUnLikeReply = true
+                viewModel.postUnLikeReply()
+            } else {
+                viewModel.isPostLikeReply = true
+                viewModel.postLikeReply()
+            }
+        } else {
+            viewModel.likeFeedId = id
+            if (isLike) {
+                viewModel.isPostUnLikeFeed = true
+                viewModel.postUnLikeFeed()
+            } else {
+                viewModel.isPostLikeFeed = true
+                viewModel.postLikeFeed()
+            }
+        }
     }
 
 }

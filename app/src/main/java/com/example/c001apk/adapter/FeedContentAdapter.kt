@@ -532,7 +532,8 @@ class FeedContentAdapter(
                         holder.ip.text = "发布于 ${feed.data?.ipLocation}"
                     ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
                     holder.isFollow = feed.data?.userAction?.followAuthor == 1
-                    if (feed.data?.userAction?.followAuthor == 0) {
+
+                    if (feed.data?.userAction?.followAuthor == 0) { //follow
                         holder.follow.text = "关注"
                         holder.follow.setTextColor(
                             ThemeUtils.getThemeAttrColor(
@@ -544,7 +545,8 @@ class FeedContentAdapter(
                         holder.follow.text = "已关注"
                         holder.follow.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
-                    if (feed.data?.deviceTitle != "") {
+
+                    if (feed.data?.deviceTitle != "") { //deviceTitle
                         holder.device.text = feed.data?.deviceTitle
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                         drawable.setBounds(
@@ -561,7 +563,7 @@ class FeedContentAdapter(
 
                     holder.pubDate.text = DateUtils.fromToday(feed.data?.dateline)
 
-                    if (feedList[0].data!!.feedType != "vote") {
+                    if (feedList[0].data!!.feedType != "vote") {  //like
                         val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                         drawableLike.setBounds(
                             0,
@@ -593,7 +595,7 @@ class FeedContentAdapter(
                         holder.like.text = feed.data?.likenum
                         holder.like.setCompoundDrawables(drawableLike, null, null, null)
 
-                        holder.reply.text = feed.data?.replynum
+                        holder.reply.text = feed.data?.replynum //reply
                         val drawableReply: Drawable = mContext.getDrawable(R.drawable.ic_message)!!
                         drawableReply.setBounds(
                             0,
@@ -803,7 +805,7 @@ class FeedContentAdapter(
                             holder.messageTitle.text = feed.data?.messageTitle
                         }
 
-                        if (feed.message != "") {
+                        if (!feed.data?.message.isNullOrEmpty()) {
                             holder.message.visibility = View.VISIBLE
                             holder.message.movementMethod = LinkMovementMethod.getInstance()
                             holder.message.text = SpannableStringBuilderUtil.setText(
@@ -812,7 +814,7 @@ class FeedContentAdapter(
                                 (holder.message.textSize * 1.3).toInt(),
                                 null
                             )
-                        }
+                        }else holder.message.visibility = View.GONE
 
                         holder.reply.text =
                             "${feed.data!!.vote!!.totalVoteNum}人投票 · ${feed.data.vote!!.totalCommentNum}个观点"

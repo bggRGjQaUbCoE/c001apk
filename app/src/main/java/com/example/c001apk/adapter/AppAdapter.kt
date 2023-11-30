@@ -1097,6 +1097,7 @@ class AppAdapter(
                         (holder.hotReply.textSize * 1.3).toInt(),
                         feed.replyRows[0].picArr
                     )
+                    SpannableStringBuilderUtil.isReturn = true
                 } else
                     holder.hotReply.visibility = View.GONE
 
