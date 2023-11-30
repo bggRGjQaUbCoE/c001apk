@@ -100,6 +100,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
                                 TopicContentFragment.newInstance(
                                     element.url,
                                     element.title,
+                                    true
                                 )
                             )
                         }
@@ -133,6 +134,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
                                 TopicContentFragment.newInstance(
                                     element.url,
                                     element.title,
+                                    true
                                 )
                             )
                         }
@@ -175,7 +177,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
             binding.viewPager.setCurrentItem(tabSelected, false)
             viewModel.isInit = false
         }
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {}
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}

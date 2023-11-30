@@ -41,16 +41,18 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
         arguments?.let {
             viewModel.url = it.getString("url")!!
             viewModel.title = it.getString("title")!!
+            viewModel.isEnable = it.getBoolean("isEnable")
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(url: String, title: String) =
+        fun newInstance(url: String, title: String, isEnable: Boolean) =
             TopicContentFragment().apply {
                 arguments = Bundle().apply {
                     putString("url", url)
                     putString("title", title)
+                    putBoolean("isEnable", isEnable)
                 }
             }
     }
@@ -66,7 +68,8 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
     override fun onResume() {
         super.onResume()
 
-        (requireParentFragment() as IOnTabClickContainer).tabController = this
+        if (viewModel.isEnable)
+            (requireParentFragment() as IOnTabClickContainer).tabController = this
 
         if (viewModel.title == "讨论")
             (requireParentFragment() as IOnSearchMenuClickContainer).controller = this

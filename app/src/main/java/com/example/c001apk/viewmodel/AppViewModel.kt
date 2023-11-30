@@ -31,6 +31,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var isEnable = false
     var listSize = -1
     var feedTypeName: String? = null
     var topReplyId: String? = null

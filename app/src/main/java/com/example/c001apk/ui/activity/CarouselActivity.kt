@@ -101,6 +101,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                                     TopicContentFragment.newInstance(
                                         element.url,
                                         element.title,
+                                        false
                                     )
                                 )
                                 initView()

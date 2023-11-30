@@ -2,16 +2,11 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.widget.EditText
 import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.fragment.feed.FeedFragment
 import com.example.c001apk.ui.fragment.feed.FeedVoteFragment
-import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TokenDeviceUtils
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class FeedActivity : BaseActivity() {
 
@@ -35,7 +30,7 @@ class FeedActivity : BaseActivity() {
             id = data.toString().replace("coolmarket://feed/", "")
         }
 
-        if (type == "vote"){
+        if (type == "vote") {
             if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
                 supportFragmentManager
                     .beginTransaction()
