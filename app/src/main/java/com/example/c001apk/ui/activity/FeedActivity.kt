@@ -35,23 +35,6 @@ class FeedActivity : BaseActivity() {
             id = data.toString().replace("coolmarket://feed/", "")
         }
 
-        if (PrefManager.SZLMID.isEmpty()){
-            val view = LayoutInflater.from(this)
-                .inflate(R.layout.item_x_app_token, null, false)
-            val editText: EditText = view.findViewById(R.id.editText)
-            editText.setText(PrefManager.SZLMID)
-            MaterialAlertDialogBuilder(this).apply {
-                setView(view)
-                setTitle("提示")
-                setMessage("数字联盟ID为空，将无法查看评论。")
-                setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.SZLMID = editText.text.toString()
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
-                }
-                show()
-            }
-        }
-
         if (type == "vote"){
             if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
                 supportFragmentManager
