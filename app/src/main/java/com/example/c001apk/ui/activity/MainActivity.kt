@@ -2,15 +2,12 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.widget.EditText
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.ThemeUtils
-import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.example.c001apk.MyApplication
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityMainBinding
 import com.example.c001apk.ui.fragment.MessageFragment
@@ -27,10 +24,8 @@ import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.CookieUtil.notification
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.net.URLEncoder
 
 
@@ -46,6 +41,8 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -76,12 +73,18 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 binding.bottomNav.menu.getItem(position)?.isChecked = true
+                when (position) {
+                    0 -> onBackPressedCallback.isEnabled = false
+                    1 -> onBackPressedCallback.isEnabled = true
+                    2 -> onBackPressedCallback.isEnabled = true
+                }
             }
         })
 
         binding.bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.navigation_home -> {
+                    onBackPressedCallback.isEnabled = false
                     if (binding.viewPager.currentItem == 0)
                         controller?.onReturnTop()
                     else
@@ -89,12 +92,16 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
                 }
 
                 R.id.navigation_message -> {
+                    onBackPressedCallback.isEnabled = true
                     binding.viewPager.setCurrentItem(1, true)
                     if (viewModel.badge != 0)
                         binding.bottomNav.removeBadge(R.id.navigation_message)
                 }
 
-                R.id.navigation_setting -> binding.viewPager.setCurrentItem(2, true)
+                R.id.navigation_setting -> {
+                    onBackPressedCallback.isEnabled = true
+                    binding.viewPager.setCurrentItem(2, true)
+                }
             }
             true
         }
@@ -159,6 +166,13 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
         badge.badgeGravity = BadgeDrawable.TOP_END
         badge.verticalOffset = 5
         badge.horizontalOffset = 5
+    }
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            if (binding.viewPager.currentItem != 0)
+                binding.viewPager.setCurrentItem(0, true)
+        }
     }
 
 }

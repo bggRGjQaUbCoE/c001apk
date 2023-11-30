@@ -16,14 +16,18 @@ import com.example.c001apk.databinding.FragmentSearchResultBinding
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
+class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContainer {
 
     private lateinit var binding: FragmentSearchResultBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
+    override var tabController: IOnTabClickListener? = null
 
     companion object {
         @JvmStatic
@@ -120,6 +124,16 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.searchTabList[position]
         }.attach()
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab?) {}
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabController?.onReturnTop()
+            }
+
+        })
     }
 
     private fun initViewPagerMenu() {

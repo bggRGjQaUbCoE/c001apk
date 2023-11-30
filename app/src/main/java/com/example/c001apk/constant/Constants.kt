@@ -1,12 +1,16 @@
 package com.example.c001apk.constant
 
+import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.util.PrefManager
+import rikka.core.util.ResourceUtils
 
 object Constants {
     const val REQUEST_WITH = "XMLHttpRequest"
     const val LOCALE = "zh-CN"
     const val APP_ID = "com.coolapk.market"
-    const val DARK_MODE = "0"
+    var DARK_MODE =
+        if (ResourceUtils.isNightMode(context.resources.configuration)) "1"
+        else "0"
     const val CHANNEL = "coolapk"
     const val MODE = "universal"
     const val APP_LABEL = "token://com.coolapk.market/dcf01e569c1e3db93a3d0fcf191a622c"

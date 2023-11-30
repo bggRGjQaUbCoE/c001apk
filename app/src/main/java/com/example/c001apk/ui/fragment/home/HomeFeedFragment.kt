@@ -89,7 +89,6 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
-                val newList = ArrayList<HomeFeedResponse.Data>()
                 val feed = result.getOrNull()
                 if (!feed.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
@@ -511,7 +510,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
     override fun onResume() {
         super.onResume()
 
-        (requireParentFragment() as IOnTabClickContainer).controller = this
+        (requireParentFragment() as IOnTabClickContainer).tabController = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false

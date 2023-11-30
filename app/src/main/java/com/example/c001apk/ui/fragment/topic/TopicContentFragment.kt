@@ -18,6 +18,8 @@ import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.TopicBlackListUtil
@@ -27,7 +29,7 @@ import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 
 class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener,
-    IOnSearchMenuClickListener {
+    IOnSearchMenuClickListener, IOnTabClickListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -63,6 +65,8 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
 
     override fun onResume() {
         super.onResume()
+
+        (requireParentFragment() as IOnTabClickContainer).tabController = this
 
         if (viewModel.title == "讨论")
             (requireParentFragment() as IOnSearchMenuClickContainer).controller = this
@@ -294,6 +298,14 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
         binding.indicator.visibility = View.VISIBLE
         binding.indicator.isIndeterminate = true
         refreshData()
+    }
+
+    override fun onReturnTop() {
+        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+            binding.swipeRefresh.isRefreshing = true
+            refreshData()
+        } else
+            binding.recyclerView.scrollToPosition(0)
     }
 
 }

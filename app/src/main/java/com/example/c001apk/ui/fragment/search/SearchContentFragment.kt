@@ -18,6 +18,8 @@ import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
@@ -28,7 +30,7 @@ import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 
 class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener,
-    IOnSearchMenuClickListener, OnPostFollowListener {
+    IOnSearchMenuClickListener, OnPostFollowListener, IOnTabClickListener {
 
     private lateinit var binding: FragmentSearchFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -71,6 +73,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
         super.onResume()
 
         (requireParentFragment() as IOnSearchMenuClickContainer).controller = this
+        (requireParentFragment() as IOnTabClickContainer).tabController = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -327,6 +330,14 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
             viewModel.url = "/v6/user/follow"
             viewModel.postFollowUnFollow()
         }
+    }
+
+    override fun onReturnTop() {
+        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+            binding.swipeRefresh.isRefreshing = true
+            refreshData()
+        } else
+            binding.recyclerView.scrollToPosition(0)
     }
 
 }

@@ -133,7 +133,7 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             initScroll()
         }
 
-        (requireParentFragment() as IOnTabClickContainer).controller = this
+        (requireParentFragment() as IOnTabClickContainer).tabController = this
 
     }
 

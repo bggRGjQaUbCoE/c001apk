@@ -20,18 +20,22 @@ import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
+import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
+class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContainer {
 
     private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
+    override var tabController: IOnTabClickListener? = null
     private val topicBlackListDao by lazy {
         TopicBlackListDatabase.getDatabase(requireContext()).blackListDao()
     }
@@ -171,7 +175,16 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer {
             binding.viewPager.setCurrentItem(tabSelected, false)
             viewModel.isInit = false
         }
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab?) {}
 
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabController?.onReturnTop()
+            }
+
+        })
     }
 
     private fun getViewData() {

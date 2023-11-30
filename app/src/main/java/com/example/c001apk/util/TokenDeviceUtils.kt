@@ -35,7 +35,7 @@ class TokenDeviceUtils {
                     USER_AGENT = "Dalvik/2.1.0 (Linux; U; Android $ANDROID_VERSION; ${MODEL} ${BUILDNUMBER}) (#Build; ${BRAND}; ${MODEL}; ${BUILDNUMBER}; $ANDROID_VERSION) +CoolMarket/${VERSION_NAME}-${VERSION_CODE}-${Constants.MODE}"
                 }
             }
-            val szlmId = PrefManager.SZLMID
+            val szlmId = if (PrefManager.SZLMID == "") randHexString(16) else PrefManager.SZLMID
             val mac = Utils.randomMacAddress()
             val manuFactor = PrefManager.MANUFACTURER
             val brand = PrefManager.BRAND

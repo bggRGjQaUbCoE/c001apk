@@ -34,7 +34,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private var tabList = ArrayList<String>()
     private var fragmentList = ArrayList<Fragment>()
-    override var controller: IOnTabClickListener? = null
+    override var tabController: IOnTabClickListener? = null
     private var menuList: ArrayList<HomeMenu> = ArrayList()
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
@@ -61,7 +61,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
             }
 
             override fun onTabReselected(tab: Tab?) {
-                controller?.onReturnTop()
+                tabController?.onReturnTop()
             }
 
         })
@@ -164,7 +164,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
     }
 
     override fun onReturnTop() {
-        controller?.onReturnTop()
+        tabController?.onReturnTop()
     }
 
     override fun onResume() {
