@@ -23,7 +23,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
@@ -288,7 +288,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(ReplyItemDecoration(space))
         }
     }
 

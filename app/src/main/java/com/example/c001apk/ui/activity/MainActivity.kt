@@ -2,11 +2,15 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.EditText
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.example.c001apk.MyApplication
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityMainBinding
 import com.example.c001apk.ui.fragment.MessageFragment
@@ -23,8 +27,10 @@ import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.CookieUtil.notification
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.net.URLEncoder
 
 
@@ -35,10 +41,28 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
 
     override var controller: IOnBottomClickListener? = null
 
+    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (PrefManager.SZLMID.isEmpty()){
+            val view = LayoutInflater.from(this)
+                .inflate(R.layout.item_x_app_token, null, false)
+            val editText: EditText = view.findViewById(R.id.editText)
+            editText.setText(PrefManager.SZLMID)
+            MaterialAlertDialogBuilder(this).apply {
+                setView(view)
+                setTitle("提示")
+                setMessage("数字联盟ID为空，将无法查看评论。")
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    PrefManager.SZLMID = editText.text.toString()
+                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
+                }
+                show()
+            }
+        }
 
         if (viewModel.isInit) {
             viewModel.isInit = false
