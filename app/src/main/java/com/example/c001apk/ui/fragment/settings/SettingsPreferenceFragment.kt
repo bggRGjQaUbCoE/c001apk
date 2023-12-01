@@ -77,6 +77,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isFullImageQuality" -> PrefManager.isFullImageQuality
                 "isClearKeyWord" -> PrefManager.isClearKeyWord
                 "isRecordHistory" -> PrefManager.isRecordHistory
+                "isIconMiniCard" -> PrefManager.isIconMiniCard
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -90,6 +91,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isFullImageQuality" -> PrefManager.isFullImageQuality = value
                 "isClearKeyWord" -> PrefManager.isClearKeyWord = value
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
+                "isIconMiniCard" -> PrefManager.isIconMiniCard = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }

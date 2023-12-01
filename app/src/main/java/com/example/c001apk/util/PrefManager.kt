@@ -142,4 +142,8 @@ object PrefManager {
     var FONTSCALE: String
         get() = pref.getString("FONTSCALE", "1.00")!!
         set(value) = pref.edit().putString("FONTSCALE", value).apply()
+
+    var isIconMiniCard: Boolean
+        get() = pref.getBoolean("isIconMiniCard", true)
+        set(value) = pref.edit().putBoolean("isIconMiniCard", value).apply()
 }

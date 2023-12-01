@@ -90,6 +90,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
                 val data = result.getOrNull()
                 if (data != null) {
                     if (viewModel.tabList.isEmpty()) {
+                        viewModel.id = data.id
                         viewModel.type = data.entityType
                         viewModel.subtitle = data.intro
                         initBar()

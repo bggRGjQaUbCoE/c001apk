@@ -163,6 +163,9 @@ class FeedContentAdapter(
         val leftOption: Button = view.findViewById(R.id.leftOption)
         val rightOption: Button = view.findViewById(R.id.rightOption)
         val voteOptions: LinearAdapterLayout = view.findViewById(R.id.voteOptions)
+        val extraUrlLayout: ConstraintLayout = view.findViewById(R.id.extraUrlLayout)
+        val extraTitle: TextView = view.findViewById(R.id.extraTitle)
+        val extraUrl: TextView = view.findViewById(R.id.extraUrl)
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -270,6 +273,11 @@ class FeedContentAdapter(
                         viewHolder.uid,
                         0
                     )
+                }
+                viewHolder.extraUrlLayout.setOnClickListener {
+                    val intent = Intent(parent.context, WebViewActivity::class.java)
+                    intent.putExtra("url", viewHolder.extraUrl.text)
+                    parent.context.startActivity(intent)
                 }
                 viewHolder
             }
@@ -605,6 +613,14 @@ class FeedContentAdapter(
                         )
                         holder.reply.setCompoundDrawables(drawableReply, null, null, null)
                     }
+
+                    if (!feed.data?.extraUrl.isNullOrEmpty()) {
+                        holder.extraUrlLayout.visibility = View.VISIBLE
+                        holder.extraUrl.text = feed.data?.extraUrl
+                        feed.data?.extraTitle?.let {
+                            holder.extraTitle.text = it
+                        }
+                    } else holder.extraUrlLayout.visibility = View.GONE
 
                     if (feedList[0].data!!.feedType == "feedArticle") {
                         holder.articleMessage.visibility = View.VISIBLE

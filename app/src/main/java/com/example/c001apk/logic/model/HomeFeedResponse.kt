@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        @SerializedName("extra_title") val extraTitle: String?,
+        @SerializedName("extra_url") val extraUrl: String?,
         val feedTypeName: String?,
         val vote: Vote?,
         @SerializedName("message_cover") val messageCover: String?,
@@ -107,7 +109,7 @@ data class HomeFeedResponse(val data: List<Data>) {
     )
 
     data class Option(
-        @SerializedName("total_select_num") val totalSelectNum:Long,
+        @SerializedName("total_select_num") val totalSelectNum: Long,
         val id: String,
         @SerializedName("vote_id") val voteId: String,
         val title: String,

@@ -59,6 +59,11 @@
             android:title="@string/font_scale" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
+            android:icon="@drawable/ic_feed"
+            android:key="isIconMiniCard"
+            android:title="@string/show_icon_mini_card" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="true"
             android:icon="@drawable/ic_history"
             android:key="isRecordHistory"
             android:title="@string/record_history" />

@@ -183,7 +183,12 @@ class BHistoryAdapter(
                         holder.id = history.fid
                         holder.uid = history.uid
                         holder.uname.text = history.uname
-                        holder.device.text = history.device
+                        if (history.device == "")
+                            holder.device.visibility = View.GONE
+                        else{
+                            holder.device.visibility = View.VISIBLE
+                            holder.device.text = history.device
+                        }
                         holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
                         holder.message.movementMethod = LinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(
@@ -198,7 +203,12 @@ class BHistoryAdapter(
                         holder.id = history.feedId
                         holder.uid = history.uid
                         holder.uname.text = history.uname
-                        holder.device.text = history.device
+                        if (history.device == "")
+                            holder.device.visibility = View.GONE
+                        else{
+                            holder.device.visibility = View.VISIBLE
+                            holder.device.text = history.device
+                        }
                         holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
                         holder.message.movementMethod = LinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(

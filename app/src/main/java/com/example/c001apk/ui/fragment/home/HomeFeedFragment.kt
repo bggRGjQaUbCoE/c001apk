@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
-import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
@@ -124,7 +123,9 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                                     viewModel.changeFirstItem = false
                                     viewModel.firstItem = element.id
                                 }
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!PrefManager.isIconMiniCard && element.entityTemplate == "iconMiniScrollCard")
+                                    continue
+                                else if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )

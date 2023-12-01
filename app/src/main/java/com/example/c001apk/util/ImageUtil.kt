@@ -1,16 +1,21 @@
 package com.example.c001apk.util
 
+import android.R.attr.contextUri
 import android.content.ContentValues
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
@@ -24,6 +29,7 @@ import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants.USER_AGENT
 import com.example.c001apk.util.ClipboardUtil.copyText
+import com.example.c001apk.util.Utils.Companion.getBase64
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -41,6 +47,10 @@ import java.io.File
 
 
 object ImageUtil {
+
+    private var filename = ""
+    private lateinit var imagesDir: File
+    private lateinit var imageCheckDir: File
 
     fun showUserCover(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
@@ -106,17 +116,12 @@ object ImageUtil {
             .into(view)
     }
 
-    suspend fun saveImageToGallery(ctx: Context, imageUrl: String): Boolean =
+    private suspend fun saveImageToGallery(ctx: Context, imageUrl: String): Boolean =
         withContext(Dispatchers.IO) {
             var success = false
-            val imageDir = Environment.DIRECTORY_PICTURES
 
-            val imagesDir = File(
-                Environment.getExternalStoragePublicDirectory(imageDir),
-                ctx.getString(R.string.app_name)
-            )
-            imagesDir.mkdirs()
-            val filename = "${System.currentTimeMillis()}.jpg"
+            if (!imagesDir.exists())
+                imagesDir.mkdirs()
 
             try {
                 val file = Glide.with(ctx)
@@ -156,23 +161,66 @@ object ImageUtil {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun showSaveImgDialog(context: Context, url: String) {
-        MaterialAlertDialogBuilder(context)
-            .setTitle("保存图片")
-            .setMessage("是否保存图片到本地？")
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                GlobalScope.launch {
-                    if (saveImageToGallery(context, url)) {
-                        ToastUtil.toast("保存成功")
-                    } else {
-                        ToastUtil.toast("保存失败")
+        val index = url.lastIndexOf('/')
+        val dot = url.lastIndexOf('.')
+        val type = url.substring(dot, url.length)
+        filename = "${url.substring(index + 1, url.length).getBase64().substring(0, 16)}$type"
+
+        MaterialAlertDialogBuilder(context).apply {
+            val items = arrayOf("保存图片", "图片分享", "复制图片地址")
+            setItems(items) { _: DialogInterface?, position: Int ->
+                when (position) {
+                    0 -> {
+                        GlobalScope.launch {
+                            imagesDir = File(
+                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                                context.getString(R.string.app_name)
+                            )
+                            imageCheckDir = File(
+                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                                "${context.getString(R.string.app_name)}/$filename"
+                            )
+                            if (imageCheckDir.exists()) {
+                                ToastUtil.toast("文件已存在")
+                            } else if (saveImageToGallery(context, url)) {
+                                ToastUtil.toast("保存成功")
+                            } else {
+                                ToastUtil.toast("保存失败")
+                            }
+                        }
+                    }
+
+                    1 -> {
+                        GlobalScope.launch {
+                            imagesDir = File(context.externalCacheDir, "imageShare")
+                            imageCheckDir = File(context.externalCacheDir, "imageShare/$filename")
+                            if (imageCheckDir.exists()) {
+                                withContext(Dispatchers.Main) {
+                                    shareImage(context, File(
+                                        context.externalCacheDir,
+                                        "imageShare/$filename",
+                                    ), null)
+                                }
+                            } else if (saveImageToGallery(context, url)) {
+                                withContext(Dispatchers.Main) {
+                                    shareImage(context, File(
+                                        context.externalCacheDir,
+                                        "imageShare/$filename",
+                                    ), null)
+                                }
+                            } else {
+                                ToastUtil.toast("分享失败")
+                            }
+                        }
+                    }
+
+                    2 -> {
+                        copyText(context, url)
                     }
                 }
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .setNeutralButton("复制图片地址") { _, _ ->
-                copyText(context, url)
-            }
-            .show()
+            show()
+        }
     }
 
     fun startBigImgView(
@@ -318,23 +366,57 @@ object ImageUtil {
                     transition: Transition<in Bitmap?>?
                 ) {
                     Palette.from(resource).generate { palette ->
-                            if (palette != null) {
-                                val vibrantSwatch = palette.vibrantSwatch
-                                val darkVibrantSwatch = palette.darkVibrantSwatch
-                                val lightVibrantSwatch = palette.lightVibrantSwatch
-                                val mutedSwatch = palette.mutedSwatch
-                                val darkMutedSwatch = palette.darkMutedSwatch
-                                val lightMutedSwatch = palette.lightMutedSwatch
+                        if (palette != null) {
+                            val vibrantSwatch = palette.vibrantSwatch
+                            val darkVibrantSwatch = palette.darkVibrantSwatch
+                            val lightVibrantSwatch = palette.lightVibrantSwatch
+                            val mutedSwatch = palette.mutedSwatch
+                            val darkMutedSwatch = palette.darkMutedSwatch
+                            val lightMutedSwatch = palette.lightMutedSwatch
 
-                                if (darkVibrantSwatch != null) {
-                                    imageView.setBackgroundColor(darkVibrantSwatch.rgb)
-                                }
+                            if (darkVibrantSwatch != null) {
+                                imageView.setBackgroundColor(darkVibrantSwatch.rgb)
                             }
                         }
+                    }
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
+    }
+
+
+    // 将File 转化为 content://URI
+    private fun getFileProvider(context: Context, file: File?): Uri {
+        val authority = context.packageName + ".fileprovider"
+        return FileProvider.getUriForFile(
+            context, authority,
+            file!!
+        )
+    }
+
+    private fun shareImage(context: Context, file: File?, title: String?) {
+        val contentUri = getFileProvider(context, file)
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        context.startActivity(Intent.createChooser(intent, title))
+    }
+
+    private fun shareVideo(context: Context, file: File?, title: String?) {
+        val contentUri = getFileProvider(context, file)
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "video/*"
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        context.startActivity(Intent.createChooser(intent, title))
+    }
+
+    private fun shareFile(context: Context, file: File?, title: String?) {
+        val contentUri = getFileProvider(context, file)
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        context.startActivity(Intent.createChooser(intent, title))
     }
 
 }
