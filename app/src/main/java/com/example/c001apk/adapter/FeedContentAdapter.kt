@@ -838,7 +838,8 @@ class FeedContentAdapter(
 
                         if (!feed.data?.message.isNullOrEmpty()) {
                             holder.message.visibility = View.VISIBLE
-                            holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                            holder.message.movementMethod =
+                                LinkTextView.LocalLinkMovementMethod.getInstance()
                             holder.message.text = SpannableStringBuilderUtil.setText(
                                 mContext,
                                 feed.data?.message.toString(),
@@ -904,7 +905,8 @@ class FeedContentAdapter(
                             holder.messageTitle.text = feed.data?.messageTitle
                         }
 
-                        holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.message.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(
                             mContext,
                             feed.data?.message.toString(),
@@ -919,10 +921,15 @@ class FeedContentAdapter(
                             val from = feed.data.pic.lastIndexOf("@")
                             val middle = feed.data.pic.lastIndexOf("x")
                             val end = feed.data.pic.lastIndexOf(".")
-                            val width = feed.data.pic.substring(from + 1, middle).toInt()
-                            val height = feed.data.pic.substring(middle + 1, end).toInt()
-                            holder.multiImage.imgHeight = height
-                            holder.multiImage.imgWidth = width
+                            if (from != -1 && middle != -1 && end != -1) {
+                                val width = feed.data.pic.substring(from + 1, middle).toInt()
+                                val height = feed.data.pic.substring(middle + 1, end).toInt()
+                                holder.multiImage.imgHeight = height
+                                holder.multiImage.imgWidth = width
+                            } else {
+                                holder.multiImage.imgHeight = -1
+                                holder.multiImage.imgWidth = -1
+                            }
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
@@ -1096,7 +1103,8 @@ class FeedContentAdapter(
 
                     ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-                    holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                    holder.message.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         reply.message,
@@ -1269,10 +1277,12 @@ class FeedContentAdapter(
                             val from = reply.pic.lastIndexOf("@")
                             val middle = reply.pic.lastIndexOf("x")
                             val end = reply.pic.lastIndexOf(".")
-                            val width = reply.pic.substring(from + 1, middle).toInt()
-                            val height = reply.pic.substring(middle + 1, end).toInt()
-                            holder.multiImage.imgHeight = height
-                            holder.multiImage.imgWidth = width
+                            if (from != -1 && middle != -1 && end != -1) {
+                                val width = reply.pic.substring(from + 1, middle).toInt()
+                                val height = reply.pic.substring(middle + 1, end).toInt()
+                                holder.multiImage.imgHeight = height
+                                holder.multiImage.imgWidth = width
+                            }
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()

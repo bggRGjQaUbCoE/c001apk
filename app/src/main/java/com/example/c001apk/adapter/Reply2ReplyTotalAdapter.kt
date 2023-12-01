@@ -361,10 +361,12 @@ class Reply2ReplyTotalAdapter(
                         val from = reply.pic.lastIndexOf("@")
                         val middle = reply.pic.lastIndexOf("x")
                         val end = reply.pic.lastIndexOf(".")
-                        val width = reply.pic.substring(from + 1, middle).toInt()
-                        val height = reply.pic.substring(middle + 1, end).toInt()
-                        holder.multiImage.imgHeight = height
-                        holder.multiImage.imgWidth = width
+                        if (from != -1 && middle != -1 && end != -1) {
+                            val width = reply.pic.substring(from + 1, middle).toInt()
+                            val height = reply.pic.substring(middle + 1, end).toInt()
+                            holder.multiImage.imgHeight = height
+                            holder.multiImage.imgWidth = width
+                        }
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()

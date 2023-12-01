@@ -570,7 +570,8 @@ class AppAdapter(
                     holder.message.visibility = View.GONE
                 } else {
                     holder.message.visibility = View.VISIBLE
-                    holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                    holder.message.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         feed.message,
@@ -1015,9 +1016,6 @@ class AppAdapter(
                             val height = feed.pic.substring(middle + 1, end).toInt()
                             holder.multiImage.imgHeight = height
                             holder.multiImage.imgWidth = width
-                        } else {
-                            holder.multiImage.imgHeight = -1
-                            holder.multiImage.imgWidth = -1
                         }
                     }
                     holder.multiImage.apply {

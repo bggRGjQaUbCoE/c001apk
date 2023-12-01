@@ -392,12 +392,15 @@ class MessageContentAdapter(
                             val from = message.forwardSourceFeed.pic.lastIndexOf("@")
                             val middle = message.forwardSourceFeed.pic.lastIndexOf("x")
                             val end = message.forwardSourceFeed.pic.lastIndexOf(".")
-                            val width =
-                                message.forwardSourceFeed.pic.substring(from + 1, middle).toInt()
-                            val height =
-                                message.forwardSourceFeed.pic.substring(middle + 1, end).toInt()
-                            holder.multiImage.imgHeight = height
-                            holder.multiImage.imgWidth = width
+                            if (from != -1 && middle != -1 && end != -1) {
+                                val width =
+                                    message.forwardSourceFeed.pic.substring(from + 1, middle)
+                                        .toInt()
+                                val height =
+                                    message.forwardSourceFeed.pic.substring(middle + 1, end).toInt()
+                                holder.multiImage.imgHeight = height
+                                holder.multiImage.imgWidth = width
+                            }
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
