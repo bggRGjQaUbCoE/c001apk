@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -77,7 +78,7 @@ class Reply2ReplyTotalAdapter(
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val uname: LinkTextView = view.findViewById(R.id.uname)
+        val uname: TextView = view.findViewById(R.id.uname)
         var id = ""
         var uid = ""
         var name = ""
@@ -280,9 +281,9 @@ class Reply2ReplyTotalAdapter(
 
                 val text =
                     if (reply.ruid == "0")
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}$replyTag</a>"""
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}$replyTag </a>"""
                     else
-                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}$rReplyTag</a>"""
+                        """<a class="feed-link-uname" href="/u/${reply.username}">${reply.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}$rReplyTag </a>"""
 
 
                 holder.uname.text = SpannableStringBuilderUtil.setReply(
@@ -291,8 +292,7 @@ class Reply2ReplyTotalAdapter(
                     holder.uname.textSize.toInt(),
                     null
                 )
-                holder.uname.movementMethod =
-                    LinkTextView.LocalLinkMovementMethod.getInstance()
+                holder.uname.movementMethod = LinkMovementMethod.getInstance()
 
                 holder.message.movementMethod =
                     LinkTextView.LocalLinkMovementMethod.getInstance()

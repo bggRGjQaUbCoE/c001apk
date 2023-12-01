@@ -43,10 +43,13 @@
             <TextView
                 android:id="@+id/uname"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingEnd="5dp"
+                android:layout_height="0dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingEnd="20dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="RtlSymmetry" />
 
             <ImageButton
                 android:id="@+id/expand"

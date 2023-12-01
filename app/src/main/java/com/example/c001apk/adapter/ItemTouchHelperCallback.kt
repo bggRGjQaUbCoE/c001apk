@@ -30,7 +30,7 @@ class ItemTouchHelperCallback(onItemTouchCallbackListener: OnItemTouchCallbackLi
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        val position = viewHolder.adapterPosition
+        val position = viewHolder.bindingAdapterPosition
         if (isLongPressEnabled) currentPositionLongPressEnabled =
             l.currentPositionLongPressEnabled(position)
         val layoutManager = recyclerView.layoutManager
@@ -63,8 +63,8 @@ class ItemTouchHelperCallback(onItemTouchCallbackListener: OnItemTouchCallbackLi
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        val fromPosition = viewHolder.adapterPosition
-        val targetPosition = target.adapterPosition
+        val fromPosition = viewHolder.bindingAdapterPosition
+        val targetPosition = target.bindingAdapterPosition
         //如果fromPosition or targetPosition不可操作则直接返回false 不进行数据交换回调
         return (l.currentPositionLongPressEnabled(fromPosition)
                 && l.currentPositionLongPressEnabled(targetPosition)
@@ -72,7 +72,7 @@ class ItemTouchHelperCallback(onItemTouchCallbackListener: OnItemTouchCallbackLi
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        l.onSwiped(viewHolder.adapterPosition)
+        l.onSwiped(viewHolder.bindingAdapterPosition)
     }
 
     override fun onMoved(

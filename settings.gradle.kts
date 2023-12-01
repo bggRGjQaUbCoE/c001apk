@@ -10,8 +10,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter()
         maven ("https://jitpack.io")
+        maven("https://oss.sonatype.org/content/repositories/public")
+        gradlePluginPortal()
     }
 }
 

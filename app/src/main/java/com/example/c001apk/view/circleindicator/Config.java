@@ -1,5 +1,6 @@
 package com.example.c001apk.view.circleindicator;
 
+import android.annotation.SuppressLint;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 
@@ -13,6 +14,7 @@ public class Config {
     int width = -1;
     int height = -1;
     int margin = -1;
+    @SuppressLint("ResourceType")
     @AnimatorRes int animatorResId = R.anim.scale_with_alpha;
     @AnimatorRes int animatorReverseResId = 0;
     @DrawableRes int backgroundResId = R.drawable.white_radius;
