@@ -1,10 +1,14 @@
 package com.example.c001apk.view
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.text.TextPaint
 import android.text.style.ClickableSpan
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
@@ -12,6 +16,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.PrefManager
 
 internal class MyURLSpan(
     private val mContext: Context,
@@ -78,9 +83,21 @@ internal class MyURLSpan(
             intent.putExtra("uname", "")
             mContext.startActivity(intent)
         } else {
-            val intent = Intent(mContext, WebViewActivity::class.java)
-            intent.putExtra("url", mUrl)
-            mContext.startActivity(intent)
+            if (PrefManager.isOpenLinkOutside) {
+                val intent = Intent()
+                intent.action = Intent.ACTION_VIEW
+                intent.data = Uri.parse(mUrl)
+                try {
+                    mContext.startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(mContext, "打开失败", Toast.LENGTH_SHORT).show()
+                    Log.w("error", "Activity was not found for intent, $intent")
+                }
+            } else {
+                val intent = Intent(mContext, WebViewActivity::class.java)
+                intent.putExtra("url", mUrl)
+                mContext.startActivity(intent)
+            }
         }
     }
 

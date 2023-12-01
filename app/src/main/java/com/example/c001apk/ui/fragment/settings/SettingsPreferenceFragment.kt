@@ -78,6 +78,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isClearKeyWord" -> PrefManager.isClearKeyWord
                 "isRecordHistory" -> PrefManager.isRecordHistory
                 "isIconMiniCard" -> PrefManager.isIconMiniCard
+                "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -92,6 +93,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isClearKeyWord" -> PrefManager.isClearKeyWord = value
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
                 "isIconMiniCard" -> PrefManager.isIconMiniCard = value
+                "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }

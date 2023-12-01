@@ -1,11 +1,14 @@
 package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.text.Html
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -275,9 +278,21 @@ class FeedContentAdapter(
                     )
                 }
                 viewHolder.extraUrlLayout.setOnClickListener {
-                    val intent = Intent(parent.context, WebViewActivity::class.java)
-                    intent.putExtra("url", viewHolder.extraUrl.text)
-                    parent.context.startActivity(intent)
+                    if (PrefManager.isOpenLinkOutside) {
+                        val intent = Intent()
+                        intent.action = Intent.ACTION_VIEW
+                        intent.data = Uri.parse(viewHolder.extraUrl.text.toString())
+                        try {
+                            parent.context.startActivity(intent)
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(parent.context, "打开失败", Toast.LENGTH_SHORT).show()
+                            Log.w("error", "Activity was not found for intent, $intent")
+                        }
+                    } else {
+                        val intent = Intent(parent.context, WebViewActivity::class.java)
+                        intent.putExtra("url", viewHolder.extraUrl.text)
+                        parent.context.startActivity(intent)
+                    }
                 }
                 viewHolder
             }
@@ -794,13 +809,34 @@ class FeedContentAdapter(
                                         shareUrl.visibility = View.VISIBLE
                                         urlTitle.text = articleList[position1 - 2].title.toString()
                                         shareUrl.setOnClickListener {
-                                            val intent =
-                                                Intent(mContext, WebViewActivity::class.java)
-                                            intent.putExtra(
-                                                "url",
-                                                articleList[position1 - 2].url.toString()
-                                            )
-                                            mContext.startActivity(intent)
+
+                                            if (PrefManager.isOpenLinkOutside) {
+                                                val intent = Intent()
+                                                intent.action = Intent.ACTION_VIEW
+                                                intent.data =
+                                                    Uri.parse(articleList[position1 - 2].url.toString())
+                                                try {
+                                                    mContext.startActivity(intent)
+                                                } catch (e: ActivityNotFoundException) {
+                                                    Toast.makeText(
+                                                        mContext,
+                                                        "打开失败",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    Log.w(
+                                                        "error",
+                                                        "Activity was not found for intent, $intent"
+                                                    )
+                                                }
+                                            } else {
+                                                val intent =
+                                                    Intent(mContext, WebViewActivity::class.java)
+                                                intent.putExtra(
+                                                    "url",
+                                                    articleList[position1 - 2].url.toString()
+                                                )
+                                                mContext.startActivity(intent)
+                                            }
                                         }
                                         return view
                                     }
@@ -830,7 +866,7 @@ class FeedContentAdapter(
                                 (holder.message.textSize * 1.3).toInt(),
                                 null
                             )
-                        }else holder.message.visibility = View.GONE
+                        } else holder.message.visibility = View.GONE
 
                         holder.reply.text =
                             "${feed.data!!.vote!!.totalVoteNum}人投票 · ${feed.data.vote!!.totalCommentNum}个观点"

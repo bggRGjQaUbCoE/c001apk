@@ -185,7 +185,7 @@ class BHistoryAdapter(
                         holder.uname.text = history.uname
                         if (history.device == "")
                             holder.device.visibility = View.GONE
-                        else{
+                        else {
                             holder.device.visibility = View.VISIBLE
                             holder.device.text = history.device
                         }
@@ -205,7 +205,7 @@ class BHistoryAdapter(
                         holder.uname.text = history.uname
                         if (history.device == "")
                             holder.device.visibility = View.GONE
-                        else{
+                        else {
                             holder.device.visibility = View.VISIBLE
                             holder.device.text = history.device
                         }

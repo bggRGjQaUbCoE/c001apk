@@ -146,4 +146,8 @@ object PrefManager {
     var isIconMiniCard: Boolean
         get() = pref.getBoolean("isIconMiniCard", true)
         set(value) = pref.edit().putBoolean("isIconMiniCard", value).apply()
+
+    var isOpenLinkOutside: Boolean
+        get() = pref.getBoolean("isOpenLinkOutside", false)
+        set(value) = pref.edit().putBoolean("isOpenLinkOutside", value).apply()
 }

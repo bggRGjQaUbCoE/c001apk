@@ -58,6 +58,11 @@
             android:key="fontScale"
             android:title="@string/font_scale" />
         <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_explorer"
+            android:key="isOpenLinkOutside"
+            android:title="@string/open_link_outside" />
+        <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_feed"
             android:key="isIconMiniCard"
