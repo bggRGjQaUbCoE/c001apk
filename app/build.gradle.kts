@@ -126,11 +126,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         viewBinding = true
@@ -188,7 +185,7 @@ dependencies {
     implementation("dev.rikka.rikkax.material:material-preference:2.0.0")
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     implementation("androidx.webkit:webkit:1.9.0")
-    implementation("org.jsoup:jsoup:1.16.2")
+    implementation("org.jsoup:jsoup:1.17.1")
     implementation("com.github.mikaelzero.mojito:mojito:1.8.7")
     implementation("com.github.mikaelzero.mojito:SketchImageViewLoader:1.8.7")
     implementation("com.github.mikaelzero.mojito:GlideImageLoader:1.8.7")

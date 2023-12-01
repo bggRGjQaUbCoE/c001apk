@@ -1193,7 +1193,7 @@ class FeedContentAdapter(
                                         ), 128
                                     )
 
-                                    val replyTag =
+                                    val replyTag1 =
                                         when (replyData.uid) {
                                             replyData.feedUid -> " [楼主] "
                                             reply.uid -> " [层主] "
@@ -1220,7 +1220,7 @@ class FeedContentAdapter(
                                         }
 
                                     val mess =
-                                        """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
+                                        """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag1}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
 
                                     textView.movementMethod = LinkMovementMethod.getInstance()
 
