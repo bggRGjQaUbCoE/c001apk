@@ -51,6 +51,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
+import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -148,7 +149,7 @@ class FeedContentAdapter(
         val uname: TextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
         val messageTitle: TextView = view.findViewById(R.id.messageTitle)
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val ip: TextView = view.findViewById(R.id.ip)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
@@ -173,7 +174,7 @@ class FeedContentAdapter(
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val uname: TextView = view.findViewById(R.id.uname)
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
@@ -231,12 +232,6 @@ class FeedContentAdapter(
                     .inflate(R.layout.item_feed_content, parent, false)
                 val viewHolder = FeedContentViewHolder(view)
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
-                viewHolder.message.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
                     parent.context.startActivity(intent)
@@ -325,27 +320,11 @@ class FeedContentAdapter(
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
-                viewHolder.message.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
                 viewHolder.itemView.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
                     parent.context.startActivity(intent)
                     true
-                }
-                viewHolder.message.setOnClickListener {
-                    iOnReplyClickContainer?.onReply2Reply(
-                        viewHolder.bindingAdapterPosition,
-                        null,
-                        viewHolder.id,
-                        viewHolder.uid,
-                        viewHolder.uname.text.toString(),
-                        "reply"
-                    )
                 }
                 viewHolder.itemView.setOnClickListener {
                     iOnReplyClickContainer?.onReply2Reply(
@@ -859,7 +838,7 @@ class FeedContentAdapter(
 
                         if (!feed.data?.message.isNullOrEmpty()) {
                             holder.message.visibility = View.VISIBLE
-                            holder.message.movementMethod = LinkMovementMethod.getInstance()
+                            holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                             holder.message.text = SpannableStringBuilderUtil.setText(
                                 mContext,
                                 feed.data?.message.toString(),
@@ -925,7 +904,7 @@ class FeedContentAdapter(
                             holder.messageTitle.text = feed.data?.messageTitle
                         }
 
-                        holder.message.movementMethod = LinkMovementMethod.getInstance()
+                        holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(
                             mContext,
                             feed.data?.message.toString(),
@@ -1117,7 +1096,7 @@ class FeedContentAdapter(
 
                     ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-                    holder.message.movementMethod = LinkMovementMethod.getInstance()
+                    holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         reply.message,

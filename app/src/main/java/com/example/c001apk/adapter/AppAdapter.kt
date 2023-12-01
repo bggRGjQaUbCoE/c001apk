@@ -45,6 +45,7 @@ import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinearItemDecoration1
 import com.example.c001apk.view.circleindicator.CircleIndicator3
@@ -110,7 +111,7 @@ class AppAdapter(
         val uname: TextView = view.findViewById(R.id.uname)
         val expand: ImageButton = view.findViewById(R.id.expand)
         val device: TextView = view.findViewById(R.id.device)
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val messageTitle: TextView = view.findViewById(R.id.messageTitle)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
@@ -135,7 +136,7 @@ class AppAdapter(
         val uname: TextView = view.findViewById(R.id.uname)
         val from: TextView = view.findViewById(R.id.from)
         val device: TextView = view.findViewById(R.id.device)
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val messageTitle: TextView = view.findViewById(R.id.messageTitle)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         var id = ""
@@ -242,24 +243,6 @@ class AppAdapter(
                         )
                     parent.context.startActivity(intent)
                 }
-                viewHolder.message.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", viewHolder.feedType)
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    if (PrefManager.isRecordHistory)
-                        HistoryUtil.saveHistory(
-                            viewHolder.id,
-                            viewHolder.uid,
-                            viewHolder.uname.text.toString(),
-                            viewHolder.avatarUrl,
-                            viewHolder.device.text.toString(),
-                            viewHolder.message.text.toString(),
-                            viewHolder.pubDataRaw
-                        )
-                    parent.context.startActivity(intent)
-                }
                 viewHolder.reply.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", viewHolder.feedType)
@@ -305,12 +288,6 @@ class AppAdapter(
                     true
                 }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
-                viewHolder.message.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
                     parent.context.startActivity(intent)
@@ -450,31 +427,7 @@ class AppAdapter(
                         )
                     parent.context.startActivity(intent)
                 }
-                viewHolder.message.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", viewHolder.feedType)
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    if (PrefManager.isRecordHistory)
-                        HistoryUtil.saveHistory(
-                            viewHolder.id,
-                            viewHolder.uid,
-                            viewHolder.uname.text.toString(),
-                            viewHolder.avatarUrl,
-                            viewHolder.device.text.toString(),
-                            viewHolder.message.text.toString(),
-                            viewHolder.pubDataRaw
-                        )
-                    parent.context.startActivity(intent)
-                }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
-                viewHolder.message.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
                     parent.context.startActivity(intent)
@@ -617,7 +570,7 @@ class AppAdapter(
                     holder.message.visibility = View.GONE
                 } else {
                     holder.message.visibility = View.VISIBLE
-                    holder.message.movementMethod = LinkMovementMethod.getInstance()
+                    holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         feed.message,
@@ -1043,7 +996,7 @@ class AppAdapter(
                         Html.FROM_HTML_MODE_COMPACT
                     )
 
-                holder.message.movementMethod = LinkMovementMethod.getInstance()
+                holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     feed.message,

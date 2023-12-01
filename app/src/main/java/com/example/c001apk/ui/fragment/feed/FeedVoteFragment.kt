@@ -301,11 +301,6 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener, IOnReplyClickList
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    Toast.makeText(
-                        requireContext(),
-                        "${viewModel.lastVisibleItemPosition},,${viewModel.voteCommentList.size}",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     if (viewModel.lastVisibleItemPosition == viewModel.voteCommentList.size + 2
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {

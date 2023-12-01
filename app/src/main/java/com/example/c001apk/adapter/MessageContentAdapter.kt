@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +24,7 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.card.MaterialCardView
@@ -64,7 +64,7 @@ class MessageContentAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-       // notifyDataSetChanged()
+        // notifyDataSetChanged()
     }
 
     class MessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -73,7 +73,7 @@ class MessageContentAdapter(
         var uid = ""
         var entityType = ""
         var isLike = false
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
@@ -85,8 +85,8 @@ class MessageContentAdapter(
         var forwardId = ""
         var forwardUid = ""
         var forwardUname = ""
-        val forwardTitle: TextView = view.findViewById(R.id.forwardTitle)
-        val forwardMessage: TextView = view.findViewById(R.id.forwardMessage)
+        val forwardTitle: LinkTextView = view.findViewById(R.id.forwardTitle)
+        val forwardMessage: LinkTextView = view.findViewById(R.id.forwardMessage)
         val forward1: MaterialCardView = view.findViewById(R.id.forward1)
         var forwardId1 = ""
         var forwardUid1 = ""
@@ -117,12 +117,6 @@ class MessageContentAdapter(
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
-                viewHolder.message.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
                 viewHolder.itemView.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
@@ -130,16 +124,6 @@ class MessageContentAdapter(
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
-                    if (viewHolder.entityType == "feed") {
-                        val intent = Intent(parent.context, FeedActivity::class.java)
-                        intent.putExtra("type", "feed")
-                        intent.putExtra("id", viewHolder.id)
-                        intent.putExtra("uid", viewHolder.uid)
-                        intent.putExtra("uname", viewHolder.uname.text)
-                        parent.context.startActivity(intent)
-                    }
-                }
-                viewHolder.message.setOnClickListener {
                     if (viewHolder.entityType == "feed") {
                         val intent = Intent(parent.context, FeedActivity::class.java)
                         intent.putExtra("type", "feed")
@@ -352,7 +336,8 @@ class MessageContentAdapter(
                     )
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
-                    holder.message.movementMethod = LinkMovementMethod.getInstance()
+                    holder.message.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         message.message,
@@ -385,14 +370,16 @@ class MessageContentAdapter(
                     holder.forwardUname = message.forwardSourceFeed.username
                     val title =
                         """<a class="feed-link-uname" href="/u/${message.forwardSourceFeed.username}">@${message.forwardSourceFeed.username}: </a>${message.forwardSourceFeed.messageTitle}"""
-                    holder.forwardTitle.movementMethod = LinkMovementMethod.getInstance()
+                    holder.forwardTitle.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.forwardTitle.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         title,
                         (holder.forwardMessage.textSize * 1.3).toInt(),
                         null
                     )
-                    holder.forwardMessage.movementMethod = LinkMovementMethod.getInstance()
+                    holder.forwardMessage.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.forwardMessage.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         message.forwardSourceFeed.message,

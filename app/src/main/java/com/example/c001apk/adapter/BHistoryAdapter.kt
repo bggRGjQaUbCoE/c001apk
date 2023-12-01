@@ -3,7 +3,6 @@ package com.example.c001apk.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -26,6 +25,7 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.view.LinkTextView
 import kotlin.concurrent.thread
 
 
@@ -69,7 +69,7 @@ class BHistoryAdapter(
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val uname: TextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val expand: ImageButton = view.findViewById(R.id.expand)
     }
@@ -94,21 +94,7 @@ class BHistoryAdapter(
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
-                viewHolder.message.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    parent.context.startActivity(intent)
-                }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
-                viewHolder.message.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
                     parent.context.startActivity(intent)
@@ -190,7 +176,8 @@ class BHistoryAdapter(
                             holder.device.text = history.device
                         }
                         holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
-                        holder.message.movementMethod = LinkMovementMethod.getInstance()
+                        holder.message.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(
                             mContext,
                             history.message,
@@ -210,7 +197,8 @@ class BHistoryAdapter(
                             holder.device.text = history.device
                         }
                         holder.pubDate.text = DateUtils.fromToday(history.pubDate.toLong())
-                        holder.message.movementMethod = LinkMovementMethod.getInstance()
+                        holder.message.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(
                             mContext,
                             history.message,

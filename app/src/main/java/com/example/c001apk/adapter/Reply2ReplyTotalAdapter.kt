@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -30,6 +29,7 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -73,16 +73,16 @@ class Reply2ReplyTotalAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-       //notifyDataSetChanged()
+        //notifyDataSetChanged()
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val uname: TextView = view.findViewById(R.id.uname)
+        val uname: LinkTextView = view.findViewById(R.id.uname)
         var id = ""
         var uid = ""
         var name = ""
         var isLike = false
-        val message: TextView = view.findViewById(R.id.message)
+        val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
         val avatar: ImageView = view.findViewById(R.id.avatar)
@@ -108,12 +108,6 @@ class Reply2ReplyTotalAdapter(
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
-                viewHolder.message.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
                 viewHolder.itemView.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
@@ -121,16 +115,6 @@ class Reply2ReplyTotalAdapter(
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
-                    iOnReplyClickListener.onReply2Reply(
-                        position,
-                        viewHolder.bindingAdapterPosition,
-                        viewHolder.id,
-                        viewHolder.uid,
-                        viewHolder.name,
-                        "reply"
-                    )
-                }
-                viewHolder.message.setOnClickListener {
                     iOnReplyClickListener.onReply2Reply(
                         position,
                         viewHolder.bindingAdapterPosition,
@@ -307,9 +291,11 @@ class Reply2ReplyTotalAdapter(
                     holder.uname.textSize.toInt(),
                     null
                 )
-                holder.uname.movementMethod = LinkMovementMethod.getInstance()
+                holder.uname.movementMethod =
+                    LinkTextView.LocalLinkMovementMethod.getInstance()
 
-                holder.message.movementMethod = LinkMovementMethod.getInstance()
+                holder.message.movementMethod =
+                    LinkTextView.LocalLinkMovementMethod.getInstance()
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     reply.message,

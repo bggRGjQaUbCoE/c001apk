@@ -69,11 +69,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/avatar" />
 
-        <TextView
+        <com.example.c001apk.view.LinkTextView
             android:id="@+id/message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:clickable="true"
+            android:focusable="true"
             android:lineSpacingMultiplier="1.3"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -121,6 +123,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/text_scroll_bg"
+            android:clickable="true"
+            android:focusable="true"
             android:padding="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/multiImage" />
