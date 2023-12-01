@@ -303,7 +303,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
         refreshData()
     }
 
-    override fun onReturnTop() {
+    override fun onReturnTop(isRefresh: Boolean?) {
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()

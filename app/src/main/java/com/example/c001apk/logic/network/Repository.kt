@@ -289,7 +289,7 @@ object Repository {
             Result.failure(RuntimeException("response status is null"))
     }
 
-    fun getDataList(url: String, title: String, subTitle: String, lastItem: String?, page: Int) =
+    fun getDataList(url: String, title: String, subTitle: String?, lastItem: String?, page: Int) =
         fire(Dispatchers.IO) {
             val dataResponse = Network.getDataList(url, title, subTitle, lastItem, page)
             if (dataResponse.data.isNotEmpty())

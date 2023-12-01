@@ -61,7 +61,10 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
             }
 
             override fun onTabReselected(tab: Tab?) {
-                tabController?.onReturnTop()
+                if (tab?.text == "关注")
+                    tabController?.onReturnTop(false)
+                else
+                    tabController?.onReturnTop(true)
             }
 
         })
@@ -164,7 +167,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
     }
 
     override fun onReturnTop() {
-        tabController?.onReturnTop()
+        tabController?.onReturnTop(true)
     }
 
     override fun onResume() {

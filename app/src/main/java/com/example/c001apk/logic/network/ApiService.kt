@@ -187,7 +187,7 @@ interface ApiService {
     fun getDataList(
         @Query("url") url: String,
         @Query("title") title: String,
-        @Query("subTitle") subTitle: String,
+        @Query("subTitle") subTitle: String?,
         @Query("lastItem") lastItem: String?,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>

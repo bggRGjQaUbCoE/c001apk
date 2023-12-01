@@ -184,7 +184,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                tabController?.onReturnTop()
+                tabController?.onReturnTop(null)
             }
 
         })

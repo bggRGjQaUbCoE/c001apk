@@ -124,13 +124,13 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClic
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.searchTabList[position]
         }.attach()
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {}
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                tabController?.onReturnTop()
+                tabController?.onReturnTop(null)
             }
 
         })

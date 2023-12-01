@@ -137,13 +137,12 @@ class AppListFragment : Fragment(), IOnTabClickListener {
 
     }
 
-
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
         viewModel.getItems(requireContext())
     }
 
-    override fun onReturnTop() {
+    override fun onReturnTop(isRefresh: Boolean?) {
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             refreshData()
         } else {

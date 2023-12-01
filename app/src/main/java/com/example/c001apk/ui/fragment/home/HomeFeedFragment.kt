@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.fragment.home
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -550,14 +551,65 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         )
     }
 
-    override fun onReturnTop() {
-        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-            binding.swipeRefresh.isRefreshing = true
-            refreshData()
-        } else {
-            binding.recyclerView.scrollToPosition(0)
-            binding.swipeRefresh.isRefreshing = true
-            refreshData()
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onReturnTop(isRefresh: Boolean?) {
+        if (isRefresh!!) {
+            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+                binding.swipeRefresh.isRefreshing = true
+                refreshData()
+            } else {
+                binding.recyclerView.scrollToPosition(0)
+                binding.swipeRefresh.isRefreshing = true
+                refreshData()
+            }
+        } else if (viewModel.type == "follow") {
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setTitle("关注分组")
+                val items = arrayOf("全部关注", "好友关注", "话题关注", "数码关注", "应用关注")
+                setSingleChoiceItems(
+                    items,
+                    viewModel.position
+                ) { dialog: DialogInterface, position: Int ->
+                    when (position) {
+                        0 -> {
+                            viewModel.position = 0
+                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW"
+                            viewModel.followTitle = "全部关注"
+                        }
+
+                        1 -> {
+                            viewModel.position = 1
+                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
+                            viewModel.followTitle = "好友关注"
+                        }
+
+                        2 -> {
+                            viewModel.position = 2
+                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
+                            viewModel.followTitle = "话题关注"
+                        }
+
+                        3 -> {
+                            viewModel.position = 3
+                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
+                            viewModel.followTitle = "数码关注"
+                        }
+
+                        4 -> {
+                            viewModel.position = 4
+                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=apk"
+                            viewModel.followTitle = "应用关注"
+                        }
+                    }
+                    viewModel.homeFeedList.clear()
+                    mAdapter.notifyDataSetChanged()
+                    binding.indicator.visibility = View.VISIBLE
+                    binding.indicator.isIndeterminate = true
+                    refreshData()
+                    dialog.dismiss()
+                }
+                show()
+            }
         }
     }
 

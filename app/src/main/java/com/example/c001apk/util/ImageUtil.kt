@@ -1,6 +1,5 @@
 package com.example.c001apk.util
 
-import android.R.attr.contextUri
 import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
@@ -196,17 +195,21 @@ object ImageUtil {
                             imageCheckDir = File(context.externalCacheDir, "imageShare/$filename")
                             if (imageCheckDir.exists()) {
                                 withContext(Dispatchers.Main) {
-                                    shareImage(context, File(
-                                        context.externalCacheDir,
-                                        "imageShare/$filename",
-                                    ), null)
+                                    shareImage(
+                                        context, File(
+                                            context.externalCacheDir,
+                                            "imageShare/$filename",
+                                        ), null
+                                    )
                                 }
                             } else if (saveImageToGallery(context, url)) {
                                 withContext(Dispatchers.Main) {
-                                    shareImage(context, File(
-                                        context.externalCacheDir,
-                                        "imageShare/$filename",
-                                    ), null)
+                                    shareImage(
+                                        context, File(
+                                            context.externalCacheDir,
+                                            "imageShare/$filename",
+                                        ), null
+                                    )
                                 }
                             } else {
                                 ToastUtil.toast("分享失败")

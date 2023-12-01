@@ -139,7 +139,7 @@ object Network {
     suspend fun getDataList(
         url: String,
         title: String,
-        subTitle: String,
+        subTitle: String?,
         lastItem: String?,
         page: Int
     ) = apiService.getDataList(url, title, subTitle, lastItem, page).await()

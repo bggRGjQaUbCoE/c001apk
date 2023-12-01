@@ -221,7 +221,13 @@ class AppViewModel : ViewModel() {
     private val getAppCommentData = MutableLiveData<String>()
 
     val appCommentData = getAppCommentData.switchMap {
-        Repository.getDataList(baseURL + appId + appCommentSort, appCommentTitle, "", "", page)
+        Repository.getDataList(
+            baseURL + appId + appCommentSort,
+            appCommentTitle,
+            subtitle,
+            lastItem,
+            page
+        )
     }
 
     fun getAppComment() {
@@ -243,7 +249,7 @@ class AppViewModel : ViewModel() {
     private val getCarouselData = MutableLiveData<String>()
 
     val carouselData = getCarouselData.switchMap {
-        Repository.getDataList(url, title, "", "", page)
+        Repository.getDataList(url, title, subtitle, lastItem, page)
     }
 
     fun getCarouselList() {
@@ -507,8 +513,10 @@ class AppViewModel : ViewModel() {
 
     private val getFollowFeedData = MutableLiveData<String>()
 
+    var followUrl = "/page?url=V9_HOME_TAB_FOLLOW"
+    var followTitle = "全部关注"
     val followFeedData = getFollowFeedData.switchMap {
-        Repository.getDataList("/page?url=V9_HOME_TAB_FOLLOW", "关注", "", lastItem, page)
+        Repository.getDataList(followUrl, followTitle, subtitle, lastItem, page)
     }
 
     fun getFollowFeed() {
@@ -518,7 +526,7 @@ class AppViewModel : ViewModel() {
     private val getHomeRankingData = MutableLiveData<String>()
 
     val homeRankingData = getHomeRankingData.switchMap {
-        Repository.getDataList("/page?url=V9_HOME_TAB_RANKING", "热榜", "", lastItem, page)
+        Repository.getDataList("/page?url=V9_HOME_TAB_RANKING", "热榜", subtitle, lastItem, page)
     }
 
     fun getHomeRanking() {
@@ -535,7 +543,7 @@ class AppViewModel : ViewModel() {
     private val getHomeTopicTitleLiveData = MutableLiveData<String>()
 
     val homeTopicTitleLiveData = getHomeTopicTitleLiveData.switchMap {
-        Repository.getDataList("/page?url=V11_VERTICAL_TOPIC", "话题", "", "", 1)
+        Repository.getDataList("/page?url=V11_VERTICAL_TOPIC", "话题", subtitle, lastItem, 1)
     }
 
     fun getHomeTopicTitle() {
@@ -547,7 +555,7 @@ class AppViewModel : ViewModel() {
     private val getTopicDataLiveData = MutableLiveData<String>()
 
     val topicDataLiveData = getTopicDataLiveData.switchMap {
-        Repository.getDataList(url, title, "", "", page)
+        Repository.getDataList(url, title, subtitle, lastItem, page)
     }
 
     fun getTopicData() {
