@@ -222,13 +222,13 @@ class MessageAdapter(
 
     }
 
-    override fun getItemCount() = notiList.size + 7
+    override fun getItemCount() = notiList.size + 6
 
     override fun getItemViewType(position: Int): Int {
         return if (position == itemCount - 1) -1
         else when (position) {
             0 -> 0
-            in 1..5 -> 1
+            in 1..4 -> 1
             else -> 2
         }
     }
@@ -266,7 +266,7 @@ class MessageAdapter(
             }
 
             is FeedContentAdapter.FeedContentReplyViewHolder -> {
-                val noti = notiList[position - 6]
+                val noti = notiList[position - 5]
                 val doc: Document = Jsoup.parse(noti.note)
                 val links: Elements = doc.select("a[href]")
                 for (link in links) {

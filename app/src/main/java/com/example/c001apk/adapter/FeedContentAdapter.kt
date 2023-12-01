@@ -926,9 +926,6 @@ class FeedContentAdapter(
                                 val height = feed.data.pic.substring(middle + 1, end).toInt()
                                 holder.multiImage.imgHeight = height
                                 holder.multiImage.imgWidth = width
-                            } else {
-                                holder.multiImage.imgHeight = -1
-                                holder.multiImage.imgWidth = -1
                             }
                         }
                         holder.multiImage.apply {

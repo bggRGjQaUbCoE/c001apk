@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.palette.graphics.Palette
@@ -28,9 +29,13 @@ import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants.USER_AGENT
 import com.example.c001apk.util.ClipboardUtil.copyText
+import com.example.c001apk.util.FileUtil.Companion.copyFile
+import com.example.c001apk.util.FileUtil.Companion.createFileByDeleteOldFile
 import com.example.c001apk.util.Utils.Companion.getBase64
+import com.example.c001apk.view.FileTarget
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
+import com.github.megatronking.stringfog.annotation.StringFogIgnore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import jp.wasabeef.glide.transformations.ColorFilterTransformation
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -42,12 +47,17 @@ import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.ext.mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.OutputStream
 
 
 object ImageUtil {
 
     private var filename = ""
+    private var type = ""
     private lateinit var imagesDir: File
     private lateinit var imageCheckDir: File
 
@@ -162,7 +172,7 @@ object ImageUtil {
     private fun showSaveImgDialog(context: Context, url: String) {
         val index = url.lastIndexOf('/')
         val dot = url.lastIndexOf('.')
-        val type = url.substring(dot, url.length)
+        type = url.substring(dot, url.length)
         filename = "${url.substring(index + 1, url.length).getBase64().substring(0, 16)}$type"
 
         MaterialAlertDialogBuilder(context).apply {
@@ -181,10 +191,8 @@ object ImageUtil {
                             )
                             if (imageCheckDir.exists()) {
                                 ToastUtil.toast("文件已存在")
-                            } else if (saveImageToGallery(context, url)) {
-                                ToastUtil.toast("保存成功")
                             } else {
-                                ToastUtil.toast("保存失败")
+                                downloadPicture(context, url)
                             }
                         }
                     }
@@ -420,6 +428,85 @@ object ImageUtil {
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_STREAM, contentUri)
         context.startActivity(Intent.createChooser(intent, title))
+    }
+
+
+    private fun downloadPicture(context: Context, url: String?) {
+        Glide.with(context).downloadOnly().load(url).into(object : FileTarget() {
+            override fun onLoadFailed(errorDrawable: Drawable?) {
+                super.onLoadFailed(errorDrawable)
+                Toast.makeText(context, "download failed", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResourceReady(resource: File, transition: Transition<in File>?) {
+                super.onResourceReady(resource, transition)
+                save(context, resource)
+            }
+        })
+    }
+
+    //from BigImageViewPager
+    private fun save(context: Context, resource: File) {
+        // 传入的保存文件夹名
+        val downloadFolderName = "c001apk"
+        // 保存的图片名称
+        //var name = System.currentTimeMillis().toString() + ""
+        //val mimeType = ImageUtil.getImageTypeWithMime(resource.absolutePath)
+        //name = "$name.$mimeType"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // 大于等于29版本的保存方法
+            val resolver = context.contentResolver
+            // 设置文件参数到ContentValues中
+            val values = ContentValues()
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            values.put(MediaStore.Images.Media.DESCRIPTION, filename)
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/$type")
+            values.put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/" + downloadFolderName + "/"
+            )
+            val insertUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            var inputStream: BufferedInputStream? = null
+            var os: OutputStream? = null
+            try {
+                inputStream = BufferedInputStream(FileInputStream(resource.absolutePath))
+                os = insertUri?.let { resolver.openOutputStream(it) }
+                os?.let {
+                    val buffer = ByteArray(1024 * 4)
+                    var len: Int
+                    while (inputStream.read(buffer).also { len = it } != -1) {
+                        os.write(buffer, 0, len)
+                    }
+                    os.flush()
+                }
+                Toast.makeText(context, "已保存到 $downloadFolderName", Toast.LENGTH_SHORT).show()
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+            } finally {
+                try {
+                    os?.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+                try {
+                    inputStream?.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            // 低于29版本的保存方法
+            val path = Environment.getExternalStorageDirectory()
+                .toString() + "/" + downloadFolderName + "/"
+            createFileByDeleteOldFile(path + filename)
+            val result = copyFile(resource, path, filename)
+            if (result) {
+                Toast.makeText(context, "已保存到 $downloadFolderName", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 }
