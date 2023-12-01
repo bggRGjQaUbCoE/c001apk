@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TokenDeviceUtils.Companion.randHexString
 import com.example.c001apk.util.Utils
@@ -377,6 +378,12 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 }
                 show()
             }
+            true
+        }
+
+        findPreference<Preference>("regenerate")?.setOnPreferenceClickListener {
+            TokenDeviceUtils.getDeviceCode(true)
+            ToastUtil.toast("已重新生成")
             true
         }
 

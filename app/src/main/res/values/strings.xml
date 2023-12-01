@@ -111,5 +111,6 @@
     <string name="font_scale">字体调节</string>
     <string name="show_icon_mini_card">头条显示广场</string>
     <string name="open_link_outside">使用外部浏览器打开链接</string>
+    <string name="regenerate">重新生成随机设备信息</string>
 
 </resources>

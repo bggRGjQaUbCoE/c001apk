@@ -39,5 +39,8 @@
         android:enabled="false"
         android:key="xAppToken"
         android:title="@string/xAppToken" />
+    <Preference
+        android:key="regenerate"
+        android:title="@string/regenerate" />
 
 </PreferenceScreen>
