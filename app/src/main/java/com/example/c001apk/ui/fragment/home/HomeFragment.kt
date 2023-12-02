@@ -93,7 +93,8 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
                         "应用" -> add(AppListFragment())
                         "头条" -> add(HomeFeedFragment.newInstance("feed"))
                         "热榜" -> add(HomeFeedFragment.newInstance("rank"))
-                        "话题" -> add(TopicFragment())
+                        "话题" -> add(TopicFragment.newInstance("topic"))
+                        "数码" -> add(TopicFragment.newInstance("product"))
                     }
                 }
             }
@@ -110,6 +111,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
             insert(HomeMenu("头条", true))
             insert(HomeMenu("热榜", true))
             insert(HomeMenu("话题", true))
+            insert(HomeMenu("数码", true))
         }
         tabList.apply {
             add("关注")
@@ -117,6 +119,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
             add("头条")
             add("热榜")
             add("话题")
+            add("数码")
         }
     }
 

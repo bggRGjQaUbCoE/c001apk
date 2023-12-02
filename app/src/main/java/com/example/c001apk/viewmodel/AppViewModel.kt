@@ -721,4 +721,14 @@ class AppViewModel : ViewModel() {
         getVoteCommentListData.value = getVoteCommentListData.value
     }
 
+    private val getProductListData = MutableLiveData<String>()
+
+    val productCategoryData = getProductListData.switchMap {
+        Repository.getProductList()
+    }
+
+    fun getProductList() {
+        getProductListData.value = getProductListData.value
+    }
+
 }

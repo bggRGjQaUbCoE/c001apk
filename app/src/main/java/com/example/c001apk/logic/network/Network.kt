@@ -174,6 +174,9 @@ object Network {
     ) =
         apiService.getVoteComment(fid, extraKey, page, firstItem, lastItem).await()
 
+    suspend fun getProductList() =
+        apiService.getProductList().await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

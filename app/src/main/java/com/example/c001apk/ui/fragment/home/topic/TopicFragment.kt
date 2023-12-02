@@ -16,31 +16,24 @@ import com.example.c001apk.view.vertical.widget.ITabView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.R
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 class TopicFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private var param1: String? = null
-    private var param2: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            viewModel.type = it.getString("TYPE")!!
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(type: String) =
             TopicFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString("TYPE", type)
                 }
             }
     }
@@ -94,6 +87,30 @@ class TopicFragment : Fragment() {
             }
         }
 
+        viewModel.productCategoryData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val data = result.getOrNull()
+                if (!data.isNullOrEmpty()) {
+                    if (viewModel.titleList.isEmpty()) {
+                        for (element in data) {
+                            viewModel.titleList.add(element.title)
+                            viewModel.fragmentList.add(
+                                HomeTopicContentFragment.newInstance(
+                                    element.url,
+                                    element.title
+                                )
+                            )
+                        }
+                        initView()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
 
@@ -102,7 +119,10 @@ class TopicFragment : Fragment() {
             binding.indicator.isIndeterminate = true
             binding.indicator.visibility = View.VISIBLE
             viewModel.isNew = true
-            viewModel.getHomeTopicTitle()
+            if (viewModel.type == "topic")
+                viewModel.getHomeTopicTitle()
+            else
+                viewModel.getProductList()
         }
     }
 
