@@ -7,12 +7,16 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
+import com.example.c001apk.ui.fragment.FollowFragment
+import com.example.c001apk.ui.fragment.home.HomeFeedFragment
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
@@ -22,6 +26,7 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.tabs.TabLayoutMediator
 
 class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
 
@@ -36,15 +41,43 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
         binding = ActivityFfflistBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
         viewModel.type = intent.getStringExtra("type")!!
         viewModel.uid = intent.getStringExtra("uid")!!
 
         initBar()
-        initView()
-        initData()
-        initRefresh()
-        initScroll()
+        if (viewModel.isEnable) {
+            binding.tabLayout.visibility = View.VISIBLE
+            binding.viewPager.visibility = View.VISIBLE
+            binding.swipeRefresh.visibility = View.GONE
+            binding.recyclerView.visibility = View.GONE
+            if (viewModel.tabList.isEmpty()){
+                viewModel.tabList.apply {
+                    add("用户")
+                    add("话题")
+                    add("数码")
+                    add("应用")
+                    //add("收藏")
+                }
+                viewModel.fragmentList.apply {
+                    add(FollowFragment.newInstance("follow"))
+                    add(FollowFragment.newInstance("topic"))
+                    add(FollowFragment.newInstance("product"))
+                    add(FollowFragment.newInstance("apk"))
+                    //add(FollowFragment.newInstance("favorite"))
+                }
+            }
+            initViewPager()
+        } else {
+            binding.tabLayout.visibility = View.GONE
+            binding.viewPager.visibility = View.GONE
+            binding.swipeRefresh.visibility = View.VISIBLE
+            binding.recyclerView.visibility = View.VISIBLE
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+        }
 
         viewModel.listData.observe(this) { result ->
             if (viewModel.isNew) {
@@ -125,6 +158,21 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
 
     }
 
+    private fun initViewPager() {
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun createFragment(position: Int): Fragment {
+                return viewModel.fragmentList[position]
+            }
+
+            override fun getItemCount() = viewModel.tabList.size
+
+        }
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = viewModel.tabList[position]
+        }.attach()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
@@ -141,7 +189,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
 
             "follow" -> {
                 if (viewModel.uid == PrefManager.uid)
-                    binding.toolBar.title = "好友"
+                    binding.toolBar.title = "我的关注"
                 else
                     binding.toolBar.title = "TA关注的人"
             }

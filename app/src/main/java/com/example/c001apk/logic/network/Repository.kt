@@ -166,27 +166,9 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun getFeedList(uid: String, page: Int) =
+    fun getFollowList(url: String, uid: String, page: Int) =
         fire(Dispatchers.IO) {
-            val feedResponse = Network.getFeedList(uid, page)
-            if (feedResponse.data.isNotEmpty())
-                Result.success(feedResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
-    fun getFollowList(uid: String, page: Int) =
-        fire(Dispatchers.IO) {
-            val feedResponse = Network.getFollowList(uid, page)
-            if (feedResponse.data.isNotEmpty())
-                Result.success(feedResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
-
-    fun getFansList(uid: String, page: Int) =
-        fire(Dispatchers.IO) {
-            val feedResponse = Network.getFansList(uid, page)
+            val feedResponse = Network.getFollowList(url, uid, page)
             if (feedResponse.data.isNotEmpty())
                 Result.success(feedResponse.data)
             else

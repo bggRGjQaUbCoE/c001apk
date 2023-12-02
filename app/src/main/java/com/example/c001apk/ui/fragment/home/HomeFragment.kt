@@ -32,10 +32,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private var tabList = ArrayList<String>()
-    private var fragmentList = ArrayList<Fragment>()
     override var tabController: IOnTabClickListener? = null
-    private var menuList: ArrayList<HomeMenu> = ArrayList()
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
     }
@@ -73,21 +70,21 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
 
     private fun initTabMenu() {
         CoroutineScope(Dispatchers.IO).launch {
-            menuList.addAll(homeMenuDao.loadAll())
-            if (menuList.isEmpty()) {
+            viewModel.menuList.addAll(homeMenuDao.loadAll())
+            if (viewModel.menuList.isEmpty()) {
                 initMenuList()
             } else {
-                for (element in menuList) {
+                for (element in viewModel.menuList) {
                     if (element.isEnable)
-                        tabList.add(element.title)
+                        viewModel.tabList.add(element.title)
                 }
-                if (tabList.isEmpty()) {
+                if (viewModel.tabList.isEmpty()) {
                     homeMenuDao.deleteAll()
                     initMenuList()
                 }
             }
-            fragmentList.apply {
-                for (element in tabList) {
+            viewModel.fragmentList.apply {
+                for (element in viewModel.tabList) {
                     when (element) {
                         "关注" -> add(HomeFeedFragment.newInstance("follow"))
                         "应用" -> add(AppListFragment())
@@ -113,7 +110,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
             insert(HomeMenu("话题", true))
             insert(HomeMenu("数码", true))
         }
-        tabList.apply {
+        viewModel.tabList.apply {
             add("关注")
             add("应用")
             add("头条")
@@ -150,22 +147,22 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
     }*/
 
     private fun initView() {
-        binding.viewPager.offscreenPageLimit = tabList.size
-        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
+                binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment {
-                return fragmentList[position]
+                return viewModel.fragmentList[position]
             }
 
-            override fun getItemCount() = tabList.size
+            override fun getItemCount() = viewModel.tabList.size
 
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = tabList[position]
+            tab.text = viewModel.tabList[position]
         }.attach()
         if (viewModel.isInitial) {
             viewModel.isInitial = false
-            if (menuList.contains(HomeMenu("头条", true)))
-                binding.viewPager.setCurrentItem(tabList.indexOf("头条"), false)
+            if (viewModel.menuList.contains(HomeMenu("头条", true)))
+                binding.viewPager.setCurrentItem(viewModel.tabList.indexOf("头条"), false)
         }
     }
 

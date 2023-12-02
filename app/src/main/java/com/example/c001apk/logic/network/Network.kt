@@ -94,14 +94,8 @@ object Network {
     suspend fun getProfile(uid: String) =
         api2Service.getProfile(uid).await()
 
-    suspend fun getFeedList(uid: String, page: Int) =
-        apiService.getFeedList(uid, page).await()
-
-    suspend fun getFollowList(uid: String, page: Int) =
-        apiService.getFollowList(uid, page).await()
-
-    suspend fun getFansList(uid: String, page: Int) =
-        apiService.getFansList(uid, page).await()
+    suspend fun getFollowList(url: String, uid: String, page: Int) =
+        apiService.getFollowList(url, uid, page).await()
 
     suspend fun postLikeFeed(id: String) =
         apiService.postLikeFeed(id).await()

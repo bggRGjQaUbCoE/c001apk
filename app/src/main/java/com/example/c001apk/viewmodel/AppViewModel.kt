@@ -16,6 +16,7 @@ import com.example.c001apk.logic.database.TopicBlackListDatabase
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.model.UpdateCheckResponse
@@ -234,8 +235,9 @@ class AppViewModel : ViewModel() {
         getAppCommentData.value = getAppCommentData.value
     }
 
+    val menuList = ArrayList<HomeMenu>()
     val tabList = ArrayList<String>()
-    var fragmentList = ArrayList<Fragment>()
+    val fragmentList = ArrayList<Fragment>()
 
     var isResume = true
 
@@ -262,12 +264,23 @@ class AppViewModel : ViewModel() {
     private val getDataListData = MutableLiveData<String>()
 
     val listData = getDataListData.switchMap {
-        when (type) {
-            "feed" -> Repository.getFeedList(uid, page)
-            "follow" -> Repository.getFollowList(uid, page)
-            "fans" -> Repository.getFansList(uid, page)
-            else -> throw IllegalArgumentException("invalid type")
+        url = when (type) {
+            "feed" -> "/v6/user/feedList?showAnonymous=0&isIncludeTop=1"
+            "follow" -> "/v6/user/followList"
+            "fans" -> "/v6/user/fansList"
+            "apk" -> {
+                uid = ""
+                "/v6/user/apkFollowList"
+            }
+
+            "forum" -> {
+                uid = ""
+                "/v6/user/forumFollowList"
+            }
+
+            else -> throw IllegalArgumentException("invalid type: $type")
         }
+        Repository.getFollowList(url, uid, page)
     }
 
     fun getFeedList() {

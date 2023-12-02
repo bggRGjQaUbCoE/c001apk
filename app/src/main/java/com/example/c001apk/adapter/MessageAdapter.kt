@@ -129,14 +129,17 @@ class MessageAdapter(
                     val intent = Intent(parent.context, FFFListActivity::class.java)
                     intent.putExtra("uid", PrefManager.uid)
                     viewHolder.feedLayout.setOnClickListener {
+                        intent.putExtra("isEnable", false)
                         intent.putExtra("type", "feed")
                         parent.context.startActivity(intent)
                     }
                     viewHolder.followLayout.setOnClickListener {
+                        intent.putExtra("isEnable", true)
                         intent.putExtra("type", "follow")
                         parent.context.startActivity(intent)
                     }
                     viewHolder.fansLayout.setOnClickListener {
+                        intent.putExtra("isEnable", false)
                         intent.putExtra("type", "fans")
                         parent.context.startActivity(intent)
                     }
