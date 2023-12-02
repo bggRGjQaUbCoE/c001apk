@@ -18,7 +18,7 @@ abstract class HomeMenuDatabase : RoomDatabase() {
 
         private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("insert into HomeMenu (title,isEnable) values ('数码',true)")
+                db.execSQL("insert into HomeMenu (title,isEnable) values ('数码',1)")
             }
         }
 
