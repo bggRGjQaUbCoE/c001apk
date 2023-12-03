@@ -73,7 +73,7 @@ interface ApiService {
     @GET("/v6/user/space")
     fun getUserSpace(
         @Query("uid") uid: String,
-    ): Call<FeedContentResponse>
+    ): Call<UserProfileResponse>
 
     @GET("/v6/user/feedList?showAnonymous=0&isIncludeTop=1&showDoing=0")
     fun getUserFeed(

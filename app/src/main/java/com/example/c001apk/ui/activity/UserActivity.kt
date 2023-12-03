@@ -104,7 +104,6 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     viewModel.followType = user.data.isFollow == 1
                     viewModel.avatar = user.data.userAvatar
                     viewModel.cover = user.data.cover
-                    viewModel.followType = user.data.isFollow == 1
                     viewModel.uname = user.data.username
                     viewModel.avatar = user.data.userAvatar
                     viewModel.cover = user.data.cover

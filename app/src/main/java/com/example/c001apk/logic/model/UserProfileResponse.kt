@@ -10,6 +10,12 @@ data class UserProfileResponse(
     val data: Data?
 ) {
     data class Data(
+        val uid:String,
+        val cover:String,
+        var isFollow: Int,
+        val bio:String,
+        @SerializedName("be_like_num") val beLikeNum: String,
+        val logintime: Long,
         val feed: String,
         val follow: String,
         val fans: String,
