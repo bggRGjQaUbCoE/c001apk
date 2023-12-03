@@ -75,8 +75,6 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         if (!viewModel.isInit) {
             initPublish()
             initView()
