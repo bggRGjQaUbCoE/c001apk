@@ -46,6 +46,8 @@ interface ApiService {
         @Query("id") id: String,
         @Query("listType") listType: String,
         @Query("page") page: Int,
+        @Query("firstItem") firstItem: String?,
+        @Query("lastItem") lastItem: String?,
         @Query("discussMode") discussMode: Int,
         @Query("feedType") feedType: String,
         @Query("blockStatus") blockStatus: Int,
@@ -237,7 +239,7 @@ interface ApiService {
 
     @GET()
     fun getCollectionList(
-        @Url url:String,
+        @Url url: String,
         @Query("uid") uid: String?,
         @Query("id") id: String?,
         @Query("showDefault") showDefault: Int,

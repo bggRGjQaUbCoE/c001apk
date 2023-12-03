@@ -224,6 +224,12 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     mAdapter.notifyItemRangeChanged(0, 3)
                     return@observe
                 } else if (!reply?.data.isNullOrEmpty()) {
+                    if (viewModel.firstItem == null)
+                        viewModel.firstItem =
+                            if (reply?.data?.size!! >= 7)
+                                reply.data[6].id
+                            else reply.data.first().id
+                    viewModel.lastItem = reply?.data?.last()?.id
                     if (viewModel.isRefreshing) {
                         viewModel.feedReplyList.clear()
                         if (viewModel.listType == "lastupdate_desc" && viewModel.feedTopReplyList.isNotEmpty())
@@ -631,6 +637,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     private fun refreshData() {
+        viewModel.firstItem = null
+        viewModel.lastItem = null
         viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true

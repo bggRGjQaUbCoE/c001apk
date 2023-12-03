@@ -120,6 +120,8 @@ class AppViewModel : ViewModel() {
             id,
             listType,
             page,
+            firstItem,
+            lastItem,
             discussMode,
             "feed",
             blockStatus,
