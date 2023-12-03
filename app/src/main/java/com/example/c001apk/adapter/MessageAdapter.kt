@@ -334,12 +334,12 @@ class MessageAdapter(
 
             is MessViewHolder -> {
                 holder.title.text = messTitle[position - 2]
-                holder.logoCover.setBackgroundColor(Color.parseColor(logoColorList[position - 1]))
-                holder.logo.setBackgroundDrawable(mContext.getDrawable(logoList[position - 1]))
+                holder.logoCover.setBackgroundColor(Color.parseColor(logoColorList[position - 2]))
+                holder.logo.setBackgroundDrawable(mContext.getDrawable(logoList[position - 2]))
                 if (messCountList.isNotEmpty()) {
-                    if (messCountList[position - 1] != 0) {
+                    if (messCountList[position - 2] != 0) {
                         holder.badge.visibility = View.VISIBLE
-                        holder.badge.text = messCountList[position - 1].toString()
+                        holder.badge.text = messCountList[position - 2].toString()
                     } else
                         holder.badge.visibility = View.GONE
                 }

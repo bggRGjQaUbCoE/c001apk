@@ -122,7 +122,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:paddingStart="10dp"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 app:layout_constraintBottom_toTopOf="@id/divider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -149,6 +149,10 @@
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
                     android:text="默认"
                     android:textSize="12sp" />
 
@@ -159,6 +163,10 @@
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
                     android:text="最新"
                     android:textSize="12sp" />
 
@@ -169,6 +177,10 @@
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
                     android:text="热门"
                     android:textSize="12sp" />
 
@@ -179,6 +191,10 @@
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
                     android:text="楼主"
                     android:textSize="12sp" />
 
