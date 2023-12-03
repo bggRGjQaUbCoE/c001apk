@@ -67,6 +67,7 @@ class AppAdapter(
     fun setIOnCollectionItemClickListener(iOnCollectionItemClickListener: IOnCollectionItemClickListener) {
         this.iOnCollectionItemClickListener = iOnCollectionItemClickListener
     }
+
     private var entityType = ""
     private var fid = ""
     private var uid = ""
@@ -570,7 +571,7 @@ class AppAdapter(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_collection_list_item, parent, false)
                 val viewHolder = CollectionViewHolder(view)
-                viewHolder.itemView.setOnClickListener{
+                viewHolder.itemView.setOnClickListener {
                     iOnCollectionItemClickListener?.onShowCollection(viewHolder.id)
                 }
                 viewHolder
@@ -1346,6 +1347,10 @@ class AppAdapter(
                 }
 
                 if (!feed.replyRows.isNullOrEmpty()) {
+                    if (BlackListUtil.checkUid(feed.replyRows[0].uid)) {
+                        holder.hotReply.visibility = View.GONE
+                        return
+                    }
                     holder.hotReply.visibility = View.VISIBLE
                     val mess =
                         if (feed.replyRows[0].picArr.isNullOrEmpty())
