@@ -14,7 +14,7 @@ import android.view.MotionEvent;
 import android.widget.TextView;
 
 //https://stackoverflow.com/questions/8558732
-public class LinkTextView extends rikka.material.widget.FakeFontWeightAppCompatCheckedTextView {
+public class LinkTextView extends rikka.material.widget.FakeFontWeightMaterialTextView {
 
     boolean dontConsumeNonUrlClicks = true;
     boolean linkHit;
@@ -41,20 +41,24 @@ public class LinkTextView extends rikka.material.widget.FakeFontWeightAppCompatC
         return res;
 
     }
+
     public void setTextViewHTML(String html) {
         CharSequence sequence = Html.fromHtml(html);
         SpannableStringBuilder strBuilder =
                 new SpannableStringBuilder(sequence);
         setText(strBuilder);
     }
+
     public static class LocalLinkMovementMethod extends LinkMovementMethod {
         static LocalLinkMovementMethod sInstance;
+
         public static LocalLinkMovementMethod getInstance() {
             if (sInstance == null)
                 sInstance = new LocalLinkMovementMethod();
 
             return sInstance;
         }
+
         @Override
         public boolean onTouchEvent(TextView widget,
                                     Spannable buffer, MotionEvent event) {

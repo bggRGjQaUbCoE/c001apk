@@ -9,6 +9,7 @@ import com.example.c001apk.logic.model.LikeReplyResponse
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.model.UpdateCheckResponse
+import com.example.c001apk.logic.model.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -111,11 +112,11 @@ interface ApiService {
     @GET("/v6/user/profile")
     fun getProfile(
         @Query("uid") uid: String
-    ): Call<FeedContentResponse>
+    ): Call<UserProfileResponse>
 
     @GET()
     fun getFollowList(
-        @Url url:String,
+        @Url url: String,
         @Query("uid") uid: String,
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
@@ -224,14 +225,23 @@ interface ApiService {
 
     @GET("/v6/vote/commentList")
     fun getVoteComment(
-        @Query("fid") fid :String,
-        @Query("extra_key") extraKey :String,
-        @Query("page") page :Int,
-        @Query("firstItem") firstItem :String?,
-        @Query("lastItem") lastItem :String?,
+        @Query("fid") fid: String,
+        @Query("extra_key") extraKey: String,
+        @Query("page") page: Int,
+        @Query("firstItem") firstItem: String?,
+        @Query("lastItem") lastItem: String?,
     ): Call<TotalReplyResponse>
 
     @GET("/v6/product/categoryList")
     fun getProductList(): Call<HomeFeedResponse>
+
+    @GET()
+    fun getCollectionList(
+        @Url url:String,
+        @Query("uid") uid: String?,
+        @Query("id") id: String?,
+        @Query("showDefault") showDefault: Int,
+        @Query("page") page: Int
+    ): Call<HomeFeedResponse>
 
 }

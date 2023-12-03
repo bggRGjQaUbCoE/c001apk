@@ -21,4 +21,10 @@
         android:title="@string/history"
         tools:ignore="AlwaysShowAction" />
 
+    <item
+        android:id="@+id/freq"
+        android:showAsAction="never"
+        android:title="@string/my_freq"
+        tools:ignore="AlwaysShowAction" />
+
 </menu>

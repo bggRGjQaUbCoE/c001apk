@@ -48,7 +48,10 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initTabMenu()
+        if (viewModel.tabList.isEmpty())
+            initTabMenu()
+        else
+            initView()
         initMenu()
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -148,7 +151,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
 
     private fun initView() {
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
-                binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment {
                 return viewModel.fragmentList[position]
             }

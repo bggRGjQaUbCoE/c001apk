@@ -363,6 +363,15 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun getCollectionList(url: String, uid: String?, id: String?, showDefault: Int, page: Int) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getCollectionList(url, uid, id, showDefault, page)
+            if (dataResponse.data != null)
+                Result.success(dataResponse.data)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

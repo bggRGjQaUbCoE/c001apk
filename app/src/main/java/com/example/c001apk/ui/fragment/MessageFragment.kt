@@ -179,10 +179,10 @@ class MessageFragment : Fragment() {
                 }
                 if (viewModel.isLoadMore)
                     if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.messageList.size + 5)
+                        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 6,
+                            viewModel.listSize + 7,
                             viewModel.messageList.size - viewModel.listSize + 1
                         )
                 else
@@ -222,11 +222,11 @@ class MessageFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (viewModel.lastVisibleItemPosition == viewModel.messageList.size + 5
+                    if (viewModel.lastVisibleItemPosition == viewModel.messageList.size + 6
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         mAdapter.setLoadState(mAdapter.LOADING)
-                        mAdapter.notifyItemChanged(viewModel.messageList.size + 5)
+                        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
                         viewModel.isLoadMore = true
                         viewModel.page++
                         viewModel.isNew = true

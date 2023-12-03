@@ -37,6 +37,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.fragment.minterface.IOnCollectionItemClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
@@ -45,9 +46,9 @@ import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinearItemDecoration1
+import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.circleindicator.CircleIndicator3
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -61,6 +62,12 @@ class AppAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
+    private var iOnCollectionItemClickListener: IOnCollectionItemClickListener? = null
+
+    fun setIOnCollectionItemClickListener(iOnCollectionItemClickListener: IOnCollectionItemClickListener) {
+        this.iOnCollectionItemClickListener = iOnCollectionItemClickListener
+    }
+    private var entityType = ""
     private var fid = ""
     private var uid = ""
     private var position = -1
@@ -197,6 +204,40 @@ class AppAdapter(
         var apkName = ""
     }
 
+    class FeedReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val avatar: ImageView = view.findViewById(R.id.avatar)
+        var avatarUrl = ""
+        val uname: TextView = view.findViewById(R.id.uname)
+        val device: TextView = view.findViewById(R.id.device)
+        val message: LinkTextView = view.findViewById(R.id.message)
+        val messageTitle: TextView = view.findViewById(R.id.messageTitle)
+        var id = ""
+        var feedId = ""
+        var uid = ""
+        var feedUid = ""
+        val pubDate: TextView = view.findViewById(R.id.pubDate)
+        var pubDataRaw = ""
+        val like: TextView = view.findViewById(R.id.like)
+        var isLike = false
+        val reply: TextView = view.findViewById(R.id.reply)
+        val expand: ImageButton = view.findViewById(R.id.expand)
+        val feedUname: TextView = view.findViewById(R.id.feedUname)
+        val feedMessage: LinkTextView = view.findViewById(R.id.feedMessage)
+        val feed: ConstraintLayout = view.findViewById(R.id.feed)
+        var entityType = ""
+    }
+
+    class CollectionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var id = ""
+        var uid = ""
+        val cover: ShapeableImageView = view.findViewById(R.id.cover)
+        val title: TextView = view.findViewById(R.id.title)
+        val description: TextView = view.findViewById(R.id.description)
+        val mode: TextView = view.findViewById(R.id.mode)
+        val followNum: TextView = view.findViewById(R.id.followNum)
+        val contentNum: TextView = view.findViewById(R.id.contentNum)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
 
@@ -322,6 +363,7 @@ class AppAdapter(
                     onImageItemClickListener = this@AppAdapter.onImageItemClickListener
                 }
                 viewHolder.expand.setOnClickListener {
+                    entityType = "feed"
                     fid = viewHolder.id
                     uid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
@@ -444,6 +486,7 @@ class AppAdapter(
                     parent.context.startActivity(intent)
                 }
                 viewHolder.expand.setOnClickListener {
+                    entityType = "feed"
                     fid = viewHolder.id
                     uid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
@@ -452,6 +495,83 @@ class AppAdapter(
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
+                }
+                viewHolder
+            }
+
+            10 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_feed_reply, parent, false)
+                val viewHolder = FeedReplyViewHolder(view)
+                viewHolder.itemView.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.uname.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.feed.setOnClickListener {
+                    val intent = Intent(parent.context, FeedActivity::class.java)
+                    intent.putExtra("type", "feed")
+                    intent.putExtra("id", viewHolder.feedId)
+                    intent.putExtra("uid", viewHolder.feedUid)
+                    intent.putExtra("uname", viewHolder.feedUname.text)
+                    if (PrefManager.isRecordHistory)
+                        HistoryUtil.saveHistory(
+                            viewHolder.id,
+                            viewHolder.uid,
+                            viewHolder.uname.text.toString(),
+                            viewHolder.avatarUrl,
+                            viewHolder.device.text.toString(),
+                            viewHolder.message.text.toString(),
+                            viewHolder.pubDataRaw
+                        )
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.like.setOnClickListener {
+                    if (PrefManager.SZLMID == "") {
+                        Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        iOnLikeClickListener?.onPostLike(
+                            viewHolder.entityType,
+                            viewHolder.isLike,
+                            viewHolder.id,
+                            viewHolder.bindingAdapterPosition
+                        )
+                    }
+                }
+                viewHolder.expand.setOnClickListener {
+                    entityType = viewHolder.entityType
+                    fid = viewHolder.id
+                    uid = viewHolder.uid
+                    position = viewHolder.bindingAdapterPosition
+                    val popup = PopupMenu(mContext, it)
+                    val inflater = popup.menuInflater
+                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.setOnMenuItemClickListener(this@AppAdapter)
+                    popup.show()
+                }
+                viewHolder
+            }
+
+            11 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_collection_list_item, parent, false)
+                val viewHolder = CollectionViewHolder(view)
+                viewHolder.itemView.setOnClickListener{
+                    iOnCollectionItemClickListener?.onShowCollection(viewHolder.id)
                 }
                 viewHolder
             }
@@ -516,6 +636,40 @@ class AppAdapter(
                     }
                     holder.like.setCompoundDrawables(drawableLike, null, null, null)
                 }
+            } else if (viewType == 10) {
+                if (payloads[0] == "like") {
+                    (holder as FeedReplyViewHolder).like.text = dataList[position].likenum
+                    holder.isLike = dataList[position].userAction?.like == 1
+                    val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                    drawableLike.setBounds(
+                        0,
+                        0,
+                        holder.like.textSize.toInt(),
+                        holder.like.textSize.toInt()
+                    )
+                    if (dataList[position].userAction?.like == 1) {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                        holder.like.setTextColor(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimary
+                            )
+                        )
+                    } else {
+                        DrawableCompat.setTint(
+                            drawableLike,
+                            mContext.getColor(android.R.color.darker_gray)
+                        )
+                        holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                    }
+                    holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                }
             }
 
         }
@@ -524,6 +678,163 @@ class AppAdapter(
     @SuppressLint("UseCompatLoadingForDrawables", "RestrictedApi", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+
+            is CollectionViewHolder -> {
+                val data = dataList[position]
+
+                holder.id = data.id
+                holder.uid = data.uid
+                holder.title.text = data.title
+                if (!data.description.isNullOrEmpty()) {
+                    holder.description.visibility = View.VISIBLE
+                    holder.description.text = data.description
+                } else holder.description.visibility = View.GONE
+                holder.mode.text = if (data.isOpen == 1) "私密"
+                else "公开"
+                holder.followNum.text = "${data.followNum}人关注"
+                holder.contentNum.text = "${data.itemNum}个内容"
+                if (!data.coverPic.isNullOrEmpty()) {
+                    holder.cover.visibility = View.VISIBLE
+                    ImageUtil.showIMG(holder.cover, data.coverPic)
+                } else holder.cover.visibility = View.GONE
+
+            }
+
+            is FeedReplyViewHolder -> {
+                val feed = dataList[position]
+
+                holder.entityType = feed.entityType
+                holder.id = feed.id
+                holder.uid = feed.uid
+                holder.avatarUrl = feed.userAvatar
+                holder.pubDataRaw = feed.dateline.toString()
+                holder.uname.text = feed.userInfo?.username
+                ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
+
+                if (!feed.messageTitle.isNullOrEmpty()) {
+                    holder.messageTitle.visibility = View.VISIBLE
+                    holder.messageTitle.text = feed.messageTitle
+                } else
+                    holder.messageTitle.visibility = View.GONE
+                if (!feed.deviceTitle.isNullOrEmpty()) {
+                    holder.device.text = feed.deviceTitle
+                    val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
+                    drawable.setBounds(
+                        0,
+                        0,
+                        holder.device.textSize.toInt(),
+                        holder.device.textSize.toInt()
+                    )
+                    holder.device.setCompoundDrawables(drawable, null, null, null)
+                    holder.device.visibility = View.VISIBLE
+                } else {
+                    holder.device.visibility = View.GONE
+                }
+
+                if (feed.message == "") {
+                    holder.message.visibility = View.GONE
+                } else {
+                    holder.message.visibility = View.VISIBLE
+                    holder.message.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
+                    holder.message.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        feed.message,
+                        (holder.message.textSize * 1.3).toInt(),
+                        null
+                    )
+                }
+
+                if (feed.feed != null) {
+                    holder.feed.visibility = View.VISIBLE
+
+                    val feedUserName =
+                        """<a class="feed-link-uname" href="/u/${feed.feed.username}">@${feed.feed.username} </a>"""
+                    holder.feedUname.movementMethod = LinkMovementMethod.getInstance()
+                    holder.feedUname.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        feedUserName,
+                        holder.feedUname.textSize.toInt(),
+                        null
+                    )
+                    holder.feedId = feed.feed.id
+                    holder.feedUid = feed.feed.uid
+                    if (feed.feed.message == "") {
+                        holder.feedMessage.visibility = View.GONE
+                    } else {
+                        holder.feedMessage.visibility = View.VISIBLE
+                        holder.feedMessage.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.feedMessage.text = SpannableStringBuilderUtil.setText(
+                            mContext,
+                            feed.feed.message,
+                            (holder.feedMessage.textSize * 1.3).toInt(),
+                            null
+                        )
+                    }
+                } else holder.feed.visibility = View.GONE
+
+                val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                drawable1.setBounds(
+                    0,
+                    0,
+                    holder.pubDate.textSize.toInt(),
+                    holder.pubDate.textSize.toInt()
+                )
+                holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
+                if (feed.likeTime == null)
+                    holder.pubDate.text = DateUtils.fromToday(feed.dateline)
+                else
+                    holder.pubDate.text = DateUtils.fromToday(feed.likeTime)
+
+                holder.isLike = feed.userAction?.like == 1
+                val drawableLike
+
+                        : Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                drawableLike.setBounds(
+                    0,
+                    0,
+                    holder.like.textSize.toInt(),
+                    holder.like.textSize.toInt()
+                )
+                if (feed.userAction?.like == 1) {
+                    DrawableCompat.setTint(
+                        drawableLike,
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            rikka.preference.simplemenu.R.attr.colorPrimary
+                        )
+                    )
+                    holder.like.setTextColor(
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            rikka.preference.simplemenu.R.attr.colorPrimary
+                        )
+                    )
+                } else {
+                    DrawableCompat.setTint(
+                        drawableLike,
+                        mContext.getColor(android.R.color.darker_gray)
+                    )
+                    holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                }
+                holder.like.text = feed.likenum
+                holder.like.setCompoundDrawables(drawableLike, null, null, null)
+
+                holder.reply.text = feed.replynum
+
+                val drawableReply
+                        : Drawable = mContext.getDrawable(R.drawable.ic_message)!!
+                drawableReply.setBounds(
+                    0,
+                    0,
+                    holder.like.textSize.toInt(),
+                    holder.like.textSize.toInt()
+                )
+                holder.reply.setCompoundDrawables(drawableReply, null, null, null)
+
+
+            }
 
             is FeedVoteViewHolder -> {
                 val feed = dataList[position]
@@ -550,7 +861,7 @@ class AppAdapter(
                     holder.messageTitle.text = feed.messageTitle
                 } else
                     holder.messageTitle.visibility = View.GONE
-                if (feed.deviceTitle != "") {
+                if (!feed.deviceTitle.isNullOrEmpty()) {
                     holder.device.text = feed.deviceTitle
                     val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                     drawable.setBounds(
@@ -925,7 +1236,7 @@ class AppAdapter(
                     holder.messageTitle.text = feed.messageTitle
                 } else
                     holder.messageTitle.visibility = View.GONE
-                if (feed.deviceTitle != "") {
+                if (!feed.deviceTitle.isNullOrEmpty()) {
                     holder.device.text = feed.deviceTitle
                     val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
                     drawable.setBounds(
@@ -1256,6 +1567,11 @@ class AppAdapter(
 
             "apk" -> 8
 
+            "feed_reply" -> 10
+
+            "collection" -> 11
+
+            // max 11
             else -> throw IllegalArgumentException("entityType error: ${dataList[position].entityType}")
         }
     }
@@ -1272,7 +1588,10 @@ class AppAdapter(
                 val intent = Intent(mContext, WebViewActivity::class.java)
                 intent.putExtra(
                     "url",
-                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
+                    if (entityType == "feed_reply")
+                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$fid"
+                    else
+                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
                 )
                 mContext.startActivity(intent)
             }

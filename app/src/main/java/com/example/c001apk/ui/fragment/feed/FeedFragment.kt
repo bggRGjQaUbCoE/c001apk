@@ -171,7 +171,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     viewModel.uid = feed.data.uid
                     viewModel.funame = feed.data.userInfo?.username.toString()
                     viewModel.avatar = feed.data.userAvatar
-                    viewModel.device = feed.data.deviceTitle
+                    viewModel.device = feed.data.deviceTitle.toString()
                     viewModel.replyCount = feed.data.replynum
                     viewModel.dateLine = feed.data.dateline
                     viewModel.feedTypeName = feed.data.feedTypeName

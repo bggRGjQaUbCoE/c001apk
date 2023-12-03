@@ -14,6 +14,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.MessageResponse
+import com.example.c001apk.ui.activity.CollectionActivity
 import com.example.c001apk.ui.activity.FFFListActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.MessageActivity
@@ -111,6 +112,13 @@ class MessageAdapter(
         val logoCover: ShapeableImageView = view.findViewById(R.id.logoCover)
         val badge: TextView = view.findViewById(R.id.badge)
     }
+
+    class MineViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val favLayout: LinearLayout = view.findViewById(R.id.favLayout)
+        val likeLayout: LinearLayout = view.findViewById(R.id.likeLayout)
+        val replyLayout: LinearLayout = view.findViewById(R.id.replyLayout)
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -220,18 +228,43 @@ class MessageAdapter(
                 viewHolder
             }
 
+            3 -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message_mine, parent, false)
+                val viewHolder = MineViewHolder(view)
+                viewHolder.favLayout.setOnClickListener {
+                    parent.context.startActivity(Intent(parent.context, CollectionActivity::class.java))
+                }
+                viewHolder.likeLayout.setOnClickListener {
+                    val intent = Intent(parent.context, FFFListActivity::class.java)
+                    intent.putExtra("isEnable", false)
+                    intent.putExtra("type", "like")
+                    intent.putExtra("uid", PrefManager.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.replyLayout.setOnClickListener {
+                    val intent = Intent(parent.context, FFFListActivity::class.java)
+                    intent.putExtra("isEnable", true)
+                    intent.putExtra("type", "reply")
+                    intent.putExtra("uid", PrefManager.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder
+            }
+
             else -> throw IllegalArgumentException("invalid type")
         }
 
     }
 
-    override fun getItemCount() = notiList.size + 6
+    override fun getItemCount() = notiList.size + 7
 
     override fun getItemViewType(position: Int): Int {
         return if (position == itemCount - 1) -1
         else when (position) {
             0 -> 0
-            in 1..4 -> 1
+            1 -> 3
+            in 2..5 -> 1
             else -> 2
         }
     }
@@ -269,7 +302,7 @@ class MessageAdapter(
             }
 
             is FeedContentAdapter.FeedContentReplyViewHolder -> {
-                val noti = notiList[position - 5]
+                val noti = notiList[position - 6]
                 val doc: Document = Jsoup.parse(noti.note)
                 val links: Elements = doc.select("a[href]")
                 for (link in links) {
@@ -300,7 +333,7 @@ class MessageAdapter(
             }
 
             is MessViewHolder -> {
-                holder.title.text = messTitle[position - 1]
+                holder.title.text = messTitle[position - 2]
                 holder.logoCover.setBackgroundColor(Color.parseColor(logoColorList[position - 1]))
                 holder.logo.setBackgroundDrawable(mContext.getDrawable(logoList[position - 1]))
                 if (messCountList.isNotEmpty()) {

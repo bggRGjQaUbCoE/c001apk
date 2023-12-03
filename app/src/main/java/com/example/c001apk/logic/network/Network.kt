@@ -171,6 +171,15 @@ object Network {
     suspend fun getProductList() =
         apiService.getProductList().await()
 
+    suspend fun getCollectionList(
+        url: String,
+        uid: String?,
+        id: String?,
+        showDefault: Int,
+        page: Int
+    ) =
+        apiService.getCollectionList(url, uid, id, showDefault, page).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

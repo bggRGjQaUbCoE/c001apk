@@ -16,7 +16,6 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.FollowFragment
-import com.example.c001apk.ui.fragment.home.HomeFeedFragment
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
@@ -51,21 +50,33 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
             binding.viewPager.visibility = View.VISIBLE
             binding.swipeRefresh.visibility = View.GONE
             binding.recyclerView.visibility = View.GONE
-            if (viewModel.tabList.isEmpty()){
-                viewModel.tabList.apply {
-                    add("用户")
-                    add("话题")
-                    add("数码")
-                    add("应用")
-                    //add("收藏")
+            if (viewModel.tabList.isEmpty()) {
+                if (viewModel.type == "follow") {
+                    viewModel.tabList.apply {
+                        add("用户")
+                        add("话题")
+                        add("数码")
+                        add("应用")
+                        //add("收藏")
+                    }
+                    viewModel.fragmentList.apply {
+                        add(FollowFragment.newInstance("follow"))
+                        add(FollowFragment.newInstance("topic"))
+                        add(FollowFragment.newInstance("product"))
+                        add(FollowFragment.newInstance("apk"))
+                        //add(FollowFragment.newInstance("favorite"))
+                    }
+                } else if (viewModel.type == "reply") {
+                    viewModel.tabList.apply {
+                        add("我的回复")
+                        add("我收到的回复")
+                    }
+                    viewModel.fragmentList.apply {
+                        add(FollowFragment.newInstance("reply"))
+                        add(FollowFragment.newInstance("replyToMe"))
+                    }
                 }
-                viewModel.fragmentList.apply {
-                    add(FollowFragment.newInstance("follow"))
-                    add(FollowFragment.newInstance("topic"))
-                    add(FollowFragment.newInstance("product"))
-                    add(FollowFragment.newInstance("apk"))
-                    //add(FollowFragment.newInstance("favorite"))
-                }
+
             }
             initViewPager()
         } else {
@@ -88,14 +99,19 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                     if (viewModel.isRefreshing) viewModel.dataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.dataList.size
-                        for (element in feed)
-                            if (element.entityType == "feed" || element.entityType == "contacts")
+                        for (element in feed) {
+                            if (element.entityType == "feed"
+                                || element.entityType == "contacts"
+                                || element.entityType == "feed_reply"
+                            )
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dataList.add(element)
+                        }
                     }
+
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
                     mAdapter.setLoadState(mAdapter.LOADING_END, null)
@@ -156,6 +172,46 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
             }
         }
 
+        viewModel.likeReplyData.observe(this) { result ->
+            if (viewModel.isPostLikeReply) {
+                viewModel.isPostLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.dataList[viewModel.likeReplyPosition].likenum =
+                            response.data
+                        viewModel.dataList[viewModel.likeReplyPosition].userAction?.like =
+                            1
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition, "like")
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+        viewModel.unLikeReplyData.observe(this) { result ->
+            if (viewModel.isPostUnLikeReply) {
+                viewModel.isPostUnLikeReply = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data != null) {
+                        viewModel.dataList[viewModel.likeReplyPosition].likenum =
+                            response.data
+                        viewModel.dataList[viewModel.likeReplyPosition].userAction?.like =
+                            0
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition, "like")
+                    } else
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun initViewPager() {
@@ -200,6 +256,10 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
                 else
                     binding.toolBar.title = "TA的粉丝"
             }
+
+            "like" -> binding.toolBar.title = "我的赞"
+
+            "reply" -> binding.toolBar.title = "我的回复"
 
         }
     }
@@ -279,14 +339,26 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
     }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeFeedId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeFeed = true
-            viewModel.postUnLikeFeed()
+        if (type == "feed_reply") {
+            viewModel.likeReplyPosition = position!!
+            viewModel.likeReplyId = id
+            if (isLike) {
+                viewModel.isPostUnLikeReply = true
+                viewModel.postUnLikeReply()
+            } else {
+                viewModel.isPostLikeReply = true
+                viewModel.postLikeReply()
+            }
         } else {
-            viewModel.isPostLikeFeed = true
-            viewModel.postLikeFeed()
+            viewModel.likeFeedId = id
+            viewModel.likePosition = position!!
+            if (isLike) {
+                viewModel.isPostUnLikeFeed = true
+                viewModel.postUnLikeFeed()
+            } else {
+                viewModel.isPostLikeFeed = true
+                viewModel.postLikeFeed()
+            }
         }
     }
 

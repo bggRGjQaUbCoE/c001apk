@@ -5,6 +5,12 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        @SerializedName("cover_pic") val coverPic: String?,
+        @SerializedName("is_open") val isOpen: Int?,
+        @SerializedName("item_num") val itemNum: String?,
+        @SerializedName("follow_num") val followNum: String?,
+        val description: String?,
+        val likeTime: Long?,
         @SerializedName("extra_title") val extraTitle: String?,
         @SerializedName("extra_url") val extraUrl: String?,
         val feedTypeName: String?,
@@ -41,7 +47,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val regdate: String,
         @SerializedName("next_level_experience") val nextLevelExperience: Int,
         val bio: String,
-        val feed: String,
+        val feed: Feed?,
         val gender: Int,
         val city: String,
         val downnum: String,
@@ -69,7 +75,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val favnum: String,
         val dateline: Long,
         @SerializedName("create_time") val createTime: String,
-        @SerializedName("device_title") val deviceTitle: String,
+        @SerializedName("device_title") val deviceTitle: String?,
         @SerializedName("device_name") val deviceName: String,
         @SerializedName("recent_reply_ids") val recentReplyIds: String,
         @SerializedName("recent_like_list") val recentLikeList: String,
@@ -93,6 +99,15 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userInfo: UserInfo?,
         val fUserInfo: UserInfo?,
         var isFollow: Int
+    )
+
+    data class Feed(
+        val id: String,
+        val uid: String,
+        val username: String,
+        val message: String,
+        val pic: String,
+        val url: String,
     )
 
     data class Vote(

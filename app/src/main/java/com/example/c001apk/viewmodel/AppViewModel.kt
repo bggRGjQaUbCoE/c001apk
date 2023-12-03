@@ -278,6 +278,12 @@ class AppViewModel : ViewModel() {
                 "/v6/user/forumFollowList"
             }
 
+            "like" -> "/v6/user/likeList"
+
+            "reply" -> "/v6/user/replyList"
+
+            "replyToMe" -> "/v6/user/replyToMeList"
+
             else -> throw IllegalArgumentException("invalid type: $type")
         }
         Repository.getFollowList(url, uid, page)
@@ -742,6 +748,19 @@ class AppViewModel : ViewModel() {
 
     fun getProductList() {
         getProductListData.value = getProductListData.value
+    }
+
+    var collectionUrl = ""
+    var cId: String? = null
+    var cUid: String? = null
+    private val getCollectionListData = MutableLiveData<String>()
+
+    val collectionListData = getCollectionListData.switchMap {
+        Repository.getCollectionList(collectionUrl, cUid, cId, 0, page)
+    }
+
+    fun getCollectionList() {
+        getCollectionListData.value = getCollectionListData.value
     }
 
 }

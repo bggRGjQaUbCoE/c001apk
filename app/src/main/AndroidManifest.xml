@@ -20,6 +20,9 @@
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.activity.CollectionActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.HistoryActivity"
             android:exported="false" />
         <activity

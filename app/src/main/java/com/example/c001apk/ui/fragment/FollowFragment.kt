@@ -86,6 +86,7 @@ class FollowFragment : Fragment() {
                             if (element.entityType == "feed"
                                 || element.entityType == "contacts"
                                 || element.entityType == "apk"
+                                || element.entityType == "feed_reply"
                             )
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
@@ -205,6 +206,14 @@ class FollowFragment : Fragment() {
                 viewModel.getFeedList()
             }
 
+            "reply" -> {
+                viewModel.getFeedList()
+            }
+
+            "replyToMe" -> {
+                viewModel.getFeedList()
+            }
+
             "topic" -> {
                 viewModel.url = "#/topic/userFollowTagList"
                 viewModel.title = "我关注的话题"
@@ -261,6 +270,14 @@ class FollowFragment : Fragment() {
                             }
 
                             "apk" -> {
+                                viewModel.getFeedList()
+                            }
+
+                            "reply" -> {
+                                viewModel.getFeedList()
+                            }
+
+                            "replyToMe" -> {
                                 viewModel.getFeedList()
                             }
 
