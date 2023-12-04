@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +20,7 @@ import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.HistoryActivity
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
+import com.example.c001apk.ui.fragment.minterface.IOnNotiLongClickListener
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.CookieUtil.atcommentme
@@ -36,7 +38,7 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 
-class MessageFragment : Fragment() {
+class MessageFragment : Fragment(), IOnNotiLongClickListener {
 
     private lateinit var binding: FragmentMessageBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -215,6 +217,26 @@ class MessageFragment : Fragment() {
             }
         }
 
+        viewModel.postDeleteNotificationData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data == "删除成功") {
+                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
+                        viewModel.messageList.removeAt(viewModel.position - 6)
+                        mAdapter.notifyItemRemoved(viewModel.position)
+                    } else if (!response.message.isNullOrEmpty()) {
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun initScroll() {
@@ -257,6 +279,7 @@ class MessageFragment : Fragment() {
             viewModel.messageList
         )
         mLayoutManager = LinearLayoutManager(activity)
+        mAdapter.setIOnNotiLongClickListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
             binding.recyclerView.layoutManager = mLayoutManager
@@ -350,6 +373,20 @@ class MessageFragment : Fragment() {
         binding.progress.progress = PrefManager.experience.toInt()
         ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
         ImageUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
+    }
+
+    override fun onDeleteNoti(uname: String, id: String, position: Int) {
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            setTitle("删除来自 $uname 的通知？")
+            setNegativeButton(android.R.string.cancel, null)
+            setPositiveButton(android.R.string.ok) { _, _ ->
+                viewModel.isNew = true
+                viewModel.position = position
+                viewModel.id = id
+                viewModel.postDeleteNotification()
+            }
+            show()
+        }
     }
 
 }

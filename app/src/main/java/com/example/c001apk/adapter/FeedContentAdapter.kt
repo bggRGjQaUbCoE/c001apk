@@ -173,6 +173,7 @@ class FeedContentAdapter(
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var notiId = ""
         val uname: TextView = view.findViewById(R.id.uname)
         val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)

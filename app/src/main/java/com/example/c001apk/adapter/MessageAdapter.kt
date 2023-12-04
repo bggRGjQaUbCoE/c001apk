@@ -20,6 +20,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.MessageActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.fragment.minterface.IOnNotiLongClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.CookieUtil.atcommentme
 import com.example.c001apk.util.CookieUtil.atme
@@ -42,6 +43,12 @@ class MessageAdapter(
     private val messCountList: List<Int>,
     private val notiList: ArrayList<MessageResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var iOnNotiLongClickListener: IOnNotiLongClickListener? = null
+
+    fun setIOnNotiLongClickListener(iOnNotiLongClickListener: IOnNotiLongClickListener) {
+        this.iOnNotiLongClickListener = iOnNotiLongClickListener
+    }
 
     private var uid = ""
 
@@ -218,6 +225,14 @@ class MessageAdapter(
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
                 }
+                viewHolder.itemView.setOnLongClickListener {
+                    iOnNotiLongClickListener?.onDeleteNoti(
+                        viewHolder.uname.text.toString(),
+                        viewHolder.notiId,
+                        viewHolder.bindingAdapterPosition
+                    )
+                    true
+                }
                 viewHolder.expand.setOnClickListener {
                     uid = viewHolder.uid
                     val popup = PopupMenu(mContext, it)
@@ -309,6 +324,7 @@ class MessageAdapter(
 
             is FeedContentAdapter.FeedContentReplyViewHolder -> {
                 val noti = notiList[position - 6]
+                holder.notiId = noti.id
                 val doc: Document = Jsoup.parse(noti.note)
                 val links: Elements = doc.select("a[href]")
                 for (link in links) {

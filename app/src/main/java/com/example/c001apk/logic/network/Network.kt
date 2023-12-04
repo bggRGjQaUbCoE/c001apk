@@ -184,6 +184,9 @@ object Network {
     ) =
         apiService.getCollectionList(url, uid, id, showDefault, page).await()
 
+    suspend fun postDeleteNotification(id: String) =
+        apiService.postDeleteNotification(id).await()
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

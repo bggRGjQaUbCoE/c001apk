@@ -247,4 +247,9 @@ interface ApiService {
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
+    @POST("/v6/notification/delete")
+    fun postDeleteNotification(
+        @Query("id") id: String,
+    ): Call<LikeReplyResponse>
+
 }

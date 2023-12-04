@@ -766,4 +766,14 @@ class AppViewModel : ViewModel() {
         getCollectionListData.value = getCollectionListData.value
     }
 
+    private val postDeleteNotificationLiveData = MutableLiveData<String>()
+
+    val postDeleteNotificationData = postDeleteNotificationLiveData.switchMap {
+        Repository.postDeleteNotification(id)
+    }
+
+    fun postDeleteNotification() {
+        postDeleteNotificationLiveData.value = postDeleteNotificationLiveData.value
+    }
+
 }

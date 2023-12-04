@@ -187,13 +187,13 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
-                        if (feed.data.topReplyRows.isNotEmpty()) {
+                        if (!feed.data.topReplyRows.isNullOrEmpty()) {
                             viewModel.isTop = true
                             mAdapter.setHaveTop(viewModel.isTop)
                             viewModel.topReplyId = feed.data.topReplyRows[0].id
                             viewModel.feedTopReplyList.clear()
                             viewModel.feedTopReplyList.addAll(feed.data.topReplyRows)
-                        } else if (feed.data.replyMeRows.isNotEmpty()) {
+                        } else if (!feed.data.replyMeRows.isNullOrEmpty()) {
                             viewModel.isTop = false
                             mAdapter.setHaveTop(viewModel.isTop)
                             viewModel.topReplyId = feed.data.replyMeRows[0].id
