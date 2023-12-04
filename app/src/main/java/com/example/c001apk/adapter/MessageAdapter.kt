@@ -236,6 +236,10 @@ class MessageAdapter(
                             parent.context.startActivity(intent)
                         }
 
+                        "null" -> {
+                            return@setOnClickListener
+                        }
+
                         else -> {
                             Toast.makeText(parent.context, "unknown type", Toast.LENGTH_SHORT)
                                 .show()
@@ -267,31 +271,36 @@ class MessageAdapter(
                     .inflate(R.layout.item_message_mine, parent, false)
                 val viewHolder = MineViewHolder(view)
                 viewHolder.favLayout.setOnClickListener {
-                    parent.context.startActivity(
-                        Intent(
-                            parent.context,
-                            CollectionActivity::class.java
+                    if (PrefManager.isLogin)
+                        parent.context.startActivity(
+                            Intent(
+                                parent.context,
+                                CollectionActivity::class.java
+                            )
                         )
-                    )
                 }
                 viewHolder.likeLayout.setOnClickListener {
-                    val intent = Intent(parent.context, FFFListActivity::class.java)
-                    intent.putExtra("isEnable", false)
-                    intent.putExtra("type", "like")
-                    intent.putExtra("uid", PrefManager.uid)
-                    parent.context.startActivity(intent)
+                    if (PrefManager.isLogin) {
+                        val intent = Intent(parent.context, FFFListActivity::class.java)
+                        intent.putExtra("isEnable", false)
+                        intent.putExtra("type", "like")
+                        intent.putExtra("uid", PrefManager.uid)
+                        parent.context.startActivity(intent)
+                    }
                 }
                 viewHolder.replyLayout.setOnClickListener {
-                    val intent = Intent(parent.context, FFFListActivity::class.java)
-                    intent.putExtra("isEnable", true)
-                    intent.putExtra("type", "reply")
-                    intent.putExtra("uid", PrefManager.uid)
-                    parent.context.startActivity(intent)
+                    if (PrefManager.isLogin) {
+                        val intent = Intent(parent.context, FFFListActivity::class.java)
+                        intent.putExtra("isEnable", true)
+                        intent.putExtra("type", "reply")
+                        intent.putExtra("uid", PrefManager.uid)
+                        parent.context.startActivity(intent)
+                    }
                 }
                 viewHolder
             }
 
-            else -> throw IllegalArgumentException("invalid type")
+            else -> throw IllegalArgumentException("invalid type: $viewType")
         }
 
     }
@@ -349,11 +358,19 @@ class MessageAdapter(
                     val href = link.attr("href")
                     if (href.contains("/feed/")) {
                         holder.type = "feed"
-                        holder.id = href.replace("/feed/", "").substring(0, href.indexOf('?'))
-                        holder.rid = href.substring(href.indexOf("rid=") + 4, href.indexOf('&'))
+                        val index0 = href.indexOf('?')
+                        val index1 = href.indexOf("rid=")
+                        val index2 = href.indexOf('&')
+                        if (index0 != -1 && index1 != -1 && index2 != -1) {
+                            holder.id = href.replace("/feed/", "").substring(0, index0)
+                            holder.rid = href.substring(index1 + 4, index2)
+                        } else
+                            holder.id = href
                     } else if (href.contains("http")) {
                         holder.type = "link"
                         holder.url = href
+                    } else if (href.isNullOrEmpty()) {
+                        holder.type = "null"
                     } else {
                         holder.type = "unknown"
                         holder.url = href
