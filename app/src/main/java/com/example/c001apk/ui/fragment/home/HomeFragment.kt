@@ -13,6 +13,7 @@ import com.example.c001apk.logic.database.HomeMenuDatabase
 import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.SearchActivity
+import com.example.c001apk.ui.fragment.home.app.AppListFragment
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener

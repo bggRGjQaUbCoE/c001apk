@@ -107,8 +107,10 @@ object AppUtils {
 
     fun getAppName(context: Context, packageName: String): String {
         return try {
-            context.packageManager.getPackageInfo(packageName,
-                0).applicationInfo.loadLabel(context.packageManager).toString()
+            context.packageManager.getPackageInfo(
+                packageName,
+                0
+            ).applicationInfo.loadLabel(context.packageManager).toString()
         } catch (e: java.lang.Exception) {
             "未获取到"
         }
@@ -127,17 +129,17 @@ object AppUtils {
         }
     }
 
-    fun getAppVersionCode(context: Context, packageName: String): String {
+    fun getAppVersionCode(context: Context, packageName: String): Long {
         return try {
             val info = context.packageManager.getPackageInfo(packageName, 0)
             val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 info.longVersionCode
             } else {
-                info.versionCode
+                info.versionCode.toLong()
             }
-            versionCode.toString()
+            versionCode
         } catch (e: Exception) {
-            ""
+            -1
         }
     }
 

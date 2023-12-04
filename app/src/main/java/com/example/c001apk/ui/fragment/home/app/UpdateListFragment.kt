@@ -1,8 +1,7 @@
-package com.example.c001apk.ui.fragment.home
+package com.example.c001apk.ui.fragment.home.app
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,7 @@ import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
-class UpdateListFragment : Fragment() {//, IOnTabClickListener {
+class UpdateListFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -38,21 +37,9 @@ class UpdateListFragment : Fragment() {//, IOnTabClickListener {
         if (!viewModel.isInit) {
             initView()
             initRefresh()
-//            initScroll()
         }
 
     }
-
-//    private fun initScroll() {
-//        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {}
-//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-//                super.onScrolled(recyclerView, dx, dy)
-//                viewModel.firstCompletelyVisibleItemPosition =
-//                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
-//            }
-//        })
-//    }
 
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
@@ -71,11 +58,6 @@ class UpdateListFragment : Fragment() {//, IOnTabClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun initView() {
-        Log.i("UpdateListFragment", "initView!!!")
-        Log.i(
-            "UpdateListFragment",
-            "UpdateListUtil.appsUpdate.size = ${UpdateListUtil.appsUpdate.size}"
-        )
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate, viewModel, this.requireActivity())
         mLayoutManager = LinearLayoutManager(activity)
@@ -85,21 +67,6 @@ class UpdateListFragment : Fragment() {//, IOnTabClickListener {
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(space))
         }
-//        viewModel.appsUpdateData.observe(viewLifecycleOwner) {
-//            it.getOrNull()?.let {
-//                viewModel.appsUpdate.clear()
-//                viewModel.appsUpdate.addAll(it)
-//                mAdapter.notifyDataSetChanged()
-//                binding.indicator.isIndeterminate = false
-//                binding.indicator.visibility = View.GONE
-//                binding.swipeRefresh.isRefreshing = false
-//            }
-//        }
-//        binding.indicator.isIndeterminate = true
-//        binding.indicator.visibility = View.VISIBLE
-//        viewModel.updateCheckEncoded.observe(viewLifecycleOwner) {
-//            refreshData()
-//        }
     }
 
     override fun onResume() {
@@ -108,30 +75,13 @@ class UpdateListFragment : Fragment() {//, IOnTabClickListener {
             viewModel.isInit = false
             initView()
             initRefresh()
-//            initScroll()
         }
-
-//        (requireParentFragment() as IOnTabClickContainer).controller = this
-
     }
 
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true
-//        viewModel.getAppsUpdate()
         binding.swipeRefresh.isRefreshing = false
     }
-
-//    override fun onReturnTop(position: Int) {
-//        if (position == 1) {
-//            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-//                refreshData()
-//            } else {
-//                binding.recyclerView.smoothScrollToPosition(0)
-//                //refreshData()
-//            }
-//        }
-//    }
-
-
+    
 }

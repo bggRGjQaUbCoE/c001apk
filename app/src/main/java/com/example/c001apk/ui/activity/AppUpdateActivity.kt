@@ -5,7 +5,7 @@ import android.view.MenuItem
 import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityAppUpdateBinding
-import com.example.c001apk.ui.fragment.home.UpdateListFragment
+import com.example.c001apk.ui.fragment.home.app.UpdateListFragment
 import com.example.c001apk.util.UpdateListUtil
 
 class AppUpdateActivity : BaseActivity() {

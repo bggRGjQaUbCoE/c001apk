@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.activity.AppActivity
+import com.example.c001apk.util.AppUtils
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.viewmodel.AppViewModel
 
@@ -49,7 +50,16 @@ class UpdateListAdapter(
         Glide.with(holder.itemView.context).load(app.logo).into(holder.icon)
         holder.appName.text = app.title
         holder.appName.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT // 刷新宽度
-        holder.codeName.text = "${app.apkversionname}(${app.apkversioncode})"
+        if (app.localVersionName == null) {
+            app.localVersionName =
+                AppUtils.getAppVersionName(holder.itemView.context, app.packageName)
+        }
+        if (app.localVersionCode == null) {
+            app.localVersionCode =
+                AppUtils.getAppVersionCode(holder.itemView.context, app.packageName)
+        }
+        holder.codeName.text =
+            "${app.localVersionName}(${app.localVersionCode}) > ${app.apkversionname}(${app.apkversioncode})"
         holder.size.text = DateUtils.fromToday(app.lastupdate) + " " + app.apksize
         holder.updateLog.text = app.changelog
         holder.bitType.text = when (app.pkg_bit_type) {
@@ -76,6 +86,13 @@ class UpdateListAdapter(
                 viewModel.packageName = app.packageName
                 viewModel.versionCode = app.apkversioncode.toString()
                 viewModel.getDownloadLink()
+            }
+        }
+        holder.updateLog.apply {
+            maxLines = if (app.expand) Int.MAX_VALUE else 5
+            setOnClickListener {
+                app.expand = !app.expand
+                maxLines = if (app.expand) Int.MAX_VALUE else 5
             }
         }
     }

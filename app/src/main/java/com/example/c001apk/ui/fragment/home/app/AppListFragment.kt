@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.fragment.home
+package com.example.c001apk.ui.fragment.home.app
 
 import android.annotation.SuppressLint
 import android.content.Intent
