@@ -189,6 +189,8 @@ class FeedContentAdapter(
         var rid = ""
         var uid = ""
         var isLike = false
+        var type = ""
+        var url = ""
         var vote: TextView = view.findViewById(R.id.vote)
     }
 

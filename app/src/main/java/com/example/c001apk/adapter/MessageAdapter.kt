@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -22,6 +23,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnNotiLongClickListener
 import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.CookieUtil.atcommentme
 import com.example.c001apk.util.CookieUtil.atme
 import com.example.c001apk.util.CookieUtil.contacts_follow
@@ -217,13 +219,29 @@ class MessageAdapter(
                     parent.context.startActivity(intent)
                 }
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("rid", viewHolder.rid)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    parent.context.startActivity(intent)
+                    when (viewHolder.type) {
+                        "feed" -> {
+                            val intent = Intent(parent.context, FeedActivity::class.java)
+                            intent.putExtra("type", "feed")
+                            intent.putExtra("id", viewHolder.id)
+                            intent.putExtra("rid", viewHolder.rid)
+                            intent.putExtra("uid", viewHolder.uid)
+                            intent.putExtra("uname", viewHolder.uname.text)
+                            parent.context.startActivity(intent)
+                        }
+
+                        "link" -> {
+                            val intent = Intent(parent.context, WebViewActivity::class.java)
+                            intent.putExtra("url", viewHolder.url)
+                            parent.context.startActivity(intent)
+                        }
+
+                        else -> {
+                            Toast.makeText(parent.context, "unknown type", Toast.LENGTH_SHORT)
+                                .show()
+                            ClipboardUtil.copyText(parent.context, viewHolder.url)
+                        }
+                    }
                 }
                 viewHolder.itemView.setOnLongClickListener {
                     iOnNotiLongClickListener?.onDeleteNoti(
@@ -328,9 +346,18 @@ class MessageAdapter(
                 val doc: Document = Jsoup.parse(noti.note)
                 val links: Elements = doc.select("a[href]")
                 for (link in links) {
-                    val href = link.attr("href").replace("/feed/", "")
-                    holder.id = href.substring(0, href.indexOf('?'))
-                    holder.rid = href.substring(href.indexOf("rid=") + 4, href.indexOf('&'))
+                    val href = link.attr("href")
+                    if (href.contains("/feed/")) {
+                        holder.type = "feed"
+                        holder.id = href.replace("/feed/", "").substring(0, href.indexOf('?'))
+                        holder.rid = href.substring(href.indexOf("rid=") + 4, href.indexOf('&'))
+                    } else if (href.contains("http")) {
+                        holder.type = "link"
+                        holder.url = href
+                    } else {
+                        holder.type = "unknown"
+                        holder.url = href
+                    }
                 }
                 holder.uid = noti.fromuid
                 holder.uname.text = noti.fromusername
