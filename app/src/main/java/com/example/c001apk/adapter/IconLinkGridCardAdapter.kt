@@ -30,6 +30,7 @@ class IconLinkGridCardAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val layoutManager = GridLayoutManager(mContext, 5, GridLayoutManager.VERTICAL, false)
         holder.recyclerView.layoutManager = layoutManager
+        holder.recyclerView.isNestedScrollingEnabled = false
         val itemAdapter = IconLinkGridCardItemAdapter(mContext, dataList[position])
         holder.recyclerView.adapter = itemAdapter
     }

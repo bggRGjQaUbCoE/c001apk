@@ -1,6 +1,5 @@
 <resources>
 
-
     <string-array name="theme_texts" translatable="false">
         <item>@string/dark_theme_off</item>
         <item>@string/dark_theme_on</item>
