@@ -28,10 +28,11 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String) =
+        fun newInstance(id: String, title:String) =
             CollectionFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
+                    putString("TITLE", title)
                 }
             }
     }
@@ -40,6 +41,7 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
         super.onCreate(savedInstanceState)
         arguments?.let {
             viewModel.cId = it.getString("ID")!!
+            viewModel.title = it.getString("TITLE")!!
         }
     }
 
@@ -105,7 +107,8 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
 
     private fun initBar() {
         binding.toolBar.apply {
-            title = "我的收藏单"
+            title = if (viewModel.title == "") "我的收藏单"
+            else viewModel.title
             setNavigationIcon(R.drawable.ic_back)
             setNavigationOnClickListener {
                 if (viewModel.cId.isNullOrEmpty())
@@ -197,12 +200,12 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
         })
     }
 
-    override fun onShowCollection(id: String) {
+    override fun onShowCollection(id: String, title:String) {
         requireActivity().supportFragmentManager
             .beginTransaction()
             .replace(
                 R.id.fragment,
-                newInstance(id),
+                newInstance(id, title),
                 null
             )
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

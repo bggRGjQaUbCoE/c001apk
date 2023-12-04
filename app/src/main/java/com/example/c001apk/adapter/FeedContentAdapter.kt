@@ -185,6 +185,7 @@ class FeedContentAdapter(
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
         val expand: ImageButton = view.findViewById(R.id.expand)
         var id = ""
+        var rid = ""
         var uid = ""
         var isLike = false
         var vote: TextView = view.findViewById(R.id.vote)
@@ -1100,14 +1101,18 @@ class FeedContentAdapter(
 
                     ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-                    holder.message.movementMethod =
-                        LinkTextView.LocalLinkMovementMethod.getInstance()
-                    holder.message.text = SpannableStringBuilderUtil.setText(
-                        mContext,
-                        reply.message,
-                        (holder.message.textSize * 1.3).toInt(),
-                        null
-                    )
+                    if (reply.message == "[图片]")
+                        holder.message.visibility = View.GONE
+                    else{
+                        holder.message.visibility = View.VISIBLE
+                        holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.message.text = SpannableStringBuilderUtil.setText(
+                            mContext,
+                            reply.message,
+                            (holder.message.textSize * 1.3).toInt(),
+                            null
+                        )
+                    }
 
                     holder.pubDate.text = DateUtils.fromToday(reply.dateline)
                     val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!

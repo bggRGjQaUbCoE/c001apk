@@ -24,8 +24,8 @@ object Network {
     ) =
         api2Service.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem).await()
 
-    suspend fun getFeedContent(id: String) =
-        api2Service.getFeedContent(id).await()
+    suspend fun getFeedContent(id: String, rid: String?) =
+        api2Service.getFeedContent(id, rid).await()
 
     suspend fun getFeedContentReply(
         id: String,

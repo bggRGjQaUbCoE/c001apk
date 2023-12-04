@@ -38,7 +38,8 @@ interface ApiService {
     @GET("/v6/feed/detail")
     //@FormUrlEncoded
     fun getFeedContent(
-        @Query("id") id: String
+        @Query("id") id: String,
+        @Query("rid") rid: String?
     ): Call<FeedContentResponse>
 
     @GET("/v6/feed/replyList")

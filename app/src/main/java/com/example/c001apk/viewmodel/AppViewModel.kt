@@ -32,6 +32,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var isTop = false
     var isEnable = false
     var listSize = -1
     var feedTypeName: String? = null
@@ -98,9 +99,9 @@ class AppViewModel : ViewModel() {
     var isEnd = false
 
     private val getFeedData = MutableLiveData<String>()
-
+    var frid: String? = null
     val feedData = getFeedData.switchMap {
-        Repository.getFeedContent(id)
+        Repository.getFeedContent(id, frid)
     }
 
     fun getFeed() {

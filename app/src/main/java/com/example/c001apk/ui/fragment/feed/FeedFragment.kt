@@ -80,6 +80,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         fun newInstance(
             type: String?,
             id: String,
+            rid: String?,
             uid: String?,
             uname: String?,
             viewReply: Boolean?
@@ -88,6 +89,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 arguments = Bundle().apply {
                     putString("TYPE", type)
                     putString("ID", id)
+                    putString("RID", rid)
                     putString("UID", uid)
                     putString("UNAME", uname)
                     if (viewReply != null) {
@@ -102,6 +104,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         arguments?.let {
             viewModel.feedType = it.getString("TYPE", "feed")
             viewModel.id = it.getString("ID", "")
+            viewModel.frid = it.getString("RID")
             viewModel.uid = it.getString("UID", "")
             viewModel.funame = it.getString("UNAME", "")
             viewModel.isViewReply = it.getBoolean("viewReply", false)
@@ -185,10 +188,17 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.feedContentList.add(feed)
                         if (feed.data.topReplyRows.isNotEmpty()) {
-                            mAdapter.setHaveTop(true)
+                            viewModel.isTop = true
+                            mAdapter.setHaveTop(viewModel.isTop)
                             viewModel.topReplyId = feed.data.topReplyRows[0].id
                             viewModel.feedTopReplyList.clear()
                             viewModel.feedTopReplyList.addAll(feed.data.topReplyRows)
+                        } else if (feed.data.replyMeRows.isNotEmpty()) {
+                            viewModel.isTop = false
+                            mAdapter.setHaveTop(viewModel.isTop)
+                            viewModel.topReplyId = feed.data.replyMeRows[0].id
+                            viewModel.feedTopReplyList.clear()
+                            viewModel.feedTopReplyList.addAll(feed.data.replyMeRows)
                         }
                     }
                 } else {
@@ -239,7 +249,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         viewModel.listSize = viewModel.feedReplyList.size
                         for (element in reply?.data!!) {
                             if (element.entityType == "feed_reply") {
-                                if (viewModel.topReplyId != null && element.id == viewModel.topReplyId)
+                                if (viewModel.listType == "lastupdate_desc" && viewModel.topReplyId != null && element.id == viewModel.topReplyId)
                                     continue
                                 if (!BlackListUtil.checkUid(element.uid))
                                     viewModel.feedReplyList.add(element)
@@ -472,8 +482,10 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     }
 
     private fun refreshReply(listType: String) {
+        viewModel.firstItem = null
+        viewModel.lastItem = null
         if (listType == "lastupdate_desc" && viewModel.feedTopReplyList.isNotEmpty())
-            mAdapter.setHaveTop(true)
+            mAdapter.setHaveTop(viewModel.isTop)
         else
             mAdapter.setHaveTop(false)
         binding.recyclerView.stopScroll()
@@ -619,6 +631,9 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             if (viewModel.errorMessage != null) {
                 mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
                 mAdapter.notifyItemChanged(2)
+            } else if (viewModel.isEnd) {
+                mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
             }
             if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
                 showTitleProfile()

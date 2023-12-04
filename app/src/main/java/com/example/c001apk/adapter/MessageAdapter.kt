@@ -213,6 +213,7 @@ class MessageAdapter(
                     val intent = Intent(parent.context, FeedActivity::class.java)
                     intent.putExtra("type", "feed")
                     intent.putExtra("id", viewHolder.id)
+                    intent.putExtra("rid", viewHolder.rid)
                     intent.putExtra("uid", viewHolder.uid)
                     intent.putExtra("uname", viewHolder.uname.text)
                     parent.context.startActivity(intent)
@@ -233,7 +234,12 @@ class MessageAdapter(
                     .inflate(R.layout.item_message_mine, parent, false)
                 val viewHolder = MineViewHolder(view)
                 viewHolder.favLayout.setOnClickListener {
-                    parent.context.startActivity(Intent(parent.context, CollectionActivity::class.java))
+                    parent.context.startActivity(
+                        Intent(
+                            parent.context,
+                            CollectionActivity::class.java
+                        )
+                    )
                 }
                 viewHolder.likeLayout.setOnClickListener {
                     val intent = Intent(parent.context, FFFListActivity::class.java)
@@ -306,8 +312,9 @@ class MessageAdapter(
                 val doc: Document = Jsoup.parse(noti.note)
                 val links: Elements = doc.select("a[href]")
                 for (link in links) {
-                    val href = link.attr("href")
-                    holder.id = href.replace("/feed/", "")
+                    val href = link.attr("href").replace("/feed/", "")
+                    holder.id = href.substring(0, href.indexOf('?'))
+                    holder.rid = href.substring(href.indexOf("rid=") + 4, href.indexOf('&'))
                 }
                 holder.uid = noti.fromuid
                 holder.uname.text = noti.fromusername

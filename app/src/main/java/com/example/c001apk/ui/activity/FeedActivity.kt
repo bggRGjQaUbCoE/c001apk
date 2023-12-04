@@ -20,6 +20,7 @@ class FeedActivity : BaseActivity() {
 
         var type = intent.getStringExtra("type")
         var id = intent.getStringExtra("id")
+        var rid = intent.getStringExtra("rid")
         val uid = intent.getStringExtra("uid")
         val uname = intent.getStringExtra("uname")
         val viewReply = intent.getBooleanExtra("viewReply", false)
@@ -46,7 +47,7 @@ class FeedActivity : BaseActivity() {
                 .beginTransaction()
                 .replace(
                     R.id.feedFragment,
-                    FeedFragment.newInstance(type, id!!, uid, uname, viewReply)
+                    FeedFragment.newInstance(type, id!!,rid, uid, uname, viewReply)
                 )
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()

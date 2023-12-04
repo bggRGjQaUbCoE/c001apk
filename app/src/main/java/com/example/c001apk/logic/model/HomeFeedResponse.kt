@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        val replyMeRows: List<TotalReplyResponse.Data>,
         @SerializedName("cover_pic") val coverPic: String?,
         @SerializedName("is_open") val isOpen: Int?,
         @SerializedName("item_num") val itemNum: String?,

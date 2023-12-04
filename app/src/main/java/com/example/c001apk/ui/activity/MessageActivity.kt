@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageContentAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
+import com.example.c001apk.databinding.ActivityMessageBinding
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
@@ -23,7 +24,7 @@ import com.example.c001apk.viewmodel.AppViewModel
 
 class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
 
-    private lateinit var binding: ActivityFfflistBinding
+    private lateinit var binding: ActivityMessageBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var messageContentAdapter: MessageContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -31,7 +32,7 @@ class MessageActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityFfflistBinding.inflate(layoutInflater)
+        binding = ActivityMessageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         viewModel.type = intent.getStringExtra("type")!!

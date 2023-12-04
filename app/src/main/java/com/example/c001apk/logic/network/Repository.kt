@@ -23,8 +23,8 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun getFeedContent(id: String) = fire(Dispatchers.IO) {
-        val feedResponse = Network.getFeedContent(id)
+    fun getFeedContent(id: String, rid: String?) = fire(Dispatchers.IO) {
+        val feedResponse = Network.getFeedContent(id, rid)
         if (feedResponse != null)
             Result.success(feedResponse)
         else
