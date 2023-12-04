@@ -8,6 +8,7 @@ data class LikeFeedResponse(
     val messageStatus: String?,
 ) {
     data class Data(
+        val follow: Int?,
         val count: String
     )
 }

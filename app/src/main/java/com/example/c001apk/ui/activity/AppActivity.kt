@@ -20,6 +20,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
@@ -32,6 +33,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var subscribe: MenuItem
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +68,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                     showErrorMessage()
                     return@observe
                 } else if (appInfo?.data != null) {
+                    viewModel.isFollow = appInfo.data.userAction?.follow == 1
                     viewModel.commentStatusText = appInfo.data.commentStatusText
                     viewModel.title = appInfo.data.title
                     viewModel.version =
@@ -183,6 +186,25 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
             }
         }
 
+        viewModel.getFollowData.observe(this) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    response.data?.follow?.let {
+                        viewModel.isFollow = !viewModel.isFollow
+                        initSub()
+                        Toast.makeText(
+                            this, if (response.data.follow == 1) "关注成功"
+                            else "取消关注成功", Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
 
     }
 
@@ -307,10 +329,20 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.topic_product_menu, menu)
+        subscribe = menu!!.findItem(R.id.subscribe)
+        subscribe.isVisible = PrefManager.isLogin
         return true
     }
 
+    private fun initSub() {
+        subscribe.title = if (viewModel.isFollow) "取消关注"
+        else "关注"
+    }
+
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+
+        initSub()
+
         menu.findItem(
             when (viewModel.appCommentTitle) {
                 "最近回复" -> R.id.topicLatestReply
@@ -378,6 +410,15 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                 viewModel.isEnd = false
                 viewModel.page = 1
                 viewModel.getAppComment()
+            }
+
+
+            R.id.subscribe -> {
+                viewModel.isNew = true
+                viewModel.url = if (viewModel.isFollow) "/v6/apk/unFollow"
+                else "/v6/apk/follow"
+                viewModel.fid = viewModel.appId
+                viewModel.getFollow()
             }
         }
         return true

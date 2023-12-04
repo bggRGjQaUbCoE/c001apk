@@ -32,6 +32,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var isFollow = false
     var isTop = false
     var isEnable = false
     var listSize = -1
@@ -774,6 +775,30 @@ class AppViewModel : ViewModel() {
 
     fun postDeleteNotification() {
         postDeleteNotificationLiveData.value = postDeleteNotificationLiveData.value
+    }
+
+    var postFollow = HashMap<String, String>()
+
+    private val postFollowLiveData = MutableLiveData<String>()
+
+    val postFollowData = postFollowLiveData.switchMap {
+        Repository.postFollow(postFollow)
+    }
+
+    fun postFollow() {
+        postFollowLiveData.value = postFollowLiveData.value
+    }
+
+    var tag: String? = null
+    var fid: String? = null
+    private val getFollowLiveData = MutableLiveData<String>()
+
+    val getFollowData = getFollowLiveData.switchMap {
+        Repository.getFollow(url, tag, fid)
+    }
+
+    fun getFollow() {
+        getFollowLiveData.value = getFollowLiveData.value
     }
 
 }

@@ -385,6 +385,24 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
+    fun postFollow(data: HashMap<String, String>) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.postFollow(data)
+            if (dataResponse != null)
+                Result.success(dataResponse)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
+    fun getFollow(url:String,tag: String?, id:String?) =
+        fire(Dispatchers.IO) {
+            val dataResponse = Network.getFollow(url, tag, id)
+            if (dataResponse != null)
+                Result.success(dataResponse)
+            else
+                Result.failure(RuntimeException("response status is null"))
+        }
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {

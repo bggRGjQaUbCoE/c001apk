@@ -8,6 +8,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -22,6 +23,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
@@ -39,6 +41,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
     private val topicBlackListDao by lazy {
         TopicBlackListDatabase.getDatabase(requireContext()).blackListDao()
     }
+    private lateinit var subscribe: MenuItem
 
     companion object {
         @JvmStatic
@@ -89,6 +92,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
 
                 val data = result.getOrNull()
                 if (data != null) {
+                    viewModel.isFollow = data.userAction?.follow == 1
                     if (viewModel.tabList.isEmpty()) {
                         viewModel.id = data.id
                         viewModel.type = data.entityType
@@ -125,6 +129,7 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
 
                 val data = result.getOrNull()
                 if (data != null) {
+                    viewModel.isFollow = data.userAction?.follow == 1
                     if (viewModel.tabList.isEmpty()) {
                         viewModel.subtitle = data.intro
                         initBar()
@@ -153,6 +158,55 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
             }
         }
 
+        viewModel.getFollowData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (!response.message.isNullOrEmpty()) {
+                        if (response.message.contains("关注成功")) {
+                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                                .show()
+                            viewModel.isFollow = !viewModel.isFollow
+                            initSub()
+                        } else
+                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                                .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+        viewModel.postFollowData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (!response.message.isNullOrEmpty()) {
+                        if (response.message.contains("手机吧成功")) {
+                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                                .show()
+                            viewModel.isFollow = !viewModel.isFollow
+                            initSub()
+                        } else
+                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                                .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+    }
+
+    private fun initSub() {
+        subscribe.title = if (viewModel.isFollow) "取消关注"
+        else "关注"
     }
 
     private fun initBar() {
@@ -224,9 +278,13 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
             menu.findItem(R.id.order).isVisible = binding.viewPager.currentItem == 1
         else
             menu.findItem(R.id.order).isVisible = false
+        subscribe = menu.findItem(R.id.subscribe)
+        subscribe.isVisible = PrefManager.isLogin
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
+
+        initSub()
 
         //if (viewModel.type == "product") {
         menu.findItem(
@@ -287,6 +345,32 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
                         }
                     }
                     show()
+                }
+            }
+
+            R.id.subscribe -> {
+                when (viewModel.type) {
+                    "topic" -> {
+                        viewModel.isNew = true
+                        viewModel.url = if (viewModel.isFollow) "/v6/feed/unFollowTag"
+                        else "/v6/feed/FollowTag"
+                        viewModel.tag = viewModel.title
+                        viewModel.getFollow()
+                    }
+
+                    "product" -> {
+                        viewModel.isNew = true
+                        viewModel.postFollow["id"] = viewModel.id
+                        viewModel.postFollow["status"] = if (viewModel.isFollow) "0"
+                        else "1"
+                        viewModel.postFollow()
+                    }
+
+                    else -> Toast.makeText(
+                        requireContext(),
+                        "type error: ${viewModel.type}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 

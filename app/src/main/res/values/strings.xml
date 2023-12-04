@@ -113,5 +113,6 @@
     <string name="open_link_outside">使用外部浏览器打开链接</string>
     <string name="regenerate">重新生成随机设备信息</string>
     <string name="my_freq">我的常去</string>
+    <string name="subscribe">关注</string>
 
 </resources>

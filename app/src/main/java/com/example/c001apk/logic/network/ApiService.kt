@@ -252,4 +252,17 @@ interface ApiService {
         @Query("id") id: String,
     ): Call<LikeReplyResponse>
 
+    @POST("/v6/product/changeFollowStatus")
+    @FormUrlEncoded
+    fun postFollow(
+        @FieldMap data: HashMap<String, String>
+    ): Call<LikeReplyResponse>
+
+    @GET()
+    fun getFollow(
+        @Url url: String,
+        @Query("tag") tag: String?,
+        @Query("id") id: String?,
+    ): Call<LikeFeedResponse>
+
 }
