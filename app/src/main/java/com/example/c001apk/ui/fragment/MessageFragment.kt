@@ -217,7 +217,7 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             }
         }
 
-        viewModel.postDeleteNotificationData.observe(viewLifecycleOwner) { result ->
+        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
@@ -380,10 +380,11 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             setTitle("删除来自 $uname 的通知？")
             setNegativeButton(android.R.string.cancel, null)
             setPositiveButton(android.R.string.ok) { _, _ ->
+                viewModel.url = "/v6/notification/delete"
                 viewModel.isNew = true
                 viewModel.position = position
-                viewModel.id = id
-                viewModel.postDeleteNotification()
+                viewModel.deleteId = id
+                viewModel.postDelete()
             }
             show()
         }

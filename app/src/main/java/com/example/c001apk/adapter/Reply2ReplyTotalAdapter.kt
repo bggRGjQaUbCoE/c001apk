@@ -25,6 +25,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
@@ -43,6 +44,12 @@ class Reply2ReplyTotalAdapter(
     private val position: Int,
     private val replyList: ArrayList<TotalReplyResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var iOnReplyDeleteClickListener: IOnReplyDeleteClickListener? = null
+
+    fun setIOnReplyDeleteClickListener(iOnReplyDeleteClickListener: IOnReplyDeleteClickListener) {
+        this.iOnReplyDeleteClickListener = iOnReplyDeleteClickListener
+    }
 
     private var rid = ""
     private var ruid = ""
@@ -150,6 +157,8 @@ class Reply2ReplyTotalAdapter(
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.menu.findItem(R.id.copy).isVisible = false
+                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.setOnMenuItemClickListener(this@Reply2ReplyTotalAdapter)
                     popup.show()
                 }
@@ -402,6 +411,10 @@ class Reply2ReplyTotalAdapter(
                     "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$rid"
                 )
                 mContext.startActivity(intent)
+            }
+
+            R.id.delete -> {
+                iOnReplyDeleteClickListener?.onDeleteReply(rid, rposition, null)
             }
         }
         return false

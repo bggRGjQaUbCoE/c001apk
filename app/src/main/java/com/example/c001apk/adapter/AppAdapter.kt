@@ -39,6 +39,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnCollectionItemClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
@@ -61,6 +62,12 @@ class AppAdapter(
     private val dataList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    private var iOnReplyDeleteClickListener: IOnReplyDeleteClickListener? = null
+
+    fun setIOnReplyDeleteClickListener(iOnReplyDeleteClickListener: IOnReplyDeleteClickListener) {
+        this.iOnReplyDeleteClickListener = iOnReplyDeleteClickListener
+    }
 
     private var iOnCollectionItemClickListener: IOnCollectionItemClickListener? = null
 
@@ -371,6 +378,8 @@ class AppAdapter(
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.menu.findItem(R.id.copy).isVisible = false
+                    popup.menu.findItem(R.id.delete).isVisible = false
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
                 }
@@ -494,6 +503,8 @@ class AppAdapter(
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.menu.findItem(R.id.copy).isVisible = false
+                    popup.menu.findItem(R.id.delete).isVisible = false
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
                 }
@@ -560,6 +571,8 @@ class AppAdapter(
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.menu.findItem(R.id.copy).isVisible = false
+                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
                 }
@@ -1599,6 +1612,10 @@ class AppAdapter(
                         "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
                 )
                 mContext.startActivity(intent)
+            }
+
+            R.id.delete -> {
+                iOnReplyDeleteClickListener?.onDeleteReply(fid, position, null)
             }
         }
         return false

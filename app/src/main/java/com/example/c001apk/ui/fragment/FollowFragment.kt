@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -13,12 +14,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
+import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
-class FollowFragment : Fragment() {
+class FollowFragment : Fragment(), IOnReplyDeleteClickListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -165,11 +167,32 @@ class FollowFragment : Fragment() {
             }
         }
 
+        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data == "删除成功") {
+                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
+                        viewModel.dataList.removeAt(viewModel.position)
+                        mAdapter.notifyItemRemoved(viewModel.position)
+                    } else if (!response.message.isNullOrEmpty()) {
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(requireContext(), viewModel.dataList)
+        mAdapter.setIOnReplyDeleteClickListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -193,6 +216,7 @@ class FollowFragment : Fragment() {
     }
 
     private fun refreshData() {
+        viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
@@ -298,6 +322,14 @@ class FollowFragment : Fragment() {
                 }
             }
         })
+    }
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {
+        viewModel.isNew = true
+        viewModel.position = position
+        viewModel.url = "/v6/feed/deleteReply"
+        viewModel.deleteId = id
+        viewModel.postDelete()
     }
 
 }

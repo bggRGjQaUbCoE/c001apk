@@ -3,6 +3,7 @@ package com.example.c001apk.ui.fragment.feed
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +31,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
@@ -48,6 +51,7 @@ import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -57,7 +61,8 @@ import java.net.URLDecoder
 
 class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
     IOnLikeClickListener, OnImageItemClickListener, IOnListTypeClickListener,
-    IOnShowMoreReplyListener, OnPostFollowListener, IOnPublishClickListener {
+    IOnShowMoreReplyListener, OnPostFollowListener, IOnPublishClickListener,
+    IOnReplyDeleteClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -119,7 +124,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged", "SetTextI18n", "InflateParams")
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n", "InflateParams", "RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -373,7 +378,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                 val response = result.getOrNull()
                 response?.let {
                     if (response.data != null) {
-                        if (response.data.messageStatus == 1 || response.data.messageStatus == 2) {
+                        if (response.data.messageStatus != null) {
                             bottomSheetDialog.editText.text = null
                             if (response.data.messageStatus == 1)
                                 Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
@@ -404,8 +409,8 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                 mAdapter.notifyItemInserted(1)
                                 binding.recyclerView.scrollToPosition(1)
                             } else {
-                                viewModel.feedReplyList[viewModel.rPosition - 2].replyRows.add(
-                                    viewModel.feedReplyList[viewModel.rPosition - 2].replyRows.size,
+                                viewModel.feedReplyList[viewModel.rPosition!! - 2].replyRows?.add(
+                                    viewModel.feedReplyList[viewModel.rPosition!! - 2].replyRows?.size!!,
                                     HomeFeedResponse.ReplyRows(
                                         viewModel.rid,
                                         PrefManager.uid,
@@ -418,11 +423,80 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                                         ""
                                     )
                                 )
-                                mAdapter.notifyItemChanged(viewModel.rPosition)
+                                mAdapter.notifyItemChanged(viewModel.rPosition!!)
                             }
                         }
                     } else {
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        if (response.messageStatus == "err_request_captcha") {
+                            viewModel.isGetCaptcha = true
+                            viewModel.timeStamp = System.currentTimeMillis() / 1000
+                            viewModel.getValidateCaptcha()
+                        }
+                    }
+                }
+            }
+        }
+
+        viewModel.validateCaptchaData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isGetCaptcha) {
+                viewModel.isGetCaptcha = false
+
+                val response = result.getOrNull()
+                response?.let {
+                    val responseBody = response.body()
+                    val bitmap = BitmapFactory.decodeStream(responseBody!!.byteStream())
+                    val captchaView = LayoutInflater.from(requireContext())
+                        .inflate(R.layout.item_captcha, null, false)
+                    val captchaImg: ImageView = captchaView.findViewById(R.id.captchaImg)
+                    captchaImg.setImageBitmap(bitmap)
+                    val captchaText: TextInputEditText = captchaView.findViewById(R.id.captchaText)
+                    captchaText.highlightColor = ColorUtils.setAlphaComponent(
+                        ThemeUtils.getThemeAttrColor(
+                            requireContext(),
+                            rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                        ), 128
+                    )
+                    MaterialAlertDialogBuilder(requireContext()).apply {
+                        setView(captchaView)
+                        setTitle("captcha")
+                        setNegativeButton(android.R.string.cancel, null)
+                        setPositiveButton("验证并继续") { _, _ ->
+                            viewModel.requestValidateData["type"] = "err_request_captcha"
+                            viewModel.requestValidateData["code"] = captchaText.text.toString()
+                            viewModel.requestValidateData["mobile"] = ""
+                            viewModel.requestValidateData["idcard"] = ""
+                            viewModel.requestValidateData["name"] = ""
+                            viewModel.isRequestValidate = true
+                            viewModel.postRequestValidate()
+                        }
+                        show()
+                    }
+                }
+            }
+        }
+
+        viewModel.postRequestValidateData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isRequestValidate) {
+                viewModel.isRequestValidate = false
+
+                val response = result.getOrNull()
+                response?.let {
+                    if (response.data != null) {
+                        Toast.makeText(activity, response.data, Toast.LENGTH_SHORT).show()
+                        if (response.data == "验证通过") {
+                            viewModel.isCreateFeed = true
+                            bottomSheetDialog.editText.text = null
+                            bottomSheetDialog.dismiss()
+                            viewModel.postReply()
+                        }
+                    } else if (response.message != null) {
+                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        if (response.message == "请输入正确的图形验证码") {
+                            viewModel.isGetCaptcha = true
+                            viewModel.timeStamp = System.currentTimeMillis() / 1000
+                            viewModel.getValidateCaptcha()
+                        }
                     }
                 }
             }
@@ -440,6 +514,33 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                         viewModel.feedContentList[0].data?.userAction?.followAuthor = 1
                     }
                     mAdapter.notifyItemChanged(0)
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
+        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data == "删除成功") {
+                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
+                        if (viewModel.rPosition == null) {
+                            viewModel.feedReplyList.removeAt(viewModel.position - 2)
+                            mAdapter.notifyItemRemoved(viewModel.position)
+                        } else {
+                            viewModel.feedReplyList[viewModel.position - 2].replyRows?.removeAt(
+                                viewModel.rPosition!!
+                            )
+                            mAdapter.notifyItemChanged(viewModel.position)
+                        }
+                    } else if (!response.message.isNullOrEmpty()) {
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -666,6 +767,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter =
             FeedContentAdapter(requireContext(), viewModel.feedContentList, viewModel.feedReplyList)
+        mAdapter.setIOnReplyDeleteClickListener(this)
         mAdapter.setIOnReplyClickListener(this)
         mAdapter.setIOnTotalReplyClickListener(this)
         mAdapter.setIOnLikeReplyListener(this)
@@ -920,6 +1022,16 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         viewModel.replyData["replyAndForward"] = replyAndForward
         viewModel.isPostReply = true
         viewModel.postReply()
+    }
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {
+        viewModel.rPosition = null
+        viewModel.rPosition = rPosition
+        viewModel.isNew = true
+        viewModel.position = position
+        viewModel.url = "/v6/feed/deleteReply"
+        viewModel.deleteId = id
+        viewModel.postDelete()
     }
 
 }

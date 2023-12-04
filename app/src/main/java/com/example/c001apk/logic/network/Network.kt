@@ -184,8 +184,8 @@ object Network {
     ) =
         apiService.getCollectionList(url, uid, id, showDefault, page).await()
 
-    suspend fun postDeleteNotification(id: String) =
-        apiService.postDeleteNotification(id).await()
+    suspend fun postDelete(url: String, id: String) =
+        apiService.postDelete(url, id).await()
 
     suspend fun postFollow(data: HashMap<String, String>) =
         apiService.postFollow(data).await()

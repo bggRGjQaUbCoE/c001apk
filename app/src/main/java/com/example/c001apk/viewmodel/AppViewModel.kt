@@ -85,7 +85,7 @@ class AppViewModel : ViewModel() {
     var ruid = "" // 被回复用户id
     var type = "" //feed reply
 
-    var rPosition = -1
+    var rPosition: Int? = null
     var firstVisibleItemPosition = -1
     var firstCompletelyVisibleItemPosition = -1
     var lastVisibleItemPosition = -1
@@ -767,14 +767,16 @@ class AppViewModel : ViewModel() {
         getCollectionListData.value = getCollectionListData.value
     }
 
-    private val postDeleteNotificationLiveData = MutableLiveData<String>()
+    private val postDeleteLiveData = MutableLiveData<String>()
 
-    val postDeleteNotificationData = postDeleteNotificationLiveData.switchMap {
-        Repository.postDeleteNotification(id)
+    val postDeleteData = postDeleteLiveData.switchMap {
+        Repository.postDelete(url, deleteId)
     }
 
-    fun postDeleteNotification() {
-        postDeleteNotificationLiveData.value = postDeleteNotificationLiveData.value
+    var deleteId = ""
+
+    fun postDelete() {
+        postDeleteLiveData.value = postDeleteLiveData.value
     }
 
     var postFollow = HashMap<String, String>()

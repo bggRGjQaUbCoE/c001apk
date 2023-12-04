@@ -43,6 +43,7 @@ import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
 import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
@@ -51,6 +52,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
+import com.example.c001apk.view.LinkMovementClickMethod
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
@@ -67,6 +69,12 @@ class FeedContentAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
+    private var iOnReplyDeleteClickListener: IOnReplyDeleteClickListener? = null
+
+    fun setIOnReplyDeleteClickListener(iOnReplyDeleteClickListener: IOnReplyDeleteClickListener) {
+        this.iOnReplyDeleteClickListener = iOnReplyDeleteClickListener
+    }
+
     private var extraKey = ""
 
     fun setExtraKey(extraKey: String) {
@@ -79,9 +87,11 @@ class FeedContentAdapter(
         this.haveTop = haveTop
     }
 
+    private var text = ""
     private var uid = ""
     private var id = ""
     private var position = -1
+    private var rPosition: Int? = null
 
     private var onPostFollowListener: OnPostFollowListener? = null
 
@@ -359,12 +369,15 @@ class FeedContentAdapter(
                     onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
                 }
                 viewHolder.expand.setOnClickListener {
+                    rPosition = null
                     id = viewHolder.id
                     uid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                    popup.menu.findItem(R.id.copy).isVisible = false
+                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.setOnMenuItemClickListener(this@FeedContentAdapter)
                     popup.show()
                 }
@@ -1106,9 +1119,10 @@ class FeedContentAdapter(
 
                     if (reply.message == "[图片]")
                         holder.message.visibility = View.GONE
-                    else{
+                    else {
                         holder.message.visibility = View.VISIBLE
-                        holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.message.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
                         holder.message.text = SpannableStringBuilderUtil.setText(
                             mContext,
                             reply.message,
@@ -1168,7 +1182,7 @@ class FeedContentAdapter(
                     )
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
-                    if (reply.replyRows.isNotEmpty()) {
+                    if (!reply.replyRows.isNullOrEmpty()) {
                         val sortedList = ArrayList<HomeFeedResponse.ReplyRows>()
                         for (element in reply.replyRows) {
                             if (!BlackListUtil.checkUid(element.uid))
@@ -1230,7 +1244,7 @@ class FeedContentAdapter(
                                     val mess =
                                         """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag1}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
 
-                                    textView.movementMethod = LinkMovementMethod.getInstance()
+                                    textView.movementMethod = LinkMovementClickMethod.getInstance()
 
                                     textView.text = SpannableStringBuilderUtil.setReply(
                                         mContext,
@@ -1253,13 +1267,20 @@ class FeedContentAdapter(
                                     }
 
                                     view.setOnLongClickListener {
-                                        val message = Html.fromHtml(
-                                            replyData.message,
-                                            Html.FROM_HTML_MODE_COMPACT
-                                        )
-                                        val intent = Intent(mContext, CopyActivity::class.java)
-                                        intent.putExtra("text", message.toString())
-                                        mContext.startActivity(intent)
+                                        this@FeedContentAdapter.text = textView.text.toString()
+                                        id = replyData.id
+                                        uid = replyData.uid
+                                        this@FeedContentAdapter.position =
+                                            holder.bindingAdapterPosition
+                                        this@FeedContentAdapter.rPosition = position1
+                                        val popup = PopupMenu(mContext, it)
+                                        val inflater = popup.menuInflater
+                                        inflater.inflate(R.menu.feed_reply_menu, popup.menu)
+                                        popup.menu.findItem(R.id.copy).isVisible = true
+                                        popup.menu.findItem(R.id.delete).isVisible =
+                                            PrefManager.uid == replyData.uid
+                                        popup.setOnMenuItemClickListener(this@FeedContentAdapter)
+                                        popup.show()
                                         true
                                     }
 
@@ -1271,7 +1292,7 @@ class FeedContentAdapter(
 
                     if (reply.replyRowsMore != 0) {
                         holder.totalReply.visibility = View.VISIBLE
-                        val count = reply.replyRowsMore + reply.replyRows.size
+                        val count = reply.replyRowsMore + reply.replyRows?.size!!
                         holder.totalReply.text = "查看更多回复($count)"
                     } else
                         holder.totalReply.visibility = View.GONE
@@ -1331,8 +1352,13 @@ class FeedContentAdapter(
         when (p0.itemId) {
             R.id.block -> {
                 BlackListUtil.saveUid(uid)
-                replyList.removeAt(position - 2)
-                notifyItemRemoved(position)
+                if (rPosition == null) {
+                    replyList.removeAt(position - 2)
+                    notifyItemRemoved(position)
+                } else {
+                    replyList[position - 2].replyRows?.removeAt(rPosition!!)
+                    notifyItemChanged(position)
+                }
             }
 
             R.id.report -> {
@@ -1341,6 +1367,16 @@ class FeedContentAdapter(
                     "url",
                     "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$id"
                 )
+                mContext.startActivity(intent)
+            }
+
+            R.id.delete -> {
+                iOnReplyDeleteClickListener?.onDeleteReply(id, position, rPosition)
+            }
+
+            R.id.copy -> {
+                val intent = Intent(mContext, CopyActivity::class.java)
+                intent.putExtra("text", text)
                 mContext.startActivity(intent)
             }
         }

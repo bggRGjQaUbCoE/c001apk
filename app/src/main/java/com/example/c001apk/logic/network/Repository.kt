@@ -376,9 +376,9 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun postDeleteNotification(id: String) =
+    fun postDelete(url: String, id: String) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.postDeleteNotification(id)
+            val dataResponse = Network.postDelete(url, id)
             if (dataResponse != null)
                 Result.success(dataResponse)
             else
@@ -394,7 +394,7 @@ object Repository {
                 Result.failure(RuntimeException("response status is null"))
         }
 
-    fun getFollow(url:String,tag: String?, id:String?) =
+    fun getFollow(url: String, tag: String?, id: String?) =
         fire(Dispatchers.IO) {
             val dataResponse = Network.getFollow(url, tag, id)
             if (dataResponse != null)

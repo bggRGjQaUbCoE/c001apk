@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class CheckResponse(
     val status: Int?,
     val message: String?,
+    val messageStatus: String?,
     val data: Data?
 ) {
 

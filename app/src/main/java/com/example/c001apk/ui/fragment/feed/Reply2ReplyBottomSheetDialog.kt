@@ -20,6 +20,7 @@ import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
@@ -32,7 +33,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.net.URLDecoder
 
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener,
-    IOnLikeClickListener, OnImageItemClickListener, IOnPublishClickListener {
+    IOnLikeClickListener, OnImageItemClickListener, IOnPublishClickListener,
+    IOnReplyDeleteClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -225,6 +227,26 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
             }
         }
 
+        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data == "删除成功") {
+                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
+                        viewModel.replyTotalList.removeAt(viewModel.position)
+                        mAdapter.notifyItemRemoved(viewModel.position)
+                    } else if (!response.message.isNullOrEmpty()) {
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun showReplyErrorMessage() {
@@ -284,6 +306,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         mAdapter.setIOnLikeReplyListener(this)
         mAdapter.setIOnReplyClickListener(this)
         mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setIOnReplyClickListener(this)
+        mAdapter.setIOnReplyDeleteClickListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -370,6 +394,16 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         viewModel.replyData["replyAndForward"] = replyAndForward
         viewModel.isPostReply = true
         viewModel.postReply()
+    }
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {
+        viewModel.rPosition = null
+        viewModel.rPosition = rPosition
+        viewModel.isNew = true
+        viewModel.position = position
+        viewModel.url = "/v6/feed/deleteReply"
+        viewModel.deleteId = id
+        viewModel.postDelete()
     }
 
 }

@@ -238,7 +238,7 @@ interface ApiService {
     @GET("/v6/product/categoryList")
     fun getProductList(): Call<HomeFeedResponse>
 
-    @GET()
+    @GET
     fun getCollectionList(
         @Url url: String,
         @Query("uid") uid: String?,
@@ -247,8 +247,9 @@ interface ApiService {
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
-    @POST("/v6/notification/delete")
-    fun postDeleteNotification(
+    @POST
+    fun postDelete(
+        @Url url: String,
         @Query("id") id: String,
     ): Call<LikeReplyResponse>
 
@@ -258,7 +259,7 @@ interface ApiService {
         @FieldMap data: HashMap<String, String>
     ): Call<LikeReplyResponse>
 
-    @GET()
+    @GET
     fun getFollow(
         @Url url: String,
         @Query("tag") tag: String?,
