@@ -22,6 +22,7 @@ import com.example.c001apk.ui.activity.BlackListActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.activity.SBCKActivity
 import com.example.c001apk.util.ActivityCollector
+import com.example.c001apk.util.CacheDataManager
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -239,6 +240,24 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 show()
             }
             true
+        }
+
+
+        findPreference<Preference>("clearCache")?.apply {
+            summary = CacheDataManager.getTotalCacheSize(requireContext())
+            setOnPreferenceClickListener {
+                MaterialAlertDialogBuilder(requireContext()).apply {
+                    setTitle("确定清除缓存吗？")
+                    setMessage("当前缓存${CacheDataManager.getTotalCacheSize(requireContext())}")
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        CacheDataManager.clearAllCache(requireContext())
+                        findPreference<Preference>("clearCache")?.summary = "刚刚清理"
+                    }
+                    show()
+                }
+                true
+            }
         }
 
     }
