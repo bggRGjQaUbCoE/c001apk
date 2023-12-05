@@ -20,7 +20,7 @@ class FeedActivity : BaseActivity() {
 
         var type = intent.getStringExtra("type")
         var id = intent.getStringExtra("id")
-        var rid = intent.getStringExtra("rid")
+        val rid = intent.getStringExtra("rid")
         val uid = intent.getStringExtra("uid")
         val uname = intent.getStringExtra("uname")
         val viewReply = intent.getBooleanExtra("viewReply", false)

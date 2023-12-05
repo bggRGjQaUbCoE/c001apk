@@ -194,5 +194,6 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("com.github.megatronking.stringfog:xor:5.0.0")
     implementation("androidx.palette:palette:1.0.0")
-
+    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.3")
+    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.3")
 }

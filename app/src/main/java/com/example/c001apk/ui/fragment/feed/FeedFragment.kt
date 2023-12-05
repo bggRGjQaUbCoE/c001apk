@@ -488,7 +488,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
                             viewModel.isCreateFeed = true
                             bottomSheetDialog.editText.text = null
                             bottomSheetDialog.dismiss()
-                            viewModel.postReply()
+                            //viewModel.postReply()
                         }
                     } else if (response.message != null) {
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

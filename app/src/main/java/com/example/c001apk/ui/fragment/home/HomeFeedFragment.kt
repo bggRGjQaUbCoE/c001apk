@@ -372,7 +372,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                             viewModel.isCreateFeed = true
                             bottomSheetDialog.editText.text = null
                             bottomSheetDialog.dismiss()
-                            viewModel.postCreateFeed()
+                            //viewModel.postCreateFeed()
                         }
                     } else if (response.message != null) {
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

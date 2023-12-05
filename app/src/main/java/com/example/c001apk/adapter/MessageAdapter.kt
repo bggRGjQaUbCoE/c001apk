@@ -223,6 +223,7 @@ class MessageAdapter(
                         "feed" -> {
                             val intent = Intent(parent.context, FeedActivity::class.java)
                             intent.putExtra("type", "feed")
+                            intent.putExtra("viewReply", true)
                             intent.putExtra("id", viewHolder.id)
                             intent.putExtra("rid", viewHolder.rid)
                             intent.putExtra("uid", viewHolder.uid)
@@ -359,7 +360,7 @@ class MessageAdapter(
                     val href = link.attr("href")
                     if (href.contains("/feed/")) {
                         holder.type = "feed"
-                        val index0 = href.indexOf('?')
+                        val index0 = href.replace("/feed/", "").indexOf('?')
                         val index1 = href.indexOf("rid=")
                         val index2 = href.indexOf('&')
                         if (index0 != -1 && index1 != -1 && index2 != -1) {
