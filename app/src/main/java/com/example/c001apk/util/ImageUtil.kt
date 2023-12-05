@@ -35,7 +35,6 @@ import com.example.c001apk.util.Utils.Companion.getBase64
 import com.example.c001apk.view.FileTarget
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
-import com.github.megatronking.stringfog.annotation.StringFogIgnore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import jp.wasabeef.glide.transformations.ColorFilterTransformation
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -172,8 +171,8 @@ object ImageUtil {
     private fun showSaveImgDialog(context: Context, url: String) {
         val index = url.lastIndexOf('/')
         val dot = url.lastIndexOf('.')
-        type = url.substring(dot, url.length)
-        filename = "${url.substring(index + 1, url.length).getBase64().substring(0, 16)}$type"
+        type = url.substring(dot + 1, url.length)
+        filename = "${url.substring(index + 1, url.length).getBase64().substring(0, 16)}.$type"
 
         MaterialAlertDialogBuilder(context).apply {
             val items = arrayOf("保存图片", "图片分享", "复制图片地址")

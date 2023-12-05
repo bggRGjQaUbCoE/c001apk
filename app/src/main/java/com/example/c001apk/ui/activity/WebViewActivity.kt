@@ -1,11 +1,13 @@
 package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -196,7 +198,12 @@ class WebViewActivity : BaseActivity() {
             R.id.openInBrowser -> {
                 val uri = Uri.parse(link)
                 val intent = Intent(Intent.ACTION_VIEW, uri)
-                startActivity(intent)
+                try {
+                    startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(this, "打开失败", Toast.LENGTH_SHORT).show()
+                    Log.w("error", "Activity was not found for intent, $intent")
+                }
             }
 
             R.id.clearCache -> {
