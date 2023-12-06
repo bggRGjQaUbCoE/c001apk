@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AbsListView.OnScrollListener
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
@@ -46,7 +45,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             //overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             isVerticalScrollBarEnabled = false
 
-            addOnScrollListener(object : RecyclerView.OnScrollListener(){
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
 

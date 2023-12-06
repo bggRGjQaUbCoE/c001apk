@@ -86,7 +86,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
+        android:clipToPadding="false"
         android:scrollbars="none"
+        app:fitsSystemWindowsInsets="bottom"
         tools:itemCount="1"
         tools:listitem="@layout/item_search_history" />
 

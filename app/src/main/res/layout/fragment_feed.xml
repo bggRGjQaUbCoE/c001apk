@@ -105,7 +105,9 @@
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scrollbars="none" />
+                android:clipToPadding="false"
+                android:scrollbars="none"
+                app:fitsSystemWindowsInsets="bottom" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -219,13 +221,9 @@
         android:id="@+id/reply"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="25dp"
-        android:layout_marginBottom="25dp"
         android:src="@drawable/ic_reply"
         android:tooltipText="@string/reply"
         android:visibility="gone"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         tools:ignore="ContentDescription" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator

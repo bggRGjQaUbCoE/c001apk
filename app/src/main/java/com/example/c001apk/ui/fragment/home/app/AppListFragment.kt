@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,9 +21,12 @@ import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class AppListFragment : Fragment(), IOnTabClickListener {
 
@@ -29,6 +34,7 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +59,20 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     private fun initFab() {
         binding.fab.apply {
             setImageResource(R.drawable.ic_update)
+            val lp = CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.WRAP_CONTENT,
+                CoordinatorLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.setMargins(
+                0,
+                0,
+                DensityTool.dp2px(requireContext(), 25f).toInt(),
+                DensityTool.getNavigationBarHeight(requireContext())
+                        + DensityTool.dp2px(requireContext(), 105f).toInt()
+            )
+            lp.gravity = Gravity.BOTTOM or Gravity.END
+            layoutParams = lp
+            (layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
             setOnClickListener {
                 val intent = Intent(requireContext(), AppUpdateActivity::class.java)
                 startActivity(intent)

@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -25,6 +27,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
@@ -33,8 +36,10 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 
 
@@ -46,6 +51,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
+    private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
 
     companion object {
         @JvmStatic
@@ -394,6 +400,20 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         if (viewModel.type == "feed" && PrefManager.isLogin) {
             val view = LayoutInflater.from(context)
                 .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
+            val lp = CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.WRAP_CONTENT,
+                CoordinatorLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.setMargins(
+                0,
+                0,
+                DensityTool.dp2px(requireContext(), 25f).toInt(),
+                DensityTool.getNavigationBarHeight(requireContext())
+                        + DensityTool.dp2px(requireContext(), 105f).toInt()
+            )
+            lp.gravity = Gravity.BOTTOM or Gravity.END
+            binding.fab.layoutParams = lp
+            (binding.fab.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
             binding.fab.visibility = View.VISIBLE
             bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view)
             bottomSheetDialog.setIOnPublishClickListener(this)

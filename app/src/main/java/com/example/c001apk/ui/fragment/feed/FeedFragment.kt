@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -49,8 +51,10 @@ import com.example.c001apk.view.StickyItemDecorator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +77,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
     private val feedFavoriteDao by lazy {
         FeedFavoriteDatabase.getDatabase(this@FeedFragment.requireContext()).feedFavoriteDao()
     }
+    private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
 
     private fun initAnimator() {
         objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
@@ -152,15 +157,32 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
             }
         }
 
-        binding.reply.setOnClickListener {
-            if (PrefManager.SZLMID == "") {
-                Toast.makeText(activity, "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
-            } else {
-                viewModel.rid = viewModel.id
-                viewModel.ruid = viewModel.uid
-                viewModel.uname = viewModel.funame
-                viewModel.type = "feed"
-                initReply()
+        binding.reply.apply {
+            val lp = CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.WRAP_CONTENT,
+                CoordinatorLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.setMargins(
+                0,
+                0,
+                DensityTool.dp2px(requireContext(), 25f).toInt(),
+                DensityTool.getNavigationBarHeight(requireContext())
+                        + DensityTool.dp2px(requireContext(), 25f).toInt()
+            )
+            lp.gravity = Gravity.BOTTOM or Gravity.END
+            layoutParams = lp
+            (layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
+
+            setOnClickListener {
+                if (PrefManager.SZLMID == "") {
+                    Toast.makeText(activity, "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.rid = viewModel.id
+                    viewModel.ruid = viewModel.uid
+                    viewModel.uname = viewModel.funame
+                    viewModel.type = "feed"
+                    initReply()
+                }
             }
         }
 
