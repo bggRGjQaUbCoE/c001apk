@@ -19,6 +19,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
@@ -448,6 +449,13 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                     viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
                     viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
+
+                    if (dy > 0) {
+                        (activity as INavViewContainer).hideNavigationView()
+                    } else if (dy < 0) {
+                        (activity as INavViewContainer).showNavigationView()
+                    }
+
                 }
             }
         })

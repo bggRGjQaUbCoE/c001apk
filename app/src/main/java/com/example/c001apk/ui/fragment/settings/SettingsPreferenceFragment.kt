@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AbsListView.OnScrollListener
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
@@ -21,6 +22,7 @@ import com.example.c001apk.ui.activity.AboutActivity
 import com.example.c001apk.ui.activity.BlackListActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.activity.SBCKActivity
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.CacheDataManager
 import com.example.c001apk.util.PrefManager
@@ -43,6 +45,20 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         recyclerView.apply {
             //overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             isVerticalScrollBarEnabled = false
+
+            addOnScrollListener(object : RecyclerView.OnScrollListener(){
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    if (dy > 0) {
+                        (activity as INavViewContainer).hideNavigationView()
+                    } else if (dy < 0) {
+                        (activity as INavViewContainer).showNavigationView()
+                    }
+
+                }
+            })
+
         }
         return recyclerView
     }

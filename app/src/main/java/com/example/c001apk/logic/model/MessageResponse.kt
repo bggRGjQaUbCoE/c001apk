@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class MessageResponse(val data: List<Data>) {
 
     data class Data(
+        val infoHtml: String?,
         val entityType: String,
         val id: String,
         val uid: String,
@@ -27,15 +28,15 @@ data class MessageResponse(val data: List<Data>) {
         val userAction: HomeFeedResponse.UserAction?,
         val forwardSourceFeed: ForwardSourceFeed?,
         val feed: Feed?,
-        val likeUsername:String,
-        val likeUid:String,
-        val likeTime:Long,
-        val likeAvatar:String,
-        val fid:String,
-        val fromUserAvatar:String,
-        val fromusername:String,
-        val fromuid:String,
-        val note:String
+        val likeUsername: String,
+        val likeUid: String,
+        val likeTime: Long,
+        val likeAvatar: String,
+        val fid: String,
+        val fromUserAvatar: String,
+        val fromusername: String,
+        val fromuid: String,
+        val note: String
     )
 
     data class Feed(

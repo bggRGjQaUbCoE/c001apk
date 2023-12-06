@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 
@@ -33,18 +34,16 @@ class HomeTopicContentFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(url: String, title: String) =
-            HomeTopicContentFragment().apply {
-                arguments = Bundle().apply {
-                    putString("url", url)
-                    putString("title", title)
-                }
+        fun newInstance(url: String, title: String) = HomeTopicContentFragment().apply {
+            arguments = Bundle().apply {
+                putString("url", url)
+                putString("title", title)
             }
+        }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentTopicContentBinding.inflate(inflater, container, false)
         return binding.root
@@ -67,13 +66,13 @@ class HomeTopicContentFragment : Fragment() {
 
                 val data = result.getOrNull()
                 if (!data.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
-                        viewModel.topicDataList.clear()
+                    if (viewModel.isRefreshing) viewModel.topicDataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.topicDataList.size
-                        for (element in data)
-                            if (element.entityType == "topic" || element.entityType == "product")
-                                viewModel.topicDataList.add(element)
+                        for (element in data) if (element.entityType == "topic" || element.entityType == "product") viewModel.topicDataList.add(
+                            element
+                        )
+                        viewModel.lastItem = viewModel.topicDataList.last().id
                     }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
@@ -81,16 +80,11 @@ class HomeTopicContentFragment : Fragment() {
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
-                            viewModel.topicDataList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
+                if (viewModel.isLoadMore) if (viewModel.isEnd) mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+                else mAdapter.notifyItemRangeChanged(
+                    viewModel.listSize + 1, viewModel.topicDataList.size - viewModel.listSize + 1
+                )
+                else mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false
                 binding.indicator.visibility = View.GONE
                 viewModel.isLoadMore = false
@@ -107,15 +101,15 @@ class HomeTopicContentFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size) {
-                        if (!viewModel.isEnd) {
-                            mAdapter.setLoadState(mAdapter.LOADING, null)
-                            mAdapter.notifyItemChanged(viewModel.topicDataList.size)
-                            viewModel.isLoadMore = true
-                            viewModel.page++
-                            viewModel.isNew = true
-                            viewModel.getTopicData()
-                        }
+                    if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
+                        && !viewModel.isRefreshing && !viewModel.isLoadMore && !viewModel.isEnd
+                    ) {
+                        mAdapter.setLoadState(mAdapter.LOADING, null)
+                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+                        viewModel.isLoadMore = true
+                        viewModel.page++
+                        viewModel.isNew = true
+                        viewModel.getTopicData()
                     }
                 }
             }
@@ -126,6 +120,13 @@ class HomeTopicContentFragment : Fragment() {
                     viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
                     viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
+
+                    if (dy > 0) {
+                        (activity as INavViewContainer).hideNavigationView()
+                    } else if (dy < 0) {
+                        (activity as INavViewContainer).showNavigationView()
+                    }
+
                 }
             }
         })
@@ -135,8 +136,7 @@ class HomeTopicContentFragment : Fragment() {
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
             ThemeUtils.getThemeAttrColor(
-                requireContext(),
-                rikka.preference.simplemenu.R.attr.colorPrimary
+                requireContext(), rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
@@ -153,8 +153,7 @@ class HomeTopicContentFragment : Fragment() {
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+            if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
         }
     }
 
@@ -167,6 +166,7 @@ class HomeTopicContentFragment : Fragment() {
     }
 
     private fun refreshData() {
+        viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false

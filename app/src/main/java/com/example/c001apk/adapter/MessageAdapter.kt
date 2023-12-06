@@ -408,7 +408,8 @@ class MessageAdapter(
                 if (messCountList.isNotEmpty()) {
                     if (messCountList[position - 2] != 0) {
                         holder.badge.visibility = View.VISIBLE
-                        holder.badge.text = messCountList[position - 2].toString()
+                        holder.badge.text = if (messCountList[position - 2] > 99) "99+"
+                        else messCountList[position - 2].toString()
                     } else
                         holder.badge.visibility = View.GONE
                 }

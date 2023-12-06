@@ -20,6 +20,7 @@ import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.HistoryActivity
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnNotiLongClickListener
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.BlackListUtil
@@ -265,6 +266,13 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
                         mLayoutManager.findLastVisibleItemPosition()
                     viewModel.firstCompletelyVisibleItemPosition =
                         mLayoutManager.findFirstCompletelyVisibleItemPosition()
+
+                    if (dy > 0) {
+                        (activity as INavViewContainer).hideNavigationView()
+                    } else if (dy < 0) {
+                        (activity as INavViewContainer).showNavigationView()
+                    }
+
                 }
             }
         })

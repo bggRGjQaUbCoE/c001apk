@@ -358,7 +358,7 @@ class MessageContentAdapter(
                         holder.pubDate.textSize.toInt()
                     )
                     holder.pubDate.setCompoundDrawables(drawable1, null, null, null)
-                    holder.message.text = "赞了你的回复"
+                    holder.message.text = "赞了你的${message.infoHtml}"
                 }
 
 

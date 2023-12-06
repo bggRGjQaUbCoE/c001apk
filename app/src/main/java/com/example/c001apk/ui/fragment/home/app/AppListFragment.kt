@@ -16,6 +16,7 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.UpdateListUtil
@@ -64,8 +65,16 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {}
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                viewModel.firstCompletelyVisibleItemPosition =
-                    mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if (viewModel.appList.isNotEmpty()) {
+                    viewModel.firstCompletelyVisibleItemPosition =
+                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+
+                    if (dy > 0) {
+                        (activity as INavViewContainer).hideNavigationView()
+                    } else if (dy < 0) {
+                        (activity as INavViewContainer).showNavigationView()
+                    }
+                }
             }
         })
     }

@@ -52,8 +52,8 @@
 
         <TextView
             android:id="@+id/badge"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_marginStart="100dp"
             android:background="@drawable/shape_oval_primary"
             android:gravity="center"
@@ -64,7 +64,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/title"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="99" />
+            tools:text="99+" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

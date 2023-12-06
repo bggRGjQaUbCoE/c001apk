@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.home.topic
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.vertical.adapter.TabAdapter
 import com.example.c001apk.view.vertical.widget.ITabView
 import com.example.c001apk.viewmodel.AppViewModel
@@ -62,6 +64,14 @@ class TopicFragment : Fragment() {
 
         if (!viewModel.isInit)
             initView()
+
+        binding.tabLayout.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            if (scrollY > oldScrollY) {
+                (activity as INavViewContainer).hideNavigationView()
+            } else if (scrollY < oldScrollY) {
+                (activity as INavViewContainer).showNavigationView()
+            }
+        }
 
         viewModel.homeTopicTitleLiveData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {

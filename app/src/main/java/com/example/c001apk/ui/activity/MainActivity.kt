@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.ThemeUtils
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -12,6 +13,7 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityMainBinding
 import com.example.c001apk.ui.fragment.MessageFragment
 import com.example.c001apk.ui.fragment.home.HomeFragment
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.settings.SettingsFragment
@@ -26,14 +28,16 @@ import com.example.c001apk.util.CookieUtil.notification
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.net.URLEncoder
 
 
-class MainActivity : BaseActivity(), IOnBottomClickContainer {
+class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-
+    private val navViewBehavior by lazy { HideBottomViewOnScrollBehavior<BottomNavigationView>() }
     override var controller: IOnBottomClickListener? = null
 
     @SuppressLint("InflateParams")
@@ -41,6 +45,9 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        //from libchecker
+        (binding.bottomNav.layoutParams as CoordinatorLayout.LayoutParams).behavior = navViewBehavior
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
@@ -173,6 +180,17 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer {
             if (binding.viewPager.currentItem != 0)
                 binding.viewPager.setCurrentItem(0, true)
         }
+    }
+
+    override fun showNavigationView() {
+        if (navViewBehavior.isScrolledDown)
+            navViewBehavior.slideUp(binding.bottomNav, true)
+
+    }
+
+    override fun hideNavigationView() {
+        if (navViewBehavior.isScrolledUp)
+            navViewBehavior.slideDown(binding.bottomNav, true)
     }
 
 }
