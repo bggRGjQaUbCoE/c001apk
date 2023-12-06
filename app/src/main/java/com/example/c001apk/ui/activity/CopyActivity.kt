@@ -9,7 +9,6 @@ import com.example.c001apk.adapter.ItemTouchHelperCallback
 import com.example.c001apk.databinding.ActivityCopyBinding
 import com.example.c001apk.logic.database.HomeMenuDatabase
 import com.example.c001apk.logic.model.HomeMenu
-import com.example.c001apk.ui.fragment.minterface.IOnHomeMenuChangedListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class CopyActivity : BaseActivity(), IOnHomeMenuChangedListener {
+class CopyActivity : BaseActivity() {
 
     private lateinit var binding: ActivityCopyBinding
     private lateinit var mAdapter: HomeMenuAdapter
@@ -53,10 +52,18 @@ class CopyActivity : BaseActivity(), IOnHomeMenuChangedListener {
         }
 
         binding.done.setOnClickListener {
+            var i = 0
             CoroutineScope(Dispatchers.IO).launch {
                 homeMenuDao.deleteAll()
                 for (element in menuList) {
-                    homeMenuDao.insert(element)
+                    homeMenuDao.insert(
+                        HomeMenu(
+                            i,
+                            element.title,
+                            element.isEnable
+                        )
+                    )
+                    i++
                 }
                 withContext(Dispatchers.Main) {
                     val intent = packageManager.getLaunchIntentForPackage(packageName)
@@ -73,7 +80,6 @@ class CopyActivity : BaseActivity(), IOnHomeMenuChangedListener {
         mLayoutManager.flexDirection = FlexDirection.ROW
         mLayoutManager.flexWrap = FlexWrap.WRAP
         mAdapter = HomeMenuAdapter(menuList)
-        mAdapter.setIOnHomeMenuChangedListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -82,10 +88,5 @@ class CopyActivity : BaseActivity(), IOnHomeMenuChangedListener {
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
     }
-
-    override fun onMenuChanged(menuList: ArrayList<HomeMenu>) {
-        this.menuList = menuList
-    }
-
 
 }

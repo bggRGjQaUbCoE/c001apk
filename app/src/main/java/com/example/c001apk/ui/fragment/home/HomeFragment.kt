@@ -107,12 +107,12 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
 
     private fun initMenuList() {
         homeMenuDao.apply {
-            insert(HomeMenu("关注", true))
-            insert(HomeMenu("应用", true))
-            insert(HomeMenu("头条", true))
-            insert(HomeMenu("热榜", true))
-            insert(HomeMenu("话题", true))
-            insert(HomeMenu("数码", true))
+            insert(HomeMenu(0, "关注", true))
+            insert(HomeMenu(1, "应用", true))
+            insert(HomeMenu(2, "头条", true))
+            insert(HomeMenu(3, "热榜", true))
+            insert(HomeMenu(4, "话题", true))
+            insert(HomeMenu(5, "数码", true))
         }
         viewModel.tabList.apply {
             add("关注")
@@ -165,7 +165,7 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
         }.attach()
         if (viewModel.isInitial) {
             viewModel.isInitial = false
-            if (viewModel.menuList.contains(HomeMenu("头条", true)))
+            if (viewModel.tabList.contains("头条"))
                 binding.viewPager.setCurrentItem(viewModel.tabList.indexOf("头条"), false)
         }
     }

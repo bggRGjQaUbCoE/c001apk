@@ -225,7 +225,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         search()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun updateHistory(keyword: String) {
         CoroutineScope(Dispatchers.IO).launch {
             if (searchHistoryDao.isExist(keyword)) {
@@ -240,7 +239,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onItemDeleteClick(keyword: String) {
         CoroutineScope(Dispatchers.IO).launch {
             searchHistoryDao.delete(keyword)

@@ -105,6 +105,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         viewModel.topicDataList.clear()
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.lastItem = data.last().id
                         viewModel.listSize = viewModel.topicDataList.size
                         for (element in data)
                             if (element.entityType == "feed"
@@ -250,6 +251,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
     }
 
     private fun refreshData() {
+        viewModel.lastItem = null
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false

@@ -6,20 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeMenu
-import com.example.c001apk.ui.fragment.minterface.IOnHomeMenuChangedListener
 import com.google.android.material.chip.Chip
-import java.util.Collections
 
 class HomeMenuAdapter(
     private val menuList: ArrayList<HomeMenu>
 ) : RecyclerView.Adapter<HomeMenuAdapter.ViewHolder>(),
     ItemTouchHelperCallback.OnItemTouchCallbackListener {
-
-    private var iOnHomeMenuChangedListener: IOnHomeMenuChangedListener? = null
-
-    fun setIOnHomeMenuChangedListener(iOnHomeMenuChangedListener: IOnHomeMenuChangedListener) {
-        this.iOnHomeMenuChangedListener = iOnHomeMenuChangedListener
-    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val menu: Chip = view.findViewById(R.id.menu)
@@ -31,7 +23,7 @@ class HomeMenuAdapter(
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             menuList[viewHolder.bindingAdapterPosition].isEnable = viewHolder.menu.isChecked
-            iOnHomeMenuChangedListener?.onMenuChanged(menuList)
+            notifyItemChanged(viewHolder.bindingAdapterPosition)
         }
         return viewHolder
     }
@@ -45,15 +37,12 @@ class HomeMenuAdapter(
     }
 
     override fun onMove(fromPosition: Int, targetPosition: Int): Boolean {
-        Collections.swap(menuList, fromPosition, targetPosition)
-        notifyItemMoved(fromPosition, targetPosition)
+        val position = menuList[fromPosition].position
         val title = menuList[fromPosition].title
         val isEnable = menuList[fromPosition].isEnable
-        menuList[fromPosition].title = menuList[targetPosition].title
-        menuList[fromPosition].isEnable = menuList[targetPosition].isEnable
-        menuList[targetPosition].title = title
-        menuList[targetPosition].isEnable = isEnable
-        iOnHomeMenuChangedListener?.onMenuChanged(menuList)
+        menuList.removeAt(fromPosition)
+        menuList.add(targetPosition, HomeMenu(position, title, isEnable))
+        notifyItemMoved(fromPosition, targetPosition)
         return true
     }
 

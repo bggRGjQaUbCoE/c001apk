@@ -5,12 +5,14 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -450,7 +452,7 @@ object ImageUtil {
         val downloadFolderName = "c001apk"
         // 保存的图片名称
         //var name = System.currentTimeMillis().toString() + ""
-        //val mimeType = ImageUtil.getImageTypeWithMime(resource.absolutePath)
+        val mimeType = ImageUtil.getImageTypeWithMime(resource.absolutePath)
         //name = "$name.$mimeType"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // 大于等于29版本的保存方法
@@ -459,7 +461,7 @@ object ImageUtil {
             val values = ContentValues()
             values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
             values.put(MediaStore.Images.Media.DESCRIPTION, filename)
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/$type")
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/$mimeType")
             values.put(
                 MediaStore.Images.Media.RELATIVE_PATH,
                 Environment.DIRECTORY_PICTURES + "/" + downloadFolderName + "/"
@@ -506,6 +508,22 @@ object ImageUtil {
                 Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun getImageTypeWithMime(path: String): String {
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(path, options)
+        var type = options.outMimeType
+        Log.d("getImageTypeWithMime", "getImageTypeWithMime: path = $path, type1 = $type")
+        // ”image/png”、”image/jpeg”、”image/gif”
+        type = if (TextUtils.isEmpty(type)) {
+            ""
+        } else {
+            type.substring(6)
+        }
+        Log.d("getImageTypeWithMime", "getImageTypeWithMime: path = $path, type2 = $type")
+        return type
     }
 
 }

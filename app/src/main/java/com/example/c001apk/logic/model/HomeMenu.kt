@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class HomeMenu(
+    @PrimaryKey
+    var position: Int,
     var title: String,
     var isEnable: Boolean
-) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
-}
+)

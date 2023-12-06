@@ -12,7 +12,7 @@ interface HomeMenuDao {
     @Insert
     fun insert(menu: HomeMenu)
 
-    @Query("select * from HomeMenu")
+    @Query("select * from HomeMenu ORDER BY position ASC")
     fun loadAll(): List<HomeMenu>
 
     @Query("SELECT 1 FROM HomeMenu WHERE title = :title LIMIT 1")

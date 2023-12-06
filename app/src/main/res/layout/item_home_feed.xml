@@ -123,7 +123,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/text_scroll_bg"
+            android:background="@drawable/selector_bg"
             android:clickable="true"
             android:focusable="true"
             android:lineSpacingMultiplier="1.2"
