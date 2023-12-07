@@ -1,12 +1,15 @@
 package com.example.c001apk.ui.fragment
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.ImageButton
@@ -16,7 +19,10 @@ import androidx.appcompat.widget.ThemeUtils
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.viewpager.widget.ViewPager
+import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
 import com.example.c001apk.adapter.HorizontalScrollAdapter
 import com.example.c001apk.ui.fragment.minterface.IOnEmojiClickListener
@@ -65,6 +71,22 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                 )
             editText.setSelection(editText.text.toString().length)
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        window?.let {
+            it.attributes?.windowAnimations = com.absinthe.libraries.utils.R.style.DialogAnimation
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+            UiUtils.setSystemBarStyle(it)
+            WindowInsetsControllerCompat(it, it.decorView)
+                .isAppearanceLightNavigationBars = !UiUtils.isDarkMode()
+        }
+
+        findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows = false
+        findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows = false
+
     }
 
     @SuppressLint("RestrictedApi")

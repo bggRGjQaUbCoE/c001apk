@@ -34,26 +34,33 @@ class ImageCarouselCardAdapter(
                 .inflate(R.layout.item_home_image_carousel_card_item, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
-            if (viewHolder.url.contains("/feed/")) {
+            if (viewHolder.url.startsWith("/feed/")) {
                 val intent = Intent(parent.context, FeedActivity::class.java)
                 intent.putExtra("type", "feed")
                 intent.putExtra("id", viewHolder.url.replace("/feed/", ""))
                 intent.putExtra("uid", "")
                 intent.putExtra("uname", "")
                 parent.context.startActivity(intent)
-            } else if (viewHolder.url.contains("/t/")) {
+            } else if (viewHolder.url.startsWith("/t/")) {
                 val intent = Intent(parent.context, TopicActivity::class.java)
                 intent.putExtra("type", "topic")
                 intent.putExtra("title", viewHolder.title)
                 intent.putExtra("url", viewHolder.url)
                 intent.putExtra("id", "")
                 parent.context.startActivity(intent)
-            } else if (viewHolder.url.contains("/page?url")) {
+            } else if (viewHolder.url.startsWith("/product/")) {
+                val intent = Intent(parent.context, TopicActivity::class.java)
+                intent.putExtra("type", "product")
+                intent.putExtra("title", viewHolder.title.replace("_首页轮播", ""))
+                intent.putExtra("url", viewHolder.url)
+                intent.putExtra("id", viewHolder.url.replace("/product/", ""))
+                parent.context.startActivity(intent)
+            } else if (viewHolder.url.startsWith("/page?url")) {
                 val intent = Intent(parent.context, CarouselActivity::class.java)
                 intent.putExtra("url", viewHolder.url.substring(10, viewHolder.url.length))
                 intent.putExtra("title", viewHolder.title)
                 parent.context.startActivity(intent)
-            } else if (viewHolder.url.contains("https://") || viewHolder.url.contains("http://")) {
+            } else if (viewHolder.url.startsWith("https://") || viewHolder.url.contains("http://")) {
                 val intent = Intent(parent.context, WebViewActivity::class.java)
                 intent.putExtra("url", viewHolder.url)
                 parent.context.startActivity(intent)
@@ -73,7 +80,7 @@ class ImageCarouselCardAdapter(
         else {
             if (position == 0)
                 holder.count.text = "${itemCount - 2}/${itemCount - 2}"
-            else if (position == itemCount-1)
+            else if (position == itemCount - 1)
                 holder.count.text = "1/${itemCount - 2}"
             else
                 holder.count.text = "${position}/${itemCount - 2}"

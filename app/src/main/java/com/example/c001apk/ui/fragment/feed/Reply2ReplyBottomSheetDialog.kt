@@ -1,17 +1,23 @@
 package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
@@ -29,6 +35,7 @@ import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.net.URLDecoder
 
@@ -72,6 +79,24 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.BottomSheetDialog)
     }*/
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
+        object : BottomSheetDialog(requireContext(), theme) {
+            override fun onAttachedToWindow() {
+                super.onAttachedToWindow()
+
+                window?.let {
+                    it.attributes?.windowAnimations = com.absinthe.libraries.utils.R.style.DialogAnimation
+                    WindowCompat.setDecorFitsSystemWindows(it, false)
+                    UiUtils.setSystemBarStyle(it)
+                    WindowInsetsControllerCompat(it, it.decorView)
+                        .isAppearanceLightNavigationBars = !UiUtils.isDarkMode()
+                }
+
+                findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows = false
+                findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows = false
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

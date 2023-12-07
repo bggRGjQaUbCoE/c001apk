@@ -20,6 +20,15 @@
         <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3.Mod</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="bottomSheetDialogTheme">@style/CustomBottomSheetDialog</item>
+    </style>
+
+    <style name="CustomBottomSheetDialog" parent="@style/ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
+    </style>
+
+    <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="shapeAppearanceOverlay">@style/CustomShapeAppearanceBottomSheetDialog</item>
     </style>
 
     <style name="PreferenceThemeOverlay.Rikka.Material3.Mod" parent="@style/PreferenceThemeOverlay">
