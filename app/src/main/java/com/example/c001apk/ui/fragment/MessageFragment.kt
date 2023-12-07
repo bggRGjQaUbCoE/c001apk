@@ -377,8 +377,12 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
         binding.name1.text = URLDecoder.decode(PrefManager.username, "UTF-8")
         binding.level.text = "Lv.${PrefManager.level}"
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
-        binding.progress.max = PrefManager.nextLevelExperience.toInt()
-        binding.progress.progress = PrefManager.experience.toInt()
+        binding.progress.max =
+            if (PrefManager.nextLevelExperience != "") PrefManager.nextLevelExperience.toInt()
+            else -1
+        binding.progress.progress =
+            if (PrefManager.experience != "") PrefManager.experience.toInt()
+            else -1
         ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
         ImageUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
     }

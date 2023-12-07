@@ -73,22 +73,6 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
         }
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-
-        window?.let {
-            it.attributes?.windowAnimations = com.absinthe.libraries.utils.R.style.DialogAnimation
-            WindowCompat.setDecorFitsSystemWindows(it, false)
-            UiUtils.setSystemBarStyle(it)
-            WindowInsetsControllerCompat(it, it.decorView)
-                .isAppearanceLightNavigationBars = !UiUtils.isDarkMode()
-        }
-
-        findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows = false
-        findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows = false
-
-    }
-
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -144,6 +128,18 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
         val imm =
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, 0)
+
+        window?.let {
+            it.attributes?.windowAnimations = com.absinthe.libraries.utils.R.style.DialogAnimation
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+            UiUtils.setSystemBarStyle(it)
+            WindowInsetsControllerCompat(it, it.decorView)
+                .isAppearanceLightNavigationBars = !UiUtils.isDarkMode()
+        }
+
+        findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows = false
+        findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows = false
+
 
         /*val decorView = requireActivity().window.decorView
         decorView.viewTreeObserver.addOnGlobalLayoutListener {

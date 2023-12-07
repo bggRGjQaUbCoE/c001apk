@@ -2,13 +2,10 @@ package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
@@ -77,25 +74,31 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.BottomSheetDialog)
+        setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialog_Md3)
     }*/
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
         object : BottomSheetDialog(requireContext(), theme) {
+
             override fun onAttachedToWindow() {
                 super.onAttachedToWindow()
 
                 window?.let {
-                    it.attributes?.windowAnimations = com.absinthe.libraries.utils.R.style.DialogAnimation
+                    it.attributes?.windowAnimations =
+                        com.absinthe.libraries.utils.R.style.DialogAnimation
                     WindowCompat.setDecorFitsSystemWindows(it, false)
                     UiUtils.setSystemBarStyle(it)
                     WindowInsetsControllerCompat(it, it.decorView)
                         .isAppearanceLightNavigationBars = !UiUtils.isDarkMode()
                 }
 
-                findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows = false
-                findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows = false
+                findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
+                    false
+                findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows =
+                    false
+
             }
+
         }
 
     override fun onCreateView(
@@ -348,10 +351,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         view.layoutParams.height = -1
         view.layoutParams.width = -1
         val behavior = BottomSheetBehavior.from(view)
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            behavior.halfExpandedRatio = 0.75F
-            behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        }
+        //if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        behavior.halfExpandedRatio = 0.75F
+        behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        //}
     }
 
     override fun onReply2Reply(
