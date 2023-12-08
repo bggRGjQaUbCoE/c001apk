@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.IconLinkGridCardBean
+import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CarouselActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
@@ -60,6 +61,12 @@ class ImageCarouselCardAdapter(
                 intent.putExtra("url", viewHolder.url.substring(10, viewHolder.url.length))
                 intent.putExtra("title", viewHolder.title)
                 parent.context.startActivity(intent)
+            } else if (viewHolder.url.startsWith("/game/")) {
+                val intent = Intent(parent.context, AppActivity::class.java)
+                intent.putExtra("id", viewHolder.url.replace("/game/", ""))
+            } else if (viewHolder.url.startsWith("/apk/")) {
+                val intent = Intent(parent.context, AppActivity::class.java)
+                intent.putExtra("id", viewHolder.url.replace("/apk/", ""))
             } else if (viewHolder.url.startsWith("https://") || viewHolder.url.contains("http://")) {
                 val intent = Intent(parent.context, WebViewActivity::class.java)
                 intent.putExtra("url", viewHolder.url)

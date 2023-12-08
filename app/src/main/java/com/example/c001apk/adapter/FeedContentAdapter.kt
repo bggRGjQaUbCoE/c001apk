@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -287,7 +286,14 @@ class FeedContentAdapter(
                     )
                 }
                 viewHolder.extraUrlLayout.setOnClickListener {
-                    if (PrefManager.isOpenLinkOutside) {
+                    val url = viewHolder.extraUrl.text.toString()
+                    if (url.startsWith("/game/")) {
+                        val intent = Intent(parent.context, AppActivity::class.java)
+                        intent.putExtra("id", url.replace("/game/", ""))
+                    } else if (url.startsWith("/apk/")) {
+                        val intent = Intent(parent.context, AppActivity::class.java)
+                        intent.putExtra("id", url.replace("/apk/", ""))
+                    } else if (PrefManager.isOpenLinkOutside) {
                         val intent = Intent()
                         intent.action = Intent.ACTION_VIEW
                         intent.data = Uri.parse(viewHolder.extraUrl.text.toString())

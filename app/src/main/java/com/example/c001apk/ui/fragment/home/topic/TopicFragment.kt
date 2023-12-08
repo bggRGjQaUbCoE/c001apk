@@ -2,7 +2,6 @@ package com.example.c001apk.ui.fragment.home.topic
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,9 +65,12 @@ class TopicFragment : Fragment() {
             initView()
 
         binding.tabLayout.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
-            if (scrollY > oldScrollY) {
+            val contentView: View = binding.tabLayout.getChildAt(0)
+            if (oldScrollY in 1..<scrollY) {
                 (activity as INavViewContainer).hideNavigationView()
-            } else if (scrollY < oldScrollY) {
+            } else if (scrollY < oldScrollY
+                && contentView.measuredHeight > (binding.tabLayout.scrollY + binding.tabLayout.height)
+            ) {
                 (activity as INavViewContainer).showNavigationView()
             }
         }
