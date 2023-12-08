@@ -6,7 +6,12 @@ object BitmapCut {
     fun cutBitmap(bm: Bitmap?): Bitmap? {
         var bitmap: Bitmap? = null
         if (bm != null) {
-            bitmap = Bitmap.createBitmap(bm, 0, 0, bm.width, bm.width * 1320 / 540)
+            bitmap =
+                if (bm.height < bm.width * 1320 / 540) {
+                    Bitmap.createBitmap(bm, 0, 0, bm.width, bm.width)
+                    throw IllegalArgumentException("BitmapCut: height: ${bm.height}, width: ${bm.width}")
+                } else
+                    Bitmap.createBitmap(bm, 0, 0, bm.width, bm.width * 1320 / 540)
         }
         return bitmap
     }

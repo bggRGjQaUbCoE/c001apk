@@ -7,7 +7,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 class NestCollapsingToolbarLayout : CollapsingToolbarLayout {
 
     private var mIsScrimsShown: Boolean = false
-    private lateinit var scrimsShowListener: OnScrimsShowListener
+    private var scrimsShowListener: OnScrimsShowListener? = null
 
     constructor(context: Context) : super(context)
 
@@ -24,7 +24,7 @@ class NestCollapsingToolbarLayout : CollapsingToolbarLayout {
         if (mIsScrimsShown != shown) {
             mIsScrimsShown = shown
             if (scrimsShowListener != null) {
-                scrimsShowListener.onScrimsShowChange(this, mIsScrimsShown)
+                scrimsShowListener?.onScrimsShowChange(this, mIsScrimsShown)
             }
         }
     }

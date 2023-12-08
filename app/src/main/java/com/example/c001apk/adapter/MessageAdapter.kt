@@ -53,6 +53,9 @@ class MessageAdapter(
     }
 
     private var uid = ""
+    private var uname = ""
+    private var id = ""
+    private var position = -1
 
     private var loadState = 2
     val LOADING = 1
@@ -258,6 +261,9 @@ class MessageAdapter(
                 }
                 viewHolder.expand.setOnClickListener {
                     uid = viewHolder.uid
+                    id = viewHolder.id
+                    uname = viewHolder.uname.text.toString()
+                    position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
@@ -432,6 +438,14 @@ class MessageAdapter(
                     "https://m.coolapk.com/mp/do?c=user&m=report&id=$uid"
                 )
                 mContext.startActivity(intent)
+            }
+
+            R.id.delete -> {
+                iOnNotiLongClickListener?.onDeleteNoti(
+                    uname,
+                    id,
+                    position
+                )
             }
         }
         return false

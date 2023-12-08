@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="Platform.Theme.C001apk" parent="Theme.Material3.DynamicColors.DayNight.Rikka" >
+    <item name="android:forceDarkAllowed">false</item>
+    <item name="android:enforceNavigationBarContrast">false</item>
+    <item name="android:enforceStatusBarContrast">false</item>
+  </style>
+
+</resources>

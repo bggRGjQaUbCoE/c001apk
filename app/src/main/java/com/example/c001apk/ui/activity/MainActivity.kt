@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.ThemeUtils
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -46,9 +49,6 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //from libchecker
-        (binding.bottomNav.layoutParams as CoordinatorLayout.LayoutParams).behavior = navViewBehavior
-
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         if (viewModel.isInit) {
@@ -67,50 +67,57 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
                     return when (position) {
                         0 -> HomeFragment()
                         1 -> MessageFragment()
-                        2 -> SettingsFragment()
-                        else -> HomeFragment()
+                        else -> SettingsFragment()
                     }
                 }
             }
+
+            registerOnPageChangeCallback(object :
+                ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    binding.bottomNav.menu.getItem(position)?.isChecked = true
+                    when (position) {
+                        0 -> onBackPressedCallback.isEnabled = false
+                        1 -> onBackPressedCallback.isEnabled = true
+                        2 -> onBackPressedCallback.isEnabled = true
+                    }
+                }
+            })
             isUserInputEnabled = false
+            fixViewPager2Insets(this)
         }
 
-        binding.viewPager.registerOnPageChangeCallback(object :
-            ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                binding.bottomNav.menu.getItem(position)?.isChecked = true
-                when (position) {
-                    0 -> onBackPressedCallback.isEnabled = false
-                    1 -> onBackPressedCallback.isEnabled = true
-                    2 -> onBackPressedCallback.isEnabled = true
+        binding.bottomNav.apply {
+            (layoutParams as CoordinatorLayout.LayoutParams).behavior = navViewBehavior
+
+            setOnItemSelectedListener {
+                when (it.itemId) {
+                    R.id.navigation_home -> {
+                        onBackPressedCallback.isEnabled = false
+                        if (binding.viewPager.currentItem == 0)
+                            controller?.onReturnTop()
+                        else
+                            binding.viewPager.setCurrentItem(0, true)
+                    }
+
+                    R.id.navigation_message -> {
+                        onBackPressedCallback.isEnabled = true
+                        binding.viewPager.setCurrentItem(1, true)
+                        if (viewModel.badge != 0)
+                            binding.bottomNav.removeBadge(R.id.navigation_message)
+                    }
+
+                    R.id.navigation_setting -> {
+                        onBackPressedCallback.isEnabled = true
+                        binding.viewPager.setCurrentItem(2, true)
+                    }
+
                 }
+                true
             }
-        })
-
-        binding.bottomNav.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.navigation_home -> {
-                    onBackPressedCallback.isEnabled = false
-                    if (binding.viewPager.currentItem == 0)
-                        controller?.onReturnTop()
-                    else
-                        binding.viewPager.setCurrentItem(0, true)
-                }
-
-                R.id.navigation_message -> {
-                    onBackPressedCallback.isEnabled = true
-                    binding.viewPager.setCurrentItem(1, true)
-                    if (viewModel.badge != 0)
-                        binding.bottomNav.removeBadge(R.id.navigation_message)
-                }
-
-                R.id.navigation_setting -> {
-                    onBackPressedCallback.isEnabled = true
-                    binding.viewPager.setCurrentItem(2, true)
-                }
-            }
-            true
+            setOnClickListener { /*Do nothing*/ }
+            fixBottomNavigationViewInsets(this)
         }
 
         viewModel.checkLoginInfoData.observe(this) { result ->
@@ -191,6 +198,30 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
     override fun hideNavigationView() {
         if (navViewBehavior.isScrolledUp)
             navViewBehavior.slideDown(binding.bottomNav, true)
+    }
+
+    // from libchecker
+    /**
+     * 覆盖掉 BottomNavigationView 内部的 OnApplyWindowInsetsListener 并避免其被软键盘顶起来
+     * @see BottomNavigationView.applyWindowInsets
+     */
+    private fun fixBottomNavigationViewInsets(view: BottomNavigationView) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, windowInsets ->
+            // 这里不直接使用 windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            // 因为它的结果可能受到 insets 传播链上层某环节的影响，出现了错误的 navigationBarsInsets
+            val navigationBarsInsets =
+                ViewCompat.getRootWindowInsets(view)!!
+                    .getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.updatePadding(bottom = navigationBarsInsets.bottom)
+            windowInsets
+        }
+    }
+
+    private fun fixViewPager2Insets(view: ViewPager2) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, windowInsets ->
+            /* Do nothing */
+            windowInsets
+        }
     }
 
 }

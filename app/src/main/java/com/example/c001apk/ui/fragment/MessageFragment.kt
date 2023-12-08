@@ -1,13 +1,11 @@
 package com.example.c001apk.ui.fragment
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
@@ -32,7 +30,6 @@ import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.NestCollapsingToolbarLayout
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.net.URLDecoder
@@ -45,13 +42,13 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: MessageAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var objectAnimator: ObjectAnimator
-
-    private fun initAnimator() {
-        objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
-        objectAnimator.interpolator = AccelerateInterpolator()
-        objectAnimator.duration = 150
-    }
+    // private lateinit var objectAnimator: ObjectAnimator
+    /*
+        private fun initAnimator() {
+            objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
+            objectAnimator.interpolator = AccelerateInterpolator()
+            objectAnimator.duration = 150
+        }*/
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,11 +64,13 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
 
         viewModel.url = "/v6/notification/list"
 
+        //initAnimator()
+
         binding.clickToLogin.setOnClickListener {
             startActivity(Intent(activity, LoginActivity::class.java))
         }
 
-        initAnimator()
+
         initRefresh()
         initView()
         initScroll()
@@ -79,7 +78,6 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
 
         if (PrefManager.isLogin) {
             binding.clickToLogin.visibility = View.GONE
-            binding.titleProfile.visibility = View.VISIBLE
             binding.avatar.visibility = View.VISIBLE
             binding.name.visibility = View.VISIBLE
             binding.levelLayout.visibility = View.VISIBLE
@@ -88,6 +86,9 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             if (viewModel.isInit) {
                 viewModel.isInit = false
                 getData()
+            } else if (viewModel.isEnd) {
+                mAdapter.setLoadState(mAdapter.LOADING_END)
+                mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
             }
             viewModel.messCountList.apply {
                 add(atme)
@@ -98,35 +99,34 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             }
         } else {
             binding.clickToLogin.visibility = View.VISIBLE
-            binding.titleProfile.visibility = View.INVISIBLE
             binding.avatar.visibility = View.INVISIBLE
             binding.name.visibility = View.INVISIBLE
             binding.levelLayout.visibility = View.INVISIBLE
             binding.progress.visibility = View.INVISIBLE
         }
 
-        binding.collapsingToolbar.setOnScrimesShowListener(object :
-            NestCollapsingToolbarLayout.OnScrimsShowListener {
-            override fun onScrimsShowChange(
-                nestCollapsingToolbarLayout: NestCollapsingToolbarLayout,
-                isScrimesShow: Boolean
-            ) {
-                if (isScrimesShow) {
-                    binding.name1.visibility = View.VISIBLE
-                    binding.avatar1.visibility = View.VISIBLE
-                    binding.titleProfile.visibility = View.VISIBLE
-                    objectAnimator.start()
-                } else {
-                    binding.name1.visibility = View.INVISIBLE
-                    binding.avatar1.visibility = View.INVISIBLE
-                    if (objectAnimator.isRunning) {
-                        objectAnimator.cancel()
-                    }
-                    binding.titleProfile.visibility = View.INVISIBLE
-                }
-            }
+        /*   binding.collapsingToolbar.setOnScrimesShowListener(object :
+               NestCollapsingToolbarLayout.OnScrimsShowListener {
+               override fun onScrimsShowChange(
+                   nestCollapsingToolbarLayout: NestCollapsingToolbarLayout,
+                   isScrimesShow: Boolean
+               ) {
+                   if (isScrimesShow) {
+                       binding.name1.visibility = View.VISIBLE
+                       binding.avatar1.visibility = View.VISIBLE
+                       binding.titleProfile.visibility = View.VISIBLE
+                       objectAnimator.start()
+                   } else {
+                       binding.name1.visibility = View.INVISIBLE
+                       binding.avatar1.visibility = View.INVISIBLE
+                       if (objectAnimator.isRunning) {
+                           objectAnimator.cancel()
+                       }
+                       binding.titleProfile.visibility = View.INVISIBLE
+                   }
+               }
 
-        })
+           })*/
 
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
@@ -334,8 +334,10 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
     @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
         binding.toolBar.inflateMenu(R.menu.message_menu)
-        if (!PrefManager.isLogin)
+        if (!PrefManager.isLogin) {
             binding.toolBar.menu.findItem(R.id.logout).isVisible = false
+        }
+        binding.toolBar.menu.findItem(R.id.freq).isVisible = false
         binding.toolBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.logout -> {
@@ -343,6 +345,10 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
                         setTitle(R.string.logoutTitle)
                         setNegativeButton(android.R.string.cancel, null)
                         setPositiveButton(android.R.string.ok) { _, _ ->
+                            viewModel.countList.clear()
+                            viewModel.messCountList.clear()
+                            viewModel.messageList.clear()
+                            mAdapter.notifyDataSetChanged()
                             PrefManager.isLogin = false
                             PrefManager.uid = ""
                             PrefManager.username = ""
@@ -374,7 +380,6 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
     @SuppressLint("SetTextI18n")
     private fun showProfile() {
         binding.name.text = URLDecoder.decode(PrefManager.username, "UTF-8")
-        binding.name1.text = URLDecoder.decode(PrefManager.username, "UTF-8")
         binding.level.text = "Lv.${PrefManager.level}"
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
         binding.progress.max =
@@ -384,7 +389,6 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             if (PrefManager.experience != "") PrefManager.experience.toInt()
             else -1
         ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
-        ImageUtil.showAvatar(binding.avatar1, PrefManager.userAvatar)
     }
 
     override fun onDeleteNoti(uname: String, id: String, position: Int) {

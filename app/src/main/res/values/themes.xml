@@ -1,22 +1,23 @@
 <resources>
 
-    <style name="Base.Theme.C001apk" parent="Theme.Material3.DynamicColors.Light.Rikka">
+    <style name="Theme.Material3.DynamicColors.DayNight.Rikka" parent="Theme.Material3.DynamicColors.Light.Rikka">
         <item name="android:windowLightStatusBar">true</item>
         <item name="colorPrimaryVariant">@color/primary_dark_light_light_status_bar</item>
+    </style>
+
+    <style name="Platform.Theme.C001apk" parent="Theme.Material3.DynamicColors.DayNight.Rikka" />
+
+    <style name="Theme.C001apk" parent="Platform.Theme.C001apk">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-
         <!-- Preference title -->
         <item name="android:textAppearanceListItem">?textAppearanceSubtitle1</item>
         <!-- Preference category title -->
         <item name="android:colorAccent">?colorPrimary</item>
         <!-- Preference switch -->
         <item name="android:colorControlActivated">?colorPrimary</item>
-    </style>
-
-    <style name="Theme.C001apk" parent="Base.Theme.C001apk">
         <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3.Mod</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -118,7 +119,8 @@
         <item name="android:insetTop">@dimen/m3_btn_inset</item>
         <item name="android:insetBottom">@dimen/m3_btn_inset</item>
         <item name="android:textAppearance">@macro/m3_comp_text_button_label_text_type</item>
-        <item name="shapeAppearance">@style/ShapeAppearance.M3.Comp.TextButton.Container.Shape</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.M3.Comp.TextButton.Container.Shape
+        </item>
         <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.TextButton</item>
         <item name="iconTint">@color/m3_text_button_foreground_color_selector</item>
         <item name="backgroundTint">@color/m3_text_button_background_color_selector</item>

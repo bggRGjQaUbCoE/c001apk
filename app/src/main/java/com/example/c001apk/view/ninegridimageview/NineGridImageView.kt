@@ -58,8 +58,8 @@ class NineGridImageView @JvmOverloads constructor(
     private var urlList: List<String>? = null
     var onImageItemClickListener: OnImageItemClickListener? = null
 
-    var imgHeight = 0
-    var imgWidth = 0
+    var imgHeight = 1
+    var imgWidth = 1
 
     private var singleWidth = 0
     private var singleHeight = 0
