@@ -89,7 +89,7 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
                         mAdapter.notifyItemChanged(viewModel.dataList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.dataList.size - viewModel.listSize + 1
                         )
                 else

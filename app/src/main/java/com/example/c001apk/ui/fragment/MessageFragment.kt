@@ -70,7 +70,6 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             startActivity(Intent(activity, LoginActivity::class.java))
         }
 
-
         initRefresh()
         initView()
         initScroll()
@@ -185,7 +184,7 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
                         mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 7,
+                            viewModel.listSize + 6,
                             viewModel.messageList.size - viewModel.listSize + 1
                         )
                 else
@@ -305,11 +304,6 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.page = 1
-            viewModel.isRefreshing = true
-            viewModel.isNew = true
-            viewModel.isLoadMore = false
-            viewModel.isEnd = false
             getData()
             if (PrefManager.isLogin) {
                 viewModel.isGetCheckLoginInfo = true
@@ -324,6 +318,10 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             binding.swipeRefresh.isRefreshing = true
             viewModel.uid = PrefManager.uid
             viewModel.isNew = true
+            viewModel.page = 1
+            viewModel.isEnd = false
+            viewModel.isRefreshing = true
+            viewModel.isLoadMore = false
             viewModel.getProfile()
         } else
             binding.swipeRefresh.isRefreshing = false
@@ -348,6 +346,8 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
                             viewModel.countList.clear()
                             viewModel.messCountList.clear()
                             viewModel.messageList.clear()
+                            viewModel.isInit = true
+                            viewModel.isEnd = false
                             mAdapter.notifyDataSetChanged()
                             PrefManager.isLogin = false
                             PrefManager.uid = ""

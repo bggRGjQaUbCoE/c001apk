@@ -165,7 +165,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                         mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.replyTotalList.size - viewModel.listSize + 1
                         )
                 else

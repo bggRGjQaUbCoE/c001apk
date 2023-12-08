@@ -82,8 +82,6 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         if (!viewModel.isInit) {
             initPublish()
             initView()
@@ -159,7 +157,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.homeFeedList.size - viewModel.listSize + 1
                         )
                 else
@@ -208,7 +206,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.homeFeedList.size - viewModel.listSize + 1
                         )
                 else
@@ -252,7 +250,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
                         mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.homeFeedList.size - viewModel.listSize + 1
                         )
                 else

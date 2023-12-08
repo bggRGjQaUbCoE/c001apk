@@ -134,7 +134,7 @@ class AppActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListen
                         mAdapter.notifyItemChanged(viewModel.appCommentList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.appCommentList.size - viewModel.listSize + 1
                         )
                 else

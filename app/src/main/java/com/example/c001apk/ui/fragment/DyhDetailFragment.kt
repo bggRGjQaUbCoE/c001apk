@@ -111,7 +111,7 @@ class DyhDetailFragment : Fragment(), IOnLikeClickListener, OnImageItemClickList
                         mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.dyhDataList.size - viewModel.listSize + 1
                         )
                 else

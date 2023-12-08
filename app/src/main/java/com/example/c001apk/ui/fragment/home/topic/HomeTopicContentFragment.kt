@@ -82,7 +82,8 @@ class HomeTopicContentFragment : Fragment() {
                 }
                 if (viewModel.isLoadMore) if (viewModel.isEnd) mAdapter.notifyItemChanged(viewModel.topicDataList.size)
                 else mAdapter.notifyItemRangeChanged(
-                    viewModel.listSize + 1, viewModel.topicDataList.size - viewModel.listSize + 1
+                    viewModel.listSize,
+                    viewModel.topicDataList.size - viewModel.listSize + 1
                 )
                 else mAdapter.notifyDataSetChanged()
                 binding.indicator.isIndeterminate = false

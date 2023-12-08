@@ -142,7 +142,7 @@ class CarouselActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickL
                                 mAdapter.notifyItemChanged(viewModel.carouselList.size)
                             else
                                 mAdapter.notifyItemRangeChanged(
-                                    viewModel.listSize + 1,
+                                    viewModel.listSize,
                                     viewModel.carouselList.size - viewModel.listSize + 1
                                 )
                         else

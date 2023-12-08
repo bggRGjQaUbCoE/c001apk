@@ -261,7 +261,7 @@ class MessageAdapter(
                 }
                 viewHolder.expand.setOnClickListener {
                     uid = viewHolder.uid
-                    id = viewHolder.id
+                    id = viewHolder.notiId
                     uname = viewHolder.uname.text.toString()
                     position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)

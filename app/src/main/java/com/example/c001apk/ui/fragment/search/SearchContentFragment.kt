@@ -129,7 +129,7 @@ class SearchContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClick
                         mAdapter.notifyItemChanged(viewModel.searchList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.searchList.size - viewModel.listSize + 1
                         )
                 else

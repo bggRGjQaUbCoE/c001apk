@@ -130,7 +130,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
                         mAdapter.notifyItemChanged(viewModel.topicDataList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.topicDataList.size - viewModel.listSize + 1
                         )
                 else

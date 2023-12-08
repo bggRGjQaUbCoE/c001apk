@@ -585,7 +585,10 @@ class AppAdapter(
                         .inflate(R.layout.item_collection_list_item, parent, false)
                 val viewHolder = CollectionViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    iOnCollectionItemClickListener?.onShowCollection(viewHolder.id, viewHolder.title.text.toString())
+                    iOnCollectionItemClickListener?.onShowCollection(
+                        viewHolder.id,
+                        viewHolder.title.text.toString()
+                    )
                 }
                 viewHolder
             }

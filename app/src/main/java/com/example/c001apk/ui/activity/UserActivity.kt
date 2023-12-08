@@ -154,7 +154,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                         mAdapter.notifyItemChanged(viewModel.feedList.size)
                     else
                         mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 1,
+                            viewModel.listSize,
                             viewModel.feedList.size - viewModel.listSize + 1
                         )
                 else
