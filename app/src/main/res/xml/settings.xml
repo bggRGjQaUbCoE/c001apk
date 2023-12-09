@@ -73,11 +73,6 @@
             android:key="isRecordHistory"
             android:title="@string/record_history" />
         <rikka.material.preference.MaterialSwitchPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_image"
-            android:key="isFullImageQuality"
-            android:title="@string/full_quality" />
-        <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="false"
             android:icon="@drawable/ic_emoji"

@@ -83,10 +83,6 @@ object PrefManager {
         get() = pref.getBoolean("customToken", false)
         set(value) = pref.edit().putBoolean("customToken", value).apply()
 
-    var isFullImageQuality: Boolean
-        get() = pref.getBoolean("isFullImageQuality", false)
-        set(value) = pref.edit().putBoolean("isFullImageQuality", value).apply()
-
     var isClearKeyWord: Boolean
         get() = pref.getBoolean("isClearKeyWord", false)
         set(value) = pref.edit().putBoolean("isClearKeyWord", value).apply()

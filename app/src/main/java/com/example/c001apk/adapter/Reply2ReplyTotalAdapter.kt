@@ -379,15 +379,11 @@ class Reply2ReplyTotalAdapter(
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
-                        if (PrefManager.isFullImageQuality) {
-                            setUrlList(reply.picArr)
-                        } else {
-                            for (element in reply.picArr)
-                                if (element.substring(element.length - 3, element.length) != "gif")
-                                    urlList.add("$element.s.jpg")
-                                else urlList.add(element)
-                            setUrlList(urlList)
-                        }
+                        for (element in reply.picArr)
+                            if (element.substring(element.length - 3, element.length) != "gif")
+                                urlList.add("$element.s.jpg")
+                            else urlList.add(element)
+                        setUrlList(urlList)
                     }
                 } else {
                     holder.multiImage.visibility = View.GONE

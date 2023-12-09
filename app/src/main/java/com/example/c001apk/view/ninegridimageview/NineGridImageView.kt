@@ -40,7 +40,6 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
-import com.example.c001apk.util.BitmapCut
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.imageview.ShapeableImageView
@@ -237,45 +236,27 @@ class NineGridImageView @JvmOverloads constructor(
                         LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT)
                             .build()
                     )
-                if (urlList.size == 1 && PrefManager.isFullImageQuality && imgHeight / imgWidth > 1320 / 540) {
-                    Glide.with(context)
-                        .asBitmap()
-                        .load(newUrl)
-                        .into(object : CustomTarget<Bitmap?>() {
-                            override fun onResourceReady(
-                                resource: Bitmap,
-                                transition: Transition<in Bitmap?>?
-                            ) {
-                                val bitmap = BitmapCut.cutBitmap(resource)
+                Glide.with(context)
+                    .asBitmap()
+                    .load(newUrl)
+                    .centerCrop()
+                    .placeholder(backgroundDrawable)
+                    .into(object : CustomTarget<Bitmap?>() {
+                        override fun onResourceReady(
+                            resource: Bitmap,
+                            transition: Transition<in Bitmap?>?
+                        ) {
+                            if (isCompress) {
+                                val bitmap = compressImage(resource)
                                 if (bitmap != null)
                                     imageView.setImageBitmap(bitmap)
+                            } else {
+                                imageView.setImageBitmap(resource)
                             }
+                        }
 
-                            override fun onLoadCleared(placeholder: Drawable?) {}
-                        })
-                } else {
-                    Glide.with(context)
-                        .asBitmap()
-                        .load(newUrl)
-                        .centerCrop()
-                        .placeholder(backgroundDrawable)
-                        .into(object : CustomTarget<Bitmap?>() {
-                            override fun onResourceReady(
-                                resource: Bitmap,
-                                transition: Transition<in Bitmap?>?
-                            ) {
-                                if (isCompress) {
-                                    val bitmap = compressImage(resource)
-                                    if (bitmap != null)
-                                        imageView.setImageBitmap(bitmap)
-                                } else {
-                                    imageView.setImageBitmap(resource)
-                                }
-                            }
-
-                            override fun onLoadCleared(placeholder: Drawable?) {}
-                        })
-                }
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+                    })
             }
         }
     }

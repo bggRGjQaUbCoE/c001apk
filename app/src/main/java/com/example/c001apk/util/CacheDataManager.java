@@ -85,9 +85,9 @@ public class CacheDataManager {
                     }
                 }
             }
-            return dir.delete();
         }
-        return false;
+        assert dir != null;
+        return dir.delete();
     }
 
 }

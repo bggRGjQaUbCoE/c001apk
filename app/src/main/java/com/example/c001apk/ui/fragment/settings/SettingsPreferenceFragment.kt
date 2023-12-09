@@ -90,7 +90,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "followSystemAccent" -> PrefManager.followSystemAccent
                 "showEmoji" -> PrefManager.showEmoji
                 "customToken" -> PrefManager.customToken
-                "isFullImageQuality" -> PrefManager.isFullImageQuality
                 "isClearKeyWord" -> PrefManager.isClearKeyWord
                 "isRecordHistory" -> PrefManager.isRecordHistory
                 "isIconMiniCard" -> PrefManager.isIconMiniCard
@@ -105,7 +104,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "followSystemAccent" -> PrefManager.followSystemAccent = value
                 "showEmoji" -> PrefManager.showEmoji = value
                 "customToken" -> PrefManager.customToken = value
-                "isFullImageQuality" -> PrefManager.isFullImageQuality = value
                 "isClearKeyWord" -> PrefManager.isClearKeyWord = value
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
                 "isIconMiniCard" -> PrefManager.isIconMiniCard = value
