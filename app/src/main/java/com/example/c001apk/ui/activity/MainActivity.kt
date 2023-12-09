@@ -150,11 +150,15 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
                             PrefManager.userAvatar = ""
                         }
 
-                        val headers = response.headers()
-                        val cookies = headers.values("Set-Cookie")
-                        val session = cookies[0]
-                        val sessionID = session.substring(0, session.indexOf(";"))
-                        SESSID = sessionID
+                        try {
+                            val headers = response.headers()
+                            val cookies = headers.values("Set-Cookie")
+                            val session = cookies[0]
+                            val sessionID = session.substring(0, session.indexOf(";"))
+                            SESSID = sessionID
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
 
                         if (viewModel.badge != 0)
                             setBadge()

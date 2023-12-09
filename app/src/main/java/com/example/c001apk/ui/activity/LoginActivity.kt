@@ -61,10 +61,15 @@ class LoginActivity : BaseActivity() {
                 viewModel.requestHash = Jsoup.parse(this).createRequestHash()
             }
             response?.apply {
-                val cookies = response.headers().values("Set-Cookie")
-                val session = cookies[0]
-                val sessionID = session.substring(0, session.indexOf(";"))
-                SESSID = sessionID
+                try {
+                    val cookies = response.headers().values("Set-Cookie")
+                    val session = cookies[0]
+                    val sessionID = session.substring(0, session.indexOf(";"))
+                    SESSID = sessionID
+                } catch (e: Exception) {
+                    Toast.makeText(this@LoginActivity, "无法获取cookie", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -83,15 +88,19 @@ class LoginActivity : BaseActivity() {
                 viewModel.requestHash = Jsoup.parse(this).createRequestHash()
             }
             response?.apply {
-                val cookies = response.headers().values("Set-Cookie")
-                val session = cookies[0]
-                val sessionID = session.substring(0, session.indexOf(";"))
-                SESSID = sessionID
+                try {
+                    val cookies = response.headers().values("Set-Cookie")
+                    val session = cookies[0]
+                    val sessionID = session.substring(0, session.indexOf(";"))
+                    SESSID = sessionID
+                } catch (e: Exception) {
+                    Toast.makeText(this@LoginActivity, "无法获取cookie", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                    return@observe
+                }
                 isGetLoginParam = true
                 viewModel.getLoginParam()
             }
-            //Log.d("fsdfsdfghhyyy", "requestHash1: ${viewModel.requestHash}")
-            //Log.d("fsdfsdfghhyyy", "sessid1: $SESSID")
         }
 
         viewModel.loginParamData.observe(this) { result ->
@@ -101,13 +110,17 @@ class LoginActivity : BaseActivity() {
                 viewModel.requestHash = Jsoup.parse(this).createRequestHash()
             }
             response?.apply {
-                val cookies = response.headers().values("Set-Cookie")
-                val session = cookies[0]
-                val sessionID = session.substring(0, session.indexOf(";"))
-                SESSID = sessionID
+                try {
+                    val cookies = response.headers().values("Set-Cookie")
+                    val session = cookies[0]
+                    val sessionID = session.substring(0, session.indexOf(";"))
+                    SESSID = sessionID
+                } catch (e: Exception) {
+                    Toast.makeText(this@LoginActivity, "无法获取cookie", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                    return@observe
+                }
             }
-            //Log.d("fsdfsdfghhyyy", "requestHash2: ${viewModel.requestHash}")
-            //Log.d("fsdfsdfghhyyy", "sessid2: $SESSID")
         }
 
         viewModel.tryLoginData.observe(this) { result ->

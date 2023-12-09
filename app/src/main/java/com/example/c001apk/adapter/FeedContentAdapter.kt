@@ -290,9 +290,11 @@ class FeedContentAdapter(
                     if (url.startsWith("/game/")) {
                         val intent = Intent(parent.context, AppActivity::class.java)
                         intent.putExtra("id", url.replace("/game/", ""))
+                        parent.context.startActivity(intent)
                     } else if (url.startsWith("/apk/")) {
                         val intent = Intent(parent.context, AppActivity::class.java)
                         intent.putExtra("id", url.replace("/apk/", ""))
+                        parent.context.startActivity(intent)
                     } else if (PrefManager.isOpenLinkOutside) {
                         val intent = Intent()
                         intent.action = Intent.ACTION_VIEW
@@ -641,88 +643,78 @@ class FeedContentAdapter(
 
                     if (feedList[0].data!!.feedType == "feedArticle") {
                         holder.articleMessage.visibility = View.VISIBLE
-
-                        val feedRaw = """{"data":${feed.data?.messageRawOutput}}"""
-                        val feedJson: FeedArticleContentBean = Gson().fromJson(
-                            feedRaw,
-                            FeedArticleContentBean::class.java
-                        )
                         val articleList = ArrayList<FeedArticleContentBean.Data>()
-                        for (element in feedJson.data) {
-                            if (element.type == "text" || element.type == "image" || element.type == "shareUrl")
-                                articleList.add(element)
-                        }
-                        holder.articleMessage.adapter = object : BaseAdapter() {
-                            override fun getCount() = articleList.size + 2
-                            override fun getItem(p0: Int): Any = 0
-                            override fun getItemId(p0: Int): Long = 0
-                            override fun getView(
-                                position1: Int,
-                                convertView: View?,
-                                parent: ViewGroup?
-                            ): View {
-                                val view = LayoutInflater.from(mContext)
-                                    .inflate(R.layout.item_feed_article_content_item, parent, false)
-                                val textView: TextView = view.findViewById(R.id.textView)
-                                val imageView: NineGridImageView = view.findViewById(R.id.imageView)
-                                val description: TextView = view.findViewById(R.id.description)
-                                val shareUrl: MaterialCardView = view.findViewById(R.id.shareUrl)
-                                val urlTitle: TextView = view.findViewById(R.id.urlTitle)
-                                if (position1 == 0) {
-                                    textView.visibility = View.GONE
-                                    shareUrl.visibility = View.GONE
-                                    description.visibility = View.GONE
-                                    if (feed.data?.messageCover.isNullOrEmpty())
-                                        imageView.visibility = View.GONE
-                                    else {
-                                        imageView.visibility = View.VISIBLE
-                                        val urlList = ArrayList<String>()
-                                        urlList.add("${feed.data?.messageCover}.s2x.jpg")
-                                        val from = feed.data?.messageCover!!.lastIndexOf("@")
-                                        val middle = feed.data.messageCover.lastIndexOf("x")
-                                        val end = feed.data.messageCover.lastIndexOf(".")
-                                        if (from != -1 && middle != -1 && end != -1) {
-                                            val width =
-                                                feed.data.messageCover.substring(from + 1, middle)
-                                                    .toInt()
-                                            val height =
-                                                feed.data.messageCover.substring(middle + 1, end)
-                                                    .toInt()
-                                            imageView.imgHeight = height
-                                            imageView.imgWidth = width
-                                        }
-                                        imageView.setUrlList(urlList)
-                                        imageView.apply {
-                                            onImageItemClickListener =
-                                                this@FeedContentAdapter.onImageItemClickListener
-                                        }
-                                    }
-                                    return view
-                                } else if (position1 == 1) {
-                                    textView.visibility = View.VISIBLE
-                                    imageView.visibility = View.GONE
-                                    description.visibility = View.GONE
-                                    shareUrl.visibility = View.GONE
-                                    textView.movementMethod = LinkMovementMethod.getInstance()
-                                    textView.text = SpannableStringBuilderUtil.setText(
-                                        mContext,
-                                        feed.data?.messageTitle.toString(),
-                                        textView.textSize.toInt(),
-                                        null
-                                    )
-                                    textView.paint.isFakeBoldText = true
-                                    textView.setOnLongClickListener {
-                                        val intent = Intent(mContext, CopyActivity::class.java)
-                                        intent.putExtra(
-                                            "text",
-                                            textView.text.toString()
+
+                        if (articleList.isEmpty()) {
+                            val feedRaw = """{"data":${feed.data?.messageRawOutput}}"""
+                            val feedJson: FeedArticleContentBean = Gson().fromJson(
+                                feedRaw,
+                                FeedArticleContentBean::class.java
+                            )
+
+                            for (element in feedJson.data) {
+                                if (element.type == "text" || element.type == "image" || element.type == "shareUrl")
+                                    articleList.add(element)
+                            }
+                            holder.articleMessage.adapter = object : BaseAdapter() {
+                                override fun getCount() = articleList.size + 2
+                                override fun getItem(p0: Int): Any = 0
+                                override fun getItemId(p0: Int): Long = 0
+                                override fun getView(
+                                    position1: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup?
+                                ): View {
+                                    val view = LayoutInflater.from(mContext)
+                                        .inflate(
+                                            R.layout.item_feed_article_content_item,
+                                            parent,
+                                            false
                                         )
-                                        mContext.startActivity(intent)
-                                        true
-                                    }
-                                    return view
-                                } else when (articleList[position1 - 2].type) {
-                                    "text" -> {
+                                    val textView: TextView = view.findViewById(R.id.textView)
+                                    val imageView: NineGridImageView =
+                                        view.findViewById(R.id.imageView)
+                                    val description: TextView = view.findViewById(R.id.description)
+                                    val shareUrl: MaterialCardView =
+                                        view.findViewById(R.id.shareUrl)
+                                    val urlTitle: TextView = view.findViewById(R.id.urlTitle)
+                                    if (position1 == 0) {
+                                        textView.visibility = View.GONE
+                                        shareUrl.visibility = View.GONE
+                                        description.visibility = View.GONE
+                                        if (feed.data?.messageCover.isNullOrEmpty())
+                                            imageView.visibility = View.GONE
+                                        else {
+                                            imageView.visibility = View.VISIBLE
+                                            val urlList = ArrayList<String>()
+                                            urlList.add("${feed.data?.messageCover}.s2x.jpg")
+                                            val from = feed.data?.messageCover!!.lastIndexOf("@")
+                                            val middle = feed.data.messageCover.lastIndexOf("x")
+                                            val end = feed.data.messageCover.lastIndexOf(".")
+                                            if (from != -1 && middle != -1 && end != -1) {
+                                                val width =
+                                                    feed.data.messageCover.substring(
+                                                        from + 1,
+                                                        middle
+                                                    )
+                                                        .toInt()
+                                                val height =
+                                                    feed.data.messageCover.substring(
+                                                        middle + 1,
+                                                        end
+                                                    )
+                                                        .toInt()
+                                                imageView.imgHeight = height
+                                                imageView.imgWidth = width
+                                            }
+                                            imageView.setUrlList(urlList)
+                                            imageView.apply {
+                                                onImageItemClickListener =
+                                                    this@FeedContentAdapter.onImageItemClickListener
+                                            }
+                                        }
+                                        return view
+                                    } else if (position1 == 1) {
                                         textView.visibility = View.VISIBLE
                                         imageView.visibility = View.GONE
                                         description.visibility = View.GONE
@@ -730,10 +722,11 @@ class FeedContentAdapter(
                                         textView.movementMethod = LinkMovementMethod.getInstance()
                                         textView.text = SpannableStringBuilderUtil.setText(
                                             mContext,
-                                            articleList[position1 - 2].message.toString(),
+                                            feed.data?.messageTitle.toString(),
                                             textView.textSize.toInt(),
                                             null
                                         )
+                                        textView.paint.isFakeBoldText = true
                                         textView.setOnLongClickListener {
                                             val intent = Intent(mContext, CopyActivity::class.java)
                                             intent.putExtra(
@@ -744,109 +737,138 @@ class FeedContentAdapter(
                                             true
                                         }
                                         return view
-                                    }
-
-                                    "image" -> {
-                                        textView.visibility = View.GONE
-                                        imageView.visibility = View.VISIBLE
-                                        shareUrl.visibility = View.GONE
-                                        val urlList = ArrayList<String>()
-                                        if (articleList[position1 - 2].url!!.substring(
-                                                articleList[position1 - 2].url!!.length - 3,
-                                                articleList[position1 - 2].url!!.length
-                                            ) != "gif"
-                                        )
-                                            urlList.add("${articleList[position1 - 2].url}.s2x.jpg")
-                                        else
-                                            urlList.add(articleList[position1 - 2].url!!)
-                                        val from = articleList[position1 - 2].url!!.lastIndexOf("@")
-                                        val middle =
-                                            articleList[position1 - 2].url!!.lastIndexOf("x")
-                                        val end = articleList[position1 - 2].url!!.lastIndexOf(".")
-                                        if (from != -1 && middle != -1 && end != -1) {
-                                            val width = articleList[position1 - 2].url?.substring(
-                                                from + 1,
-                                                middle
-                                            )?.toInt()
-                                            val height =
-                                                articleList[position1 - 2].url?.substring(
-                                                    middle + 1,
-                                                    end
-                                                )
-                                                    ?.toInt()
-                                            imageView.imgHeight = height!!
-                                            imageView.imgWidth = width!!
-                                        }
-                                        imageView.setUrlList(urlList)
-                                        imageView.apply {
-                                            onImageItemClickListener =
-                                                this@FeedContentAdapter.onImageItemClickListener
-                                        }
-                                        if (articleList[position1 - 2].description == "")
+                                    } else when (articleList[position1 - 2].type) {
+                                        "text" -> {
+                                            textView.visibility = View.VISIBLE
+                                            imageView.visibility = View.GONE
                                             description.visibility = View.GONE
-                                        else
-                                            description.visibility = View.VISIBLE
-                                        description.text = SpannableStringBuilderUtil.setText(
-                                            mContext,
-                                            articleList[position1 - 2].description.toString(),
-                                            description.textSize.toInt(),
-                                            null
-                                        )
-                                        description.setOnLongClickListener {
-                                            val intent = Intent(mContext, CopyActivity::class.java)
-                                            intent.putExtra(
-                                                "text",
-                                                description.text.toString()
+                                            shareUrl.visibility = View.GONE
+                                            textView.movementMethod =
+                                                LinkMovementMethod.getInstance()
+                                            textView.text = SpannableStringBuilderUtil.setText(
+                                                mContext,
+                                                articleList[position1 - 2].message.toString(),
+                                                textView.textSize.toInt(),
+                                                null
                                             )
-                                            mContext.startActivity(intent)
-                                            true
-                                        }
-                                        return view
-                                    }
-
-                                    "shareUrl" -> {
-                                        textView.visibility = View.GONE
-                                        imageView.visibility = View.GONE
-                                        description.visibility = View.GONE
-                                        shareUrl.visibility = View.VISIBLE
-                                        urlTitle.text = articleList[position1 - 2].title.toString()
-                                        shareUrl.setOnClickListener {
-
-                                            if (PrefManager.isOpenLinkOutside) {
-                                                val intent = Intent()
-                                                intent.action = Intent.ACTION_VIEW
-                                                intent.data =
-                                                    Uri.parse(articleList[position1 - 2].url.toString())
-                                                try {
-                                                    mContext.startActivity(intent)
-                                                } catch (e: ActivityNotFoundException) {
-                                                    Toast.makeText(
-                                                        mContext,
-                                                        "打开失败",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    Log.w(
-                                                        "error",
-                                                        "Activity was not found for intent, $intent"
-                                                    )
-                                                }
-                                            } else {
+                                            textView.setOnLongClickListener {
                                                 val intent =
-                                                    Intent(mContext, WebViewActivity::class.java)
+                                                    Intent(mContext, CopyActivity::class.java)
                                                 intent.putExtra(
-                                                    "url",
-                                                    articleList[position1 - 2].url.toString()
+                                                    "text",
+                                                    textView.text.toString()
                                                 )
                                                 mContext.startActivity(intent)
+                                                true
                                             }
+                                            return view
                                         }
-                                        return view
+
+                                        "image" -> {
+                                            textView.visibility = View.GONE
+                                            imageView.visibility = View.VISIBLE
+                                            shareUrl.visibility = View.GONE
+                                            val urlList = ArrayList<String>()
+                                            urlList.add("${articleList[position1 - 2].url}.s2x.jpg")
+                                            val from =
+                                                articleList[position1 - 2].url!!.lastIndexOf("@")
+                                            val middle =
+                                                articleList[position1 - 2].url!!.lastIndexOf("x")
+                                            val end =
+                                                articleList[position1 - 2].url!!.lastIndexOf(".")
+                                            if (from != -1 && middle != -1 && end != -1) {
+                                                val width =
+                                                    articleList[position1 - 2].url?.substring(
+                                                        from + 1,
+                                                        middle
+                                                    )?.toInt()
+                                                val height =
+                                                    articleList[position1 - 2].url?.substring(
+                                                        middle + 1,
+                                                        end
+                                                    )
+                                                        ?.toInt()
+                                                imageView.imgHeight = height!!
+                                                imageView.imgWidth = width!!
+                                            }
+                                            imageView.isCompress = true
+                                            imageView.setUrlList(urlList)
+                                            imageView.apply {
+                                                onImageItemClickListener =
+                                                    this@FeedContentAdapter.onImageItemClickListener
+                                            }
+                                            if (articleList[position1 - 2].description == "")
+                                                description.visibility = View.GONE
+                                            else
+                                                description.visibility = View.VISIBLE
+                                            description.text = SpannableStringBuilderUtil.setText(
+                                                mContext,
+                                                articleList[position1 - 2].description.toString(),
+                                                description.textSize.toInt(),
+                                                null
+                                            )
+                                            description.setOnLongClickListener {
+                                                val intent =
+                                                    Intent(mContext, CopyActivity::class.java)
+                                                intent.putExtra(
+                                                    "text",
+                                                    description.text.toString()
+                                                )
+                                                mContext.startActivity(intent)
+                                                true
+                                            }
+                                            return view
+                                        }
+
+                                        "shareUrl" -> {
+                                            textView.visibility = View.GONE
+                                            imageView.visibility = View.GONE
+                                            description.visibility = View.GONE
+                                            shareUrl.visibility = View.VISIBLE
+                                            urlTitle.text =
+                                                articleList[position1 - 2].title.toString()
+                                            shareUrl.setOnClickListener {
+
+                                                if (PrefManager.isOpenLinkOutside) {
+                                                    val intent = Intent()
+                                                    intent.action = Intent.ACTION_VIEW
+                                                    intent.data =
+                                                        Uri.parse(articleList[position1 - 2].url.toString())
+                                                    try {
+                                                        mContext.startActivity(intent)
+                                                    } catch (e: ActivityNotFoundException) {
+                                                        Toast.makeText(
+                                                            mContext,
+                                                            "打开失败",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        Log.w(
+                                                            "error",
+                                                            "Activity was not found for intent, $intent"
+                                                        )
+                                                    }
+                                                } else {
+                                                    val intent =
+                                                        Intent(
+                                                            mContext,
+                                                            WebViewActivity::class.java
+                                                        )
+                                                    intent.putExtra(
+                                                        "url",
+                                                        articleList[position1 - 2].url.toString()
+                                                    )
+                                                    mContext.startActivity(intent)
+                                                }
+                                            }
+                                            return view
+                                        }
+
+                                        else -> throw IllegalArgumentException("error feed article type: ${articleList[position1 - 2].type}")
                                     }
 
-                                    else -> throw IllegalArgumentException("error feed article type: ${articleList[position1 - 2].type}")
                                 }
-
                             }
+                            holder.linearAdapterLayout.notifyDataSetChange()
                         }
                     } else if (feedList[0].data!!.feedType == "vote") {
                         val lp = holder.itemView.layoutParams

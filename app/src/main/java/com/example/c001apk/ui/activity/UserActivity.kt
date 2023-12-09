@@ -135,7 +135,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.feedList.size
                         for (element in feed) {
-                            if (element.entityTemplate == "feed")
+                            if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )

@@ -64,9 +64,11 @@ class ImageCarouselCardAdapter(
             } else if (viewHolder.url.startsWith("/game/")) {
                 val intent = Intent(parent.context, AppActivity::class.java)
                 intent.putExtra("id", viewHolder.url.replace("/game/", ""))
+                parent.context.startActivity(intent)
             } else if (viewHolder.url.startsWith("/apk/")) {
                 val intent = Intent(parent.context, AppActivity::class.java)
                 intent.putExtra("id", viewHolder.url.replace("/apk/", ""))
+                parent.context.startActivity(intent)
             } else if (viewHolder.url.startsWith("https://") || viewHolder.url.contains("http://")) {
                 val intent = Intent(parent.context, WebViewActivity::class.java)
                 intent.putExtra("url", viewHolder.url)
