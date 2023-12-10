@@ -243,9 +243,9 @@ object ImageUtil {
     ) {
         val imgList: MutableList<String> = ArrayList()
         for (img in urlList) {
-            if (img.substring(img.length - 6, img.length) == ".s.jpg")
+            if (img.endsWith(".s.jpg"))
                 imgList.add(img.replace(".s.jpg", ""))
-            else if (img.substring(img.length - 8, img.length) == ".s2x.jpg")
+            else if (img.endsWith(".s2x.jpg"))
                 imgList.add(img.replace(".s2x.jpg", ""))
             else
                 imgList.add(img)
@@ -256,7 +256,8 @@ object ImageUtil {
             progressLoader {
                 DefaultPercentProgress()
             }
-            setIndicator(CircleIndexIndicator())
+            if (imgList.size != 1)
+                setIndicator(CircleIndexIndicator())
             views(nineGridView.getImageViews().toTypedArray())
             setOnMojitoListener(object : SimpleMojitoViewCallback() {
                 override fun onStartAnim(position: Int) {

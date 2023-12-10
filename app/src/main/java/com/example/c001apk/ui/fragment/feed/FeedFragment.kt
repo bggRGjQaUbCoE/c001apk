@@ -569,11 +569,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
 
     @SuppressLint("SetTextI18n")
     private fun initButton() {
-        binding.name1.setOnClickListener {
-            val intent = Intent(requireContext(), UserActivity::class.java)
-            intent.putExtra("id", viewModel.uid)
-            requireActivity().startActivity(intent)
-        }
         binding.avatar1.setOnClickListener {
             val intent = Intent(requireContext(), UserActivity::class.java)
             intent.putExtra("id", viewModel.uid)

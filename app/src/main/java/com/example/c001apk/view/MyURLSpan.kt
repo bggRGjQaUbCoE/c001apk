@@ -43,12 +43,12 @@ internal class MyURLSpan(
             val id = mUrl.replace("/feed/replyList?id=", "")
             IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id)
         } else if (mUrl.contains("coolapk.com/u/")) {
-            val uid = mUrl.substring(mUrl.lastIndexOf('/') + 1, mUrl.length)
+            val uid = mUrl.replace("coolapk.com/u/", "")
             val intent = Intent(mContext, UserActivity::class.java)
             intent.putExtra("id", uid)
             mContext.startActivity(intent)
         } else if (mUrl.contains("coolapk.com/apk/")) {
-            val id = mUrl.substring(mUrl.lastIndexOf('/') + 1, mUrl.length)
+            val id = mUrl.replace("coolapk.com/apk/", "")
             val intent = Intent(mContext, AppActivity::class.java)
             intent.putExtra("id", id)
             mContext.startActivity(intent)

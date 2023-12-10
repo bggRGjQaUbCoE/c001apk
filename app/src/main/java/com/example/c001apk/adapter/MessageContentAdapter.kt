@@ -391,13 +391,9 @@ class MessageContentAdapter(
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
                             for (element in message.forwardSourceFeed.picArr)
-                                if (element.substring(
-                                        element.length - 3,
-                                        element.length
-                                    ) != "gif"
-                                )
-                                    urlList.add("$element.s.jpg")
-                                else urlList.add(element)
+                                if (element.endsWith("gif"))
+                                    urlList.add(element)
+                                else urlList.add("$element.s.jpg")
                             setUrlList(urlList)
                         }
                     } else {

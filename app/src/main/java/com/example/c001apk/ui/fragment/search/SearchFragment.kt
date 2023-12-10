@@ -30,7 +30,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SearchFragment : Fragment(), IOnItemClickListener {
 
@@ -96,13 +95,18 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
-                viewModel.historyList.clear()
-                viewModel.historyList.addAll(it)
-                if (viewModel.historyList.isEmpty())
-                    binding.historyLayout.visibility = View.GONE
-                else
-                    binding.historyLayout.visibility = View.VISIBLE
-                mAdapter.notifyDataSetChanged()
+                try {
+                    viewModel.historyList.clear()
+                    viewModel.historyList.addAll(it)
+                    if (viewModel.historyList.isEmpty())
+                        binding.historyLayout.visibility = View.GONE
+                    else
+                        binding.historyLayout.visibility = View.VISIBLE
+                    mAdapter.notifyDataSetChanged()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    throw IllegalArgumentException("searchFragment: fail to load keyword: ${e.message}")
+                }
             }
         }
 
@@ -127,12 +131,17 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                 setTitle(R.string.clearAllTitle)
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    CoroutineScope(Dispatchers.IO).launch {
-                        searchHistoryDao.deleteAll()
+                    try {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            searchHistoryDao.deleteAll()
+                        }
+                        viewModel.historyList.clear()
+                        mAdapter.notifyDataSetChanged()
+                        binding.historyLayout.visibility = View.GONE
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        throw IllegalArgumentException("searchFragment: fail to clear keyword: ${e.message}")
                     }
-                    viewModel.historyList.clear()
-                    mAdapter.notifyDataSetChanged()
-                    binding.historyLayout.visibility = View.GONE
                 }
                 show()
             }
@@ -226,26 +235,35 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     }
 
     private fun updateHistory(keyword: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            if (searchHistoryDao.isExist(keyword)) {
-                viewModel.historyList.remove(keyword)
-                searchHistoryDao.delete(keyword)
+        try {
+            CoroutineScope(Dispatchers.IO).launch {
+                if (searchHistoryDao.isExist(keyword)) {
+                    searchHistoryDao.delete(keyword)
+                }
+                searchHistoryDao.insert(SearchHistory(keyword))
             }
+            viewModel.historyList.remove(keyword)
             viewModel.historyList.add(0, keyword)
-            searchHistoryDao.insert(SearchHistory(keyword))
-            withContext(Dispatchers.Main) {
-                mAdapter.notifyItemInserted(0)
-            }
+            mAdapter.notifyItemInserted(0)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw IllegalArgumentException("searchFragment: fail to update keyword: ${e.message}")
         }
+
     }
 
     override fun onItemDeleteClick(keyword: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            searchHistoryDao.delete(keyword)
+        try {
+            CoroutineScope(Dispatchers.IO).launch {
+                searchHistoryDao.delete(keyword)
+            }
+            val position = viewModel.historyList.indexOf(keyword)
+            viewModel.historyList.removeAt(position)
+            mAdapter.notifyItemRemoved(position)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw IllegalArgumentException("searchFragment: fail to delete keyword: ${e.message}")
         }
-        val position = viewModel.historyList.indexOf(keyword)
-        viewModel.historyList.removeAt(position)
-        mAdapter.notifyItemRemoved(position)
     }
 
 }

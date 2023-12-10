@@ -252,7 +252,6 @@ class Reply2ReplyTotalAdapter(
                 holder.isLike = reply.userAction?.like == 1
                 ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
-
                 val replyTag =
                     when (reply.uid) {
                         fuid -> " [楼主] "
@@ -282,15 +281,19 @@ class Reply2ReplyTotalAdapter(
                 )
                 holder.uname.movementMethod = LinkMovementMethod.getInstance()
 
-                holder.message.movementMethod =
-                    LinkTextView.LocalLinkMovementMethod.getInstance()
-                holder.message.text = SpannableStringBuilderUtil.setText(
-                    mContext,
-                    reply.message,
-                    (holder.message.textSize * 1.3).toInt(),
-                    null
-                )
-
+                if (reply.message == "[图片]")
+                    holder.message.visibility = View.GONE
+                else {
+                    holder.message.visibility = View.VISIBLE
+                    holder.message.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
+                    holder.message.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        reply.message,
+                        (holder.message.textSize * 1.3).toInt(),
+                        null
+                    )
+                }
 
                 holder.pubDate.text = DateUtils.fromToday(reply.dateline)
                 val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
@@ -359,9 +362,9 @@ class Reply2ReplyTotalAdapter(
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
                         for (element in reply.picArr)
-                            if (element.substring(element.length - 3, element.length) != "gif")
-                                urlList.add("$element.s.jpg")
-                            else urlList.add(element)
+                            if (element.endsWith("gif"))
+                                urlList.add(element)
+                            else urlList.add("$element.s.jpg")
                         setUrlList(urlList)
                     }
                 } else {
