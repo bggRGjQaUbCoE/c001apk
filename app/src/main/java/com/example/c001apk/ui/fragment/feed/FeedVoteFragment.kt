@@ -20,8 +20,7 @@ import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.WebViewActivity
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.ImageUtil
@@ -29,7 +28,6 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.VoteItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.github.megatronking.stringfog.annotation.StringFogIgnore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,8 +38,7 @@ import kotlinx.coroutines.withContext
 import java.lang.reflect.Method
 
 @StringFogIgnore
-class FeedVoteFragment : Fragment(), OnImageItemClickListener, IOnReplyClickListener,
-    IOnLikeClickListener {
+class FeedVoteFragment : Fragment(), AppListener {
 
     private lateinit var binding: FragmentFeedVoteBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -507,9 +504,7 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener, IOnReplyClickList
             viewModel.feedContentList,
             viewModel.voteCommentList
         )
-        mAdapter.setOnImageItemClickListener(this)
-        mAdapter.setIOnReplyClickListener(this)
-        mAdapter.setIOnLikeReplyListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         // https://codeantenna.com/a/2NDTnG37Vg
@@ -528,19 +523,13 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener, IOnReplyClickList
         }
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {}
+
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
 
     override fun onReply2Reply(
         rPosition: Int,
@@ -579,6 +568,10 @@ class FeedVoteFragment : Fragment(), OnImageItemClickListener, IOnReplyClickList
                 viewModel.postLikeFeed()
             }
         }
+    }
+
+    override fun onRefreshReply(listType: String) {
+        TODO("Not yet implemented")
     }
 
 }

@@ -18,15 +18,13 @@ import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.UserActivity
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -38,22 +36,10 @@ class MessageContentAdapter(
     private val dataList: List<MessageResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var onImageItemClickListener: OnImageItemClickListener? = null
+    private var appListener: AppListener? = null
 
-    fun setOnImageItemClickListener(onImageItemClickListener: OnImageItemClickListener) {
-        this.onImageItemClickListener = onImageItemClickListener
-    }
-
-    private var iOnLikeClickListener: IOnLikeClickListener? = null
-
-    fun setIOnLikeReplyListener(iOnLikeClickListener: IOnLikeClickListener) {
-        this.iOnLikeClickListener = iOnLikeClickListener
-    }
-
-    private lateinit var iOnReplyClickListener: IOnReplyClickListener
-
-    fun setIOnReplyClickListener(iOnReplyClickListener: IOnReplyClickListener) {
-        this.iOnReplyClickListener = iOnReplyClickListener
+    fun setAppListener(appListener: AppListener) {
+        this.appListener = appListener
     }
 
     private var loadState = 2
@@ -161,7 +147,7 @@ class MessageContentAdapter(
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        iOnLikeClickListener?.onPostLike(
+                        appListener?.onPostLike(
                             null,
                             viewHolder.isLike,
                             viewHolder.id,
@@ -170,7 +156,7 @@ class MessageContentAdapter(
                     }
                 }
                 viewHolder.multiImage.apply {
-                    onImageItemClickListener = this@MessageContentAdapter.onImageItemClickListener
+                    appListener = this@MessageContentAdapter.appListener
                 }
                 viewHolder.forward1.setOnClickListener {
                     val intent = Intent(parent.context, FeedActivity::class.java)

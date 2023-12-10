@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
@@ -14,13 +15,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 
-class FollowFragment : Fragment(), IOnReplyDeleteClickListener {
+class FollowFragment : Fragment(), AppListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -192,7 +194,7 @@ class FollowFragment : Fragment(), IOnReplyDeleteClickListener {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(requireContext(), viewModel.dataList)
-        mAdapter.setIOnReplyDeleteClickListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -324,6 +326,24 @@ class FollowFragment : Fragment(), IOnReplyDeleteClickListener {
         })
     }
 
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
+    }
+
+    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {}
+
+    override fun onRefreshReply(listType: String) {}
+
     override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {
         viewModel.isNew = true
         viewModel.position = position
@@ -331,5 +351,7 @@ class FollowFragment : Fragment(), IOnReplyDeleteClickListener {
         viewModel.deleteId = id
         viewModel.postDelete()
     }
+
+    override fun onShowCollection(id: String, title: String) {}
 
 }

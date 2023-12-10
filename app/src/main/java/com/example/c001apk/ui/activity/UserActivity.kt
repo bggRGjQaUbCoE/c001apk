@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityUserBinding
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.CountUtil
@@ -27,12 +27,11 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
-class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
+class UserActivity : BaseActivity(), AppListener {
 
     private lateinit var binding: ActivityUserBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -332,8 +331,7 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(this, viewModel.feedList)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -435,6 +433,20 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         return true
     }
 
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
+    }
+
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position!!
@@ -447,18 +459,10 @@ class UserActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListe
         }
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
+    override fun onRefreshReply(listType: String) {}
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {}
 
 }

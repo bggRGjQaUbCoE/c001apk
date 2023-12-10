@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
@@ -25,11 +25,10 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 
-class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickListener,
-    IOnSearchMenuClickListener, IOnTabClickListener {
+class TopicContentFragment : Fragment(), AppListener, IOnSearchMenuClickListener,
+    IOnTabClickListener {
 
     private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -231,8 +230,7 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(requireContext(), viewModel.topicDataList)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -252,11 +250,26 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
 
     private fun refreshData() {
         viewModel.lastItem = null
+        viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         viewModel.isNew = true
         viewModel.getTopicData()
+    }
+
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
     }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
@@ -271,19 +284,11 @@ class TopicContentFragment : Fragment(), IOnLikeClickListener, OnImageItemClickL
         }
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
+    override fun onRefreshReply(listType: String) {}
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {}
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onSearch(type: String, value: String, id: String?) {

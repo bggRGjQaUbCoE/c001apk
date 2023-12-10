@@ -20,25 +20,21 @@ import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.net.URLDecoder
 
-class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickListener,
-    IOnLikeClickListener, OnImageItemClickListener, IOnPublishClickListener,
-    IOnReplyDeleteClickListener {
+class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
+    IOnPublishClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -331,11 +327,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
                 viewModel.replyTotalList
             )
         mLayoutManager = LinearLayoutManager(activity)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setIOnReplyClickListener(this)
-        mAdapter.setOnImageItemClickListener(this)
-        mAdapter.setIOnReplyClickListener(this)
-        mAdapter.setIOnReplyDeleteClickListener(this)
+        mAdapter.setAppListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -356,6 +348,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         //}
     }
+
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
 
     override fun onReply2Reply(
         rPosition: Int,
@@ -403,19 +399,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         }
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
+    override fun onRefreshReply(listType: String) {}
 
     override fun onPublish(message: String, replyAndForward: String) {
         viewModel.replyData["message"] = message
@@ -433,5 +417,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnReplyClickL
         viewModel.deleteId = id
         viewModel.postDelete()
     }
+
+    override fun onShowCollection(id: String, title: String) {}
 
 }

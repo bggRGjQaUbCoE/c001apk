@@ -21,8 +21,8 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
@@ -34,7 +34,6 @@ import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -43,8 +42,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 
 
-class HomeFeedFragment : Fragment(), IOnLikeClickListener,
-    OnImageItemClickListener, IOnTabClickListener, IOnPublishClickListener {
+class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublishClickListener {
 
     private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -525,8 +523,7 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
             requireContext(), viewModel.homeFeedList
         )
         mLayoutManager = LinearLayoutManager(activity)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setAppListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -550,6 +547,19 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
         }
     }
 
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {}
+
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
         viewModel.likeFeedId = id
         viewModel.likePosition = position!!
@@ -563,19 +573,11 @@ class HomeFeedFragment : Fragment(), IOnLikeClickListener,
 
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
+    override fun onRefreshReply(listType: String) {}
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {}
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onReturnTop(isRefresh: Boolean?) {

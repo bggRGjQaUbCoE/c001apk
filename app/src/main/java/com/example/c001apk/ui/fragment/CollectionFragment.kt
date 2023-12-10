@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -14,12 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentCollectionBinding
-import com.example.c001apk.ui.fragment.minterface.IOnCollectionItemClickListener
-import com.example.c001apk.ui.fragment.search.SearchResultFragment
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 
-class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
+class CollectionFragment : Fragment(), AppListener {
 
     private lateinit var binding: FragmentCollectionBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -28,7 +29,7 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String, title:String) =
+        fun newInstance(id: String, title: String) =
             CollectionFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
@@ -135,7 +136,7 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(requireContext(), viewModel.dataList)
-        mAdapter.setIOnCollectionItemClickListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -146,6 +147,7 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
     }
 
     private fun refreshData() {
+        viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
@@ -200,7 +202,27 @@ class CollectionFragment : Fragment(), IOnCollectionItemClickListener {
         })
     }
 
-    override fun onShowCollection(id: String, title:String) {
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
+    }
+
+    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {}
+
+    override fun onRefreshReply(listType: String) {}
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {
         requireActivity().supportFragmentManager
             .beginTransaction()
             .replace(

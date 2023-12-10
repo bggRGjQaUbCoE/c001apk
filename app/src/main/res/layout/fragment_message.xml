@@ -38,6 +38,7 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="20dp"
                     android:text="@string/click_to_login"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -79,7 +80,7 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
 
                         <TextView
@@ -117,7 +118,7 @@
                         android:id="@+id/progress"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         app:trackCornerRadius="20dp"
                         tools:max="1000"
                         tools:progress="500" />

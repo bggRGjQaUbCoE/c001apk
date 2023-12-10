@@ -388,7 +388,8 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
         binding.progress.progress =
             if (PrefManager.experience != "") PrefManager.experience.toInt()
             else -1
-        ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
+        if (PrefManager.userAvatar.isNotEmpty())
+            ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
     }
 
     override fun onDeleteNoti(uname: String, id: String, position: Int) {

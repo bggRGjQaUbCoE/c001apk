@@ -40,6 +40,7 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.imageview.ShapeableImageView
@@ -60,7 +61,7 @@ class NineGridImageView @JvmOverloads constructor(
     var isCompress = false
 
     private var urlList: List<String>? = null
-    var onImageItemClickListener: OnImageItemClickListener? = null
+    var appListener: AppListener? = null
 
     var imgHeight = 1
     var imgWidth = 1
@@ -161,14 +162,12 @@ class NineGridImageView @JvmOverloads constructor(
                 childrenView.scaleType = ImageView.ScaleType.CENTER_CROP
             }
             childrenView.setOnClickListener {
-                if (onImageItemClickListener != null) {
-                    onImageItemClickListener!!.onClick(
-                        this,
-                        childrenView,
-                        urlList!!,
-                        i
-                    )
-                }
+                appListener?.onClick(
+                    this,
+                    childrenView,
+                    urlList!!,
+                    i
+                )
             }
             childrenView.layout(left, top, right, bottom)
         }

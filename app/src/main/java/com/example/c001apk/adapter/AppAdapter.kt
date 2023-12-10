@@ -37,10 +37,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
-import com.example.c001apk.ui.fragment.minterface.IOnCollectionItemClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
-import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.HistoryUtil
@@ -52,7 +49,6 @@ import com.example.c001apk.view.LinearItemDecoration1
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.circleindicator.CircleIndicator3
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
@@ -63,39 +59,15 @@ class AppAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
-    private var iOnReplyDeleteClickListener: IOnReplyDeleteClickListener? = null
-
-    fun setIOnReplyDeleteClickListener(iOnReplyDeleteClickListener: IOnReplyDeleteClickListener) {
-        this.iOnReplyDeleteClickListener = iOnReplyDeleteClickListener
-    }
-
-    private var iOnCollectionItemClickListener: IOnCollectionItemClickListener? = null
-
-    fun setIOnCollectionItemClickListener(iOnCollectionItemClickListener: IOnCollectionItemClickListener) {
-        this.iOnCollectionItemClickListener = iOnCollectionItemClickListener
-    }
-
     private var entityType = ""
     private var fid = ""
     private var uid = ""
     private var position = -1
 
-    private var onPostFollowListener: OnPostFollowListener? = null
+    private var appListener: AppListener? = null
 
-    fun setOnPostFollowListener(onPostFollowListener: OnPostFollowListener) {
-        this.onPostFollowListener = onPostFollowListener
-    }
-
-    private var onImageItemClickListener: OnImageItemClickListener? = null
-
-    fun setOnImageItemClickListener(onImageItemClickListener: OnImageItemClickListener) {
-        this.onImageItemClickListener = onImageItemClickListener
-    }
-
-    private var iOnLikeClickListener: IOnLikeClickListener? = null
-
-    fun setIOnLikeReplyListener(iOnLikeClickListener: IOnLikeClickListener) {
-        this.iOnLikeClickListener = iOnLikeClickListener
+    fun setAppListener(appListener: AppListener) {
+        this.appListener = appListener
     }
 
     private var loadState = 2
@@ -358,7 +330,7 @@ class AppAdapter(
                             Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
                                 .show()
                         } else {
-                            iOnLikeClickListener?.onPostLike(
+                            appListener?.onPostLike(
                                 null,
                                 viewHolder.isLike,
                                 viewHolder.id,
@@ -368,7 +340,7 @@ class AppAdapter(
                     }
                 }
                 viewHolder.multiImage.apply {
-                    onImageItemClickListener = this@AppAdapter.onImageItemClickListener
+                    appListener = this@AppAdapter.appListener
                 }
                 viewHolder.expand.setOnClickListener {
                     entityType = "feed"
@@ -418,7 +390,7 @@ class AppAdapter(
                     parent.context.startActivity(intent)
                 }
                 viewHolder.followBtn.setOnClickListener {
-                    onPostFollowListener?.onPostFollow(
+                    appListener?.onPostFollow(
                         viewHolder.isFollow,
                         viewHolder.uid,
                         viewHolder.bindingAdapterPosition
@@ -555,7 +527,7 @@ class AppAdapter(
                         Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
                             .show()
                     } else {
-                        iOnLikeClickListener?.onPostLike(
+                        appListener?.onPostLike(
                             viewHolder.entityType,
                             viewHolder.isLike,
                             viewHolder.id,
@@ -585,7 +557,7 @@ class AppAdapter(
                         .inflate(R.layout.item_collection_list_item, parent, false)
                 val viewHolder = CollectionViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    iOnCollectionItemClickListener?.onShowCollection(
+                    appListener?.onShowCollection(
                         viewHolder.id,
                         viewHolder.title.text.toString()
                     )
@@ -1614,7 +1586,7 @@ class AppAdapter(
             }
 
             R.id.delete -> {
-                iOnReplyDeleteClickListener?.onDeleteReply(fid, position, null)
+                appListener?.onDeleteReply(fid, position, null)
             }
         }
         return false

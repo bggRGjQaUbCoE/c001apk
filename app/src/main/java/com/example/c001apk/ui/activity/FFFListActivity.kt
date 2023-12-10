@@ -16,18 +16,17 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.FollowFragment
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
-class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickListener {
+class FFFListActivity : BaseActivity(), AppListener {
 
     private lateinit var binding: ActivityFfflistBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -320,8 +319,7 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
     private fun initView() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(this, viewModel.dataList)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setOnImageItemClickListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -336,6 +334,20 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
         viewModel.isEnd = false
         viewModel.isNew = true
         viewModel.getFeedList()
+    }
+
+    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
     }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
@@ -362,18 +374,10 @@ class FFFListActivity : BaseActivity(), IOnLikeClickListener, OnImageItemClickLi
         }
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
+    override fun onRefreshReply(listType: String) {}
+
+    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {}
 
 }

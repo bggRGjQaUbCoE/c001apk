@@ -29,15 +29,10 @@ import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
-import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
-import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.DateUtils
@@ -49,7 +44,6 @@ import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.OffsetLinearLayoutManager
 import com.example.c001apk.view.StickyItemDecorator
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -63,10 +57,7 @@ import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 
 
-class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListener,
-    IOnLikeClickListener, OnImageItemClickListener, IOnListTypeClickListener,
-    IOnShowMoreReplyListener, OnPostFollowListener, IOnPublishClickListener,
-    IOnReplyDeleteClickListener {
+class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPublishClickListener {
 
     private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -789,13 +780,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter =
             FeedContentAdapter(requireContext(), viewModel.feedContentList, viewModel.feedReplyList)
-        mAdapter.setIOnReplyDeleteClickListener(this)
-        mAdapter.setIOnReplyClickListener(this)
-        mAdapter.setIOnTotalReplyClickListener(this)
-        mAdapter.setIOnLikeReplyListener(this)
-        mAdapter.setOnImageItemClickListener(this)
-        mAdapter.setIOnListTypeClickListener(this)
-        mAdapter.setOnPostFollowListener(this)
+        mAdapter.setAppListener(this)
         mLayoutManager = OffsetLinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -976,20 +961,6 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         }
     }
 
-    override fun onClick(
-        nineGridView: NineGridImageView,
-        imageView: ImageView,
-        urlList: List<String>,
-        position: Int
-    ) {
-        ImageUtil.startBigImgView(
-            nineGridView,
-            imageView,
-            urlList,
-            position
-        )
-    }
-
     override fun onRefreshReply(listType: String) {
         when (listType) {
             "lastupdate_desc" -> binding.buttonToggle.check(R.id.lastUpdate)
@@ -1055,5 +1026,7 @@ class FeedFragment : Fragment(), IOnTotalReplyClickListener, IOnReplyClickListen
         viewModel.deleteId = id
         viewModel.postDelete()
     }
+
+    override fun onShowCollection(id: String, title: String) {}
 
 }

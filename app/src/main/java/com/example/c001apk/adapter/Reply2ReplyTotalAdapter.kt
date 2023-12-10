@@ -23,9 +23,7 @@ import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
@@ -33,7 +31,6 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 
@@ -45,33 +42,15 @@ class Reply2ReplyTotalAdapter(
     private val replyList: ArrayList<TotalReplyResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
-    private var iOnReplyDeleteClickListener: IOnReplyDeleteClickListener? = null
+    private var appListener: AppListener? = null
 
-    fun setIOnReplyDeleteClickListener(iOnReplyDeleteClickListener: IOnReplyDeleteClickListener) {
-        this.iOnReplyDeleteClickListener = iOnReplyDeleteClickListener
+    fun setAppListener(appListener: AppListener) {
+        this.appListener = appListener
     }
 
     private var rid = ""
     private var ruid = ""
     private var rposition = -1
-
-    private var onImageItemClickListener: OnImageItemClickListener? = null
-
-    fun setOnImageItemClickListener(onImageItemClickListener: OnImageItemClickListener) {
-        this.onImageItemClickListener = onImageItemClickListener
-    }
-
-    private var iOnLikeClickListener: IOnLikeClickListener? = null
-
-    fun setIOnLikeReplyListener(iOnLikeClickListener: IOnLikeClickListener) {
-        this.iOnLikeClickListener = iOnLikeClickListener
-    }
-
-    private lateinit var iOnReplyClickListener: IOnReplyClickListener
-
-    fun setIOnReplyClickListener(iOnReplyClickListener: IOnReplyClickListener) {
-        this.iOnReplyClickListener = iOnReplyClickListener
-    }
 
     private var loadState = 2
     val LOADING = 1
@@ -123,7 +102,7 @@ class Reply2ReplyTotalAdapter(
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
-                    iOnReplyClickListener.onReply2Reply(
+                    appListener?.onReply2Reply(
                         position,
                         viewHolder.bindingAdapterPosition,
                         viewHolder.id,
@@ -138,7 +117,7 @@ class Reply2ReplyTotalAdapter(
                             Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
                                 .show()
                         } else {
-                            iOnLikeClickListener?.onPostLike(
+                            appListener?.onPostLike(
                                 null,
                                 viewHolder.isLike,
                                 viewHolder.id,
@@ -148,7 +127,7 @@ class Reply2ReplyTotalAdapter(
                     }
                 }
                 viewHolder.multiImage.apply {
-                    onImageItemClickListener = this@Reply2ReplyTotalAdapter.onImageItemClickListener
+                    appListener = this@Reply2ReplyTotalAdapter.appListener
                 }
                 viewHolder.expand.setOnClickListener {
                     rid = viewHolder.id
@@ -410,7 +389,7 @@ class Reply2ReplyTotalAdapter(
             }
 
             R.id.delete -> {
-                iOnReplyDeleteClickListener?.onDeleteReply(rid, rposition, null)
+                appListener?.onDeleteReply(rid, rposition, null)
             }
         }
         return false

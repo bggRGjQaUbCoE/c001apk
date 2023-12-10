@@ -39,12 +39,7 @@ import com.example.c001apk.ui.activity.DyhActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
-import com.example.c001apk.ui.fragment.minterface.IOnLikeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnListTypeClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnReplyDeleteClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnTotalReplyClickListener
-import com.example.c001apk.ui.fragment.minterface.OnPostFollowListener
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
@@ -54,7 +49,6 @@ import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinkMovementClickMethod
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.example.c001apk.view.ninegridimageview.OnImageItemClickListener
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -67,12 +61,6 @@ class FeedContentAdapter(
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
-
-    private var iOnReplyDeleteClickListener: IOnReplyDeleteClickListener? = null
-
-    fun setIOnReplyDeleteClickListener(iOnReplyDeleteClickListener: IOnReplyDeleteClickListener) {
-        this.iOnReplyDeleteClickListener = iOnReplyDeleteClickListener
-    }
 
     private var extraKey = ""
 
@@ -92,28 +80,10 @@ class FeedContentAdapter(
     private var position = -1
     private var rPosition: Int? = null
 
-    private var onPostFollowListener: OnPostFollowListener? = null
-
-    fun setOnPostFollowListener(onPostFollowListener: OnPostFollowListener) {
-        this.onPostFollowListener = onPostFollowListener
-    }
-
-    private var iOnListTypeClickListener: IOnListTypeClickListener? = null
-
-    fun setIOnListTypeClickListener(iOnListTypeClickListener: IOnListTypeClickListener) {
-        this.iOnListTypeClickListener = iOnListTypeClickListener
-    }
-
     private var listType = "lastupdate_desc"
 
     fun setListType(listType: String) {
         this.listType = listType
-    }
-
-    private var onImageItemClickListener: OnImageItemClickListener? = null
-
-    fun setOnImageItemClickListener(onImageItemClickListener: OnImageItemClickListener) {
-        this.onImageItemClickListener = onImageItemClickListener
     }
 
     private val TYPE_CONTENT = 0
@@ -135,22 +105,10 @@ class FeedContentAdapter(
         // notifyDataSetChanged()
     }
 
-    private var iOnReplyClickContainer: IOnReplyClickListener? = null
+    private var appListener: AppListener? = null
 
-    fun setIOnReplyClickListener(iOnLikeClickListener: IOnReplyClickListener) {
-        this.iOnReplyClickContainer = iOnLikeClickListener
-    }
-
-    private var iOnLikeClickListener: IOnLikeClickListener? = null
-
-    fun setIOnLikeReplyListener(iOnLikeClickListener: IOnLikeClickListener) {
-        this.iOnLikeClickListener = iOnLikeClickListener
-    }
-
-    private var iOnTotalReplyClickListener: IOnTotalReplyClickListener? = null
-
-    fun setIOnTotalReplyClickListener(iOnTotalReplyClickListener: IOnTotalReplyClickListener) {
-        this.iOnTotalReplyClickListener = iOnTotalReplyClickListener
+    fun setAppListener(appListener: AppListener) {
+        this.appListener = appListener
     }
 
     class FeedContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -226,16 +184,16 @@ class FeedContentAdapter(
                     LayoutInflater.from(parent.context).inflate(R.layout.item_top, parent, false)
                 val viewHolder = TopViewHolder(view)
                 viewHolder.lastUpdate.setOnClickListener {
-                    iOnListTypeClickListener?.onRefreshReply("lastupdate_desc")
+                    appListener?.onRefreshReply("lastupdate_desc")
                 }
                 viewHolder.dateLine.setOnClickListener {
-                    iOnListTypeClickListener?.onRefreshReply("dateline_desc")
+                    appListener?.onRefreshReply("dateline_desc")
                 }
                 viewHolder.popular.setOnClickListener {
-                    iOnListTypeClickListener?.onRefreshReply("popular")
+                    appListener?.onRefreshReply("popular")
                 }
                 viewHolder.author.setOnClickListener {
-                    iOnListTypeClickListener?.onRefreshReply("")
+                    appListener?.onRefreshReply("")
                 }
                 viewHolder
             }
@@ -266,7 +224,7 @@ class FeedContentAdapter(
                             Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
                                 .show()
                         } else {
-                            iOnLikeClickListener?.onPostLike(
+                            appListener?.onPostLike(
                                 "feed",
                                 viewHolder.isLike,
                                 viewHolder.id,
@@ -276,10 +234,10 @@ class FeedContentAdapter(
                     }
                 }
                 viewHolder.multiImage.apply {
-                    onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
+                    appListener = this@FeedContentAdapter.appListener
                 }
                 viewHolder.follow.setOnClickListener {
-                    onPostFollowListener?.onPostFollow(
+                    appListener?.onPostFollow(
                         viewHolder.isFollow,
                         viewHolder.uid,
                         0
@@ -326,7 +284,7 @@ class FeedContentAdapter(
                         .inflate(R.layout.item_feed_content_reply_item, parent, false)
                 val viewHolder = FeedContentReplyViewHolder(view)
                 viewHolder.totalReply.setOnClickListener {
-                    iOnTotalReplyClickListener?.onShowTotalReply(
+                    appListener?.onShowTotalReply(
                         viewHolder.bindingAdapterPosition,
                         viewHolder.uid,
                         viewHolder.id
@@ -349,7 +307,7 @@ class FeedContentAdapter(
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
-                    iOnReplyClickContainer?.onReply2Reply(
+                    appListener?.onReply2Reply(
                         viewHolder.bindingAdapterPosition,
                         null,
                         viewHolder.id,
@@ -364,7 +322,7 @@ class FeedContentAdapter(
                             Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
                                 .show()
                         } else {
-                            iOnLikeClickListener?.onPostLike(
+                            appListener?.onPostLike(
                                 "reply",
                                 viewHolder.isLike,
                                 viewHolder.id,
@@ -374,7 +332,7 @@ class FeedContentAdapter(
                     }
                 }
                 viewHolder.multiImage.apply {
-                    onImageItemClickListener = this@FeedContentAdapter.onImageItemClickListener
+                    appListener = this@FeedContentAdapter.appListener
                 }
                 viewHolder.expand.setOnClickListener {
                     rPosition = null
@@ -709,8 +667,8 @@ class FeedContentAdapter(
                                             }
                                             imageView.setUrlList(urlList)
                                             imageView.apply {
-                                                onImageItemClickListener =
-                                                    this@FeedContentAdapter.onImageItemClickListener
+                                                appListener =
+                                                    this@FeedContentAdapter.appListener
                                             }
                                         }
                                         return view
@@ -794,8 +752,8 @@ class FeedContentAdapter(
                                             imageView.isCompress = true
                                             imageView.setUrlList(urlList)
                                             imageView.apply {
-                                                onImageItemClickListener =
-                                                    this@FeedContentAdapter.onImageItemClickListener
+                                                appListener =
+                                                    this@FeedContentAdapter.appListener
                                             }
                                             if (articleList[position1 - 2].description == "")
                                                 description.visibility = View.GONE
@@ -1280,7 +1238,7 @@ class FeedContentAdapter(
                                     SpannableStringBuilderUtil.setData(position1, replyData.uid)
 
                                     view.setOnClickListener {
-                                        iOnReplyClickContainer?.onReply2Reply(
+                                        appListener?.onReply2Reply(
                                             holder.bindingAdapterPosition,
                                             null,
                                             replyData.id,
@@ -1391,7 +1349,7 @@ class FeedContentAdapter(
             }
 
             R.id.delete -> {
-                iOnReplyDeleteClickListener?.onDeleteReply(id, position, rPosition)
+                appListener?.onDeleteReply(id, position, rPosition)
             }
 
             R.id.copy -> {
