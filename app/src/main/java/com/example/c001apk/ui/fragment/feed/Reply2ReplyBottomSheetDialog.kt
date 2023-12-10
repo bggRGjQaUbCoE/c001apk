@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -23,10 +22,8 @@ import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.ReplyItemDecoration
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -41,6 +38,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
+    var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
 
     companion object {
         fun newInstance(
@@ -141,17 +139,19 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                     showReplyErrorMessage()
                     return@observe
                 } else if (!reply?.data.isNullOrEmpty()) {
-                    if (!viewModel.isLoadMore)
+                    if (!viewModel.isLoadMore) {
                         viewModel.replyTotalList.clear()
+                        viewModel.replyTotalList.addAll(oriReply)
+                    }
                     viewModel.listSize = viewModel.replyTotalList.size
                     for (element in reply?.data!!)
                         if (element.entityType == "feed_reply")
                             if (!BlackListUtil.checkUid(element.uid))
                                 viewModel.replyTotalList.add(element)
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
                 } else {
+                    if (viewModel.replyTotalList.isEmpty())
+                        viewModel.replyTotalList.addAll(oriReply)
                     mAdapter.setLoadState(mAdapter.LOADING_END)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
@@ -166,6 +166,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         )
                 else
                     mAdapter.notifyDataSetChanged()
+                binding.indicator.isIndeterminate = false
+                binding.indicator.visibility = View.GONE
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
             }
@@ -349,7 +351,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         //}
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {
+        val mBottomSheetDialogFragment = newInstance(position, viewModel.fuid, uid, id)
+        mBottomSheetDialogFragment.oriReply.add(viewModel.replyTotalList[position])
+        mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
+    }
 
     override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
 

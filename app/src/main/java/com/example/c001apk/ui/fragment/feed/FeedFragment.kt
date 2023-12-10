@@ -24,7 +24,6 @@ import com.example.c001apk.adapter.FeedContentAdapter
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
-import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
@@ -43,7 +42,6 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.OffsetLinearLayoutManager
 import com.example.c001apk.view.StickyItemDecorator
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -424,16 +422,25 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                             } else {
                                 viewModel.feedReplyList[viewModel.rPosition!! - 2].replyRows?.add(
                                     viewModel.feedReplyList[viewModel.rPosition!! - 2].replyRows?.size!!,
-                                    HomeFeedResponse.ReplyRows(
+                                    TotalReplyResponse.Data(
+                                        null,
+                                        "feed_reply",
                                         viewModel.rid,
+                                        viewModel.ruid,
                                         PrefManager.uid,
                                         viewModel.rid,
                                         URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                        viewModel.replyData["message"].toString(),
-                                        viewModel.ruid,
                                         viewModel.uname,
+                                        viewModel.replyData["message"].toString(),
+                                        "",
                                         null,
-                                        ""
+                                        System.currentTimeMillis() / 1000,
+                                        "0",
+                                        "0",
+                                        PrefManager.userAvatar,
+                                        null,
+                                        0,
+                                        null
                                     )
                                 )
                                 mAdapter.notifyItemChanged(viewModel.rPosition!!)
@@ -904,9 +911,14 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
         }
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String) {
+    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {
         val mBottomSheetDialogFragment =
             Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid, uid, id)
+        if (rPosition == null)
+            mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[position - 2])
+        else
+            mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[position - 2].replyRows!![rPosition])
+
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 
@@ -966,10 +978,11 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
         refreshReply(listType)
     }
 
-    override fun onShowMoreReply(position: Int, uid: String, id: String) {
+    override fun onShowMoreReply(position: Int, uid: String, id: String, rPosition: Int) {
         viewModel.isShowMoreReply = true
         val mBottomSheetDialogFragment =
             Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid, uid, id)
+        mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[rPosition - 2])
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 

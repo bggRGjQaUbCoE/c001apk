@@ -244,7 +244,6 @@ class Reply2ReplyTotalAdapter(
             }
 
             is ViewHolder -> {
-
                 val reply = replyList[position]
                 holder.id = reply.id
                 holder.uid = reply.uid
@@ -393,6 +392,10 @@ class Reply2ReplyTotalAdapter(
 
             R.id.delete -> {
                 appListener?.onDeleteReply(rid, rposition, null)
+            }
+
+            R.id.show -> {
+                appListener?.onShowTotalReply(rposition, ruid, rid, null)
             }
         }
         return false

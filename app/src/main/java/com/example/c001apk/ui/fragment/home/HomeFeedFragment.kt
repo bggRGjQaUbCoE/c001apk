@@ -547,7 +547,7 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
         }
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
 
     override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
 

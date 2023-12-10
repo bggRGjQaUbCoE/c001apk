@@ -268,6 +268,7 @@ class MessageAdapter(
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
                     popup.menu.findItem(R.id.copy).isVisible = false
+                    popup.menu.findItem(R.id.show).isVisible = false
                     popup.setOnMenuItemClickListener(this@MessageAdapter)
                     popup.show()
                 }

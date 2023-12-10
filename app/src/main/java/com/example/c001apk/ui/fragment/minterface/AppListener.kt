@@ -1,12 +1,13 @@
 package com.example.c001apk.ui.fragment.minterface
 
 import android.widget.ImageView
+import com.example.c001apk.ui.fragment.feed.Reply2ReplyBottomSheetDialog
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 
 interface AppListener {
 
-    fun onShowTotalReply(position: Int, uid: String, id: String)
+    fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?)
 
     fun onPostFollow(isFollow: Boolean, uid: String, position: Int)
 

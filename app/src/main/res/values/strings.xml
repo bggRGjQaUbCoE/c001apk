@@ -115,5 +115,6 @@
     <string name="my_freq">我的常去</string>
     <string name="subscribe">关注</string>
     <string name="copyText">复制</string>
+    <string name="show_reply_1">查看对话</string>
 
 </resources>

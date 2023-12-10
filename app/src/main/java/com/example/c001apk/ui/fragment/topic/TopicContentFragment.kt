@@ -258,7 +258,7 @@ class TopicContentFragment : Fragment(), AppListener, IOnSearchMenuClickListener
         viewModel.getTopicData()
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String) {}
+    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
 
     override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
 

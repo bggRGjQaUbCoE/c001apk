@@ -31,7 +31,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedContentResponse
-import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CopyActivity
@@ -77,6 +76,7 @@ class FeedContentAdapter(
     private var text = ""
     private var uid = ""
     private var id = ""
+    private var ruid = ""
     private var position = -1
     private var rPosition: Int? = null
 
@@ -287,7 +287,8 @@ class FeedContentAdapter(
                     appListener?.onShowTotalReply(
                         viewHolder.bindingAdapterPosition,
                         viewHolder.uid,
-                        viewHolder.id
+                        viewHolder.id,
+                        null
                     )
                 }
                 viewHolder.avatar.setOnClickListener {
@@ -338,6 +339,7 @@ class FeedContentAdapter(
                     rPosition = null
                     id = viewHolder.id
                     uid = viewHolder.uid
+                    ruid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
@@ -1161,7 +1163,7 @@ class FeedContentAdapter(
                     holder.reply.setCompoundDrawables(drawableReply, null, null, null)
 
                     if (!reply.replyRows.isNullOrEmpty()) {
-                        val sortedList = ArrayList<HomeFeedResponse.ReplyRows>()
+                        val sortedList = ArrayList<TotalReplyResponse.Data>()
                         for (element in reply.replyRows) {
                             if (!BlackListUtil.checkUid(element.uid))
                                 sortedList.add(element)
@@ -1231,7 +1233,11 @@ class FeedContentAdapter(
                                         replyData.picArr
                                     )
 
-                                    SpannableStringBuilderUtil.setData(position1, replyData.uid)
+                                    SpannableStringBuilderUtil.setData(
+                                        position1 + 1,
+                                        reply.uid,
+                                        holder.bindingAdapterPosition
+                                    )
 
                                     view.setOnClickListener {
                                         appListener?.onReply2Reply(
@@ -1248,6 +1254,7 @@ class FeedContentAdapter(
                                         this@FeedContentAdapter.text = textView.text.toString()
                                         id = replyData.id
                                         uid = replyData.uid
+                                        ruid = reply.uid
                                         this@FeedContentAdapter.position =
                                             holder.bindingAdapterPosition
                                         this@FeedContentAdapter.rPosition = position1
@@ -1348,6 +1355,10 @@ class FeedContentAdapter(
                 val intent = Intent(mContext, CopyActivity::class.java)
                 intent.putExtra("text", text)
                 mContext.startActivity(intent)
+            }
+
+            R.id.show -> {
+                appListener?.onShowTotalReply(position, ruid, id, rPosition)
             }
         }
         return false
