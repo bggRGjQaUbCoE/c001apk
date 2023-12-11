@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.home
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.Gravity
@@ -28,12 +29,10 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DensityTool
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -404,8 +403,11 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
                 0,
                 0,
                 DensityTool.dp2px(requireContext(), 25f).toInt(),
-                DensityTool.getNavigationBarHeight(requireContext())
-                        + DensityTool.dp2px(requireContext(), 105f).toInt()
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    DensityTool.getNavigationBarHeight(requireContext())
+                            + DensityTool.dp2px(requireContext(), 105f).toInt()
+                else
+                    DensityTool.dp2px(requireContext(), 25f).toInt()
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             binding.fab.layoutParams = lp
@@ -558,7 +560,8 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
         uid: String,
         uname: String,
         type: String
-    ) {}
+    ) {
+    }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
         viewModel.likeFeedId = id

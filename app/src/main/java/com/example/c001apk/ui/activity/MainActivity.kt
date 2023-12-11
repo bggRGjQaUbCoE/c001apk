@@ -33,6 +33,7 @@ import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 import java.net.URLEncoder
 
 
@@ -42,6 +43,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private val navViewBehavior by lazy { HideBottomViewOnScrollBehavior<BottomNavigationView>() }
     override var controller: IOnBottomClickListener? = null
+    private lateinit var navView: NavigationBarView
 
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +62,8 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
         if (viewModel.badge != 0)
             setBadge()
 
+        navView = binding.bottomNav as NavigationBarView
+
         binding.viewPager.apply {
             adapter = object : FragmentStateAdapter(this@MainActivity) {
                 override fun getItemCount() = 3
@@ -76,7 +80,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
                 ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
-                    binding.bottomNav.menu.getItem(position)?.isChecked = true
+                    navView.menu.getItem(position)?.isChecked = true
                     when (position) {
                         0 -> onBackPressedCallback.isEnabled = false
                         1 -> onBackPressedCallback.isEnabled = true
@@ -88,8 +92,10 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
             fixViewPager2Insets(this)
         }
 
-        binding.bottomNav.apply {
-            (layoutParams as CoordinatorLayout.LayoutParams).behavior = navViewBehavior
+        navView.apply {
+            if (this is BottomNavigationView) {
+                (layoutParams as CoordinatorLayout.LayoutParams).behavior = navViewBehavior
+            }
 
             setOnItemSelectedListener {
                 when (it.itemId) {
@@ -105,7 +111,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
                         onBackPressedCallback.isEnabled = true
                         binding.viewPager.setCurrentItem(1, true)
                         if (viewModel.badge != 0)
-                            binding.bottomNav.removeBadge(R.id.navigation_message)
+                            navView.removeBadge(R.id.navigation_message)
                     }
 
                     R.id.navigation_setting -> {
@@ -117,7 +123,9 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
                 true
             }
             setOnClickListener { /*Do nothing*/ }
-            fixBottomNavigationViewInsets(this)
+            if (this is BottomNavigationView) {
+                fixBottomNavigationViewInsets(this)
+            }
         }
 
         viewModel.checkLoginInfoData.observe(this) { result ->
@@ -176,7 +184,7 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
 
     @SuppressLint("RestrictedApi")
     private fun setBadge() {
-        val badge = binding.bottomNav.getOrCreateBadge(R.id.navigation_message)
+        val badge = navView.getOrCreateBadge(R.id.navigation_message)
         badge.number = viewModel.badge
         badge.backgroundColor =
             ThemeUtils.getThemeAttrColor(this, rikka.preference.simplemenu.R.attr.colorPrimary)
@@ -194,14 +202,17 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
     }
 
     override fun showNavigationView() {
-        if (navViewBehavior.isScrolledDown)
-            navViewBehavior.slideUp(binding.bottomNav, true)
-
+        if (binding.bottomNav is BottomNavigationView) {
+            if (navViewBehavior.isScrolledDown)
+                navViewBehavior.slideUp(binding.bottomNav as BottomNavigationView, true)
+        }
     }
 
     override fun hideNavigationView() {
-        if (navViewBehavior.isScrolledUp)
-            navViewBehavior.slideDown(binding.bottomNav, true)
+        if (binding.bottomNav is BottomNavigationView) {
+            if (navViewBehavior.isScrolledUp)
+                navViewBehavior.slideDown(binding.bottomNav as BottomNavigationView, true)
+        }
     }
 
     // from libchecker

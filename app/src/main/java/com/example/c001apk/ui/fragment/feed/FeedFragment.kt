@@ -1,8 +1,8 @@
 package com.example.c001apk.ui.fragment.feed
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -10,7 +10,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
@@ -62,17 +61,10 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: OffsetLinearLayoutManager
-    private lateinit var objectAnimator: ObjectAnimator
     private val feedFavoriteDao by lazy {
         FeedFavoriteDatabase.getDatabase(this@FeedFragment.requireContext()).feedFavoriteDao()
     }
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
-
-    private fun initAnimator() {
-        objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
-        objectAnimator.interpolator = AccelerateInterpolator()
-        objectAnimator.duration = 150
-    }
 
     companion object {
         @JvmStatic
@@ -122,7 +114,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initAnimator()
         initBar()
         initView()
         initData()
@@ -155,8 +146,11 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                 0,
                 0,
                 DensityTool.dp2px(requireContext(), 25f).toInt(),
-                DensityTool.getNavigationBarHeight(requireContext())
-                        + DensityTool.dp2px(requireContext(), 25f).toInt()
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    DensityTool.getNavigationBarHeight(requireContext())
+                            + DensityTool.dp2px(requireContext(), 25f).toInt()
+                else
+                    DensityTool.dp2px(requireContext(), 25f).toInt()
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             layoutParams = lp
@@ -665,9 +659,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                     if (viewModel.firstCompletelyVisibleItemPosition == 0) {
                         if (binding.titleProfile.visibility != View.GONE)
                             binding.titleProfile.visibility = View.GONE
-                        if (objectAnimator.isRunning) {
-                            objectAnimator.cancel()
-                        }
                     } else if (viewModel.firstVisibleItemPosition >= 1) {
                         if (binding.titleProfile.visibility != View.VISIBLE)
                             showTitleProfile()
@@ -677,9 +668,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                     } else {
                         if (binding.titleProfile.visibility != View.GONE) {
                             binding.titleProfile.visibility = View.GONE
-                            if (objectAnimator.isRunning) {
-                                objectAnimator.cancel()
-                            }
                         }
                     }
                 }
@@ -714,7 +702,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
             ImageUtil.showIMG(binding.avatar1, viewModel.avatar)
         }
         binding.titleProfile.visibility = View.VISIBLE
-        objectAnimator.start()
     }
 
     @SuppressLint("RestrictedApi")
@@ -735,9 +722,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     @SuppressLint("NotifyDataSetChanged")
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
-            if (objectAnimator.isRunning) {
-                objectAnimator.cancel()
-            }
             binding.titleProfile.visibility = View.GONE
             binding.indicator.visibility = View.VISIBLE
             binding.indicator.isIndeterminate = true
@@ -756,9 +740,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
             } else {
                 if (binding.titleProfile.visibility != View.GONE)
                     binding.titleProfile.visibility = View.GONE
-                if (objectAnimator.isRunning) {
-                    objectAnimator.cancel()
-                }
             }
             if (PrefManager.isLogin)
                 binding.reply.visibility = View.VISIBLE

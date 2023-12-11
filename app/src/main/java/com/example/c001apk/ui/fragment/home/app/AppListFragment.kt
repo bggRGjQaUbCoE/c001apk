@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.home.app
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -67,8 +68,11 @@ class AppListFragment : Fragment(), IOnTabClickListener {
                 0,
                 0,
                 DensityTool.dp2px(requireContext(), 25f).toInt(),
-                DensityTool.getNavigationBarHeight(requireContext())
-                        + DensityTool.dp2px(requireContext(), 105f).toInt()
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    DensityTool.getNavigationBarHeight(requireContext())
+                            + DensityTool.dp2px(requireContext(), 105f).toInt()
+                else
+                    DensityTool.dp2px(requireContext(), 25f).toInt()
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             layoutParams = lp
