@@ -183,7 +183,7 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
                                 || element.entityTemplate == "iconMiniGridCard"
                                 || element.entityTemplate == "iconLinkGridCard"
                                 || element.entityTemplate == "imageSquareScrollCard"
-                                )
+                            )
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
@@ -476,11 +476,15 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
                 viewModel.title = "热榜"
                 viewModel.getDataList()
             }
+
             "follow" -> {
-                viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
-                viewModel.title = "全部关注"
+                if (viewModel.url == "") {
+                    viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
+                    viewModel.title = "全部关注"
+                }
                 viewModel.getDataList()
             }
+
             "coolPic" -> {
                 viewModel.url = "/page?url=V11_FIND_COOLPIC"
                 viewModel.title = "酷图"

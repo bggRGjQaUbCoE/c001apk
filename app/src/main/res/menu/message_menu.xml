@@ -13,7 +13,7 @@
         android:id="@+id/favorite"
         android:icon="@drawable/ic_favorite_border"
         android:showAsAction="never"
-        android:title="@string/favorite" />
+        android:title="@string/local_favorite" />
 
     <item
         android:id="@+id/history"
