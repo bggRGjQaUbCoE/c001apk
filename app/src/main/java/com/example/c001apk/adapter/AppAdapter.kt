@@ -164,6 +164,17 @@ class AppAdapter(
         var isFollow = false
     }
 
+    class RecentHistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val uname: TextView = view.findViewById(R.id.uname)
+        val follow: TextView = view.findViewById(R.id.follow)
+        val fans: TextView = view.findViewById(R.id.fans)
+        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val followBtn: TextView = view.findViewById(R.id.followBtn)
+        var targetType = ""
+        var id = ""
+        var url = ""
+    }
+
     class TopicProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
         val hotNum: TextView = view.findViewById(R.id.hotNum)
@@ -568,7 +579,54 @@ class AppAdapter(
                 viewHolder
             }
 
-            else -> throw IllegalArgumentException("entityType error")
+            12 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_search_user, parent, false)
+                val viewHolder = RecentHistoryViewHolder(view)
+                viewHolder.itemView.setOnClickListener {
+                    when (viewHolder.targetType) {
+                        "user" -> {
+                            val intent = Intent(parent.context, UserActivity::class.java)
+                            intent.putExtra("id", viewHolder.url.replace("/u/", ""))
+                            parent.context.startActivity(intent)
+                        }
+
+                        "apk" -> {
+                            val intent = Intent(parent.context, AppActivity::class.java)
+                            intent.putExtra("id", viewHolder.url.replace("/apk/", ""))
+                            parent.context.startActivity(intent)
+                        }
+
+                        "game" -> {
+                            val intent = Intent(parent.context, AppActivity::class.java)
+                            intent.putExtra("id", viewHolder.url.replace("/game/", ""))
+                            parent.context.startActivity(intent)
+                        }
+
+                        "topic" -> {
+                            val intent = Intent(parent.context, TopicActivity::class.java)
+                            intent.putExtra("type", "topic")
+                            intent.putExtra("title", viewHolder.uname.text.toString())
+                            intent.putExtra("url", viewHolder.url)
+                            intent.putExtra("id", "")
+                            parent.context.startActivity(intent)
+                        }
+
+                        "product" -> {
+                            val intent = Intent(parent.context, TopicActivity::class.java)
+                            intent.putExtra("type", "product")
+                            intent.putExtra("title", viewHolder.uname.text.toString().replace("数码: ", ""))
+                            intent.putExtra("url", viewHolder.url)
+                            intent.putExtra("id", viewHolder.url.replace("/product/", ""))
+                            parent.context.startActivity(intent)
+                        }
+                    }
+                }
+                viewHolder
+            }
+
+            else -> throw IllegalArgumentException("entityType error: $entityType")
         }
 
     }
@@ -671,6 +729,19 @@ class AppAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
 
+            is RecentHistoryViewHolder -> {
+                val data = dataList[position]
+                holder.targetType = data.targetType.toString()
+                holder.url = data.url
+                holder.id = data.id
+                holder.uname.text = "${data.targetTypeTitle}: ${data.title}"
+                holder.followBtn.visibility = View.GONE
+                holder.follow.text = "${data.followNum}关注"
+                holder.fans.text = if (data.targetType == "user") "${data.fansNum}关注"
+                else "${data.commentNum}讨论"
+                ImageUtil.showAvatar(holder.avatar, data.logo)
+            }
+
             is CollectionViewHolder -> {
                 val data = dataList[position]
 
@@ -681,7 +752,7 @@ class AppAdapter(
                     holder.description.visibility = View.VISIBLE
                     holder.description.text = data.description
                 } else holder.description.visibility = View.GONE
-                holder.mode.text = if (data.isOpen == 1) "私密"
+                holder.mode.text = if (data.isOpen == 0) "私密"
                 else "公开"
                 holder.followNum.text = "${data.followNum}人关注"
                 holder.contentNum.text = "${data.itemNum}个内容"
@@ -1563,7 +1634,9 @@ class AppAdapter(
 
             "collection" -> 11
 
-            // max 11
+            "recentHistory" -> 12
+
+            // max 12
             else -> throw IllegalArgumentException("entityType error: ${dataList[position].entityType}")
         }
     }

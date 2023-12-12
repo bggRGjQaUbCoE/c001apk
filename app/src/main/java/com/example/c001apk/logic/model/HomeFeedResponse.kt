@@ -5,6 +5,10 @@ import com.google.gson.annotations.SerializedName
 data class HomeFeedResponse(val data: List<Data>) {
 
     data class Data(
+        @SerializedName("comment_num") val commentNum: String?,
+        @SerializedName("fans_num") val fansNum: String?,
+        @SerializedName("target_type") val targetType: String?,
+        @SerializedName("target_type_title") val targetTypeTitle: String?,
         val replyMeRows: List<TotalReplyResponse.Data>?,
         @SerializedName("cover_pic") val coverPic: String?,
         @SerializedName("is_open") val isOpen: Int?,

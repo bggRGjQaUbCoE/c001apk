@@ -193,8 +193,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("com.github.megatronking.stringfog:xor:5.0.0")
-    implementation("androidx.palette:palette:1.0.0")
-    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.3")
-    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.3")
+    //implementation("androidx.palette:palette:1.0.0")
+    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.4")
+    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.4")
     implementation("com.github.zhaobozhen.libraries:utils:1.1.4")
 }

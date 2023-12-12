@@ -288,6 +288,8 @@ class AppViewModel : ViewModel() {
 
             "replyToMe" -> "/v6/user/replyToMeList"
 
+            "recentHistory" -> "/v6/user/recentHistoryList"
+
             else -> throw IllegalArgumentException("invalid type: $type")
         }
         Repository.getFollowList(url, uid, page)

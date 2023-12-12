@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageAdapter
 import com.example.c001apk.databinding.FragmentMessageBinding
+import com.example.c001apk.ui.activity.FFFListActivity
 import com.example.c001apk.ui.activity.HistoryActivity
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
@@ -334,8 +335,8 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
         binding.toolBar.inflateMenu(R.menu.message_menu)
         if (!PrefManager.isLogin) {
             binding.toolBar.menu.findItem(R.id.logout).isVisible = false
+            binding.toolBar.menu.findItem(R.id.freq).isVisible = false
         }
-        binding.toolBar.menu.findItem(R.id.freq).isVisible = false
         binding.toolBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.logout -> {
@@ -369,6 +370,14 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
                 R.id.history -> {
                     val intent = Intent(requireContext(), HistoryActivity::class.java)
                     intent.putExtra("type", "browse")
+                    requireContext().startActivity(intent)
+                }
+
+                R.id.freq -> {
+                    val intent = Intent(requireContext(), FFFListActivity::class.java)
+                    intent.putExtra("isEnable", false)
+                    intent.putExtra("type", "recentHistory")
+                    intent.putExtra("uid", PrefManager.uid)
                     requireContext().startActivity(intent)
                 }
 

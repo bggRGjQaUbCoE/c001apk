@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
@@ -18,11 +17,9 @@ import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.FollowFragment
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -102,6 +99,7 @@ class FFFListActivity : BaseActivity(), AppListener {
                             if (element.entityType == "feed"
                                 || element.entityType == "contacts"
                                 || element.entityType == "feed_reply"
+                                || element.entityType == "recentHistory"
                             )
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
@@ -239,26 +237,30 @@ class FFFListActivity : BaseActivity(), AppListener {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        when (viewModel.type) {
-            "feed" -> binding.toolBar.title = "我的动态"
+        binding.toolBar.title = when (viewModel.type) {
+            "feed" -> "我的动态"
 
             "follow" -> {
                 if (viewModel.uid == PrefManager.uid)
-                    binding.toolBar.title = "我的关注"
+                    "我的关注"
                 else
-                    binding.toolBar.title = "TA关注的人"
+                    "TA关注的人"
             }
 
             "fans" -> {
                 if (viewModel.uid == PrefManager.uid)
-                    binding.toolBar.title = "关注我的人"
+                    "关注我的人"
                 else
-                    binding.toolBar.title = "TA的粉丝"
+                    "TA的粉丝"
             }
 
-            "like" -> binding.toolBar.title = "我的赞"
+            "like" -> "我的赞"
 
-            "reply" -> binding.toolBar.title = "我的回复"
+            "reply" -> "我的回复"
+
+            "recentHistory" -> "我的常去"
+
+            else -> viewModel.type
 
         }
     }

@@ -30,7 +30,7 @@ class AboutActivity : AbsAboutActivity() {
         items.add(License("RikkaX", "RikkaApps", License.MIT, "https://github.com/RikkaApps/RikkaX"))
         items.add(License("about-page", "drakeet", License.APACHE_2, "https://github.com/drakeet/about-page"))
         items.add(License("LSPosed", "LSPosed", License.GPL_V3, "https://github.com/LSPosed/LSPosed"))
-        items.add(License("LibChecker", "LibChecker", License.GPL_V3, "https://github.com/LibChecker/LibChecker"))
+        items.add(License("LibChecker", "LibChecker", License.APACHE_2, "https://github.com/LibChecker/LibChecker"))
         items.add(License("Hide-My-Applist", "Dr-TSNG", License.GPL_V3, "https://github.com/Dr-TSNG/Hide-My-Applist"))
         items.add(License("okhttp", "square", License.APACHE_2, "https://github.com/square/okhttp"))
         items.add(License("retrofit", "square", License.APACHE_2, "https://github.com/square/retrofit"))
