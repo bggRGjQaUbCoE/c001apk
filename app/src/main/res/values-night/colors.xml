@@ -4,4 +4,6 @@
     <color name="cover">#0DFFFFFF</color>
     <color name="bw">@color/white</color>
     <color name="wb">@color/black</color>
+    <color name="advanced_menu_item_text_not_checked">#ECECEC</color>
+    <color name="advanced_menu_item_text_checked">#232323</color>
 </resources>

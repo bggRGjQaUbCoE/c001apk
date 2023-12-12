@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
@@ -67,12 +68,12 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             lp.setMargins(
                 0,
                 0,
-                DensityTool.dp2px(requireContext(), 25f).toInt(),
+                25.dp,
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     DensityTool.getNavigationBarHeight(requireContext())
-                            + DensityTool.dp2px(requireContext(), 105f).toInt()
+                            + 105.dp
                 else
-                    DensityTool.dp2px(requireContext(), 25f).toInt()
+                    25.dp
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             layoutParams = lp

@@ -18,6 +18,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
 import com.example.c001apk.databinding.FragmentFeedBinding
@@ -145,12 +146,12 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
             lp.setMargins(
                 0,
                 0,
-                DensityTool.dp2px(requireContext(), 25f).toInt(),
+                25.dp,
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     DensityTool.getNavigationBarHeight(requireContext())
-                            + DensityTool.dp2px(requireContext(), 25f).toInt()
+                            + 25.dp
                 else
-                    DensityTool.dp2px(requireContext(), 25f).toInt()
+                    25.dp
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             layoutParams = lp

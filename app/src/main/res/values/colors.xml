@@ -8,4 +8,6 @@
     <color name="ic_launcher_background">#607D8B</color>
     <color name="bw">@color/black</color>
     <color name="wb">@color/white</color>
+    <color name="advanced_menu_item_text_not_checked">#232323</color>
+    <color name="advanced_menu_item_text_checked">#ECECEC</color>
 </resources>

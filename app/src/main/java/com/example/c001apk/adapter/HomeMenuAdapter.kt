@@ -4,8 +4,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeMenu
+import com.example.c001apk.view.CheckableChipView
 import com.google.android.material.chip.Chip
 
 class HomeMenuAdapter(
@@ -14,7 +16,11 @@ class HomeMenuAdapter(
     ItemTouchHelperCallback.OnItemTouchCallbackListener {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val menu: Chip = view.findViewById(R.id.menu)
+        private val checkedColor = context.getColor(R.color.advanced_menu_item_text_checked)
+        private val uncheckedColor = context.getColor(R.color.advanced_menu_item_text_not_checked)
+        val menu: CheckableChipView = view.findViewById<CheckableChipView?>(R.id.menu).also {
+            it.textColorPair = checkedColor to uncheckedColor
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
