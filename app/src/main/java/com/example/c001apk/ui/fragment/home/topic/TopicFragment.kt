@@ -75,7 +75,7 @@ class TopicFragment : Fragment() {
             }
         }
 
-        viewModel.homeTopicTitleLiveData.observe(viewLifecycleOwner) { result ->
+        viewModel.dataListData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
@@ -131,9 +131,11 @@ class TopicFragment : Fragment() {
             binding.indicator.isIndeterminate = true
             binding.indicator.visibility = View.VISIBLE
             viewModel.isNew = true
-            if (viewModel.type == "topic")
-                viewModel.getHomeTopicTitle()
-            else
+            if (viewModel.type == "topic") {
+                viewModel.url = "/page?url=V11_VERTICAL_TOPIC"
+                viewModel.title = "话题"
+                viewModel.getDataList()
+            } else
                 viewModel.getProductList()
         }
     }

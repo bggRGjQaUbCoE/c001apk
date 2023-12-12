@@ -144,6 +144,10 @@ class AppAdapter(
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
 
+    class ImageSquareScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+    }
+
     class IconMiniScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
@@ -626,6 +630,13 @@ class AppAdapter(
                 viewHolder
             }
 
+            13 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_home_image_square_scroll_card, parent, false)
+                ImageSquareScrollCardViewHolder(view)
+            }
+
             else -> throw IllegalArgumentException("entityType error: $entityType")
         }
 
@@ -728,6 +739,24 @@ class AppAdapter(
     @SuppressLint("UseCompatLoadingForDrawables", "RestrictedApi", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+
+            is ImageSquareScrollCardViewHolder -> {
+                val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
+                for (element in dataList[position].entities) {
+                    if (element.entityType == "picCategory")
+                        imageTextScrollCard.add(element)
+                }
+                val mAdapter = ImageSquareScrollCardAdapter(mContext, imageTextScrollCard)
+                val mLayoutManager = LinearLayoutManager(mContext)
+                mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
+                val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
+                holder.recyclerView.apply {
+                    adapter = mAdapter
+                    layoutManager = mLayoutManager
+                    if (itemDecorationCount == 0)
+                        addItemDecoration(LinearItemDecoration1(space))
+                }
+            }
 
             is RecentHistoryViewHolder -> {
                 val data = dataList[position]
@@ -1549,14 +1578,14 @@ class AppAdapter(
                 val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
                 holder.title.text = dataList[position].title
                 holder.title.setPadding(space, space, space, 0)
-                val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
+                /*val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
                 drawable.setBounds(
                     0,
                     0,
                     holder.title.textSize.toInt(),
                     holder.title.textSize.toInt()
                 )
-                holder.title.setCompoundDrawables(null, null, drawable, null)
+                holder.title.setCompoundDrawables(null, null, drawable, null)*/
                 holder.recyclerView.apply {
                     adapter = mAdapter
                     layoutManager = mLayoutManager
@@ -1613,6 +1642,9 @@ class AppAdapter(
                     "iconMiniGridCard" -> 4
 
                     "refreshCard" -> 5
+
+                    "imageSquareScrollCard" -> 13
+
                     else -> throw IllegalArgumentException("entityType error: ${dataList[position].entityTemplate}")
                 }
             }
@@ -1636,7 +1668,7 @@ class AppAdapter(
 
             "recentHistory" -> 12
 
-            // max 12
+            // max 13
             else -> throw IllegalArgumentException("entityType error: ${dataList[position].entityType}")
         }
     }

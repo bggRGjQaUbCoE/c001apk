@@ -168,7 +168,7 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
             }
         }
 
-        viewModel.homeRankingData.observe(viewLifecycleOwner) { result ->
+        viewModel.dataListData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
@@ -182,53 +182,8 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
                             if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniGridCard"
                                 || element.entityTemplate == "iconLinkGridCard"
-                            ) {
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                        element.tags + element.ttitle
-                                    )
+                                || element.entityTemplate == "imageSquareScrollCard"
                                 )
-                                    viewModel.homeFeedList.add(element)
-                            }
-                        }
-                        viewModel.lastItem =
-                            viewModel.homeFeedList[viewModel.homeFeedList.size - 1].entityId
-                    }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
-                } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.homeFeedList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
-            }
-        }
-
-        viewModel.followFeedData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val feed = result.getOrNull()
-                if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
-                        viewModel.homeFeedList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.homeFeedList.size
-                        for (element in feed) {
-                            if (element.entityType == "feed")
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
@@ -454,8 +409,9 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
                         viewModel.isNew = true
                         when (viewModel.type) {
                             "feed" -> viewModel.getHomeFeed()
-                            "rank" -> viewModel.getHomeRanking()
-                            "follow" -> viewModel.getFollowFeed()
+                            "rank" -> viewModel.getDataList()
+                            "follow" -> viewModel.getDataList()
+                            "coolPic" -> viewModel.getDataList()
                         }
 
                     }
@@ -515,8 +471,21 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
         viewModel.isNew = true
         when (viewModel.type) {
             "feed" -> viewModel.getHomeFeed()
-            "rank" -> viewModel.getHomeRanking()
-            "follow" -> viewModel.getFollowFeed()
+            "rank" -> {
+                viewModel.url = "/page?url=V9_HOME_TAB_RANKING"
+                viewModel.title = "热榜"
+                viewModel.getDataList()
+            }
+            "follow" -> {
+                viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
+                viewModel.title = "全部关注"
+                viewModel.getDataList()
+            }
+            "coolPic" -> {
+                viewModel.url = "/page?url=V11_FIND_COOLPIC"
+                viewModel.title = "酷图"
+                viewModel.getDataList()
+            }
         }
     }
 
@@ -605,32 +574,32 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
                     when (position) {
                         0 -> {
                             viewModel.position = 0
-                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW"
-                            viewModel.followTitle = "全部关注"
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
+                            viewModel.title = "全部关注"
                         }
 
                         1 -> {
                             viewModel.position = 1
-                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
-                            viewModel.followTitle = "好友关注"
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
+                            viewModel.title = "好友关注"
                         }
 
                         2 -> {
                             viewModel.position = 2
-                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
-                            viewModel.followTitle = "话题关注"
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
+                            viewModel.title = "话题关注"
                         }
 
                         3 -> {
                             viewModel.position = 3
-                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
-                            viewModel.followTitle = "数码关注"
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
+                            viewModel.title = "数码关注"
                         }
 
                         4 -> {
                             viewModel.position = 4
-                            viewModel.followUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=apk"
-                            viewModel.followTitle = "应用关注"
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=apk"
+                            viewModel.title = "应用关注"
                         }
                     }
                     viewModel.homeFeedList.clear()

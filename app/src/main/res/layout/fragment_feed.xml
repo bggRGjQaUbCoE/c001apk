@@ -48,6 +48,7 @@
                         android:id="@+id/name1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:ellipsize="end"
                         android:maxLines="1"
                         tools:text="name" />
 
@@ -70,6 +71,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
+                            android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="@android:color/darker_gray"
                             android:textSize="13sp"

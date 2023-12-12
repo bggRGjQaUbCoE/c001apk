@@ -215,8 +215,7 @@ class AppViewModel : ViewModel() {
 
 
     var likePosition = -1
-    private val baseURL =
-        "/page?url=%2Ffeed%2FapkCommentList%3Fid%3D"
+    private val baseURL = "/page?url=/feed/apkCommentList?id="
     var appId = ""
     var isInit = true
     val appCommentList = ArrayList<HomeFeedResponse.Data>()
@@ -261,7 +260,6 @@ class AppViewModel : ViewModel() {
     fun getCarouselList() {
         getCarouselData.value = getCarouselData.value
     }
-
 
     val dataList = ArrayList<HomeFeedResponse.Data>()
 
@@ -536,26 +534,14 @@ class AppViewModel : ViewModel() {
         getHomeFeedData.value = getHomeFeedData.value
     }
 
-    private val getFollowFeedData = MutableLiveData<String>()
+    private val getDataListLiveData = MutableLiveData<String>()
 
-    var followUrl = "/page?url=V9_HOME_TAB_FOLLOW"
-    var followTitle = "全部关注"
-    val followFeedData = getFollowFeedData.switchMap {
-        Repository.getDataList(followUrl, followTitle, subtitle, lastItem, page)
+    val dataListData = getDataListLiveData.switchMap {
+        Repository.getDataList(url, title, subtitle, lastItem, page)
     }
 
-    fun getFollowFeed() {
-        getFollowFeedData.value = getFollowFeedData.value
-    }
-
-    private val getHomeRankingData = MutableLiveData<String>()
-
-    val homeRankingData = getHomeRankingData.switchMap {
-        Repository.getDataList("/page?url=V9_HOME_TAB_RANKING", "热榜", subtitle, lastItem, page)
-    }
-
-    fun getHomeRanking() {
-        getHomeRankingData.value = getHomeRankingData.value
+    fun getDataList() {
+        getDataListLiveData.value = getDataListLiveData.value
     }
 
     var isInitial = true
@@ -564,16 +550,6 @@ class AppViewModel : ViewModel() {
     var titleList = ArrayList<String>()
 
     val homeTopicTitleList = ArrayList<HomeFeedResponse.Entities>()
-
-    private val getHomeTopicTitleLiveData = MutableLiveData<String>()
-
-    val homeTopicTitleLiveData = getHomeTopicTitleLiveData.switchMap {
-        Repository.getDataList("/page?url=V11_VERTICAL_TOPIC", "话题", subtitle, lastItem, 1)
-    }
-
-    fun getHomeTopicTitle() {
-        getHomeTopicTitleLiveData.value = getHomeTopicTitleLiveData.value
-    }
 
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 

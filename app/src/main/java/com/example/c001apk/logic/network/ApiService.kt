@@ -117,7 +117,7 @@ interface ApiService {
         @Query("uid") uid: String
     ): Call<UserProfileResponse>
 
-    @GET()
+    @GET
     fun getFollowList(
         @Url url: String,
         @Query("uid") uid: String,
@@ -235,7 +235,7 @@ interface ApiService {
         @Query("lastItem") lastItem: String?,
     ): Call<TotalReplyResponse>
 
-    @GET("/v6/product/categoryList")
+    @GET
     fun getProductList(): Call<HomeFeedResponse>
 
     @GET

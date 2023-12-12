@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.c001apk.ui.activity.AppActivity
+import com.example.c001apk.ui.activity.CoolPicActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
@@ -29,7 +30,7 @@ internal class MyURLSpan(
     private var position = 0
     private var rPosition = 0
     private var uid = ""
-    fun setData(position: Int, uid: String, rPosition:Int) {
+    fun setData(position: Int, uid: String, rPosition: Int) {
         this.position = position
         this.rPosition = rPosition
         this.uid = uid
@@ -55,15 +56,21 @@ internal class MyURLSpan(
             val intent = Intent(mContext, AppActivity::class.java)
             intent.putExtra("id", id)
             mContext.startActivity(intent)
-        } else if (StringBuilder(mUrl).startsWith("/t/")) {
-            val intent = Intent(mContext, TopicActivity::class.java)
-            val index = StringBuilder(mUrl).indexOf("?")
-            intent.putExtra("url", StringBuilder(mUrl).substring(3, index).toString())
-            intent.putExtra("title", StringBuilder(mUrl).substring(3, index).toString())
-            intent.putExtra("type", "topic")
-            intent.putExtra("id", "")
-            mContext.startActivity(intent)
-        } else if (StringBuilder(mUrl).startsWith("/u/")) {
+        } else if (mUrl.startsWith("/t/")) {
+            if (mUrl.contains("?type=8")) {
+                val intent = Intent(mContext, CoolPicActivity::class.java)
+                intent.putExtra("title", mUrl.replace("/t/", "").replace("?type=8", ""))
+                mContext.startActivity(intent)
+            } else {
+                val intent = Intent(mContext, TopicActivity::class.java)
+                val index = mUrl.indexOf("?")
+                intent.putExtra("url", mUrl.substring(3, index))
+                intent.putExtra("title", mUrl.substring(3, index))
+                intent.putExtra("type", "topic")
+                intent.putExtra("id", "")
+                mContext.startActivity(intent)
+            }
+        } else if (mUrl.startsWith("/u/")) {
             val intent = Intent(mContext, UserActivity::class.java)
             intent.putExtra("id", mUrl.replace("/u/", ""))
             mContext.startActivity(intent)

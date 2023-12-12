@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -17,7 +16,6 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentCollectionBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 
 class CollectionFragment : Fragment(), AppListener {
@@ -107,17 +105,23 @@ class CollectionFragment : Fragment(), AppListener {
     }
 
     private fun initBar() {
-        binding.toolBar.apply {
-            title = if (viewModel.title == "") "我的收藏单"
-            else viewModel.title
-            setNavigationIcon(R.drawable.ic_back)
-            setNavigationOnClickListener {
-                if (viewModel.cId.isNullOrEmpty())
-                    requireActivity().finish()
-                else
-                    requireActivity().supportFragmentManager.popBackStack()
+        if (viewModel.cId == "recommend"
+            || viewModel.cId == "hot"
+            || viewModel.cId == "newest"
+        )
+            binding.appBar.visibility = View.GONE
+        else
+            binding.toolBar.apply {
+                title = if (viewModel.title == "") "我的收藏单"
+                else viewModel.title
+                setNavigationIcon(R.drawable.ic_back)
+                setNavigationOnClickListener {
+                    if (viewModel.cId.isNullOrEmpty())
+                        requireActivity().finish()
+                    else
+                        requireActivity().supportFragmentManager.popBackStack()
+                }
             }
-        }
     }
 
     private fun initData() {
@@ -152,8 +156,12 @@ class CollectionFragment : Fragment(), AppListener {
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         viewModel.isNew = true
-        viewModel.collectionUrl = if (viewModel.cId.isNullOrEmpty()) "/v6/collection/list"
-        else "/v6/collection/itemList"
+        viewModel.collectionUrl =
+            if (viewModel.cId.isNullOrEmpty()) "/v6/collection/list"
+            else if (viewModel.cId == "recommend") "/v6/picture/list?tag=${viewModel.title}&type=recommend"
+            else if (viewModel.cId == "hot") "/v6/picture/list?tag=${viewModel.title}&type=hot"
+            else if (viewModel.cId == "newest") "/v6/picture/list?tag=${viewModel.title}&type=newest"
+            else "/v6/collection/itemList"
         viewModel.getCollectionList()
     }
 

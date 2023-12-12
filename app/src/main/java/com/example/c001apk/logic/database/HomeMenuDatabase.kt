@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.c001apk.logic.dao.HomeMenuDao
 import com.example.c001apk.logic.model.HomeMenu
 
-@Database(version = 3, entities = [HomeMenu::class])
+@Database(version = 4, entities = [HomeMenu::class])
 abstract class HomeMenuDatabase : RoomDatabase() {
     abstract fun homeMenuDao(): HomeMenuDao
 
@@ -30,6 +30,12 @@ abstract class HomeMenuDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("insert into HomeMenu (position,title,isEnable) values (6,'酷图',1)")
+            }
+        }
+
         @Synchronized
         fun getDatabase(context: Context): HomeMenuDatabase {
             instance?.let {
@@ -41,6 +47,7 @@ abstract class HomeMenuDatabase : RoomDatabase() {
             )
                 .addMigrations(MIGRATION_1_2)
                 .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_3_4)
                 .build().apply {
                     instance = this
                 }
