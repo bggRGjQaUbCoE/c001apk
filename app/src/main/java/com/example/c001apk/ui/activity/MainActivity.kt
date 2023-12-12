@@ -51,6 +51,8 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        navView = binding.bottomNav as NavigationBarView
+
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         if (viewModel.isInit) {
@@ -61,8 +63,6 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
 
         if (viewModel.badge != 0)
             setBadge()
-
-        navView = binding.bottomNav as NavigationBarView
 
         binding.viewPager.apply {
             adapter = object : FragmentStateAdapter(this@MainActivity) {
