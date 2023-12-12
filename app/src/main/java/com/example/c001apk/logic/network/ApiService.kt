@@ -235,7 +235,7 @@ interface ApiService {
         @Query("lastItem") lastItem: String?,
     ): Call<TotalReplyResponse>
 
-    @GET
+    @GET("/v6/product/categoryList")
     fun getProductList(): Call<HomeFeedResponse>
 
     @GET

@@ -1610,14 +1610,14 @@ class AppAdapter(
                     holder.title.text = dataList[position].title
                     holder.title.setPadding(space, space, space, 0)
                 }
-                val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
+                /*val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
                 drawable.setBounds(
                     0,
                     0,
                     holder.title.textSize.toInt(),
                     holder.title.textSize.toInt()
                 )
-                holder.title.setCompoundDrawables(null, null, drawable, null)
+                holder.title.setCompoundDrawables(null, null, drawable, null)*/
                 holder.recyclerView.apply {
                     adapter = mAdapter
                     layoutManager = mLayoutManager
