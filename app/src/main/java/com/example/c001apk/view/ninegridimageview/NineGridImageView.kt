@@ -43,6 +43,7 @@ import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.http2https
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
@@ -231,7 +232,7 @@ class NineGridImageView @JvmOverloads constructor(
                 }
                 val newUrl =
                     GlideUrl(
-                        urlList[i],
+                        urlList[i].http2https(),
                         LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT)
                             .build()
                     )

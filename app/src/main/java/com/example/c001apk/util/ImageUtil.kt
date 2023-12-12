@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -19,15 +18,12 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
-import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
-import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants.USER_AGENT
 import com.example.c001apk.util.ClipboardUtil.copyText
@@ -64,7 +60,7 @@ object ImageUtil {
 
     fun showUserCover(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
-            url,
+            url?.http2https(),
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         Glide
@@ -81,7 +77,7 @@ object ImageUtil {
 
     fun showIMG(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
-            url,
+            url?.http2https(),
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         Glide
@@ -96,7 +92,7 @@ object ImageUtil {
 
     fun showAvatar(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
-            url,
+            url?.http2https(),
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         Glide
@@ -112,7 +108,7 @@ object ImageUtil {
 
     fun showIMG1(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
-            url,
+            url?.http2https(),
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         Glide
@@ -136,7 +132,7 @@ object ImageUtil {
             try {
                 val file = Glide.with(ctx)
                     .asFile()
-                    .load(imageUrl)
+                    .load(imageUrl.http2https())
                     .submit()
                     .get()
                 val image = File(imagesDir, filename)
@@ -193,7 +189,7 @@ object ImageUtil {
                             if (imageCheckDir.exists()) {
                                 ToastUtil.toast("文件已存在")
                             } else {
-                                downloadPicture(context, url)
+                                downloadPicture(context, url.http2https())
                             }
                         }
                     }
@@ -244,11 +240,11 @@ object ImageUtil {
         val imgList: MutableList<String> = ArrayList()
         for (img in urlList) {
             if (img.endsWith(".s.jpg"))
-                imgList.add(img.replace(".s.jpg", ""))
+                imgList.add(img.replace(".s.jpg", "").http2https())
             else if (img.endsWith(".s2x.jpg"))
-                imgList.add(img.replace(".s2x.jpg", ""))
+                imgList.add(img.replace(".s2x.jpg", "").http2https())
             else
-                imgList.add(img)
+                imgList.add(img.http2https())
         }
         Mojito.start(imageView.context) {
             urls(imgList)
@@ -306,12 +302,16 @@ object ImageUtil {
         context: Context,
         imgList: List<String>
     ) {
+        val newList = ArrayList<String>()
+        for (url in imgList) {
+            newList.add(url.http2https())
+        }
         Mojito.start(context) {
-            urls(imgList)
+            urls(newList)
             progressLoader {
                 DefaultPercentProgress()
             }
-            if (imgList.size > 1) {
+            if (newList.size > 1) {
                 setIndicator(CircleIndexIndicator())
             }
             setOnMojitoListener(object : SimpleMojitoViewCallback() {
@@ -336,7 +336,7 @@ object ImageUtil {
         imageView: ImageView,
         url: String
     ) {
-        imageView.mojito(url) {
+        imageView.mojito(url.http2https()) {
             progressLoader {
                 DefaultPercentProgress()
             }
@@ -349,7 +349,7 @@ object ImageUtil {
                     position: Int
                 ) {
                     if (fragmentActivity != null) {
-                        showSaveImgDialog(fragmentActivity, url)
+                        showSaveImgDialog(fragmentActivity, url.http2https())
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }
@@ -362,10 +362,10 @@ object ImageUtil {
         context: Context,
         url: String
     ) {
-        startBigImgViewSimple(context, listOf(url))
+        startBigImgViewSimple(context, listOf(url.http2https()))
     }
 
-    fun showPaletteColor(imageView: ImageView, url: String?) {
+    /*fun showPaletteColor(imageView: ImageView, url: String?) {
         val newUrl = GlideUrl(
             url,
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
@@ -396,7 +396,7 @@ object ImageUtil {
 
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
-    }
+    }*/
 
 
     // 将File 转化为 content://URI
@@ -434,7 +434,11 @@ object ImageUtil {
 
 
     private fun downloadPicture(context: Context, url: String?) {
-        Glide.with(context).downloadOnly().load(url).into(object : FileTarget() {
+        val newUrl = GlideUrl(
+            url?.http2https(),
+            LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
+        )
+        Glide.with(context).downloadOnly().load(newUrl).into(object : FileTarget() {
             override fun onLoadFailed(errorDrawable: Drawable?) {
                 super.onLoadFailed(errorDrawable)
                 Toast.makeText(context, "download failed", Toast.LENGTH_SHORT).show()

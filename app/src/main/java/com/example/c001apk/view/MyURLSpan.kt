@@ -17,6 +17,7 @@ import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.http2https
 
 internal class MyURLSpan(
     private val mContext: Context,
@@ -68,7 +69,7 @@ internal class MyURLSpan(
             mContext.startActivity(intent)
         } else if (mUrl.contains("image.coolapk.com")) {
             if (imgList == null) {
-                ImageUtil.startBigImgViewSimple(mContext, mUrl)
+                ImageUtil.startBigImgViewSimple(mContext, mUrl.http2https())
             } else {
                 ImageUtil.startBigImgViewSimple(mContext, imgList)
             }
