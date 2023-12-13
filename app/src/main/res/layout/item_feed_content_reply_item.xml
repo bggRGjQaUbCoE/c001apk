@@ -40,13 +40,14 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp">
 
-            <TextView
+            <com.example.c001apk.view.LinkTextView
                 android:id="@+id/uname"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:paddingEnd="20dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintEnd_toStartOf="@id/expand"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="RtlSymmetry" />

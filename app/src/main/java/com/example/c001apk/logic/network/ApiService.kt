@@ -84,9 +84,10 @@ interface ApiService {
         @Query("page") page: Int,
     ): Call<HomeFeedResponse>
 
-    @GET("/v6/apk/detail?installed=1")
+    @GET("/v6/apk/detail")
     fun getAppInfo(
         @Query("id") id: String,
+        @Query("installed") installed: Int = 1,
     ): Call<FeedContentResponse>
 
     @POST("/v6/apk/download?extra=")

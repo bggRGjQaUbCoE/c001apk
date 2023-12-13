@@ -48,6 +48,7 @@ object SpannableStringBuilderUtil {
     }
 
     var isReturn = false
+    var isColor = false
 
     fun setText(
         mContext: Context,
@@ -70,6 +71,7 @@ object SpannableStringBuilderUtil {
         for (url in urls) {
             val myURLSpan = MyURLSpan(mContext, url.url, imgList)
             myURLSpan.setData(position, uid)
+            myURLSpan.isColor = isColor
             myURLSpan.isReturn = isReturn
             val start = builder.getSpanStart(url)
             val end = builder.getSpanEnd(url)
@@ -121,6 +123,7 @@ object SpannableStringBuilderUtil {
         for (url in urls) {
             val myURLSpan = MyURLSpan(mContext, url.url, imgList)
             myURLSpan.setData(position, uid)
+            myURLSpan.isColor = isColor
             val start = builder.getSpanStart(url)
             val end = builder.getSpanEnd(url)
             val flags = builder.getSpanFlags(url)

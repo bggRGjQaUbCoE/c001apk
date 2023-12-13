@@ -1,5 +1,6 @@
 package com.example.c001apk.view
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,7 @@ import android.text.style.ClickableSpan
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.widget.ThemeUtils
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CoolPicActivity
 import com.example.c001apk.ui.activity.FeedActivity
@@ -29,12 +31,13 @@ internal class MyURLSpan(
 
     private var position = 0
     private var uid = ""
-    fun setData(position: Int, uid: String) {
+    fun setData(position: Int, uid: String, ) {
         this.position = position
         this.uid = uid
     }
 
     var isReturn = false
+    var isColor = false
 
     override fun onClick(widget: View) {
         if (mUrl == "") {
@@ -109,9 +112,14 @@ internal class MyURLSpan(
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun updateDrawState(ds: TextPaint) {
         super.updateDrawState(ds)
-        //ds.color = Color.parseColor("#1e5494") //设置文本颜色
+        if (isColor)
+            ds.color = ThemeUtils.getThemeAttrColor(
+                mContext,
+                com.google.android.material.R.attr.colorControlNormal
+            ) //设置文本颜色
         ds.isUnderlineText = false //取消下划线
     }
 }

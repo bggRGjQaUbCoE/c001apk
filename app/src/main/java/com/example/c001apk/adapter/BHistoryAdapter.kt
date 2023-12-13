@@ -67,7 +67,7 @@ class BHistoryAdapter(
         var id = ""
         var uid = ""
         val avatar: ImageView = view.findViewById(R.id.avatar)
-        val uname: TextView = view.findViewById(R.id.uname)
+        val uname: LinkTextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
         val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
@@ -101,11 +101,6 @@ class BHistoryAdapter(
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
-                }
-                viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
@@ -168,7 +163,17 @@ class BHistoryAdapter(
                         val history = dataList[position] as BrowseHistory
                         holder.id = history.fid
                         holder.uid = history.uid
-                        holder.uname.text = history.uname
+                        val name =
+                            """<a class="feed-link-uname" href="/u/${history.uid}">${history.uname}</a>""" + "\u3000"
+                        SpannableStringBuilderUtil.isColor = true
+                        holder.uname.text = SpannableStringBuilderUtil.setReply(
+                            mContext,
+                            name,
+                            holder.uname.textSize.toInt(),
+                            null
+                        )
+                        holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        SpannableStringBuilderUtil.isColor = false
                         if (history.device == "")
                             holder.device.visibility = View.GONE
                         else {
@@ -189,7 +194,17 @@ class BHistoryAdapter(
                         val history = dataList[position] as FeedFavorite
                         holder.id = history.feedId
                         holder.uid = history.uid
-                        holder.uname.text = history.uname
+                        val name =
+                            """<a class="feed-link-uname" href="/u/${history.uid}">${history.uname}</a>""" + "\u3000"
+                        SpannableStringBuilderUtil.isColor = true
+                        holder.uname.text = SpannableStringBuilderUtil.setReply(
+                            mContext,
+                            name,
+                            holder.uname.textSize.toInt(),
+                            null
+                        )
+                        holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        SpannableStringBuilderUtil.isColor = false
                         if (history.device == "")
                             holder.device.visibility = View.GONE
                         else {

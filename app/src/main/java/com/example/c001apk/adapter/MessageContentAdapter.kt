@@ -355,7 +355,7 @@ class MessageContentAdapter(
                     holder.forwardUid = message.forwardSourceFeed.uid
                     holder.forwardUname = message.forwardSourceFeed.username
                     val title =
-                        """<a class="feed-link-uname" href="/u/${message.forwardSourceFeed.username}">@${message.forwardSourceFeed.username}: </a>${message.forwardSourceFeed.messageTitle}"""
+                        """<a class="feed-link-uname" href="/u/${message.forwardSourceFeed.uid}">@${message.forwardSourceFeed.username}: </a>${message.forwardSourceFeed.messageTitle}"""
                     holder.forwardTitle.movementMethod =
                         LinkTextView.LocalLinkMovementMethod.getInstance()
                     holder.forwardTitle.text = SpannableStringBuilderUtil.setText(

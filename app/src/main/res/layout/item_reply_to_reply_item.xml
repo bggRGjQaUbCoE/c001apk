@@ -33,13 +33,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <com.example.c001apk.view.LinkTextView
                 android:id="@+id/uname"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:paddingEnd="25dp"
+                app:layout_constraintEnd_toStartOf="@id/expand"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

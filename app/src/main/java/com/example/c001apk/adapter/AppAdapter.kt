@@ -95,7 +95,7 @@ class AppAdapter(
 
     class FeedVoteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ImageView = view.findViewById(R.id.avatar)
-        val uname: TextView = view.findViewById(R.id.uname)
+        val uname: LinkTextView = view.findViewById(R.id.uname)
         val expand: ImageButton = view.findViewById(R.id.expand)
         val device: TextView = view.findViewById(R.id.device)
         val message: LinkTextView = view.findViewById(R.id.message)
@@ -120,7 +120,7 @@ class AppAdapter(
         var feedType = ""
         val avatar: ImageView = view.findViewById(R.id.avatar)
         var avatarUrl = ""
-        val uname: TextView = view.findViewById(R.id.uname)
+        val uname: LinkTextView = view.findViewById(R.id.uname)
         val from: TextView = view.findViewById(R.id.from)
         val device: TextView = view.findViewById(R.id.device)
         val message: LinkTextView = view.findViewById(R.id.message)
@@ -334,11 +334,6 @@ class AppAdapter(
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
                 }
-                viewHolder.uname.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
-                }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
                         if (PrefManager.SZLMID == "") {
@@ -474,11 +469,6 @@ class AppAdapter(
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
-                }
-                viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
@@ -620,7 +610,10 @@ class AppAdapter(
                         "product" -> {
                             val intent = Intent(parent.context, TopicActivity::class.java)
                             intent.putExtra("type", "product")
-                            intent.putExtra("title", viewHolder.uname.text.toString().replace("数码: ", ""))
+                            intent.putExtra(
+                                "title",
+                                viewHolder.uname.text.toString().replace("数码: ", "")
+                            )
                             intent.putExtra("url", viewHolder.url)
                             intent.putExtra("id", viewHolder.url.replace("/product/", ""))
                             parent.context.startActivity(intent)
@@ -841,7 +834,7 @@ class AppAdapter(
                     holder.feed.visibility = View.VISIBLE
 
                     val feedUserName =
-                        """<a class="feed-link-uname" href="/u/${feed.feed.username}">@${feed.feed.username} </a>"""
+                        """<a class="feed-link-uname" href="/u/${feed.feed.uid}">@${feed.feed.username} </a>"""
                     holder.feedUname.movementMethod = LinkMovementMethod.getInstance()
                     holder.feedUname.text = SpannableStringBuilderUtil.setText(
                         mContext,
@@ -936,7 +929,17 @@ class AppAdapter(
                 holder.uid = feed.uid
                 holder.avatarUrl = feed.userAvatar
                 holder.pubDataRaw = feed.dateline.toString()
-                holder.uname.text = feed.userInfo?.username
+                val name =
+                    """<a class="feed-link-uname" href="/u/${feed.userInfo?.uid}">${feed.userInfo?.username}</a>""" + "\u3000"
+                SpannableStringBuilderUtil.isColor = true
+                holder.uname.text = SpannableStringBuilderUtil.setReply(
+                    mContext,
+                    name,
+                    holder.uname.textSize.toInt(),
+                    null
+                )
+                holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                SpannableStringBuilderUtil.isColor = false
                 ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
                 if (feed.vote?.totalOptionNum == 2) {
                     holder.optionNum.visibility = View.GONE
@@ -1321,7 +1324,17 @@ class AppAdapter(
                 holder.isLike = feed.userAction?.like == 1
                 holder.avatarUrl = feed.userAvatar
                 holder.pubDataRaw = feed.dateline.toString()
-                holder.uname.text = feed.userInfo?.username
+                val name =
+                    """<a class="feed-link-uname" href="/u/${feed.userInfo?.uid}">${feed.userInfo?.username}</a>""" + "\u3000"
+                SpannableStringBuilderUtil.isColor = true
+                holder.uname.text = SpannableStringBuilderUtil.setReply(
+                    mContext,
+                    name,
+                    holder.uname.textSize.toInt(),
+                    null
+                )
+                holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                SpannableStringBuilderUtil.isColor = false
                 ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
                 if (feed.feedType == "feedArticle" || feed.feedType == "vote") {
                     holder.messageTitle.visibility = View.VISIBLE

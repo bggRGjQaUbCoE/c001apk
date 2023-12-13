@@ -185,15 +185,19 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
 
                 val appInfo = result.getOrNull()
                 if (appInfo?.data != null) {
-                    PrefManager.VERSION_NAME = appInfo.data.apkversionname
-                    val int = NumberFormat.getInstance(Locale.US).parse(appInfo.data.apkversionname)
-                        ?.toFloat()?.toInt().toString()
-                    if (int != "")
-                        PrefManager.API_VERSION = int
-                    PrefManager.VERSION_CODE = appInfo.data.apkversioncode
-                    PrefManager.USER_AGENT =
-                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${appInfo.data.apkversionname}-${appInfo.data.apkversioncode}-${Constants.MODE}"
-
+                    try {
+                        PrefManager.VERSION_NAME = appInfo.data.apkversionname
+                        val int =
+                            NumberFormat.getInstance(Locale.US).parse(appInfo.data.apkversionname)
+                                ?.toFloat()?.toInt().toString()
+                        if (int != "")
+                            PrefManager.API_VERSION = int
+                        PrefManager.VERSION_CODE = appInfo.data.apkversioncode
+                        PrefManager.USER_AGENT =
+                            "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${appInfo.data.apkversionname}-${appInfo.data.apkversioncode}-${Constants.MODE}"
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 viewModel.isNew = true

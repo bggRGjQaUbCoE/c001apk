@@ -113,7 +113,7 @@ class FeedContentAdapter(
 
     class FeedContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ImageView = view.findViewById(R.id.avatar)
-        val uname: TextView = view.findViewById(R.id.uname)
+        val uname: LinkTextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
         val messageTitle: TextView = view.findViewById(R.id.messageTitle)
         val message: LinkTextView = view.findViewById(R.id.message)
@@ -141,7 +141,7 @@ class FeedContentAdapter(
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var notiId = ""
-        val uname: TextView = view.findViewById(R.id.uname)
+        val uname: LinkTextView = view.findViewById(R.id.uname)
         val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
@@ -209,11 +209,6 @@ class FeedContentAdapter(
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
-                }
-                viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
@@ -292,11 +287,6 @@ class FeedContentAdapter(
                     )
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
-                }
-                viewHolder.uname.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uid)
                     parent.context.startActivity(intent)
@@ -514,7 +504,17 @@ class FeedContentAdapter(
                     holder.id = feed.data?.id.toString()
                     holder.uid = feed.data?.uid.toString()
                     holder.isLike = feed.data?.userAction?.like == 1
-                    holder.uname.text = feed.data?.userInfo?.username
+                    val name =
+                        """<a class="feed-link-uname" href="/u/${feed.data?.userInfo?.uid}">${feed.data?.userInfo?.username}</a>""" + "\u3000"
+                    SpannableStringBuilderUtil.isColor = true
+                    holder.uname.text = SpannableStringBuilderUtil.setReply(
+                        mContext,
+                        name,
+                        holder.uname.textSize.toInt(),
+                        null
+                    )
+                    holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                    SpannableStringBuilderUtil.isColor = false
                     if (!feed.data?.ipLocation.isNullOrEmpty())
                         holder.ip.text = "发布于 ${feed.data?.ipLocation}"
                     ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
@@ -1088,15 +1088,20 @@ class FeedContentAdapter(
 
                             else -> ""
                         }
+                    val name =
+                        """<a class="feed-link-uname" href="/u/${reply.uid}">${reply.username}$unameTag$replyTag</a>""" + "\u3000"
+                    SpannableStringBuilderUtil.isColor = true
                     holder.uname.text = SpannableStringBuilderUtil.setReply(
                         mContext,
-                        "${reply.username}$unameTag$replyTag",
+                        name,
                         holder.uname.textSize.toInt(),
                         null
                     )
+                    holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
 
                     ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
+                    SpannableStringBuilderUtil.isColor = false
                     if (reply.message == "[图片]")
                         holder.message.visibility = View.GONE
                     else {
@@ -1212,7 +1217,7 @@ class FeedContentAdapter(
                                     val rReplyUser =
                                         when (replyData.ruid) {
                                             reply.uid -> ""
-                                            else -> """<a class="feed-link-uname" href="/u/${replyData.rusername}">${replyData.rusername}${rReplyTag}</a>"""
+                                            else -> """<a class="feed-link-uname" href="/u/${replyData.ruid}">${replyData.rusername}${rReplyTag}</a>"""
                                         }
 
                                     val replyPic =
@@ -1235,7 +1240,7 @@ class FeedContentAdapter(
 
                                     SpannableStringBuilderUtil.setData(
                                         position1 + 1,
-                                        reply.uid,
+                                        reply.uid
                                     )
 
                                     view.setOnClickListener {

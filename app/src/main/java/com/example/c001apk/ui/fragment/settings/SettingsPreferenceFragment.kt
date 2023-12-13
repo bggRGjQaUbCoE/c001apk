@@ -192,10 +192,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle(requireContext().getString(R.string.zmlmId))
-                setNeutralButton("重新生成DeviceCode") { _, _ ->
-                    PrefManager.SZLMID = editText.text.toString()
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(true)
-                }
+                setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.SZLMID = editText.text.toString()
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
