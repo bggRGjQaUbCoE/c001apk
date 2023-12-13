@@ -960,11 +960,18 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
         refreshReply(listType)
     }
 
-    override fun onShowMoreReply(position: Int, uid: String, id: String, rPosition: Int) {
+    override fun onShowMoreReply(position: Int, uid: String, id: String) {
         viewModel.isShowMoreReply = true
+        var index = 0
+        for (element in viewModel.feedReplyList){
+            if (element.id == id)
+                break
+            else
+                index++
+        }
         val mBottomSheetDialogFragment =
             Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid, uid, id)
-        mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[rPosition - 2])
+        mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[index])
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
 

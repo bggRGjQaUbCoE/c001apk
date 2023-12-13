@@ -1236,7 +1236,6 @@ class FeedContentAdapter(
                                     SpannableStringBuilderUtil.setData(
                                         position1 + 1,
                                         reply.uid,
-                                        holder.bindingAdapterPosition
                                     )
 
                                     view.setOnClickListener {

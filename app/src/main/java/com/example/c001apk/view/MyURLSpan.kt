@@ -28,11 +28,9 @@ internal class MyURLSpan(
     ClickableSpan() {
 
     private var position = 0
-    private var rPosition = 0
     private var uid = ""
-    fun setData(position: Int, uid: String, rPosition: Int) {
+    fun setData(position: Int, uid: String) {
         this.position = position
-        this.rPosition = rPosition
         this.uid = uid
     }
 
@@ -45,7 +43,7 @@ internal class MyURLSpan(
             if (isReturn)
                 return
             val id = mUrl.replace("/feed/replyList?id=", "")
-            IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id, rPosition)
+            IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id)
         } else if (mUrl.contains("coolapk.com/u/")) {
             val uid = mUrl.replace("coolapk.com/u/", "")
             val intent = Intent(mContext, UserActivity::class.java)
