@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityMainBinding
 import com.example.c001apk.ui.fragment.MessageFragment
 import com.example.c001apk.ui.fragment.home.HomeFragment
@@ -35,6 +36,8 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import java.net.URLEncoder
+import java.text.NumberFormat
+import java.util.Locale
 
 
 class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer {
@@ -176,10 +179,35 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
             }
         }
 
+        viewModel.appInfoData.observe(this) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val appInfo = result.getOrNull()
+                if (appInfo?.data != null) {
+                    PrefManager.VERSION_NAME = appInfo.data.apkversionname
+                    val int = NumberFormat.getInstance(Locale.US).parse(appInfo.data.apkversionname)
+                        ?.toFloat()?.toInt().toString()
+                    if (int != "")
+                        PrefManager.API_VERSION = int
+                    PrefManager.VERSION_CODE = appInfo.data.apkversioncode
+                    PrefManager.USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${appInfo.data.apkversionname}-${appInfo.data.apkversioncode}-${Constants.MODE}"
+
+                }
+
+                viewModel.isNew = true
+                viewModel.getCheckLoginInfo()
+
+            }
+        }
+
     }
 
     private fun genData() {
-        viewModel.getCheckLoginInfo()
+        viewModel.id = "com.coolapk.market"
+        viewModel.isNew = true
+        viewModel.getAppInfo()
     }
 
     @SuppressLint("RestrictedApi")

@@ -40,6 +40,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val homeTabCardRows: List<HomeTabCardRows>,
         @SerializedName("be_like_num") val beLikeNum: String,
         val version: String,
+        val apkversionname: String,
         val apkversioncode: String,
         val apksize: String,
         val apkfile: String?,

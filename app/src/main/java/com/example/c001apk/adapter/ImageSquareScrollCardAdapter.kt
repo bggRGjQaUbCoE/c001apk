@@ -32,7 +32,7 @@ class ImageSquareScrollCardAdapter(
         val view =
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_home_image_square_scroll_card_item, parent, false)
-        val padding = 80f
+        val padding = 78f
         val spacePx = (DensityTool.dp2px(parent.context, padding))
         val imageWidth = DensityTool.getScreenWidth(parent.context) - spacePx
         view.layoutParams.width = (imageWidth / 5).toInt()
