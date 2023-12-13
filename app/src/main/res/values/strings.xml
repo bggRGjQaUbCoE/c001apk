@@ -117,5 +117,6 @@
     <string name="copyText">复制</string>
     <string name="show_reply_1">查看对话</string>
     <string name="local_favorite">本地收藏</string>
+    <string name="about_developer">开发者</string>
 
 </resources>

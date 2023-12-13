@@ -20,6 +20,11 @@ class AboutActivity : AbsAboutActivity() {
         items.add(Category(getString(R.string.about)))
         items.add(Card("fake coolapk"))
 
+        items.add(Category(getString(R.string.about_developer)))
+        items.add(Contributor(R.drawable.cont_author, "bggRGjQaUbCoE", "Developer & Designer", "https://github.com/bggRGjQaUbCoE"))
+        items.add(Line())
+        items.add(Contributor(R.drawable.cont_klxiaoniu, "klxiaoniu", "Developer & Collaborator", "https://github.com/klxiaoniu"))
+
         items.add(Category(getString(R.string.feedback)))
         items.add(Card("Github\nhttps://github.com/bggRGjQaUbCoE/c001apk"))
 

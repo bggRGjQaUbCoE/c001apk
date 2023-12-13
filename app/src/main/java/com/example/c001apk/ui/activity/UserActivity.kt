@@ -249,6 +249,7 @@ class UserActivity : BaseActivity(), AppListener {
         }
         val intent = Intent(this, FFFListActivity::class.java)
         intent.putExtra("uid", viewModel.uid)
+        intent.putExtra("isEnable", false)
         binding.follow.setOnClickListener {
             intent.putExtra("type", "follow")
             startActivity(intent)
