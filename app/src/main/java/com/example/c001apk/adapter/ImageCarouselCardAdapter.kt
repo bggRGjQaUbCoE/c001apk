@@ -58,7 +58,7 @@ class ImageCarouselCardAdapter(
                 parent.context.startActivity(intent)
             } else if (viewHolder.url.startsWith("/page?url")) {
                 val intent = Intent(parent.context, CarouselActivity::class.java)
-                intent.putExtra("url", viewHolder.url.replace("/page?url", ""))
+                intent.putExtra("url", viewHolder.url.replace("/page?url=", ""))
                 intent.putExtra("title", viewHolder.title)
                 parent.context.startActivity(intent)
             } else if (viewHolder.url.startsWith("/game/")) {
