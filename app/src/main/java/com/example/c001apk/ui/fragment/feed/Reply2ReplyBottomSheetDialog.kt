@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
+import com.example.c001apk.constant.RecyclerView.checkForGaps
+import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
@@ -356,11 +358,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod =
-                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod = checkForGaps
             mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod =
-                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
             mMarkItemDecorInsetsDirtyMethod.isAccessible = true
         }
         binding.recyclerView.apply {

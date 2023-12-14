@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
+import com.example.c001apk.constant.RecyclerView.checkForGaps
+import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
@@ -800,11 +802,9 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.tabLayout.visibility = View.GONE
             // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod =
-                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod = checkForGaps
             mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod =
-                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
             mMarkItemDecorInsetsDirtyMethod.isAccessible = true
         } else
             binding.tabLayout.visibility = View.VISIBLE

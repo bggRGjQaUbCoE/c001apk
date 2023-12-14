@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
+import com.example.c001apk.constant.RecyclerView.checkForGaps
+import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentFeedVoteBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
@@ -26,7 +28,6 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.VoteItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
-import com.github.megatronking.stringfog.annotation.StringFogIgnore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Method
 
-@StringFogIgnore
 class FeedVoteFragment : Fragment(), AppListener {
 
     private lateinit var binding: FragmentFeedVoteBinding
@@ -508,11 +508,9 @@ class FeedVoteFragment : Fragment(), AppListener {
         mLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         // https://codeantenna.com/a/2NDTnG37Vg
-        mCheckForGapMethod =
-            StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+        mCheckForGapMethod = checkForGaps
         mCheckForGapMethod.isAccessible = true
-        mMarkItemDecorInsetsDirtyMethod =
-            RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+        mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
         mMarkItemDecorInsetsDirtyMethod.isAccessible = true
 
         binding.recyclerView.apply {

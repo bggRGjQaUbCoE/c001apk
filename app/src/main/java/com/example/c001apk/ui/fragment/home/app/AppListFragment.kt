@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
+import com.example.c001apk.constant.RecyclerView.checkForGaps
+import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
@@ -148,11 +150,9 @@ class AppListFragment : Fragment(), IOnTabClickListener {
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod =
-                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod = checkForGaps
             mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod =
-                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
             mMarkItemDecorInsetsDirtyMethod.isAccessible = true
         }
         binding.recyclerView.apply {

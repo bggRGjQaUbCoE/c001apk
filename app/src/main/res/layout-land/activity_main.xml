@@ -28,6 +28,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/nav_menu"
-        app:menuGravity="center" />
+        app:menuGravity="top" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

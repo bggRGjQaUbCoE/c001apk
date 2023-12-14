@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageAdapter
+import com.example.c001apk.constant.RecyclerView.checkForGaps
+import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.FFFListActivity
 import com.example.c001apk.ui.activity.HistoryActivity
@@ -313,11 +315,9 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod =
-                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod = checkForGaps
             mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod =
-                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
             mMarkItemDecorInsetsDirtyMethod.isAccessible = true
         }
         binding.recyclerView.apply {
