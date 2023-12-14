@@ -118,5 +118,7 @@
     <string name="show_reply_1">查看对话</string>
     <string name="local_favorite">本地收藏</string>
     <string name="about_developer">开发者</string>
+    <string name="backup">导出</string>
+    <string name="restore">导入</string>
 
 </resources>

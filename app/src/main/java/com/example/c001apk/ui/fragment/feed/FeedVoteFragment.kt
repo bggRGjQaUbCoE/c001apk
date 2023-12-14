@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
@@ -23,11 +22,9 @@ import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.VoteItemDecoration
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.github.megatronking.stringfog.annotation.StringFogIgnore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder

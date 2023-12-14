@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
@@ -15,9 +14,7 @@ import com.example.c001apk.adapter.MessageContentAdapter
 import com.example.c001apk.databinding.ActivityMessageBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.viewmodel.AppViewModel
 
 class MessageActivity : BaseActivity(), AppListener {

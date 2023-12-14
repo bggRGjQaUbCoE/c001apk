@@ -53,7 +53,6 @@ import java.io.OutputStream
 object ImageUtil {
 
     private var filename = ""
-    private var type = ""
     private lateinit var imagesDir: File
     private lateinit var imageCheckDir: File
 

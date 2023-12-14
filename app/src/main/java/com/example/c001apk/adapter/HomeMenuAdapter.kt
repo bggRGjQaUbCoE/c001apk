@@ -8,7 +8,6 @@ import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.view.CheckableChipView
-import com.google.android.material.chip.Chip
 
 class HomeMenuAdapter(
     private val menuList: ArrayList<HomeMenu>

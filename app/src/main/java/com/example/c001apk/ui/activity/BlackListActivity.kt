@@ -8,6 +8,8 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.ViewModelProvider
@@ -23,10 +25,15 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+
 
 class BlackListActivity : BaseActivity(), IOnItemClickListener {
 
@@ -57,6 +64,7 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
             }
         }
 
+        initBar()
         initButton()
         initEditText()
         initEdit()
@@ -73,6 +81,97 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
         }
 
     }
+
+    private fun initBar() {
+        binding.toolBar.apply {
+            title = if (viewModel.type == "user") getString(R.string.user_black_list)
+            else getString(R.string.topic_black_list)
+            setNavigationIcon(R.drawable.ic_back)
+            setNavigationOnClickListener {
+                finish()
+            }
+            inflateMenu(R.menu.blacklist_menu)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.backup -> {
+                        if (saveFile(Gson().toJson(viewModel.historyList)))
+                            backupSAFLauncher.launch(
+                                if (viewModel.type == "user") "user_blacklist.json"
+                                else "topic_blacklist.json"
+                            )
+                        else
+                            Toast.makeText(this@BlackListActivity, "导出失败", Toast.LENGTH_SHORT)
+                                .show()
+                    }
+
+                    R.id.restore -> {
+                        restoreSAFLauncher.launch("application/json")
+                    }
+                }
+                true
+            }
+        }
+    }
+
+    private fun saveFile(content: String): Boolean {
+        return try {
+            val dir = File(this.cacheDir.toString())
+            if (!dir.exists())
+                dir.mkdir()
+            val file = File("${this.cacheDir}/blacklist.json")
+            if (!file.exists())
+                file.createNewFile()
+            else {
+                file.delete()
+                file.createNewFile()
+            }
+            val fileOutputStream = FileOutputStream(file)
+            fileOutputStream.write(content.toByteArray())
+            fileOutputStream.flush()
+            fileOutputStream.close()
+            true
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    private val backupSAFLauncher =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) backup@{ uri ->
+            if (uri == null) return@backup
+            try {
+                File("${this.cacheDir}/blacklist.json").inputStream().use { input ->
+                    this.contentResolver.openOutputStream(uri).use { output ->
+                        if (output == null) Toast.makeText(this, "导出失败", Toast.LENGTH_SHORT)
+                            .show()
+                        else input.copyTo(output)
+                    }
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+    private val restoreSAFLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) restore@{ uri ->
+            if (uri == null) return@restore
+            try {
+                val string = this.contentResolver
+                    .openInputStream(uri)?.reader().use { it?.readText() }
+                    ?: throw IOException("Backup file was damaged")
+                val json: Array<String> = Gson().fromJson(
+                    string,
+                    Array<String>::class.java
+                )
+                for (element in json) {
+                    if (viewModel.historyList.indexOf(element) == -1)
+                        updateUid(element)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Toast.makeText(this, "导入失败", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     private fun initButton() {
         binding.search.setOnClickListener {

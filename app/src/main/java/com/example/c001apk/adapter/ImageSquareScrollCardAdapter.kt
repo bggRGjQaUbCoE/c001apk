@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CoolPicActivity
-import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
 import com.google.android.material.imageview.ShapeableImageView
