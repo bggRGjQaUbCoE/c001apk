@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
@@ -26,9 +27,11 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.lang.reflect.Method
 
 class AppListFragment : Fragment(), IOnTabClickListener {
 
@@ -37,6 +40,9 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     private lateinit var mAdapter: AppListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -91,8 +97,22 @@ class AppListFragment : Fragment(), IOnTabClickListener {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.appList.isNotEmpty()) {
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.firstCompletelyVisibleItemPosition =
+                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    } else {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val positions = sLayoutManager.findFirstCompletelyVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos < viewModel.firstCompletelyVisibleItemPosition) {
+                                viewModel.firstCompletelyVisibleItemPosition = pos
+                            }
+                        }
+                    }
 
                     if (dy > 0) {
                         (activity as INavViewContainer).hideNavigationView()
@@ -124,11 +144,29 @@ class AppListFragment : Fragment(), IOnTabClickListener {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppListAdapter(viewModel.appList)
         mLayoutManager = LinearLayoutManager(activity)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        }
         binding.recyclerView.apply {
+            itemAnimator = null
             adapter = mAdapter
-            layoutManager = mLayoutManager
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    addItemDecoration(LinearItemDecoration(space))
+                else
+                    addItemDecoration(StaggerItemDecoration(space))
         }
         viewModel.items.observe(viewLifecycleOwner) {
             viewModel.appList.clear()
@@ -172,6 +210,7 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     }
 
     private fun refreshData() {
+        viewModel.firstCompletelyVisibleItemPosition = -1
         binding.swipeRefresh.isRefreshing = true
         viewModel.getItems(requireContext())
     }

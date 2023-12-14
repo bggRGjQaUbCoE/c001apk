@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.fragment.home.topic
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +11,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
+import java.lang.reflect.Method
 
 class HomeTopicContentFragment : Fragment() {
 
@@ -23,6 +27,9 @@ class HomeTopicContentFragment : Fragment() {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,9 +125,24 @@ class HomeTopicContentFragment : Fragment() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.topicDataList.isNotEmpty()) {
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.lastVisibleItemPosition =
+                            mLayoutManager.findLastVisibleItemPosition()
+                        viewModel.firstCompletelyVisibleItemPosition =
+                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    } else {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
+                        }
+                    }
 
                     if (dy > 0) {
                         (activity as INavViewContainer).hideNavigationView()
@@ -151,10 +173,27 @@ class HomeTopicContentFragment : Fragment() {
         val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(requireContext(), viewModel.topicDataList)
         mLayoutManager = LinearLayoutManager(activity)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        }
         binding.recyclerView.apply {
             adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0) addItemDecoration(LinearItemDecoration(space))
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                addItemDecoration(LinearItemDecoration(space))
+            else
+                addItemDecoration(StaggerItemDecoration(space))
         }
     }
 
@@ -167,6 +206,8 @@ class HomeTopicContentFragment : Fragment() {
     }
 
     private fun refreshData() {
+        viewModel.firstVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = -1
         viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true

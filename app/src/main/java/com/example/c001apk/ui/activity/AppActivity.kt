@@ -2,6 +2,7 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -12,6 +13,7 @@ import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityAppBinding
@@ -22,7 +24,9 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
+import java.lang.reflect.Method
 
 class AppActivity : BaseActivity(), AppListener {
 
@@ -31,6 +35,9 @@ class AppActivity : BaseActivity(), AppListener {
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var subscribe: MenuItem
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -241,11 +248,27 @@ class AppActivity : BaseActivity(), AppListener {
         mAdapter = AppAdapter(this, viewModel.appCommentList)
         mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(this)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        }
         binding.recyclerView.apply {
             adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(space))
+            else
+                addItemDecoration(StaggerItemDecoration(space))
         }
     }
 
@@ -264,6 +287,8 @@ class AppActivity : BaseActivity(), AppListener {
     }
 
     private fun refreshData() {
+        viewModel.firstVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = -1
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
@@ -315,9 +340,24 @@ class AppActivity : BaseActivity(), AppListener {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.appCommentList.isNotEmpty()) {
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.lastVisibleItemPosition =
+                            mLayoutManager.findLastVisibleItemPosition()
+                        viewModel.firstCompletelyVisibleItemPosition =
+                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    } else {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
+                        }
+                    }
                 }
             }
         })

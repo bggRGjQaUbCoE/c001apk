@@ -18,6 +18,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
@@ -41,6 +42,7 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.OffsetLinearLayoutManager
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.view.StickyItemDecorator
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
@@ -52,6 +54,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.reflect.Method
 import java.net.URLDecoder
 
 
@@ -62,10 +65,13 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: OffsetLinearLayoutManager
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val feedFavoriteDao by lazy {
         FeedFavoriteDatabase.getDatabase(this@FeedFragment.requireContext()).feedFavoriteDao()
     }
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -97,8 +103,10 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
             viewModel.feedType = it.getString("TYPE", "feed")
             viewModel.id = it.getString("ID", "")
             viewModel.frid = it.getString("RID")
-            viewModel.uid = it.getString("UID", "")
-            viewModel.funame = it.getString("UNAME", "")
+            if (viewModel.uid == "")
+                viewModel.uid = it.getString("UID", "")
+            if (viewModel.funame == "")
+                viewModel.funame = it.getString("UNAME", "")
             viewModel.isViewReply = it.getBoolean("viewReply", false)
         }
     }
@@ -651,24 +659,43 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (viewModel.feedContentList.isNotEmpty()) {
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    viewModel.firstVisibleItemPosition =
-                        mLayoutManager.findFirstVisibleItemPosition()
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.firstCompletelyVisibleItemPosition =
+                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                        viewModel.firstVisibleItemPosition =
+                            mLayoutManager.findFirstVisibleItemPosition()
+                        viewModel.lastVisibleItemPosition =
+                            mLayoutManager.findLastVisibleItemPosition()
 
-                    if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-                        if (binding.titleProfile.visibility != View.GONE)
-                            binding.titleProfile.visibility = View.GONE
-                    } else if (viewModel.firstVisibleItemPosition >= 1) {
-                        if (binding.titleProfile.visibility != View.VISIBLE)
-                            showTitleProfile()
-                    } else if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
-                        if (binding.titleProfile.visibility != View.VISIBLE)
-                            showTitleProfile()
+                        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+                            if (binding.titleProfile.visibility != View.GONE)
+                                binding.titleProfile.visibility = View.GONE
+                        } else if (viewModel.firstVisibleItemPosition >= 1) {
+                            if (binding.titleProfile.visibility != View.VISIBLE)
+                                showTitleProfile()
+                        } else if (getScrollYDistance() >= DensityTool.dp2px(
+                                requireContext(),
+                                50f
+                            )
+                        ) {
+                            if (binding.titleProfile.visibility != View.VISIBLE)
+                                showTitleProfile()
+                        } else {
+                            if (binding.titleProfile.visibility != View.GONE) {
+                                binding.titleProfile.visibility = View.GONE
+                            }
+                        }
                     } else {
-                        if (binding.titleProfile.visibility != View.GONE) {
-                            binding.titleProfile.visibility = View.GONE
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val last = sLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in last) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
                         }
                     }
                 }
@@ -685,7 +712,7 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     }
 
     private fun showTitleProfile() {
-        if (binding.name1.text == "") {
+        if (binding.name1.text.isNullOrEmpty()) {
             binding.name1.text = viewModel.funame
             binding.date.text = DateUtils.fromToday(viewModel.dateLine)
             if (viewModel.device != "") {
@@ -750,6 +777,8 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     }
 
     private fun refreshData() {
+        viewModel.firstVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = -1
         viewModel.firstItem = null
         viewModel.lastItem = null
         viewModel.page = 1
@@ -766,19 +795,39 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
             FeedContentAdapter(requireContext(), viewModel.feedContentList, viewModel.feedReplyList)
         mAdapter.setAppListener(this)
         mLayoutManager = OffsetLinearLayoutManager(activity)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.tabLayout.visibility = View.GONE
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        } else
+            binding.tabLayout.visibility = View.VISIBLE
         binding.recyclerView.apply {
             adapter = mAdapter
-            layoutManager = mLayoutManager
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(
-                    StickyItemDecorator(
-                        space,
-                        object : StickyItemDecorator.SortShowListener {
-                            override fun showSort(show: Boolean) {
-                                binding.tabLayout.visibility = if (show) View.VISIBLE else View.GONE
-                            }
-                        })
-                )
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    addItemDecoration(
+                        StickyItemDecorator(
+                            space,
+                            object : StickyItemDecorator.SortShowListener {
+                                override fun showSort(show: Boolean) {
+                                    binding.tabLayout.visibility =
+                                        if (show) View.VISIBLE else View.GONE
+                                }
+                            })
+                    )
+                else
+                    addItemDecoration(StaggerItemDecoration(space))
         }
     }
 
@@ -793,8 +842,11 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                 binding.recyclerView.stopScroll()
                 binding.titleProfile.visibility = View.GONE
                 mLayoutManager.scrollToPositionWithOffset(0, 0)
+                sLayoutManager.scrollToPositionWithOffset(0, 0)
             }
             inflateMenu(R.menu.feed_menu)
+            menu.findItem(R.id.showReply).isVisible =
+                resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
             val favorite = menu.findItem(R.id.favorite)
             CoroutineScope(Dispatchers.IO).launch {
                 if (feedFavoriteDao.isFavorite(viewModel.id)) {
@@ -963,7 +1015,7 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
     override fun onShowMoreReply(position: Int, uid: String, id: String) {
         viewModel.isShowMoreReply = true
         var index = 0
-        for (element in viewModel.feedReplyList){
+        for (element in viewModel.feedReplyList) {
             if (element.id == id)
                 break
             else

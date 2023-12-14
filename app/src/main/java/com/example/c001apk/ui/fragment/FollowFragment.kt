@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.fragment
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
@@ -18,7 +20,9 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
+import java.lang.reflect.Method
 
 class FollowFragment : Fragment(), AppListener {
 
@@ -26,6 +30,9 @@ class FollowFragment : Fragment(), AppListener {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -194,11 +201,27 @@ class FollowFragment : Fragment(), AppListener {
         mAdapter = AppAdapter(requireContext(), viewModel.dataList)
         mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(activity)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        }
         binding.recyclerView.apply {
             adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(space))
+            else
+                addItemDecoration(StaggerItemDecoration(space))
         }
     }
 
@@ -216,6 +239,8 @@ class FollowFragment : Fragment(), AppListener {
     }
 
     private fun refreshData() {
+        viewModel.firstVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = -1
         viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
@@ -316,9 +341,24 @@ class FollowFragment : Fragment(), AppListener {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.dataList.isNotEmpty()) {
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.lastVisibleItemPosition =
+                            mLayoutManager.findLastVisibleItemPosition()
+                        viewModel.firstCompletelyVisibleItemPosition =
+                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    } else {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
+                        }
+                    }
                 }
             }
         })

@@ -335,6 +335,7 @@ class FeedVoteFragment : Fragment(), AppListener {
                             viewModel.lastVisibleItemPosition = pos
                         }
                     }
+
                 }
             }
         })
@@ -481,6 +482,8 @@ class FeedVoteFragment : Fragment(), AppListener {
     }
 
     private fun refreshData() {
+        viewModel.firstVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = -1
         viewModel.lastVisibleItemPosition = -1
         viewModel.currentOption = 0
         viewModel.page = 1

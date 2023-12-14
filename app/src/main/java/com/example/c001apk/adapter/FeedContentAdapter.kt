@@ -439,20 +439,24 @@ class FeedContentAdapter(
         when (holder) {
 
             is TopViewHolder -> {
-                val lp = holder.itemView.layoutParams
-                if (lp is StaggeredGridLayoutManager.LayoutParams) {
-                    lp.isFullSpan = true
-                    holder.replyCount.text = "观点"
-                    holder.replyCount.textSize = 16f
-                    holder.buttonToggle.visibility = View.GONE
-                } else if (feedList.isNotEmpty()) {
-                    holder.replyCount.text = "共${feedList[0].data?.replynum}回复"
-                    holder.buttonToggle.visibility = View.VISIBLE
-                    when (listType) {
-                        "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
-                        "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
-                        "popular" -> holder.buttonToggle.check(R.id.popular)
-                        "" -> holder.buttonToggle.check(R.id.author)
+                if (feedList.isNotEmpty()) {
+                    val lp = holder.itemView.layoutParams
+                    if (feedList[0].data!!.feedType == "vote"
+                        && lp is StaggeredGridLayoutManager.LayoutParams
+                    ) {
+                        lp.isFullSpan = true
+                        holder.replyCount.text = "观点"
+                        holder.replyCount.textSize = 16f
+                        holder.buttonToggle.visibility = View.GONE
+                    } else if (feedList.isNotEmpty()) {
+                        holder.replyCount.text = "共${feedList[0].data?.replynum}回复"
+                        holder.buttonToggle.visibility = View.VISIBLE
+                        when (listType) {
+                            "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
+                            "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
+                            "popular" -> holder.buttonToggle.check(R.id.popular)
+                            "" -> holder.buttonToggle.check(R.id.author)
+                        }
                     }
                 }
             }
@@ -1102,9 +1106,10 @@ class FeedContentAdapter(
                     ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
 
                     SpannableStringBuilderUtil.isColor = false
-                    if (reply.message == "[图片]")
+                    if (reply.message == "[图片]") {
+                        holder.message.text = "[图片]"
                         holder.message.visibility = View.GONE
-                    else {
+                    } else {
                         holder.message.visibility = View.VISIBLE
                         holder.message.movementMethod =
                             LinkTextView.LocalLinkMovementMethod.getInstance()

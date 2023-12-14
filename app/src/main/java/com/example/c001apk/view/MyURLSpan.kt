@@ -31,7 +31,7 @@ internal class MyURLSpan(
 
     private var position = 0
     private var uid = ""
-    fun setData(position: Int, uid: String, ) {
+    fun setData(position: Int, uid: String) {
         this.position = position
         this.uid = uid
     }
@@ -85,7 +85,7 @@ internal class MyURLSpan(
             val id = if (mUrl.contains("shareKey")) {
                 mUrl.substring(mUrl.lastIndexOf("/feed/") + 6, mUrl.lastIndexOf("?shareKey"))
             } else {
-                mUrl.substring(mUrl.lastIndexOf("/feed/") + 6, mUrl.length)
+                mUrl.substring(mUrl.lastIndexOf("/feed/") + 6)
             }
             val intent = Intent(mContext, FeedActivity::class.java)
             intent.putExtra("type", "feed")

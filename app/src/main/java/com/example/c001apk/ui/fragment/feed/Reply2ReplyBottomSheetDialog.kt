@@ -2,6 +2,7 @@ package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
@@ -23,11 +25,13 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.view.ReplyItemDecoration
+import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import java.lang.reflect.Method
 import java.net.URLDecoder
 
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
@@ -39,6 +43,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         fun newInstance(
@@ -301,7 +308,22 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.replyTotalList.isNotEmpty())
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.lastVisibleItemPosition =
+                            mLayoutManager.findLastVisibleItemPosition()
+                    } else {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
+                        }
+                    }
             }
         })
     }
@@ -330,11 +352,27 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
             )
         mLayoutManager = LinearLayoutManager(activity)
         mAdapter.setAppListener(this)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        }
         binding.recyclerView.apply {
             adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
-                addItemDecoration(ReplyItemDecoration(space))
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                addItemDecoration(LinearItemDecoration(space))
+            else
+                addItemDecoration(StaggerItemDecoration(space))
         }
     }
 

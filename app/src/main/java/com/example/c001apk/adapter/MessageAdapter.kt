@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.activity.CollectionActivity
@@ -331,6 +332,11 @@ class MessageAdapter(
         when (holder) {
 
             is AppAdapter.FootViewHolder -> {
+                val lp = holder.itemView.layoutParams
+                if (lp is StaggeredGridLayoutManager.LayoutParams) {
+                    lp.isFullSpan = true
+                }
+
                 when (loadState) {
                     LOADING -> {
                         holder.footerLayout.visibility = View.VISIBLE

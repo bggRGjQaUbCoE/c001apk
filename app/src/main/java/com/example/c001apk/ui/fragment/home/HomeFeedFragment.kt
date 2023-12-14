@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
@@ -34,12 +35,14 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
+import java.lang.reflect.Method
 
 
 class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublishClickListener {
@@ -48,8 +51,11 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
+    private lateinit var mCheckForGapMethod: Method
+    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -421,10 +427,24 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.homeFeedList.isNotEmpty()) {
-                    viewModel.lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition()
-                    viewModel.firstCompletelyVisibleItemPosition =
-                        mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        viewModel.lastVisibleItemPosition =
+                            mLayoutManager.findLastVisibleItemPosition()
+                        viewModel.firstCompletelyVisibleItemPosition =
+                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    } else {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
 
+                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
+                        }
+                    }
                     if (dy > 0) {
                         (activity as INavViewContainer).hideNavigationView()
                     } else if (dy < 0) {
@@ -461,6 +481,8 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
 
     private fun refreshData() {
         //viewModel.lastItem = null
+        viewModel.firstVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = -1
         viewModel.changeFirstItem = true
         viewModel.isEnd = false
         viewModel.page = 1
@@ -499,12 +521,31 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
             requireContext(), viewModel.homeFeedList
         )
         mLayoutManager = LinearLayoutManager(activity)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // https://codeantenna.com/a/2NDTnG37Vg
+            mCheckForGapMethod =
+                StaggeredGridLayoutManager::class.java.getDeclaredMethod("checkForGaps")
+            mCheckForGapMethod.isAccessible = true
+            mMarkItemDecorInsetsDirtyMethod =
+                RecyclerView::class.java.getDeclaredMethod("markItemDecorInsetsDirty")
+            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
+        }
+
         mAdapter.setAppListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
+            if (itemDecorationCount == 0) {
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    addItemDecoration(LinearItemDecoration(space))
+                else
+                    addItemDecoration(StaggerItemDecoration(space))
+            }
         }
     }
 

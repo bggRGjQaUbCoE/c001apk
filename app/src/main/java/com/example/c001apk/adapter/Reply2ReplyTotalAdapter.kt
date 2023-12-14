@@ -17,6 +17,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
@@ -214,6 +215,11 @@ class Reply2ReplyTotalAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is FootViewHolder -> {
+                val lp = holder.itemView.layoutParams
+                if (lp is StaggeredGridLayoutManager.LayoutParams) {
+                    lp.isFullSpan = true
+                }
+
                 when (loadState) {
                     LOADING -> {
                         holder.footerLayout.visibility = View.VISIBLE
@@ -279,9 +285,10 @@ class Reply2ReplyTotalAdapter(
                 )
                 holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
 
-                if (reply.message == "[图片]")
+                if (reply.message == "[图片]") {
+                    holder.message.text = "[图片]"
                     holder.message.visibility = View.GONE
-                else {
+                } else {
                     holder.message.visibility = View.VISIBLE
                     holder.message.movementMethod =
                         LinkTextView.LocalLinkMovementMethod.getInstance()

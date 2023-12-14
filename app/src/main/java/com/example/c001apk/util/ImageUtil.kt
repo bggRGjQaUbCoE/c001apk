@@ -165,7 +165,7 @@ object ImageUtil {
 
     private fun saveImage(context: Context, url: String, isEnd: Boolean) {
         val index = url.lastIndexOf('/')
-        filename = url.substring(index + 1, url.length)
+        filename = url.substring(index+1)
         imagesDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
             context.getString(R.string.app_name)

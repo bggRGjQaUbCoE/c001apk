@@ -2,6 +2,7 @@ package com.example.c001apk.adapter
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,9 +32,15 @@ class ImageSquareScrollCardAdapter(
         val view =
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_home_image_square_scroll_card_item, parent, false)
-        val padding = 78f
-        val spacePx = (DensityTool.dp2px(parent.context, padding))
-        val imageWidth = DensityTool.getScreenWidth(parent.context) - spacePx
+        val padding =
+            if (mContext.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 78f
+            else 95f
+        val spacePx = DensityTool.dp2px(parent.context, padding)
+        val imageWidth =
+            if (mContext.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                DensityTool.getScreenWidth(parent.context) - spacePx
+            else
+                DensityTool.getScreenWidth(parent.context) / 2 - spacePx
         view.layoutParams.width = (imageWidth / 5).toInt()
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
