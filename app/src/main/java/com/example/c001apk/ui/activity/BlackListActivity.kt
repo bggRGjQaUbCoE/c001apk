@@ -155,7 +155,7 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
     private val restoreSAFLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) restore@{ uri ->
             if (uri == null) return@restore
-            try {
+            runCatching {
                 val string = this.contentResolver
                     .openInputStream(uri)?.reader().use { it?.readText() }
                     ?: throw IOException("Backup file was damaged")
@@ -167,9 +167,19 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
                     if (viewModel.historyList.indexOf(element) == -1)
                         updateUid(element)
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Toast.makeText(this, "导入失败", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("导入失败")
+                    .setMessage(it.message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNegativeButton("Crash Log") { _, _ ->
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("Crash Log")
+                            .setMessage(it.stackTraceToString())
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
+                    }
+                    .show()
             }
         }
 

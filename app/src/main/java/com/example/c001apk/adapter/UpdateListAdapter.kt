@@ -1,6 +1,7 @@
 package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -78,7 +80,12 @@ class UpdateListAdapter(
                     val link = result.getOrNull()
                     if (link != null) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                        activity.startActivity(intent)
+                        try {
+                            activity.startActivity(intent)
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(activity, "打开失败", Toast.LENGTH_SHORT).show()
+                            e.printStackTrace()
+                        }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
                     }
