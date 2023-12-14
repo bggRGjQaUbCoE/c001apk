@@ -46,7 +46,7 @@ class HistoryActivity : BaseActivity() {
         binding.toolBar.title =
             when (viewModel.type) {
                 "browse" -> "浏览历史"
-                "favorite" -> "收藏"
+                "favorite" -> "本地收藏"
                 else -> throw IllegalArgumentException("error type: ${viewModel.type}")
             }
 

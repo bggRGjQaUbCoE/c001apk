@@ -10,97 +10,205 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/favLayout"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical">
+            android:baselineAligned="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:src="@drawable/ic_star"
-                android:tint="?attr/colorPrimary" />
-
-            <TextView
-                android:id="@+id/myFav"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:id="@+id/localFavLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="我的收藏" />
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_archive"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/local_favorite" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider" />
+
+            <LinearLayout
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:id="@+id/historyLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_history"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/history" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider" />
+
+            <LinearLayout
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:id="@+id/freqLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_freq"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/my_freq" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <View
-            android:layout_width="1px"
-            android:layout_height="20dp"
-            android:background="?attr/actionBarDivider" />
-
         <LinearLayout
-            android:id="@+id/likeLayout"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical">
+            android:baselineAligned="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:src="@drawable/ic_fav"
-                android:tint="?attr/colorPrimary" />
-
-            <TextView
-                android:id="@+id/myLike"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:id="@+id/favLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="我的赞" />
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
 
-        </LinearLayout>
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_star"
+                    android:tint="?attr/colorPrimary" />
 
-        <View
-            android:layout_width="1px"
-            android:layout_height="20dp"
-            android:background="?attr/actionBarDivider" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/my_fav" />
 
-        <LinearLayout
-            android:id="@+id/replyLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical">
+            </LinearLayout>
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:src="@drawable/ic_chat"
-                android:tint="?attr/colorPrimary" />
+            <View
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider" />
 
-            <TextView
-                android:id="@+id/myReply"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:id="@+id/likeLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="我的回复" />
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_fav"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/my_like" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider" />
+
+            <LinearLayout
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:id="@+id/replyLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_chat"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/my_reply" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -19,6 +19,7 @@ import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.activity.CollectionActivity
 import com.example.c001apk.ui.activity.FFFListActivity
 import com.example.c001apk.ui.activity.FeedActivity
+import com.example.c001apk.ui.activity.HistoryActivity
 import com.example.c001apk.ui.activity.MessageActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
@@ -130,6 +131,9 @@ class MessageAdapter(
         val favLayout: LinearLayout = view.findViewById(R.id.favLayout)
         val likeLayout: LinearLayout = view.findViewById(R.id.likeLayout)
         val replyLayout: LinearLayout = view.findViewById(R.id.replyLayout)
+        val localFavLayout: LinearLayout = view.findViewById(R.id.localFavLayout)
+        val historyLayout: LinearLayout = view.findViewById(R.id.historyLayout)
+        val freqLayout: LinearLayout = view.findViewById(R.id.freqLayout)
     }
 
 
@@ -307,6 +311,25 @@ class MessageAdapter(
                         parent.context.startActivity(intent)
                     }
                 }
+                viewHolder.localFavLayout.setOnClickListener {
+                    val intent = Intent(parent.context, HistoryActivity::class.java)
+                    intent.putExtra("type", "favorite")
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.historyLayout.setOnClickListener {
+                    val intent = Intent(parent.context, HistoryActivity::class.java)
+                    intent.putExtra("type", "browse")
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.freqLayout.setOnClickListener {
+                    if (PrefManager.isLogin) {
+                        val intent = Intent(parent.context, FFFListActivity::class.java)
+                        intent.putExtra("isEnable", false)
+                        intent.putExtra("type", "recentHistory")
+                        intent.putExtra("uid", PrefManager.uid)
+                        parent.context.startActivity(intent)
+                    }
+                }
                 viewHolder
             }
 
@@ -330,6 +353,13 @@ class MessageAdapter(
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
+
+            is MineViewHolder -> {
+                val lp = holder.itemView.layoutParams
+                if (lp is StaggeredGridLayoutManager.LayoutParams) {
+                    lp.isFullSpan = true
+                }
+            }
 
             is AppAdapter.FootViewHolder -> {
                 val lp = holder.itemView.layoutParams
@@ -402,6 +432,10 @@ class MessageAdapter(
             }
 
             is FFFViewHolder -> {
+                val lp = holder.itemView.layoutParams
+                if (lp is StaggeredGridLayoutManager.LayoutParams) {
+                    lp.isFullSpan = true
+                }
                 if (countList.isNotEmpty()) {
                     holder.apply {
                         feedCount.text = countList[0]

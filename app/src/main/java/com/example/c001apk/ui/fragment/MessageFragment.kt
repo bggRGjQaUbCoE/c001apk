@@ -19,8 +19,6 @@ import com.example.c001apk.adapter.MessageAdapter
 import com.example.c001apk.constant.RecyclerView.checkForGaps
 import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentMessageBinding
-import com.example.c001apk.ui.activity.FFFListActivity
-import com.example.c001apk.ui.activity.HistoryActivity
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
@@ -36,6 +34,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import com.example.c001apk.view.StaggerMessItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.lang.reflect.Method
@@ -329,7 +328,7 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(space))
             else
-                addItemDecoration(StaggerItemDecoration(space))
+                addItemDecoration(StaggerMessItemDecoration(space))
         }
     }
 
@@ -369,57 +368,35 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
-        binding.toolBar.inflateMenu(R.menu.message_menu)
-        if (!PrefManager.isLogin) {
-            binding.toolBar.menu.findItem(R.id.logout).isVisible = false
-            binding.toolBar.menu.findItem(R.id.freq).isVisible = false
-        }
-        binding.toolBar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.logout -> {
-                    MaterialAlertDialogBuilder(requireContext()).apply {
-                        setTitle(R.string.logoutTitle)
-                        setNegativeButton(android.R.string.cancel, null)
-                        setPositiveButton(android.R.string.ok) { _, _ ->
-                            viewModel.countList.clear()
-                            viewModel.messCountList.clear()
-                            viewModel.messageList.clear()
-                            viewModel.isInit = true
-                            viewModel.isEnd = false
-                            mAdapter.notifyDataSetChanged()
-                            PrefManager.isLogin = false
-                            PrefManager.uid = ""
-                            PrefManager.username = ""
-                            PrefManager.token = ""
-                            PrefManager.userAvatar = ""
-                            ActivityCollector.recreateActivity(MainActivity::class.java.name)
+        binding.toolBar.apply {
+            inflateMenu(R.menu.message_menu)
+            menu.findItem(R.id.logout).isVisible = PrefManager.isLogin
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.logout -> {
+                        MaterialAlertDialogBuilder(requireContext()).apply {
+                            setTitle(R.string.logoutTitle)
+                            setNegativeButton(android.R.string.cancel, null)
+                            setPositiveButton(android.R.string.ok) { _, _ ->
+                                viewModel.countList.clear()
+                                viewModel.messCountList.clear()
+                                viewModel.messageList.clear()
+                                viewModel.isInit = true
+                                viewModel.isEnd = false
+                                mAdapter.notifyDataSetChanged()
+                                PrefManager.isLogin = false
+                                PrefManager.uid = ""
+                                PrefManager.username = ""
+                                PrefManager.token = ""
+                                PrefManager.userAvatar = ""
+                                ActivityCollector.recreateActivity(MainActivity::class.java.name)
+                            }
+                            show()
                         }
-                        show()
                     }
                 }
-
-                R.id.favorite -> {
-                    val intent = Intent(requireContext(), HistoryActivity::class.java)
-                    intent.putExtra("type", "favorite")
-                    requireContext().startActivity(intent)
-                }
-
-                R.id.history -> {
-                    val intent = Intent(requireContext(), HistoryActivity::class.java)
-                    intent.putExtra("type", "browse")
-                    requireContext().startActivity(intent)
-                }
-
-                R.id.freq -> {
-                    val intent = Intent(requireContext(), FFFListActivity::class.java)
-                    intent.putExtra("isEnable", false)
-                    intent.putExtra("type", "recentHistory")
-                    intent.putExtra("uid", PrefManager.uid)
-                    requireContext().startActivity(intent)
-                }
-
+                return@setOnMenuItemClickListener true
             }
-            return@setOnMenuItemClickListener true
         }
     }
 

@@ -120,5 +120,8 @@
     <string name="about_developer">开发者</string>
     <string name="backup">导出</string>
     <string name="restore">导入</string>
+    <string name="my_fav">我的收藏</string>
+    <string name="my_like">我的赞</string>
+    <string name="my_reply">我的回复</string>
 
 </resources>
