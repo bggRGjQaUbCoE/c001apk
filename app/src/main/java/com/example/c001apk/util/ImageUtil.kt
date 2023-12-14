@@ -165,7 +165,7 @@ object ImageUtil {
 
     private fun saveImage(context: Context, url: String, isEnd: Boolean) {
         val index = url.lastIndexOf('/')
-        filename = url.substring(index+1)
+        filename = url.substring(index + 1)
         imagesDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
             context.getString(R.string.app_name)
@@ -211,6 +211,8 @@ object ImageUtil {
 
                     2 -> {
                         GlobalScope.launch {
+                            val index = url.lastIndexOf('/')
+                            filename = url.substring(index + 1)
                             imagesDir = File(context.externalCacheDir, "imageShare")
                             imageCheckDir = File(context.externalCacheDir, "imageShare/$filename")
                             if (imageCheckDir.exists()) {
