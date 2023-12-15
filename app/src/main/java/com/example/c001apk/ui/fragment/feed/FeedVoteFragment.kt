@@ -478,6 +478,15 @@ class FeedVoteFragment : Fragment(), AppListener {
             binding.indicator.visibility = View.VISIBLE
             binding.indicator.isIndeterminate = true
             refreshData()
+        } else {
+            binding.contentLayout.visibility = View.VISIBLE
+            if (viewModel.errorMessage != null) {
+                mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
+                mAdapter.notifyItemChanged(2)
+            } else if (viewModel.isEnd) {
+                mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
+            }
         }
     }
 

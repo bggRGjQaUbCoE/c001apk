@@ -112,7 +112,9 @@ class TopicContentFragment : Fragment(), AppListener, IOnSearchMenuClickListener
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.lastItem = data.last().id
                         viewModel.listSize = viewModel.topicDataList.size
-                        for (element in data)
+                        for (element in data) {
+                            if (element.id == viewModel.lastItem)
+                                continue
                             if (element.entityType == "feed"
                                 || element.entityType == "topic"
                                 || element.entityType == "product"
@@ -123,6 +125,7 @@ class TopicContentFragment : Fragment(), AppListener, IOnSearchMenuClickListener
                                     )
                                 )
                                     viewModel.topicDataList.add(element)
+                        }
                     }
                     mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
@@ -285,6 +288,7 @@ class TopicContentFragment : Fragment(), AppListener, IOnSearchMenuClickListener
     }
 
     private fun refreshData() {
+        viewModel.subtitle = ""
         viewModel.firstVisibleItemPosition = -1
         viewModel.lastVisibleItemPosition = -1
         viewModel.lastItem = null
