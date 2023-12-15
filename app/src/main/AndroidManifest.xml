@@ -19,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.C001apk">
         <activity
+            android:name=".ui.activity.BugHandlerActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.CoolPicActivity"
             android:exported="false" />
         <activity

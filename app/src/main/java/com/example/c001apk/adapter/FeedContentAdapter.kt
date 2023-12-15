@@ -598,10 +598,14 @@ class FeedContentAdapter(
                     }
 
                     if (!feed.data?.extraUrl.isNullOrEmpty()) {
-                        holder.extraUrlLayout.visibility = View.VISIBLE
-                        holder.extraUrl.text = feed.data?.extraUrl
-                        feed.data?.extraTitle?.let {
-                            holder.extraTitle.text = it
+                        if (feed.data?.extraUrl!!.startsWith("/goods/")) {
+                            holder.extraUrlLayout.visibility = View.GONE
+                        } else {
+                            holder.extraUrlLayout.visibility = View.VISIBLE
+                            holder.extraUrl.text = feed.data.extraUrl
+                            feed.data.extraTitle?.let {
+                                holder.extraTitle.text = it
+                            }
                         }
                     } else holder.extraUrlLayout.visibility = View.GONE
 
