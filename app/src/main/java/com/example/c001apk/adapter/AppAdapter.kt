@@ -362,7 +362,7 @@ class AppAdapter(
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
                     popup.menu.findItem(R.id.copy).isVisible = false
-                    popup.menu.findItem(R.id.delete).isVisible = false
+                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.menu.findItem(R.id.show).isVisible = false
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
@@ -1713,7 +1713,7 @@ class AppAdapter(
             }
 
             R.id.delete -> {
-                appListener?.onDeleteReply(fid, position, null)
+                appListener?.onDeleteFeedReply(fid, position, null)
             }
         }
         return false

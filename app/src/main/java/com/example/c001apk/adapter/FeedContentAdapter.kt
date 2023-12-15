@@ -1361,7 +1361,7 @@ class FeedContentAdapter(
             }
 
             R.id.delete -> {
-                appListener?.onDeleteReply(id, position, rPosition)
+                appListener?.onDeleteFeedReply(id, position, rPosition)
             }
 
             R.id.copy -> {

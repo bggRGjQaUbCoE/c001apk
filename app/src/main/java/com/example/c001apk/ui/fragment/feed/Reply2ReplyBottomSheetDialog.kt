@@ -452,7 +452,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         viewModel.postReply()
     }
 
-    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {
         viewModel.rPosition = null
         viewModel.rPosition = rPosition
         viewModel.isNew = true

@@ -352,6 +352,26 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
             }
         }
 
+        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data == "删除成功") {
+                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
+                        viewModel.homeFeedList.removeAt(viewModel.position)
+                        mAdapter.notifyItemRemoved(viewModel.position)
+                    } else if (!response.message.isNullOrEmpty()) {
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     @SuppressLint("InflateParams")
@@ -593,7 +613,13 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
 
     override fun onRefreshReply(listType: String) {}
 
-    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {
+        viewModel.isNew = true
+        viewModel.position = position
+        viewModel.url = "/v6/feed/deleteFeed"
+        viewModel.deleteId = id
+        viewModel.postDelete()
+    }
 
     override fun onShowCollection(id: String, title: String) {}
 

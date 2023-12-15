@@ -530,7 +530,7 @@ class FeedVoteFragment : Fragment(), AppListener {
         }
     }
 
-    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
 
     override fun onShowCollection(id: String, title: String) {}
 
@@ -577,8 +577,6 @@ class FeedVoteFragment : Fragment(), AppListener {
         }
     }
 
-    override fun onRefreshReply(listType: String) {
-        TODO("Not yet implemented")
-    }
+    override fun onRefreshReply(listType: String) {}
 
 }

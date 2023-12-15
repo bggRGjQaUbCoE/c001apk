@@ -37,7 +37,7 @@ interface AppListener {
         )
     }
 
-    fun onDeleteReply(id: String, position: Int, rPosition: Int?)
+    fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?)
 
     fun onShowCollection(id: String, title: String)
 

@@ -218,6 +218,26 @@ class FFFListActivity : BaseActivity(), AppListener {
             }
         }
 
+        viewModel.postDeleteData.observe(this) { result ->
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+
+                val response = result.getOrNull()
+                if (response != null) {
+                    if (response.data == "删除成功") {
+                        Toast.makeText(this, response.data, Toast.LENGTH_SHORT).show()
+                        viewModel.dataList.removeAt(viewModel.position)
+                        mAdapter.notifyItemRemoved(viewModel.position)
+                    } else if (!response.message.isNullOrEmpty()) {
+                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+        }
+
     }
 
     private fun initViewPager() {
@@ -419,8 +439,13 @@ class FFFListActivity : BaseActivity(), AppListener {
 
     override fun onRefreshReply(listType: String) {}
 
-    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
-
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {
+        viewModel.isNew = true
+        viewModel.position = position
+        viewModel.url = "/v6/feed/deleteFeed"
+        viewModel.deleteId = id
+        viewModel.postDelete()
+    }
     override fun onShowCollection(id: String, title: String) {}
 
 }

@@ -321,7 +321,7 @@ class SearchContentFragment : Fragment(), AppListener, IOnSearchMenuClickListene
 
     override fun onRefreshReply(listType: String) {}
 
-    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {}
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
 
     override fun onShowCollection(id: String, title: String) {}
 

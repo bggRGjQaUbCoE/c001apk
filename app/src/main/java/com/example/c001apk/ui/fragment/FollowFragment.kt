@@ -382,7 +382,7 @@ class FollowFragment : Fragment(), AppListener {
 
     override fun onRefreshReply(listType: String) {}
 
-    override fun onDeleteReply(id: String, position: Int, rPosition: Int?) {
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {
         viewModel.isNew = true
         viewModel.position = position
         viewModel.url = "/v6/feed/deleteReply"

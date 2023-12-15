@@ -397,7 +397,7 @@ class Reply2ReplyTotalAdapter(
             }
 
             R.id.delete -> {
-                appListener?.onDeleteReply(rid, rposition, null)
+                appListener?.onDeleteFeedReply(rid, rposition, null)
             }
 
             R.id.show -> {
