@@ -27,7 +27,7 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -370,7 +370,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                     mLayoutManager
                 else sLayoutManager
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(ReplyItemDecoration(space))
             else
                 addItemDecoration(StaggerItemDecoration(space))
         }

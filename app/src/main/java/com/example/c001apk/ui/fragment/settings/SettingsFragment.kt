@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.fragment.settings
 
 import android.app.Dialog
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -41,13 +43,18 @@ class SettingsFragment : Fragment() {
         binding.toolBar.inflateMenu(R.menu.settings_menu)
         binding.toolBar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.feedback ->
-                    startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://github.com/bggRGjQaUbCoE/c001apk/issues")
+                R.id.feedback -> {
+                    try {
+                        startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/bggRGjQaUbCoE/c001apk/issues")
+                            )
                         )
-                    )
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(requireContext(), "打开失败", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
                 R.id.about -> AboutDialog().show(childFragmentManager, "about")
 

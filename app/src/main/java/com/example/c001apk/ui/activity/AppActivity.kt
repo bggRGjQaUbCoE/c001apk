@@ -1,10 +1,12 @@
 package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -235,7 +237,12 @@ class AppActivity : BaseActivity(), AppListener {
                     val link = result.getOrNull()
                     if (link != null) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                        startActivity(intent)
+                        try {
+                            startActivity(intent)
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(this@AppActivity, "打开失败", Toast.LENGTH_SHORT).show()
+                            Log.w("error", "Activity was not found for intent, $intent")
+                        }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
                     }

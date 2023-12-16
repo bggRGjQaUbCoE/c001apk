@@ -143,16 +143,6 @@ class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
         }
     }
 
-    /*private fun initMenu() {
-        binding.toolBar.inflateMenu(R.menu.home_feed_menu)
-        binding.toolBar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.search -> startActivity(Intent(activity, SearchActivity::class.java))
-            }
-            return@setOnMenuItemClickListener true
-        }
-    }*/
-
     private fun initView() {
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
