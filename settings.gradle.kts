@@ -17,5 +17,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "c001apk"
-include(":app")
+include(":app", ":mojito", ":SketchImageViewLoader", ":GlideImageLoader")
  
