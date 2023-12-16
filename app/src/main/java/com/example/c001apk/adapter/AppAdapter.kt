@@ -602,7 +602,7 @@ class AppAdapter(
                         "topic" -> {
                             val intent = Intent(parent.context, TopicActivity::class.java)
                             intent.putExtra("type", "topic")
-                            intent.putExtra("title", viewHolder.uname.text.toString())
+                            intent.putExtra("title", viewHolder.uname.text.toString().replace("话题: ", ""))
                             intent.putExtra("url", viewHolder.url)
                             intent.putExtra("id", "")
                             parent.context.startActivity(intent)
