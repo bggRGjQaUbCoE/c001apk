@@ -29,7 +29,6 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -282,29 +281,24 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
         CoroutineScope(Dispatchers.IO).launch {
             when (viewModel.type) {
                 "user" -> {
-                    if (blackListDao.isExist(uid)) {
-                        viewModel.historyList.remove(uid)
-                        blackListDao.delete(uid)
-                    }
+                    if (!blackListDao.isExist(uid))
+                        blackListDao.insert(SearchHistory(uid))
+
                 }
 
                 "topic" -> {
-                    if (topicBlackListDao.isExist(uid)) {
-                        viewModel.historyList.remove(uid)
-                        topicBlackListDao.delete(uid)
-                    }
+                    if (!topicBlackListDao.isExist(uid))
+                        topicBlackListDao.insert(SearchHistory(uid))
                 }
             }
+        }
+        if (viewModel.historyList.indexOf(uid) == -1) {
             viewModel.historyList.add(0, uid)
-            when (viewModel.type) {
-                "user" -> blackListDao.insert(SearchHistory(uid))
-                "topic" -> topicBlackListDao.insert(SearchHistory(uid))
-            }
-            withContext(Dispatchers.Main) {
-                mAdapter.notifyItemInserted(0)
-                if (binding.clearAll.visibility != View.VISIBLE)
-                    binding.clearAll.visibility = View.VISIBLE
-            }
+            mAdapter.notifyItemInserted(0)
+            if (binding.clearAll.visibility != View.VISIBLE)
+                binding.clearAll.visibility = View.VISIBLE
+        } else {
+            Toast.makeText(this, "已存在", Toast.LENGTH_SHORT).show()
         }
     }
 

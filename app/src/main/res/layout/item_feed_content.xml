@@ -216,25 +216,28 @@
 
             <TextView
                 android:id="@+id/extraTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:background="@drawable/text_scroll_bg"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/cover"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/extraUrl"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/text_scroll_bg"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/cover"
                 app:layout_constraintTop_toBottomOf="@id/extraTitle" />
         </androidx.constraintlayout.widget.ConstraintLayout>

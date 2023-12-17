@@ -35,6 +35,7 @@ import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.DyhActivity
+import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
@@ -240,7 +241,19 @@ class FeedContentAdapter(
                 }
                 viewHolder.extraUrlLayout.setOnClickListener {
                     val url = viewHolder.extraUrl.text.toString()
-                    if (url.startsWith("/game/")) {
+                    if (url.contains("www.coolapk.com/feed/")) {
+                        val id = if (url.contains("shareKey")) {
+                            url.substring(url.lastIndexOf("/feed/") + 6, url.lastIndexOf("?shareKey"))
+                        } else {
+                            url.substring(url.lastIndexOf("/feed/") + 6)
+                        }
+                        val intent = Intent(mContext, FeedActivity::class.java)
+                        intent.putExtra("type", "feed")
+                        intent.putExtra("id", id)
+                        intent.putExtra("uid", "")
+                        intent.putExtra("uname", "")
+                        mContext.startActivity(intent)
+                    } else if (url.startsWith("/game/")) {
                         val intent = Intent(parent.context, AppActivity::class.java)
                         intent.putExtra("id", url.replace("/game/", ""))
                         parent.context.startActivity(intent)
