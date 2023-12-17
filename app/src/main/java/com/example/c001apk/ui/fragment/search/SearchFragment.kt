@@ -3,6 +3,8 @@ package com.example.c001apk.ui.fragment.search
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +32,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 class SearchFragment : Fragment(), IOnItemClickListener {
 
@@ -149,11 +152,16 @@ class SearchFragment : Fragment(), IOnItemClickListener {
     }
 
     private fun initButton() {
-        binding.back.setOnClickListener {
-            requireActivity().finish()
+        binding.toolBar.apply {
+            setNavigationOnClickListener {
+                requireActivity().finish()
+            }
         }
         binding.search.setOnClickListener {
             search()
+        }
+        binding.clear.setOnClickListener {
+            binding.editText.text = null
         }
     }
 
@@ -205,22 +213,44 @@ class SearchFragment : Fragment(), IOnItemClickListener {
 
     @SuppressLint("RestrictedApi")
     private fun initEditText() {
-        binding.editText.highlightColor = ColorUtils.setAlphaComponent(
-            ThemeUtils.getThemeAttrColor(
-                requireContext(),
-                rikka.preference.simplemenu.R.attr.colorPrimaryDark
-            ), 128
-        )
-        binding.editText.isFocusable = true
-        binding.editText.isFocusableInTouchMode = true
-        binding.editText.requestFocus()
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(binding.editText, 0)
-        binding.editText.imeOptions = EditorInfo.IME_ACTION_SEARCH
-        binding.editText.inputType = EditorInfo.TYPE_CLASS_TEXT
-        if (viewModel.pageType != "")
-            binding.editText.hint = "在 ${viewModel.title} 中搜索"
+        binding.editText.apply {
+            highlightColor = ColorUtils.setAlphaComponent(
+                ThemeUtils.getThemeAttrColor(
+                    requireContext(),
+                    rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                ), 128
+            )
+            isFocusable = true
+            isFocusableInTouchMode = true
+            requestFocus()
+            val imm =
+                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.editText, 0)
+            imeOptions = EditorInfo.IME_ACTION_SEARCH
+            inputType = EditorInfo.TYPE_CLASS_TEXT
+            if (viewModel.pageType != "")
+                hint = "在 ${viewModel.title} 中搜索"
+
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable) {
+                    if (s.isEmpty())
+                        binding.clear.visibility = View.GONE
+                    else
+                        binding.clear.visibility = View.VISIBLE
+                }
+            })
+
+        }
     }
 
     /*override fun onStart() {

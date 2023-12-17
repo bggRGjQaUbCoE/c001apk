@@ -74,6 +74,7 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClic
     private fun initBar() {
         binding.toolBar.apply {
             title = viewModel.keyWord
+            setTitleTextAppearance(requireContext(), R.style.Toolbar_TitleText)
             if (viewModel.pageType != "")
                 subtitle = when (viewModel.pageType) {
                     "tag" -> "话题: ${viewModel.title}"
