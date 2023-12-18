@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.EditText
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
@@ -66,8 +67,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -92,8 +95,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -118,8 +123,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -150,8 +157,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -181,8 +190,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -207,13 +218,16 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
 
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    PrefManager.MODEL = editText.text.toString().ifEmpty { Utils.randomDeviceModel() }
+                    PrefManager.MODEL =
+                        editText.text.toString().ifEmpty { Utils.randomDeviceModel() }
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -244,8 +258,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -275,8 +291,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -306,8 +324,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT =
                         "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${PrefManager.VERSION_NAME}-${PrefManager.VERSION_CODE}-${Constants.MODE}"
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -330,8 +350,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.USER_AGENT = editText.text.toString()
                         .ifEmpty { Constants.USER_AGENT }
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -353,8 +375,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.xAppToken = editText.text.toString()
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 
@@ -376,8 +400,10 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.xAppDevice = editText.text.toString()
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
@@ -197,8 +198,10 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.SZLMID = editText.text.toString()
                     PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
                 }
-                show()
-            }
+            }.create().apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                editText.requestFocus()
+            }.show()
             true
         }
 

@@ -228,8 +228,8 @@ class SearchFragment : Fragment(), IOnItemClickListener {
             imm.showSoftInput(binding.editText, 0)
             imeOptions = EditorInfo.IME_ACTION_SEARCH
             inputType = EditorInfo.TYPE_CLASS_TEXT
-            if (viewModel.pageType != "")
-                hint = "在 ${viewModel.title} 中搜索"
+            hint = if (viewModel.pageType != "") "在 ${viewModel.title} 中搜索"
+            else "搜索"
 
             addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
