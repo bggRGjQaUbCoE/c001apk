@@ -2,6 +2,7 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
@@ -18,18 +19,12 @@ class FeedActivity : BaseActivity() {
         binding = ActivityFeedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        var type = intent.getStringExtra("type")
-        var id = intent.getStringExtra("id")
+        val type = intent.getStringExtra("type")
+        val id = intent.getStringExtra("id")
         val rid = intent.getStringExtra("rid")
         val uid = intent.getStringExtra("uid")
         val uname = intent.getStringExtra("uname")
         val viewReply = intent.getBooleanExtra("viewReply", false)
-
-        val data = intent.data
-        if (data.toString().startsWith("coolmarket://feed/")) {
-            type = "feed"
-            id = data.toString().replace("coolmarket://feed/", "")
-        }
 
         if (type == "vote") {
             if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
@@ -47,7 +42,7 @@ class FeedActivity : BaseActivity() {
                 .beginTransaction()
                 .replace(
                     R.id.feedFragment,
-                    FeedFragment.newInstance(type, id!!,rid, uid, uname, viewReply)
+                    FeedFragment.newInstance(type, id!!, rid, uid, uname, viewReply)
                 )
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
