@@ -90,7 +90,9 @@ class AppActivity : BaseActivity(), AppListener {
                     viewModel.versionCode = appInfo.data.apkversioncode
                     showAppInfo()
 
-                    if (viewModel.commentStatusText == "允许评论") {
+                    if (viewModel.commentStatusText != null
+                        && viewModel.commentStatusText == "允许评论"
+                    ) {
                         viewModel.isRefreshing = true
                         viewModel.isNew = true
                         viewModel.getAppComment()
@@ -230,24 +232,23 @@ class AppActivity : BaseActivity(), AppListener {
         binding.collapsingToolbar.title = viewModel.title
         binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
         ImageUtil.showIMG(binding.logo, viewModel.logo)
-        binding.btnDownload.apply {
-            visibility = View.VISIBLE
-            setOnClickListener {
-                viewModel.downloadLinkData.observe(this@AppActivity) { result ->
-                    val link = result.getOrNull()
-                    if (link != null) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                        try {
-                            startActivity(intent)
-                        } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(this@AppActivity, "打开失败", Toast.LENGTH_SHORT).show()
-                            Log.w("error", "Activity was not found for intent, $intent")
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
-                viewModel.getDownloadLink()
+        viewModel.getDownloadLink()
+        viewModel.downloadLinkData.observe(this@AppActivity) { result ->
+            val link = result.getOrNull()
+            if (link != null) {
+                binding.btnDownload.visibility = View.VISIBLE
+                viewModel.collectionUrl = link
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        }
+        binding.btnDownload.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.collectionUrl))
+            try {
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this@AppActivity, "打开失败", Toast.LENGTH_SHORT).show()
+                Log.w("error", "Activity was not found for intent, $intent")
             }
         }
     }

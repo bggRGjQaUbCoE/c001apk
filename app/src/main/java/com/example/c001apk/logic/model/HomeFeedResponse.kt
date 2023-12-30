@@ -89,7 +89,7 @@ data class HomeFeedResponse(val data: List<Data>) {
         val userAvatar: String,
         val infoHtml: String,
         val title: String,
-        val commentStatusText: String,
+        val commentStatusText: String?,
         val picArr: List<String>?,
         val replyRows: List<ReplyRows>?,
         val replyRowsMore: Int,

@@ -38,7 +38,7 @@ class AppViewModel : ViewModel() {
     var listSize = -1
     var feedTypeName: String? = null
     var topReplyId: String? = null
-    var commentStatusText = ""
+    var commentStatusText: String? = null
     var errorMessage: String? = null
     val bHistoryList: ArrayList<Any> = ArrayList()
     var requestHash = ""
