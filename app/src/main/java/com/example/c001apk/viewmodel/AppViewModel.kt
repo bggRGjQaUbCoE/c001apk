@@ -771,10 +771,11 @@ class AppViewModel : ViewModel() {
 
     var tag: String? = null
     var fid: String? = null
+    var followUrl = ""
     private val getFollowLiveData = MutableLiveData<String>()
 
     val getFollowData = getFollowLiveData.switchMap {
-        Repository.getFollow(url, tag, fid)
+        Repository.getFollow(followUrl, tag, fid)
     }
 
     fun getFollow() {

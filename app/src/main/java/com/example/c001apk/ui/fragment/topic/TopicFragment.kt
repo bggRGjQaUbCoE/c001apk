@@ -308,8 +308,8 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
                 val intent = Intent(activity, SearchActivity::class.java)
                 if (viewModel.type == "topic") {
                     intent.putExtra("pageType", "tag")
-                    intent.putExtra("pageParam", viewModel.title)
-                    intent.putExtra("title", viewModel.title)
+                    intent.putExtra("pageParam", viewModel.url.replace("/t/", ""))
+                    intent.putExtra("title", viewModel.url.replace("/t/", ""))
                 } else {
                     intent.putExtra("pageType", "product_phone")
                     intent.putExtra("pageParam", viewModel.id)
@@ -352,9 +352,9 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
                 when (viewModel.type) {
                     "topic" -> {
                         viewModel.isNew = true
-                        viewModel.url = if (viewModel.isFollow) "/v6/feed/unFollowTag"
-                        else "/v6/feed/FollowTag"
-                        viewModel.tag = viewModel.title
+                        viewModel.followUrl = if (viewModel.isFollow) "/v6/feed/unFollowTag"
+                        else "/v6/feed/followTag"
+                        viewModel.tag = viewModel.url.replace("/t/", "")
                         viewModel.getFollow()
                     }
 

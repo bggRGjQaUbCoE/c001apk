@@ -236,7 +236,7 @@ class AppActivity : BaseActivity(), IOnTabClickContainer {
 
             R.id.subscribe -> {
                 viewModel.isNew = true
-                viewModel.url = if (viewModel.isFollow) "/v6/apk/unFollow"
+                viewModel.followUrl = if (viewModel.isFollow) "/v6/apk/unFollow"
                 else "/v6/apk/follow"
                 viewModel.fid = viewModel.appId
                 viewModel.getFollow()
