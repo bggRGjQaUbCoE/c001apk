@@ -10,6 +10,7 @@ import com.example.c001apk.util.Utils.Companion.randomBrand
 import com.example.c001apk.util.Utils.Companion.randomDeviceModel
 import com.example.c001apk.util.Utils.Companion.randomManufacturer
 import com.example.c001apk.util.Utils.Companion.randomSdkInt
+import org.mindrot.jbcrypt.BCrypt
 import java.util.Random
 
 
@@ -58,9 +59,9 @@ class TokenDeviceUtils {
             val md5Token = token.getMD5()
 
             val bcryptSalt = "${"$2a$10$$base64TimeStamp/$md5Token".substring(0, 31)}u"
-            val bcryptResult = org.mindrot.jbcrypt.BCrypt.hashpw(md5Base64Token, bcryptSalt)
+            val bcryptResult = BCrypt.hashpw(md5Base64Token, bcryptSalt)
 
-            return "v2${bcryptResult.getBase64()}"
+            return "v2${bcryptResult.replaceRange(0, 3, "$2y").getBase64()}"
         }
 
         fun getLastingDeviceCode(): String {
