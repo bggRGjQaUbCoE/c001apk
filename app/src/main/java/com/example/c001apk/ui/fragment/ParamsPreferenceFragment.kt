@@ -408,7 +408,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<Preference>("regenerate")?.setOnPreferenceClickListener {
-            TokenDeviceUtils.getDeviceCode(true)
+            PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(true)
             ToastUtil.toast("已重新生成")
             true
         }
