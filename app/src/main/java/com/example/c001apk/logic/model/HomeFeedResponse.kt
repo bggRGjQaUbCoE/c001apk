@@ -211,7 +211,8 @@ data class HomeFeedResponse(val data: List<Data>) {
         val ruid: String,
         val rusername: String,
         val picArr: List<String>?,
-        val pic: String
+        val pic: String,
+        val userInfo: UserInfo?
     )
 
     data class Entities(

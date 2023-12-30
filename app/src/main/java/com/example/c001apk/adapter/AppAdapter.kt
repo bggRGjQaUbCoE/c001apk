@@ -1460,11 +1460,11 @@ class AppAdapter(
                     holder.hotReply.visibility = View.VISIBLE
                     val mess =
                         if (feed.replyRows[0].picArr.isNullOrEmpty())
-                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].username}\">${feed.replyRows[0].username}</a>: ${feed.replyRows[0].message}"
+                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message}"
                         else if (feed.replyRows[0].message == "[图片]")
-                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].username}\">${feed.replyRows[0].username}</a>: ${feed.replyRows[0].message} <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
+                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
                         else
-                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].username}\">${feed.replyRows[0].username}</a>: ${feed.replyRows[0].message} [图片] <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
+                            "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} [图片] <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
                     holder.hotReply.movementMethod = LinkMovementMethod.getInstance()
                     holder.hotReply.text = SpannableStringBuilderUtil.setText(
                         mContext,

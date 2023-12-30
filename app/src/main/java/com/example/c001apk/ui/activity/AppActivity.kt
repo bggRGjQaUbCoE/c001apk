@@ -88,11 +88,10 @@ class AppActivity : BaseActivity(), AppListener {
                     viewModel.appId = appInfo.data.id
                     viewModel.packageName = appInfo.data.apkname
                     viewModel.versionCode = appInfo.data.apkversioncode
+                    viewModel.type = appInfo.data.entityType
                     showAppInfo()
 
-                    if (viewModel.commentStatusText != null
-                        && viewModel.commentStatusText == "允许评论"
-                    ) {
+                    if (viewModel.commentStatusText == "允许评论" || viewModel.type == "appForum") {
                         viewModel.isRefreshing = true
                         viewModel.isNew = true
                         viewModel.getAppComment()
@@ -232,7 +231,8 @@ class AppActivity : BaseActivity(), AppListener {
         binding.collapsingToolbar.title = viewModel.title
         binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
         ImageUtil.showIMG(binding.logo, viewModel.logo)
-        viewModel.getDownloadLink()
+        if (viewModel.type == "apk")
+            viewModel.getDownloadLink()
         viewModel.downloadLinkData.observe(this@AppActivity) { result ->
             val link = result.getOrNull()
             if (link != null) {
