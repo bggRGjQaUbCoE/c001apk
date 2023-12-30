@@ -7,6 +7,7 @@ import android.os.Bundle
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ThemeUtils
+import com.google.android.material.color.DynamicColors
 import rikka.material.app.MaterialActivity
 
 abstract class BaseActivity : MaterialActivity() {
@@ -27,7 +28,8 @@ abstract class BaseActivity : MaterialActivity() {
         ActivityCollector.removeActivity(this)
     }
 
-    override fun computeUserThemeKey() = ThemeUtils.colorTheme + ThemeUtils.getNightThemeStyleRes(this)
+    override fun computeUserThemeKey() =
+        ThemeUtils.colorTheme + ThemeUtils.getNightThemeStyleRes(this)
 
     override fun onApplyTranslucentSystemBars() {
         super.onApplyTranslucentSystemBars()
@@ -36,7 +38,10 @@ abstract class BaseActivity : MaterialActivity() {
     }
 
     override fun onApplyUserThemeResource(theme: Resources.Theme, isDecorView: Boolean) {
-        if (!ThemeUtils.isSystemAccent) theme.applyStyle(ThemeUtils.colorThemeStyleRes, true)
+        if (ThemeUtils.isSystemAccent)
+            DynamicColors.applyToActivityIfAvailable(this)
+        else
+            theme.applyStyle(ThemeUtils.colorThemeStyleRes, true)
         theme.applyStyle(ThemeUtils.getNightThemeStyleRes(this), true) //blackDarkMode
     }
 }
