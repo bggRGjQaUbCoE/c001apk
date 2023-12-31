@@ -18,14 +18,15 @@ class AppLinkActivity : BaseActivity() {
             intent.putExtra("uid", "")
             intent.putExtra("uname", "")
             startActivity(intent)
-        } else if (data.toString().startsWith("https://www.coolapk.com")
-            || data.toString().startsWith("http://www.coolapk.com")
-            || data.toString().startsWith("www.coolapk.com")
-        ) {
+        } else {
+
             val replace = data.toString()
-                .replace("https://www.coolapk.com", "")
-                .replace("http://www.coolapk.com", "")
-                .replace("www.coolapk.com", "")
+                .replace("https://", "")
+                .replace("http://", "")
+                .replace("www.", "")
+                .replace("coolapk1s", "coolapk")
+                .replace("coolapk.com", "")
+
             if (replace.startsWith("/feed/")) {
                 val intent = Intent(this, FeedActivity::class.java)
                 intent.putExtra("type", "feed")
@@ -52,6 +53,7 @@ class AppLinkActivity : BaseActivity() {
                 Toast.makeText(this, "unsupported intent: ${data.toString()}", Toast.LENGTH_SHORT)
                     .show()
             }
+
         }
 
         finish()

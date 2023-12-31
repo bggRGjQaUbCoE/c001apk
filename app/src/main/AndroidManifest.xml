@@ -214,6 +214,170 @@
                     android:host="www.coolapk.com"
                     android:pathPattern="/album/.*"
                     android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/.*"
+                    android:scheme="coolmarket" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/apk/.*\\..*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/game/.*\\..*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/feed/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/web/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/faxian/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/t/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/u/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/n/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/album/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/apk/.*\\..*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/game/.*\\..*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/feed/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/web/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/faxian/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/t/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/u/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/n/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/album/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/apk/.*\\..*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/game/.*\\..*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/feed/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/web/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/faxian/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/t/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/u/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/n/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="coolapk1s.com"
+                    android:pathPattern="/album/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/apk/.*\\..*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/game/.*\\..*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/feed/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/web/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/faxian/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/t/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/u/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/n/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.coolapk1s.com"
+                    android:pathPattern="/album/.*"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity
