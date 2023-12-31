@@ -204,14 +204,14 @@ class NineGridImageView @JvmOverloads constructor(
 
     fun getImageViewAt(position: Int) = getChildAt(position) as? ImageView
 
-    @SuppressLint("RestrictedApi")
+    @SuppressLint("RestrictedApi", "ResourceAsColor")
     fun setUrlList(urlList: List<String>?) {
         if (urlList != null) {
             this.urlList = urlList
             generateChildrenLayout(urlList.size)
             removeAllViews()
 
-            for (i in urlList.indices) {
+            for (url in urlList) {
                 val imageView = ShapeableImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
                     .setAllCorners(RoundedCornerTreatment())
@@ -220,6 +220,7 @@ class NineGridImageView @JvmOverloads constructor(
                 imageView.shapeAppearanceModel = shapePathModel
                 imageView.strokeWidth = DensityTool.dp2px(context, 1f)
                 imageView.strokeColor = context.getColorStateList(R.color.cover)
+                imageView.setBackgroundColor(context.getColor(R.color.cover))
                 addView(imageView, generateDefaultLayoutParams())
                 /*val options = RequestOptions().transform(
                     RoundedCorners(
@@ -232,31 +233,32 @@ class NineGridImageView @JvmOverloads constructor(
                 }
                 val newUrl =
                     GlideUrl(
-                        urlList[i].http2https(),
+                        url.http2https(),
                         LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT)
                             .build()
                     )
-                Glide.with(context)
-                    .asBitmap()
-                    .load(newUrl)
-                    .centerCrop()
-                    .placeholder(backgroundDrawable)
-                    .into(object : CustomTarget<Bitmap?>() {
-                        override fun onResourceReady(
-                            resource: Bitmap,
-                            transition: Transition<in Bitmap?>?
-                        ) {
-                            if (isCompress) {
+                if (isCompress)
+                    Glide.with(context)
+                        .asBitmap()
+                        .load(newUrl)
+                        .centerCrop()
+                        .into(object : CustomTarget<Bitmap?>() {
+                            override fun onResourceReady(
+                                resource: Bitmap,
+                                transition: Transition<in Bitmap?>?
+                            ) {
                                 val bitmap = compressImage(resource)
                                 if (bitmap != null)
                                     imageView.setImageBitmap(bitmap)
-                            } else {
-                                imageView.setImageBitmap(resource)
                             }
-                        }
 
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                    })
+                            override fun onLoadCleared(placeholder: Drawable?) {}
+                        })
+                else
+                    Glide.with(context)
+                        .load(newUrl)
+                        .centerCrop()
+                        .into(imageView)
             }
         }
     }

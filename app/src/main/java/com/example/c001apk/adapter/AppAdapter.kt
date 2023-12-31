@@ -602,7 +602,10 @@ class AppAdapter(
                         "topic" -> {
                             val intent = Intent(parent.context, TopicActivity::class.java)
                             intent.putExtra("type", "topic")
-                            intent.putExtra("title", viewHolder.uname.text.toString().replace("话题: ", ""))
+                            intent.putExtra(
+                                "title",
+                                viewHolder.uname.text.toString().replace("话题: ", "")
+                            )
                             intent.putExtra("url", viewHolder.url)
                             intent.putExtra("id", "")
                             parent.context.startActivity(intent)
@@ -1429,7 +1432,7 @@ class AppAdapter(
 
                 if (!feed.picArr.isNullOrEmpty()) {
                     holder.multiImage.visibility = View.VISIBLE
-                    if (feed.picArr.size == 1) {
+                    if (feed.picArr.size == 1 || feed.feedType == "feedArticle") {
                         val from = feed.pic.lastIndexOf("@")
                         val middle = feed.pic.lastIndexOf("x")
                         val end = feed.pic.lastIndexOf(".")
@@ -1442,10 +1445,13 @@ class AppAdapter(
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
-                        for (element in feed.picArr)
-                            if (element.endsWith("gif"))
-                                urlList.add(element)
-                            else urlList.add("$element.s.jpg")
+                        if (feed.feedType == "feedArticle" && imgWidth > imgHeight)
+                            urlList.add(feed.pic)
+                        else
+                            for (element in feed.picArr)
+                                if (element.endsWith("gif"))
+                                    urlList.add(element)
+                                else urlList.add("$element.s.jpg")
                         setUrlList(urlList)
                     }
                 } else {
