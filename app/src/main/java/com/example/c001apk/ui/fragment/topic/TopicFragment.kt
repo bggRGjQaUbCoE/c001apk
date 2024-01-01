@@ -30,7 +30,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer, IOnTabClickContainer {
+class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
+    IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
@@ -324,7 +325,9 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
             R.id.block -> {
                 MaterialAlertDialogBuilder(requireContext()).apply {
-                    setTitle("确定将 ${viewModel.title} 加入黑名单？")
+                    val title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
+                    else viewModel.title
+                    setTitle("确定将 $title 加入黑名单？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
                         CoroutineScope(Dispatchers.IO).launch {

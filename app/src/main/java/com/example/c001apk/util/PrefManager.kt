@@ -150,4 +150,8 @@ object PrefManager {
     var FOLLOWTYPE: String
         get() = pref.getString("FOLLOWTYPE", "all")!!
         set(value) = pref.edit().putString("FOLLOWTYPE", value).apply()
+
+    var imageQuality: String
+        get() = pref.getString("imageQuality", "auto")!!
+        set(value) = pref.edit().putString("imageQuality", value).apply()
 }

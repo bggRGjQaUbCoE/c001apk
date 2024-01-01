@@ -54,6 +54,10 @@
             android:key="topicBlackList"
             android:title="@string/topic_black_list" />
         <Preference
+            android:icon="@drawable/ic_image"
+            android:key="imageQuality"
+            android:title="@string/image_quality" />
+        <Preference
             android:icon="@drawable/ic_text_fields"
             android:key="fontScale"
             android:title="@string/font_scale" />

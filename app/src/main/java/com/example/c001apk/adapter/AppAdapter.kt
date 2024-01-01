@@ -43,6 +43,7 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
@@ -1449,7 +1450,10 @@ class AppAdapter(
                             urlList.add(feed.pic)
                         else
                             for (element in feed.picArr)
-                                if (element.endsWith("gif"))
+                                if ((PrefManager.imageQuality == "origin" ||
+                                            (PrefManager.imageQuality == "auto" && NetWorkUtil.isWifiConnected()))
+                                    && element.endsWith("gif")
+                                )
                                     urlList.add(element)
                                 else urlList.add("$element.s.jpg")
                         setUrlList(urlList)

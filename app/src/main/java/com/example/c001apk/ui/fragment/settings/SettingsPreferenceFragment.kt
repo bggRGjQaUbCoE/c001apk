@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.fragment.settings
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -271,6 +272,33 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 }
                 true
             }
+        }
+
+        findPreference<Preference>("imageQuality")?.setOnPreferenceClickListener {
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setTitle("图片画质")
+                val items = arrayOf("网络自适应", "原图", "普清")
+                val index = when (PrefManager.imageQuality) {
+                    "auto" -> 0
+                    "origin" -> 1
+                    else -> 2
+                }
+                setSingleChoiceItems(
+                    items,
+                    index
+                ) { dialog: DialogInterface, position: Int ->
+                    when (position) {
+                        0 -> PrefManager.imageQuality = "auto"
+
+                        1 -> PrefManager.imageQuality = "origin"
+
+                        2 -> PrefManager.imageQuality = "thumbnail"
+                    }
+                    dialog.dismiss()
+                }
+                show()
+            }
+            true
         }
 
     }

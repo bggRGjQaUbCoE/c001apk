@@ -43,6 +43,7 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
@@ -243,7 +244,10 @@ class FeedContentAdapter(
                     val url = viewHolder.extraUrl.text.toString()
                     if (url.contains("www.coolapk.com/feed/")) {
                         val id = if (url.contains("shareKey")) {
-                            url.substring(url.lastIndexOf("/feed/") + 6, url.lastIndexOf("?shareKey"))
+                            url.substring(
+                                url.lastIndexOf("/feed/") + 6,
+                                url.lastIndexOf("?shareKey")
+                            )
                         } else {
                             url.substring(url.lastIndexOf("/feed/") + 6)
                         }
@@ -957,7 +961,7 @@ class FeedContentAdapter(
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
                             for (element in feed.data?.picArr!!)
-                                if (element.endsWith("gif"))
+                                if (PrefManager.imageQuality == "origin" && element.endsWith("gif"))
                                     urlList.add(element)
                                 else urlList.add("$element.s.jpg")
                             setUrlList(urlList)
@@ -1324,7 +1328,10 @@ class FeedContentAdapter(
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
                             for (element in reply.picArr)
-                                if (element.endsWith("gif"))
+                                if ((PrefManager.imageQuality == "origin" ||
+                                            (PrefManager.imageQuality == "auto" && NetWorkUtil.isWifiConnected()))
+                                    && element.endsWith("gif")
+                                )
                                     urlList.add(element)
                                 else urlList.add("$element.s.jpg")
                             setUrlList(urlList)

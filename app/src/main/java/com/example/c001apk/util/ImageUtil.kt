@@ -42,6 +42,7 @@ import kotlinx.coroutines.withContext
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.ext.mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
+import net.mikaelzero.mojito.impl.DefaultTargetFragmentCover
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
 import java.io.BufferedInputStream
 import java.io.File
@@ -254,24 +255,40 @@ object ImageUtil {
         urlList: List<String>,
         position: Int
     ) {
-        val imgList: MutableList<String> = ArrayList()
-        for (img in urlList) {
-            if (img.endsWith(".s.jpg"))
-                imgList.add(img.replace(".s.jpg", "").http2https())
-            else if (img.endsWith(".s2x.jpg"))
-                imgList.add(img.replace(".s2x.jpg", "").http2https())
+        val thumbList: MutableList<String> = ArrayList()
+        val originList: MutableList<String> = ArrayList()
+        for (url in urlList) {
+            if (url.endsWith(".s.jpg"))
+                originList.add(url.replace(".s.jpg", "").http2https())
+            else if (url.endsWith(".s2x.jpg"))
+                originList.add(url.replace(".s2x.jpg", "").http2https())
             else
-                imgList.add(img.http2https())
+                originList.add(url.http2https())
+            thumbList.add(url.http2https())
         }
         Mojito.start(imageView.context) {
-            urls(imgList)
+            urls(thumbList, originList)
             position(position)
             progressLoader {
                 DefaultPercentProgress()
             }
-            if (imgList.size != 1)
+            if (urlList.size != 1)
                 setIndicator(CircleIndexIndicator())
             views(nineGridView.getImageViews().toTypedArray())
+            when (PrefManager.imageQuality) {
+                "auto" ->
+                    if (NetWorkUtil.isWifiConnected())
+                        autoLoadTarget(true)
+                    else
+                        autoLoadTarget(false)
+
+                "origin" -> autoLoadTarget(true)
+
+                "thumbnail" -> autoLoadTarget(false)
+            }
+            fragmentCoverLoader {
+                DefaultTargetFragmentCover()
+            }
             setOnMojitoListener(object : SimpleMojitoViewCallback() {
                 override fun onStartAnim(position: Int) {
                     nineGridView.getImageViewAt(position)?.apply {
@@ -305,7 +322,7 @@ object ImageUtil {
                     position: Int
                 ) {
                     if (fragmentActivity != null) {
-                        showSaveImgDialog(fragmentActivity, imgList[position], imgList)
+                        showSaveImgDialog(fragmentActivity, originList[position], originList)
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }
@@ -319,16 +336,32 @@ object ImageUtil {
         context: Context,
         imgList: List<String>
     ) {
-        val newList = ArrayList<String>()
+        val thumbList = ArrayList<String>()
+        val originList = ArrayList<String>()
         for (url in imgList) {
-            newList.add(url.http2https())
+            thumbList.add("${url.http2https()}.s.jpg")
+            originList.add(url.http2https())
         }
         Mojito.start(context) {
-            urls(newList)
+            urls(thumbList, originList)
+            when (PrefManager.imageQuality) {
+                "auto" ->
+                    if (NetWorkUtil.isWifiConnected())
+                        autoLoadTarget(true)
+                    else
+                        autoLoadTarget(false)
+
+                "origin" -> autoLoadTarget(true)
+
+                "thumbnail" -> autoLoadTarget(false)
+            }
+            fragmentCoverLoader {
+                DefaultTargetFragmentCover()
+            }
             progressLoader {
                 DefaultPercentProgress()
             }
-            if (newList.size > 1) {
+            if (imgList.size > 1) {
                 setIndicator(CircleIndexIndicator())
             }
             setOnMojitoListener(object : SimpleMojitoViewCallback() {
@@ -340,7 +373,7 @@ object ImageUtil {
                     position: Int
                 ) {
                     if (fragmentActivity != null) {
-                        showSaveImgDialog(fragmentActivity, newList[position], newList)
+                        showSaveImgDialog(fragmentActivity, originList[position], originList)
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }

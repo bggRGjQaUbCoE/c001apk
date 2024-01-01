@@ -123,5 +123,6 @@
     <string name="my_fav">我的收藏</string>
     <string name="my_like">我的赞</string>
     <string name="my_reply">我的回复</string>
+    <string name="image_quality">图片画质</string>
 
 </resources>
