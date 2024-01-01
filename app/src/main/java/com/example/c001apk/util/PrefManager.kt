@@ -146,4 +146,8 @@ object PrefManager {
     var isOpenLinkOutside: Boolean
         get() = pref.getBoolean("isOpenLinkOutside", false)
         set(value) = pref.edit().putBoolean("isOpenLinkOutside", value).apply()
+
+    var FOLLOWTYPE: String
+        get() = pref.getString("FOLLOWTYPE", "all")!!
+        set(value) = pref.edit().putString("FOLLOWTYPE", value).apply()
 }

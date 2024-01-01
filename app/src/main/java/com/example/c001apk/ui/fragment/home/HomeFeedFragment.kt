@@ -514,8 +514,29 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
             "follow" -> {
                 if (viewModel.url == "") {
-                    viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
-                    viewModel.title = "全部关注"
+                    when (PrefManager.FOLLOWTYPE) {
+                        "all" -> {
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
+                            viewModel.title = "全部关注"
+                        }
+
+                        "circle" -> {
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
+                            viewModel.title = "好友关注"
+                        }
+
+                        "topic" -> {
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
+                            viewModel.title = "话题关注"
+                        }
+
+                        else -> {
+                            viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
+                            viewModel.title = "数码关注"
+                        }
+                    }
+
+
                 }
                 viewModel.getDataList()
             }
@@ -629,39 +650,45 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setTitle("关注分组")
                 val items = arrayOf("全部关注", "好友关注", "话题关注", "数码关注", "应用关注")
+                viewModel.position = when (PrefManager.FOLLOWTYPE) {
+                    "all" -> 0
+                    "circle" -> 1
+                    "topic" -> 2
+                    else -> 3
+                }
                 setSingleChoiceItems(
                     items,
                     viewModel.position
                 ) { dialog: DialogInterface, position: Int ->
                     when (position) {
                         0 -> {
-                            viewModel.position = 0
                             viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
                             viewModel.title = "全部关注"
+                            PrefManager.FOLLOWTYPE = "all"
                         }
 
                         1 -> {
-                            viewModel.position = 1
                             viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
                             viewModel.title = "好友关注"
+                            PrefManager.FOLLOWTYPE = "circle"
                         }
 
                         2 -> {
-                            viewModel.position = 2
                             viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
                             viewModel.title = "话题关注"
+                            PrefManager.FOLLOWTYPE = "topic"
                         }
 
                         3 -> {
-                            viewModel.position = 3
                             viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
                             viewModel.title = "数码关注"
+                            PrefManager.FOLLOWTYPE = "product"
                         }
 
                         4 -> {
-                            viewModel.position = 4
                             viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW&type=apk"
                             viewModel.title = "应用关注"
+                            PrefManager.FOLLOWTYPE = "apk"
                         }
                     }
                     viewModel.homeFeedList.clear()
