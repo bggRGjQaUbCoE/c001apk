@@ -6,14 +6,10 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivitySearchBinding
 import com.example.c001apk.ui.fragment.search.SearchFragment
 
-class SearchActivity : BaseActivity() {
-
-    private lateinit var binding: ActivitySearchBinding
+class SearchActivity : BaseActivity<ActivitySearchBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivitySearchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         val pageType = intent.getStringExtra("pageType" )!!
         val pageParam = intent.getStringExtra("pageParam")!!

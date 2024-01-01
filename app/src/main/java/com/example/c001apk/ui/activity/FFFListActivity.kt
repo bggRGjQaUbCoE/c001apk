@@ -29,9 +29,8 @@ import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 import java.lang.reflect.Method
 
-class FFFListActivity : BaseActivity(), AppListener {
+class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
 
-    private lateinit var binding: ActivityFfflistBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -42,8 +41,6 @@ class FFFListActivity : BaseActivity(), AppListener {
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityFfflistBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
         viewModel.type = intent.getStringExtra("type")!!

@@ -3,12 +3,9 @@ package com.example.c001apk.ui.fragment
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,9 +25,8 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import java.lang.reflect.Method
 
-class AppFragment : Fragment(), AppListener, IOnTabClickListener {
+class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IOnTabClickListener {
 
-    private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -64,13 +60,6 @@ class AppFragment : Fragment(), AppListener, IOnTabClickListener {
                 else -> "最新发布"
             }
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentTopicContentBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     @SuppressLint("NotifyDataSetChanged")

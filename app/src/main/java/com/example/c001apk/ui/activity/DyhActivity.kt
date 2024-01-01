@@ -9,15 +9,12 @@ import com.example.c001apk.ui.fragment.DyhDetailFragment
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
-class DyhActivity : BaseActivity() {
+class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
 
-    private lateinit var binding: ActivityDyhDetailBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityDyhDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.id = intent.getStringExtra("id")!!
         viewModel.title = intent.getStringExtra("title")!!

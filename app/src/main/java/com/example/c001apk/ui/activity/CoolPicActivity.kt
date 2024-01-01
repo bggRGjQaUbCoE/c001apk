@@ -9,15 +9,12 @@ import com.example.c001apk.ui.fragment.CollectionFragment
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
-class CoolPicActivity : BaseActivity() {
+class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
 
-    private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = FragmentTopicBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.title = intent.getStringExtra("title")!!
 

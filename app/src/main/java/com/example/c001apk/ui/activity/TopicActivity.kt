@@ -6,14 +6,9 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityTopicBinding
 import com.example.c001apk.ui.fragment.topic.TopicFragment
 
-class TopicActivity : BaseActivity() {
-
-    private lateinit var binding: ActivityTopicBinding
-
+class TopicActivity : BaseActivity<ActivityTopicBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTopicBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         val type = intent.getStringExtra("type")!!
         val title = intent.getStringExtra("title")!!

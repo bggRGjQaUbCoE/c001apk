@@ -1,19 +1,17 @@
 package com.example.c001apk.ui.fragment.search
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchResultBinding
 import com.example.c001apk.ui.activity.SearchActivity
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
@@ -22,9 +20,8 @@ import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContainer {
+class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(), IOnSearchMenuClickContainer, IOnTabClickContainer {
 
-    private lateinit var binding: FragmentSearchResultBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
@@ -51,14 +48,6 @@ class SearchResultFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClic
             viewModel.pageParam = it.getString("pageParam")!!
             viewModel.title = it.getString("title")!!
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSearchResultBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

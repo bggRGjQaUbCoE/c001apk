@@ -2,22 +2,17 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.fragment.feed.FeedFragment
 import com.example.c001apk.ui.fragment.feed.FeedVoteFragment
 
-class FeedActivity : BaseActivity() {
-
-    private lateinit var binding: ActivityFeedBinding
+class FeedActivity : BaseActivity<ActivityFeedBinding>() {
 
     @SuppressLint("CommitTransaction", "InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityFeedBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         val type = intent.getStringExtra("type")
         val id = intent.getStringExtra("id")

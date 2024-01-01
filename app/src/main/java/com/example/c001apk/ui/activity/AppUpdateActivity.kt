@@ -8,12 +8,10 @@ import com.example.c001apk.databinding.ActivityAppUpdateBinding
 import com.example.c001apk.ui.fragment.home.app.UpdateListFragment
 import com.example.c001apk.util.UpdateListUtil
 
-class AppUpdateActivity : BaseActivity() {
-    private lateinit var binding: ActivityAppUpdateBinding
+class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAppUpdateBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

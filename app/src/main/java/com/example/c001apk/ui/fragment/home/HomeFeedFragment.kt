@@ -8,13 +8,11 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +23,7 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.constant.RecyclerView.checkForGaps
 import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
@@ -47,9 +46,9 @@ import com.google.android.material.textfield.TextInputEditText
 import java.lang.reflect.Method
 
 
-class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublishClickListener {
+class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, IOnTabClickListener,
+    IOnPublishClickListener {
 
-    private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -74,14 +73,6 @@ class HomeFeedFragment : Fragment(), AppListener, IOnTabClickListener, IOnPublis
         arguments?.let {
             viewModel.type = it.getString("TYPE")!!
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentHomeFeedBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     @SuppressLint("NotifyDataSetChanged", "RestrictedApi", "InflateParams")

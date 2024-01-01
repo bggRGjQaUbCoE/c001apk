@@ -2,9 +2,7 @@ package com.example.c001apk.ui.fragment.home
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -13,6 +11,7 @@ import com.example.c001apk.logic.database.HomeMenuDatabase
 import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.SearchActivity
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.home.app.AppListFragment
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
@@ -29,21 +28,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class HomeFragment : Fragment(), IOnBottomClickListener, IOnTabClickContainer {
+class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener,
+    IOnTabClickContainer {
 
-    private lateinit var binding: FragmentHomeBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var tabController: IOnTabClickListener? = null
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -6,14 +6,10 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityCollectionBinding
 import com.example.c001apk.ui.fragment.CollectionFragment
 
-class CollectionActivity : BaseActivity() {
-
-    private lateinit var binding: ActivityCollectionBinding
+class CollectionActivity : BaseActivity<ActivityCollectionBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCollectionBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         if (supportFragmentManager.findFragmentById(R.id.fragment) == null) {
             supportFragmentManager

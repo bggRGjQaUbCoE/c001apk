@@ -40,9 +40,8 @@ import java.text.NumberFormat
 import java.util.Locale
 
 
-class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer {
+class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContainer, INavViewContainer {
 
-    private lateinit var binding: ActivityMainBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private val navViewBehavior by lazy { HideBottomViewOnScrollBehavior<BottomNavigationView>() }
     override var controller: IOnBottomClickListener? = null
@@ -51,8 +50,6 @@ class MainActivity : BaseActivity(), IOnBottomClickContainer, INavViewContainer 
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         navView = binding.bottomNav as NavigationBarView
 

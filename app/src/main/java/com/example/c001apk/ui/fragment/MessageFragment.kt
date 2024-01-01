@@ -4,12 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,7 +30,6 @@ import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -42,9 +38,8 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 
-class MessageFragment : Fragment(), IOnNotiLongClickListener {
+class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClickListener {
 
-    private lateinit var binding: FragmentMessageBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: MessageAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -58,14 +53,6 @@ class MessageFragment : Fragment(), IOnNotiLongClickListener {
             objectAnimator.interpolator = AccelerateInterpolator()
             objectAnimator.duration = 150
         }*/
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMessageBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -34,9 +34,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 
-class BlackListActivity : BaseActivity(), IOnItemClickListener {
+class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClickListener {
 
-    private lateinit var binding: ActivityBlackListBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
@@ -50,8 +49,6 @@ class BlackListActivity : BaseActivity(), IOnItemClickListener {
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityBlackListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.type = intent.getStringExtra("type").toString()
 

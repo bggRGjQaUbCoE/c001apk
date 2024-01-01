@@ -22,9 +22,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class HistoryActivity : BaseActivity() {
+class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
-    private lateinit var binding: ActivityHistoryBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: BHistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -38,8 +37,6 @@ class HistoryActivity : BaseActivity() {
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityHistoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.type = intent.getStringExtra("type")!!
 

@@ -29,16 +29,13 @@ import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 
 
-class WebViewActivity : BaseActivity() {
+class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
 
-    private lateinit var binding: ActivityWebViewBinding
     private lateinit var link: String
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityWebViewBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

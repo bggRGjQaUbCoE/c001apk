@@ -3,12 +3,9 @@ package com.example.c001apk.ui.fragment.search
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +15,7 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.constant.RecyclerView.checkForGaps
 import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
@@ -30,10 +28,9 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import java.lang.reflect.Method
 
-class SearchContentFragment : Fragment(), AppListener, IOnSearchMenuClickListener,
+class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppListener, IOnSearchMenuClickListener,
     IOnTabClickListener {
 
-    private lateinit var binding: FragmentSearchFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -62,14 +59,6 @@ class SearchContentFragment : Fragment(), AppListener, IOnSearchMenuClickListene
             viewModel.pageType = it.getString("pageType")!!
             viewModel.pageParam = it.getString("pageParam")!!
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSearchFeedBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onResume() {

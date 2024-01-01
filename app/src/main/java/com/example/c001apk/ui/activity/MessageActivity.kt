@@ -23,9 +23,8 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import java.lang.reflect.Method
 
-class MessageActivity : BaseActivity(), AppListener {
+class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
 
-    private lateinit var binding: ActivityMessageBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var messageContentAdapter: MessageContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -36,8 +35,6 @@ class MessageActivity : BaseActivity(), AppListener {
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMessageBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.type = intent.getStringExtra("type")!!
 

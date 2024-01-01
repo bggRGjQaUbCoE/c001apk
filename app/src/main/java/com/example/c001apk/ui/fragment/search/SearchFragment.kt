@@ -5,16 +5,13 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
@@ -22,6 +19,7 @@ import com.example.c001apk.adapter.HistoryAdapter
 import com.example.c001apk.databinding.FragmentSearchBinding
 import com.example.c001apk.logic.database.SearchHistoryDatabase
 import com.example.c001apk.logic.model.SearchHistory
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
@@ -34,9 +32,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class SearchFragment : Fragment(), IOnItemClickListener {
+class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListener {
 
-    private lateinit var binding: FragmentSearchBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
@@ -64,14 +61,6 @@ class SearchFragment : Fragment(), IOnItemClickListener {
                     putString("title", title)
                 }
             }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSearchBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     @SuppressLint("NotifyDataSetChanged")

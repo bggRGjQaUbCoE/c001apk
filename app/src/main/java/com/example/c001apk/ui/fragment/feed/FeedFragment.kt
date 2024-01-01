@@ -9,13 +9,11 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -30,6 +28,7 @@ import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
@@ -60,9 +59,8 @@ import java.lang.reflect.Method
 import java.net.URLDecoder
 
 
-class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPublishClickListener {
+class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMoreReplyListener, IOnPublishClickListener {
 
-    private lateinit var binding: FragmentFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     private lateinit var mAdapter: FeedContentAdapter
@@ -111,14 +109,6 @@ class FeedFragment : Fragment(), AppListener, IOnShowMoreReplyListener, IOnPubli
                 viewModel.funame = it.getString("UNAME", "")
             viewModel.isViewReply = it.getBoolean("viewReply", false)
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentFeedBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     @SuppressLint("NotifyDataSetChanged", "SetTextI18n", "InflateParams", "RestrictedApi")

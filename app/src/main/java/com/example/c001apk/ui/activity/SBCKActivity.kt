@@ -1,11 +1,5 @@
 package com.example.c001apk.ui.activity
 
-import android.os.Bundle
-import com.example.c001apk.R
+import com.example.c001apk.databinding.ActivitySbckactivityBinding
 
-class SBCKActivity : BaseActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sbckactivity)
-    }
-}
+class SBCKActivity : BaseActivity<ActivitySbckactivityBinding>()

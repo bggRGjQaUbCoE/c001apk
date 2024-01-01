@@ -3,8 +3,9 @@ package com.example.c001apk.ui.activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import rikka.material.app.MaterialActivity
 
-class AppLinkActivity : BaseActivity() {
+class AppLinkActivity : MaterialActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

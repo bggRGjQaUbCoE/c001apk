@@ -6,12 +6,9 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +20,7 @@ import com.example.c001apk.constant.RecyclerView.checkForGaps
 import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
@@ -35,9 +33,8 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.lang.reflect.Method
 
-class AppListFragment : Fragment(), IOnTabClickListener {
+class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener {
 
-    private lateinit var binding: FragmentHomeFeedBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -45,14 +42,6 @@ class AppListFragment : Fragment(), IOnTabClickListener {
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var mCheckForGapMethod: Method
     private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentHomeFeedBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

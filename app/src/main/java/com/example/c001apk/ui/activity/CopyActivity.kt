@@ -18,9 +18,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class CopyActivity : BaseActivity() {
+class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
-    private lateinit var binding: ActivityCopyBinding
     private lateinit var mAdapter: HomeMenuAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
     private var menuList: ArrayList<HomeMenu> = ArrayList()
@@ -31,8 +30,6 @@ class CopyActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCopyBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         val text: String? = intent.getStringExtra("text")
         text?.let {

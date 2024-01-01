@@ -21,23 +21,19 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.graphics.Typeface
 import android.os.Bundle
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import com.example.c001apk.R
+import com.example.c001apk.databinding.ActivityBugHandlerBinding
 
 /**
  * BugHandlerActivity:
  *   An activity makes crash reporting easier.
  */
-class BugHandlerActivity : BaseActivity() {
+class BugHandlerActivity : BaseActivity<ActivityBugHandlerBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_bug_handler)
 
-        val bugText = findViewById<TextView>(R.id.error)
         val receivedText = intent.getStringExtra("exception_message")
-        bugText.typeface = Typeface.MONOSPACE
-        bugText.text = receivedText
+        binding.error.typeface = Typeface.MONOSPACE
+        binding.error.text = receivedText
 
         // Make our life easier by copying the log to clipboard
         val clipboard: ClipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager

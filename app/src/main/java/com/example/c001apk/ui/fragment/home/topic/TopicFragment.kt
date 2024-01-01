@@ -2,7 +2,6 @@ package com.example.c001apk.ui.fragment.home.topic
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
@@ -11,15 +10,15 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.vertical.adapter.TabAdapter
 import com.example.c001apk.view.vertical.widget.ITabView
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.R
 
-class TopicFragment : Fragment() {
+class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
-    private lateinit var binding: FragmentHomeTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,14 +36,6 @@ class TopicFragment : Fragment() {
                     putString("TYPE", type)
                 }
             }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentHomeTopicBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onResume() {

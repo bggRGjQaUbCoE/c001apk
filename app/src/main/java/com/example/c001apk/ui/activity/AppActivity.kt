@@ -26,9 +26,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.tabs.TabLayoutMediator
 
-class AppActivity : BaseActivity(), IOnTabClickContainer {
+class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
-    private lateinit var binding: ActivityAppBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var subscribe: MenuItem
     override var tabController: IOnTabClickListener? = null
@@ -36,8 +35,6 @@ class AppActivity : BaseActivity(), IOnTabClickContainer {
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAppBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

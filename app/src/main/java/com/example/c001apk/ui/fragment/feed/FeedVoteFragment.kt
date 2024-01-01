@@ -3,12 +3,9 @@ package com.example.c001apk.ui.fragment.feed
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -21,6 +18,7 @@ import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
@@ -35,9 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Method
 
-class FeedVoteFragment : Fragment(), AppListener {
+class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
-    private lateinit var binding: FragmentFeedVoteBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: FeedContentAdapter
     private lateinit var mLayoutManager: StaggeredGridLayoutManager
@@ -62,14 +59,6 @@ class FeedVoteFragment : Fragment(), AppListener {
         arguments?.let {
             viewModel.id = it.getString("ID", "")
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentFeedVoteBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     @SuppressLint("NotifyDataSetChanged")

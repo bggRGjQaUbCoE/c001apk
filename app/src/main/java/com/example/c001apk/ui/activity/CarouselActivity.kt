@@ -27,9 +27,8 @@ import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 import java.lang.reflect.Method
 
-class CarouselActivity : BaseActivity(), AppListener {
+class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
 
-    private lateinit var binding: ActivityCarouselBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -48,8 +47,6 @@ class CarouselActivity : BaseActivity(), AppListener {
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCarouselBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         viewModel.url = intent.getStringExtra("url")!!
         viewModel.title = intent.getStringExtra("title")!!

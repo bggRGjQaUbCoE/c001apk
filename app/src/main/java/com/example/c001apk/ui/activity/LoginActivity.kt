@@ -29,9 +29,8 @@ import com.google.gson.Gson
 import org.jsoup.Jsoup
 
 
-class LoginActivity : BaseActivity() {
+class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 
-    private lateinit var binding: ActivityLoginBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private var isLoginPass = true
 
@@ -45,8 +44,6 @@ class LoginActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

@@ -35,9 +35,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.lang.reflect.Method
 
 
-class UserActivity : BaseActivity(), AppListener {
+class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
 
-    private lateinit var binding: ActivityUserBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -51,8 +50,6 @@ class UserActivity : BaseActivity(), AppListener {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityUserBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

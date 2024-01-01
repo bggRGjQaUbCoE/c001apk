@@ -2,14 +2,11 @@ package com.example.c001apk.ui.fragment.topic
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -19,6 +16,7 @@ import com.example.c001apk.logic.database.TopicBlackListDatabase
 import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.activity.TopicActivity
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
@@ -32,9 +30,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContainer {
+class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer, IOnTabClickContainer {
 
-    private lateinit var binding: FragmentTopicBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
@@ -65,14 +62,6 @@ class TopicFragment : Fragment(), IOnSearchMenuClickContainer, IOnTabClickContai
             viewModel.id = it.getString("id")!!
             viewModel.type = it.getString("type")!!
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentTopicBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

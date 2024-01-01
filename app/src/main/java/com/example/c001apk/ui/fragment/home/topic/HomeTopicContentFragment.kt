@@ -3,11 +3,8 @@ package com.example.c001apk.ui.fragment.home.topic
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,15 +14,15 @@ import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.constant.RecyclerView.checkForGaps
 import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentTopicContentBinding
+import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import java.lang.reflect.Method
 
-class HomeTopicContentFragment : Fragment() {
+class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
-    private lateinit var binding: FragmentTopicContentBinding
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -49,13 +46,6 @@ class HomeTopicContentFragment : Fragment() {
                 putString("title", title)
             }
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentTopicContentBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     @SuppressLint("NotifyDataSetChanged")
