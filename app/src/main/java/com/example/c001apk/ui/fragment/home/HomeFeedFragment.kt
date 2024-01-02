@@ -92,12 +92,15 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (!feed.isNullOrEmpty()) {
+                if (!feed?.message.isNullOrEmpty()) {
+                    mAdapter.setLoadState(mAdapter.LOADING_ERROR, feed?.message)
+                    mAdapter.notifyItemChanged(0)
+                } else if (!feed?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
-                        if (feed.size <= 4 && feed.last().entityTemplate == "refreshCard") {
+                        if (feed?.data!!.size <= 4 && feed.data.last().entityTemplate == "refreshCard") {
                             if (viewModel.homeFeedList.size >= 4) {
                                 if (viewModel.homeFeedList[3].entityTemplate != "refreshCard") {
-                                    viewModel.homeFeedList.add(3, feed.last())
+                                    viewModel.homeFeedList.add(3, feed.data.last())
                                     mAdapter.notifyItemInserted(3)
                                 }
                             }
@@ -114,7 +117,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.homeFeedList.size
-                        for (element in feed) {
+                        for (element in feed?.data!!) {
                             if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniScrollCard"
                                 || element.entityTemplate == "iconLinkGridCard"
@@ -172,12 +175,15 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (!feed.isNullOrEmpty()) {
+                if (!feed?.message.isNullOrEmpty()) {
+                    mAdapter.setLoadState(mAdapter.LOADING_ERROR, feed?.message)
+                    mAdapter.notifyItemChanged(0)
+                } else if (!feed?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing)
                         viewModel.homeFeedList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.homeFeedList.size
-                        for (element in feed) {
+                        for (element in feed?.data!!) {
                             if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniGridCard"
                                 || element.entityTemplate == "iconLinkGridCard"

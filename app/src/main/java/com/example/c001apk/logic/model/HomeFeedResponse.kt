@@ -2,7 +2,13 @@ package com.example.c001apk.logic.model
 
 import com.google.gson.annotations.SerializedName
 
-data class HomeFeedResponse(val data: List<Data>) {
+data class HomeFeedResponse(
+    val status: Int?,
+    val error: Int?,
+    val message: String?,
+    val messageStatus: Int?,
+    val data: List<Data>?
+) {
 
     data class Data(
         @SerializedName("comment_num") val commentNum: String?,

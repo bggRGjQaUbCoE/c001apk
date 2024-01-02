@@ -94,14 +94,14 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (!data.isNullOrEmpty()) {
+                if (!data?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         viewModel.topicDataList.clear()
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.lastItem = data.last().id
+                        viewModel.lastItem = data?.data!!.last().id
                         viewModel.listSize = viewModel.topicDataList.size
-                        for (element in data) {
+                        for (element in data.data) {
                             if (element.id == viewModel.lastItem)
                                 continue
                             if (element.entityType == "feed"

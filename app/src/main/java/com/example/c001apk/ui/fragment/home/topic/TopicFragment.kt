@@ -71,9 +71,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
                 viewModel.isNew = false
 
                 val topic = result.getOrNull()
-                if (!topic.isNullOrEmpty()) {
+                if (!topic?.data.isNullOrEmpty()) {
                     if (viewModel.titleList.isEmpty()) {
-                        for (element in topic[0].entities) {
+                        for (element in topic?.data!![0].entities) {
                             viewModel.titleList.add(element.title)
                             viewModel.fragmentList.add(
                                 HomeTopicContentFragment.newInstance(

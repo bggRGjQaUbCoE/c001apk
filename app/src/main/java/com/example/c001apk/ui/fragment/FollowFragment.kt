@@ -122,13 +122,13 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (!data.isNullOrEmpty()) {
+                if (!data?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         viewModel.dataList.clear()
                     }
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.dataList.size
-                        for (element in data)
+                        for (element in data?.data!!)
                             if (element.entityType == "feed"
                                 || element.entityType == "topic"
                                 || element.entityType == "product"

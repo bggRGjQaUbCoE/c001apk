@@ -79,13 +79,13 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                     if (viewModel.commentStatusText == "允许评论" || viewModel.type == "appForum") {
                         viewModel.tabList.apply {
                             add("最近回复")
-                            add("热度排序")
                             add("最新发布")
+                            add("热度排序")
                         }
                         viewModel.fragmentList.apply {
                             add(AppFragment.newInstance("reply", viewModel.id))
-                            add(AppFragment.newInstance("hot", viewModel.id))
                             add(AppFragment.newInstance("pub", viewModel.id))
+                            add(AppFragment.newInstance("hot", viewModel.id))
                         }
                         initView()
                     } else {

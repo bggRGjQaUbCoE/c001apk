@@ -48,6 +48,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinearItemDecoration1
 import com.example.c001apk.view.LinkTextView
@@ -1635,7 +1636,9 @@ class AppAdapter(
             is IconMiniScrollCardViewHolder -> {
                 val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
                 for (element in dataList[position].entities) {
-                    if (element.entityType == "topic" || element.entityType == "product")
+                    if ((element.entityType == "topic" || element.entityType == "product")
+                        && !TopicBlackListUtil.checkTopic(element.title)
+                    )
                         imageTextScrollCard.add(element)
                 }
                 val mAdapter = IconMiniScrollCardAdapter(imageTextScrollCard)

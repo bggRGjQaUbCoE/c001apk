@@ -75,20 +75,20 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                 viewModel.isNew = false
 
                 val response = result.getOrNull()
-                if (!response.isNullOrEmpty()) {
+                if (!response?.data.isNullOrEmpty()) {
 
                     if (viewModel.isInit) {
                         viewModel.isInit = false
 
                         viewModel.barTitle =
-                            if (response[response.size - 1].extraDataArr == null)
+                            if (response?.data!![response.data.size - 1].extraDataArr == null)
                                 viewModel.title
                             else
-                                response[response.size - 1].extraDataArr?.pageTitle.toString()
+                                response.data[response.data.size - 1].extraDataArr?.pageTitle.toString()
                         initBar(viewModel.barTitle)
 
                         var index = 0
-                        for (element in response) {
+                        for (element in response.data) {
                             if (element.entityTemplate == "iconTabLinkGridCard") {
                                 binding.tabLayout.visibility = View.VISIBLE
                                 binding.viewPager.visibility = View.VISIBLE
@@ -97,7 +97,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                         }
 
                         if (binding.tabLayout.visibility == View.VISIBLE) {
-                            for (element in response[index].entities) {
+                            for (element in response.data[index].entities) {
                                 viewModel.tabList.add(element.title)
                                 viewModel.fragmentList.add(
                                     TopicContentFragment.newInstance(
@@ -115,7 +115,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                             initScroll()
                             binding.swipeRefresh.visibility = View.VISIBLE
                             binding.recyclerView.visibility = View.VISIBLE
-                            for (element in response)
+                            for (element in response.data)
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                             element.tags + element.ttitle
@@ -130,7 +130,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                             viewModel.carouselList.clear()
                         if (viewModel.isRefreshing || viewModel.isLoadMore) {
                             viewModel.listSize = viewModel.carouselList.size
-                            for (element in response)
+                            for (element in response?.data!!)
                                 if (element.entityType == "feed")
                                     if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
                                             element.tags + element.ttitle

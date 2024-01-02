@@ -17,8 +17,8 @@ object Repository {
         fire(Dispatchers.IO) {
             val homeFeedResponse =
                 Network.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
-            if (homeFeedResponse.data.isNotEmpty())
-                Result.success(homeFeedResponse.data)
+            if (homeFeedResponse != null)
+                Result.success(homeFeedResponse)
             else
                 Result.failure(RuntimeException("response status is null"))
         }
@@ -81,7 +81,7 @@ object Repository {
                 page,
                 showAnonymous
             )
-            if (searchResponse.data.isNotEmpty())
+            if (!searchResponse.data.isNullOrEmpty())
                 Result.success(searchResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
@@ -126,7 +126,7 @@ object Repository {
     fun getUserFeed(uid: String, page: Int) =
         fire(Dispatchers.IO) {
             val userResponse = Network.getUserFeed(uid, page)
-            if (userResponse.data.isNotEmpty())
+            if (!userResponse.data.isNullOrEmpty())
                 Result.success(userResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
@@ -173,7 +173,7 @@ object Repository {
     fun getFollowList(url: String, uid: String, page: Int) =
         fire(Dispatchers.IO) {
             val feedResponse = Network.getFollowList(url, uid, page)
-            if (feedResponse.data.isNotEmpty())
+            if (!feedResponse.data.isNullOrEmpty())
                 Result.success(feedResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))
@@ -278,8 +278,8 @@ object Repository {
     fun getDataList(url: String, title: String, subTitle: String?, lastItem: String?, page: Int) =
         fire(Dispatchers.IO) {
             val dataResponse = Network.getDataList(url, title, subTitle, lastItem, page)
-            if (dataResponse.data.isNotEmpty())
-                Result.success(dataResponse.data)
+            if (dataResponse != null)
+                Result.success(dataResponse)
             else
                 Result.failure(RuntimeException("response status is null"))
         }
@@ -287,7 +287,7 @@ object Repository {
     fun getDyhDetail(dyhId: String, type: String, page: Int) =
         fire(Dispatchers.IO) {
             val dataResponse = Network.getDyhDetail(dyhId, type, page)
-            if (dataResponse.data.isNotEmpty())
+            if (!dataResponse.data.isNullOrEmpty())
                 Result.success(dataResponse.data)
             else
                 Result.failure(RuntimeException("response status is null"))

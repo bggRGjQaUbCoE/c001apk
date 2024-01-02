@@ -64,11 +64,11 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (!data.isNullOrEmpty()) {
+                if (!data?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) viewModel.topicDataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.topicDataList.size
-                        for (element in data) if (element.entityType == "topic" || element.entityType == "product") viewModel.topicDataList.add(
+                        for (element in data?.data!!) if (element.entityType == "topic" || element.entityType == "product") viewModel.topicDataList.add(
                             element
                         )
                         viewModel.lastItem = viewModel.topicDataList.last().id

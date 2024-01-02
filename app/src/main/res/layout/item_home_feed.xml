@@ -111,6 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
+            android:background="?attr/actionBarItemBackground"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
             app:layout_constraintEnd_toStartOf="@id/like" />

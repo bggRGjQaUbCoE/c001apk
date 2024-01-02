@@ -78,11 +78,11 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
                 viewModel.isNew = false
 
                 val comment = result.getOrNull()
-                if (!comment.isNullOrEmpty()) {
+                if (!comment?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) viewModel.appCommentList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.appCommentList.size
-                        for (element in comment) if (element.entityType == "feed") if (!BlackListUtil.checkUid(
+                        for (element in comment?.data!!) if (element.entityType == "feed") if (!BlackListUtil.checkUid(
                                 element.userInfo?.uid.toString()
                             ) && !TopicBlackListUtil.checkTopic(
                                 element.tags + element.ttitle

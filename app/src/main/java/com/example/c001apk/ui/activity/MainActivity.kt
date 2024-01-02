@@ -226,8 +226,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
 
     private val onBackPressedCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            if (binding.viewPager.currentItem != 0)
+            if (binding.viewPager.currentItem != 0) {
+                showNavigationView()
                 binding.viewPager.setCurrentItem(0, true)
+            }
         }
     }
 
