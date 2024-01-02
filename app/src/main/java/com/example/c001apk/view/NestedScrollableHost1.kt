@@ -14,8 +14,9 @@ import kotlin.math.absoluteValue
 import kotlin.math.sign
 
 // https://blog.csdn.net/weixin_44139159/article/details/123546494
-class NestedScrollableHost2 : FrameLayout {
+class NestedScrollableHost1 : FrameLayout {
     constructor(context: Context) : super(context)
+
     @SuppressLint("CustomViewStyleable")
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         val a = context.obtainStyledAttributes(attrs, R.styleable.NestedScrollableHost)

@@ -9,10 +9,9 @@ import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentFeedVoteBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
@@ -23,6 +22,9 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.VoteItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
@@ -359,6 +361,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
             }
             inflateMenu(R.menu.feed_menu)
             val favorite = menu.findItem(R.id.favorite)
+            menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             CoroutineScope(Dispatchers.IO).launch {
                 if (feedFavoriteDao.isFavorite(viewModel.id)) {
                     withContext(Dispatchers.Main) {
@@ -496,7 +499,6 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
     private fun initView() {
         binding.tabLayout.visibility = View.GONE
-        val space = requireContext().resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = FeedContentAdapter(
             requireContext(),
             viewModel.feedContentList,
@@ -515,7 +517,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(VoteItemDecoration(space))
+                addItemDecoration(VoteItemDecoration(10.dp))
         }
     }
 

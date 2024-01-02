@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.BHistoryAdapter
 import com.example.c001apk.databinding.ActivityHistoryBinding
@@ -110,7 +111,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mLayoutManager = LinearLayoutManager(this)
         mAdapter = when (viewModel.type) {
             "browse" -> BHistoryAdapter(this)
@@ -122,7 +122,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(LinearItemDecoration(10.dp))
         }
     }
 

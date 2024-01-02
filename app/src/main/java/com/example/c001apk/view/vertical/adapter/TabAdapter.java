@@ -4,7 +4,7 @@ import com.example.c001apk.view.vertical.widget.TabView;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 public interface TabAdapter {
     int getCount();

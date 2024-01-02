@@ -20,8 +20,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FeedContentAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
@@ -41,6 +39,8 @@ import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.OffsetLinearLayoutManager
 import com.example.c001apk.view.StaggerItemDecoration
@@ -59,7 +59,8 @@ import java.lang.reflect.Method
 import java.net.URLDecoder
 
 
-class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMoreReplyListener, IOnPublishClickListener {
+class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMoreReplyListener,
+    IOnPublishClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
@@ -665,11 +666,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                         } else if (viewModel.firstVisibleItemPosition >= 1) {
                             if (binding.titleProfile.visibility != View.VISIBLE)
                                 showTitleProfile()
-                        } else if (getScrollYDistance() >= DensityTool.dp2px(
-                                requireContext(),
-                                50f
-                            )
-                        ) {
+                        } else if (getScrollYDistance() >= 50.dp) {
                             if (binding.titleProfile.visibility != View.VISIBLE)
                                 showTitleProfile()
                         } else {
@@ -755,7 +752,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                 mAdapter.setLoadState(mAdapter.LOADING_END, null)
                 mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
             }
-            if (getScrollYDistance() >= DensityTool.dp2px(requireContext(), 50f)) {
+            if (getScrollYDistance() >= 50.dp) {
                 showTitleProfile()
             } else {
                 if (binding.titleProfile.visibility != View.GONE)
@@ -782,7 +779,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter =
             FeedContentAdapter(requireContext(), viewModel.feedContentList, viewModel.feedReplyList)
         mAdapter.setAppListener(this)
@@ -808,7 +804,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     addItemDecoration(
                         StickyItemDecorator(
-                            space,
+                            10.dp,
                             object : StickyItemDecorator.SortShowListener {
                                 override fun showSort(show: Boolean) {
                                     binding.tabLayout.visibility =
@@ -817,7 +813,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                             })
                     )
                 else
-                    addItemDecoration(StaggerItemDecoration(space))
+                    addItemDecoration(StaggerItemDecoration(10.dp))
         }
     }
 
@@ -837,6 +833,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
             inflateMenu(R.menu.feed_menu)
             menu.findItem(R.id.showReply).isVisible =
                 resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
+            menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             val favorite = menu.findItem(R.id.favorite)
             CoroutineScope(Dispatchers.IO).launch {
                 if (feedFavoriteDao.isFavorite(viewModel.id)) {

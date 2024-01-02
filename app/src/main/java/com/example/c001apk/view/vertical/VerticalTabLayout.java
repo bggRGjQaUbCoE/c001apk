@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 public class VerticalTabLayout extends ScrollView {
     private final Context mContext;

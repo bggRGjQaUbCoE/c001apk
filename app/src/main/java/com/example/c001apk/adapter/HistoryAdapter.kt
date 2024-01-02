@@ -26,7 +26,8 @@ class HistoryAdapter(private var historyList: ArrayList<String>) :
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_search_history, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_search_history, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.keyWord.setOnLongClickListener {
             if (viewHolder.delete.visibility == View.GONE)

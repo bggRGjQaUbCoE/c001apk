@@ -16,7 +16,7 @@ interface BrowseHistoryDao {
     fun loadAllHistory(): List<BrowseHistory>
 
     @Query("SELECT 1 FROM BrowseHistory WHERE fid = :fid LIMIT 1")
-    fun isExist(fid: String) :Boolean
+    fun isExist(fid: String): Boolean
 
     @Query("DELETE FROM BrowseHistory WHERE fid = :fid")
     fun delete(fid: String)

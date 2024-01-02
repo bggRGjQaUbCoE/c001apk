@@ -6,7 +6,7 @@ import android.view.View;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 
 public interface Badge {

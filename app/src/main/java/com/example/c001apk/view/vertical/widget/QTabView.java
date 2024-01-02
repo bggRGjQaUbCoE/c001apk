@@ -19,17 +19,17 @@ import com.example.c001apk.view.vertical.util.DisplayUtil;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 public class QTabView extends TabView {
-    private Context mContext;
+    private final Context mContext;
     private TextView mTitle;
     private Badge mBadgeView;
     private TabIcon mTabIcon;
     private TabTitle mTabTitle;
     private TabBadge mTabBadge;
     private boolean mChecked;
-    private Drawable mDefaultBackground;
+    private final Drawable mDefaultBackground;
 
 
     public QTabView(Context context) {
@@ -52,7 +52,7 @@ public class QTabView extends TabView {
     }
 
     private void initView() {
-        setMinimumHeight(DisplayUtil.dp2px(mContext,25));
+        setMinimumHeight(DisplayUtil.dp2px(mContext, 25));
         if (mTitle == null) {
             mTitle = new TextView(mContext);
             LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);

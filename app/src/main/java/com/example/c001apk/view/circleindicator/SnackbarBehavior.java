@@ -20,13 +20,15 @@ public class SnackbarBehavior extends CoordinatorLayout.Behavior<BaseCircleIndic
         super(context, attributeSet);
     }
 
-    @Override public boolean layoutDependsOn(@NonNull CoordinatorLayout parent,
-            @NonNull BaseCircleIndicator child, @NonNull View dependency) {
+    @Override
+    public boolean layoutDependsOn(@NonNull CoordinatorLayout parent,
+                                   @NonNull BaseCircleIndicator child, @NonNull View dependency) {
         return dependency instanceof Snackbar.SnackbarLayout;
     }
 
-    @Override public boolean onDependentViewChanged(@NonNull CoordinatorLayout parent,
-            @NonNull BaseCircleIndicator child, @NonNull View dependency) {
+    @Override
+    public boolean onDependentViewChanged(@NonNull CoordinatorLayout parent,
+                                          @NonNull BaseCircleIndicator child, @NonNull View dependency) {
         float translationY = getTranslationYForSnackbar(parent, child);
         child.setTranslationY(translationY);
         return true;

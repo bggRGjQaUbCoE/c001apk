@@ -25,6 +25,7 @@ import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
 import kotlin.concurrent.thread
@@ -61,7 +62,6 @@ class BHistoryAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        //notifyDataSetChanged()
     }
 
     class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -113,6 +113,7 @@ class BHistoryAdapter(
                     val popup = PopupMenu(mContext, it)
                     val inflater = popup.menuInflater
                     inflater.inflate(R.menu.feed_history_menu, popup.menu)
+                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
                     popup.setOnMenuItemClickListener(this@BHistoryAdapter)
                     popup.show()
                 }
@@ -178,7 +179,8 @@ class BHistoryAdapter(
                             holder.uname.textSize.toInt(),
                             null
                         )
-                        holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.uname.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
                         SpannableStringBuilderUtil.isColor = false
                         if (history.device == "")
                             holder.device.visibility = View.GONE
@@ -209,7 +211,8 @@ class BHistoryAdapter(
                             holder.uname.textSize.toInt(),
                             null
                         )
-                        holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.uname.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
                         SpannableStringBuilderUtil.isColor = false
                         if (history.device == "")
                             holder.device.visibility = View.GONE

@@ -22,12 +22,14 @@ import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.IconLinkGridCardBean
@@ -83,7 +85,6 @@ class AppAdapter(
     fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
-        //notifyDataSetChanged()
     }
 
     class ImageCarouselCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -151,7 +152,6 @@ class AppAdapter(
     }
 
     class IconMiniScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.title)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
 
@@ -365,6 +365,7 @@ class AppAdapter(
                     popup.menu.findItem(R.id.copy).isVisible = false
                     popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.menu.findItem(R.id.show).isVisible = false
+                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
                 }
@@ -381,7 +382,7 @@ class AppAdapter(
             4 -> {
                 val view =
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_home_image_text_scroll_card, parent, false)
+                        .inflate(R.layout.item_home_icon_mini_scroll_card, parent, false)
                 IconMiniScrollCardViewHolder(view)
             }
 
@@ -486,6 +487,7 @@ class AppAdapter(
                     popup.menu.findItem(R.id.copy).isVisible = false
                     popup.menu.findItem(R.id.delete).isVisible = false
                     popup.menu.findItem(R.id.show).isVisible = false
+                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
                 }
@@ -555,6 +557,7 @@ class AppAdapter(
                     popup.menu.findItem(R.id.copy).isVisible = false
                     popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.menu.findItem(R.id.show).isVisible = false
+                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
                     popup.setOnMenuItemClickListener(this@AppAdapter)
                     popup.show()
                 }
@@ -747,12 +750,11 @@ class AppAdapter(
                 val mAdapter = ImageSquareScrollCardAdapter(mContext, imageTextScrollCard)
                 val mLayoutManager = LinearLayoutManager(mContext)
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
-                val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
                 holder.recyclerView.apply {
                     adapter = mAdapter
                     layoutManager = mLayoutManager
                     if (itemDecorationCount == 0)
-                        addItemDecoration(LinearItemDecoration1(space))
+                        addItemDecoration(LinearItemDecoration1(10.dp))
                 }
             }
 
@@ -983,6 +985,12 @@ class AppAdapter(
                     holder.message.visibility = View.VISIBLE
                     holder.message.movementMethod =
                         LinkTextView.LocalLinkMovementMethod.getInstance()
+                    holder.message.highlightColor = ColorUtils.setAlphaComponent(
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                        ), 128
+                    )
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         feed.message,
@@ -1020,13 +1028,11 @@ class AppAdapter(
                             val title: TextView = view.findViewById(R.id.title)
                             title.text = optionList[position1]
                             if (position1 != 0) {
-                                val space =
-                                    mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                 val layoutParams = ConstraintLayout.LayoutParams(
                                     ConstraintLayout.LayoutParams.MATCH_PARENT,
                                     ConstraintLayout.LayoutParams.WRAP_CONTENT
                                 )
-                                layoutParams.setMargins(0, space, 0, 0)
+                                layoutParams.setMargins(0, 5.dp, 0, 0)
                                 view.layoutParams = layoutParams
                             }
                             return view
@@ -1070,13 +1076,11 @@ class AppAdapter(
                                     title.text = feed.targetRow.title
                                     ImageUtil.showIMG(logo, feed.targetRow.logo)
                                 } else {
-                                    val space =
-                                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                     val layoutParams = ConstraintLayout.LayoutParams(
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT
                                     )
-                                    layoutParams.setMargins(space, 0, 0, 0)
+                                    layoutParams.setMargins(5.dp, 0, 0, 0)
                                     view.layoutParams = layoutParams
                                     type = feed.relationRows!![position - 1].entityType
                                     id = feed.relationRows[position - 1].id
@@ -1095,13 +1099,11 @@ class AppAdapter(
                                     url = feed.relationRows[0].url
                                     ImageUtil.showIMG(logo, feed.relationRows[0].logo)
                                 } else {
-                                    val space =
-                                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                     val layoutParams = ConstraintLayout.LayoutParams(
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT
                                     )
-                                    layoutParams.setMargins(space, 0, 0, 0)
+                                    layoutParams.setMargins(5.dp, 0, 0, 0)
                                     view.layoutParams = layoutParams
                                     type = feed.relationRows!![position].entityType
                                     id = feed.relationRows[position].id
@@ -1424,6 +1426,12 @@ class AppAdapter(
                     )
 
                 holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
+                holder.message.highlightColor = ColorUtils.setAlphaComponent(
+                    ThemeUtils.getThemeAttrColor(
+                        mContext,
+                        rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                    ), 128
+                )
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     feed.message,
@@ -1447,7 +1455,7 @@ class AppAdapter(
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
                         if (feed.feedType == "feedArticle" && imgWidth > imgHeight)
-                            urlList.add(feed.pic)
+                            urlList.add("${feed.pic}.s.jpg")
                         else
                             for (element in feed.picArr)
                                 if ((PrefManager.imageQuality == "origin" ||
@@ -1468,6 +1476,12 @@ class AppAdapter(
                         return
                     }
                     holder.hotReply.visibility = View.VISIBLE
+                    holder.hotReply.highlightColor = ColorUtils.setAlphaComponent(
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                        ), 128
+                    )
                     val mess =
                         if (feed.replyRows[0].picArr.isNullOrEmpty())
                             "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message}"
@@ -1522,13 +1536,11 @@ class AppAdapter(
                                     title.text = feed.targetRow.title
                                     ImageUtil.showIMG(logo, feed.targetRow.logo)
                                 } else {
-                                    val space =
-                                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                     val layoutParams = ConstraintLayout.LayoutParams(
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT
                                     )
-                                    layoutParams.setMargins(space, 0, 0, 0)
+                                    layoutParams.setMargins(5.dp, 0, 0, 0)
                                     view.layoutParams = layoutParams
                                     type = feed.relationRows!![position - 1].entityType
                                     id = feed.relationRows[position - 1].id
@@ -1547,13 +1559,11 @@ class AppAdapter(
                                     url = feed.relationRows[0].url
                                     ImageUtil.showIMG(logo, feed.relationRows[0].logo)
                                 } else {
-                                    val space =
-                                        mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                     val layoutParams = ConstraintLayout.LayoutParams(
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                         ConstraintLayout.LayoutParams.WRAP_CONTENT
                                     )
-                                    layoutParams.setMargins(space, 0, 0, 0)
+                                    layoutParams.setMargins(5.dp, 0, 0, 0)
                                     view.layoutParams = layoutParams
                                     type = feed.relationRows!![position].entityType
                                     id = feed.relationRows[position].id
@@ -1604,9 +1614,8 @@ class AppAdapter(
                 val mAdapter = ImageTextScrollCardAdapter(mContext, imageTextScrollCard)
                 val mLayoutManager = LinearLayoutManager(mContext)
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
-                val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
                 holder.title.text = dataList[position].title
-                holder.title.setPadding(space, space, space, 0)
+                holder.title.setPadding(10.dp, 10.dp, 10.dp, 0)
                 /*val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
                 drawable.setBounds(
                     0,
@@ -1619,7 +1628,7 @@ class AppAdapter(
                     adapter = mAdapter
                     layoutManager = mLayoutManager
                     if (itemDecorationCount == 0)
-                        addItemDecoration(LinearItemDecoration1(space))
+                        addItemDecoration(LinearItemDecoration1(10.dp))
                 }
             }
 
@@ -1629,29 +1638,14 @@ class AppAdapter(
                     if (element.entityType == "topic" || element.entityType == "product")
                         imageTextScrollCard.add(element)
                 }
-                val mAdapter = IconMiniScrollCardAdapter(mContext, imageTextScrollCard)
+                val mAdapter = IconMiniScrollCardAdapter(imageTextScrollCard)
                 val mLayoutManager = LinearLayoutManager(mContext)
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
-                val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
-                if (dataList[position].title == "")
-                    holder.title.visibility = View.GONE
-                else {
-                    holder.title.text = dataList[position].title
-                    holder.title.setPadding(space, space, space, 0)
-                }
-                /*val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
-                drawable.setBounds(
-                    0,
-                    0,
-                    holder.title.textSize.toInt(),
-                    holder.title.textSize.toInt()
-                )
-                holder.title.setCompoundDrawables(null, null, drawable, null)*/
                 holder.recyclerView.apply {
                     adapter = mAdapter
                     layoutManager = mLayoutManager
                     if (itemDecorationCount == 0)
-                        addItemDecoration(LinearItemDecoration1(space))
+                        addItemDecoration(LinearItemDecoration1(10.dp))
                 }
             }
         }

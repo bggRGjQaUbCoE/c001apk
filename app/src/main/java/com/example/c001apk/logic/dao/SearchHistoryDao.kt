@@ -16,7 +16,7 @@ interface SearchHistoryDao {
     fun loadAllHistory(): List<SearchHistory>
 
     @Query("SELECT 1 FROM SearchHistory WHERE keyWord = :keyWord LIMIT 1")
-    fun isExist(keyWord: String) :Boolean
+    fun isExist(keyWord: String): Boolean
 
     @Query("DELETE FROM SearchHistory WHERE keyWord = :keyWord")
     fun delete(keyWord: String)

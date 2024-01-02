@@ -176,28 +176,28 @@ public class DateUtils {
     }
 
     public static String getYear() {
-        return calendar.get(Calendar.YEAR) + "";
+        return String.valueOf(calendar.get(Calendar.YEAR));
     }
 
     public static String getMonth() {
         int month = calendar.get(Calendar.MONTH) + 1;
-        return month + "";
+        return String.valueOf(month);
     }
 
     public static String getDay() {
-        return calendar.get(Calendar.DATE) + "";
+        return String.valueOf(calendar.get(Calendar.DATE));
     }
 
     public static String get24Hour() {
-        return calendar.get(Calendar.HOUR_OF_DAY) + "";
+        return String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
     }
 
     public static String getMinute() {
-        return calendar.get(Calendar.MINUTE) + "";
+        return String.valueOf(calendar.get(Calendar.MINUTE));
     }
 
     public static String getSecond() {
-        return calendar.get(Calendar.SECOND) + "";
+        return String.valueOf(calendar.get(Calendar.SECOND));
     }
 
 }

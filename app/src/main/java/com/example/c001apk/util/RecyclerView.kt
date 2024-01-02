@@ -1,4 +1,4 @@
-package com.example.c001apk.constant
+package com.example.c001apk.util
 
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.megatronking.stringfog.annotation.StringFogIgnore

@@ -61,7 +61,6 @@ class Reply2ReplyTotalAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        //notifyDataSetChanged()
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -139,6 +138,7 @@ class Reply2ReplyTotalAdapter(
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
                     popup.menu.findItem(R.id.copy).isVisible = false
                     popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
+                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
                     popup.setOnMenuItemClickListener(this@Reply2ReplyTotalAdapter)
                     popup.show()
                 }

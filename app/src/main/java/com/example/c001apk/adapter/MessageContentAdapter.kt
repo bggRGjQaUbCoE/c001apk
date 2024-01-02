@@ -52,7 +52,6 @@ class MessageContentAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        // notifyDataSetChanged()
     }
 
     class MessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {

@@ -67,7 +67,6 @@ class MessageAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int) {
         this.loadState = loadState
-        //notifyDataSetChanged()
     }
 
     private val messTitle = ArrayList<String>()
@@ -423,7 +422,6 @@ class MessageAdapter(
                 }
                 holder.uid = noti.fromuid
                 holder.uname.text = noti.fromusername
-                //holder.message.movementMethod = CustomLinkMovementMethod.getInstance()
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext, noti.note, (holder.message.textSize * 1.3).toInt(), null
                 )

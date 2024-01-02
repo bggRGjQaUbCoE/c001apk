@@ -33,12 +33,12 @@ public class CircleIndicator2 extends BaseCircleIndicator {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public CircleIndicator2(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
+                            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public void attachToRecyclerView(@NonNull RecyclerView recyclerView,
-            @NonNull SnapHelper snapHelper) {
+                                     @NonNull SnapHelper snapHelper) {
         mRecyclerView = recyclerView;
         mSnapHelper = snapHelper;
         mLastPosition = -1;
@@ -85,7 +85,8 @@ public class CircleIndicator2 extends BaseCircleIndicator {
 
     private final RecyclerView.AdapterDataObserver mAdapterDataObserver =
             new RecyclerView.AdapterDataObserver() {
-                @Override public void onChanged() {
+                @Override
+                public void onChanged() {
                     super.onChanged();
                     if (mRecyclerView == null) {
                         return;
@@ -104,23 +105,27 @@ public class CircleIndicator2 extends BaseCircleIndicator {
                     createIndicators();
                 }
 
-                @Override public void onItemRangeChanged(int positionStart, int itemCount) {
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount) {
                     super.onItemRangeChanged(positionStart, itemCount);
                     onChanged();
                 }
 
-                @Override public void onItemRangeChanged(int positionStart, int itemCount,
-                        @Nullable Object payload) {
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount,
+                                               @Nullable Object payload) {
                     super.onItemRangeChanged(positionStart, itemCount, payload);
                     onChanged();
                 }
 
-                @Override public void onItemRangeInserted(int positionStart, int itemCount) {
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
                     super.onItemRangeInserted(positionStart, itemCount);
                     onChanged();
                 }
 
-                @Override public void onItemRangeRemoved(int positionStart, int itemCount) {
+                @Override
+                public void onItemRangeRemoved(int positionStart, int itemCount) {
                     super.onItemRangeRemoved(positionStart, itemCount);
                     onChanged();
                 }

@@ -16,8 +16,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.BaseFragment
@@ -25,6 +23,8 @@ import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.DensityTool
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
@@ -132,7 +132,6 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
 
     @SuppressLint("NotifyDataSetChanged")
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppListAdapter(viewModel.appList)
         mLayoutManager = LinearLayoutManager(activity)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -153,9 +152,9 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
                 else sLayoutManager
             if (itemDecorationCount == 0)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    addItemDecoration(LinearItemDecoration(space))
+                    addItemDecoration(LinearItemDecoration(10.dp))
                 else
-                    addItemDecoration(StaggerItemDecoration(space))
+                    addItemDecoration(StaggerItemDecoration(10.dp))
         }
         viewModel.items.observe(viewLifecycleOwner) {
             viewModel.appList.clear()

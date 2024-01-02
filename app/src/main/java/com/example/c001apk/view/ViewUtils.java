@@ -18,10 +18,9 @@ public class ViewUtils {
             if (child instanceof RecyclerView) {
                 return child;
             }
-            if (!(child instanceof ViewGroup)) {
+            if (!(child instanceof ViewGroup viewGroup)) {
                 continue;
             }
-            ViewGroup viewGroup = (ViewGroup) child;
             for (int i = 0; i < viewGroup.getChildCount(); i++) {
                 unvisited.add(viewGroup.getChildAt(i));
             }

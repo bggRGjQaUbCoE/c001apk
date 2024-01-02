@@ -59,11 +59,13 @@ public class CircleIndicator extends BaseCircleIndicator {
     private final ViewPager.OnPageChangeListener mInternalPageChangeListener =
             new ViewPager.OnPageChangeListener() {
 
-                @Override public void onPageScrolled(int position, float positionOffset,
-                        int positionOffsetPixels) {
+                @Override
+                public void onPageScrolled(int position, float positionOffset,
+                                           int positionOffsetPixels) {
                 }
 
-                @Override public void onPageSelected(int position) {
+                @Override
+                public void onPageSelected(int position) {
 
                     if (mViewpager.getAdapter() == null
                             || mViewpager.getAdapter().getCount() <= 0) {
@@ -72,7 +74,8 @@ public class CircleIndicator extends BaseCircleIndicator {
                     animatePageSelected(position);
                 }
 
-                @Override public void onPageScrollStateChanged(int state) {
+                @Override
+                public void onPageScrollStateChanged(int state) {
                 }
             };
 
@@ -81,7 +84,8 @@ public class CircleIndicator extends BaseCircleIndicator {
     }
 
     private final DataSetObserver mInternalDataSetObserver = new DataSetObserver() {
-        @Override public void onChanged() {
+        @Override
+        public void onChanged() {
             super.onChanged();
             if (mViewpager == null) {
                 return;
@@ -104,7 +108,8 @@ public class CircleIndicator extends BaseCircleIndicator {
     /**
      * @deprecated User ViewPager addOnPageChangeListener
      */
-    @Deprecated public void setOnPageChangeListener(
+    @Deprecated
+    public void setOnPageChangeListener(
             ViewPager.OnPageChangeListener onPageChangeListener) {
         if (mViewpager == null) {
             throw new NullPointerException("can not find Viewpager , setViewPager first");

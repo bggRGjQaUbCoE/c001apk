@@ -15,10 +15,14 @@ public class Config {
     int height = -1;
     int margin = -1;
     @SuppressLint("ResourceType")
-    @AnimatorRes int animatorResId = R.anim.scale_with_alpha;
-    @AnimatorRes int animatorReverseResId = 0;
-    @DrawableRes int backgroundResId = R.drawable.white_radius;
-    @DrawableRes int unselectedBackgroundId;
+    @AnimatorRes
+    int animatorResId = R.anim.scale_with_alpha;
+    @AnimatorRes
+    int animatorReverseResId = 0;
+    @DrawableRes
+    int backgroundResId = R.drawable.white_radius;
+    @DrawableRes
+    int unselectedBackgroundId;
     int orientation = LinearLayout.HORIZONTAL;
     int gravity = Gravity.CENTER;
 

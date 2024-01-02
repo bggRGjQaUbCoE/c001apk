@@ -29,7 +29,7 @@ class NestCollapsingToolbarLayout : CollapsingToolbarLayout {
         }
     }
 
-    fun setOnScrimesShowListener(listener: OnScrimsShowListener){
+    fun setOnScrimesShowListener(listener: OnScrimsShowListener) {
         scrimsShowListener = listener
     }
 

@@ -4,7 +4,7 @@ import android.content.Context;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 
 public class DisplayUtil {

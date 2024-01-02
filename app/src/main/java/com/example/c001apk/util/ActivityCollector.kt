@@ -43,9 +43,9 @@ object ActivityCollector {
         for (activity in activities) {
             val name = activity.javaClass.name //activity的类名
             if (name != activityName) {
-                if(activity.isFinishing){
+                if (activity.isFinishing) {
                     activities.remove(activity)
-                }else{
+                } else {
                     activity.finish()
                 }
             }

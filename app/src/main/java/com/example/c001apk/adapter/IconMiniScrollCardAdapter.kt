@@ -1,6 +1,5 @@
 package com.example.c001apk.adapter
 
-import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,6 @@ import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.util.ImageUtil
 
 class IconMiniScrollCardAdapter(
-    private val mContext: Context,
     private val iconMiniScrollCardList: List<HomeFeedResponse.Entities>
 ) :
     RecyclerView.Adapter<IconMiniScrollCardAdapter.ViewHolder>() {

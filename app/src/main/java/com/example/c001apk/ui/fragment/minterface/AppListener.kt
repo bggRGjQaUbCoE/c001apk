@@ -28,7 +28,7 @@ interface AppListener {
         imageView: ImageView,
         urlList: List<String>,
         position: Int
-    ){
+    ) {
         ImageUtil.startBigImgView(
             nineGridView,
             imageView,

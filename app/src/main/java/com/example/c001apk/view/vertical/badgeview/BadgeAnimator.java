@@ -13,13 +13,13 @@ import java.util.Random;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  * Animation borrowed from https://github.com/tyrantgit/ExplosionField
  */
 
 public class BadgeAnimator extends ValueAnimator {
-    private BitmapFragment[][] mFragments;
-    private WeakReference<QBadgeView> mWeakBadge;
+    private final BitmapFragment[][] mFragments;
+    private final WeakReference<QBadgeView> mWeakBadge;
 
     public BadgeAnimator(Bitmap badgeBitmap, PointF center, QBadgeView badge) {
         mWeakBadge = new WeakReference<>(badge);

@@ -46,7 +46,8 @@ class BaseCircleIndicator extends LinearLayout {
 
     protected int mLastPosition = -1;
 
-    @Nullable private IndicatorCreatedListener mIndicatorCreatedListener;
+    @Nullable
+    private IndicatorCreatedListener mIndicatorCreatedListener;
 
     public BaseCircleIndicator(Context context) {
         super(context);
@@ -65,7 +66,7 @@ class BaseCircleIndicator extends LinearLayout {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public BaseCircleIndicator(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
+                               int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
     }
@@ -85,7 +86,7 @@ class BaseCircleIndicator extends LinearLayout {
         if (attrs == null) {
             return config;
         }
-       TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.BaseCircleIndicator);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.BaseCircleIndicator);
         config.width =
                 typedArray.getDimensionPixelSize(R.styleable.BaseCircleIndicator_ci_width, -1);
         config.height =
@@ -98,10 +99,10 @@ class BaseCircleIndicator extends LinearLayout {
                 typedArray.getResourceId(R.styleable.BaseCircleIndicator_ci_animator_reverse, 0);
         config.backgroundResId =
                 typedArray.getResourceId(R.styleable.BaseCircleIndicator_ci_drawable, R.drawable.white_radius);
-        config.unselectedBackgroundId =config.backgroundResId;
-              //  typedArray.getResourceId(R.styleable.BaseCircleIndicator_ci_drawable_unselected,
-                       // config.backgroundResId );
-        config.orientation =  -1;//typedArray.getInt(R.styleable.BaseCircleIndicator_ci_orientation, -1);
+        config.unselectedBackgroundId = config.backgroundResId;
+        //  typedArray.getResourceId(R.styleable.BaseCircleIndicator_ci_drawable_unselected,
+        // config.backgroundResId );
+        config.orientation = -1;//typedArray.getInt(R.styleable.BaseCircleIndicator_ci_orientation, -1);
         config.gravity = -1;//typedArray.getInt(R.styleable.BaseCircleIndicator_ci_gravity, -1);
         typedArray.recycle();
 
@@ -138,7 +139,7 @@ class BaseCircleIndicator extends LinearLayout {
     }
 
     public void tintIndicator(@ColorInt int indicatorColor,
-            @ColorInt int unselectedIndicatorColor) {
+                              @ColorInt int unselectedIndicatorColor) {
         mIndicatorTintColor = ColorStateList.valueOf(indicatorColor);
         mIndicatorTintUnselectedColor = ColorStateList.valueOf(unselectedIndicatorColor);
         changeIndicatorBackground();
@@ -149,7 +150,7 @@ class BaseCircleIndicator extends LinearLayout {
     }
 
     public void changeIndicatorResource(@DrawableRes int indicatorResId,
-            @DrawableRes int indicatorUnselectedResId) {
+                                        @DrawableRes int indicatorUnselectedResId) {
         mIndicatorBackgroundResId = indicatorResId;
         mIndicatorUnselectedBackgroundResId = indicatorUnselectedResId;
         changeIndicatorBackground();
@@ -159,7 +160,7 @@ class BaseCircleIndicator extends LinearLayout {
         /**
          * IndicatorCreatedListener
          *
-         * @param view internal indicator view
+         * @param view     internal indicator view
          * @param position position
          */
         void onIndicatorCreated(View view, int position);
@@ -304,7 +305,7 @@ class BaseCircleIndicator extends LinearLayout {
     }
 
     private void bindIndicatorBackground(View view, @DrawableRes int drawableRes,
-            @Nullable ColorStateList tintColor) {
+                                         @Nullable ColorStateList tintColor) {
         if (tintColor != null) {
             Drawable indicatorDrawable = DrawableCompat.wrap(
                     ContextCompat.getDrawable(getContext(), drawableRes).mutate());
@@ -316,7 +317,8 @@ class BaseCircleIndicator extends LinearLayout {
     }
 
     protected static class ReverseInterpolator implements Interpolator {
-        @Override public float getInterpolation(float value) {
+        @Override
+        public float getInterpolation(float value) {
             return Math.abs(1.0f - value);
         }
     }

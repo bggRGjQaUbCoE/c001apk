@@ -10,10 +10,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.example.c001apk.R
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -22,13 +20,16 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import java.lang.reflect.Method
 
-class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppListener, IOnSearchMenuClickListener,
+class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppListener,
+    IOnSearchMenuClickListener,
     IOnTabClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -269,8 +270,6 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-
         mAdapter = AppAdapter(requireContext(), viewModel.searchList)
         mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(activity)
@@ -290,9 +289,9 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
                     mLayoutManager
                 else sLayoutManager
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(LinearItemDecoration(10.dp))
             else
-                addItemDecoration(StaggerItemDecoration(space))
+                addItemDecoration(StaggerItemDecoration(10.dp))
         }
     }
 

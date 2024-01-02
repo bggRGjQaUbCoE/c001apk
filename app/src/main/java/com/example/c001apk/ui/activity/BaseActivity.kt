@@ -31,7 +31,7 @@ abstract class BaseActivity<VB : ViewBinding> : MaterialActivity() {
     override fun attachBaseContext(newBase: Context) {
         val configuration = newBase.resources.configuration
         configuration.fontScale = PrefManager.FONTSCALE.toFloat()
-        super.attachBaseContext(newBase.createConfigurationContext(configuration));
+        super.attachBaseContext(newBase.createConfigurationContext(configuration))
     }
 
     override fun onDestroy() {

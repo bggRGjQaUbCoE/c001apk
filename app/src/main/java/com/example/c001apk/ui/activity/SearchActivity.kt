@@ -11,14 +11,17 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val pageType = intent.getStringExtra("pageType" )!!
+        val pageType = intent.getStringExtra("pageType")!!
         val pageParam = intent.getStringExtra("pageParam")!!
         val title = intent.getStringExtra("title")!!
 
         if (supportFragmentManager.findFragmentById(R.id.searchFragment) == null) {
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.searchFragment, SearchFragment.newInstance(pageType, pageParam, title))
+                .replace(
+                    R.id.searchFragment,
+                    SearchFragment.newInstance(pageType, pageParam, title)
+                )
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }

@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 
 public class QBadgeView extends View implements Badge {
@@ -155,7 +155,7 @@ public class QBadgeView extends View implements Badge {
                 ViewGroup.LayoutParams targetParams = targetView.getLayoutParams();
                 targetContainer.removeView(targetView);
                 final BadgeContainer badgeContainer = new BadgeContainer(getContext());
-                if(targetContainer instanceof RelativeLayout){
+                if (targetContainer instanceof RelativeLayout) {
                     badgeContainer.setId(targetView.getId());
                 }
                 targetContainer.addView(badgeContainer, index, targetParams);
@@ -832,7 +832,7 @@ public class QBadgeView extends View implements Badge {
 
         @Override
         protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-            if(!(getParent() instanceof RelativeLayout)){
+            if (!(getParent() instanceof RelativeLayout)) {
                 super.dispatchRestoreInstanceState(container);
             }
         }

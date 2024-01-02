@@ -15,11 +15,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
 import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
@@ -27,6 +26,8 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
@@ -342,8 +343,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-
         mAdapter =
             Reply2ReplyTotalAdapter(
                 requireContext(),
@@ -370,9 +369,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                     mLayoutManager
                 else sLayoutManager
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(ReplyItemDecoration(space))
+                addItemDecoration(ReplyItemDecoration(10.dp))
             else
-                addItemDecoration(StaggerItemDecoration(space))
+                addItemDecoration(StaggerItemDecoration(10.dp))
         }
     }
 

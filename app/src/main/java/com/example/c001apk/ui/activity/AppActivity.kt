@@ -3,6 +3,7 @@ package com.example.c001apk.ui.activity
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -156,7 +157,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         binding.size.text = viewModel.size
         binding.updateTime.text = viewModel.lastupdate
         binding.collapsingToolbar.title = viewModel.title
-        binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
+        binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
         ImageUtil.showIMG(binding.logo, viewModel.logo)
         if (viewModel.type == "apk")
             viewModel.getDownloadLink()

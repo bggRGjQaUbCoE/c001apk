@@ -34,9 +34,9 @@ class UpdateListAdapter(
         var appName: TextView = itemView.findViewById(R.id.appName)
         var codeName: TextView = itemView.findViewById(R.id.codeName)
         var size: TextView = itemView.findViewById(R.id.size)
-        var updateLog = itemView.findViewById<TextView>(R.id.updateLog)
-        val bitType = itemView.findViewById<TextView>(R.id.bitType)
-        val btnUpdate = itemView.findViewById<Button>(R.id.btnUpdate)
+        var updateLog: TextView = itemView.findViewById(R.id.updateLog)
+        val bitType: TextView = itemView.findViewById(R.id.bitType)
+        val btnUpdate: Button = itemView.findViewById(R.id.btnUpdate)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CoolPicActivity
@@ -33,15 +34,14 @@ class ImageSquareScrollCardAdapter(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_home_image_square_scroll_card_item, parent, false)
         val padding =
-            if (mContext.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 78f
-            else 95f
-        val spacePx = DensityTool.dp2px(parent.context, padding)
+            if (mContext.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 78.dp
+            else 95.dp
         val imageWidth =
             if (mContext.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                DensityTool.getScreenWidth(parent.context) - spacePx
+                DensityTool.getScreenWidth(parent.context) - padding
             else
-                DensityTool.getScreenWidth(parent.context) / 2 - spacePx
-        view.layoutParams.width = (imageWidth / 5).toInt()
+                DensityTool.getScreenWidth(parent.context) / 2 - padding
+        view.layoutParams.width = (imageWidth / 5)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(parent.context, CoolPicActivity::class.java)

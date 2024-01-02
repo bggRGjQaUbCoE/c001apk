@@ -63,7 +63,6 @@ public class AppSigning {
 
     /**
      * 获取签名sha1值
-     *
      */
     public static String getSha1(Context context) {
         String res = "";
@@ -76,7 +75,6 @@ public class AppSigning {
 
     /**
      * 获取签名MD5值
-     *
      */
     public static String getMD5(Context context) {
         String res = "";
@@ -89,7 +87,6 @@ public class AppSigning {
 
     /**
      * 获取签名SHA256值
-     *
      */
     public static String getSHA256(Context context) {
         String res = "";
@@ -102,7 +99,6 @@ public class AppSigning {
 
     /**
      * 返回对应包的签名信息
-     *
      */
     private static Signature[] getSignatures(Context context, String packageName) {
         PackageInfo packageInfo;
@@ -117,7 +113,6 @@ public class AppSigning {
 
     /**
      * 获取相应的类型的字符串（把签名的byte[]信息转换成16进制）
-     *
      */
     private static String getSignatureString(Signature sig, String type) {
         byte[] hexBytes = sig.toByteArray();
@@ -139,7 +134,6 @@ public class AppSigning {
 
     /**
      * 获取相应的类型的字符串（把签名的byte[]信息转换成 95:F4:D4:FG 这样的字符串形式）
-     *
      */
     private static String getSignatureByteString(Signature sig, String type) {
         byte[] hexBytes = sig.toByteArray();

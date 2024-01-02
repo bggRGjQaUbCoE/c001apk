@@ -15,7 +15,7 @@ class IconLinkGridCardAdapter(
 ) : RecyclerView.Adapter<IconLinkGridCardAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val recyclerView :RecyclerView= view.findViewById(R.id.recyclerView)
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

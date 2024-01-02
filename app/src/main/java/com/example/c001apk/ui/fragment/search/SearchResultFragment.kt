@@ -20,7 +20,8 @@ import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(), IOnSearchMenuClickContainer, IOnTabClickContainer {
+class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
+    IOnSearchMenuClickContainer, IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null

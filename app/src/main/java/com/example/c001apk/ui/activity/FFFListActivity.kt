@@ -13,15 +13,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.c001apk.R
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.FollowFragment
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
@@ -360,7 +360,6 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = AppAdapter(this, viewModel.dataList)
         mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(this)
@@ -380,9 +379,9 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
                     mLayoutManager
                 else sLayoutManager
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(LinearItemDecoration(10.dp))
             else
-                addItemDecoration(StaggerItemDecoration(space))
+                addItemDecoration(StaggerItemDecoration(10.dp))
         }
     }
 
@@ -443,6 +442,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
         viewModel.deleteId = id
         viewModel.postDelete()
     }
+
     override fun onShowCollection(id: String, title: String) {}
 
 }

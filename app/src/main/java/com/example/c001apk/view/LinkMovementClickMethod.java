@@ -12,7 +12,7 @@ public class LinkMovementClickMethod extends LinkMovementMethod {
 
     private long lastClickTime;
 
-    private static final long CLICK_DELAY = 500l;
+    private static final long CLICK_DELAY = 500L;
 
     @Override
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {

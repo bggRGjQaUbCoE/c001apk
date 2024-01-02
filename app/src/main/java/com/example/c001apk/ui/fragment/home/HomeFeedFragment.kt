@@ -20,8 +20,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
@@ -33,6 +31,8 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
@@ -550,10 +550,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
-        mAdapter = AppAdapter(
-            requireContext(), viewModel.homeFeedList
-        )
+        mAdapter = AppAdapter(requireContext(), viewModel.homeFeedList)
         mLayoutManager = LinearLayoutManager(activity)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
@@ -574,9 +571,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 else sLayoutManager
             if (itemDecorationCount == 0) {
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    addItemDecoration(LinearItemDecoration(space))
+                    addItemDecoration(LinearItemDecoration(10.dp))
                 else
-                    addItemDecoration(StaggerItemDecoration(space))
+                    addItemDecoration(StaggerItemDecoration(10.dp))
             }
         }
     }

@@ -14,7 +14,7 @@ public class OffsetLinearLayoutManager extends LinearLayoutManager {
         super(context);
     }
 
-    private Map<Integer, Integer> heightMap = new HashMap<>();
+    private final Map<Integer, Integer> heightMap = new HashMap<>();
 
     public int listHeight = 0;
 

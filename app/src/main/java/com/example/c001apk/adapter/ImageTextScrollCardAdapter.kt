@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.FeedActivity
@@ -39,14 +40,13 @@ class ImageTextScrollCardAdapter(
         val view =
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_home_image_text_scroll_card_item, parent, false)
-        val padding = 50f
-        val spacePx = DensityTool.dp2px(parent.context, padding)
+        val padding = 50.dp
         val imageWidth =
             if (mContext.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                DensityTool.getScreenWidth(parent.context) - spacePx
+                DensityTool.getScreenWidth(parent.context) - padding
             else
-                DensityTool.getScreenWidth(parent.context) / 2 - spacePx
-        view.layoutParams.width = (imageWidth - imageWidth / 3).toInt()
+                DensityTool.getScreenWidth(parent.context) / 2 - padding
+        view.layoutParams.width = (imageWidth - imageWidth / 3)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(parent.context, FeedActivity::class.java)
@@ -81,8 +81,7 @@ class ImageTextScrollCardAdapter(
         holder.uid = imageTextScrollCard.userInfo.uid
         holder.uname = imageTextScrollCard.username
         holder.title.text = imageTextScrollCard.title
-        val space = mContext.resources.getDimensionPixelSize(R.dimen.normal_space)
-        holder.title.setPadding(space, space, space, space)
+        holder.title.setPadding(10.dp, 10.dp, 10.dp, 10.dp)
         ImageUtil.showIMG1(holder.imageTextScrollCard, imageTextScrollCard.pic)
     }
 

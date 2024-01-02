@@ -33,7 +33,8 @@ class TokenDeviceUtils {
                     BUILDNUMBER = randHexString(16)
                     SDK_INT = randomSdkInt()
                     ANDROID_VERSION = randomAndroidVersionRelease()
-                    USER_AGENT = "Dalvik/2.1.0 (Linux; U; Android $ANDROID_VERSION; ${MODEL} ${BUILDNUMBER}) (#Build; ${BRAND}; ${MODEL}; ${BUILDNUMBER}; $ANDROID_VERSION) +CoolMarket/${VERSION_NAME}-${VERSION_CODE}-${Constants.MODE}"
+                    USER_AGENT =
+                        "Dalvik/2.1.0 (Linux; U; Android $ANDROID_VERSION; ${MODEL} ${BUILDNUMBER}) (#Build; ${BRAND}; ${MODEL}; ${BUILDNUMBER}; $ANDROID_VERSION) +CoolMarket/${VERSION_NAME}-${VERSION_CODE}-${Constants.MODE}"
                 }
             }
             val szlmId = if (PrefManager.SZLMID == "") randHexString(16) else PrefManager.SZLMID
@@ -82,7 +83,7 @@ class TokenDeviceUtils {
         fun getLastingBrand(): String {
             val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("BRAND", null).let {
-                it ?: Utils.randomBrand().apply {
+                it ?: randomBrand().apply {
                     sp.edit().putString("BRAND", this).apply()
                 }
             }
@@ -91,7 +92,7 @@ class TokenDeviceUtils {
         fun getLastingModel(): String {
             val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("MODEL", null).let {
-                it ?: Utils.randomDeviceModel().apply {
+                it ?: randomDeviceModel().apply {
                     sp.edit().putString("MODEL", this).apply()
                 }
             }
@@ -100,7 +101,7 @@ class TokenDeviceUtils {
         fun getLastingSdkInt(): String {
             val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("SDK_INT", null).let {
-                it ?: Utils.randomSdkInt().apply {
+                it ?: randomSdkInt().apply {
                     sp.edit().putString("SDK_INT", this).apply()
                 }
             }
@@ -109,7 +110,7 @@ class TokenDeviceUtils {
         fun getLastingAndroidVersionRelease(): String {
             val sp = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             return sp.getString("ANDROID_VERSION_RELEASE", null).let {
-                it ?: Utils.randomAndroidVersionRelease().apply {
+                it ?: randomAndroidVersionRelease().apply {
                     sp.edit().putString("ANDROID_VERSION_RELEASE", this).apply()
                 }
             }
@@ -119,10 +120,10 @@ class TokenDeviceUtils {
             context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE).edit().apply {
                 putString("DEVICE_CODE", getDeviceCode(false))
                 putString("INSTALL_TIME", System.currentTimeMillis().toString())
-                putString("BRAND", Utils.randomBrand())
-                putString("MODEL", Utils.randomDeviceModel())
-                putString("SDK_INT", Utils.randomSdkInt())
-                putString("ANDROID_VERSION_RELEASE", Utils.randomAndroidVersionRelease())
+                putString("BRAND", randomBrand())
+                putString("MODEL", randomDeviceModel())
+                putString("SDK_INT", randomSdkInt())
+                putString("ANDROID_VERSION_RELEASE", randomAndroidVersionRelease())
             }.apply()
         }
     }

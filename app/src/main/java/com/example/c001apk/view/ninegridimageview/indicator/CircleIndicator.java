@@ -79,7 +79,7 @@ public class CircleIndicator extends LinearLayout {
         }
     };
 
-    private DataSetObserver mInternalDataSetObserver = new DataSetObserver() {
+    private final DataSetObserver mInternalDataSetObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
             super.onChanged();

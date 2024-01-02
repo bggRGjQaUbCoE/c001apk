@@ -19,7 +19,11 @@ import com.bumptech.glide.signature.ObjectKey
 @GlideModule
 class IconGlideModule : AppGlideModule() {
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-        registry.prepend(LocalAppIcon::class.java, Drawable::class.java, IconModelLoaderFactory(context))
+        registry.prepend(
+            LocalAppIcon::class.java,
+            Drawable::class.java,
+            IconModelLoaderFactory(context)
+        )
     }
 
 
@@ -29,7 +33,8 @@ data class LocalAppIcon(
     val packageName: String
 )
 
-class IconModelLoaderFactory(private val context: Context) : ModelLoaderFactory<LocalAppIcon, Drawable> {
+class IconModelLoaderFactory(private val context: Context) :
+    ModelLoaderFactory<LocalAppIcon, Drawable> {
     override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<LocalAppIcon, Drawable> {
         return IconModelLoader(context)
     }

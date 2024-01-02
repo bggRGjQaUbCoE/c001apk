@@ -29,11 +29,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
+import com.absinthe.libraries.utils.extensions.dp
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
@@ -41,11 +41,9 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
-import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
 import com.google.android.material.imageview.ShapeableImageView
-import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import net.mikaelzero.mojito.tools.Utils.dip2px
@@ -215,22 +213,13 @@ class NineGridImageView @JvmOverloads constructor(
                 val imageView = ShapeableImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
                     .setAllCorners(RoundedCornerTreatment())
-                    .setAllCornerSizes(DensityTool.dp2px(context, 12f))
+                    .setAllCornerSizes(12.dp.toFloat())
                     .build()
                 imageView.shapeAppearanceModel = shapePathModel
-                imageView.strokeWidth = DensityTool.dp2px(context, 1f)
+                imageView.strokeWidth = 1.dp.toFloat()
                 imageView.strokeColor = context.getColorStateList(R.color.cover)
                 imageView.setBackgroundColor(context.getColor(R.color.cover))
                 addView(imageView, generateDefaultLayoutParams())
-                /*val options = RequestOptions().transform(
-                    RoundedCorners(
-                        DensityTool.dp2px(context, 12f).toInt()
-                    )
-                )*/
-                val backgroundDrawable = MaterialShapeDrawable(shapePathModel).apply {
-                    setTint(context.getColor(R.color.cover))
-                    paintStyle = Paint.Style.FILL
-                }
                 val newUrl =
                     GlideUrl(
                         url.http2https(),

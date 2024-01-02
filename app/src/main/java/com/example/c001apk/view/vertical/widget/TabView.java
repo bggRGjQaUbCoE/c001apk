@@ -10,7 +10,7 @@ import com.example.c001apk.view.vertical.badgeview.Badge;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 public abstract class TabView extends FrameLayout implements Checkable, ITabView {
 

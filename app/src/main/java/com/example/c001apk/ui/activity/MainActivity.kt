@@ -40,7 +40,8 @@ import java.text.NumberFormat
 import java.util.Locale
 
 
-class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContainer, INavViewContainer {
+class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContainer,
+    INavViewContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private val navViewBehavior by lazy { HideBottomViewOnScrollBehavior<BottomNavigationView>() }

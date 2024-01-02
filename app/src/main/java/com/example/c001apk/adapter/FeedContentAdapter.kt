@@ -28,6 +28,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedContentResponse
@@ -104,7 +105,6 @@ class FeedContentAdapter(
     fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
-        // notifyDataSetChanged()
     }
 
     private var appListener: AppListener? = null
@@ -353,6 +353,7 @@ class FeedContentAdapter(
                     inflater.inflate(R.menu.feed_reply_menu, popup.menu)
                     popup.menu.findItem(R.id.copy).isVisible = false
                     popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
+                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
                     popup.setOnMenuItemClickListener(this@FeedContentAdapter)
                     popup.show()
                 }
@@ -912,13 +913,11 @@ class FeedContentAdapter(
                                     val title: TextView = view.findViewById(R.id.title)
                                     title.text = feed.data.vote.options[position1].title
                                     if (position1 != 0) {
-                                        val space =
-                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                         val layoutParams = ConstraintLayout.LayoutParams(
                                             ConstraintLayout.LayoutParams.MATCH_PARENT,
                                             ConstraintLayout.LayoutParams.WRAP_CONTENT
                                         )
-                                        layoutParams.setMargins(0, space, 0, 0)
+                                        layoutParams.setMargins(0, 5.dp, 0, 0)
                                         view.layoutParams = layoutParams
                                     }
                                     return view
@@ -961,7 +960,10 @@ class FeedContentAdapter(
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
                             for (element in feed.data?.picArr!!)
-                                if (PrefManager.imageQuality == "origin" && element.endsWith("gif"))
+                                if ((PrefManager.imageQuality == "origin" ||
+                                            (PrefManager.imageQuality == "auto" && NetWorkUtil.isWifiConnected()))
+                                    && element.endsWith("gif")
+                                )
                                     urlList.add(element)
                                 else urlList.add("$element.s.jpg")
                             setUrlList(urlList)
@@ -1005,13 +1007,11 @@ class FeedContentAdapter(
                                         title.text = feed.data.targetRow.title
                                         ImageUtil.showIMG(logo, feed.data.targetRow.logo)
                                     } else {
-                                        val space =
-                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                         val layoutParams = ConstraintLayout.LayoutParams(
                                             ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                             ConstraintLayout.LayoutParams.WRAP_CONTENT
                                         )
-                                        layoutParams.setMargins(space, 0, 0, 0)
+                                        layoutParams.setMargins(5.dp, 0, 0, 0)
                                         view.layoutParams = layoutParams
                                         type = feed.data.relationRows!![position - 1].entityType
                                         id = feed.data.relationRows[position - 1].id
@@ -1030,13 +1030,11 @@ class FeedContentAdapter(
                                         url = feed.data.relationRows[0].url
                                         ImageUtil.showIMG(logo, feed.data.relationRows[0].logo)
                                     } else {
-                                        val space =
-                                            mContext.resources.getDimensionPixelSize(R.dimen.minor_space)
                                         val layoutParams = ConstraintLayout.LayoutParams(
                                             ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                             ConstraintLayout.LayoutParams.WRAP_CONTENT
                                         )
-                                        layoutParams.setMargins(space, 0, 0, 0)
+                                        layoutParams.setMargins(5.dp, 0, 0, 0)
                                         view.layoutParams = layoutParams
                                         type = feed.data?.relationRows!![position].entityType
                                         id = feed.data.relationRows[position].id
@@ -1134,6 +1132,12 @@ class FeedContentAdapter(
                         holder.message.visibility = View.VISIBLE
                         holder.message.movementMethod =
                             LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.message.highlightColor = ColorUtils.setAlphaComponent(
+                            ThemeUtils.getThemeAttrColor(
+                                mContext,
+                                rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                            ), 128
+                        )
                         holder.message.text = SpannableStringBuilderUtil.setText(
                             mContext,
                             reply.message,
@@ -1218,7 +1222,6 @@ class FeedContentAdapter(
 
                                     val replyData = sortedList[position1]
                                     val textView: TextView = view.findViewById(R.id.reply)
-                                    //textView.highlightColor = Color.TRANSPARENT
                                     textView.highlightColor = ColorUtils.setAlphaComponent(
                                         ThemeUtils.getThemeAttrColor(
                                             mContext,
@@ -1294,6 +1297,8 @@ class FeedContentAdapter(
                                         popup.menu.findItem(R.id.copy).isVisible = true
                                         popup.menu.findItem(R.id.delete).isVisible =
                                             PrefManager.uid == replyData.uid
+                                        popup.menu.findItem(R.id.report).isVisible =
+                                            PrefManager.isLogin
                                         popup.setOnMenuItemClickListener(this@FeedContentAdapter)
                                         popup.show()
                                         true

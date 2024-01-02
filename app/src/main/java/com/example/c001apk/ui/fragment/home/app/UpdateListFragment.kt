@@ -6,7 +6,7 @@ import android.view.View
 import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.c001apk.R
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.UpdateListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.fragment.BaseFragment
@@ -47,14 +47,13 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate, viewModel, this.requireActivity())
         mLayoutManager = LinearLayoutManager(activity)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(LinearItemDecoration(10.dp))
         }
     }
 
@@ -72,5 +71,5 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
         binding.swipeRefresh.isRefreshing = true
         binding.swipeRefresh.isRefreshing = false
     }
-    
+
 }

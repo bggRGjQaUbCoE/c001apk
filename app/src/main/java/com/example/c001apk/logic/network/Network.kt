@@ -190,7 +190,7 @@ object Network {
     suspend fun postFollow(data: HashMap<String, String>) =
         apiService.postFollow(data).await()
 
-    suspend fun getFollow(url:String,tag: String?, id:String?) =
+    suspend fun getFollow(url: String, tag: String?, id: String?) =
         apiService.getFollow(url, tag, id).await()
 
     private suspend fun <T> Call<T>.await(): T {

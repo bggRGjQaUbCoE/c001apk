@@ -17,7 +17,7 @@ class StaggerItemDecoration(private val space: Int) : ItemDecoration() {
         val position = parent.getChildAdapterPosition(view)
         val params = view.layoutParams as StaggeredGridLayoutManager.LayoutParams
         val spanIndex = params.spanIndex
-        if (position == 0 || position == 1){
+        if (position == 0 || position == 1) {
             outRect.top = space
         }
         if (spanIndex % 2 == 1) {

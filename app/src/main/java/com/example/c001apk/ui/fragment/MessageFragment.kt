@@ -11,10 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageAdapter
-import com.example.c001apk.constant.RecyclerView.checkForGaps
-import com.example.c001apk.constant.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
@@ -29,6 +28,8 @@ import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.RecyclerView.checkForGaps
+import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
@@ -288,7 +289,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
     }
 
     private fun initView() {
-        val space = resources.getDimensionPixelSize(R.dimen.normal_space)
         mAdapter = MessageAdapter(
             requireContext(),
             viewModel.countList,
@@ -313,9 +313,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                     mLayoutManager
                 else sLayoutManager
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(LinearItemDecoration(space))
+                addItemDecoration(LinearItemDecoration(10.dp))
             else
-                addItemDecoration(StaggerMessItemDecoration(space))
+                addItemDecoration(StaggerMessItemDecoration(10.dp))
         }
     }
 

@@ -9,7 +9,7 @@ import com.example.c001apk.view.vertical.badgeview.Badge;
 
 /**
  * @author chqiu
- *         Email:qstumn@163.com
+ * Email:qstumn@163.com
  */
 
 public interface ITabView {
@@ -32,7 +32,7 @@ public interface ITabView {
 
     class TabIcon {
 
-        private Builder mBuilder;
+        private final Builder mBuilder;
 
         private TabIcon(Builder mBuilder) {
             this.mBuilder = mBuilder;
@@ -113,7 +113,7 @@ public interface ITabView {
     }
 
     class TabTitle {
-        private Builder mBuilder;
+        private final Builder mBuilder;
 
         private TabTitle(Builder mBuilder) {
             this.mBuilder = mBuilder;
@@ -171,7 +171,7 @@ public interface ITabView {
     }
 
     class TabBadge {
-        private Builder mBuilder;
+        private final Builder mBuilder;
 
         private TabBadge(Builder mBuilder) {
             this.mBuilder = mBuilder;
