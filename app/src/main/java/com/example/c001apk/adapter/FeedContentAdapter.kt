@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -53,7 +52,6 @@ import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 
 
@@ -101,7 +99,6 @@ class FeedContentAdapter(
     val LOADING_ERROR = 4
     private var errorMessage: String? = null
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
@@ -161,12 +158,6 @@ class FeedContentAdapter(
         var type = ""
         var url = ""
         var vote: TextView = view.findViewById(R.id.vote)
-    }
-
-    class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
-        val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
-        val noMore: TextView = view.findViewById(R.id.noMore)
     }
 
     class TopViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -287,7 +278,11 @@ class FeedContentAdapter(
             TYPE_FOOTER -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_rv_footer, parent, false)
-                FootViewHolder(view)
+                val viewHolder = AppAdapter.FootViewHolder(view)
+                viewHolder.retry.setOnClickListener {
+                    appListener?.onReload()
+                }
+                viewHolder
             }
 
             TYPE_REPLY -> {
@@ -479,7 +474,7 @@ class FeedContentAdapter(
                 }
             }
 
-            is FootViewHolder -> {
+            is AppAdapter.FootViewHolder -> {
                 val lp = holder.itemView.layoutParams
                 if (lp is StaggeredGridLayoutManager.LayoutParams) {
                     lp.isFullSpan = true
@@ -491,6 +486,7 @@ class FeedContentAdapter(
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
 
                     }
 
@@ -499,6 +495,7 @@ class FeedContentAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_END -> {
@@ -506,6 +503,8 @@ class FeedContentAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.VISIBLE
+                        holder.noMore.text = mContext.getString(R.string.no_more)
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_ERROR -> {
@@ -514,6 +513,7 @@ class FeedContentAdapter(
                         holder.indicator.isIndeterminate = false
                         holder.noMore.text = errorMessage
                         holder.noMore.visibility = View.VISIBLE
+                        holder.retry.visibility = View.VISIBLE
                     }
 
                     else -> {}

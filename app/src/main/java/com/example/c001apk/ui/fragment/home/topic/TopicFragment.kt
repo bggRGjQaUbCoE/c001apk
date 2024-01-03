@@ -24,7 +24,7 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("TYPE")!!
+            viewModel.type = it.getString("TYPE")
         }
     }
 
@@ -54,6 +54,17 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
         if (!viewModel.isInit)
             initView()
+
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            viewModel.isNew = true
+            if (viewModel.type == "topic")
+                viewModel.getDataList()
+            else
+                viewModel.getProductList()
+        }
 
         binding.tabLayout.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
             val contentView: View = binding.tabLayout.getChildAt(0)
@@ -85,6 +96,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
                         initView()
                     }
                 } else {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -109,6 +123,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
                         initView()
                     }
                 } else {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -118,9 +135,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
 
     private fun initData() {
-        if (viewModel.homeTopicTitleList.isEmpty()) {
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
+        if (viewModel.titleList.isEmpty()) {
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
             viewModel.isNew = true
             if (viewModel.type == "topic") {
                 viewModel.url = "/page?url=V11_VERTICAL_TOPIC"
@@ -132,11 +149,16 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
     }
 
     private fun initView() {
-        binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
-        binding.tabLayout.setupWithViewPager(binding.viewPager)
-        binding.indicator.isIndeterminate = false
-        binding.indicator.visibility = View.GONE
-        binding.topicLayout.visibility = View.VISIBLE
+        if (viewModel.titleList.isNotEmpty()) {
+            binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
+            binding.tabLayout.setupWithViewPager(binding.viewPager)
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
+            binding.errorLayout.parent.visibility = View.GONE
+            binding.topicLayout.visibility = View.VISIBLE
+        } else {
+            binding.errorLayout.parent.visibility = View.VISIBLE
+        }
     }
 
 

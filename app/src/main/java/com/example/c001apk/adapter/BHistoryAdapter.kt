@@ -1,6 +1,5 @@
 package com.example.c001apk.adapter
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -58,10 +57,12 @@ class BHistoryAdapter(
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
+    val LOADING_ERROR = 4
+    private var errorMessage: String? = null
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun setLoadState(loadState: Int) {
+    fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
+        this.errorMessage = errorMessage
     }
 
     class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -143,6 +144,7 @@ class BHistoryAdapter(
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
 
                     }
 
@@ -151,6 +153,7 @@ class BHistoryAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_END -> {
@@ -158,6 +161,17 @@ class BHistoryAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.VISIBLE
+                        holder.noMore.text = mContext.getString(R.string.no_more)
+                        holder.retry.visibility = View.GONE
+                    }
+
+                    LOADING_ERROR -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.text = errorMessage
+                        holder.noMore.visibility = View.VISIBLE
+                        holder.retry.visibility = View.VISIBLE
                     }
 
                     else -> {}

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.fragment.BaseFragment
@@ -41,7 +42,7 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
 
     companion object {
         @JvmStatic
-        fun newInstance(keyWord: String, type: String, pageType: String, pageParam: String) =
+        fun newInstance(keyWord: String, type: String, pageType: String?, pageParam: String?) =
             SearchContentFragment().apply {
                 arguments = Bundle().apply {
                     putString("KEYWORD", keyWord)
@@ -55,10 +56,10 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.keyWord = it.getString("KEYWORD")!!
-            viewModel.type = it.getString("TYPE")!!
-            viewModel.pageType = it.getString("pageType")!!
-            viewModel.pageParam = it.getString("pageParam")!!
+            viewModel.keyWord = it.getString("KEYWORD")
+            viewModel.type = it.getString("TYPE")
+            viewModel.pageType = it.getString("pageType")
+            viewModel.pageParam = it.getString("pageParam")
         }
     }
 
@@ -94,26 +95,48 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
                 viewModel.isNew = false
 
                 val search = result.getOrNull()
-                if (!search.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
-                        viewModel.searchList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.searchList.size
-                        if (viewModel.type == "feed")
-                            for (element in search) {
-                                if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
-                                            element.tags + element.ttitle
+                if (search != null) {
+                    if (!search.message.isNullOrEmpty()) {
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = search.message
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        viewModel.isEnd = true
+                        viewModel.isLoadMore = false
+                        viewModel.isRefreshing = false
+                        binding.swipeRefresh.isRefreshing = false
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
+                        mAdapter.notifyItemChanged(viewModel.searchList.size)
+                        return@observe
+                    } else if (!search.data.isNullOrEmpty()) {
+                        if (viewModel.isRefreshing)
+                            viewModel.searchList.clear()
+                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                            viewModel.listSize = viewModel.searchList.size
+                            if (viewModel.type == "feed")
+                                for (element in search.data) {
+                                    if (element.entityType == "feed")
+                                        if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                            && !TopicBlackListUtil.checkTopic(
+                                                element.tags + element.ttitle
+                                            )
                                         )
-                                    )
-                                        viewModel.searchList.add(element)
-                            }
-                        else
-                            viewModel.searchList.addAll(search)
+                                            viewModel.searchList.add(element)
+                                }
+                            else
+                                viewModel.searchList.addAll(search.data)
+                        }
+                        viewModel.loadState = mAdapter.LOADING_COMPLETE
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                    } else {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        viewModel.isEnd = true
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -127,8 +150,8 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -193,20 +216,14 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.searchList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.searchList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getSearch()
-
+                        loadMore()
                     }
                 }
             }
@@ -235,6 +252,15 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.searchList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getSearch()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -244,17 +270,20 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
         if (viewModel.searchList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.searchList.size)
         }
     }
 
@@ -321,8 +350,8 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
         }
         viewModel.searchList.clear()
         mAdapter.notifyDataSetChanged()
-        binding.indicator.visibility = View.VISIBLE
-        binding.indicator.isIndeterminate = true
+        binding.indicator.parent.visibility = View.VISIBLE
+        binding.indicator.parent.isIndeterminate = true
         refreshData()
     }
 
@@ -360,6 +389,11 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
             refreshData()
         } else
             binding.recyclerView.scrollToPosition(0)
+    }
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
     }
 
 }

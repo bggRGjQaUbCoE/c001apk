@@ -45,8 +45,8 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.cId = it.getString("ID")!!
-            viewModel.title = it.getString("TITLE")!!
+            viewModel.cId = it.getString("ID")
+            viewModel.title = it.getString("TITLE")
         }
     }
 
@@ -91,8 +91,8 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
@@ -110,7 +110,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
             binding.appBar.visibility = View.GONE
         else
             binding.toolBar.apply {
-                title = if (viewModel.title == "") "我的收藏单"
+                title = if (viewModel.title.isNullOrEmpty()) "我的收藏单"
                 else viewModel.title
                 setNavigationIcon(R.drawable.ic_back)
                 setNavigationOnClickListener {
@@ -124,8 +124,8 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
 
     private fun initData() {
         if (viewModel.dataList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
         } else {
             if (viewModel.isEnd) {
@@ -187,15 +187,14 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -270,5 +269,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
             .addToBackStack(null)
             .commit()
     }
+
+    override fun onReload() {}
 
 }

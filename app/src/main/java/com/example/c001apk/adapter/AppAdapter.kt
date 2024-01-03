@@ -82,7 +82,6 @@ class AppAdapter(
     val LOADING_ERROR = 4
     private var errorMessage: String? = null
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
@@ -242,7 +241,11 @@ class AppAdapter(
             -1 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_rv_footer, parent, false)
-                FootViewHolder(view)
+                val viewHolder = FootViewHolder(view)
+                viewHolder.retry.setOnClickListener {
+                    appListener?.onReload()
+                }
+                viewHolder
             }
 
             0 -> {
@@ -648,6 +651,7 @@ class AppAdapter(
         val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
         val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
         val noMore: TextView = view.findViewById(R.id.noMore)
+        val retry: Button = view.findViewById(R.id.retry)
     }
 
     override fun getItemCount() = dataList.size + 1
@@ -1224,6 +1228,7 @@ class AppAdapter(
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
 
                     }
 
@@ -1232,6 +1237,7 @@ class AppAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_END -> {
@@ -1239,6 +1245,8 @@ class AppAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.VISIBLE
+                        holder.noMore.text = mContext.getString(R.string.no_more)
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_ERROR -> {
@@ -1247,6 +1255,7 @@ class AppAdapter(
                         holder.indicator.isIndeterminate = false
                         holder.noMore.text = errorMessage
                         holder.noMore.visibility = View.VISIBLE
+                        holder.retry.visibility = View.VISIBLE
                     }
 
                     else -> {}

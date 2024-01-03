@@ -144,8 +144,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                 val reply = result.getOrNull()
                 if (reply?.message != null) {
                     viewModel.errorMessage = reply.message
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
                     showReplyErrorMessage()
                     return@observe
                 } else if (!reply?.data.isNullOrEmpty()) {
@@ -158,11 +158,21 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         if (element.entityType == "feed_reply")
                             if (!BlackListUtil.checkUid(element.uid))
                                 viewModel.replyTotalList.add(element)
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (reply?.data?.isEmpty() == true) {
+                    if (viewModel.replyTotalList.isEmpty())
+                        viewModel.replyTotalList.addAll(oriReply)
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
+                    result.exceptionOrNull()?.printStackTrace()
                 } else {
                     if (viewModel.replyTotalList.isEmpty())
                         viewModel.replyTotalList.addAll(oriReply)
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -176,8 +186,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
             }
@@ -236,12 +246,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                                 TotalReplyResponse.Data(
                                     null,
                                     "feed_reply",
-                                    viewModel.id,
-                                    viewModel.ruid,
-                                    PrefManager.uid,
-                                    viewModel.id,
+                                    viewModel.id.toString(),
+                                    viewModel.ruid.toString(),
+                                    PrefManager.uid.toString(),
+                                    viewModel.id.toString(),
                                     URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                    viewModel.uname,
+                                    viewModel.uname.toString(),
                                     viewModel.replyData["message"].toString(),
                                     "",
                                     null,
@@ -298,12 +308,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                     if (viewModel.lastVisibleItemPosition == viewModel.replyTotalList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
-                        mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getReplyTotal()
+                        loadMore()
                     }
                 }
             }
@@ -331,14 +337,26 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getReplyTotal()
+    }
+
     private fun initData() {
         if (viewModel.replyTotalList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             viewModel.isEnd = false
             viewModel.isLoadMore = false
             viewModel.isNew = true
             viewModel.getReplyTotal()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
         }
     }
 
@@ -346,8 +364,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         mAdapter =
             Reply2ReplyTotalAdapter(
                 requireContext(),
-                viewModel.fuid,
-                viewModel.uid,
+                viewModel.fuid.toString(),
+                viewModel.uid.toString(),
                 viewModel.position,
                 viewModel.replyTotalList
             )
@@ -389,7 +407,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     }
 
     override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {
-        val mBottomSheetDialogFragment = newInstance(position, viewModel.fuid, uid, id)
+        val mBottomSheetDialogFragment = newInstance(position, viewModel.fuid.toString(), uid, id)
         mBottomSheetDialogFragment.oriReply.add(viewModel.replyTotalList[position])
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
@@ -422,9 +440,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     @SuppressLint("InflateParams", "RestrictedApi")
     private fun initReply() {
         bottomSheetDialog.apply {
-            rid = viewModel.rid
-            ruid = viewModel.ruid
-            uname = viewModel.uname
+            rid = viewModel.rid.toString()
+            ruid = viewModel.ruid.toString()
+            uname = viewModel.uname.toString()
             setData()
             show()
         }
@@ -462,5 +480,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     }
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

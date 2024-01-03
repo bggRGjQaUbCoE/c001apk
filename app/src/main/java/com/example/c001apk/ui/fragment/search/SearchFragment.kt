@@ -45,15 +45,15 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.pageType = it.getString("pageType")!!
-            viewModel.pageParam = it.getString("pageParam")!!
-            viewModel.title = it.getString("title")!!
+            viewModel.pageType = it.getString("pageType")
+            viewModel.pageParam = it.getString("pageParam")
+            viewModel.title = it.getString("title")
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(pageType: String, pageParam: String, title: String) =
+        fun newInstance(pageType: String?, pageParam: String?, title: String?) =
             SearchFragment().apply {
                 arguments = Bundle().apply {
                     putString("pageType", pageType)
@@ -217,7 +217,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             imm.showSoftInput(binding.editText, 0)
             imeOptions = EditorInfo.IME_ACTION_SEARCH
             inputType = EditorInfo.TYPE_CLASS_TEXT
-            hint = if (viewModel.pageType != "") "在 ${viewModel.title} 中搜索"
+            hint = if (!viewModel.pageType.isNullOrEmpty()) "在 ${viewModel.title} 中搜索"
             else "搜索"
 
             addTextChangedListener(object : TextWatcher {

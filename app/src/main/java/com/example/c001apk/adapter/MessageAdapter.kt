@@ -63,10 +63,12 @@ class MessageAdapter(
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
+    val LOADING_ERROR = 4
+    private var errorMessage: String? = null
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun setLoadState(loadState: Int) {
+    fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
+        this.errorMessage = errorMessage
     }
 
     private val messTitle = ArrayList<String>()
@@ -142,7 +144,11 @@ class MessageAdapter(
             -1 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_rv_footer, parent, false)
-                AppAdapter.FootViewHolder(view)
+                val viewHolder = AppAdapter.FootViewHolder(view)
+                viewHolder.retry.setOnClickListener {
+                    iOnNotiLongClickListener?.onReload()
+                }
+                viewHolder
             }
 
             0 -> {
@@ -372,6 +378,7 @@ class MessageAdapter(
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
 
                     }
 
@@ -380,6 +387,7 @@ class MessageAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_END -> {
@@ -387,6 +395,17 @@ class MessageAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.VISIBLE
+                        holder.noMore.text = mContext.getString(R.string.no_more)
+                        holder.retry.visibility = View.GONE
+                    }
+
+                    LOADING_ERROR -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.text = errorMessage
+                        holder.noMore.visibility = View.VISIBLE
+                        holder.retry.visibility = View.VISIBLE
                     }
 
                     else -> {}
@@ -463,7 +482,6 @@ class MessageAdapter(
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onMenuItemClick(p0: MenuItem): Boolean {
         when (p0.itemId) {
             R.id.block -> {

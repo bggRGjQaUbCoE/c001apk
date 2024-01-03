@@ -47,21 +47,12 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var mCheckForGapMethod: Method
     private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
-    // private lateinit var objectAnimator: ObjectAnimator
-    /*
-        private fun initAnimator() {
-            objectAnimator = ObjectAnimator.ofFloat(binding.titleProfile, "translationY", 120f, 0f)
-            objectAnimator.interpolator = AccelerateInterpolator()
-            objectAnimator.duration = 150
-        }*/
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.url = "/v6/notification/list"
-
-        //initAnimator()
 
         binding.clickToLogin.setOnClickListener {
             startActivity(Intent(activity, LoginActivity::class.java))
@@ -83,7 +74,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                 viewModel.isInit = false
                 getData()
             } else if (viewModel.isEnd) {
-                mAdapter.setLoadState(mAdapter.LOADING_END)
+                mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                 mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
             }
             viewModel.messCountList.apply {
@@ -170,9 +161,16 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                                 if (!BlackListUtil.checkUid(element.fromuid))
                                     viewModel.messageList.add(element)
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -244,13 +242,8 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                     if (viewModel.lastVisibleItemPosition == viewModel.messageList.size + 6
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING)
-                        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getMessage()
-
+                        loadMore()
                     }
                 }
             }
@@ -286,6 +279,15 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                 }
             }
         })
+    }
+
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getMessage()
     }
 
     private fun initView() {
@@ -353,7 +355,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
     }
 
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
         binding.toolBar.apply {
             inflateMenu(R.menu.message_menu)
@@ -415,6 +416,11 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             }
             show()
         }
+    }
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
     }
 
 }

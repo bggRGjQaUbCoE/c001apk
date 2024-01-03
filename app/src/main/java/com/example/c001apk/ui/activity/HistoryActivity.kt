@@ -51,9 +51,9 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         initBar()
         initView()
         if (viewModel.bHistoryList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
-            viewModel.getBrowseList(viewModel.type, this)
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            viewModel.getBrowseList(viewModel.type.toString(), this)
         }
 
         viewModel.browseLiveData.observe(this) {
@@ -67,9 +67,9 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                         viewModel.bHistoryList.add(element)
                 }
             }
-            mAdapter.setDataListData(viewModel.type, viewModel.bHistoryList)
-            binding.indicator.visibility = View.GONE
-            binding.indicator.isIndeterminate = false
+            mAdapter.setDataListData(viewModel.type.toString(), viewModel.bHistoryList)
+            binding.indicator.parent.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
             mAdapter.notifyDataSetChanged()
         }
 

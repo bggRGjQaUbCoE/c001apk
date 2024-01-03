@@ -196,7 +196,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -212,21 +211,12 @@
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         tools:ignore="ContentDescription" />
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
+    <include
         android:id="@+id/indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="false"
-        android:visibility="gone" />
+        layout="@layout/item_indicator" />
 
-    <TextView
+    <include
         android:id="@+id/errorMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="20dp"
-        android:textSize="18sp"
-        android:visibility="gone" />
+        layout="@layout/item_error_message" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

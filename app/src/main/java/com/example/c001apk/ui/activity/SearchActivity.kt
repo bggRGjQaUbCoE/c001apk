@@ -11,9 +11,9 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val pageType = intent.getStringExtra("pageType")!!
-        val pageParam = intent.getStringExtra("pageParam")!!
-        val title = intent.getStringExtra("title")!!
+        val pageType = intent.getStringExtra("pageType")
+        val pageParam = intent.getStringExtra("pageParam")
+        val title = intent.getStringExtra("title")
 
         if (supportFragmentManager.findFragmentById(R.id.searchFragment) == null) {
             supportFragmentManager

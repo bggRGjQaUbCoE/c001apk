@@ -81,8 +81,8 @@ object Repository {
                 page,
                 showAnonymous
             )
-            if (!searchResponse.data.isNullOrEmpty())
-                Result.success(searchResponse.data)
+            if (searchResponse != null)
+                Result.success(searchResponse)
             else
                 Result.failure(RuntimeException("response status is null"))
         }

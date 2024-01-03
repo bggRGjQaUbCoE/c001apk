@@ -71,7 +71,6 @@
                 android:textSize="12sp"
                 tools:text="size" />
 
-
         </LinearLayout>
 
         <TextView

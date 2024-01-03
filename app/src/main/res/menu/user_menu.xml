@@ -22,6 +22,4 @@
         android:showAsAction="never"
         android:title="@string/block" />
 
-
-
 </menu>

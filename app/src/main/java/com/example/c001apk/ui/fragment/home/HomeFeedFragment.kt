@@ -71,7 +71,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("TYPE")!!
+            viewModel.type = it.getString("TYPE")
         }
     }
 
@@ -93,8 +93,14 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
                 val feed = result.getOrNull()
                 if (!feed?.message.isNullOrEmpty()) {
-                    mAdapter.setLoadState(mAdapter.LOADING_ERROR, feed?.message)
-                    mAdapter.notifyItemChanged(0)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = feed?.message
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                    mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.swipeRefresh.isRefreshing = false
+                    return@observe
                 } else if (!feed?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         if (feed?.data!!.size <= 4 && feed.data.last().entityTemplate == "refreshCard") {
@@ -104,12 +110,13 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                     mAdapter.notifyItemInserted(3)
                                 }
                             }
-                            mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                            viewModel.loadState = mAdapter.LOADING_COMPLETE
+                            mAdapter.setLoadState(viewModel.loadState, null)
                             viewModel.isLoadMore = false
                             viewModel.isRefreshing = false
                             binding.swipeRefresh.isRefreshing = false
-                            binding.indicator.isIndeterminate = false
-                            binding.indicator.visibility = View.GONE
+                            binding.indicator.parent.isIndeterminate = false
+                            binding.indicator.parent.visibility = View.GONE
                             return@observe
                         } else {
                             viewModel.homeFeedList.clear()
@@ -131,7 +138,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                 }
                                 if (!PrefManager.isIconMiniCard && element.entityTemplate == "iconMiniScrollCard")
                                     continue
-                                else if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                else if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
@@ -146,10 +154,20 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                 viewModel.homeFeedList.last().entityId
                         }
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
-                } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.data?.isEmpty() == true) {
                     viewModel.isEnd = true
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else {
+                    viewModel.isEnd = true
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(
+                        viewModel.loadState,
+                        viewModel.errorMessage
+                    )
                     result.exceptionOrNull()?.printStackTrace()
                 }
                 if (viewModel.isLoadMore)
@@ -165,8 +183,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
             }
         }
 
@@ -176,8 +194,14 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
                 val feed = result.getOrNull()
                 if (!feed?.message.isNullOrEmpty()) {
-                    mAdapter.setLoadState(mAdapter.LOADING_ERROR, feed?.message)
-                    mAdapter.notifyItemChanged(0)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = feed?.message
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                    mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.swipeRefresh.isRefreshing = false
+                    return@observe
                 } else if (!feed?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing)
                         viewModel.homeFeedList.clear()
@@ -189,7 +213,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                 || element.entityTemplate == "iconLinkGridCard"
                                 || element.entityTemplate == "imageSquareScrollCard"
                             )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
@@ -197,10 +222,20 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                             //viewModel.lastItem = feed[feed.size - 1].entityId
                         }
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
-                } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.data?.isEmpty() == true) {
                     viewModel.isEnd = true
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else {
+                    viewModel.isEnd = true
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(
+                        viewModel.loadState,
+                        viewModel.errorMessage
+                    )
                     result.exceptionOrNull()?.printStackTrace()
                 }
                 if (viewModel.isLoadMore)
@@ -216,8 +251,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
             }
         }
 
@@ -418,27 +453,14 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.homeFeedList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
-                        viewModel.isLoadMore = true
-                        //viewModel.firstItem = null
                         viewModel.page++
-                        viewModel.firstLaunch = 0
-                        viewModel.isNew = true
-                        when (viewModel.type) {
-                            "feed" -> viewModel.getHomeFeed()
-                            "rank" -> viewModel.getDataList()
-                            "follow" -> viewModel.getDataList()
-                            "coolPic" -> viewModel.getDataList()
-                        }
-
+                        loadMore()
                     }
                 }
             }
@@ -475,6 +497,21 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
+        viewModel.isLoadMore = true
+        viewModel.firstLaunch = 0
+        viewModel.isNew = true
+        when (viewModel.type) {
+            "feed" -> viewModel.getHomeFeed()
+            "rank" -> viewModel.getDataList()
+            "follow" -> viewModel.getDataList()
+            "coolPic" -> viewModel.getDataList()
+        }
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -484,17 +521,20 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
         if (viewModel.homeFeedList.isEmpty()) {
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.homeFeedList.size)
         }
     }
 
@@ -519,7 +559,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             }
 
             "follow" -> {
-                if (viewModel.url == "") {
+                if (viewModel.url.isNullOrEmpty()) {
                     when (PrefManager.FOLLOWTYPE) {
                         "all" -> {
                             viewModel.url = "/page?url=V9_HOME_TAB_FOLLOW"
@@ -638,7 +678,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
     override fun onShowCollection(id: String, title: String) {}
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onReturnTop(isRefresh: Boolean?) {
         if (isRefresh!!) {
             if (viewModel.firstCompletelyVisibleItemPosition == 0) {
@@ -696,8 +735,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                     }
                     viewModel.homeFeedList.clear()
                     mAdapter.notifyDataSetChanged()
-                    binding.indicator.visibility = View.VISIBLE
-                    binding.indicator.isIndeterminate = true
+                    binding.indicator.parent.visibility = View.VISIBLE
+                    binding.indicator.parent.isIndeterminate = true
                     refreshData()
                     dialog.dismiss()
                 }
@@ -752,6 +791,11 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
         viewModel.createFeedData["goods_list_id"] = ""
         viewModel.isCreateFeed = true
         viewModel.postCreateFeed()
+    }
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
     }
 
 }

@@ -41,4 +41,6 @@ interface AppListener {
 
     fun onShowCollection(id: String, title: String)
 
+    fun onReload()
+
 }

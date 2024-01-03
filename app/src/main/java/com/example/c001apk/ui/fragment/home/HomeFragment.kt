@@ -120,11 +120,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
 
     private fun initMenu() {
         binding.search.setOnClickListener {
-            val intent = Intent(activity, SearchActivity::class.java)
-            intent.putExtra("pageType", "")
-            intent.putExtra("pageParam", "")
-            intent.putExtra("title", "")
-            requireActivity().startActivity(intent)
+            requireActivity().startActivity(Intent(activity, SearchActivity::class.java))
         }
 
         binding.menu.setOnClickListener {

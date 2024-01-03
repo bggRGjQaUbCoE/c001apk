@@ -59,7 +59,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.id = it.getString("ID", "")
+            viewModel.id = it.getString("ID")
         }
     }
 
@@ -80,8 +80,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                 val feed = result.getOrNull()
                 if (feed?.message != null) {
                     viewModel.errorMessage = feed.message
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
                     showErrorMessage()
                     return@observe
                 } else if (feed?.data != null) {
@@ -115,7 +115,6 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                     viewModel.isLoadMore = false
                     viewModel.isRefreshing = false
                     binding.swipeRefresh.isRefreshing = false
-                    Toast.makeText(activity, "加载失败", Toast.LENGTH_SHORT).show()
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -126,7 +125,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                 viewModel.isNew = false
 
                 val voteComment = result.getOrNull()
-                if (voteComment?.data != null) {
+                if (!voteComment?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         viewModel.isRefreshing = false
                         viewModel.leftVoteCommentList.clear()
@@ -138,20 +137,20 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                         viewModel.rightVoteCommentList.clear()
                     }
                     if (viewModel.totalOptionNum == 2 && viewModel.currentOption == 0) {
-                        if (voteComment.data.isEmpty())
+                        if (voteComment?.data?.isEmpty() == true)
                             viewModel.leftEnd = true
                         else
-                            viewModel.leftVoteCommentList.addAll(voteComment.data)
+                            viewModel.leftVoteCommentList.addAll(voteComment?.data!!)
                         viewModel.currentOption++
                         viewModel.extraKey =
                             viewModel.feedContentList[0].data!!.vote!!.options[viewModel.currentOption].id
                         viewModel.isNew = true
                         viewModel.getVoteComment()
                     } else if (viewModel.totalOptionNum == 2 && viewModel.currentOption == 1) {
-                        if (voteComment.data.isEmpty())
+                        if (voteComment?.data?.isEmpty() == true)
                             viewModel.rightEnd = true
                         else
-                            viewModel.rightVoteCommentList.addAll(voteComment.data)
+                            viewModel.rightVoteCommentList.addAll(voteComment?.data!!)
                         viewModel.listSize = viewModel.voteCommentList.size
                         if (viewModel.leftVoteCommentList.isNotEmpty() && viewModel.rightVoteCommentList.isNotEmpty()) {
                             if (viewModel.leftVoteCommentList.size >= viewModel.rightVoteCommentList.size) {
@@ -197,19 +196,19 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                                 viewModel.voteCommentList.size + 3
                             )
                         }
-                        binding.indicator.isIndeterminate = false
-                        binding.indicator.visibility = View.GONE
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
                         binding.contentLayout.visibility = View.VISIBLE
                         binding.swipeRefresh.isRefreshing = false
                         viewModel.isLoadMore = false
                         viewModel.isRefreshing = false
                     } else {
                         viewModel.listSize = viewModel.voteCommentList.size
-                        if (voteComment.data.isEmpty()) {
+                        if (voteComment?.data?.isEmpty() == true) {
                             viewModel.isEnd = true
                             mAdapter.setLoadState(mAdapter.LOADING_END, null)
                         } else {
-                            viewModel.voteCommentList.addAll(voteComment.data)
+                            viewModel.voteCommentList.addAll(voteComment?.data!!)
                             mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
                         }
                         if (viewModel.isLoadMore) {
@@ -223,17 +222,28 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                                 viewModel.voteCommentList.size + 3
                             )
                         }
-                        binding.indicator.isIndeterminate = false
-                        binding.indicator.visibility = View.GONE
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
                         binding.contentLayout.visibility = View.VISIBLE
                         binding.swipeRefresh.isRefreshing = false
                         viewModel.isLoadMore = false
                         viewModel.isRefreshing = false
                     }
+                } else if (voteComment?.data?.isEmpty() == true) {
+                    viewModel.isEnd = true
+                    viewModel.isLoadMore = false
+                    viewModel.isRefreshing = false
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.notifyItemChanged(viewModel.voteCommentList.size + 2)
+                    mAdapter.setLoadState(viewModel.loadState, null)
                 } else {
                     viewModel.isEnd = true
                     viewModel.isLoadMore = false
                     viewModel.isRefreshing = false
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                    mAdapter.notifyItemChanged(viewModel.voteCommentList.size + 2)
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -289,23 +299,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                     if (viewModel.lastVisibleItemPosition == viewModel.voteCommentList.size + 2
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.voteCommentList.size + 2)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        if (viewModel.totalOptionNum == 2) {
-                            if (!viewModel.leftEnd) {
-                                viewModel.currentOption = 0
-                                viewModel.extraKey =
-                                    viewModel.feedContentList[0].data!!.vote!!.options[viewModel.currentOption].id
-                            } else {
-                                viewModel.currentOption = 1
-                                viewModel.extraKey =
-                                    viewModel.feedContentList[0].data!!.vote!!.options[viewModel.currentOption].id
-                            }
-                        }
-                        viewModel.getVoteComment()
+                        loadMore()
                     }
                 }
             }
@@ -332,6 +327,26 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.voteCommentList.size + 2)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        if (viewModel.totalOptionNum == 2) {
+            if (!viewModel.leftEnd) {
+                viewModel.currentOption = 0
+                viewModel.extraKey =
+                    viewModel.feedContentList[0].data!!.vote!!.options[viewModel.currentOption].id
+            } else {
+                viewModel.currentOption = 1
+                viewModel.extraKey =
+                    viewModel.feedContentList[0].data!!.vote!!.options[viewModel.currentOption].id
+            }
+        }
+        viewModel.getVoteComment()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -341,8 +356,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
@@ -363,7 +378,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
             val favorite = menu.findItem(R.id.favorite)
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             CoroutineScope(Dispatchers.IO).launch {
-                if (feedFavoriteDao.isFavorite(viewModel.id)) {
+                if (feedFavoriteDao.isFavorite(viewModel.id.toString())) {
                     withContext(Dispatchers.Main) {
                         favorite.title = "取消收藏"
                     }
@@ -390,7 +405,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                             setTitle("确定将 ${viewModel.funame} 加入黑名单？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                BlackListUtil.saveUid(viewModel.uid)
+                                BlackListUtil.saveUid(viewModel.uid.toString())
                                 //requireActivity().finish()
                             }
                             show()
@@ -423,8 +438,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
                     R.id.favorite -> {
                         CoroutineScope(Dispatchers.IO).launch {
-                            if (feedFavoriteDao.isFavorite(viewModel.id)) {
-                                feedFavoriteDao.delete(viewModel.id)
+                            if (feedFavoriteDao.isFavorite(viewModel.id.toString())) {
+                                feedFavoriteDao.delete(viewModel.id.toString())
                                 withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
                                     ToastUtil.toast("已取消收藏")
@@ -432,11 +447,11 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                             } else {
                                 try {
                                     val fav = FeedFavorite(
-                                        viewModel.id,
-                                        viewModel.uid,
-                                        viewModel.funame,
-                                        viewModel.avatar,
-                                        viewModel.device,
+                                        viewModel.id.toString(),
+                                        viewModel.uid.toString(),
+                                        viewModel.funame.toString(),
+                                        viewModel.avatar.toString(),
+                                        viewModel.device.toString(),
                                         viewModel.feedContentList[0].data?.message.toString(), // 还未加载完会空指针
                                         viewModel.feedContentList[0].data?.dateline.toString()
                                     )
@@ -460,25 +475,20 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
     }
 
     private fun showErrorMessage() {
-        binding.errorMessage.visibility = View.VISIBLE
-        binding.errorMessage.text = viewModel.errorMessage
+        binding.errorMessage.parent.visibility = View.VISIBLE
+        binding.errorMessage.parent.text = viewModel.errorMessage
     }
 
     private fun initData() {
         if (viewModel.feedContentList.isEmpty()) {
             binding.titleProfile.visibility = View.GONE
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
         } else {
             binding.contentLayout.visibility = View.VISIBLE
-            if (viewModel.errorMessage != null) {
-                mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
-                mAdapter.notifyItemChanged(2)
-            } else if (viewModel.isEnd) {
-                mAdapter.setLoadState(mAdapter.LOADING_END, null)
-                mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
-            }
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.voteCommentList.size + 2)
         }
     }
 
@@ -569,5 +579,10 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
     }
 
     override fun onRefreshReply(listType: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

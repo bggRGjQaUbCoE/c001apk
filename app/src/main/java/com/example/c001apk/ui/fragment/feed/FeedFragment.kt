@@ -102,12 +102,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
         super.onCreate(savedInstanceState)
         arguments?.let {
             viewModel.feedType = it.getString("TYPE", "feed")
-            viewModel.id = it.getString("ID", "")
+            viewModel.id = it.getString("ID")
             viewModel.frid = it.getString("RID")
-            if (viewModel.uid == "")
-                viewModel.uid = it.getString("UID", "")
-            if (viewModel.funame == "")
-                viewModel.funame = it.getString("UNAME", "")
+            if (!viewModel.uid.isNullOrEmpty())
+                viewModel.uid = it.getString("UID")
+            if (!viewModel.funame.isNullOrEmpty())
+                viewModel.funame = it.getString("UNAME")
             viewModel.isViewReply = it.getBoolean("viewReply", false)
         }
     }
@@ -122,6 +122,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
         initButton()
         initRefresh()
         initScroll()
+
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.visibility = View.GONE
+            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.isIndeterminate = true
+            refreshData()
+        }
 
         if (PrefManager.isLogin) {
             val view1 = LayoutInflater.from(context)
@@ -218,7 +225,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                     viewModel.isLoadMore = false
                     viewModel.isRefreshing = false
                     binding.swipeRefresh.isRefreshing = false
-                    Toast.makeText(activity, "加载失败", Toast.LENGTH_SHORT).show()
+                    binding.indicator.isIndeterminate = false
+                    binding.indicator.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -242,7 +251,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                     viewModel.isLoadMore = false
                     viewModel.isRefreshing = false
                     binding.swipeRefresh.isRefreshing = false
-                    mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     mAdapter.notifyItemRangeChanged(0, 3)
                     return@observe
                 } else if (!reply?.data.isNullOrEmpty()) {
@@ -268,10 +278,20 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                             }
                         }
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
-                } else {
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (reply?.data?.isEmpty() == true) {
                     viewModel.isEnd = true
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else {
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    viewModel.isEnd = true
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    mAdapter.setLoadState(
+                        viewModel.loadState,
+                        viewModel.errorMessage
+                    )
                     result.exceptionOrNull()?.printStackTrace()
                 }
                 if (viewModel.isViewReply) {
@@ -395,12 +415,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                                     0, TotalReplyResponse.Data(
                                         null,
                                         "feed_reply",
-                                        viewModel.id,
-                                        viewModel.ruid,
+                                        viewModel.id.toString(),
+                                        viewModel.ruid.toString(),
                                         PrefManager.uid,
-                                        viewModel.id,
+                                        viewModel.id.toString(),
                                         URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                        viewModel.uname,
+                                        viewModel.uname.toString(),
                                         viewModel.replyData["message"].toString(),
                                         "",
                                         null,
@@ -421,12 +441,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                                     TotalReplyResponse.Data(
                                         null,
                                         "feed_reply",
-                                        viewModel.rid,
-                                        viewModel.ruid,
+                                        viewModel.rid.toString(),
+                                        viewModel.ruid.toString(),
                                         PrefManager.uid,
-                                        viewModel.rid,
+                                        viewModel.rid.toString(),
                                         URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                        viewModel.uname,
+                                        viewModel.uname.toString(),
                                         viewModel.replyData["message"].toString(),
                                         "",
                                         null,
@@ -566,8 +586,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
     }
 
     private fun showErrorMessage() {
-        binding.errorMessage.visibility = View.VISIBLE
-        binding.errorMessage.text = viewModel.errorMessage
+        binding.errorMessage.parent.visibility = View.VISIBLE
+        binding.errorMessage.parent.text = viewModel.errorMessage
     }
 
     @SuppressLint("SetTextI18n")
@@ -620,9 +640,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
 
     private fun initReply() {
         bottomSheetDialog.apply {
-            rid = viewModel.rid
-            ruid = viewModel.ruid
-            uname = viewModel.uname
+            rid = viewModel.rid.toString()
+            ruid = viewModel.ruid.toString()
+            uname = viewModel.uname.toString()
             setData()
             show()
         }
@@ -630,19 +650,15 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
                     if (viewModel.lastVisibleItemPosition == viewModel.feedReplyList.size + 2
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getFeedReply()
+                        loadMore()
                     }
                 }
             }
@@ -700,11 +716,20 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getFeedReply()
+    }
+
     private fun showTitleProfile() {
         if (binding.name1.text.isNullOrEmpty()) {
             binding.name1.text = viewModel.funame
             binding.date.text = DateUtils.fromToday(viewModel.dateLine)
-            if (viewModel.device != "") {
+            if (viewModel.device.isNullOrEmpty()) {
                 binding.device.text = viewModel.device
                 val drawable: Drawable =
                     requireContext().getDrawable(R.drawable.ic_device)!!
@@ -736,22 +761,19 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initData() {
-        if (viewModel.feedContentList.isEmpty()) {
+        if (viewModel.isInit) {
+            viewModel.isInit = false
             binding.titleProfile.visibility = View.GONE
             binding.indicator.visibility = View.VISIBLE
             binding.indicator.isIndeterminate = true
             refreshData()
+        } else if (viewModel.feedContentList.isEmpty()) {
+            binding.errorLayout.parent.visibility = View.VISIBLE
         } else {
             binding.contentLayout.visibility = View.VISIBLE
-            if (viewModel.errorMessage != null) {
-                mAdapter.setLoadState(mAdapter.LOADING_ERROR, viewModel.errorMessage)
-                mAdapter.notifyItemChanged(2)
-            } else if (viewModel.isEnd) {
-                mAdapter.setLoadState(mAdapter.LOADING_END, null)
-                mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
-            }
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.feedReplyList.size + 2)
             if (getScrollYDistance() >= 50.dp) {
                 showTitleProfile()
             } else {
@@ -836,7 +858,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             val favorite = menu.findItem(R.id.favorite)
             CoroutineScope(Dispatchers.IO).launch {
-                if (feedFavoriteDao.isFavorite(viewModel.id)) {
+                if (feedFavoriteDao.isFavorite(viewModel.id.toString())) {
                     withContext(Dispatchers.Main) {
                         favorite.title = "取消收藏"
                     }
@@ -863,7 +885,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                             setTitle("确定将 ${viewModel.funame} 加入黑名单？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                BlackListUtil.saveUid(viewModel.uid)
+                                BlackListUtil.saveUid(viewModel.uid.toString())
                                 //requireActivity().finish()
                             }
                             show()
@@ -896,8 +918,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
 
                     R.id.favorite -> {
                         CoroutineScope(Dispatchers.IO).launch {
-                            if (feedFavoriteDao.isFavorite(viewModel.id)) {
-                                feedFavoriteDao.delete(viewModel.id)
+                            if (feedFavoriteDao.isFavorite(viewModel.id.toString())) {
+                                feedFavoriteDao.delete(viewModel.id.toString())
                                 withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
                                     ToastUtil.toast("已取消收藏")
@@ -905,11 +927,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                             } else {
                                 try {
                                     val fav = FeedFavorite(
-                                        viewModel.id,
-                                        viewModel.uid,
-                                        viewModel.funame,
-                                        viewModel.avatar,
-                                        viewModel.device,
+                                        viewModel.id.toString(),
+                                        viewModel.uid.toString(),
+                                        viewModel.funame.toString(),
+                                        viewModel.avatar.toString(),
+                                        viewModel.device.toString(),
                                         viewModel.feedContentList[0].data?.message.toString(), // 还未加载完会空指针
                                         viewModel.feedContentList[0].data?.dateline.toString()
                                     )
@@ -934,7 +956,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
 
     override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {
         val mBottomSheetDialogFragment =
-            Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid, uid, id)
+            Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid.toString(), uid, id)
         if (rPosition == null)
             mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[position - 2])
         else
@@ -1009,7 +1031,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                 index++
         }
         val mBottomSheetDialogFragment =
-            Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid, uid, id)
+            Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid.toString(), uid, id)
         mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[index])
         mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
     }
@@ -1064,5 +1086,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
     }
 
     override fun onShowCollection(id: String, title: String) {}
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

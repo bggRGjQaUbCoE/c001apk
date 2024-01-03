@@ -124,8 +124,8 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
@@ -160,8 +160,8 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             viewModel.appList.clear()
             viewModel.appList.addAll(it)
             mAdapter.notifyDataSetChanged()
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             binding.swipeRefresh.isRefreshing = false
         }
         viewModel.appsUpdateData.observe(viewLifecycleOwner) {
@@ -176,8 +176,8 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             viewModel.getAppsUpdate()
         }
         if (viewModel.appList.isEmpty()) {
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
             viewModel.getItems(requireContext())
         }
 

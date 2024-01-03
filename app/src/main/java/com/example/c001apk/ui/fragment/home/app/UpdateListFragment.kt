@@ -39,13 +39,12 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initView() {
         mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate, viewModel, this.requireActivity())
         mLayoutManager = LinearLayoutManager(activity)

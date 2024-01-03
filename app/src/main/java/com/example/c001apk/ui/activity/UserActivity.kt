@@ -56,7 +56,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        if (viewModel.uname != "") {
+        if (!viewModel.uname.isNullOrEmpty()) {
             showUserInfo()
             binding.followBtn.visibility = View.VISIBLE
             binding.infoLayout.visibility = View.VISIBLE
@@ -69,15 +69,26 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         initScroll()
 
         binding.avatar.setOnClickListener {
-            ImageUtil.startBigImgViewSimple(binding.avatar, viewModel.avatar)
+            ImageUtil.startBigImgViewSimple(binding.avatar, viewModel.avatar.toString())
         }
 
         binding.cover.setOnClickListener {
-            ImageUtil.startBigImgViewSimple(binding.cover, viewModel.cover)
+            ImageUtil.startBigImgViewSimple(binding.cover, viewModel.cover.toString())
+        }
+
+        binding.name.setOnClickListener {
+            copyText(this, viewModel.uname.toString())
         }
 
         binding.uid.setOnClickListener {
-            copyText(this, viewModel.uid)
+            copyText(this, viewModel.uid.toString())
+        }
+
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.visibility = View.GONE
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            refreshData()
         }
 
         binding.followBtn.setOnClickListener {
@@ -99,8 +110,8 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                 val user = result.getOrNull()
                 if (user?.message != null) {
                     viewModel.errorMessage = user.message
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
                     showErrorMessage()
                     return@observe
                 } else if (user?.data != null) {
@@ -124,6 +135,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                     viewModel.isNew = true
                     viewModel.getUserFeed()
                 } else {
+                    viewModel.uid = null
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -140,16 +155,24 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                         viewModel.listSize = viewModel.feedList.size
                         for (element in feed) {
                             if (element.entityType == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.feedList.add(element)
                         }
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -165,8 +188,8 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                     mAdapter.notifyDataSetChanged()
                 binding.infoLayout.visibility = View.VISIBLE
                 binding.followBtn.visibility = View.VISIBLE
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
@@ -241,7 +264,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         binding.uid.text = viewModel.uid
         binding.level.text = viewModel.level
         binding.level.visibility = View.VISIBLE
-        if (viewModel.bio == "") binding.bio.visibility = View.GONE
+        if (viewModel.bio.isNullOrEmpty()) binding.bio.visibility = View.GONE
         else binding.bio.text = viewModel.bio
         binding.like.text = viewModel.like
         binding.follow.text = viewModel.follow
@@ -267,25 +290,20 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
 
     private fun showErrorMessage() {
         binding.swipeRefresh.isEnabled = false
-        binding.errorMessage.visibility = View.VISIBLE
-        binding.errorMessage.text = viewModel.errorMessage
+        binding.errorMessage.parent.visibility = View.VISIBLE
+        binding.errorMessage.parent.text = viewModel.errorMessage
     }
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.feedList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.feedList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getUserFeed()
+                        loadMore()
                     }
                 }
             }
@@ -316,6 +334,15 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.feedList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getUserFeed()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -324,8 +351,8 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
@@ -333,9 +360,14 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
     private fun initData() {
         if (viewModel.isInit) {
             viewModel.isInit = false
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
+        } else if (viewModel.uid == null) {
+            binding.errorLayout.parent.visibility = View.VISIBLE
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.feedList.size)
         }
     }
 
@@ -345,7 +377,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
-        if (viewModel.id == "")
+        if (viewModel.id.isNullOrEmpty())
             viewModel.id = intent.getStringExtra("id")!!
         viewModel.isNew = true
         viewModel.getUser()
@@ -448,7 +480,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                     setTitle("确定将 ${viewModel.uname} 加入黑名单？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        BlackListUtil.saveUid(viewModel.uid)
+                        BlackListUtil.saveUid(viewModel.uid.toString())
                     }
                     show()
                 }
@@ -502,5 +534,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
     override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

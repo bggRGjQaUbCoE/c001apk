@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -47,8 +48,8 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("type")!!
-            viewModel.appId = it.getString("id")!!
+            viewModel.type = it.getString("type")
+            viewModel.appId = it.getString("id")
             viewModel.appCommentSort = when (viewModel.type) {
                 "reply" -> ""
                 "hot" -> "&sort=popular"
@@ -82,17 +83,26 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
                     if (viewModel.isRefreshing) viewModel.appCommentList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.appCommentList.size
-                        for (element in comment?.data!!) if (element.entityType == "feed") if (!BlackListUtil.checkUid(
-                                element.userInfo?.uid.toString()
-                            ) && !TopicBlackListUtil.checkTopic(
-                                element.tags + element.ttitle
-                            )
-                        ) viewModel.appCommentList.add(element)
-
+                        for (element in comment?.data!!)
+                            if (element.entityType == "feed")
+                                if (!BlackListUtil.checkUid(
+                                        element.userInfo?.uid.toString()
+                                    ) && !TopicBlackListUtil.checkTopic(
+                                        element.tags + element.ttitle
+                                    )
+                                )
+                                    viewModel.appCommentList.add(element)
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (comment?.data?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -101,8 +111,8 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
                     viewModel.listSize, viewModel.appCommentList.size - viewModel.listSize + 1
                 )
                 else mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
@@ -151,14 +161,12 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
 
     private fun initData() {
         if (viewModel.appCommentList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
         } else {
-            if (viewModel.isEnd) {
-                mAdapter.setLoadState(mAdapter.LOADING_END, null)
-                mAdapter.notifyItemChanged(viewModel.appCommentList.size)
-            }
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.appCommentList.size)
         }
     }
 
@@ -212,18 +220,14 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (viewModel.lastVisibleItemPosition == viewModel.appCommentList.size && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.appCommentList.size)
-                        viewModel.isLoadMore = true
+                    if (viewModel.lastVisibleItemPosition == viewModel.appCommentList.size
+                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
+                    ) {
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getAppComment()
-
+                        loadMore()
                     }
                 }
             }
@@ -251,6 +255,15 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
                 }
             }
         })
+    }
+
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.appCommentList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getAppComment()
     }
 
     override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
@@ -300,6 +313,11 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
             binding.swipeRefresh.isRefreshing = true
             refreshData()
         } else binding.recyclerView.scrollToPosition(0)
+    }
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
     }
 
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -45,7 +46,7 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("TYPE")!!
+            viewModel.type = it.getString("TYPE")
         }
     }
 
@@ -87,15 +88,23 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                                 || element.entityType == "apk"
                                 || element.entityType == "feed_reply"
                             )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dataList.add(element)
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -109,8 +118,8 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
@@ -134,15 +143,23 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                                 || element.entityType == "product"
                                 || element.entityType == "user"
                             )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dataList.add(element)
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (data?.data?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -156,8 +173,8 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -214,14 +231,12 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
 
     private fun initData() {
         if (viewModel.dataList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
         } else {
-            if (viewModel.isEnd) {
-                mAdapter.setLoadState(mAdapter.LOADING_END, null)
-                mAdapter.notifyItemChanged(viewModel.dataList.size)
-            }
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.dataList.size)
         }
     }
 
@@ -280,47 +295,22 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.dataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.dataList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        when (viewModel.type) {
-                            "follow" -> {
-                                viewModel.getFeedList()
-                            }
-
-                            "apk" -> {
-                                viewModel.getFeedList()
-                            }
-
-                            "reply" -> {
-                                viewModel.getFeedList()
-                            }
-
-                            "replyToMe" -> {
-                                viewModel.getFeedList()
-                            }
-
-                            else -> {
-                                viewModel.getTopicData()
-                            }
-                        }
+                        loadMore()
                     }
                 }
             }
@@ -351,6 +341,35 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.dataList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        when (viewModel.type) {
+            "follow" -> {
+                viewModel.getFeedList()
+            }
+
+            "apk" -> {
+                viewModel.getFeedList()
+            }
+
+            "reply" -> {
+                viewModel.getFeedList()
+            }
+
+            "replyToMe" -> {
+                viewModel.getFeedList()
+            }
+
+            else -> {
+                viewModel.getTopicData()
+            }
+        }
+    }
+
     override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
 
     override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
@@ -378,5 +397,10 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
     }
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

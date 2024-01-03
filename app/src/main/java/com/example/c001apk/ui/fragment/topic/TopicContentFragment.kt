@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.BaseFragment
@@ -41,8 +42,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.url = it.getString("url")!!
-            viewModel.title = it.getString("title")!!
+            viewModel.url = it.getString("url")
+            viewModel.title = it.getString("title")
             viewModel.isEnable = it.getBoolean("isEnable")
         }
     }
@@ -70,8 +71,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
 
         if (viewModel.isInit) {
             viewModel.isInit = false
-            initData()
             initView()
+            initData()
             initRefresh()
             initScroll()
         }
@@ -83,8 +84,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isInit) {
-            initData()
             initView()
+            initData()
             initRefresh()
             initScroll()
         }
@@ -109,16 +110,24 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                                 || element.entityType == "product"
                                 || element.entityType == "user"
                             )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.topicDataList.add(element)
                         }
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (data?.data?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -132,8 +141,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -182,19 +191,14 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getTopicData()
+                        loadMore()
                     }
                 }
             }
@@ -225,6 +229,15 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getTopicData()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -234,8 +247,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
@@ -269,9 +282,12 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
 
     private fun initData() {
         if (viewModel.topicDataList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.topicDataList.size)
         }
     }
 
@@ -335,8 +351,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
         }
         viewModel.topicDataList.clear()
         mAdapter.notifyDataSetChanged()
-        binding.indicator.visibility = View.VISIBLE
-        binding.indicator.isIndeterminate = true
+        binding.indicator.parent.visibility = View.VISIBLE
+        binding.indicator.parent.isIndeterminate = true
         refreshData()
     }
 
@@ -346,6 +362,11 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             refreshData()
         } else
             binding.recyclerView.scrollToPosition(0)
+    }
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
     }
 
 }

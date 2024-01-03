@@ -6,14 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragment.topic.TopicFragment">
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="false"
-        android:visibility="gone" />
-
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -52,5 +44,13 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <include
+        android:id="@+id/indicator"
+        layout="@layout/item_indicator" />
+
+    <include
+        android:id="@+id/errorLayout"
+        layout="@layout/item_error_layout" />
 
 </FrameLayout>

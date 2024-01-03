@@ -29,7 +29,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
 
     companion object {
         @JvmStatic
-        fun newInstance(keyWord: String, pageType: String, pageParam: String, title: String) =
+        fun newInstance(keyWord: String, pageType: String?, pageParam: String?, title: String?) =
             SearchResultFragment().apply {
                 arguments = Bundle().apply {
                     putString("KEYWORD", keyWord)
@@ -44,10 +44,10 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         arguments?.let {
-            viewModel.keyWord = it.getString("KEYWORD")!!
-            viewModel.pageType = it.getString("pageType")!!
-            viewModel.pageParam = it.getString("pageParam")!!
-            viewModel.title = it.getString("title")!!
+            viewModel.keyWord = it.getString("KEYWORD")
+            viewModel.pageType = it.getString("pageType")
+            viewModel.pageParam = it.getString("pageParam")
+            viewModel.title = it.getString("title")
         }
     }
 
@@ -56,7 +56,6 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
 
         initBar()
         initData()
-        initView()
         initViewPagerMenu()
 
     }
@@ -65,7 +64,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
         binding.toolBar.apply {
             title = viewModel.keyWord
             setTitleTextAppearance(requireContext(), R.style.Toolbar_TitleText)
-            if (viewModel.pageType != "")
+            if (!viewModel.pageType.isNullOrEmpty())
                 subtitle = when (viewModel.pageType) {
                     "tag" -> "话题: ${viewModel.title}"
                     "product_phone" -> "数码: ${viewModel.title}"
@@ -82,14 +81,49 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     }
 
     private fun initData() {
-        if (viewModel.pageType == "") {
+        if (viewModel.pageType.isNullOrEmpty()) {
             viewModel.searchTabList = arrayOf("动态", "应用", "数码", "用户", "话题")
             viewModel.searchFragmentList.run {
-                add(SearchContentFragment.newInstance(viewModel.keyWord, "feed", "", ""))
-                add(SearchContentFragment.newInstance(viewModel.keyWord, "apk", "", ""))
-                add(SearchContentFragment.newInstance(viewModel.keyWord, "product", "", ""))
-                add(SearchContentFragment.newInstance(viewModel.keyWord, "user", "", ""))
-                add(SearchContentFragment.newInstance(viewModel.keyWord, "feedTopic", "", ""))
+                add(
+                    SearchContentFragment.newInstance(
+                        viewModel.keyWord.toString(),
+                        "feed",
+                        null,
+                        null
+                    )
+                )
+                add(
+                    SearchContentFragment.newInstance(
+                        viewModel.keyWord.toString(),
+                        "apk",
+                        null,
+                        null
+                    )
+                )
+                add(
+                    SearchContentFragment.newInstance(
+                        viewModel.keyWord.toString(),
+                        "product",
+                        null,
+                        null
+                    )
+                )
+                add(
+                    SearchContentFragment.newInstance(
+                        viewModel.keyWord.toString(),
+                        "user",
+                        null,
+                        null
+                    )
+                )
+                add(
+                    SearchContentFragment.newInstance(
+                        viewModel.keyWord.toString(),
+                        "feedTopic",
+                        null,
+                        null
+                    )
+                )
             }
         } else {
             binding.tabLayout.visibility = View.GONE
@@ -97,13 +131,14 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
             viewModel.searchFragmentList
                 .add(
                     SearchContentFragment.newInstance(
-                        viewModel.keyWord,
+                        viewModel.keyWord.toString(),
                         "feed",
-                        viewModel.pageType,
-                        viewModel.pageParam
+                        viewModel.pageType.toString(),
+                        viewModel.pageParam.toString()
                     )
                 )
         }
+        initView()
     }
 
     private fun initView() {

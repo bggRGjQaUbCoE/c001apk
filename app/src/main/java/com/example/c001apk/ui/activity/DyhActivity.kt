@@ -29,8 +29,8 @@ class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
     private fun initData() {
         viewModel.tabList.add("精选")
         viewModel.tabList.add("广场")
-        viewModel.fragmentList.add(DyhDetailFragment.newInstance(viewModel.id, "all"))
-        viewModel.fragmentList.add(DyhDetailFragment.newInstance(viewModel.id, "square"))
+        viewModel.fragmentList.add(DyhDetailFragment.newInstance(viewModel.id.toString(), "all"))
+        viewModel.fragmentList.add(DyhDetailFragment.newInstance(viewModel.id.toString(), "square"))
     }
 
     private fun initView() {

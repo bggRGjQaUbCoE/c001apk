@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.MessageContentAdapter
 import com.example.c001apk.databinding.ActivityMessageBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -26,7 +27,7 @@ import java.lang.reflect.Method
 class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var messageContentAdapter: MessageContentAdapter
+    private lateinit var mAdapter: MessageContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var mCheckForGapMethod: Method
@@ -52,6 +53,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                 if (!feed.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) viewModel.messageList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                        viewModel.listSize = viewModel.messageList.size
                         for (element in feed)
                             if (element.entityType == "feed"
                                 || element.entityType == "feed_reply"
@@ -60,15 +62,31 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                                 if (!BlackListUtil.checkUid(element.uid))
                                     viewModel.messageList.add(element)
                     }
-                    messageContentAdapter.setLoadState(messageContentAdapter.LOADING_COMPLETE)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    messageContentAdapter.setLoadState(messageContentAdapter.LOADING_END)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                messageContentAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                if (viewModel.isLoadMore)
+                    if (viewModel.isEnd)
+                        mAdapter.notifyItemChanged(viewModel.messageList.size)
+                    else
+                        mAdapter.notifyItemRangeChanged(
+                            viewModel.listSize,
+                            viewModel.messageList.size - viewModel.listSize + 1
+                        )
+                else
+                    mAdapter.notifyDataSetChanged()
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
@@ -84,7 +102,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                        messageContentAdapter.notifyItemChanged(viewModel.likePosition, "like")
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -102,7 +120,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                     if (response.data != null) {
                         viewModel.dataList[viewModel.likePosition].likenum = response.data.count
                         viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                        messageContentAdapter.notifyItemChanged(viewModel.likePosition, "like")
+                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
                         Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -149,20 +167,14 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.messageList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        messageContentAdapter.setLoadState(messageContentAdapter.LOADING)
-                        messageContentAdapter.notifyDataSetChanged()
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getMessage()
-
+                        loadMore()
                     }
                 }
             }
@@ -193,6 +205,15 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.messageList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getMessage()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -201,23 +222,27 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
         if (viewModel.messageList.isEmpty()) {
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.messageList.size)
         }
     }
 
     private fun initView() {
-        messageContentAdapter = MessageContentAdapter(this, viewModel.type, viewModel.messageList)
-        messageContentAdapter.setAppListener(this)
+        mAdapter =
+            MessageContentAdapter(this, viewModel.type.toString(), viewModel.messageList)
+        mAdapter.setAppListener(this)
         mLayoutManager = LinearLayoutManager(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
@@ -229,7 +254,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
             mMarkItemDecorInsetsDirtyMethod.isAccessible = true
         }
         binding.recyclerView.apply {
-            adapter = messageContentAdapter
+            adapter = mAdapter
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -290,5 +315,10 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
     override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

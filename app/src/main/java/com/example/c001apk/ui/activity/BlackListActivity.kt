@@ -273,7 +273,6 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun updateUid(uid: String) {
         CoroutineScope(Dispatchers.IO).launch {
             when (viewModel.type) {
@@ -319,7 +318,6 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onItemDeleteClick(keyword: String) {
         CoroutineScope(Dispatchers.IO).launch {
             when (viewModel.type) {

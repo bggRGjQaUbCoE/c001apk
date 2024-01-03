@@ -41,13 +41,20 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        if (viewModel.title != "") {
+        if (!viewModel.title.isNullOrEmpty()) {
             showAppInfo()
             binding.appLayout.visibility = View.VISIBLE
         } else if (viewModel.errorMessage != null) {
             showErrorMessage()
         }
         initData()
+
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.visibility = View.GONE
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            refreshData()
+        }
 
         viewModel.appInfoData.observe(this) { result ->
             if (viewModel.isNew) {
@@ -56,8 +63,8 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                 val appInfo = result.getOrNull()
                 if (appInfo?.message != null) {
                     viewModel.errorMessage = appInfo.message
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
                     showErrorMessage()
                     return@observe
                 } else if (appInfo?.data != null) {
@@ -83,21 +90,23 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                             add("热度排序")
                         }
                         viewModel.fragmentList.apply {
-                            add(AppFragment.newInstance("reply", viewModel.id))
-                            add(AppFragment.newInstance("pub", viewModel.id))
-                            add(AppFragment.newInstance("hot", viewModel.id))
+                            add(AppFragment.newInstance("reply", viewModel.id.toString()))
+                            add(AppFragment.newInstance("pub", viewModel.id.toString()))
+                            add(AppFragment.newInstance("hot", viewModel.id.toString()))
                         }
                         initView()
                     } else {
                         viewModel.errorMessage = appInfo.data.commentStatusText
                         showErrorMessage()
                     }
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
+
                     binding.appLayout.visibility = View.VISIBLE
                 } else {
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
             }
         }
 
@@ -147,8 +156,8 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
     private fun showErrorMessage() {
         binding.tabLayout.visibility = View.GONE
-        binding.errorMessage.visibility = View.VISIBLE
-        binding.errorMessage.text = viewModel.errorMessage
+        binding.errorMessage.parent.visibility = View.VISIBLE
+        binding.errorMessage.parent.text = viewModel.errorMessage
     }
 
     private fun showAppInfo() {
@@ -181,13 +190,14 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initData() {
         if (viewModel.isInit) {
             viewModel.isInit = false
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
             refreshData()
+        } else if (viewModel.tabList.isEmpty()) {
+            binding.errorLayout.parent.visibility = View.VISIBLE
         } else if (viewModel.tabList.isNotEmpty()) {
             initView()
         } else if (viewModel.commentStatusText != "允许评论" && viewModel.type != "appForum") {
@@ -219,17 +229,20 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         return super.onPrepareOptionsMenu(menu)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
 
             R.id.search -> {
-                val intent = Intent(this, SearchActivity::class.java)
-                intent.putExtra("pageType", "apk")
-                intent.putExtra("pageParam", viewModel.appId)
-                intent.putExtra("title", viewModel.title)
-                startActivity(intent)
+                if (viewModel.appId.isNullOrEmpty() || viewModel.title.isNullOrEmpty()) {
+                    Toast.makeText(this, "加载中...", Toast.LENGTH_SHORT).show()
+                } else {
+                    val intent = Intent(this, SearchActivity::class.java)
+                    intent.putExtra("pageType", "apk")
+                    intent.putExtra("pageParam", viewModel.appId)
+                    intent.putExtra("title", viewModel.title)
+                    startActivity(intent)
+                }
             }
 
             R.id.subscribe -> {

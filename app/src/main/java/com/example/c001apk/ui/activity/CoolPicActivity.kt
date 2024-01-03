@@ -41,9 +41,9 @@ class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
                 add("最新")
             }
             viewModel.fragmentList.apply {
-                add(CollectionFragment.newInstance("recommend", viewModel.title))
-                add(CollectionFragment.newInstance("hot", viewModel.title))
-                add(CollectionFragment.newInstance("newest", viewModel.title))
+                add(CollectionFragment.newInstance("recommend", viewModel.title.toString()))
+                add(CollectionFragment.newInstance("hot", viewModel.title.toString()))
+                add(CollectionFragment.newInstance("newest", viewModel.title.toString()))
             }
         }
     }

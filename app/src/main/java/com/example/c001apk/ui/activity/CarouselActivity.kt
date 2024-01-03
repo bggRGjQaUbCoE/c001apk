@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityCarouselBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -51,6 +52,17 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
         viewModel.url = intent.getStringExtra("url")!!
         viewModel.title = intent.getStringExtra("title")!!
 
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.visibility = View.GONE
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            refreshData()
+        }
+
+        if (!viewModel.isResume && viewModel.isInit) {
+            binding.errorLayout.parent.visibility = View.VISIBLE
+        }
+
         if (!viewModel.isInit) {
             if (viewModel.tabList.isNotEmpty()) {
                 binding.tabLayout.visibility = View.VISIBLE
@@ -64,10 +76,10 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                 initRefresh()
                 initScroll()
             }
-            if (viewModel.barTitle != "")
-                initBar(viewModel.barTitle)
+            if (!viewModel.barTitle.isNullOrEmpty())
+                initBar(viewModel.barTitle.toString())
             else
-                initBar(viewModel.title)
+                initBar(viewModel.title.toString())
         }
 
         viewModel.carouselData.observe(this) { result ->
@@ -85,7 +97,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                                 viewModel.title
                             else
                                 response.data[response.data.size - 1].extraDataArr?.pageTitle.toString()
-                        initBar(viewModel.barTitle)
+                        initBar(viewModel.barTitle.toString())
 
                         var index = 0
                         for (element in response.data) {
@@ -117,7 +129,8 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                             binding.recyclerView.visibility = View.VISIBLE
                             for (element in response.data)
                                 if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                        && !TopicBlackListUtil.checkTopic(
                                             element.tags + element.ttitle
                                         )
                                     )
@@ -132,7 +145,8 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                             viewModel.listSize = viewModel.carouselList.size
                             for (element in response?.data!!)
                                 if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                        && !TopicBlackListUtil.checkTopic(
                                             element.tags + element.ttitle
                                         )
                                     )
@@ -150,16 +164,26 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                         else
                             mAdapter.notifyDataSetChanged()
                     }
-                    binding.indicator.isIndeterminate = false
-                    binding.indicator.visibility = View.GONE
+                } else if (response?.data?.isEmpty() == true) {
+                    if (::mAdapter.isInitialized) {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        mAdapter.notifyItemChanged(viewModel.carouselList.size)
+                    }
+                    viewModel.isEnd = true
                 } else {
                     if (::mAdapter.isInitialized) {
-                        mAdapter.setLoadState(mAdapter.LOADING_END, null)
-                        mAdapter.notifyItemChanged(0)
-                    }
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = getString(R.string.loading_failed)
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        mAdapter.notifyItemChanged(viewModel.carouselList.size)
+                    } else if (viewModel.carouselList.isEmpty())
+                        binding.errorLayout.parent.visibility = View.VISIBLE
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -208,19 +232,14 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.carouselList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.carouselList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getCarouselList()
+                        loadMore()
                     }
                 }
             }
@@ -251,6 +270,15 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.carouselList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getCarouselList()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -260,8 +288,8 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
@@ -308,10 +336,12 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
 
     private fun initData() {
         if (viewModel.carouselList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
-            viewModel.isNew = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.carouselList.size)
         }
     }
 
@@ -370,5 +400,10 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

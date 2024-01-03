@@ -28,11 +28,15 @@
         <com.example.c001apk.view.circleindicator.CircleIndicator3
             android:id="@+id/indicator"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
+            android:layout_height="10dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="3dp"
+            app:ci_animator="@anim/indicator_animator"
+            app:ci_animator_reverse="@anim/indicator_animator_reverse"
             app:ci_drawable="@drawable/black_radius_square"
-            app:ci_height="3dp"
-            app:ci_width="8dp" />
+            app:ci_height="4dp"
+            app:ci_width="10dp" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

@@ -58,22 +58,30 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         arguments?.let {
-            viewModel.url = it.getString("url")!!
-            viewModel.title = it.getString("title")!!
-            viewModel.id = it.getString("id")!!
-            viewModel.type = it.getString("type")!!
+            viewModel.url = it.getString("url")
+            viewModel.title = it.getString("title")
+            viewModel.id = it.getString("id")
+            viewModel.type = it.getString("type")
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (viewModel.tabList.isEmpty())
+        if (viewModel.isResume) {
+            viewModel.isResume = false
             getViewData()
-        else {
+        } else if (!viewModel.isResume && viewModel.tabList.isEmpty()) {
+            binding.errorLayout.parent.visibility = View.VISIBLE
+        } else {
             initView(null)
             initBar()
             initViewPagerMenu()
+        }
+
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.visibility = View.GONE
+            getViewData()
         }
 
         viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
@@ -106,8 +114,12 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                         }
                         initView(tabSelected)
                     }
-                    binding.indicator.isIndeterminate = false
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
                 } else {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -141,8 +153,12 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                         }
                         initView(tabSelected)
                     }
-                    binding.indicator.isIndeterminate = false
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
                 } else {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
                     result.exceptionOrNull()?.printStackTrace()
                 }
             }
@@ -201,7 +217,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
     private fun initBar() {
         binding.toolBar.apply {
-            title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
+            title = if (viewModel.type == "topic") viewModel.url.toString().replace("/t/", "")
             else viewModel.title
             viewModel.subtitle?.let { subtitle = viewModel.subtitle }
         }
@@ -235,12 +251,12 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     }
 
     private fun getViewData() {
-        binding.indicator.visibility = View.VISIBLE
-        binding.indicator.isIndeterminate = true
+        binding.indicator.parent.visibility = View.VISIBLE
+        binding.indicator.parent.isIndeterminate = true
         viewModel.isNew = true
         initViewPagerMenu()
         if (viewModel.type == "topic") {
-            viewModel.url = viewModel.url.replace("/t/", "")
+            viewModel.url = viewModel.url.toString().replace("/t/", "")
             viewModel.getTopicLayout()
         } else if (viewModel.type == "product") {
             viewModel.getProductLayout()
@@ -298,8 +314,8 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                 val intent = Intent(activity, SearchActivity::class.java)
                 if (viewModel.type == "topic") {
                     intent.putExtra("pageType", "tag")
-                    intent.putExtra("pageParam", viewModel.url.replace("/t/", ""))
-                    intent.putExtra("title", viewModel.url.replace("/t/", ""))
+                    intent.putExtra("pageParam", viewModel.url.toString().replace("/t/", ""))
+                    intent.putExtra("title", viewModel.url.toString().replace("/t/", ""))
                 } else {
                     intent.putExtra("pageType", "product_phone")
                     intent.putExtra("pageParam", viewModel.id)
@@ -325,14 +341,15 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
             R.id.block -> {
                 MaterialAlertDialogBuilder(requireContext()).apply {
-                    val title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
-                    else viewModel.title
+                    val title =
+                        if (viewModel.type == "topic") viewModel.url.toString().replace("/t/", "")
+                        else viewModel.title
                     setTitle("确定将 $title 加入黑名单？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
                         CoroutineScope(Dispatchers.IO).launch {
-                            if (!topicBlackListDao.isExist(viewModel.title)) {
-                                topicBlackListDao.insert(SearchHistory(viewModel.title))
+                            if (!topicBlackListDao.isExist(viewModel.title.toString())) {
+                                topicBlackListDao.insert(SearchHistory(viewModel.title.toString()))
                             }
                         }
                     }
@@ -346,13 +363,13 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                         viewModel.isNew = true
                         viewModel.followUrl = if (viewModel.isFollow) "/v6/feed/unFollowTag"
                         else "/v6/feed/followTag"
-                        viewModel.tag = viewModel.url.replace("/t/", "")
+                        viewModel.tag = viewModel.url.toString().replace("/t/", "")
                         viewModel.getFollow()
                     }
 
                     "product" -> {
                         viewModel.isNew = true
-                        viewModel.postFollow["id"] = viewModel.id
+                        viewModel.postFollow["id"] = viewModel.id.toString()
                         viewModel.postFollow["status"] = if (viewModel.isFollow) "0"
                         else "1"
                         viewModel.postFollow()

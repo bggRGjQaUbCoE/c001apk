@@ -32,6 +32,7 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
+    var loadState = 0
     var isFollow = false
     var isTop = false
     var isEnable = false
@@ -41,31 +42,31 @@ class AppViewModel : ViewModel() {
     var commentStatusText: String? = null
     var errorMessage: String? = null
     val bHistoryList: ArrayList<Any> = ArrayList()
-    var requestHash = ""
+    var requestHash: String? = null
     var changeFirstItem = false
     var isRequestValidate = false
     var isGetCaptcha = false
     var isCreateFeed = false
     var isGetCheckLoginInfo = false
-    var level = ""
-    var bio = ""
-    var loginTime = ""
-    var like = ""
-    var follow = ""
-    var fans = ""
-    var version = ""
-    var logo = ""
-    var size = ""
-    var lastupdate = ""
+    var level: String? = null
+    var bio: String? = null
+    var loginTime: String? = null
+    var like: String? = null
+    var follow: String? = null
+    var fans: String? = null
+    var version: String? = null
+    var logo: String? = null
+    var size: String? = null
+    var lastupdate: String? = null
     var dateLine = 0L
     var followType = false
     var isViewReply = false
     var isShowMoreReply = false
-    var replyCount = ""
+    var replyCount: String? = null
     var isRefreshReply = false
-    var device = ""
-    var avatar = ""
-    var cover = ""
+    var device: String? = null
+    var avatar: String? = null
+    var cover: String? = null
     var isNew = true
     var isPostLikeFeed = false
     var isPostUnLikeFeed = false
@@ -74,16 +75,16 @@ class AppViewModel : ViewModel() {
     var isPostReply = false
     var postFollowUnFollow = false
 
-    var fuid = "" // feed user id
+    var fuid: String? = null // feed user id
 
     //feed data
-    var id = "" // feed id
-    var uid = "" // feed user id
-    var funame = ""
-    var uname = "" // feed username //被回复用户name
-    var rid = "" // 回复feed/reply id
-    var ruid = "" // 被回复用户id
-    var type = "" //feed reply
+    var id: String? = null // feed id
+    var uid: String? = null// feed user id
+    var funame: String? = null
+    var uname: String? = null// feed username //被回复用户name
+    var rid: String? = null// 回复feed/reply id
+    var ruid: String? = null// 被回复用户id
+    var type: String? = null //feed reply
 
     var rPosition: Int? = null
     var firstVisibleItemPosition = -1
@@ -102,7 +103,7 @@ class AppViewModel : ViewModel() {
     private val getFeedData = MutableLiveData<String>()
     var frid: String? = null
     val feedData = getFeedData.switchMap {
-        Repository.getFeedContent(id, frid)
+        Repository.getFeedContent(id.toString(), frid)
     }
 
     fun getFeed() {
@@ -119,7 +120,7 @@ class AppViewModel : ViewModel() {
 
     val feedReplyData = getFeedReplyData.switchMap {
         Repository.getFeedContentReply(
-            id,
+            id.toString(),
             listType,
             page,
             firstItem,
@@ -137,10 +138,10 @@ class AppViewModel : ViewModel() {
 
 
     //like reply
-    var likeReplyId = ""
+    var likeReplyId: String? = null
     private val postLikeReplyData = MutableLiveData<String>()
     val likeReplyData = postLikeReplyData.switchMap {
-        Repository.postLikeReply(likeReplyId)
+        Repository.postLikeReply(likeReplyId.toString())
     }
 
     fun postLikeReply() {
@@ -150,7 +151,7 @@ class AppViewModel : ViewModel() {
     //unlike reply
     private val postUnLikeReplyData = MutableLiveData<String>()
     val unLikeReplyData = postUnLikeReplyData.switchMap {
-        Repository.postUnLikeReply(likeReplyId)
+        Repository.postUnLikeReply(likeReplyId.toString())
     }
 
     fun postUnLikeReply() {
@@ -158,10 +159,10 @@ class AppViewModel : ViewModel() {
     }
 
     //like feed
-    var likeFeedId = ""
+    var likeFeedId: String? = null
     private val postLikeFeedData = MutableLiveData<String>()
     val likeFeedData = postLikeFeedData.switchMap {
-        Repository.postLikeFeed(likeFeedId)
+        Repository.postLikeFeed(likeFeedId.toString())
     }
 
     fun postLikeFeed() {
@@ -171,7 +172,7 @@ class AppViewModel : ViewModel() {
     //unlike feed
     private val postUnLikeFeedData = MutableLiveData<String>()
     val unLikeFeedData = postUnLikeFeedData.switchMap {
-        Repository.postUnLikeFeed(likeFeedId)
+        Repository.postUnLikeFeed(likeFeedId.toString())
     }
 
     fun postUnLikeFeed() {
@@ -183,7 +184,7 @@ class AppViewModel : ViewModel() {
     private val postReplyLiveData = MutableLiveData<String>()
 
     val postReplyData = postReplyLiveData.switchMap {
-        Repository.postReply(replyData, rid, type)
+        Repository.postReply(replyData, rid.toString(), type.toString())
     }
 
     fun postReply() {
@@ -193,20 +194,24 @@ class AppViewModel : ViewModel() {
     private val getAppInfoData = MutableLiveData<String>()
 
     val appInfoData = getAppInfoData.switchMap {
-        Repository.getAppInfo(id)
+        Repository.getAppInfo(id.toString())
     }
 
     fun getAppInfo() {
         getAppInfoData.value = getAppInfoData.value
     }
 
-    var packageName = ""
-    var versionCode = ""
+    var packageName: String? = null
+    var versionCode: String? = null
 
     private val getDownloadLinkData = MutableLiveData<String>()
 
     val downloadLinkData = getDownloadLinkData.switchMap {
-        Repository.getAppDownloadLink(packageName, appId, versionCode)
+        Repository.getAppDownloadLink(
+            packageName.toString(),
+            appId.toString(),
+            versionCode.toString()
+        )
     }
 
     fun getDownloadLink() {
@@ -216,11 +221,11 @@ class AppViewModel : ViewModel() {
 
     var likePosition = -1
     private val baseURL = "/page?url=/feed/apkCommentList?id="
-    var appId = ""
+    var appId: String? = null
     var isInit = true
     val appCommentList = ArrayList<HomeFeedResponse.Data>()
     var appCommentTitle = "最近回复"
-    var appCommentSort = ""
+    var appCommentSort: String? = null
 
     private val getAppCommentData = MutableLiveData<String>()
 
@@ -244,9 +249,9 @@ class AppViewModel : ViewModel() {
 
     var isResume = true
 
-    var barTitle = ""
-    var url = ""
-    var title = ""
+    var barTitle: String? = null
+    var url: String? = null
+    var title: String? = null
     var productTitle = "最近回复"
 
     val carouselList = ArrayList<HomeFeedResponse.Data>()
@@ -254,7 +259,7 @@ class AppViewModel : ViewModel() {
     private val getCarouselData = MutableLiveData<String>()
 
     val carouselData = getCarouselData.switchMap {
-        Repository.getDataList(url, title, subtitle, lastItem, page)
+        Repository.getDataList(url.toString(), title.toString(), subtitle, lastItem, page)
     }
 
     fun getCarouselList() {
@@ -290,7 +295,7 @@ class AppViewModel : ViewModel() {
 
             else -> throw IllegalArgumentException("invalid type: $type")
         }
-        Repository.getFollowList(url, uid, page)
+        Repository.getFollowList(url.toString(), uid.toString(), page)
     }
 
     fun getFeedList() {
@@ -302,7 +307,7 @@ class AppViewModel : ViewModel() {
     private val getMessageListData = MutableLiveData<String>()
 
     val messageData = getMessageListData.switchMap {
-        Repository.getMessage(url, page)
+        Repository.getMessage(url.toString(), page)
     }
 
     fun getMessage() {
@@ -367,14 +372,14 @@ class AppViewModel : ViewModel() {
     private val getProfileDataLiveData = MutableLiveData<String>()
 
     val profileDataLiveData = getProfileDataLiveData.switchMap {
-        Repository.getProfile(uid)
+        Repository.getProfile(uid.toString())
     }
 
     fun getProfile() {
         getProfileDataLiveData.value = getProfileDataLiveData.value
     }
 
-    var key = ""
+    var key: String? = null
     private val getSmsLoginParamLiveData = MutableLiveData<String>()
 
     val smsLoginParamData = getSmsLoginParamLiveData.switchMap {
@@ -412,7 +417,7 @@ class AppViewModel : ViewModel() {
     private val getUserData = MutableLiveData<String>()
 
     val userData = getUserData.switchMap {
-        Repository.getUserSpace(id)
+        Repository.getUserSpace(id.toString())
     }
 
     fun getUser() {
@@ -425,7 +430,7 @@ class AppViewModel : ViewModel() {
     private val getUserFeedData = MutableLiveData<String>()
 
     val userFeedData = getUserFeedData.switchMap {
-        Repository.getUserFeed(uid, page)
+        Repository.getUserFeed(uid.toString(), page)
     }
 
     fun getUserFeed() {
@@ -434,12 +439,12 @@ class AppViewModel : ViewModel() {
 
     val dyhDataList = ArrayList<HomeFeedResponse.Data>()
 
-    var dyhId = ""
+    var dyhId: String? = null
 
     private val getDyhDetailLiveData = MutableLiveData<String>()
 
     val dyhDetailLiveData = getDyhDetailLiveData.switchMap {
-        Repository.getDyhDetail(dyhId, type, page)
+        Repository.getDyhDetail(dyhId.toString(), type.toString(), page)
     }
 
     fun getDyhDetail() {
@@ -454,7 +459,7 @@ class AppViewModel : ViewModel() {
     private val getReplyTotalLiveData = MutableLiveData<String>()
 
     val replyTotalLiveData = getReplyTotalLiveData.switchMap {
-        Repository.getReply2Reply(id, page)
+        Repository.getReply2Reply(id.toString(), page)
     }
 
     fun getReplyTotal() {
@@ -517,7 +522,7 @@ class AppViewModel : ViewModel() {
 
     val homeFeedList = ArrayList<HomeFeedResponse.Data>()
     var firstLaunch = 1
-    var installTime = ""
+    var installTime: String? = null
     var firstItem: String? = null
     var lastItem: String? = null
 
@@ -525,9 +530,9 @@ class AppViewModel : ViewModel() {
 
     val homeFeedData = getHomeFeedData.switchMap {
         if (isRefreshing)
-            Repository.getHomeFeed(page, firstLaunch, installTime, firstItem, null)
+            Repository.getHomeFeed(page, firstLaunch, installTime.toString(), firstItem, null)
         else //if (isLoadMore)
-            Repository.getHomeFeed(page, firstLaunch, installTime, null, lastItem)
+            Repository.getHomeFeed(page, firstLaunch, installTime.toString(), null, lastItem)
     }
 
     fun getHomeFeed() {
@@ -537,7 +542,7 @@ class AppViewModel : ViewModel() {
     private val getDataListLiveData = MutableLiveData<String>()
 
     val dataListData = getDataListLiveData.switchMap {
-        Repository.getDataList(url, title, subtitle, lastItem, page)
+        Repository.getDataList(url.toString(), title.toString(), subtitle, lastItem, page)
     }
 
     fun getDataList() {
@@ -549,14 +554,12 @@ class AppViewModel : ViewModel() {
 
     var titleList = ArrayList<String>()
 
-    val homeTopicTitleList = ArrayList<HomeFeedResponse.Entities>()
-
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 
     private val getTopicDataLiveData = MutableLiveData<String>()
 
     val topicDataLiveData = getTopicDataLiveData.switchMap {
-        Repository.getDataList(url, title, subtitle, lastItem, page)
+        Repository.getDataList(url.toString(), title.toString(), subtitle, lastItem, page)
     }
 
     fun getTopicData() {
@@ -573,21 +576,21 @@ class AppViewModel : ViewModel() {
 
     var feedType: String = "all"
     var sort: String = "default" //hot // reply
-    var keyWord: String = ""
-    var pageType = ""  //"tag"
-    var pageParam = "" //topic title
+    var keyWord: String? = null
+    var pageType: String? = null  //"tag"
+    var pageParam: String? = null //topic title
     private var showAnonymous = -1
 
     private val getSearchData = MutableLiveData<String>()
 
     val searchData = getSearchData.switchMap {
         Repository.getSearch(
-            type,
+            type.toString(),
             feedType,
             sort,
-            keyWord,
-            pageType,
-            pageParam,
+            keyWord.toString(),
+            pageType.toString(),
+            pageParam.toString(),
             page,
             showAnonymous
         )
@@ -602,7 +605,7 @@ class AppViewModel : ViewModel() {
     private val getTopicLayoutLiveData = MutableLiveData<String>()
 
     val topicLayoutLiveData = getTopicLayoutLiveData.switchMap {
-        Repository.getTopicLayout(url)
+        Repository.getTopicLayout(url.toString())
     }
 
     fun getTopicLayout() {
@@ -612,7 +615,7 @@ class AppViewModel : ViewModel() {
     private val getProductLayoutLiveData = MutableLiveData<String>()
 
     val productLayoutLiveData = getProductLayoutLiveData.switchMap {
-        Repository.getProductLayout(id)
+        Repository.getProductLayout(id.toString())
     }
 
     fun getProductLayout() {
@@ -626,7 +629,7 @@ class AppViewModel : ViewModel() {
     private val postFollowUnFollowLiveData = MutableLiveData<String>()
 
     val postFollowUnFollowData = postFollowUnFollowLiveData.switchMap {
-        Repository.postFollowUnFollow(url, uid)
+        Repository.postFollowUnFollow(url.toString(), uid.toString())
     }
 
     var createFeedData = HashMap<String, String?>()
@@ -704,7 +707,7 @@ class AppViewModel : ViewModel() {
 
     var totalOptionNum = -1
     var currentOption = 0
-    var extraKey = ""
+    var extraKey: String? = null
     var leftEnd = false
     var rightEnd = false
 
@@ -715,7 +718,7 @@ class AppViewModel : ViewModel() {
     private val getVoteCommentListData = MutableLiveData<String>()
 
     val voteCommentData = getVoteCommentListData.switchMap {
-        Repository.getVoteComment(id, extraKey, page, firstItem, lastItem)
+        Repository.getVoteComment(id.toString(), extraKey.toString(), page, firstItem, lastItem)
     }
 
     fun getVoteComment() {
@@ -732,13 +735,13 @@ class AppViewModel : ViewModel() {
         getProductListData.value = getProductListData.value
     }
 
-    var collectionUrl = ""
+    var collectionUrl: String? = null
     var cId: String? = null
     var cUid: String? = null
     private val getCollectionListData = MutableLiveData<String>()
 
     val collectionListData = getCollectionListData.switchMap {
-        Repository.getCollectionList(collectionUrl, cUid, cId, 0, page)
+        Repository.getCollectionList(collectionUrl.toString(), cUid, cId, 0, page)
     }
 
     fun getCollectionList() {
@@ -748,10 +751,10 @@ class AppViewModel : ViewModel() {
     private val postDeleteLiveData = MutableLiveData<String>()
 
     val postDeleteData = postDeleteLiveData.switchMap {
-        Repository.postDelete(url, deleteId)
+        Repository.postDelete(url.toString(), deleteId.toString())
     }
 
-    var deleteId = ""
+    var deleteId: String? = null
 
     fun postDelete() {
         postDeleteLiveData.value = postDeleteLiveData.value
@@ -771,11 +774,11 @@ class AppViewModel : ViewModel() {
 
     var tag: String? = null
     var fid: String? = null
-    var followUrl = ""
+    var followUrl: String? = null
     private val getFollowLiveData = MutableLiveData<String>()
 
     val getFollowData = getFollowLiveData.switchMap {
-        Repository.getFollow(followUrl, tag, fid)
+        Repository.getFollow(followUrl.toString(), tag, fid)
     }
 
     fun getFollow() {

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.fragment.FollowFragment
@@ -107,17 +108,24 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
                                 || element.entityType == "feed_reply"
                                 || element.entityType == "recentHistory"
                             )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dataList.add(element)
                         }
                     }
-
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (feed?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -131,8 +139,8 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
                 viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
@@ -293,20 +301,15 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.dataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.dataList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getFeedList()
-
+                        viewModel.loadState = mAdapter.LOADING
+                        loadMore()
                     }
                 }
             }
@@ -337,6 +340,14 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
         })
     }
 
+    private fun loadMore() {
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.dataList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getFeedList()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -345,17 +356,20 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initData() {
         if (viewModel.dataList.isEmpty()) {
-            binding.indicator.isIndeterminate = true
-            binding.indicator.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.dataList.size)
         }
     }
 
@@ -444,5 +458,10 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
     }
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = true
+        loadMore()
+    }
 
 }

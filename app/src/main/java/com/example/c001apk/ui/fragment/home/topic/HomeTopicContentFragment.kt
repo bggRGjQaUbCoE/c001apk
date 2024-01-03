@@ -10,9 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.BaseFragment
+import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.util.RecyclerView.checkForGaps
 import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
@@ -21,7 +23,7 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import java.lang.reflect.Method
 
-class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
+class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
@@ -33,8 +35,8 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.url = it.getString("url")!!
-            viewModel.title = it.getString("title")!!
+            viewModel.url = it.getString("url")
+            viewModel.title = it.getString("title")
         }
     }
 
@@ -53,8 +55,8 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isInit) {
-            initData()
             initView()
+            initData()
             initRefresh()
             initScroll()
         }
@@ -64,7 +66,15 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (!data?.data.isNullOrEmpty()) {
+                if (!data?.message.isNullOrEmpty()) {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = data?.message
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                    mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+                    return@observe
+                } else if (!data?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) viewModel.topicDataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.topicDataList.size
@@ -73,9 +83,16 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
                         )
                         viewModel.lastItem = viewModel.topicDataList.last().id
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (data?.data?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -85,31 +102,25 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
                     viewModel.topicDataList.size - viewModel.listSize + 1
                 )
                 else mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
             }
         }
-
     }
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
                         && !viewModel.isRefreshing && !viewModel.isLoadMore && !viewModel.isEnd
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getTopicData()
+                        loadMore()
                     }
                 }
             }
@@ -147,6 +158,15 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
         })
     }
 
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getTopicData()
+    }
+
     @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
@@ -155,8 +175,8 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
@@ -164,6 +184,7 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
     private fun initView() {
         mAdapter = AppAdapter(requireContext(), viewModel.topicDataList)
         mLayoutManager = LinearLayoutManager(activity)
+        mAdapter.setAppListener(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -188,9 +209,12 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
     private fun initData() {
         if (viewModel.topicDataList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.topicDataList.size)
         }
     }
 
@@ -210,11 +234,38 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
         if (viewModel.isInit) {
             viewModel.isInit = false
-            initData()
             initView()
+            initData()
             initRefresh()
             initScroll()
         }
+    }
+
+    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
+
+    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
+
+    override fun onReply2Reply(
+        rPosition: Int,
+        r2rPosition: Int?,
+        id: String,
+        uid: String,
+        uname: String,
+        type: String
+    ) {
+    }
+
+    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {}
+
+    override fun onRefreshReply(listType: String) {}
+
+    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
+
+    override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
     }
 
 }

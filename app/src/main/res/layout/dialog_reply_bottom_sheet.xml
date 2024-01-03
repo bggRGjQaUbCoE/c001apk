@@ -116,5 +116,4 @@
         android:layout_height="24dp"
         android:visibility="gone" />
 
-
 </LinearLayout>

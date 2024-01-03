@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentDyhDetailBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -48,8 +49,8 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
 
         if (viewModel.isInit) {
             viewModel.isInit = false
-            initData()
             initView()
+            initData()
             initRefresh()
             initScroll()
         }
@@ -59,8 +60,8 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.dyhId = it.getString("id")!!
-            viewModel.type = it.getString("type")!!
+            viewModel.dyhId = it.getString("id")
+            viewModel.type = it.getString("type")
         }
     }
 
@@ -69,8 +70,8 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isInit) {
-            initData()
             initView()
+            initData()
             initRefresh()
             initScroll()
         }
@@ -87,15 +88,23 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                         viewModel.listSize = viewModel.dyhDataList.size
                         for (element in data)
                             if (element.entityType == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString()) && !TopicBlackListUtil.checkTopic(
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                    && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.dyhDataList.add(element)
                     }
-                    mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
+                    viewModel.loadState = mAdapter.LOADING_COMPLETE
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                } else if (data?.isEmpty() == true) {
+                    viewModel.loadState = mAdapter.LOADING_END
+                    mAdapter.setLoadState(viewModel.loadState, null)
+                    viewModel.isEnd = true
                 } else {
-                    mAdapter.setLoadState(mAdapter.LOADING_END, null)
+                    viewModel.loadState = mAdapter.LOADING_ERROR
+                    viewModel.errorMessage = getString(R.string.loading_failed)
+                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
                     viewModel.isEnd = true
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -109,8 +118,8 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                         )
                 else
                     mAdapter.notifyDataSetChanged()
-                binding.indicator.isIndeterminate = false
-                binding.indicator.visibility = View.GONE
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
@@ -159,9 +168,12 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
 
     private fun initData() {
         if (viewModel.dyhDataList.isEmpty()) {
-            binding.indicator.visibility = View.VISIBLE
-            binding.indicator.isIndeterminate = true
+            binding.indicator.parent.visibility = View.VISIBLE
+            binding.indicator.parent.isIndeterminate = true
             refreshData()
+        } else {
+            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+            mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
         }
     }
 
@@ -211,27 +223,22 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
             refreshData()
         }
     }
 
     private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (viewModel.lastVisibleItemPosition == viewModel.dyhDataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        mAdapter.setLoadState(mAdapter.LOADING, null)
-                        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
-                        viewModel.isLoadMore = true
                         viewModel.page++
-                        viewModel.isNew = true
-                        viewModel.getDyhDetail()
+                        loadMore()
                     }
                 }
             }
@@ -260,6 +267,15 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                 }
             }
         })
+    }
+
+    private fun loadMore() {
+        viewModel.loadState = mAdapter.LOADING
+        mAdapter.setLoadState(viewModel.loadState, null)
+        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
+        viewModel.isLoadMore = true
+        viewModel.isNew = true
+        viewModel.getDyhDetail()
     }
 
     override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
@@ -293,5 +309,10 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
     override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
 
     override fun onShowCollection(id: String, title: String) {}
+
+    override fun onReload() {
+        viewModel.isEnd = false
+        loadMore()
+    }
 
 }

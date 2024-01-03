@@ -132,21 +132,16 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
+    <include
         android:id="@+id/indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="false"
-        android:visibility="gone" />
+        layout="@layout/item_indicator" />
 
-    <TextView
+    <include
         android:id="@+id/errorMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="20dp"
-        android:textSize="18sp"
-        android:visibility="gone" />
+        layout="@layout/item_error_message" />
+
+    <include
+        android:id="@+id/errorLayout"
+        layout="@layout/item_error_layout" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

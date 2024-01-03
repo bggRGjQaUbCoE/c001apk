@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -32,7 +31,6 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import com.google.android.material.progressindicator.CircularProgressIndicator
 
 
 class Reply2ReplyTotalAdapter(
@@ -57,10 +55,12 @@ class Reply2ReplyTotalAdapter(
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
+    val LOADING_ERROR = 4
+    private var errorMessage: String? = null
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun setLoadState(loadState: Int) {
+    fun setLoadState(loadState: Int, errorMessage: String?) {
         this.loadState = loadState
+        this.errorMessage = errorMessage
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -76,12 +76,6 @@ class Reply2ReplyTotalAdapter(
         val reply: TextView = view.findViewById(R.id.reply)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         val expand: ImageButton = view.findViewById(R.id.expand)
-    }
-
-    class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
-        val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
-        val noMore: TextView = view.findViewById(R.id.noMore)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -148,7 +142,11 @@ class Reply2ReplyTotalAdapter(
             else -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_rv_footer, parent, false)
-                FootViewHolder(view)
+                val viewHolder = AppAdapter.FootViewHolder(view)
+                viewHolder.retry.setOnClickListener {
+                    appListener?.onReload()
+                }
+                viewHolder
             }
         }
 
@@ -215,7 +213,7 @@ class Reply2ReplyTotalAdapter(
     @SuppressLint("SetTextI18n", "RestrictedApi", "UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is FootViewHolder -> {
+            is AppAdapter.FootViewHolder -> {
                 val lp = holder.itemView.layoutParams
                 if (lp is StaggeredGridLayoutManager.LayoutParams) {
                     lp.isFullSpan = true
@@ -227,6 +225,7 @@ class Reply2ReplyTotalAdapter(
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
 
                     }
 
@@ -235,6 +234,7 @@ class Reply2ReplyTotalAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
                     }
 
                     LOADING_END -> {
@@ -242,6 +242,17 @@ class Reply2ReplyTotalAdapter(
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
                         holder.noMore.visibility = View.VISIBLE
+                        holder.noMore.text = mContext.getString(R.string.no_more)
+                        holder.retry.visibility = View.GONE
+                    }
+
+                    LOADING_ERROR -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.text = errorMessage
+                        holder.noMore.visibility = View.VISIBLE
+                        holder.retry.visibility = View.VISIBLE
                     }
 
                     else -> {}

@@ -1,6 +1,5 @@
 package com.example.c001apk.adapter
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +23,6 @@ class HistoryAdapter(private var historyList: ArrayList<String>) :
         val delete: ImageButton = view.findViewById(R.id.delete)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_search_history, parent, false)
