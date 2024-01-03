@@ -97,7 +97,7 @@ class AppAdapter(
     }
 
     class FeedVoteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val uname: LinkTextView = view.findViewById(R.id.uname)
         val expand: ImageButton = view.findViewById(R.id.expand)
         val device: TextView = view.findViewById(R.id.device)
@@ -121,7 +121,7 @@ class AppAdapter(
 
     class FeedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var feedType = ""
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         var avatarUrl = ""
         val uname: LinkTextView = view.findViewById(R.id.uname)
         val from: TextView = view.findViewById(R.id.from)
@@ -164,7 +164,7 @@ class AppAdapter(
         val follow: TextView = view.findViewById(R.id.follow)
         val fans: TextView = view.findViewById(R.id.fans)
         val act: TextView = view.findViewById(R.id.act)
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val followBtn: TextView = view.findViewById(R.id.followBtn)
         var uid = ""
         var isFollow = false
@@ -174,7 +174,7 @@ class AppAdapter(
         val uname: TextView = view.findViewById(R.id.uname)
         val follow: TextView = view.findViewById(R.id.follow)
         val fans: TextView = view.findViewById(R.id.fans)
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val followBtn: TextView = view.findViewById(R.id.followBtn)
         var targetType = ""
         var id = ""
@@ -202,7 +202,7 @@ class AppAdapter(
     }
 
     class FeedReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         var avatarUrl = ""
         val uname: TextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
@@ -773,7 +773,7 @@ class AppAdapter(
                 holder.follow.text = "${data.followNum}关注"
                 holder.fans.text = if (data.targetType == "user") "${data.fansNum}关注"
                 else "${data.commentNum}讨论"
-                ImageUtil.showAvatar(holder.avatar, data.logo)
+                ImageUtil.showIMG(holder.avatar, data.logo)
             }
 
             is CollectionViewHolder -> {
@@ -806,7 +806,7 @@ class AppAdapter(
                 holder.avatarUrl = feed.userAvatar
                 holder.pubDataRaw = feed.dateline.toString()
                 holder.uname.text = feed.userInfo?.username
-                ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
+                ImageUtil.showIMG(holder.avatar, feed.userAvatar)
 
                 if (!feed.messageTitle.isNullOrEmpty()) {
                     holder.messageTitle.visibility = View.VISIBLE
@@ -952,7 +952,7 @@ class AppAdapter(
                 )
                 holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                 SpannableStringBuilderUtil.isColor = false
-                ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
+                ImageUtil.showIMG(holder.avatar, feed.userAvatar)
                 if (feed.vote?.totalOptionNum == 2) {
                     holder.optionNum.visibility = View.GONE
                     holder.voteNum.text =
@@ -1181,14 +1181,14 @@ class AppAdapter(
                     holder.follow.text = "${user.userInfo.follow}关注"
                     holder.fans.text = "${user.userInfo.fans}粉丝"
                     holder.act.text = DateUtils.fromToday(user.userInfo.logintime) + "活跃"
-                    ImageUtil.showAvatar(holder.avatar, user.userInfo.userAvatar)
+                    ImageUtil.showIMG(holder.avatar, user.userInfo.userAvatar)
                 } else if (user.userInfo == null && user.fUserInfo != null) {
                     holder.uid = user.fUserInfo.uid
                     holder.uname.text = user.fUserInfo.username
                     holder.follow.text = "${user.fUserInfo.follow}关注"
                     holder.fans.text = "${user.fUserInfo.fans}粉丝"
                     holder.act.text = DateUtils.fromToday(user.fUserInfo.logintime) + "活跃"
-                    ImageUtil.showAvatar(holder.avatar, user.fUserInfo.userAvatar)
+                    ImageUtil.showIMG(holder.avatar, user.fUserInfo.userAvatar)
                 } else if (user.userInfo != null && user.fUserInfo == null) {
                     holder.uid = user.uid
                     holder.uname.text = user.username
@@ -1208,7 +1208,7 @@ class AppAdapter(
                         holder.followBtn.text = "已关注"
                         holder.followBtn.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
-                    ImageUtil.showAvatar(holder.avatar, user.userAvatar)
+                    ImageUtil.showIMG(holder.avatar, user.userAvatar)
                 }
             }
 
@@ -1357,7 +1357,7 @@ class AppAdapter(
                 )
                 holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                 SpannableStringBuilderUtil.isColor = false
-                ImageUtil.showAvatar(holder.avatar, feed.userAvatar)
+                ImageUtil.showIMG(holder.avatar, feed.userAvatar)
                 if (feed.feedType == "feedArticle" || feed.feedType == "vote") {
                     holder.messageTitle.visibility = View.VISIBLE
                     holder.messageTitle.text = feed.messageTitle

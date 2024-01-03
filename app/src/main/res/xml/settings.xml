@@ -54,13 +54,18 @@
             android:key="topicBlackList"
             android:title="@string/topic_black_list" />
         <Preference
-            android:icon="@drawable/ic_image"
-            android:key="imageQuality"
-            android:title="@string/image_quality" />
-        <Preference
             android:icon="@drawable/ic_text_fields"
             android:key="fontScale"
             android:title="@string/font_scale" />
+        <Preference
+            android:icon="@drawable/ic_image"
+            android:key="imageQuality"
+            android:title="@string/image_quality" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_filter"
+            android:key="isColorFilter"
+            android:title="@string/color_filter_in_dark_mode" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_explorer"

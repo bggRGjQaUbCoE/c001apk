@@ -389,7 +389,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             if (PrefManager.experience != "") PrefManager.experience.toInt()
             else -1
         if (PrefManager.userAvatar.isNotEmpty())
-            ImageUtil.showAvatar(binding.avatar, PrefManager.userAvatar)
+            ImageUtil.showIMG(binding.avatar, PrefManager.userAvatar)
     }
 
     override fun onDeleteNoti(uname: String, id: String, position: Int) {

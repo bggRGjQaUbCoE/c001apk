@@ -52,6 +52,7 @@ import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.gson.Gson
 
 
@@ -111,7 +112,7 @@ class FeedContentAdapter(
     }
 
     class FeedContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val uname: LinkTextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
         val messageTitle: TextView = view.findViewById(R.id.messageTitle)
@@ -144,7 +145,7 @@ class FeedContentAdapter(
         val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
         val replyLayout: MaterialCardView = view.findViewById(R.id.replyLayout)
         val totalReply: TextView = view.findViewById(R.id.totalReply)
@@ -539,7 +540,7 @@ class FeedContentAdapter(
                     SpannableStringBuilderUtil.isColor = false
                     if (!feed.data?.ipLocation.isNullOrEmpty())
                         holder.ip.text = "发布于 ${feed.data?.ipLocation}"
-                    ImageUtil.showAvatar(holder.avatar, feed.data?.userAvatar)
+                    ImageUtil.showIMG(holder.avatar, feed.data?.userAvatar)
                     holder.isFollow = feed.data?.userAction?.followAuthor == 1
 
                     if (feed.data?.userAction?.followAuthor == 0) { //follow
@@ -1122,7 +1123,7 @@ class FeedContentAdapter(
                     )
                     holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
 
-                    ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
+                    ImageUtil.showIMG(holder.avatar, reply.userAvatar)
 
                     SpannableStringBuilderUtil.isColor = false
                     if (reply.message == "[图片]") {

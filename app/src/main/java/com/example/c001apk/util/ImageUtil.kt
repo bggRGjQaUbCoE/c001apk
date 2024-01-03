@@ -1,5 +1,6 @@
 package com.example.c001apk.util
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
@@ -44,6 +45,7 @@ import net.mikaelzero.mojito.ext.mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
 import net.mikaelzero.mojito.impl.DefaultTargetFragmentCover
 import net.mikaelzero.mojito.impl.SimpleMojitoViewCallback
+import rikka.core.util.ResourceUtils
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -74,6 +76,7 @@ object ImageUtil {
             .into(view)
     }
 
+    @SuppressLint("CheckResult")
     fun showIMG(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
             url?.http2https(),
@@ -81,43 +84,16 @@ object ImageUtil {
         )
         Glide
             .with(view)
-            .load(newUrl)
+            .load(newUrl).apply {
+                if (ResourceUtils.isNightMode(view.context.resources.configuration)
+                    && PrefManager.isColorFilter
+                )
+                    transform(ColorFilterTransformation(Color.parseColor("#2A000000")))
+            }
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transition(withCrossFade(100))
             .skipMemoryCache(false)
             .dontAnimate()
-            .into(view)
-    }
-
-    fun showAvatar(view: ImageView, url: String?) {
-        val newUrl = GlideUrl(
-            url?.http2https(),
-            LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
-        )
-        Glide
-            .with(view)
-            .load(newUrl)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(withCrossFade(100))
-            .skipMemoryCache(false)
-            .dontAnimate()
-            .circleCrop()
-            .into(view)
-    }
-
-    fun showIMG1(view: ImageView, url: String?) {
-        val newUrl = GlideUrl(
-            url?.http2https(),
-            LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
-        )
-        Glide
-            .with(view)
-            .load(newUrl)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(withCrossFade(100))
-            .skipMemoryCache(false)
-            .dontAnimate()
-            .centerCrop()
             .into(view)
     }
 

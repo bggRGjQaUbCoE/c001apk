@@ -27,6 +27,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
+import com.google.android.material.imageview.ShapeableImageView
 import kotlin.concurrent.thread
 
 
@@ -68,7 +69,7 @@ class BHistoryAdapter(
     class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var id = ""
         var uid = ""
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val uname: LinkTextView = view.findViewById(R.id.uname)
         val device: TextView = view.findViewById(R.id.device)
         val message: LinkTextView = view.findViewById(R.id.message)
@@ -211,7 +212,7 @@ class BHistoryAdapter(
                             (holder.message.textSize * 1.3).toInt(),
                             null
                         )
-                        ImageUtil.showAvatar(holder.avatar, history.avatar)
+                        ImageUtil.showIMG(holder.avatar, history.avatar)
                     } else {
                         val history = dataList[position] as FeedFavorite
                         holder.id = history.feedId
@@ -243,7 +244,7 @@ class BHistoryAdapter(
                             (holder.message.textSize * 1.3).toInt(),
                             null
                         )
-                        ImageUtil.showAvatar(holder.avatar, history.avatar)
+                        ImageUtil.showIMG(holder.avatar, history.avatar)
                     }
                 }
             }

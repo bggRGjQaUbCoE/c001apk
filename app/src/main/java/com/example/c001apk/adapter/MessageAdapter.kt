@@ -445,7 +445,7 @@ class MessageAdapter(
                     mContext, noti.note, (holder.message.textSize * 1.3).toInt(), null
                 )
                 holder.pubDate.text = DateUtils.fromToday(noti.dateline)
-                ImageUtil.showAvatar(holder.avatar, noti.fromUserAvatar)
+                ImageUtil.showIMG(holder.avatar, noti.fromUserAvatar)
             }
 
             is FFFViewHolder -> {

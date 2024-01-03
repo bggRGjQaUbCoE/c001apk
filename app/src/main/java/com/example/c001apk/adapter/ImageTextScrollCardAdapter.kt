@@ -82,7 +82,7 @@ class ImageTextScrollCardAdapter(
         holder.uname = imageTextScrollCard.username
         holder.title.text = imageTextScrollCard.title
         holder.title.setPadding(10.dp, 10.dp, 10.dp, 10.dp)
-        ImageUtil.showIMG1(holder.imageTextScrollCard, imageTextScrollCard.pic)
+        ImageUtil.showIMG(holder.imageTextScrollCard, imageTextScrollCard.pic)
     }
 
 }

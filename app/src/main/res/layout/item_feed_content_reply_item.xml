@@ -19,10 +19,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/avatar"
                 android:layout_width="30dp"
-                android:layout_height="30dp" />
+                android:layout_height="30dp"
+                app:shapeAppearance="@style/circleImageStyle" />
 
             <TextView
                 android:id="@+id/vote"

@@ -154,4 +154,8 @@ object PrefManager {
     var imageQuality: String
         get() = pref.getString("imageQuality", "auto")!!
         set(value) = pref.edit().putString("imageQuality", value).apply()
+
+    var isColorFilter: Boolean
+        get() = pref.getBoolean("isColorFilter", false)
+        set(value) = pref.edit().putBoolean("isColorFilter", value).apply()
 }

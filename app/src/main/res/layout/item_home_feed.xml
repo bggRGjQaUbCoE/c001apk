@@ -14,12 +14,13 @@
         android:layout_height="wrap_content"
         android:padding="10dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/avatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearance="@style/circleImageStyle" />
 
         <ImageButton
             android:id="@+id/expand"
@@ -51,6 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:layout_marginTop="2dp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
@@ -60,6 +62,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:layout_marginTop="2dp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/from"
             app:layout_constraintTop_toBottomOf="@id/uname" />

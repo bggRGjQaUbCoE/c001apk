@@ -31,6 +31,7 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
+import com.google.android.material.imageview.ShapeableImageView
 
 
 class Reply2ReplyTotalAdapter(
@@ -72,7 +73,7 @@ class Reply2ReplyTotalAdapter(
         val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
         val expand: ImageButton = view.findViewById(R.id.expand)
@@ -266,7 +267,7 @@ class Reply2ReplyTotalAdapter(
                 holder.uid = reply.uid
                 holder.name = reply.username
                 holder.isLike = reply.userAction?.like == 1
-                ImageUtil.showAvatar(holder.avatar, reply.userAvatar)
+                ImageUtil.showIMG(holder.avatar, reply.userAvatar)
 
                 val replyTag =
                     when (reply.uid) {

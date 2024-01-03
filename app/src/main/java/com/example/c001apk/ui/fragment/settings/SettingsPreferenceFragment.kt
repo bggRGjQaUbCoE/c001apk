@@ -96,6 +96,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isRecordHistory" -> PrefManager.isRecordHistory
                 "isIconMiniCard" -> PrefManager.isIconMiniCard
                 "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside
+                "isColorFilter" -> PrefManager.isColorFilter
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -110,6 +111,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
                 "isIconMiniCard" -> PrefManager.isIconMiniCard = value
                 "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside = value
+                "isColorFilter" -> PrefManager.isColorFilter = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -158,11 +160,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<MaterialSwitchPreference>("showEmoji")?.setOnPreferenceChangeListener { _, _ ->
-            activity?.recreate()
-            true
-        }
-
-        findPreference<MaterialSwitchPreference>("allHuaji")?.setOnPreferenceChangeListener { _, _ ->
             activity?.recreate()
             true
         }
@@ -298,6 +295,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 }
                 show()
             }
+            true
+        }
+
+        findPreference<MaterialSwitchPreference>("isColorFilter")?.setOnPreferenceChangeListener { _, _ ->
+            activity?.recreate()
             true
         }
 

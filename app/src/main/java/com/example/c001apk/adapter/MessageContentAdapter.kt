@@ -63,7 +63,7 @@ class MessageContentAdapter(
         val message: LinkTextView = view.findViewById(R.id.message)
         val pubDate: TextView = view.findViewById(R.id.pubDate)
         val like: TextView = view.findViewById(R.id.like)
-        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
         val reply: TextView = view.findViewById(R.id.reply)
         val device: TextView = view.findViewById(R.id.device)
         val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
@@ -216,7 +216,7 @@ class MessageContentAdapter(
                 holder.follow.text = DateUtils.fromToday(message.dateline)
                 if (type == "contactsFollow")
                     holder.fans.text = "关注了你"
-                ImageUtil.showAvatar(holder.avatar, message.fromUserAvatar)
+                ImageUtil.showIMG(holder.avatar, message.fromUserAvatar)
             }
 
             is AppAdapter.FootViewHolder -> {
@@ -273,7 +273,7 @@ class MessageContentAdapter(
                     holder.uid = message.uid
                     holder.entityType = message.entityType
                     holder.uname.text = message.username
-                    ImageUtil.showAvatar(holder.avatar, message.userAvatar)
+                    ImageUtil.showIMG(holder.avatar, message.userAvatar)
                     if (message.deviceTitle != "") {
                         holder.device.text = message.deviceTitle
                         val drawable: Drawable = mContext.getDrawable(R.drawable.ic_device)!!
@@ -351,7 +351,7 @@ class MessageContentAdapter(
                     holder.entityType = message.entityType
                     holder.uname.text = message.likeUsername
                     holder.uid = message.likeUid
-                    ImageUtil.showAvatar(holder.avatar, message.likeAvatar)
+                    ImageUtil.showIMG(holder.avatar, message.likeAvatar)
                     holder.pubDate.text = DateUtils.fromToday(message.likeTime)
                     val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
                     drawable1.setBounds(

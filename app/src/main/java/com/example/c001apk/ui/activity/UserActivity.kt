@@ -273,7 +273,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
         binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
         ImageUtil.showUserCover(binding.cover, viewModel.cover)
-        ImageUtil.showAvatar(binding.avatar, viewModel.avatar)
+        ImageUtil.showIMG(binding.avatar, viewModel.avatar)
         binding.name.text = viewModel.uname
         binding.uid.text = viewModel.uid
         binding.level.text = viewModel.level

@@ -29,6 +29,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.ViewGroup
@@ -39,6 +40,7 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.c001apk.MyApplication
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.PrefManager
@@ -47,6 +49,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import net.mikaelzero.mojito.tools.Utils.dip2px
+import rikka.core.util.ResourceUtils
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
@@ -219,6 +222,10 @@ class NineGridImageView @JvmOverloads constructor(
                 imageView.strokeWidth = 1.dp.toFloat()
                 imageView.strokeColor = context.getColorStateList(R.color.cover)
                 imageView.setBackgroundColor(context.getColor(R.color.cover))
+                if (ResourceUtils.isNightMode(MyApplication.context.resources.configuration)
+                    && PrefManager.isColorFilter
+                )
+                    imageView.setColorFilter(Color.parseColor("#2d000000"))
                 addView(imageView, generateDefaultLayoutParams())
                 val newUrl =
                     GlideUrl(
