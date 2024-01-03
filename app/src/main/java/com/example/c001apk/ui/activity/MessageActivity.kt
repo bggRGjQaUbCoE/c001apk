@@ -50,24 +50,38 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing) viewModel.messageList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.messageList.size
-                        for (element in feed)
-                            if (element.entityType == "feed"
-                                || element.entityType == "feed_reply"
-                                || element.entityType == "notification"
-                            )
-                                if (!BlackListUtil.checkUid(element.uid))
-                                    viewModel.messageList.add(element)
+                if (feed != null) {
+                    if (!feed.message.isNullOrEmpty()) {
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = feed.message
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        viewModel.isEnd = true
+                        viewModel.isLoadMore = false
+                        viewModel.isRefreshing = false
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
+                        binding.swipeRefresh.isRefreshing = false
+                        mAdapter.notifyItemChanged(viewModel.messageList.size)
+                        return@observe
+                    } else if (!feed.data.isNullOrEmpty()) {
+                        if (viewModel.isRefreshing) viewModel.messageList.clear()
+                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                            viewModel.listSize = viewModel.messageList.size
+                            for (element in feed.data)
+                                if (element.entityType == "feed"
+                                    || element.entityType == "feed_reply"
+                                    || element.entityType == "notification"
+                                )
+                                    if (!BlackListUtil.checkUid(element.uid))
+                                        viewModel.messageList.add(element)
+                        }
+                        viewModel.loadState = mAdapter.LOADING_COMPLETE
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                    } else if (feed.data?.isEmpty() == true) {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        viewModel.isEnd = true
                     }
-                    viewModel.loadState = mAdapter.LOADING_COMPLETE
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                } else if (feed?.isEmpty() == true) {
-                    viewModel.loadState = mAdapter.LOADING_END
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                    viewModel.isEnd = true
                 } else {
                     viewModel.loadState = mAdapter.LOADING_ERROR
                     viewModel.errorMessage = getString(R.string.loading_failed)

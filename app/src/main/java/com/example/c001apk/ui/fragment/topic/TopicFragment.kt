@@ -89,15 +89,15 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (data != null) {
-                    viewModel.isFollow = data.userAction?.follow == 1
+                if (data?.data != null) {
+                    viewModel.isFollow = data.data.userAction?.follow == 1
                     if (viewModel.tabList.isEmpty()) {
-                        viewModel.id = data.id
-                        viewModel.type = data.entityType
-                        viewModel.subtitle = data.intro
+                        viewModel.id = data.data.id
+                        viewModel.type = data.data.entityType
+                        viewModel.subtitle = data.data.intro
                         initBar()
 
-                        for (element in data.tabList) {
+                        for (element in data.data.tabList) {
                             viewModel.tabList.add(element.title)
                             viewModel.fragmentList.add(
                                 TopicContentFragment.newInstance(
@@ -108,8 +108,8 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                             )
                         }
                         var tabSelected = 0
-                        for (element in data.tabList) {
-                            if (data.selectedTab == element.pageName) break
+                        for (element in data.data.tabList) {
+                            if (data.data.selectedTab == element.pageName) break
                             else tabSelected++
                         }
                         initView(tabSelected)
@@ -130,13 +130,13 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (data != null) {
-                    viewModel.isFollow = data.userAction?.follow == 1
+                if (data?.data != null) {
+                    viewModel.isFollow = data.data.userAction?.follow == 1
                     if (viewModel.tabList.isEmpty()) {
-                        viewModel.subtitle = data.intro
+                        viewModel.subtitle = data.data.intro
                         initBar()
 
-                        for (element in data.tabList) {
+                        for (element in data.data.tabList) {
                             viewModel.tabList.add(element.title)
                             viewModel.fragmentList.add(
                                 TopicContentFragment.newInstance(
@@ -147,8 +147,8 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                             )
                         }
                         var tabSelected = 0
-                        for (element in data.tabList) {
-                            if (data.selectedTab == element.pageName) break
+                        for (element in data.data.tabList) {
+                            if (data.data.selectedTab == element.pageName) break
                             else tabSelected++
                         }
                         initView(tabSelected)

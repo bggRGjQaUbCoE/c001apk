@@ -2,7 +2,13 @@ package com.example.c001apk.logic.model
 
 import com.google.gson.annotations.SerializedName
 
-data class MessageResponse(val data: List<Data>) {
+data class MessageResponse(
+    val status: Int?,
+    val error: Int?,
+    val message: String?,
+    val messageStatus: Int?,
+    val data: List<Data>?
+) {
 
     data class Data(
         val infoHtml: String?,

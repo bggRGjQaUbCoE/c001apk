@@ -92,46 +92,23 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             binding.progress.visibility = View.INVISIBLE
         }
 
-        /*   binding.collapsingToolbar.setOnScrimesShowListener(object :
-               NestCollapsingToolbarLayout.OnScrimsShowListener {
-               override fun onScrimsShowChange(
-                   nestCollapsingToolbarLayout: NestCollapsingToolbarLayout,
-                   isScrimesShow: Boolean
-               ) {
-                   if (isScrimesShow) {
-                       binding.name1.visibility = View.VISIBLE
-                       binding.avatar1.visibility = View.VISIBLE
-                       binding.titleProfile.visibility = View.VISIBLE
-                       objectAnimator.start()
-                   } else {
-                       binding.name1.visibility = View.INVISIBLE
-                       binding.avatar1.visibility = View.INVISIBLE
-                       if (objectAnimator.isRunning) {
-                           objectAnimator.cancel()
-                       }
-                       binding.titleProfile.visibility = View.INVISIBLE
-                   }
-               }
-
-           })*/
-
         viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (data != null) {
+                if (data?.data != null) {
                     viewModel.countList.clear()
                     viewModel.countList.apply {
-                        add(data.feed)
-                        add(data.follow)
-                        add(data.fans)
+                        add(data.data.feed)
+                        add(data.data.follow)
+                        add(data.data.fans)
                     }
-                    PrefManager.username = URLEncoder.encode(data.username, "UTF-8")
-                    PrefManager.userAvatar = data.userAvatar
-                    PrefManager.level = data.level
-                    PrefManager.experience = data.experience.toString()
-                    PrefManager.nextLevelExperience = data.nextLevelExperience.toString()
+                    PrefManager.username = URLEncoder.encode(data.data.username, "UTF-8")
+                    PrefManager.userAvatar = data.data.userAvatar
+                    PrefManager.level = data.data.level
+                    PrefManager.experience = data.data.experience.toString()
+                    PrefManager.nextLevelExperience = data.data.nextLevelExperience.toString()
                     showProfile()
 
                     viewModel.isNew = true
@@ -151,22 +128,34 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
-                        viewModel.messageList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.messageList.size
-                        for (element in feed)
-                            if (element.entityType == "notification")
-                                if (!BlackListUtil.checkUid(element.fromuid))
-                                    viewModel.messageList.add(element)
+                if (feed != null) {
+                    if (!feed.message.isNullOrEmpty()) {
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = feed.message
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        viewModel.isEnd = true
+                        viewModel.isLoadMore = false
+                        viewModel.isRefreshing = false
+                        binding.swipeRefresh.isRefreshing = false
+                        mAdapter.notifyItemChanged(viewModel.messageList.size)
+                        return@observe
+                    } else if (!feed.data.isNullOrEmpty()) {
+                        if (viewModel.isRefreshing)
+                            viewModel.messageList.clear()
+                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                            viewModel.listSize = viewModel.messageList.size
+                            for (element in feed.data)
+                                if (element.entityType == "notification")
+                                    if (!BlackListUtil.checkUid(element.fromuid))
+                                        viewModel.messageList.add(element)
+                        }
+                        viewModel.loadState = mAdapter.LOADING_COMPLETE
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                    } else if (feed.data?.isEmpty() == true) {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        viewModel.isEnd = true
                     }
-                    viewModel.loadState = mAdapter.LOADING_COMPLETE
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                } else if (feed?.isEmpty() == true) {
-                    viewModel.loadState = mAdapter.LOADING_END
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                    viewModel.isEnd = true
                 } else {
                     viewModel.loadState = mAdapter.LOADING_ERROR
                     viewModel.errorMessage = getString(R.string.loading_failed)

@@ -125,7 +125,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.homeFeedList.size
                         for (element in feed?.data!!) {
-                            if (element.entityType == "feed"
+                            if (!PrefManager.isIconMiniCard && element.entityTemplate == "iconMiniScrollCard")
+                                continue
+                            else if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniScrollCard"
                                 || element.entityTemplate == "iconLinkGridCard"
                                 || element.entityTemplate == "imageCarouselCard_1"
@@ -136,9 +138,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                     viewModel.changeFirstItem = false
                                     viewModel.firstItem = element.id
                                 }
-                                if (!PrefManager.isIconMiniCard && element.entityTemplate == "iconMiniScrollCard")
-                                    continue
-                                else if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
                                     && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
@@ -208,18 +208,22 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.homeFeedList.size
                         for (element in feed?.data!!) {
-                            if (element.entityType == "feed"
+                            if (!PrefManager.isIconMiniCard
+                                && element.entityTemplate == "iconMiniGridCard"
+                            )
+                                continue
+                            else if (element.entityType == "feed"
                                 || element.entityTemplate == "iconMiniGridCard"
                                 || element.entityTemplate == "iconLinkGridCard"
                                 || element.entityTemplate == "imageSquareScrollCard"
-                            )
+                            ) {
                                 if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
                                     && !TopicBlackListUtil.checkTopic(
                                         element.tags + element.ttitle
                                     )
                                 )
                                     viewModel.homeFeedList.add(element)
-                            //viewModel.lastItem = feed[feed.size - 1].entityId
+                            }
                         }
                     }
                     viewModel.loadState = mAdapter.LOADING_COMPLETE

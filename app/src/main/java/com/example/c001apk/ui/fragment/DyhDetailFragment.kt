@@ -81,26 +81,40 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (!data.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing)
-                        viewModel.dyhDataList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.dyhDataList.size
-                        for (element in data)
-                            if (element.entityType == "feed")
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                    && !TopicBlackListUtil.checkTopic(
-                                        element.tags + element.ttitle
+                if (data != null) {
+                    if (!data.message.isNullOrEmpty()) {
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = data.message
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        viewModel.isEnd = true
+                        viewModel.isLoadMore = false
+                        viewModel.isRefreshing = false
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
+                        binding.swipeRefresh.isRefreshing = false
+                        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
+                        return@observe
+                    } else if (!data.data.isNullOrEmpty()) {
+                        if (viewModel.isRefreshing)
+                            viewModel.dyhDataList.clear()
+                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                            viewModel.listSize = viewModel.dyhDataList.size
+                            for (element in data.data)
+                                if (element.entityType == "feed")
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                        && !TopicBlackListUtil.checkTopic(
+                                            element.tags + element.ttitle
+                                        )
                                     )
-                                )
-                                    viewModel.dyhDataList.add(element)
+                                        viewModel.dyhDataList.add(element)
+                        }
+                        viewModel.loadState = mAdapter.LOADING_COMPLETE
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                    } else if (data.data?.isEmpty() == true) {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        viewModel.isEnd = true
                     }
-                    viewModel.loadState = mAdapter.LOADING_COMPLETE
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                } else if (data?.isEmpty() == true) {
-                    viewModel.loadState = mAdapter.LOADING_END
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                    viewModel.isEnd = true
                 } else {
                     viewModel.loadState = mAdapter.LOADING_ERROR
                     viewModel.errorMessage = getString(R.string.loading_failed)

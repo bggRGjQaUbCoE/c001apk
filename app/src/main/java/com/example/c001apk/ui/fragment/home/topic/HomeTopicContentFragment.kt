@@ -69,6 +69,7 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), Ap
                 if (!data?.message.isNullOrEmpty()) {
                     binding.indicator.parent.isIndeterminate = false
                     binding.indicator.parent.visibility = View.GONE
+                    binding.swipeRefresh.isRefreshing = false
                     viewModel.loadState = mAdapter.LOADING_ERROR
                     viewModel.errorMessage = data?.message
                     mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)

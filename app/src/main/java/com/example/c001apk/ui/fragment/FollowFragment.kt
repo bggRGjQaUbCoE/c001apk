@@ -78,29 +78,43 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                 viewModel.isNew = false
 
                 val feed = result.getOrNull()
-                if (!feed.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing) viewModel.dataList.clear()
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.dataList.size
-                        for (element in feed)
-                            if (element.entityType == "feed"
-                                || element.entityType == "contacts"
-                                || element.entityType == "apk"
-                                || element.entityType == "feed_reply"
-                            )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                    && !TopicBlackListUtil.checkTopic(
-                                        element.tags + element.ttitle
-                                    )
+                if (feed != null) {
+                    if (!feed.message.isNullOrEmpty()) {
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = feed.message
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        viewModel.isEnd = true
+                        viewModel.isLoadMore = false
+                        viewModel.isRefreshing = false
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
+                        binding.swipeRefresh.isRefreshing = false
+                        mAdapter.notifyItemChanged(viewModel.dataList.size)
+                        return@observe
+                    } else if (!feed.data.isNullOrEmpty()) {
+                        if (viewModel.isRefreshing) viewModel.dataList.clear()
+                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                            viewModel.listSize = viewModel.dataList.size
+                            for (element in feed.data)
+                                if (element.entityType == "feed"
+                                    || element.entityType == "contacts"
+                                    || element.entityType == "apk"
+                                    || element.entityType == "feed_reply"
                                 )
-                                    viewModel.dataList.add(element)
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                        && !TopicBlackListUtil.checkTopic(
+                                            element.tags + element.ttitle
+                                        )
+                                    )
+                                        viewModel.dataList.add(element)
+                        }
+                        viewModel.loadState = mAdapter.LOADING_COMPLETE
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                    } else if (feed.data?.isEmpty() == true) {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        viewModel.isEnd = true
                     }
-                    viewModel.loadState = mAdapter.LOADING_COMPLETE
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                } else if (feed?.isEmpty() == true) {
-                    viewModel.loadState = mAdapter.LOADING_END
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                    viewModel.isEnd = true
                 } else {
                     viewModel.loadState = mAdapter.LOADING_ERROR
                     viewModel.errorMessage = getString(R.string.loading_failed)
@@ -131,31 +145,45 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener 
                 viewModel.isNew = false
 
                 val data = result.getOrNull()
-                if (!data?.data.isNullOrEmpty()) {
-                    if (viewModel.isRefreshing) {
-                        viewModel.dataList.clear()
-                    }
-                    if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                        viewModel.listSize = viewModel.dataList.size
-                        for (element in data?.data!!)
-                            if (element.entityType == "feed"
-                                || element.entityType == "topic"
-                                || element.entityType == "product"
-                                || element.entityType == "user"
-                            )
-                                if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                    && !TopicBlackListUtil.checkTopic(
-                                        element.tags + element.ttitle
-                                    )
+                if (data != null) {
+                    if (!data.message.isNullOrEmpty()) {
+                        viewModel.loadState = mAdapter.LOADING_ERROR
+                        viewModel.errorMessage = data.message
+                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
+                        viewModel.isEnd = true
+                        viewModel.isLoadMore = false
+                        viewModel.isRefreshing = false
+                        binding.indicator.parent.isIndeterminate = false
+                        binding.indicator.parent.visibility = View.GONE
+                        binding.swipeRefresh.isRefreshing = false
+                        mAdapter.notifyItemChanged(viewModel.dataList.size)
+                        return@observe
+                    } else if (!data.data.isNullOrEmpty()) {
+                        if (viewModel.isRefreshing) {
+                            viewModel.dataList.clear()
+                        }
+                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
+                            viewModel.listSize = viewModel.dataList.size
+                            for (element in data.data)
+                                if (element.entityType == "feed"
+                                    || element.entityType == "topic"
+                                    || element.entityType == "product"
+                                    || element.entityType == "user"
                                 )
-                                    viewModel.dataList.add(element)
+                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
+                                        && !TopicBlackListUtil.checkTopic(
+                                            element.tags + element.ttitle
+                                        )
+                                    )
+                                        viewModel.dataList.add(element)
+                        }
+                        viewModel.loadState = mAdapter.LOADING_COMPLETE
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                    } else if (data.data?.isEmpty() == true) {
+                        viewModel.loadState = mAdapter.LOADING_END
+                        mAdapter.setLoadState(viewModel.loadState, null)
+                        viewModel.isEnd = true
                     }
-                    viewModel.loadState = mAdapter.LOADING_COMPLETE
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                } else if (data?.data?.isEmpty() == true) {
-                    viewModel.loadState = mAdapter.LOADING_END
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                    viewModel.isEnd = true
                 } else {
                     viewModel.loadState = mAdapter.LOADING_ERROR
                     viewModel.errorMessage = getString(R.string.loading_failed)

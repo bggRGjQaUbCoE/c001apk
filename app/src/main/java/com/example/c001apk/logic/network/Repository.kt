@@ -15,20 +15,11 @@ object Repository {
         lastItem: String?
     ) =
         fire(Dispatchers.IO) {
-            val homeFeedResponse =
-                Network.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
-            if (homeFeedResponse != null)
-                Result.success(homeFeedResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem))
         }
 
     fun getFeedContent(id: String, rid: String?) = fire(Dispatchers.IO) {
-        val feedResponse = Network.getFeedContent(id, rid)
-        if (feedResponse != null)
-            Result.success(feedResponse)
-        else
-            Result.failure(RuntimeException("response status is null"))
+        Result.success(Network.getFeedContent(id, rid))
     }
 
     fun getFeedContentReply(
@@ -43,21 +34,19 @@ object Repository {
         fromFeedAuthor: Int
     ) =
         fire(Dispatchers.IO) {
-            val feedReplyResponse = Network.getFeedContentReply(
-                id,
-                listType,
-                page,
-                firstItem,
-                lastItem,
-                discussMode,
-                feedType,
-                blockStatus,
-                fromFeedAuthor
+            Result.success(
+                Network.getFeedContentReply(
+                    id,
+                    listType,
+                    page,
+                    firstItem,
+                    lastItem,
+                    discussMode,
+                    feedType,
+                    blockStatus,
+                    fromFeedAuthor
+                )
             )
-            if (feedReplyResponse != null)
-                Result.success(feedReplyResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
         }
 
     fun getSearch(
@@ -71,83 +60,54 @@ object Repository {
         showAnonymous: Int
     ) =
         fire(Dispatchers.IO) {
-            val searchResponse = Network.getSearch(
-                type,
-                feedType,
-                sort,
-                keyWord,
-                pageType,
-                pageParam,
-                page,
-                showAnonymous
+            Result.success(
+                Network.getSearch(
+                    type,
+                    feedType,
+                    sort,
+                    keyWord,
+                    pageType,
+                    pageParam,
+                    page,
+                    showAnonymous
+                )
             )
-            if (searchResponse != null)
-                Result.success(searchResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
         }
 
     fun getReply2Reply(id: String, page: Int) =
         fire(Dispatchers.IO) {
-            val searchResponse = Network.getReply2Reply(id, page)
-            if (searchResponse != null)
-                Result.success(searchResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getReply2Reply(id, page))
         }
 
     fun getTopicLayout(tag: String) =
         fire(Dispatchers.IO) {
-            val topicLayoutResponse = Network.getTopicLayout(tag)
-            if (topicLayoutResponse.data != null)
-                Result.success(topicLayoutResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getTopicLayout(tag))
         }
 
     fun getProductLayout(id: String) =
         fire(Dispatchers.IO) {
-            val topicLayoutResponse = Network.getProductLayout(id)
-            if (topicLayoutResponse.data != null)
-                Result.success(topicLayoutResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getProductLayout(id))
         }
 
     fun getUserSpace(uid: String) =
         fire(Dispatchers.IO) {
-            val userResponse = Network.getUserSpace(uid)
-            if (userResponse != null)
-                Result.success(userResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getUserSpace(uid))
         }
 
     fun getUserFeed(uid: String, page: Int) =
         fire(Dispatchers.IO) {
-            val userResponse = Network.getUserFeed(uid, page)
-            if (!userResponse.data.isNullOrEmpty())
-                Result.success(userResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getUserFeed(uid, page))
         }
 
     fun getAppInfo(id: String) =
         fire(Dispatchers.IO) {
-            val appResponse = Network.getAppInfo(id)
-            if (appResponse != null)
-                Result.success(appResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getAppInfo(id))
         }
 
     fun getAppDownloadLink(pn: String, aid: String, vc: String) =
         fire(Dispatchers.IO) {
             val appResponse = Network.getAppDownloadLink(pn, aid, vc)
-            if (appResponse != null) {
-                Result.success(appResponse.headers()["Location"])
-            } else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(appResponse.headers()["Location"])
         }
 
     fun getAppsUpdate(pkgs: String) =
@@ -155,252 +115,140 @@ object Repository {
             val multipartBody =
                 MultipartBody.Part.createFormData("pkgs", pkgs)
             val appResponse = Network.getAppsUpdate(multipartBody)
-            if (appResponse != null)
-                Result.success(appResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(appResponse.data)
         }
 
     fun getProfile(uid: String) =
         fire(Dispatchers.IO) {
-            val profileResponse = Network.getProfile(uid)
-            if (profileResponse.data != null)
-                Result.success(profileResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getProfile(uid))
         }
 
     fun getFollowList(url: String, uid: String, page: Int) =
         fire(Dispatchers.IO) {
-            val feedResponse = Network.getFollowList(url, uid, page)
-            if (!feedResponse.data.isNullOrEmpty())
-                Result.success(feedResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getFollowList(url, uid, page))
         }
 
     fun postLikeFeed(id: String) =
         fire(Dispatchers.IO) {
-            val response = Network.postLikeFeed(id)
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postLikeFeed(id))
         }
 
     fun postUnLikeFeed(id: String) =
         fire(Dispatchers.IO) {
-            val response = Network.postUnLikeFeed(id)
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postUnLikeFeed(id))
         }
 
     fun postLikeReply(id: String) =
         fire(Dispatchers.IO) {
-            val response = Network.postLikeReply(id)
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postLikeReply(id))
         }
 
     fun postUnLikeReply(id: String) =
         fire(Dispatchers.IO) {
-            val response = Network.postUnLikeReply(id)
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postUnLikeReply(id))
         }
 
     fun checkLoginInfo() =
         fire(Dispatchers.IO) {
-            val response = Network.checkLoginInfo()
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.checkLoginInfo())
         }
 
     fun preGetLoginParam() =
         fire(Dispatchers.IO) {
-            val response = Network.preGetLoginParam()
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.preGetLoginParam())
         }
 
     fun getLoginParam() =
         fire(Dispatchers.IO) {
-            val response = Network.getLoginParam()
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getLoginParam())
         }
 
     fun tryLogin(data: HashMap<String, String?>) =
         fire(Dispatchers.IO) {
-            val response = Network.tryLogin(data)
-            if (response != null)
-                Result.success(response)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.tryLogin(data))
         }
 
     fun getCaptcha(url: String) = fire(Dispatchers.IO) {
-        val response = Network.getCaptcha(url)
-        if (response != null)
-            Result.success(response)
-        else
-            Result.failure(RuntimeException("response status is null"))
+        Result.success(Network.getCaptcha(url))
     }
 
     fun getValidateCaptcha(url: String) = fire(Dispatchers.IO) {
-        val response = Network.getValidateCaptcha(url)
-        if (response != null)
-            Result.success(response)
-        else
-            Result.failure(RuntimeException("response status is null"))
+        Result.success(Network.getValidateCaptcha(url))
     }
 
     fun postReply(data: HashMap<String, String>, id: String, type: String) = fire(Dispatchers.IO) {
-        val replyResponse = Network.postReply(data, id, type)
-        if (replyResponse != null)
-            Result.success(replyResponse)
-        else
-            Result.failure(RuntimeException("response status is null"))
+        Result.success(Network.postReply(data, id, type))
     }
 
     fun getDataList(url: String, title: String, subTitle: String?, lastItem: String?, page: Int) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getDataList(url, title, subTitle, lastItem, page)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getDataList(url, title, subTitle, lastItem, page))
         }
 
     fun getDyhDetail(dyhId: String, type: String, page: Int) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getDyhDetail(dyhId, type, page)
-            if (!dataResponse.data.isNullOrEmpty())
-                Result.success(dataResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getDyhDetail(dyhId, type, page))
         }
 
     fun getSmsToken(type: String, data: HashMap<String, String?>) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getSmsToken(type, data)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getSmsToken(type, data))
         }
 
     fun getSmsLoginParam(type: String) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getSmsLoginParam(type)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getSmsLoginParam(type))
         }
 
     fun getMessage(url: String, page: Int) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getMessage(url, page)
-            if (dataResponse.data.isNotEmpty())
-                Result.success(dataResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getMessage(url, page))
         }
 
     fun postFollowUnFollow(url: String, uid: String) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.postFollowUnFollow(url, uid)
-            if (dataResponse.data != null)
-                Result.success(dataResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postFollowUnFollow(url, uid))
         }
 
     fun postCreateFeed(data: HashMap<String, String?>) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.postCreateFeed(data)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postCreateFeed(data))
         }
 
     fun postRequestValidate(data: HashMap<String, String?>) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.postRequestValidate(data)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postRequestValidate(data))
         }
 
     fun getVoteComment(
         fid: String, extraKey: String, page: Int, firstItem: String?, lastItem: String?,
-    ) =
-        fire(Dispatchers.IO) {
-            val dataResponse = Network.getVoteComment(fid, extraKey, page, firstItem, lastItem)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
-        }
+    ) = fire(Dispatchers.IO) {
+        Result.success(Network.getVoteComment(fid, extraKey, page, firstItem, lastItem))
+    }
 
     fun getProductList() =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getProductList()
-            if (dataResponse.data != null)
-                Result.success(dataResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getProductList())
         }
 
     fun getCollectionList(url: String, uid: String?, id: String?, showDefault: Int, page: Int) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getCollectionList(url, uid, id, showDefault, page)
-            if (dataResponse.data != null)
-                Result.success(dataResponse.data)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getCollectionList(url, uid, id, showDefault, page))
         }
 
     fun postDelete(url: String, id: String) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.postDelete(url, id)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postDelete(url, id))
         }
 
     fun postFollow(data: HashMap<String, String>) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.postFollow(data)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.postFollow(data))
         }
 
     fun getFollow(url: String, tag: String?, id: String?) =
         fire(Dispatchers.IO) {
-            val dataResponse = Network.getFollow(url, tag, id)
-            if (dataResponse != null)
-                Result.success(dataResponse)
-            else
-                Result.failure(RuntimeException("response status is null"))
+            Result.success(Network.getFollow(url, tag, id))
         }
 
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =

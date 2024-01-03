@@ -177,11 +177,11 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 
         viewModel.profileDataLiveData.observe(this) { result ->
             val data = result.getOrNull()
-            data?.let {
-                PrefManager.userAvatar = data.userAvatar
-                PrefManager.level = data.level
-                PrefManager.experience = data.experience.toString()
-                PrefManager.nextLevelExperience = data.nextLevelExperience.toString()
+            data?.data.let {
+                PrefManager.userAvatar = data?.data?.userAvatar.toString()
+                PrefManager.level = data?.data?.level.toString()
+                PrefManager.experience = data?.data?.experience.toString()
+                PrefManager.nextLevelExperience = data?.data?.nextLevelExperience.toString()
                 afterLogin()
             }
         }
