@@ -104,10 +104,12 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 } else if (!feed?.data.isNullOrEmpty()) {
                     if (viewModel.isRefreshing) {
                         if (feed?.data!!.size <= 4 && feed.data.last().entityTemplate == "refreshCard") {
-                            if (viewModel.homeFeedList.size >= 4) {
-                                if (viewModel.homeFeedList[3].entityTemplate != "refreshCard") {
-                                    viewModel.homeFeedList.add(3, feed.data.last())
-                                    mAdapter.notifyItemInserted(3)
+                            val index = if (PrefManager.isIconMiniCard) 4
+                            else 3
+                            if (viewModel.homeFeedList.size >= index) {
+                                if (viewModel.homeFeedList[index - 1].entityTemplate != "refreshCard") {
+                                    viewModel.homeFeedList.add(index - 1, feed.data.last())
+                                    mAdapter.notifyItemInserted(index - 1)
                                 }
                             }
                             viewModel.loadState = mAdapter.LOADING_COMPLETE
@@ -132,7 +134,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                 || element.entityTemplate == "iconLinkGridCard"
                                 || element.entityTemplate == "imageCarouselCard_1"
                                 || element.entityTemplate == "imageTextScrollCard"
-                                || element.entityTemplate == "refreshCard"
                             ) {
                                 if (element.entityType == "feed" && viewModel.changeFirstItem) {
                                     viewModel.changeFirstItem = false
@@ -146,13 +147,11 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                     viewModel.homeFeedList.add(element)
                             }
                         }
-                        if (viewModel.homeFeedList.last().entityTemplate == "refreshCard") {
-                            viewModel.lastItem =
-                                viewModel.homeFeedList[viewModel.homeFeedList.size - 2].entityId
-                        } else {
-                            viewModel.lastItem =
-                                viewModel.homeFeedList.last().entityId
-                        }
+                        viewModel.lastItem = if (feed.data.last().entityTemplate != "refreshCard")
+                            feed.data.last().entityId
+                        else if (feed.data[feed.data.size - 2].entityTemplate != "refreshCard")
+                            feed.data[feed.data.size - 2].entityId
+                        else ""
                     }
                     viewModel.loadState = mAdapter.LOADING_COMPLETE
                     mAdapter.setLoadState(viewModel.loadState, null)
