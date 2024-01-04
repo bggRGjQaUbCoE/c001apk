@@ -34,18 +34,19 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.appcompat.widget.ThemeUtils
 import com.absinthe.libraries.utils.extensions.dp
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.example.c001apk.MyApplication
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
+import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
-import com.google.android.material.imageview.ShapeableImageView
+import com.example.c001apk.view.RoundImageView
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import net.mikaelzero.mojito.tools.Utils.dip2px
@@ -213,19 +214,47 @@ class NineGridImageView @JvmOverloads constructor(
             removeAllViews()
 
             for (url in urlList) {
-                val imageView = ShapeableImageView(context)
+                val imageView = RoundImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
                     .setAllCorners(RoundedCornerTreatment())
                     .setAllCornerSizes(12.dp.toFloat())
                     .build()
-                imageView.shapeAppearanceModel = shapePathModel
-                imageView.strokeWidth = 1.dp.toFloat()
-                imageView.strokeColor = context.getColorStateList(R.color.cover)
-                imageView.setBackgroundColor(context.getColor(R.color.cover))
-                if (ResourceUtils.isNightMode(MyApplication.context.resources.configuration)
-                    && PrefManager.isColorFilter
-                )
-                    imageView.setColorFilter(Color.parseColor("#2d000000"))
+                imageView.apply {
+                    shapeAppearanceModel = shapePathModel
+                    strokeWidth = 1.dp.toFloat()
+                    strokeColor = context.getColorStateList(R.color.cover)
+                    setBackgroundColor(context.getColor(R.color.cover))
+                    if (ResourceUtils.isNightMode(context.resources.configuration)
+                        && PrefManager.isColorFilter
+                    )
+                        setColorFilter(Color.parseColor("#2D000000"))
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                    val replace = url.replace(".s2x.jpg", "")
+                        .replace(".s.jpg", "")
+                    val from = replace.lastIndexOf("@")
+                    val middle = replace.lastIndexOf("x")
+                    val end = replace.lastIndexOf(".")
+                    if (from != -1 && middle != -1 && end != -1) {
+                        imgWidth = replace.substring(from + 1, middle).toInt()
+                        imgHeight = replace.substring(middle + 1, end).toInt()
+                    }
+                    if ((((PrefManager.imageQuality == "auto"
+                                && !NetWorkUtil.isWifiConnected())
+                                || PrefManager.imageQuality == "thumbnail")
+                                && replace.endsWith("gif"))
+                        || imgHeight / imgWidth > 2.45
+                    ) {
+                        labelBackground = ThemeUtils.getThemeAttrColor(
+                            context,
+                            rikka.preference.simplemenu.R.attr.colorPrimary
+                        )
+                        labelText = if (replace.endsWith("gif")) "GIF"
+                        else "长图"
+                        textSize = 12.dp
+                        textColor = context.getColor(R.color.wb)
+                        labelWidth = 20.dp
+                    }
+                }
                 addView(imageView, generateDefaultLayoutParams())
                 val newUrl =
                     GlideUrl(

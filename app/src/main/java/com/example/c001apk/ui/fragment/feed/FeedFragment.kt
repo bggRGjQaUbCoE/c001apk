@@ -729,7 +729,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
         if (binding.name1.text.isNullOrEmpty()) {
             binding.name1.text = viewModel.funame
             binding.date.text = DateUtils.fromToday(viewModel.dateLine)
-            if (viewModel.device.isNullOrEmpty()) {
+            if (!viewModel.device.isNullOrEmpty()) {
                 binding.device.text = viewModel.device
                 val drawable: Drawable =
                     requireContext().getDrawable(R.drawable.ic_device)!!

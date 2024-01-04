@@ -88,7 +88,7 @@ object ImageUtil {
                 if (ResourceUtils.isNightMode(view.context.resources.configuration)
                     && PrefManager.isColorFilter
                 )
-                    transform(ColorFilterTransformation(Color.parseColor("#2A000000")))
+                    transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
             }
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transition(withCrossFade(100))

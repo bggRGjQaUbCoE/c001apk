@@ -57,4 +57,92 @@
 
     <attr name="checkableChipViewStyle" format="reference"/>
 
+    <declare-styleable name="RoundImageView">
+        <!-- Text to display. -->
+        <attr name="android:text" />
+        <!-- Size of text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp).
+             Supported values include the following:<p/>
+        <ul>
+            <li><b>px</b> Pixels</li>
+            <li><b>sp</b> Scaled pixels (scaled to relative pixel size on screen). See {@link android.util.DisplayMetrics} for more information.</li>
+            <li><b>pt</b> Points</li>
+            <li><b>dip</b> Device independent pixels. See {@link android.util.DisplayMetrics} for more information.</li>
+        </ul>
+            -->
+        <attr name="android:textSize" />
+        <!-- Color of text (usually same as colorForeground). -->
+        <attr name="android:textColor" />
+        <!-- Border width -->
+        <attr name="borderWidth" format="dimension" />
+        <!-- Border color -->
+        <attr name="borderColor" format="color" />
+        <!-- Whether to show the border line -->
+        <attr name="displayBorder" format="boolean" />
+        <!-- Defines the radius of the four corners. -->
+        <attr name="android:radius" />
+        <!-- Radius of the top left corner. -->
+        <attr name="android:topLeftRadius" />
+        <!-- Radius of the top right corner. -->
+        <attr name="android:topRightRadius" />
+        <!-- Radius of the bottom left corner. -->
+        <attr name="android:bottomLeftRadius" />
+        <!-- Radius of the bottom right corner. -->
+        <attr name="android:bottomRightRadius" />
+        <!-- Display Type -->
+        <attr name="displayType">
+            <!-- Rectangle -->
+            <enum name="normal" value="0" />
+            <!-- circle -->
+            <enum name="circle" value="1" />
+            <!-- Rounded Rectangle -->
+            <enum name="round_rect" value="2" />
+        </attr>
+        <!-- Display labels-->
+        <attr name="displayLabel" format="boolean" />
+        <!-- The label background-->
+        <attr name="labelBackground" format="color" />
+        <!-- The label width-->
+        <attr name="labelWidth" format="dimension" />
+        <!-- Distance start location margin-->
+        <attr name="startMargin" format="dimension" />
+        <!-- Default text typeface. -->
+        <attr name="android:typeface" />
+        <!-- Default text typeface style. -->
+        <attr name="android:textStyle" />
+        <!-- Label display location-->
+        <attr name="labelGravity">
+            <!-- Align top left-->
+            <enum name="leftTop" value="0" />
+            <!-- Align bottom left-->
+            <enum name="leftBottom" value="1" />
+            <!-- Align top right-->
+            <enum name="rightTop" value="2" />
+            <!-- Align bottom right-->
+            <enum name="rightBottom" value="3" />
+        </attr>
+        <!-- Use gradient content-->
+        <attr name="gradientContent">
+            <enum name="none" value="0" />
+            <!-- Border gradient-->
+            <enum name="border" value="1" />
+            <!-- Label gradient-->
+            <enum name="label" value="2" />
+            <!-- Label background gradient-->
+            <enum name="labelBackground" value="3" />
+            <!-- Use gradient colors for borders, labels and label backgrounds-->
+            <enum name="all" value="4" />
+        </attr>
+        <!-- Type of gradient. The default type is linear. -->
+        <attr name="android:type" />
+        <!-- Start color of the gradient. -->
+        <attr name="android:startColor" />
+        <!-- Optional center color. For linear gradients, use centerX or centerY to place the center
+             color. -->
+        <attr name="android:centerColor" />
+        <!-- End color of the gradient. -->
+        <attr name="android:endColor" />
+        <!-- Standard orientation constant. -->
+        <attr name="android:orientation" />
+    </declare-styleable>
+
 </resources>
