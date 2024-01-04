@@ -58,7 +58,7 @@ jobs:
           cp -f keystore.jks ./app/c001apk.jks
           ls -hl
           ls -l ./app
-          ./gradlew :app:assembleRelease
+          ./gradlew :app:assembleRelease --debug
         env:
           KEYSTORE_PATH: "../keystore.jks"
           KEYSTORE_PASSWORD: 12345678
