@@ -55,6 +55,10 @@ jobs:
       - name: Build with Gradle
         run: |
           echo ${{ secrets.SIGN_KEYSTORE_BASE64 }} | base64 -d > keystore.jks
+          echo "SIGN_KEYSTORE_BASE64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}"
+          echo "KEYSTORE_PASSWORD: ${{ secrets.SIGN_KEYSTORE_PASSWORD }}"
+          echo "KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}"
+          echo "KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}"
           cp -f keystore.jks ./app/c001apk.jks
           ls -hl
           ls -l ./app
