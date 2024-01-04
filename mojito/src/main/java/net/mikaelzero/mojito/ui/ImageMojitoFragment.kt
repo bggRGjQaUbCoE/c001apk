@@ -20,7 +20,12 @@ import net.mikaelzero.mojito.interfaces.IMojitoFragment
 import net.mikaelzero.mojito.interfaces.IProgress
 import net.mikaelzero.mojito.interfaces.ImageViewLoadFactory
 import net.mikaelzero.mojito.interfaces.OnMojitoViewCallback
-import net.mikaelzero.mojito.loader.*
+import net.mikaelzero.mojito.loader.ContentLoader
+import net.mikaelzero.mojito.loader.DefaultImageCallback
+import net.mikaelzero.mojito.loader.FragmentCoverLoader
+import net.mikaelzero.mojito.loader.ImageLoader
+import net.mikaelzero.mojito.loader.OnLongTapCallback
+import net.mikaelzero.mojito.loader.OnTapCallback
 import net.mikaelzero.mojito.tools.BitmapUtil
 import net.mikaelzero.mojito.tools.MojitoConstant
 import net.mikaelzero.mojito.tools.ScreenUtils
@@ -331,6 +336,15 @@ class ImageMojitoFragment : Fragment(), IMojitoFragment, OnMojitoViewCallback {
         val arr = BitmapUtil.getAdjustSize(image.path, options)
         var w = arr[0]
         var h = arr[1]
+        fragmentConfig.targetUrl?.let {
+            val from = it.lastIndexOf("@")
+            val middle = it.lastIndexOf("x")
+            val end = it.lastIndexOf(".")
+            if (from != -1 && middle != -1 && end != -1) {
+                w = it.substring(from + 1, middle).toInt()
+                h = it.substring(middle + 1, end).toInt()
+            }
+        }
         val isLongImage = contentLoader?.isLongImage(w, h)
         if (isLongImage != null && isLongImage) {
             w = ScreenUtils.getScreenWidth(context)
