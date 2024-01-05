@@ -274,10 +274,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("imageQuality")?.setOnPreferenceClickListener {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setTitle("图片画质")
-                val items = arrayOf("网络自适应", "原图", "普清")
+                val items = arrayOf("网络自适应", "原图", "普清", "wsrv.nl图片代理")
                 val index = when (PrefManager.imageQuality) {
                     "auto" -> 0
                     "origin" -> 1
+                    "proxy" -> 3
                     else -> 2
                 }
                 setSingleChoiceItems(
@@ -290,6 +291,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                         1 -> PrefManager.imageQuality = "origin"
 
                         2 -> PrefManager.imageQuality = "thumbnail"
+
+                        3 -> PrefManager.imageQuality = "proxy"
                     }
                     dialog.dismiss()
                 }

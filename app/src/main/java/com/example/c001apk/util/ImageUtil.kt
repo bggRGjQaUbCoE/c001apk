@@ -314,14 +314,32 @@ object ImageUtil {
     ) {
         val thumbList = ArrayList<String>()
         val originList = ArrayList<String>()
+        // 使用 wsrv.nl 来代理转换图片格式
+        val allowImageSet = HashSet<String>()
+        allowImageSet.add("jpg")
+        allowImageSet.add("jpeg")
+        allowImageSet.add("png")
+        allowImageSet.add("bmp")
+        allowImageSet.add("tiff")
         for (url in imgList) {
-            thumbList.add("${url.http2https()}.s.jpg")
-            originList.add(url.http2https())
+            var httpsUrl = url.http2https()
+            //
+            val flag = "proxy" == PrefManager.imageQuality
+            if (flag) {
+                val lastIndexOf = httpsUrl.lastIndexOf(".")
+                val suffix = httpsUrl.substring(lastIndexOf + 1)
+                val toLowerCase = suffix.lowercase()
+                if (allowImageSet.contains(toLowerCase)) {
+                    httpsUrl = "https://wsrv.nl/?&output=webp&url=$httpsUrl"
+                }
+            }
+            thumbList.add("${httpsUrl}.s.jpg")
+            originList.add(httpsUrl)
         }
         Mojito.start(context) {
             urls(thumbList, originList)
             when (PrefManager.imageQuality) {
-                "auto" ->
+                "auto", "proxy" ->
                     if (NetWorkUtil.isWifiConnected())
                         autoLoadTarget(true)
                     else
@@ -330,6 +348,8 @@ object ImageUtil {
                 "origin" -> autoLoadTarget(true)
 
                 "thumbnail" -> autoLoadTarget(false)
+
+                else -> autoLoadTarget(true)
             }
             fragmentCoverLoader {
                 DefaultTargetFragmentCover()
