@@ -149,9 +149,9 @@ android {
         outputs.all {
             val versionName = defaultConfig.versionName
             val versionCode = defaultConfig.versionCode
-            if (buildType.name == "release")
+            if (buildType.name == "release" || buildType.name == "debug")
                 (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                    "c001apk_$versionName($versionCode).apk"
+                    "c001apk_($versionCode).apk"
         }
     }
 }
