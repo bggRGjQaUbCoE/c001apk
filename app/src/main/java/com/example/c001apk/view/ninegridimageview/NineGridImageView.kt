@@ -43,6 +43,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
@@ -209,11 +210,12 @@ class NineGridImageView @JvmOverloads constructor(
     @SuppressLint("RestrictedApi", "ResourceAsColor")
     fun setUrlList(urlList: List<String>?) {
         if (urlList != null) {
-            this.urlList = urlList
-            generateChildrenLayout(urlList.size)
+            val newList = urlList.map { url -> ImageUtil.proxyImageUrl(url) }
+            this.urlList = newList
+            generateChildrenLayout(newList.size)
             removeAllViews()
 
-            for (url in urlList) {
+            for (url in newList) {
                 val imageView = RoundImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
                     .setAllCorners(RoundedCornerTreatment())

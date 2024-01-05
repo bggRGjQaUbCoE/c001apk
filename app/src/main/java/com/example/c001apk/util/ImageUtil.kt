@@ -59,6 +59,35 @@ object ImageUtil {
     private lateinit var imagesDir: File
     private lateinit var imageCheckDir: File
 
+    // 使用 wsrv.nl 来代理转换图片格式
+    val allowImageSet = HashSet<String>()
+
+    init {
+        allowImageSet.add("jpg")
+        allowImageSet.add("jpeg")
+        allowImageSet.add("png")
+        allowImageSet.add("bmp")
+        allowImageSet.add("tiff")
+        allowImageSet.add("gif")
+        allowImageSet.add("ico")
+    }
+
+    fun proxyImageUrl(url: String): String {
+        var httpsUrl = url.http2https()
+        //
+        val flag =
+            "proxy" == PrefManager.imageQuality && !httpsUrl.startsWith("https://wsrv.nl/")
+        if (flag) {
+            val lastIndexOf = httpsUrl.lastIndexOf(".")
+            val suffix = httpsUrl.substring(lastIndexOf + 1)
+            val toLowerCase = suffix.lowercase()
+            if (allowImageSet.contains(toLowerCase)) {
+                httpsUrl = "https://wsrv.nl/?&n=-1&output=webp&url=$httpsUrl"
+            }
+        }
+        return httpsUrl
+    }
+
     fun showUserCover(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
             url?.http2https(),
@@ -233,28 +262,10 @@ object ImageUtil {
     ) {
         val thumbList: MutableList<String> = ArrayList()
         val originList: MutableList<String> = ArrayList()
-        // 使用 wsrv.nl 来代理转换图片格式
-        val allowImageSet = HashSet<String>()
-        allowImageSet.add("jpg")
-        allowImageSet.add("jpeg")
-        allowImageSet.add("png")
-        allowImageSet.add("bmp")
-        allowImageSet.add("tiff")
+
         for (url in urlList) {
 
-            var httpsUrl = url.http2https()
-            //
-            val flag =
-                "proxy" == PrefManager.imageQuality && !httpsUrl.startsWith("https://wsrv.nl/")
-            if (flag) {
-                val lastIndexOf = httpsUrl.lastIndexOf(".")
-                val suffix = httpsUrl.substring(lastIndexOf + 1)
-                val toLowerCase = suffix.lowercase()
-                if (allowImageSet.contains(toLowerCase)) {
-                    httpsUrl = "https://wsrv.nl/?&output=webp&url=$httpsUrl"
-                }
-            }
-
+            val httpsUrl = proxyImageUrl(url)
             if (httpsUrl.endsWith(".s.jpg"))
                 originList.add(httpsUrl.replace(".s.jpg", ""))
             else if (httpsUrl.endsWith(".s2x.jpg"))
@@ -335,25 +346,10 @@ object ImageUtil {
     ) {
         val thumbList = ArrayList<String>()
         val originList = ArrayList<String>()
-        // 使用 wsrv.nl 来代理转换图片格式
-        val allowImageSet = HashSet<String>()
-        allowImageSet.add("jpg")
-        allowImageSet.add("jpeg")
-        allowImageSet.add("png")
-        allowImageSet.add("bmp")
-        allowImageSet.add("tiff")
+
         for (url in imgList) {
-            var httpsUrl = url.http2https()
-            //
-            val flag = "proxy" == PrefManager.imageQuality && !httpsUrl.startsWith("https://wsrv.nl/")
-            if (flag) {
-                val lastIndexOf = httpsUrl.lastIndexOf(".")
-                val suffix = httpsUrl.substring(lastIndexOf + 1)
-                val toLowerCase = suffix.lowercase()
-                if (allowImageSet.contains(toLowerCase)) {
-                    httpsUrl = "https://wsrv.nl/?&output=webp&url=$httpsUrl"
-                }
-            }
+            // 使用 wsrv.nl 来代理转换图片格式
+            val httpsUrl = proxyImageUrl(url)
             thumbList.add("${httpsUrl}.s.jpg")
             originList.add(httpsUrl)
         }
