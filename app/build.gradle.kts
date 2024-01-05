@@ -87,14 +87,42 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("keyStore") {
+            keyAlias = "c001apk"
+            keyPassword = "123456"
+            storeFile = file("c001apk.jks")
+            storePassword = "123456"
+        }
+    }
+
     buildTypes {
-        release {
+        /*release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }*/
+        val signConfig = signingConfigs.getByName("keyStore")
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signConfig
+        }
+        getByName("debug") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signConfig
         }
     }
     compileOptions {
@@ -169,7 +197,4 @@ dependencies {
 //    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.4")
 //    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.4")
     implementation("com.github.zhaobozhen.libraries:utils:1.1.4")
-
-    // injekt
-    // implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 }
