@@ -64,7 +64,20 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         # don't upload the artifacts if it's a pull request
-        if: ${{ !github.event.pull_request }}
+#        if: ${{ !github.event.pull_request }}
         with:
-          path: './app/build/outputs/*'
+          path: './app/build/outputs/**/*.apk'
           name: build_output_${{ github.event.head_commit.id }}.zip
+
+      - name: 获取当前时间
+        uses: srfrnk/current-time@master
+        id: current-time
+        with:
+          format: YYYY/MM/DD
+      - name: 上传
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "build_android_${{steps.current-time.outputs.formattedTime}}"
+          prerelease: true
+          files: ./app/build/outputs/**/*.apk
