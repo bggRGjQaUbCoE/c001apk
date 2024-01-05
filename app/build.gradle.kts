@@ -87,42 +87,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        create("keyStore") {
-            keyAlias = "c001apk"
-            keyPassword = "123456"
-            storeFile = file("c001apk.jks")
-            storePassword = "123456"
-        }
-    }
-
     buildTypes {
-        /*release {
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }*/
-        val signConfig = signingConfigs.getByName("keyStore")
-        getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signConfig
-        }
-        getByName("debug") {
-            isMinifyEnabled = false
-            isShrinkResources = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signConfig
         }
     }
     compileOptions {
