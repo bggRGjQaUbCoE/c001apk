@@ -133,7 +133,10 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+    val SUPPORTED_ABIS = setOf(
+        "armeabi-v7a", "arm64-v8a", "x86"
+//        , "x86_64"
+    )
     splits {
         abi {
             isEnable = true
@@ -156,7 +159,10 @@ android {
             val versionCode = defaultConfig.versionCode
             if (buildType.name == "release" || buildType.name == "debug")
                 (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                    "c001apk_($versionCode).apk"
+                    (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName
+                        .replace("app-","c001apk-")
+                        .replace("release","($versionCode)")
+                        .replace("debug","($versionCode)")
         }
     }
 }
