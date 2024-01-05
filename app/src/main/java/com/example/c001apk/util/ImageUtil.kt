@@ -233,14 +233,35 @@ object ImageUtil {
     ) {
         val thumbList: MutableList<String> = ArrayList()
         val originList: MutableList<String> = ArrayList()
+        // 使用 wsrv.nl 来代理转换图片格式
+        val allowImageSet = HashSet<String>()
+        allowImageSet.add("jpg")
+        allowImageSet.add("jpeg")
+        allowImageSet.add("png")
+        allowImageSet.add("bmp")
+        allowImageSet.add("tiff")
         for (url in urlList) {
-            if (url.endsWith(".s.jpg"))
-                originList.add(url.replace(".s.jpg", "").http2https())
-            else if (url.endsWith(".s2x.jpg"))
-                originList.add(url.replace(".s2x.jpg", "").http2https())
+
+            var httpsUrl = url.http2https()
+            //
+            val flag =
+                "proxy" == PrefManager.imageQuality && !httpsUrl.startsWith("https://wsrv.nl/")
+            if (flag) {
+                val lastIndexOf = httpsUrl.lastIndexOf(".")
+                val suffix = httpsUrl.substring(lastIndexOf + 1)
+                val toLowerCase = suffix.lowercase()
+                if (allowImageSet.contains(toLowerCase)) {
+                    httpsUrl = "https://wsrv.nl/?&output=webp&url=$httpsUrl"
+                }
+            }
+
+            if (httpsUrl.endsWith(".s.jpg"))
+                originList.add(httpsUrl.replace(".s.jpg", ""))
+            else if (httpsUrl.endsWith(".s2x.jpg"))
+                originList.add(httpsUrl.replace(".s2x.jpg", ""))
             else
-                originList.add(url.http2https())
-            thumbList.add(url.http2https())
+                originList.add(httpsUrl)
+            thumbList.add(httpsUrl)
         }
         Mojito.start(imageView.context) {
             urls(thumbList, originList)
@@ -252,7 +273,7 @@ object ImageUtil {
                 setIndicator(CircleIndexIndicator())
             views(nineGridView.getImageViews().toTypedArray())
             when (PrefManager.imageQuality) {
-                "auto" ->
+                "auto", "proxy" ->
                     if (NetWorkUtil.isWifiConnected())
                         autoLoadTarget(true)
                     else
@@ -324,7 +345,7 @@ object ImageUtil {
         for (url in imgList) {
             var httpsUrl = url.http2https()
             //
-            val flag = "proxy" == PrefManager.imageQuality
+            val flag = "proxy" == PrefManager.imageQuality && !httpsUrl.startsWith("https://wsrv.nl/")
             if (flag) {
                 val lastIndexOf = httpsUrl.lastIndexOf(".")
                 val suffix = httpsUrl.substring(lastIndexOf + 1)
