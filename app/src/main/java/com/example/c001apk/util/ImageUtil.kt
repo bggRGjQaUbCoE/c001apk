@@ -68,7 +68,7 @@ object ImageUtil {
         allowImageSet.add("png")
         allowImageSet.add("bmp")
         allowImageSet.add("tiff")
-        allowImageSet.add("gif")
+//        allowImageSet.add("gif")
         allowImageSet.add("ico")
     }
 
