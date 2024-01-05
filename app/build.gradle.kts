@@ -133,13 +133,18 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include(*SUPPORTED_ABIS.toTypedArray())
+            isUniversalApk = true
+        }
+    }
     defaultConfig {
         ndk {
-            abiFilters.add("arm64-v8a")
-            abiFilters.add("armeabi-v7a")
-//            abiFilters.add("armeabi")
-//            abiFilters.add("x86")
-            abiFilters.add("x86_64")
+            abiFilters += SUPPORTED_ABIS
         }
     }
     ksp {
