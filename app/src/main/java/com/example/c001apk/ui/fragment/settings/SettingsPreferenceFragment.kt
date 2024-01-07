@@ -299,7 +299,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<MaterialSwitchPreference>("isColorFilter")?.setOnPreferenceChangeListener { _, _ ->
-            activity?.recreate()
+            if (ResourceUtils.isNightMode(requireContext().resources.configuration))
+                activity?.recreate()
             true
         }
 

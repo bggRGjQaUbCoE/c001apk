@@ -10,10 +10,10 @@ class TopicActivity : BaseActivity<ActivityTopicBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val type = intent.getStringExtra("type")!!
-        val title = intent.getStringExtra("title")!!
-        val url = intent.getStringExtra("url")!!
-        val id = intent.getStringExtra("id")!!
+        val type = intent.getStringExtra("type")
+        val title = intent.getStringExtra("title")
+        val url = intent.getStringExtra("url")
+        val id = intent.getStringExtra("id")
 
         if (supportFragmentManager.findFragmentById(R.id.topicFragment) == null) {
             supportFragmentManager

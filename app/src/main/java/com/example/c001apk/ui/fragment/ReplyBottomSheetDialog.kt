@@ -51,9 +51,6 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
     private var replyTextMap: MutableMap<String, String> = HashMap()
     private var replyAndForward = "0"
     var editText: ExtendEditText = view.findViewById(R.id.editText)
-    /* val captchaLayout: LinearLayout = view.findViewById(R.id.captchaLayout)
-     val captchaImg:ImageView = view.findViewById(R.id.captchaImg)
-     val captchaText: TextInputEditText = view.findViewById(R.id.captchaText)*/
 
     fun setData() {
         editText.hint = "回复: $uname"

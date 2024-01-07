@@ -4,7 +4,7 @@ data class FeedArticleContentBean(
     var data: List<Data>,
 ) {
     data class Data(
-        val type: String,
+        val type: String?,
         val message: String?,
         val url: String?,
         val description: String?,

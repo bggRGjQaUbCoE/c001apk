@@ -43,7 +43,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
     companion object {
         @JvmStatic
-        fun newInstance(type: String, title: String, url: String, id: String) =
+        fun newInstance(type: String?, title: String?, url: String?, id: String?) =
             TopicFragment().apply {
                 arguments = Bundle().apply {
                     putString("url", url)

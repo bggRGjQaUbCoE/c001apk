@@ -44,8 +44,8 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
         super.onCreate(savedInstanceState)
 
         viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
-        viewModel.type = intent.getStringExtra("type")!!
-        viewModel.uid = intent.getStringExtra("uid")!!
+        viewModel.type = intent.getStringExtra("type")
+        viewModel.uid = intent.getStringExtra("uid")
 
         initBar()
         if (viewModel.isEnable) {

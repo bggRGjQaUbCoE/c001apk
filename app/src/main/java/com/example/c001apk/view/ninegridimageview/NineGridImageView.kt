@@ -30,17 +30,15 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.widget.ThemeUtils
 import com.absinthe.libraries.utils.extensions.dp
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.NetWorkUtil
@@ -78,11 +76,11 @@ class NineGridImageView @JvmOverloads constructor(
     private var rows: Int = 0
 
 
-    private val itemGap = 5
+    private val itemGap = 5f
     private var gap: Int = 0
 
     init {
-        gap = dip2px(context, itemGap.toFloat())
+        gap = dip2px(context, itemGap)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -93,7 +91,13 @@ class NineGridImageView @JvmOverloads constructor(
         if (urlList != null && urlList!!.isNotEmpty()) {
             val childrenCount = urlList!!.size
             if (childrenCount == 1) {
-                if (imgHeight < imgWidth) {
+                if (isCompress) {
+                    singleWidth = totalWidth
+                    singleHeight =
+                        if (imgHeight >= imgWidth * 22f / 9f)
+                            totalWidth * 22 / 9
+                        else totalWidth * imgHeight / imgWidth
+                } else if (imgHeight < imgWidth) {
                     singleHeight = defaultWidth * 2
                     singleWidth = singleHeight * imgWidth / imgHeight
                     if (singleWidth > totalWidth) {
@@ -101,15 +105,15 @@ class NineGridImageView @JvmOverloads constructor(
                         singleHeight = singleWidth * imgHeight / imgWidth
                     }
                 } else if (imgHeight > imgWidth) {
-                    if (imgHeight / imgWidth < 1.5) {
+                    if (imgHeight < imgWidth * 1.5) {
                         singleWidth = defaultWidth * 2
                         singleHeight = singleWidth * imgHeight / imgWidth
-                    } else if (imgHeight / imgWidth <= 1320 / 540) {
+                    } else if (imgHeight <= imgWidth * 22f / 9f) {
                         singleWidth = defaultWidth
                         singleHeight = singleWidth * imgHeight / imgWidth
                     } else {
                         singleWidth = defaultWidth
-                        singleHeight = singleWidth * 1320 / 540
+                        singleHeight = singleWidth * 22 / 9
                     }
                 } else {
                     singleWidth = defaultWidth * 2
@@ -172,7 +176,7 @@ class NineGridImageView @JvmOverloads constructor(
                     i
                 )
             }
-            childrenView.layout(left, top, right, bottom)
+            childrenView.layout(left.toInt(), top.toInt(), right.toInt(), bottom.toInt())
         }
     }
 
@@ -206,7 +210,7 @@ class NineGridImageView @JvmOverloads constructor(
 
     fun getImageViewAt(position: Int) = getChildAt(position) as? ImageView
 
-    @SuppressLint("RestrictedApi", "ResourceAsColor")
+    @SuppressLint("RestrictedApi", "ResourceAsColor", "InflateParams")
     fun setUrlList(urlList: List<String>?) {
         if (urlList != null) {
             this.urlList = urlList
@@ -224,12 +228,13 @@ class NineGridImageView @JvmOverloads constructor(
                     strokeWidth = 1.dp.toFloat()
                     strokeColor = context.getColorStateList(R.color.cover)
                     setBackgroundColor(context.getColor(R.color.cover))
+                    foreground = context.getDrawable(R.drawable.selector_bg_12_carousel)
                     if (ResourceUtils.isNightMode(context.resources.configuration)
                         && PrefManager.isColorFilter
                     )
                         setColorFilter(Color.parseColor("#2D000000"))
                     scaleType = ImageView.ScaleType.CENTER_CROP
-                    val replace = url.replace(".s2x.jpg", "")
+                    val replace = url.replace(".s.jpg", "")
                         .replace(".s.jpg", "")
                     val from = replace.lastIndexOf("@")
                     val middle = replace.lastIndexOf("x")
@@ -238,11 +243,12 @@ class NineGridImageView @JvmOverloads constructor(
                         imgWidth = replace.substring(from + 1, middle).toInt()
                         imgHeight = replace.substring(middle + 1, end).toInt()
                     }
-                    if ((((PrefManager.imageQuality == "auto"
+                    if (((((PrefManager.imageQuality == "auto"
                                 && !NetWorkUtil.isWifiConnected())
                                 || PrefManager.imageQuality == "thumbnail")
+                                || isCompress)
                                 && replace.endsWith("gif"))
-                        || imgHeight / imgWidth > 2.45
+                        || imgHeight > imgWidth * 22f / 9f
                     ) {
                         labelBackground = ThemeUtils.getThemeAttrColor(
                             context,
@@ -262,28 +268,11 @@ class NineGridImageView @JvmOverloads constructor(
                         LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT)
                             .build()
                     )
-                if (isCompress)
-                    Glide.with(context)
-                        .asBitmap()
-                        .load(newUrl)
-                        .centerCrop()
-                        .into(object : CustomTarget<Bitmap?>() {
-                            override fun onResourceReady(
-                                resource: Bitmap,
-                                transition: Transition<in Bitmap?>?
-                            ) {
-                                val bitmap = compressImage(resource)
-                                if (bitmap != null)
-                                    imageView.setImageBitmap(bitmap)
-                            }
-
-                            override fun onLoadCleared(placeholder: Drawable?) {}
-                        })
-                else
-                    Glide.with(context)
-                        .load(newUrl)
-                        .centerCrop()
-                        .into(imageView)
+                Glide.with(context)
+                    .load(newUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .skipMemoryCache(false)
+                    .into(imageView)
             }
         }
     }

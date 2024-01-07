@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -53,19 +54,21 @@ import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 
-
-class FeedContentAdapter(
+class FeedAdapter(
     private val mContext: Context,
     private val feedList: List<FeedContentResponse>,
     private var replyList: ArrayList<TotalReplyResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
-    private var extraKey = ""
+    private lateinit var articleList: ArrayList<FeedArticleContentBean.Data>
 
-    fun setExtraKey(extraKey: String) {
+    private var extraKey: String? = null
+
+    fun setExtraKey(extraKey: String?) {
         this.extraKey = extraKey
     }
 
@@ -75,29 +78,12 @@ class FeedContentAdapter(
         this.haveTop = haveTop
     }
 
-    private var text = ""
-    private var uid = ""
-    private var id = ""
-    private var ruid = ""
-    private var position = -1
-    private var rPosition: Int? = null
-
-    private var listType = "lastupdate_desc"
-
-    fun setListType(listType: String) {
-        this.listType = listType
-    }
-
-    private val TYPE_CONTENT = 0
-    private val TYPE_FOOTER = 1
-    private val TYPE_REPLY = 2
-    private val TYPE_FIX = 3
-
     private var loadState = 2
     val LOADING = 1
     val LOADING_COMPLETE = 2
     val LOADING_END = 3
     val LOADING_ERROR = 4
+    val LOADING_REPLY = 5
     private var errorMessage: String? = null
 
     fun setLoadState(loadState: Int, errorMessage: String?) {
@@ -105,10 +91,68 @@ class FeedContentAdapter(
         this.errorMessage = errorMessage
     }
 
+    private var text = ""
+    private var uid = ""
+    private var id = ""
+    private var ruid = ""
+    private var position = -1
+    private var rPosition: Int? = null
+
     private var appListener: AppListener? = null
 
-    fun setAppListener(appListener: AppListener) {
+    fun setAppListener(appListener: AppListener?) {
         this.appListener = appListener
+    }
+
+    private var listType = "lastupdate_desc"
+
+    fun setListType(listType: String) {
+        this.listType = listType
+    }
+
+    class TextViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val textView: TextView = view.findViewById(R.id.textView)
+    }
+
+    class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val imageView: NineGridImageView =
+            view.findViewById(R.id.imageView)
+        val description: TextView = view.findViewById(R.id.description)
+    }
+
+    class UrlViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val shareUrl: MaterialCardView =
+            view.findViewById(R.id.shareUrl)
+        val urlTitle: TextView = view.findViewById(R.id.urlTitle)
+    }
+
+    class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
+        val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
+        val noMore: TextView = view.findViewById(R.id.noMore)
+        val retry: Button = view.findViewById(R.id.retry)
+    }
+
+    class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val uname: LinkTextView = view.findViewById(R.id.uname)
+        val message: LinkTextView = view.findViewById(R.id.message)
+        val pubDate: TextView = view.findViewById(R.id.pubDate)
+        val like: TextView = view.findViewById(R.id.like)
+        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
+        val reply: TextView = view.findViewById(R.id.reply)
+        val replyLayout: MaterialCardView = view.findViewById(R.id.replyLayout)
+        val totalReply: TextView = view.findViewById(R.id.totalReply)
+        val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
+        val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
+        val expand: ImageButton = view.findViewById(R.id.expand)
+        var id = ""
+        var notiId = ""
+        var rid = ""
+        var uid = ""
+        var isLike = false
+        var type = ""
+        var url = ""
+        var vote: TextView = view.findViewById(R.id.vote)
     }
 
     class FeedContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -129,7 +173,6 @@ class FeedContentAdapter(
         var uid = ""
         val dyhLayout: HorizontalScrollView = view.findViewById(R.id.dyhLayout)
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
-        val articleMessage: LinearAdapterLayout = view.findViewById(R.id.articleMessage)
         val twoOptionsLayout: LinearLayout = view.findViewById(R.id.twoOptionsLayout)
         val leftOption: Button = view.findViewById(R.id.leftOption)
         val rightOption: Button = view.findViewById(R.id.rightOption)
@@ -137,28 +180,6 @@ class FeedContentAdapter(
         val extraUrlLayout: ConstraintLayout = view.findViewById(R.id.extraUrlLayout)
         val extraTitle: TextView = view.findViewById(R.id.extraTitle)
         val extraUrl: TextView = view.findViewById(R.id.extraUrl)
-    }
-
-    class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var notiId = ""
-        val uname: LinkTextView = view.findViewById(R.id.uname)
-        val message: LinkTextView = view.findViewById(R.id.message)
-        val pubDate: TextView = view.findViewById(R.id.pubDate)
-        val like: TextView = view.findViewById(R.id.like)
-        val avatar: ShapeableImageView = view.findViewById(R.id.avatar)
-        val reply: TextView = view.findViewById(R.id.reply)
-        val replyLayout: MaterialCardView = view.findViewById(R.id.replyLayout)
-        val totalReply: TextView = view.findViewById(R.id.totalReply)
-        val multiImage: NineGridImageView = view.findViewById(R.id.multiImage)
-        val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
-        val expand: ImageButton = view.findViewById(R.id.expand)
-        var id = ""
-        var rid = ""
-        var uid = ""
-        var isLike = false
-        var type = ""
-        var url = ""
-        var vote: TextView = view.findViewById(R.id.vote)
     }
 
     class TopViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -171,122 +192,53 @@ class FeedContentAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+
+
         return when (viewType) {
 
-            TYPE_FIX -> {
-                val view: View =
-                    LayoutInflater.from(parent.context).inflate(R.layout.item_top, parent, false)
-                val viewHolder = TopViewHolder(view)
-                viewHolder.lastUpdate.setOnClickListener {
-                    appListener?.onRefreshReply("lastupdate_desc")
-                }
-                viewHolder.dateLine.setOnClickListener {
-                    appListener?.onRefreshReply("dateline_desc")
-                }
-                viewHolder.popular.setOnClickListener {
-                    appListener?.onRefreshReply("popular")
-                }
-                viewHolder.author.setOnClickListener {
-                    appListener?.onRefreshReply("")
-                }
-                viewHolder
-            }
-
-            TYPE_CONTENT -> {
-                val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_feed_content, parent, false)
-                val viewHolder = FeedContentViewHolder(view)
-                viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
-                    true
-                }
-                viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
-                }
-                viewHolder.like.setOnClickListener {
-                    if (PrefManager.isLogin) {
-                        if (PrefManager.SZLMID == "") {
-                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            appListener?.onPostLike(
-                                "feed",
-                                viewHolder.isLike,
-                                viewHolder.id,
-                                null
-                            )
-                        }
-                    }
-                }
-                viewHolder.multiImage.apply {
-                    appListener = this@FeedContentAdapter.appListener
-                }
-                viewHolder.follow.setOnClickListener {
-                    appListener?.onPostFollow(
-                        viewHolder.isFollow,
-                        viewHolder.uid,
-                        0
-                    )
-                }
-                viewHolder.extraUrlLayout.setOnClickListener {
-                    val url = viewHolder.extraUrl.text.toString()
-                    if (url.contains("www.coolapk.com/feed/")) {
-                        val id = if (url.contains("shareKey")) {
-                            url.substring(
-                                url.lastIndexOf("/feed/") + 6,
-                                url.lastIndexOf("?shareKey")
-                            )
-                        } else {
-                            url.substring(url.lastIndexOf("/feed/") + 6)
-                        }
-                        val intent = Intent(mContext, FeedActivity::class.java)
-                        intent.putExtra("type", "feed")
-                        intent.putExtra("id", id)
-                        intent.putExtra("uid", "")
-                        intent.putExtra("uname", "")
-                        mContext.startActivity(intent)
-                    } else if (url.startsWith("/game/")) {
-                        val intent = Intent(parent.context, AppActivity::class.java)
-                        intent.putExtra("id", url.replace("/game/", ""))
-                        parent.context.startActivity(intent)
-                    } else if (url.startsWith("/apk/")) {
-                        val intent = Intent(parent.context, AppActivity::class.java)
-                        intent.putExtra("id", url.replace("/apk/", ""))
-                        parent.context.startActivity(intent)
-                    } else if (PrefManager.isOpenLinkOutside) {
-                        val intent = Intent()
-                        intent.action = Intent.ACTION_VIEW
-                        intent.data = Uri.parse(viewHolder.extraUrl.text.toString())
-                        try {
-                            parent.context.startActivity(intent)
-                        } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(parent.context, "打开失败", Toast.LENGTH_SHORT).show()
-                            Log.w("error", "Activity was not found for intent, $intent")
-                        }
-                    } else {
-                        val intent = Intent(parent.context, WebViewActivity::class.java)
-                        intent.putExtra("url", viewHolder.extraUrl.text)
-                        parent.context.startActivity(intent)
-                    }
-                }
-                viewHolder
-            }
-
-            TYPE_FOOTER -> {
+            -1 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_rv_footer, parent, false)
-                val viewHolder = AppAdapter.FootViewHolder(view)
+                val viewHolder = FootViewHolder(view)
                 viewHolder.retry.setOnClickListener {
                     appListener?.onReload()
                 }
                 viewHolder
             }
 
-            TYPE_REPLY -> {
+            0 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_feed_article_content_item, parent, false)
+                val viewHolder = TextViewHolder(view)
+                viewHolder.textView.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.textView.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder
+            }
+
+            1 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_feed_article_content_item, parent, false)
+                val viewHolder = ImageViewHolder(view)
+                viewHolder.imageView.apply {
+                    appListener = this@FeedAdapter.appListener
+                }
+                viewHolder
+            }
+
+            2 -> {
+                val view =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_feed_article_content_item, parent, false)
+                UrlViewHolder(view)
+            }
+
+            3 -> {
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_feed_content_reply_item, parent, false)
@@ -336,7 +288,7 @@ class FeedContentAdapter(
                     }
                 }
                 viewHolder.multiImage.apply {
-                    appListener = this@FeedContentAdapter.appListener
+                    appListener = this@FeedAdapter.appListener
                 }
                 viewHolder.expand.setOnClickListener {
                     rPosition = null
@@ -350,176 +302,204 @@ class FeedContentAdapter(
                     popup.menu.findItem(R.id.copy).isVisible = false
                     popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
                     popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
-                    popup.setOnMenuItemClickListener(this@FeedContentAdapter)
+                    popup.setOnMenuItemClickListener(this@FeedAdapter)
                     popup.show()
                 }
                 viewHolder
             }
 
-            else -> throw IllegalArgumentException("type error")
+            4 -> {
+                val view: View =
+                    LayoutInflater.from(parent.context).inflate(R.layout.item_top, parent, false)
+                val viewHolder = TopViewHolder(view)
+                viewHolder.lastUpdate.setOnClickListener {
+                    appListener?.onRefreshReply("lastupdate_desc")
+                }
+                viewHolder.dateLine.setOnClickListener {
+                    appListener?.onRefreshReply("dateline_desc")
+                }
+                viewHolder.popular.setOnClickListener {
+                    appListener?.onRefreshReply("popular")
+                }
+                viewHolder.author.setOnClickListener {
+                    appListener?.onRefreshReply("")
+                }
+                viewHolder
+            }
+
+            5 -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_feed_content, parent, false)
+                val viewHolder = FeedContentViewHolder(view)
+                viewHolder.message.setOnLongClickListener {
+                    val intent = Intent(parent.context, CopyActivity::class.java)
+                    intent.putExtra("text", viewHolder.message.text.toString())
+                    parent.context.startActivity(intent)
+                    true
+                }
+                viewHolder.avatar.setOnClickListener {
+                    val intent = Intent(parent.context, UserActivity::class.java)
+                    intent.putExtra("id", viewHolder.uid)
+                    parent.context.startActivity(intent)
+                }
+                viewHolder.like.setOnClickListener {
+                    if (PrefManager.isLogin) {
+                        if (PrefManager.SZLMID == "") {
+                            Toast.makeText(mContext, "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            appListener?.onPostLike(
+                                "feed",
+                                viewHolder.isLike,
+                                viewHolder.id,
+                                null
+                            )
+                        }
+                    }
+                }
+                viewHolder.multiImage.apply {
+                    appListener = this@FeedAdapter.appListener
+                }
+                viewHolder.follow.visibility =
+                    if (PrefManager.isLogin) View.VISIBLE
+                    else View.GONE
+                viewHolder.follow.setOnClickListener {
+                    if (PrefManager.isLogin)
+                        appListener?.onPostFollow(
+                            viewHolder.isFollow,
+                            viewHolder.uid,
+                            0
+                        )
+                }
+                viewHolder.extraUrlLayout.setOnClickListener {
+                    val url = viewHolder.extraUrl.text.toString()
+                    if (url.contains("www.coolapk.com/feed/")) {
+                        val id = if (url.contains("shareKey")) {
+                            url.substring(
+                                url.lastIndexOf("/feed/") + 6,
+                                url.lastIndexOf("?shareKey")
+                            )
+                        } else {
+                            url.substring(url.lastIndexOf("/feed/") + 6)
+                        }
+                        val intent = Intent(mContext, FeedActivity::class.java)
+                        intent.putExtra("type", "feed")
+                        intent.putExtra("id", id)
+                        intent.putExtra("uid", "")
+                        intent.putExtra("uname", "")
+                        mContext.startActivity(intent)
+                    } else if (url.startsWith("/game/")) {
+                        val intent = Intent(parent.context, AppActivity::class.java)
+                        intent.putExtra("id", url.replace("/game/", ""))
+                        parent.context.startActivity(intent)
+                    } else if (url.startsWith("/apk/")) {
+                        val intent = Intent(parent.context, AppActivity::class.java)
+                        intent.putExtra("id", url.replace("/apk/", ""))
+                        parent.context.startActivity(intent)
+                    } else if (PrefManager.isOpenLinkOutside) {
+                        val intent = Intent()
+                        intent.action = Intent.ACTION_VIEW
+                        intent.data = Uri.parse(viewHolder.extraUrl.text.toString())
+                        try {
+                            parent.context.startActivity(intent)
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(parent.context, "打开失败", Toast.LENGTH_SHORT).show()
+                            Log.w("error", "Activity was not found for intent, $intent")
+                        }
+                    } else {
+                        val intent = Intent(parent.context, WebViewActivity::class.java)
+                        intent.putExtra("url", viewHolder.extraUrl.text)
+                        parent.context.startActivity(intent)
+                    }
+                }
+                viewHolder
+            }
+
+            else -> throw IllegalArgumentException("viewType error: $viewType")
+
+        }
+
+    }
+
+    override fun getItemCount(): Int {
+        return if (feedList.isEmpty()) 0
+        else {
+            if (feedList[0].data?.feedType == "feedArticle") {
+                articleList = ArrayList()
+
+                if (feedList[0].data?.messageCover?.isNotEmpty() == true) {
+                    articleList.add(
+                        FeedArticleContentBean.Data(
+                            "image",
+                            null,
+                            feedList[0].data?.messageCover,
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                    )
+                }
+
+                if (feedList[0].data?.messageTitle?.isNotEmpty() == true) {
+                    articleList.add(
+                        FeedArticleContentBean.Data(
+                            "text",
+                            feedList[0].data?.messageTitle,
+                            null,
+                            null,
+                            "true",
+                            null,
+                            null
+                        )
+                    )
+                }
+
+                val feedRaw = """{"data":${feedList[0].data?.messageRawOutput}}"""
+                val feedJson: FeedArticleContentBean = Gson().fromJson(
+                    feedRaw,
+                    FeedArticleContentBean::class.java
+                )
+
+                for (element in feedJson.data) {
+                    if (element.type == "text" || element.type == "image" || element.type == "shareUrl")
+                        articleList.add(element)
+                }
+
+                articleList.size + replyList.size + 2
+            } else replyList.size + 3
         }
     }
 
-    override fun getItemCount() = replyList.size + 3
+    override fun getItemViewType(position: Int): Int {
+        return if (feedList[0].data?.feedType == "feedArticle") {
+            when (position) {
+                itemCount - 1 -> -1
+                in 0..<articleList.size -> {
+                    when (articleList[position].type) {
+                        "text" -> 0
+                        "image" -> 1
+                        "shareUrl" -> 2
+                        else -> throw IllegalArgumentException()
+                    }
+                }
 
-    @SuppressLint("RestrictedApi")
-    override fun onBindViewHolder(
-        holder: RecyclerView.ViewHolder,
-        position: Int,
-        payloads: MutableList<Any>
-    ) {
-        if (payloads.isEmpty()) {
-            onBindViewHolder(holder, position)
+                articleList.size -> 4 //fix
+                else -> 3 //reply
+            }
         } else {
-            when (getItemViewType(position)) {
-                TYPE_CONTENT -> {
-                    if (payloads[0] == "like") {
-                        (holder as FeedContentViewHolder).like.text = feedList[0].data?.likenum
-                        holder.isLike = feedList[0].data?.userAction?.like == 1
-                        val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
-                        drawableLike.setBounds(
-                            0,
-                            0,
-                            holder.like.textSize.toInt(),
-                            holder.like.textSize.toInt()
-                        )
-                        if (feedList[0].data?.userAction?.like == 1) {
-                            DrawableCompat.setTint(
-                                drawableLike,
-                                ThemeUtils.getThemeAttrColor(
-                                    mContext,
-                                    rikka.preference.simplemenu.R.attr.colorPrimary
-                                )
-                            )
-                            holder.like.setTextColor(
-                                ThemeUtils.getThemeAttrColor(
-                                    mContext,
-                                    rikka.preference.simplemenu.R.attr.colorPrimary
-                                )
-                            )
-                        } else {
-                            DrawableCompat.setTint(
-                                drawableLike,
-                                mContext.getColor(android.R.color.darker_gray)
-                            )
-                            holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
-                        }
-                        holder.like.setCompoundDrawables(drawableLike, null, null, null)
-                    }
-                }
-
-                TYPE_REPLY -> {
-                    if (payloads[0] == "like") {
-                        (holder as FeedContentReplyViewHolder).like.text =
-                            replyList[position - 2].likenum
-                        holder.isLike = replyList[position - 2].userAction?.like == 1
-                        val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
-                        drawableLike.setBounds(
-                            0,
-                            0,
-                            holder.like.textSize.toInt(),
-                            holder.like.textSize.toInt()
-                        )
-                        if (replyList[position - 2].userAction?.like == 1) {
-                            DrawableCompat.setTint(
-                                drawableLike,
-                                ThemeUtils.getThemeAttrColor(
-                                    mContext,
-                                    rikka.preference.simplemenu.R.attr.colorPrimary
-                                )
-                            )
-                            holder.like.setTextColor(
-                                ThemeUtils.getThemeAttrColor(
-                                    mContext,
-                                    rikka.preference.simplemenu.R.attr.colorPrimary
-                                )
-                            )
-                        } else {
-                            DrawableCompat.setTint(
-                                drawableLike,
-                                mContext.getColor(android.R.color.darker_gray)
-                            )
-                            holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
-                        }
-                        holder.like.setCompoundDrawables(drawableLike, null, null, null)
-                    }
-                }
+            when (position) {
+                itemCount - 1 -> -1
+                0 -> 5
+                1 -> 4
+                else -> 3
             }
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n", "RestrictedApi")
+    @SuppressLint("SetTextI18n", "RestrictedApi")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-
-            is TopViewHolder -> {
-                if (feedList.isNotEmpty()) {
-                    val lp = holder.itemView.layoutParams
-                    if (feedList[0].data!!.feedType == "vote"
-                        && lp is StaggeredGridLayoutManager.LayoutParams
-                    ) {
-                        lp.isFullSpan = true
-                        holder.replyCount.text = "观点"
-                        holder.replyCount.textSize = 16f
-                        holder.buttonToggle.visibility = View.GONE
-                    } else if (feedList.isNotEmpty()) {
-                        holder.replyCount.text = "共${feedList[0].data?.replynum}回复"
-                        holder.buttonToggle.visibility = View.VISIBLE
-                        when (listType) {
-                            "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
-                            "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
-                            "popular" -> holder.buttonToggle.check(R.id.popular)
-                            "" -> holder.buttonToggle.check(R.id.author)
-                        }
-                    }
-                }
-            }
-
-            is AppAdapter.FootViewHolder -> {
-                val lp = holder.itemView.layoutParams
-                if (lp is StaggeredGridLayoutManager.LayoutParams) {
-                    lp.isFullSpan = true
-                }
-
-                when (loadState) {
-                    LOADING -> {
-                        holder.footerLayout.visibility = View.VISIBLE
-                        holder.indicator.visibility = View.VISIBLE
-                        holder.indicator.isIndeterminate = true
-                        holder.noMore.visibility = View.GONE
-                        holder.retry.visibility = View.GONE
-
-                    }
-
-                    LOADING_COMPLETE -> {
-                        holder.footerLayout.visibility = View.GONE
-                        holder.indicator.visibility = View.GONE
-                        holder.indicator.isIndeterminate = false
-                        holder.noMore.visibility = View.GONE
-                        holder.retry.visibility = View.GONE
-                    }
-
-                    LOADING_END -> {
-                        holder.footerLayout.visibility = View.VISIBLE
-                        holder.indicator.visibility = View.GONE
-                        holder.indicator.isIndeterminate = false
-                        holder.noMore.visibility = View.VISIBLE
-                        holder.noMore.text = mContext.getString(R.string.no_more)
-                        holder.retry.visibility = View.GONE
-                    }
-
-                    LOADING_ERROR -> {
-                        holder.footerLayout.visibility = View.VISIBLE
-                        holder.indicator.visibility = View.GONE
-                        holder.indicator.isIndeterminate = false
-                        holder.noMore.text = errorMessage
-                        holder.noMore.visibility = View.VISIBLE
-                        holder.retry.visibility = View.VISIBLE
-                    }
-
-                    else -> {}
-                }
-            }
 
             is FeedContentViewHolder -> {
                 if (feedList.isNotEmpty()) {
@@ -628,236 +608,7 @@ class FeedContentAdapter(
                         }
                     } else holder.extraUrlLayout.visibility = View.GONE
 
-                    if (feedList[0].data!!.feedType == "feedArticle") {
-                        holder.articleMessage.visibility = View.VISIBLE
-                        val articleList = ArrayList<FeedArticleContentBean.Data>()
-
-                        if (articleList.isEmpty()) {
-                            val feedRaw = """{"data":${feed.data?.messageRawOutput}}"""
-                            val feedJson: FeedArticleContentBean = Gson().fromJson(
-                                feedRaw,
-                                FeedArticleContentBean::class.java
-                            )
-
-                            for (element in feedJson.data) {
-                                if (element.type == "text" || element.type == "image" || element.type == "shareUrl")
-                                    articleList.add(element)
-                            }
-                            holder.articleMessage.adapter = object : BaseAdapter() {
-                                override fun getCount() = articleList.size + 2
-                                override fun getItem(p0: Int): Any = 0
-                                override fun getItemId(p0: Int): Long = 0
-                                override fun getView(
-                                    position1: Int,
-                                    convertView: View?,
-                                    parent: ViewGroup?
-                                ): View {
-                                    val view = LayoutInflater.from(mContext)
-                                        .inflate(
-                                            R.layout.item_feed_article_content_item,
-                                            parent,
-                                            false
-                                        )
-                                    val textView: TextView = view.findViewById(R.id.textView)
-                                    val imageView: NineGridImageView =
-                                        view.findViewById(R.id.imageView)
-                                    val description: TextView = view.findViewById(R.id.description)
-                                    val shareUrl: MaterialCardView =
-                                        view.findViewById(R.id.shareUrl)
-                                    val urlTitle: TextView = view.findViewById(R.id.urlTitle)
-                                    if (position1 == 0) {
-                                        textView.visibility = View.GONE
-                                        shareUrl.visibility = View.GONE
-                                        description.visibility = View.GONE
-                                        if (feed.data?.messageCover.isNullOrEmpty())
-                                            imageView.visibility = View.GONE
-                                        else {
-                                            imageView.visibility = View.VISIBLE
-                                            val urlList = ArrayList<String>()
-                                            urlList.add("${feed.data?.messageCover}.s2x.jpg")
-                                            val from = feed.data?.messageCover!!.lastIndexOf("@")
-                                            val middle = feed.data.messageCover.lastIndexOf("x")
-                                            val end = feed.data.messageCover.lastIndexOf(".")
-                                            if (from != -1 && middle != -1 && end != -1) {
-                                                val width =
-                                                    feed.data.messageCover.substring(
-                                                        from + 1,
-                                                        middle
-                                                    )
-                                                        .toInt()
-                                                val height =
-                                                    feed.data.messageCover.substring(
-                                                        middle + 1,
-                                                        end
-                                                    )
-                                                        .toInt()
-                                                imageView.imgHeight = height
-                                                imageView.imgWidth = width
-                                            }
-                                            imageView.setUrlList(urlList)
-                                            imageView.apply {
-                                                appListener =
-                                                    this@FeedContentAdapter.appListener
-                                            }
-                                        }
-                                        return view
-                                    } else if (position1 == 1) {
-                                        textView.visibility = View.VISIBLE
-                                        imageView.visibility = View.GONE
-                                        description.visibility = View.GONE
-                                        shareUrl.visibility = View.GONE
-                                        textView.movementMethod = LinkMovementMethod.getInstance()
-                                        textView.text = SpannableStringBuilderUtil.setText(
-                                            mContext,
-                                            feed.data?.messageTitle.toString(),
-                                            textView.textSize.toInt(),
-                                            null
-                                        )
-                                        textView.paint.isFakeBoldText = true
-                                        textView.setOnLongClickListener {
-                                            val intent = Intent(mContext, CopyActivity::class.java)
-                                            intent.putExtra(
-                                                "text",
-                                                textView.text.toString()
-                                            )
-                                            mContext.startActivity(intent)
-                                            true
-                                        }
-                                        return view
-                                    } else when (articleList[position1 - 2].type) {
-                                        "text" -> {
-                                            textView.visibility = View.VISIBLE
-                                            imageView.visibility = View.GONE
-                                            description.visibility = View.GONE
-                                            shareUrl.visibility = View.GONE
-                                            textView.movementMethod =
-                                                LinkMovementMethod.getInstance()
-                                            textView.text = SpannableStringBuilderUtil.setText(
-                                                mContext,
-                                                articleList[position1 - 2].message.toString(),
-                                                textView.textSize.toInt(),
-                                                null
-                                            )
-                                            textView.setOnLongClickListener {
-                                                val intent =
-                                                    Intent(mContext, CopyActivity::class.java)
-                                                intent.putExtra(
-                                                    "text",
-                                                    textView.text.toString()
-                                                )
-                                                mContext.startActivity(intent)
-                                                true
-                                            }
-                                            return view
-                                        }
-
-                                        "image" -> {
-                                            textView.visibility = View.GONE
-                                            imageView.visibility = View.VISIBLE
-                                            shareUrl.visibility = View.GONE
-                                            val urlList = ArrayList<String>()
-                                            urlList.add("${articleList[position1 - 2].url}.s2x.jpg")
-                                            val from =
-                                                articleList[position1 - 2].url!!.lastIndexOf("@")
-                                            val middle =
-                                                articleList[position1 - 2].url!!.lastIndexOf("x")
-                                            val end =
-                                                articleList[position1 - 2].url!!.lastIndexOf(".")
-                                            if (from != -1 && middle != -1 && end != -1) {
-                                                val width =
-                                                    articleList[position1 - 2].url?.substring(
-                                                        from + 1,
-                                                        middle
-                                                    )?.toInt()
-                                                val height =
-                                                    articleList[position1 - 2].url?.substring(
-                                                        middle + 1,
-                                                        end
-                                                    )
-                                                        ?.toInt()
-                                                imageView.imgHeight = height!!
-                                                imageView.imgWidth = width!!
-                                            }
-                                            imageView.isCompress = true
-                                            imageView.setUrlList(urlList)
-                                            imageView.apply {
-                                                appListener =
-                                                    this@FeedContentAdapter.appListener
-                                            }
-                                            if (articleList[position1 - 2].description == "")
-                                                description.visibility = View.GONE
-                                            else
-                                                description.visibility = View.VISIBLE
-                                            description.text = SpannableStringBuilderUtil.setText(
-                                                mContext,
-                                                articleList[position1 - 2].description.toString(),
-                                                description.textSize.toInt(),
-                                                null
-                                            )
-                                            description.setOnLongClickListener {
-                                                val intent =
-                                                    Intent(mContext, CopyActivity::class.java)
-                                                intent.putExtra(
-                                                    "text",
-                                                    description.text.toString()
-                                                )
-                                                mContext.startActivity(intent)
-                                                true
-                                            }
-                                            return view
-                                        }
-
-                                        "shareUrl" -> {
-                                            textView.visibility = View.GONE
-                                            imageView.visibility = View.GONE
-                                            description.visibility = View.GONE
-                                            shareUrl.visibility = View.VISIBLE
-                                            urlTitle.text =
-                                                articleList[position1 - 2].title.toString()
-                                            shareUrl.setOnClickListener {
-
-                                                if (PrefManager.isOpenLinkOutside) {
-                                                    val intent = Intent()
-                                                    intent.action = Intent.ACTION_VIEW
-                                                    intent.data =
-                                                        Uri.parse(articleList[position1 - 2].url.toString())
-                                                    try {
-                                                        mContext.startActivity(intent)
-                                                    } catch (e: ActivityNotFoundException) {
-                                                        Toast.makeText(
-                                                            mContext,
-                                                            "打开失败",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                        Log.w(
-                                                            "error",
-                                                            "Activity was not found for intent, $intent"
-                                                        )
-                                                    }
-                                                } else {
-                                                    val intent =
-                                                        Intent(
-                                                            mContext,
-                                                            WebViewActivity::class.java
-                                                        )
-                                                    intent.putExtra(
-                                                        "url",
-                                                        articleList[position1 - 2].url.toString()
-                                                    )
-                                                    mContext.startActivity(intent)
-                                                }
-                                            }
-                                            return view
-                                        }
-
-                                        else -> throw IllegalArgumentException("error feed article type: ${articleList[position1 - 2].type}")
-                                    }
-
-                                }
-                            }
-                            holder.linearAdapterLayout.notifyDataSetChange()
-                        }
-                    } else if (feedList[0].data!!.feedType == "vote") {
+                    if (feedList[0].data!!.feedType == "vote") {
                         val lp = holder.itemView.layoutParams
                         if (lp is StaggeredGridLayoutManager.LayoutParams) {
                             lp.isFullSpan = true
@@ -945,7 +696,7 @@ class FeedContentAdapter(
                         )
                     }
 
-                    if (feedList[0].data!!.feedType != "feedArticle" && !feed.data?.picArr.isNullOrEmpty()) {
+                    if (!feed.data?.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
                         if (feed.data?.picArr?.size == 1) {
                             val from = feed.data.pic.lastIndexOf("@")
@@ -991,10 +742,14 @@ class FeedContentAdapter(
                                 parent: ViewGroup?
                             ): View {
                                 val view = LayoutInflater.from(mContext).inflate(
-                                    R.layout.item_feed_tag,
+                                    R.layout.item_home_icon_mini_scroll_card_item,
                                     parent,
                                     false
                                 )
+                                val parentLayout: ConstraintLayout =
+                                    view.findViewById(R.id.parentLayout)
+                                parentLayout.background =
+                                    mContext.getDrawable(R.drawable.selector_bg_20_feed)
                                 val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
                                 val title: TextView = view.findViewById(R.id.title)
                                 val type: String
@@ -1077,21 +832,168 @@ class FeedContentAdapter(
                 }
             }
 
+            is FootViewHolder -> {
+                val lp = holder.itemView.layoutParams
+                if (lp is StaggeredGridLayoutManager.LayoutParams) {
+                    lp.isFullSpan = true
+                }
+
+                when (loadState) {
+
+                    LOADING_REPLY -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.footerLayout.layoutParams =
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.MATCH_PARENT
+                            )
+                        holder.indicator.visibility = View.VISIBLE
+                        holder.indicator.isIndeterminate = true
+                        holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
+
+                    }
+
+                    LOADING -> {
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.footerLayout.layoutParams =
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
+                            )
+                        holder.indicator.visibility = View.VISIBLE
+                        holder.indicator.isIndeterminate = true
+                        holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
+
+                    }
+
+                    LOADING_COMPLETE -> {
+                        holder.footerLayout.layoutParams =
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
+                            )
+                        holder.footerLayout.visibility = View.GONE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.GONE
+                        holder.retry.visibility = View.GONE
+                    }
+
+                    LOADING_END -> {
+                        holder.footerLayout.layoutParams =
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
+                            )
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.visibility = View.VISIBLE
+                        holder.noMore.text = mContext.getString(R.string.no_more)
+                        holder.retry.visibility = View.GONE
+                    }
+
+                    LOADING_ERROR -> {
+                        holder.footerLayout.layoutParams =
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
+                            )
+                        holder.footerLayout.visibility = View.VISIBLE
+                        holder.indicator.visibility = View.GONE
+                        holder.indicator.isIndeterminate = false
+                        holder.noMore.text = errorMessage
+                        holder.noMore.visibility = View.VISIBLE
+                        holder.retry.visibility = View.VISIBLE
+                    }
+
+                    else -> {}
+                }
+            }
+
+            is TopViewHolder -> {
+                if (feedList.isNotEmpty()) {
+                    if (feedList[0].data?.feedType == "vote") {
+                        holder.replyCount.text = "观点"
+                        holder.buttonToggle.visibility = View.GONE
+                    } else {
+                        holder.replyCount.text = "共 ${feedList[0].data?.replynum} 回复"
+                        holder.buttonToggle.visibility = View.VISIBLE
+                        when (listType) {
+                            "lastupdate_desc" -> holder.buttonToggle.check(R.id.lastUpdate)
+                            "dateline_desc" -> holder.buttonToggle.check(R.id.dateLine)
+                            "popular" -> holder.buttonToggle.check(R.id.popular)
+                            "" -> holder.buttonToggle.check(R.id.author)
+                        }
+                    }
+                }
+            }
+
+            is TextViewHolder -> {
+                val item = articleList[position]
+                holder.textView.visibility = View.VISIBLE
+                holder.textView.movementMethod =
+                    LinkMovementMethod.getInstance()
+                holder.textView.text = SpannableStringBuilderUtil.setText(
+                    mContext,
+                    item.message.toString(),
+                    holder.textView.textSize.toInt(),
+                    null
+                )
+                holder.textView.paint.isFakeBoldText =
+                    (position == 0 || position == 1) && item.title == "true"
+            }
+
+            is ImageViewHolder -> {
+                val item = articleList[position]
+                holder.imageView.visibility = View.VISIBLE
+                val urlList = ArrayList<String>()
+                urlList.add("${item.url}.s.jpg")
+                val from =
+                    item.url!!.lastIndexOf("@")
+                val middle =
+                    item.url.lastIndexOf("x")
+                val end =
+                    item.url.lastIndexOf(".")
+                if (from != -1 && middle != -1 && end != -1) {
+                    val width =
+                        item.url.substring(from + 1, middle).toInt()
+                    val height =
+                        item.url.substring(middle + 1, end).toInt()
+                    holder.imageView.imgHeight = height
+                    holder.imageView.imgWidth = width
+                }
+                holder.imageView.isCompress = true
+                holder.imageView.setUrlList(urlList)
+                if (item.description.isNullOrEmpty())
+                    holder.description.visibility = View.GONE
+                else
+                    holder.description.visibility = View.VISIBLE
+                holder.description.text = SpannableStringBuilderUtil.setText(
+                    mContext,
+                    item.description.toString(),
+                    holder.description.textSize.toInt(),
+                    null
+                )
+            }
+
+            is UrlViewHolder -> {
+                val item = articleList[position]
+                holder.shareUrl.visibility = View.VISIBLE
+                holder.urlTitle.text =
+                    item.title.toString()
+            }
+
             is FeedContentReplyViewHolder -> {
                 if (replyList.isNotEmpty()) {
 
-                    val reply = replyList[position - 2]
+                    val reply = if (feedList[0].data?.feedType == "feedArticle")
+                        replyList[position - articleList.size - 1]
+                    else replyList[position - 2]
 
-                    if (feedList[0].data!!.feedType == "vote" && extraKey != "") {
-                        holder.vote.visibility = View.VISIBLE
-
-                        if (reply.extraKey == extraKey) {
-                            holder.vote.text = "正方"
-                        } else {
-                            holder.vote.text = "反方"
-                        }
-                    } else
-                        holder.vote.visibility = View.GONE
+                    holder.vote.visibility = View.GONE
 
                     holder.isLike = reply.userAction?.like == 1
                     holder.id = reply.id
@@ -1285,13 +1187,13 @@ class FeedContentAdapter(
                                     }
 
                                     view.setOnLongClickListener {
-                                        this@FeedContentAdapter.text = textView.text.toString()
+                                        this@FeedAdapter.text = textView.text.toString()
                                         id = replyData.id
                                         uid = replyData.uid
                                         ruid = reply.uid
-                                        this@FeedContentAdapter.position =
+                                        this@FeedAdapter.position =
                                             holder.bindingAdapterPosition
-                                        this@FeedContentAdapter.rPosition = position1
+                                        this@FeedAdapter.rPosition = position1
                                         val popup = PopupMenu(mContext, it)
                                         val inflater = popup.menuInflater
                                         inflater.inflate(R.menu.feed_reply_menu, popup.menu)
@@ -1300,7 +1202,7 @@ class FeedContentAdapter(
                                             PrefManager.uid == replyData.uid
                                         popup.menu.findItem(R.id.report).isVisible =
                                             PrefManager.isLogin
-                                        popup.setOnMenuItemClickListener(this@FeedContentAdapter)
+                                        popup.setOnMenuItemClickListener(this@FeedAdapter)
                                         popup.show()
                                         true
                                     }
@@ -1347,20 +1249,7 @@ class FeedContentAdapter(
                     }
                 }
             }
-        }
 
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return when (position) {
-
-            itemCount - 1 -> TYPE_FOOTER
-
-            0 -> TYPE_CONTENT
-
-            1 -> TYPE_FIX
-
-            else -> TYPE_REPLY
         }
     }
 

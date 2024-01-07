@@ -11,7 +11,7 @@ data class TotalReplyResponse(
 
     data class Data(
         @SerializedName("extra_key") val extraKey: String?,
-        val entityType: String,
+        val entityType: String?,
         val id: String,
         val ruid: String,
         val uid: String,

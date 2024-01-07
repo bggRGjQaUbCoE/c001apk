@@ -37,7 +37,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.type = intent.getStringExtra("type")!!
+        viewModel.type = intent.getStringExtra("type")
 
         initBar()
         initView()

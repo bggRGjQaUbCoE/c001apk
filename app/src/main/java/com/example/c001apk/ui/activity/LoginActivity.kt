@@ -124,7 +124,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             val response = result.getOrNull()
             response?.body()?.let {
                 val login: LoginResponse = Gson().fromJson(
-                    response.body()!!.string(),
+                    response.body()?.string(),
                     LoginResponse::class.java
                 )
                 if (login.status == 1) {
@@ -198,7 +198,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         binding.getSMS.setOnClickListener {
             if (binding.account.text.toString() == "")
                 Toast.makeText(this, "手机号不能为空", Toast.LENGTH_SHORT).show()
-            else if (binding.account.text!!.length != 11)
+            else if (binding.account.text.toString().length != 11)
                 Toast.makeText(this, "手机号不合规", Toast.LENGTH_SHORT).show()
             else
                 getSMS()

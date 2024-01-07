@@ -220,7 +220,7 @@ class MessageAdapter(
             2 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_feed_content_reply_item, parent, false)
-                val viewHolder = FeedContentAdapter.FeedContentReplyViewHolder(view)
+                val viewHolder = FeedAdapter.FeedContentReplyViewHolder(view)
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uid)
@@ -412,7 +412,7 @@ class MessageAdapter(
                 }
             }
 
-            is FeedContentAdapter.FeedContentReplyViewHolder -> {
+            is FeedAdapter.FeedContentReplyViewHolder -> {
                 val noti = notiList[position - 6]
                 holder.notiId = noti.id
                 val doc: Document = Jsoup.parse(noti.note)

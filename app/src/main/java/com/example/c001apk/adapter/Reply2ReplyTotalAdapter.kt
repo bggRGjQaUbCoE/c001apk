@@ -3,13 +3,13 @@ package com.example.c001apk.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
@@ -64,7 +64,7 @@ class Reply2ReplyTotalAdapter(
         this.errorMessage = errorMessage
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val uname: LinkTextView = view.findViewById(R.id.uname)
         var id = ""
         var uid = ""
@@ -84,7 +84,7 @@ class Reply2ReplyTotalAdapter(
             0 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_reply_to_reply_item, parent, false)
-                val viewHolder = ViewHolder(view)
+                val viewHolder = ReplyViewHolder(view)
                 viewHolder.avatar.setOnClickListener {
                     val intent = Intent(parent.context, UserActivity::class.java)
                     intent.putExtra("id", viewHolder.uid)
@@ -174,7 +174,7 @@ class Reply2ReplyTotalAdapter(
 
             if (viewType == 0) {
                 if (payloads[0] == "like") {
-                    (holder as ViewHolder).like.text = replyList[position].likenum
+                    (holder as ReplyViewHolder).like.text = replyList[position].likenum
                     holder.isLike = replyList[position].userAction?.like == 1
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(
@@ -261,8 +261,16 @@ class Reply2ReplyTotalAdapter(
 
             }
 
-            is ViewHolder -> {
+            is ReplyViewHolder -> {
                 val reply = replyList[position]
+
+                if (position == 0) {
+                    holder.itemView.setBackgroundColor(Color.TRANSPARENT)
+
+                } else {
+                    holder.itemView.setBackgroundColor(mContext.getColor(R.color.home_card_background_color))
+                }
+
                 holder.id = reply.id
                 holder.uid = reply.uid
                 holder.name = reply.username

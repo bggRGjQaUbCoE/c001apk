@@ -1064,7 +1064,7 @@ class AppAdapter(
                             parent: ViewGroup?
                         ): View {
                             val view = LayoutInflater.from(mContext).inflate(
-                                R.layout.item_feed_tag,
+                                R.layout.item_home_icon_mini_scroll_card_item,
                                 parent,
                                 false
                             )
@@ -1529,7 +1529,7 @@ class AppAdapter(
                             parent: ViewGroup?
                         ): View {
                             val view = LayoutInflater.from(mContext).inflate(
-                                R.layout.item_feed_tag,
+                                R.layout.item_home_icon_mini_scroll_card_item,
                                 parent,
                                 false
                             )

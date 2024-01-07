@@ -30,7 +30,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var subscribe: MenuItem
+    private var subscribe: MenuItem? = null
     override var tabController: IOnTabClickListener? = null
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
@@ -206,21 +206,21 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun refreshData() {
-        viewModel.id = intent.getStringExtra("id")!!
+        viewModel.id = intent.getStringExtra("id")
         viewModel.isNew = true
         viewModel.getAppInfo()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.topic_product_menu, menu)
-        subscribe = menu!!.findItem(R.id.subscribe)
-        subscribe.isVisible = PrefManager.isLogin
-        menu.findItem(R.id.order).isVisible = false
+        subscribe = menu?.findItem(R.id.subscribe)
+        subscribe?.isVisible = PrefManager.isLogin
+        menu?.findItem(R.id.order)?.isVisible = false
         return true
     }
 
     private fun initSub() {
-        subscribe.title = if (viewModel.isFollow) "取消关注"
+        subscribe?.title = if (viewModel.isFollow) "取消关注"
         else "关注"
     }
 

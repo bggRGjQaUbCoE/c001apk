@@ -52,7 +52,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="2dp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
@@ -62,7 +61,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="2dp"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintStart_toEndOf="@id/from"
             app:layout_constraintTop_toBottomOf="@id/uname" />
@@ -133,9 +131,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/selector_bg"
             android:clickable="true"
             android:focusable="true"
+            android:background="@drawable/selector_bg_12"
             android:lineSpacingMultiplier="1.2"
             android:padding="10dp"
             app:layout_constraintStart_toStartOf="parent"

@@ -387,7 +387,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                     mLayoutManager
                 else sLayoutManager
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(ReplyItemDecoration(10.dp))
+                addItemDecoration(ReplyItemDecoration(requireContext(), 1))
             else
                 addItemDecoration(StaggerItemDecoration(10.dp))
         }

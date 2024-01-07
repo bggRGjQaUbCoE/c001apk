@@ -16,8 +16,8 @@ class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.id = intent.getStringExtra("id")!!
-        viewModel.title = intent.getStringExtra("title")!!
+        viewModel.id = intent.getStringExtra("id")
+        viewModel.title = intent.getStringExtra("title")
 
         initBar()
         if (viewModel.tabList.isEmpty())

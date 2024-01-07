@@ -50,7 +50,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.type = intent.getStringExtra("type").toString()
+        viewModel.type = intent.getStringExtra("type")
 
         initView()
         if (viewModel.historyList.isEmpty()) {

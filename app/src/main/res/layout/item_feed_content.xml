@@ -1,263 +1,250 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="false"
-    android:focusable="true"
-    app:cardBackgroundColor="@color/home_card_background_color"
-    app:cardElevation="0dp"
-    app:strokeWidth="0dp">
+    android:paddingStart="16dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearance="@style/circleImageStyle" />
+
+    <com.example.c001apk.view.LinkTextView
+        android:id="@+id/uname"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:lines="1"
+        android:maxLines="1"
+        android:singleLine="true"
+        app:layout_constraintEnd_toStartOf="@id/follow"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/follow"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="关注" />
+
+    <TextView
+        android:id="@+id/pubDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="13sp"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintTop_toBottomOf="@id/uname" />
+
+    <TextView
+        android:id="@+id/device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="13sp"
+        app:layout_constraintStart_toEndOf="@id/pubDate"
+        app:layout_constraintTop_toBottomOf="@id/uname" />
+
+    <TextView
+        android:id="@+id/messageTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:layout_marginTop="10dp"
+        android:lineSpacingMultiplier="1.3"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/avatar" />
+
+    <com.example.c001apk.view.LinkTextView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:lineSpacingMultiplier="1.3"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/messageTitle" />
+
+    <LinearLayout
+        android:id="@+id/twoOptionsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/message">
+
+        <Button
+            android:id="@+id/leftOption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="VS"
+            android:textSize="20sp"
+            android:textStyle="bold|italic" />
+
+        <Button
+            android:id="@+id/rightOption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <com.example.c001apk.view.LinearAdapterLayout
+        android:id="@+id/voteOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/twoOptionsLayout" />
+
+    <TextView
+        android:id="@+id/ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/extraUrlLayout" />
+
+    <TextView
+        android:id="@+id/like"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/actionBarItemBackground"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintBaseline_toBaselineOf="@id/ip"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/reply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintBaseline_toBaselineOf="@id/ip"
+        app:layout_constraintEnd_toStartOf="@id/like" />
+
+    <com.example.c001apk.view.ninegridimageview.NineGridImageView
+        android:id="@+id/multiImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/voteOptions" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/extraUrlLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/selector_bg_12_feed"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="7dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/multiImage">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:id="@+id/cover"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="?attr/colorPrimary"
+            android:src="@drawable/ic_link"
+            android:tint="@color/wb"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="H, 1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/circleImageStyle" />
+            app:shapeAppearance="@style/searchTopicRadius" />
 
-        <com.example.c001apk.view.LinkTextView
-            android:id="@+id/uname"
+        <TextView
+            android:id="@+id/extraTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:clickable="true"
             android:ellipsize="end"
-            android:focusable="true"
-            android:lines="1"
             android:maxLines="1"
             android:singleLine="true"
-            app:layout_constraintEnd_toStartOf="@id/follow"
-            app:layout_constraintStart_toEndOf="@id/avatar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cover"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/follow"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="关注" />
-
-        <TextView
-            android:id="@+id/pubDate"
-            android:layout_width="wrap_content"
+            android:id="@+id/extraUrl"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintStart_toEndOf="@id/avatar"
-            app:layout_constraintTop_toBottomOf="@id/uname" />
-
-        <TextView
-            android:id="@+id/device"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintStart_toEndOf="@id/pubDate"
-            app:layout_constraintTop_toBottomOf="@id/uname" />
-
-        <com.example.c001apk.view.LinearAdapterLayout
-            android:id="@+id/articleMessage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/avatar" />
-
-        <TextView
-            android:id="@+id/messageTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:lineSpacingMultiplier="1.3"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/articleMessage" />
-
-        <com.example.c001apk.view.LinkTextView
-            android:id="@+id/message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:lineSpacingMultiplier="1.3"
-            android:textSize="16sp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/messageTitle" />
-
-        <LinearLayout
-            android:id="@+id/twoOptionsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/message">
-
-            <Button
-                android:id="@+id/leftOption"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:textSize="12sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="VS"
-                android:textSize="20sp"
-                android:textStyle="bold|italic" />
-
-            <Button
-                android:id="@+id/rightOption"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <com.example.c001apk.view.LinearAdapterLayout
-            android:id="@+id/voteOptions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/twoOptionsLayout" />
-
-        <TextView
-            android:id="@+id/ip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/extraUrlLayout" />
-
-        <TextView
-            android:id="@+id/like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/actionBarItemBackground"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintBaseline_toBaselineOf="@id/ip"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <TextView
-            android:id="@+id/reply"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintBaseline_toBaselineOf="@id/ip"
-            app:layout_constraintEnd_toStartOf="@id/like" />
-
-        <com.example.c001apk.view.ninegridimageview.NineGridImageView
-            android:id="@+id/multiImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/voteOptions" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/extraUrlLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/selector_bg"
-            android:padding="7dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multiImage">
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/cover"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="?attr/colorPrimary"
-                android:src="@drawable/ic_link"
-                android:tint="@color/wb"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="H, 1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearance="@style/searchTopicRadius" />
-
-            <TextView
-                android:id="@+id/extraTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:singleLine="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/cover"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/extraUrl"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:singleLine="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/cover"
-                app:layout_constraintTop_toBottomOf="@id/extraTitle" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <HorizontalScrollView
-            android:id="@+id/dyhLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:scrollbars="none"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ip">
-
-            <com.example.c001apk.view.LinearAdapterLayout
-                android:id="@+id/linearAdapterLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
-        </HorizontalScrollView>
-
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:singleLine="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cover"
+            app:layout_constraintTop_toBottomOf="@id/extraTitle" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.google.android.material.card.MaterialCardView>
+    <HorizontalScrollView
+        android:id="@+id/dyhLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ip">
+
+        <com.example.c001apk.view.LinearAdapterLayout
+            android:id="@+id/linearAdapterLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

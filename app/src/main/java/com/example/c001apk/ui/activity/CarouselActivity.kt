@@ -49,8 +49,8 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.url = intent.getStringExtra("url")!!
-        viewModel.title = intent.getStringExtra("title")!!
+        viewModel.url = intent.getStringExtra("url")
+        viewModel.title = intent.getStringExtra("title")
 
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.visibility = View.GONE

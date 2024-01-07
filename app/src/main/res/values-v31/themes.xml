@@ -1,7 +1,7 @@
 <resources>
 
     <style name="cardBG">
-        <item name="android:background">@color/reply2reply_card_background_color</item>
+        <item name="android:background">@color/home_card_background_color</item>
     </style>
 
     <style name="UserTextColor">

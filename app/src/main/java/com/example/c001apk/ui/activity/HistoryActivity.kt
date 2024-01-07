@@ -39,7 +39,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.type = intent.getStringExtra("type")!!
+        viewModel.type = intent.getStringExtra("type")
 
         binding.toolBar.title =
             when (viewModel.type) {

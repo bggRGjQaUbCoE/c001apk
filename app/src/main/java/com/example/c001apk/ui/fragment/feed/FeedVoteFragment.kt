@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
-import com.example.c001apk.adapter.FeedContentAdapter
+import com.example.c001apk.adapter.FeedAdapter
 import com.example.c001apk.databinding.FragmentFeedVoteBinding
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.model.FeedFavorite
@@ -37,8 +37,8 @@ import java.lang.reflect.Method
 
 class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var mAdapter: FeedContentAdapter
+    private val viewModel by lazy { ViewModelProvider(requireActivity())[AppViewModel::class.java] }
+    private lateinit var mAdapter: FeedAdapter
     private lateinit var mLayoutManager: StaggeredGridLayoutManager
     private val feedFavoriteDao by lazy {
         FeedFavoriteDatabase.getDatabase(this@FeedVoteFragment.requireContext()).feedFavoriteDao()
@@ -48,7 +48,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
     companion object {
         @JvmStatic
-        fun newInstance(id: String) =
+        fun newInstance(id: String?) =
             FeedVoteFragment().apply {
                 arguments = Bundle().apply {
                     putString("ID", id)
@@ -92,7 +92,6 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                     viewModel.replyCount = feed.data.replynum
                     viewModel.dateLine = feed.data.dateline
                     viewModel.feedTypeName = feed.data.feedTypeName
-                    viewModel.feedType = feed.data.feedType
                     viewModel.totalOptionNum = feed.data.vote!!.totalOptionNum
                     binding.toolBar.title = viewModel.feedTypeName
                     if (viewModel.isRefreshing) {
@@ -103,6 +102,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                         if (viewModel.totalOptionNum == 2) {
                             viewModel.extraKey = feed.data.vote.options[viewModel.currentOption].id
                             mAdapter.setExtraKey(feed.data.vote.options[viewModel.currentOption].id)
+                        } else {
+                            viewModel.extraKey = ""
                         }
                         viewModel.getVoteComment()
 
@@ -480,10 +481,18 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
     }
 
     private fun initData() {
-        if (viewModel.feedContentList.isEmpty()) {
+        if (viewModel.isInit) {
+            viewModel.isInit = false
             binding.titleProfile.visibility = View.GONE
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
+            viewModel.totalOptionNum = viewModel.feedContentList[0].data?.vote!!.totalOptionNum
+            if (viewModel.totalOptionNum == 2) {
+                viewModel.extraKey =
+                    viewModel.feedContentList[0].data?.vote?.options?.get(viewModel.currentOption)?.id
+                mAdapter.setExtraKey(viewModel.feedContentList[0].data?.vote?.options?.get(viewModel.currentOption)?.id)
+            } else {
+                viewModel.extraKey = ""
+            }
+            //viewModel.getVoteComment()
             refreshData()
         } else {
             binding.contentLayout.visibility = View.VISIBLE
@@ -504,12 +513,12 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
         viewModel.isNew = true
-        viewModel.getFeed()
+        viewModel.getVoteComment()
     }
 
     private fun initView() {
         binding.tabLayout.visibility = View.GONE
-        mAdapter = FeedContentAdapter(
+        mAdapter = FeedAdapter(
             requireContext(),
             viewModel.feedContentList,
             viewModel.voteCommentList

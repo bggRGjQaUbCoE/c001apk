@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/selector_bg">
+    android:foreground="@drawable/selector_bg_12_carousel">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageTextScrollCard"
@@ -20,6 +20,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/shape_text_scroll_card_text_bg"
         android:maxLines="2"
         android:minLines="2"
         app:layout_constraintStart_toStartOf="parent"

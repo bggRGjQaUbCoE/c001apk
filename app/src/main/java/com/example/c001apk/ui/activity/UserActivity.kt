@@ -392,7 +392,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         viewModel.isRefreshing = true
         viewModel.isEnd = false
         if (viewModel.id.isNullOrEmpty())
-            viewModel.id = intent.getStringExtra("id")!!
+            viewModel.id = intent.getStringExtra("id")
         viewModel.isNew = true
         viewModel.getUser()
     }
@@ -428,8 +428,8 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.user_menu, menu)
 
-        val itemBlock = menu!!.findItem(R.id.block)
-        val spannableString = SpannableString(itemBlock.title)
+        val itemBlock = menu?.findItem(R.id.block)
+        val spannableString = SpannableString(itemBlock?.title)
         spannableString.setSpan(
             ForegroundColorSpan(
                 ThemeUtils.getThemeAttrColor(
@@ -441,11 +441,11 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             spannableString.length,
             0
         )
-        itemBlock.title = spannableString
+        itemBlock?.title = spannableString
 
 
-        val itemShare = menu.findItem(R.id.share)
-        val spannableString1 = SpannableString(itemShare.title)
+        val itemShare = menu?.findItem(R.id.share)
+        val spannableString1 = SpannableString(itemShare?.title)
         spannableString1.setSpan(
             ForegroundColorSpan(
                 ThemeUtils.getThemeAttrColor(
@@ -457,10 +457,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             spannableString1.length,
             0
         )
-        itemShare.title = spannableString1
+        itemShare?.title = spannableString1
 
-        val itemReport = menu.findItem(R.id.report)
-        val spannableString2 = SpannableString(itemReport.title)
+        val itemReport = menu?.findItem(R.id.report)
+        val spannableString2 = SpannableString(itemReport?.title)
         spannableString2.setSpan(
             ForegroundColorSpan(
                 ThemeUtils.getThemeAttrColor(
@@ -472,7 +472,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             spannableString2.length,
             0
         )
-        itemReport.title = spannableString2
+        itemReport?.title = spannableString2
 
         return true
     }

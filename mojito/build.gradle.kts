@@ -71,7 +71,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
     implementation("com.geyifeng.immersionbar:immersionbar:3.2.1")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("androidx.viewpager2:viewpager2:1.0.0")

@@ -72,7 +72,7 @@ object ImageUtil {
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transition(withCrossFade(100))
             .skipMemoryCache(false)
-            .dontAnimate()
+            //.dontAnimate()
             .into(view)
     }
 
@@ -236,8 +236,6 @@ object ImageUtil {
         for (url in urlList) {
             if (url.endsWith(".s.jpg"))
                 originList.add(url.replace(".s.jpg", "").http2https())
-            else if (url.endsWith(".s2x.jpg"))
-                originList.add(url.replace(".s2x.jpg", "").http2https())
             else
                 originList.add(url.http2https())
             thumbList.add(url.http2https())

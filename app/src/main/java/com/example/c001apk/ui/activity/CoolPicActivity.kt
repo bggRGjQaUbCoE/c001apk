@@ -16,7 +16,7 @@ class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.title = intent.getStringExtra("title")!!
+        viewModel.title = intent.getStringExtra("title")
 
         initBar()
         initTabList()

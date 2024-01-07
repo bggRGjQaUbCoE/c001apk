@@ -17,14 +17,21 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bottom_sheet_controll_bar" />
+            android:src="@drawable/bottom_sheet_controller_bar" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="10dp"
+            android:background="?attr/colorSurfaceVariant" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:scrollbars="none" />
+
     </LinearLayout>
 
     <TextView

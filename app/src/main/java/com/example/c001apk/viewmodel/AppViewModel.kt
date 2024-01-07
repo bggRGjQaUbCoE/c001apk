@@ -32,7 +32,8 @@ import rikka.core.content.pm.longVersionCodeCompat
 
 class AppViewModel : ViewModel() {
 
-    var loadState = 0
+    var itemCount = 1
+    var loadState = 1
     var isFollow = false
     var isTop = false
     var isEnable = false
@@ -67,7 +68,7 @@ class AppViewModel : ViewModel() {
     var device: String? = null
     var avatar: String? = null
     var cover: String? = null
-    var isNew = true
+    var isNew = false
     var isPostLikeFeed = false
     var isPostUnLikeFeed = false
     var isPostLikeReply = false
