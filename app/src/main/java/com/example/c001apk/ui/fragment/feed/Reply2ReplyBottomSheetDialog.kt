@@ -248,7 +248,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                                     "feed_reply",
                                     viewModel.id.toString(),
                                     viewModel.ruid.toString(),
-                                    PrefManager.uid.toString(),
+                                    PrefManager.uid,
                                     viewModel.id.toString(),
                                     URLDecoder.decode(PrefManager.username, "UTF-8"),
                                     viewModel.uname.toString(),
@@ -400,10 +400,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         view.layoutParams.height = -1
         view.layoutParams.width = -1
         val behavior = BottomSheetBehavior.from(view)
-        //if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        behavior.halfExpandedRatio = 0.75F
-        behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        //}
+        if (behavior.state != BottomSheetBehavior.STATE_EXPANDED) {
+            behavior.halfExpandedRatio = 0.75F
+            behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        }
     }
 
     override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {

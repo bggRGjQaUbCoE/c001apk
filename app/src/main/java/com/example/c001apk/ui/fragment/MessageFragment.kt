@@ -344,6 +344,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
         binding.toolBar.apply {
             inflateMenu(R.menu.message_menu)

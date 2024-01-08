@@ -681,6 +681,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
     override fun onShowCollection(id: String, title: String) {}
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onReturnTop(isRefresh: Boolean?) {
         if (isRefresh!!) {
             if (viewModel.firstCompletelyVisibleItemPosition == 0) {

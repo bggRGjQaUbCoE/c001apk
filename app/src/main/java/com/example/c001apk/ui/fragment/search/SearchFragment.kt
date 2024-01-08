@@ -191,7 +191,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         }
     }
 
-    private fun hideKeyBoard() {
+    /*private fun hideKeyBoard() {
         val im =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         im.hideSoftInputFromWindow(
@@ -199,7 +199,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             InputMethodManager.HIDE_NOT_ALWAYS
         )
     }
-
+*/
     @SuppressLint("RestrictedApi")
     private fun initEditText() {
         binding.editText.apply {
