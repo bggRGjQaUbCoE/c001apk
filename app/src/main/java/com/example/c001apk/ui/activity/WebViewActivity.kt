@@ -25,6 +25,7 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
 import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.http2https
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 
@@ -42,7 +43,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
 
         link = intent.getStringExtra("url")
         link?.let {
-            loadUrlInWebView(it)
+            loadUrlInWebView(it.http2https())
         }
 
         if (SDK_INT >= 32) {
@@ -192,7 +193,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
 
             R.id.copyLink -> {
                 link?.let {
-                    copyText(this, it)
+                    copyText(this, it.http2https())
                 }
             }
 
