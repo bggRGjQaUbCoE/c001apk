@@ -44,7 +44,6 @@ class TokenDeviceUtils {
             val model = PrefManager.MODEL
             val buildNumber = PrefManager.BUILDNUMBER
             return DeviceCode.encode("$szlmId; ; ; $mac; $manuFactor; $brand; $model; $buildNumber; null")
-            //DeviceInfo(aid, mac, manuFactor, brand, model, buildNumber, fuck).createDeviceCode()
         }
 
         fun String.getTokenV2(): String {

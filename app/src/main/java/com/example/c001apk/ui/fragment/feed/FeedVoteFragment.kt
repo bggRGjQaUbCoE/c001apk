@@ -493,6 +493,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                 viewModel.extraKey = ""
             }
             //viewModel.getVoteComment()
+            mAdapter.setLoadState(mAdapter.LOADING, null)
+            mAdapter.notifyItemRangeChanged(0, 3)
             refreshData()
         } else {
             binding.contentLayout.visibility = View.VISIBLE

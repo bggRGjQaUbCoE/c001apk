@@ -1,9 +1,5 @@
 <resources>
 
-    <style name="cardBG">
-        <item name="android:background">@color/home_card_background_color</item>
-    </style>
-
     <style name="UserTextColor">
         <item name="android:textColor">@color/m3_dynamic_dark_default_color_primary_text</item>
     </style>

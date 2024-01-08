@@ -264,11 +264,22 @@ class Reply2ReplyTotalAdapter(
             is ReplyViewHolder -> {
                 val reply = replyList[position]
 
-                if (position == 0) {
-                    holder.itemView.setBackgroundColor(Color.TRANSPARENT)
-
-                } else {
-                    holder.itemView.setBackgroundColor(mContext.getColor(R.color.home_card_background_color))
+                holder.itemView.also {
+                    if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                        if (position == 0) {
+                            it.setBackgroundColor(Color.TRANSPARENT)
+                        } else {
+                            it.background = mContext.getDrawable(R.drawable.text_card_bg)
+                        }
+                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_carousel)
+                    } else {
+                        if (position == 0) {
+                            it.setBackgroundColor(Color.TRANSPARENT)
+                        } else {
+                            it.setBackgroundColor(mContext.getColor(R.color.home_card_background_color))
+                        }
+                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_carousel)
+                    }
                 }
 
                 holder.id = reply.id

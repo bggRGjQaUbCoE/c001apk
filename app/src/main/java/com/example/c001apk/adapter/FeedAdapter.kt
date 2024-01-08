@@ -331,7 +331,7 @@ class FeedAdapter(
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_feed_content, parent, false)
                 val viewHolder = FeedContentViewHolder(view)
-                viewHolder.message.setOnLongClickListener {
+                viewHolder.itemView.setOnLongClickListener {
                     val intent = Intent(parent.context, CopyActivity::class.java)
                     intent.putExtra("text", viewHolder.message.text.toString())
                     parent.context.startActivity(intent)
@@ -836,17 +836,24 @@ class FeedAdapter(
                 val lp = holder.itemView.layoutParams
                 if (lp is StaggeredGridLayoutManager.LayoutParams) {
                     lp.isFullSpan = true
+                } else {
+                    holder.footerLayout.layoutParams =
+                        if (loadState == LOADING_REPLY)
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.MATCH_PARENT
+                            )
+                        else
+                            FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
+                            )
                 }
 
                 when (loadState) {
 
                     LOADING_REPLY -> {
                         holder.footerLayout.visibility = View.VISIBLE
-                        holder.footerLayout.layoutParams =
-                            FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.MATCH_PARENT
-                            )
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
@@ -856,24 +863,13 @@ class FeedAdapter(
 
                     LOADING -> {
                         holder.footerLayout.visibility = View.VISIBLE
-                        holder.footerLayout.layoutParams =
-                            FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.WRAP_CONTENT
-                            )
                         holder.indicator.visibility = View.VISIBLE
                         holder.indicator.isIndeterminate = true
                         holder.noMore.visibility = View.GONE
                         holder.retry.visibility = View.GONE
-
                     }
 
                     LOADING_COMPLETE -> {
-                        holder.footerLayout.layoutParams =
-                            FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.WRAP_CONTENT
-                            )
                         holder.footerLayout.visibility = View.GONE
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
@@ -882,11 +878,6 @@ class FeedAdapter(
                     }
 
                     LOADING_END -> {
-                        holder.footerLayout.layoutParams =
-                            FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.WRAP_CONTENT
-                            )
                         holder.footerLayout.visibility = View.VISIBLE
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
@@ -896,11 +887,6 @@ class FeedAdapter(
                     }
 
                     LOADING_ERROR -> {
-                        holder.footerLayout.layoutParams =
-                            FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.WRAP_CONTENT
-                            )
                         holder.footerLayout.visibility = View.VISIBLE
                         holder.indicator.visibility = View.GONE
                         holder.indicator.isIndeterminate = false
@@ -909,13 +895,14 @@ class FeedAdapter(
                         holder.retry.visibility = View.VISIBLE
                     }
 
-                    else -> {}
                 }
             }
 
             is TopViewHolder -> {
                 if (feedList.isNotEmpty()) {
                     if (feedList[0].data?.feedType == "vote") {
+                        (holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan =
+                            true
                         holder.replyCount.text = "观点"
                         holder.buttonToggle.visibility = View.GONE
                     } else {
@@ -989,6 +976,17 @@ class FeedAdapter(
             is FeedContentReplyViewHolder -> {
                 if (replyList.isNotEmpty()) {
 
+                    holder.itemView.also {
+                        if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                            it.background = mContext.getDrawable(R.drawable.text_card_bg)
+                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_carousel)
+                            holder.replyLayout.setCardBackgroundColor(mContext.getColor(R.color.reply2reply_card_background_color))
+                        } else {
+                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_carousel)
+                            holder.replyLayout.setCardBackgroundColor(mContext.getColor(R.color.home_card_background_color))
+                        }
+                    }
+
                     val reply = if (feedList[0].data?.feedType == "feedArticle")
                         replyList[position - articleList.size - 1]
                     else replyList[position - 2]
@@ -1049,15 +1047,17 @@ class FeedAdapter(
                         )
                     }
 
-                    holder.pubDate.text = DateUtils.fromToday(reply.dateline)
-                    val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
-                    drawableDate.setBounds(
-                        0,
-                        0,
-                        holder.pubDate.textSize.toInt(),
-                        holder.pubDate.textSize.toInt()
-                    )
-                    holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
+                    if (feedList[0].data?.feedType != "vote") {
+                        holder.pubDate.text = DateUtils.fromToday(reply.dateline)
+                        val drawableDate: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
+                        drawableDate.setBounds(
+                            0,
+                            0,
+                            holder.pubDate.textSize.toInt(),
+                            holder.pubDate.textSize.toInt()
+                        )
+                        holder.pubDate.setCompoundDrawables(drawableDate, null, null, null)
+                    } else holder.pubDate.visibility = View.INVISIBLE
 
                     val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                     drawableLike.setBounds(

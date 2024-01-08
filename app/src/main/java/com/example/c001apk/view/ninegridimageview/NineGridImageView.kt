@@ -176,7 +176,7 @@ class NineGridImageView @JvmOverloads constructor(
                     i
                 )
             }
-            childrenView.layout(left.toInt(), top.toInt(), right.toInt(), bottom.toInt())
+            childrenView.layout(left, top, right, bottom)
         }
     }
 

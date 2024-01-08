@@ -95,10 +95,6 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <style name="cardBG">
-        <item name="android:background">@color/cover</item>
-    </style>
-
     <style name="UserTextColor">
         <item name="android:textColor">@color/white</item>
     </style>

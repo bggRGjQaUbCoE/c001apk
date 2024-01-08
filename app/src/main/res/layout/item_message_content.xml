@@ -102,9 +102,9 @@
             app:strokeWidth="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                style="@style/cardBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/reply2reply_card_background_color"
                 android:padding="5dp">
 
                 <com.example.c001apk.view.LinkTextView
@@ -153,9 +153,9 @@
             app:strokeWidth="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                style="@style/cardBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/reply2reply_card_background_color"
                 android:padding="5dp">
 
                 <com.google.android.material.imageview.ShapeableImageView

@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
     android:orientation="horizontal"
     android:paddingStart="16dp"
     android:paddingTop="12dp"
@@ -120,7 +119,6 @@
             app:strokeWidth="0dp">
 
             <LinearLayout
-                style="@style/cardBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
