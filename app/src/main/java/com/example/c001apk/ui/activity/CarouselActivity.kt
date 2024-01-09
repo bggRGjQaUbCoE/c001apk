@@ -165,6 +165,8 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                             mAdapter.notifyDataSetChanged()
                     }
                 } else if (response?.data?.isEmpty() == true) {
+                    if (viewModel.isRefreshing)
+                        viewModel.carouselList.clear()
                     if (::mAdapter.isInitialized) {
                         viewModel.loadState = mAdapter.LOADING_END
                         mAdapter.setLoadState(viewModel.loadState, null)
@@ -235,6 +237,26 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.carouselList.isNotEmpty() && !viewModel.isEnd) {
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                        } else {
+                            val result =
+                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                            if (result)
+                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            for (pos in positions) {
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
+                            }
+                        }
+                    }
+
                     if (viewModel.lastVisibleItemPosition == viewModel.carouselList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
@@ -242,30 +264,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                         loadMore()
                     }
                 }
-            }
 
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.carouselList.isNotEmpty()) {
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        viewModel.lastVisibleItemPosition =
-                            mLayoutManager.findLastVisibleItemPosition()
-                        viewModel.firstCompletelyVisibleItemPosition =
-                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    } else {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        for (pos in positions) {
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
-                            }
-                        }
-                    }
-                }
             }
         })
     }

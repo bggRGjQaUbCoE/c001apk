@@ -231,6 +231,11 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                         viewModel.isRefreshing = false
                     }
                 } else if (voteComment?.data?.isEmpty() == true) {
+                    if (viewModel.isRefreshing) {
+                        viewModel.leftVoteCommentList.clear()
+                        viewModel.rightVoteCommentList.clear()
+                        viewModel.voteCommentList.clear()
+                    }
                     viewModel.isEnd = true
                     viewModel.isLoadMore = false
                     viewModel.isRefreshing = false
@@ -297,32 +302,27 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.feedContentList.isNotEmpty() && !viewModel.isEnd) {
+                        val result =
+                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                        if (result)
+                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                        val positions = mLayoutManager.findLastVisibleItemPositions(null)
+                        for (pos in positions) {
+                            if (pos > viewModel.lastVisibleItemPosition) {
+                                viewModel.lastVisibleItemPosition = pos
+                            }
+                        }
+                    }
+
                     if (viewModel.lastVisibleItemPosition == viewModel.voteCommentList.size + 2
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
                         loadMore()
                     }
-                }
-            }
-
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.feedContentList.isNotEmpty()) {
-
-                    val result =
-                        mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                    if (result)
-                        mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
-                    val positions = mLayoutManager.findLastVisibleItemPositions(null)
-                    for (pos in positions) {
-                        if (pos > viewModel.lastVisibleItemPosition) {
-                            viewModel.lastVisibleItemPosition = pos
-                        }
-                    }
-
                 }
             }
         })

@@ -91,6 +91,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
                         viewModel.loadState = mAdapter.LOADING_COMPLETE
                         mAdapter.setLoadState(viewModel.loadState, null)
                     } else {
+                        if (viewModel.isRefreshing) viewModel.dataList.clear()
                         viewModel.loadState = mAdapter.LOADING_END
                         mAdapter.setLoadState(viewModel.loadState, null)
                         viewModel.isEnd = true
@@ -217,35 +218,31 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.dataList.isNotEmpty() && !viewModel.isEnd) {
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                        } else {
+                            val result =
+                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                            if (result)
+                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            for (pos in positions) {
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
+                            }
+                        }
+                    }
+
                     if (viewModel.lastVisibleItemPosition == viewModel.dataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
                         loadMore()
-                    }
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.dataList.isNotEmpty()) {
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        viewModel.lastVisibleItemPosition =
-                            mLayoutManager.findLastVisibleItemPosition()
-                        viewModel.firstCompletelyVisibleItemPosition =
-                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    } else {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        for (pos in positions) {
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
-                            }
-                        }
                     }
                 }
             }

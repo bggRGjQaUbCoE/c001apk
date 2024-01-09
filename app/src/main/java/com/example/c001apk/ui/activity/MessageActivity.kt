@@ -78,6 +78,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                         viewModel.loadState = mAdapter.LOADING_COMPLETE
                         mAdapter.setLoadState(viewModel.loadState, null)
                     } else if (feed.data?.isEmpty() == true) {
+                        if (viewModel.isRefreshing) viewModel.messageList.clear()
                         viewModel.loadState = mAdapter.LOADING_END
                         mAdapter.setLoadState(viewModel.loadState, null)
                         viewModel.isEnd = true
@@ -184,35 +185,31 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.messageList.isNotEmpty() && !viewModel.isEnd) {
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                        } else {
+                            val result =
+                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                            if (result)
+                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            for (pos in positions) {
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
+                            }
+                        }
+                    }
+
                     if (viewModel.lastVisibleItemPosition == viewModel.messageList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
                         loadMore()
-                    }
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.messageList.isNotEmpty()) {
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        viewModel.lastVisibleItemPosition =
-                            mLayoutManager.findLastVisibleItemPosition()
-                        viewModel.firstCompletelyVisibleItemPosition =
-                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    } else {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        for (pos in positions) {
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
-                            }
-                        }
                     }
                 }
             }

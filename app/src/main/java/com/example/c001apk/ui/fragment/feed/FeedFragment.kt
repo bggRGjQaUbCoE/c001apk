@@ -130,6 +130,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                     viewModel.loadState = mAdapter.LOADING_COMPLETE
                     mAdapter.setLoadState(viewModel.loadState, null)
                 } else if (reply?.data?.isEmpty() == true) {
+                    if (viewModel.isRefreshing)
+                        viewModel.feedReplyList.clear()
                     viewModel.isEnd = true
                     viewModel.loadState = mAdapter.LOADING_END
                     mAdapter.setLoadState(viewModel.loadState, null)
@@ -445,6 +447,25 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
             ) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.feedContentList.isNotEmpty() && !viewModel.isEnd) {
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                        } else {
+                            val result =
+                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                            if (result)
+                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                            val last = sLayoutManager.findLastVisibleItemPositions(null)
+                            for (pos in last) {
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
+                            }
+                        }
+                    }
 
                     if (viewModel.lastVisibleItemPosition ==
                         viewModel.itemCount + viewModel.feedReplyList.size + 1

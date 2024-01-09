@@ -156,6 +156,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                     viewModel.loadState = mAdapter.LOADING_COMPLETE
                     mAdapter.setLoadState(viewModel.loadState, null)
                 } else if (feed?.data?.isEmpty() == true) {
+                    if (viewModel.isRefreshing)
+                        viewModel.homeFeedList.clear()
                     viewModel.isEnd = true
                     viewModel.loadState = mAdapter.LOADING_END
                     mAdapter.setLoadState(viewModel.loadState, null)
@@ -228,6 +230,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                     viewModel.loadState = mAdapter.LOADING_COMPLETE
                     mAdapter.setLoadState(viewModel.loadState, null)
                 } else if (feed?.data?.isEmpty() == true) {
+                    if (viewModel.isRefreshing)
+                        viewModel.homeFeedList.clear()
                     viewModel.isEnd = true
                     viewModel.loadState = mAdapter.LOADING_END
                     mAdapter.setLoadState(viewModel.loadState, null)
@@ -459,6 +463,28 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.homeFeedList.isNotEmpty()) {
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                            viewModel.firstCompletelyVisibleItemPosition =
+                                mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                        } else {
+                            val result =
+                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                            if (result)
+                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            for (pos in positions) {
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
+                            }
+                        }
+                    }
+
                     if (viewModel.lastVisibleItemPosition == viewModel.homeFeedList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
@@ -471,30 +497,11 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.homeFeedList.isNotEmpty()) {
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        viewModel.lastVisibleItemPosition =
-                            mLayoutManager.findLastVisibleItemPosition()
-                        viewModel.firstCompletelyVisibleItemPosition =
-                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    } else {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        for (pos in positions) {
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
-                            }
-                        }
-                    }
                     if (dy > 0) {
                         (activity as INavViewContainer).hideNavigationView()
                     } else if (dy < 0) {
                         (activity as INavViewContainer).showNavigationView()
                     }
-
                 }
             }
         })

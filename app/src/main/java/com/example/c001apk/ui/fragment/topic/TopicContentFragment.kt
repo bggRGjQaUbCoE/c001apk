@@ -109,9 +109,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                         mAdapter.notifyItemChanged(viewModel.topicDataList.size)
                         return@observe
                     } else if (!data.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing) {
+                        if (viewModel.isRefreshing)
                             viewModel.topicDataList.clear()
-                        }
                         if (viewModel.isRefreshing || viewModel.isLoadMore) {
                             viewModel.lastItem = data.data.last().id
                             viewModel.listSize = viewModel.topicDataList.size
@@ -134,6 +133,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                         viewModel.loadState = mAdapter.LOADING_COMPLETE
                         mAdapter.setLoadState(viewModel.loadState, null)
                     } else if (data.data?.isEmpty() == true) {
+                        if (viewModel.isRefreshing)
+                            viewModel.topicDataList.clear()
                         viewModel.loadState = mAdapter.LOADING_END
                         mAdapter.setLoadState(viewModel.loadState, null)
                         viewModel.isEnd = true
@@ -208,35 +209,33 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    if (viewModel.topicDataList.isNotEmpty()) {
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                            viewModel.firstCompletelyVisibleItemPosition =
+                                mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                        } else {
+                            val result =
+                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
+                            if (result)
+                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
+
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            for (pos in positions) {
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
+                            }
+                        }
+                    }
+
                     if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
                         loadMore()
-                    }
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.topicDataList.isNotEmpty()) {
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        viewModel.lastVisibleItemPosition =
-                            mLayoutManager.findLastVisibleItemPosition()
-                        viewModel.firstCompletelyVisibleItemPosition =
-                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    } else {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        for (pos in positions) {
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
-                            }
-                        }
                     }
                 }
             }
