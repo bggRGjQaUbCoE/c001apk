@@ -61,7 +61,7 @@ class AppViewModel : ViewModel() {
     var lastupdate: String? = null
     var dateLine = 0L
     var followType = false
-    var isViewReply = false
+    var isViewReply: Boolean? = null
     var isShowMoreReply = false
     var replyCount: String? = null
     var isRefreshReply = false

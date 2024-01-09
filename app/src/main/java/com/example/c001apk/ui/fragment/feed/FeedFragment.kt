@@ -145,7 +145,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                     )
                     result.exceptionOrNull()?.printStackTrace()
                 }
-                if (viewModel.isViewReply) {
+                if (viewModel.isViewReply == true) {
                     viewModel.isViewReply = false
                     mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
                 }
@@ -698,7 +698,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                 0,
                 viewModel.itemCount + 2
             )
-            if (viewModel.isViewReply) {
+            if (viewModel.isViewReply == true) {
                 viewModel.isViewReply = false
                 mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
             }

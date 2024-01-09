@@ -24,7 +24,8 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
         viewModel.rid = intent.getStringExtra("rid")
         viewModel.uid = intent.getStringExtra("uid")
         viewModel.uname = intent.getStringExtra("uname")
-        viewModel.isViewReply = intent.getBooleanExtra("viewReply", false)
+        if (viewModel.isViewReply == null)
+            viewModel.isViewReply = intent.getBooleanExtra("viewReply", false)
 
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.visibility = View.GONE
