@@ -182,11 +182,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].likenum =
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - viewModel.itemCount - 1].likenum =
                             response.data
-                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].userAction?.like =
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - viewModel.itemCount - 1].userAction?.like =
                             1
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {
@@ -202,11 +202,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.data != null) {
-                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].likenum =
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - viewModel.itemCount - 1].likenum =
                             response.data
-                        viewModel.feedReplyList[viewModel.likeReplyPosition - 1].userAction?.like =
+                        viewModel.feedReplyList[viewModel.likeReplyPosition - viewModel.itemCount - 1].userAction?.like =
                             0
-                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
+                        mAdapter.notifyItemChanged(viewModel.likeReplyPosition, "like")
                     } else
                         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
                 } else {

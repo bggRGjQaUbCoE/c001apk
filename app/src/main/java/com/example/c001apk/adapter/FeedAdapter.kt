@@ -282,7 +282,7 @@ class FeedAdapter(
                                 "reply",
                                 viewHolder.isLike,
                                 viewHolder.id,
-                                viewHolder.bindingAdapterPosition - 1
+                                viewHolder.bindingAdapterPosition
                             )
                         }
                     }
@@ -459,6 +459,96 @@ class FeedAdapter(
                 0 -> 5
                 1 -> 4
                 else -> 3
+            }
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            when (getItemViewType(position)) {
+
+                5 -> {
+                    if (payloads[0] == "like") {
+                        (holder as FeedContentViewHolder).like.text = feedList[0].data?.likenum
+                        holder.isLike = feedList[0].data?.userAction?.like == 1
+                        val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                        drawableLike.setBounds(
+                            0,
+                            0,
+                            holder.like.textSize.toInt(),
+                            holder.like.textSize.toInt()
+                        )
+                        if (feedList[0].data?.userAction?.like == 1) {
+                            DrawableCompat.setTint(
+                                drawableLike,
+                                ThemeUtils.getThemeAttrColor(
+                                    mContext,
+                                    rikka.preference.simplemenu.R.attr.colorPrimary
+                                )
+                            )
+                            holder.like.setTextColor(
+                                ThemeUtils.getThemeAttrColor(
+                                    mContext,
+                                    rikka.preference.simplemenu.R.attr.colorPrimary
+                                )
+                            )
+                        } else {
+                            DrawableCompat.setTint(
+                                drawableLike,
+                                mContext.getColor(android.R.color.darker_gray)
+                            )
+                            holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                        }
+                        holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                    }
+                }
+
+                3 -> {
+                    if (payloads[0] == "like") {
+                        val index =
+                            if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
+                            else position - 2
+                        (holder as FeedContentReplyViewHolder).like.text =
+                            replyList[index].likenum
+                        holder.isLike = replyList[index].userAction?.like == 1
+                        val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
+                        drawableLike.setBounds(
+                            0,
+                            0,
+                            holder.like.textSize.toInt(),
+                            holder.like.textSize.toInt()
+                        )
+                        if (replyList[index].userAction?.like == 1) {
+                            DrawableCompat.setTint(
+                                drawableLike,
+                                ThemeUtils.getThemeAttrColor(
+                                    mContext,
+                                    rikka.preference.simplemenu.R.attr.colorPrimary
+                                )
+                            )
+                            holder.like.setTextColor(
+                                ThemeUtils.getThemeAttrColor(
+                                    mContext,
+                                    rikka.preference.simplemenu.R.attr.colorPrimary
+                                )
+                            )
+                        } else {
+                            DrawableCompat.setTint(
+                                drawableLike,
+                                mContext.getColor(android.R.color.darker_gray)
+                            )
+                            holder.like.setTextColor(mContext.getColor(android.R.color.darker_gray))
+                        }
+                        holder.like.setCompoundDrawables(drawableLike, null, null, null)
+                    }
+                }
             }
         }
     }
