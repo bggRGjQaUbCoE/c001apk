@@ -3,6 +3,7 @@ package com.example.c001apk.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -22,7 +23,6 @@ import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,7 +35,6 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CopyActivity
-import com.example.c001apk.ui.activity.DyhActivity
 import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
@@ -46,6 +45,8 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
+import com.example.c001apk.util.NetWorkUtil.openLink
+import com.example.c001apk.util.NetWorkUtil.openLinkDyh
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.util.TopicBlackListUtil
@@ -588,49 +589,10 @@ class AppAdapter(
                         .inflate(R.layout.item_search_user, parent, false)
                 val viewHolder = RecentHistoryViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    when (viewHolder.targetType) {
-                        "user" -> {
-                            val intent = Intent(parent.context, UserActivity::class.java)
-                            intent.putExtra("id", viewHolder.url.replace("/u/", ""))
-                            parent.context.startActivity(intent)
-                        }
-
-                        "apk" -> {
-                            val intent = Intent(parent.context, AppActivity::class.java)
-                            intent.putExtra("id", viewHolder.url.replace("/apk/", ""))
-                            parent.context.startActivity(intent)
-                        }
-
-                        "game" -> {
-                            val intent = Intent(parent.context, AppActivity::class.java)
-                            intent.putExtra("id", viewHolder.url.replace("/game/", ""))
-                            parent.context.startActivity(intent)
-                        }
-
-                        "topic" -> {
-                            val intent = Intent(parent.context, TopicActivity::class.java)
-                            intent.putExtra("type", "topic")
-                            intent.putExtra(
-                                "title",
-                                viewHolder.uname.text.toString().replace("话题: ", "")
-                            )
-                            intent.putExtra("url", viewHolder.url)
-                            intent.putExtra("id", "")
-                            parent.context.startActivity(intent)
-                        }
-
-                        "product" -> {
-                            val intent = Intent(parent.context, TopicActivity::class.java)
-                            intent.putExtra("type", "product")
-                            intent.putExtra(
-                                "title",
-                                viewHolder.uname.text.toString().replace("数码: ", "")
-                            )
-                            intent.putExtra("url", viewHolder.url)
-                            intent.putExtra("id", viewHolder.url.replace("/product/", ""))
-                            parent.context.startActivity(intent)
-                        }
-                    }
+                    openLink(
+                        parent.context,
+                        viewHolder.url,
+                        viewHolder.uname.text.toString().replace("话题: ", "").replace("数码: ", ""))
                 }
                 viewHolder
             }
@@ -990,12 +952,7 @@ class AppAdapter(
                     holder.message.visibility = View.VISIBLE
                     holder.message.movementMethod =
                         LinkTextView.LocalLinkMovementMethod.getInstance()
-                    holder.message.highlightColor = ColorUtils.setAlphaComponent(
-                        ThemeUtils.getThemeAttrColor(
-                            mContext,
-                            rikka.preference.simplemenu.R.attr.colorPrimaryDark
-                        ), 128
-                    )
+                    holder.message.highlightColor = Color.TRANSPARENT
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         feed.message,
@@ -1121,27 +1078,7 @@ class AppAdapter(
                                 }
                             }
                             view.setOnClickListener {
-                                if (url.contains("/apk/")) {
-                                    val intent = Intent(mContext, AppActivity::class.java)
-                                    intent.putExtra("id", url.replace("/apk/", ""))
-                                    mContext.startActivity(intent)
-                                } else if (url.contains("/game/")) {
-                                    val intent = Intent(mContext, AppActivity::class.java)
-                                    intent.putExtra("id", url.replace("/game/", ""))
-                                    mContext.startActivity(intent)
-                                } else if (type == "feedRelation") {
-                                    val intent = Intent(mContext, DyhActivity::class.java)
-                                    intent.putExtra("id", id)
-                                    intent.putExtra("title", title.text)
-                                    mContext.startActivity(intent)
-                                } else if (type == "topic" || type == "product") {
-                                    val intent = Intent(mContext, TopicActivity::class.java)
-                                    intent.putExtra("type", type)
-                                    intent.putExtra("title", title.text)
-                                    intent.putExtra("url", url)
-                                    intent.putExtra("id", id)
-                                    mContext.startActivity(intent)
-                                }
+                                openLinkDyh(type, mContext, url, id, title.text.toString())
                             }
                             return view
                         }
@@ -1189,7 +1126,7 @@ class AppAdapter(
                     holder.fans.text = "${user.fUserInfo.fans}粉丝"
                     holder.act.text = DateUtils.fromToday(user.fUserInfo.logintime) + "活跃"
                     ImageUtil.showIMG(holder.avatar, user.fUserInfo.userAvatar)
-                } else if (user.userInfo != null && user.fUserInfo == null) {
+                } else if (user.userInfo != null) {
                     holder.uid = user.uid
                     holder.uname.text = user.username
                     holder.follow.text = "${user.follow}关注"
@@ -1436,12 +1373,7 @@ class AppAdapter(
                     )
 
                 holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
-                holder.message.highlightColor = ColorUtils.setAlphaComponent(
-                    ThemeUtils.getThemeAttrColor(
-                        mContext,
-                        rikka.preference.simplemenu.R.attr.colorPrimaryDark
-                    ), 128
-                )
+                holder.message.highlightColor = Color.TRANSPARENT
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     feed.message,
@@ -1486,12 +1418,7 @@ class AppAdapter(
                         return
                     }
                     holder.hotReply.visibility = View.VISIBLE
-                    holder.hotReply.highlightColor = ColorUtils.setAlphaComponent(
-                        ThemeUtils.getThemeAttrColor(
-                            mContext,
-                            rikka.preference.simplemenu.R.attr.colorPrimaryDark
-                        ), 128
-                    )
+                    holder.hotReply.highlightColor = Color.TRANSPARENT
                     val mess =
                         if (feed.replyRows[0].picArr.isNullOrEmpty())
                             "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message}"
@@ -1586,27 +1513,7 @@ class AppAdapter(
                                 }
                             }
                             view.setOnClickListener {
-                                if (url.contains("/apk/")) {
-                                    val intent = Intent(mContext, AppActivity::class.java)
-                                    intent.putExtra("id", url.replace("/apk/", ""))
-                                    mContext.startActivity(intent)
-                                } else if (url.contains("/game/")) {
-                                    val intent = Intent(mContext, AppActivity::class.java)
-                                    intent.putExtra("id", url.replace("/game/", ""))
-                                    mContext.startActivity(intent)
-                                } else if (type == "feedRelation") {
-                                    val intent = Intent(mContext, DyhActivity::class.java)
-                                    intent.putExtra("id", id)
-                                    intent.putExtra("title", title.text)
-                                    mContext.startActivity(intent)
-                                } else if (type == "topic" || type == "product") {
-                                    val intent = Intent(mContext, TopicActivity::class.java)
-                                    intent.putExtra("type", type)
-                                    intent.putExtra("title", title.text)
-                                    intent.putExtra("url", url)
-                                    intent.putExtra("id", id)
-                                    mContext.startActivity(intent)
-                                }
+                                openLinkDyh(type, mContext, url, id, title.text.toString())
                             }
                             return view
                         }

@@ -1,13 +1,10 @@
 package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -33,11 +30,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
-import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.ui.activity.CopyActivity
-import com.example.c001apk.ui.activity.DyhActivity
-import com.example.c001apk.ui.activity.FeedActivity
-import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -45,6 +38,8 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
+import com.example.c001apk.util.NetWorkUtil.openLink
+import com.example.c001apk.util.NetWorkUtil.openLinkDyh
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
@@ -121,6 +116,7 @@ class FeedAdapter(
     }
 
     class UrlViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var url = ""
         val shareUrl: MaterialCardView =
             view.findViewById(R.id.shareUrl)
         val urlTitle: TextView = view.findViewById(R.id.urlTitle)
@@ -235,7 +231,11 @@ class FeedAdapter(
                 val view =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_feed_article_content_item, parent, false)
-                UrlViewHolder(view)
+                val viewHolder = UrlViewHolder(view)
+                viewHolder.shareUrl.setOnClickListener {
+                    openLink(parent.context, viewHolder.url, viewHolder.urlTitle.text.toString())
+                }
+                viewHolder
             }
 
             3 -> {
@@ -372,45 +372,11 @@ class FeedAdapter(
                         )
                 }
                 viewHolder.extraUrlLayout.setOnClickListener {
-                    val url = viewHolder.extraUrl.text.toString()
-                    if (url.contains("www.coolapk.com/feed/")) {
-                        val id = if (url.contains("shareKey")) {
-                            url.substring(
-                                url.lastIndexOf("/feed/") + 6,
-                                url.lastIndexOf("?shareKey")
-                            )
-                        } else {
-                            url.substring(url.lastIndexOf("/feed/") + 6)
-                        }
-                        val intent = Intent(mContext, FeedActivity::class.java)
-                        intent.putExtra("type", "feed")
-                        intent.putExtra("id", id)
-                        intent.putExtra("uid", "")
-                        intent.putExtra("uname", "")
-                        mContext.startActivity(intent)
-                    } else if (url.startsWith("/game/")) {
-                        val intent = Intent(parent.context, AppActivity::class.java)
-                        intent.putExtra("id", url.replace("/game/", ""))
-                        parent.context.startActivity(intent)
-                    } else if (url.startsWith("/apk/")) {
-                        val intent = Intent(parent.context, AppActivity::class.java)
-                        intent.putExtra("id", url.replace("/apk/", ""))
-                        parent.context.startActivity(intent)
-                    } else if (PrefManager.isOpenLinkOutside) {
-                        val intent = Intent()
-                        intent.action = Intent.ACTION_VIEW
-                        intent.data = Uri.parse(viewHolder.extraUrl.text.toString())
-                        try {
-                            parent.context.startActivity(intent)
-                        } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(parent.context, "打开失败", Toast.LENGTH_SHORT).show()
-                            Log.w("error", "Activity was not found for intent, $intent")
-                        }
-                    } else {
-                        val intent = Intent(parent.context, WebViewActivity::class.java)
-                        intent.putExtra("url", viewHolder.extraUrl.text)
-                        parent.context.startActivity(intent)
-                    }
+                    openLink(
+                        parent.context,
+                        viewHolder.extraUrl.text.toString(),
+                        viewHolder.extraTitle.text.toString()
+                    )
                 }
                 viewHolder
             }
@@ -803,27 +769,7 @@ class FeedAdapter(
                                     }
                                 }
                                 view.setOnClickListener {
-                                    if (url.contains("/apk/")) {
-                                        val intent = Intent(mContext, AppActivity::class.java)
-                                        intent.putExtra("id", url.replace("/apk/", ""))
-                                        mContext.startActivity(intent)
-                                    } else if (url.contains("/game/")) {
-                                        val intent = Intent(mContext, AppActivity::class.java)
-                                        intent.putExtra("id", url.replace("/game/", ""))
-                                        mContext.startActivity(intent)
-                                    } else if (type == "feedRelation") {
-                                        val intent = Intent(mContext, DyhActivity::class.java)
-                                        intent.putExtra("id", id)
-                                        intent.putExtra("title", title.text)
-                                        mContext.startActivity(intent)
-                                    } else if (type == "topic" || type == "product") {
-                                        val intent = Intent(mContext, TopicActivity::class.java)
-                                        intent.putExtra("type", type)
-                                        intent.putExtra("title", title.text)
-                                        intent.putExtra("url", url)
-                                        intent.putExtra("id", id)
-                                        mContext.startActivity(intent)
-                                    }
+                                    openLinkDyh(type, mContext, url, id, title.text.toString())
                                 }
                                 return view
                             }
@@ -969,8 +915,8 @@ class FeedAdapter(
             is UrlViewHolder -> {
                 val item = articleList[position]
                 holder.shareUrl.visibility = View.VISIBLE
-                holder.urlTitle.text =
-                    item.title.toString()
+                holder.urlTitle.text = item.title.toString()
+                holder.url = item.url.toString()
             }
 
             is FeedContentReplyViewHolder -> {

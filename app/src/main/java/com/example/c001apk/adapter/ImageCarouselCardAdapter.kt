@@ -1,7 +1,6 @@
 package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.IconLinkGridCardBean
-import com.example.c001apk.ui.activity.AppActivity
-import com.example.c001apk.ui.activity.CarouselActivity
-import com.example.c001apk.ui.activity.FeedActivity
-import com.example.c001apk.ui.activity.TopicActivity
-import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.NetWorkUtil.openLink
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImageCarouselCardAdapter(
@@ -35,45 +30,7 @@ class ImageCarouselCardAdapter(
                 .inflate(R.layout.item_home_image_carousel_card_item, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
-            if (viewHolder.url.startsWith("/feed/")) {
-                val intent = Intent(parent.context, FeedActivity::class.java)
-                intent.putExtra("type", "feed")
-                intent.putExtra("id", viewHolder.url.replace("/feed/", ""))
-                intent.putExtra("uid", "")
-                intent.putExtra("uname", "")
-                parent.context.startActivity(intent)
-            } else if (viewHolder.url.startsWith("/t/")) {
-                val intent = Intent(parent.context, TopicActivity::class.java)
-                intent.putExtra("type", "topic")
-                intent.putExtra("title", viewHolder.title)
-                intent.putExtra("url", viewHolder.url)
-                intent.putExtra("id", "")
-                parent.context.startActivity(intent)
-            } else if (viewHolder.url.startsWith("/product/")) {
-                val intent = Intent(parent.context, TopicActivity::class.java)
-                intent.putExtra("type", "product")
-                intent.putExtra("title", viewHolder.title.replace("_首页轮播", ""))
-                intent.putExtra("url", viewHolder.url)
-                intent.putExtra("id", viewHolder.url.replace("/product/", ""))
-                parent.context.startActivity(intent)
-            } else if (viewHolder.url.startsWith("/page?url")) {
-                val intent = Intent(parent.context, CarouselActivity::class.java)
-                intent.putExtra("url", viewHolder.url.replace("/page?url=", ""))
-                intent.putExtra("title", viewHolder.title)
-                parent.context.startActivity(intent)
-            } else if (viewHolder.url.startsWith("/game/")) {
-                val intent = Intent(parent.context, AppActivity::class.java)
-                intent.putExtra("id", viewHolder.url.replace("/game/", ""))
-                parent.context.startActivity(intent)
-            } else if (viewHolder.url.startsWith("/apk/")) {
-                val intent = Intent(parent.context, AppActivity::class.java)
-                intent.putExtra("id", viewHolder.url.replace("/apk/", ""))
-                parent.context.startActivity(intent)
-            } else if (viewHolder.url.startsWith("https://") || viewHolder.url.contains("http://")) {
-                val intent = Intent(parent.context, WebViewActivity::class.java)
-                intent.putExtra("url", viewHolder.url)
-                parent.context.startActivity(intent)
-            }
+            openLink(parent.context, viewHolder.url, viewHolder.title.replace("_首页轮播", ""))
         }
         return viewHolder
     }
