@@ -58,6 +58,9 @@ inline fun <reified T : BaseExtension> Project.setupBaseModule(crossinline block
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
         }
+        kotlinOptions {
+            jvmTarget = "17"
+        }
         (this as T).block()
     }
 }

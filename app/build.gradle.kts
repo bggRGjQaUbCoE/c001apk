@@ -1,3 +1,7 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+import org.jetbrains.kotlin.konan.properties.Properties
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -55,23 +59,18 @@ materialThemeBuilder {
     generatePalette = true
 }
 
-val gitBuildNumber: Int by lazy {
-    val stdout = org.apache.commons.io.output.ByteArrayOutputStream()
+fun String.execute(currentWorkingDir: File = file("./")): String {
+    val byteOut = ByteArrayOutputStream()
     rootProject.exec {
-        commandLine("git", "rev-list", "--count", "HEAD")
-        standardOutput = stdout
+        workingDir = currentWorkingDir
+        commandLine = split("\\s".toRegex())
+        standardOutput = byteOut
     }
-    stdout.toString().trim().toInt()
+    return String(byteOut.toByteArray()).trim()
 }
 
-val gitBuildName: String by lazy {
-    val stdout = org.apache.commons.io.output.ByteArrayOutputStream()
-    rootProject.exec {
-        commandLine("git", "rev-parse", "--short", "HEAD")
-        standardOutput = stdout
-    }
-    stdout.toString().trim()
-}
+val gitCommitCount = "git rev-list HEAD --count".execute().toInt()
+val gitCommitHash = "git rev-parse --verify --short HEAD".execute()
 
 android {
     namespace = "com.example.c001apk"
@@ -81,13 +80,31 @@ android {
         applicationId = "com.example.c001apk"
         minSdk = 24
         targetSdk = 34
-        versionCode = gitBuildNumber
-        versionName = gitBuildName
+        versionCode = gitCommitCount
+        versionName = gitCommitHash
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val localProperties = Properties().also {
+        val properties = rootProject.file("local.properties")
+        if (properties.exists())
+            it.load(properties.inputStream())
+    }
+    val config = localProperties.getProperty("KEYSTORE_PATH")?.let {
+        signingConfigs.create("release") {
+            storeFile = file(it)
+            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD")
+            keyAlias = localProperties.getProperty("KEY_ALIAS")
+            keyPassword = localProperties.getProperty("KEY_PASSWORD")
+            enableV2Signing = true
+            enableV3Signing = true
+        }
+    }
     buildTypes {
+        all {
+            signingConfig = config ?: signingConfigs["debug"]
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -100,6 +117,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
@@ -117,12 +137,10 @@ android {
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
-    applicationVariants.all {
-        outputs.all {
-            val versionName = defaultConfig.versionName
-            val versionCode = defaultConfig.versionCode
-            if (buildType.name == "release")
-                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+    applicationVariants.configureEach {
+        outputs.configureEach {
+            if (baseName == "release")
+                (this as? ApkVariantOutputImpl)?.outputFileName =
                     "c001apk_$versionName($versionCode).apk"
         }
     }
