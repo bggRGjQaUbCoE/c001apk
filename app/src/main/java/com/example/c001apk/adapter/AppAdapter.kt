@@ -1400,12 +1400,7 @@ class AppAdapter(
                             urlList.add("${feed.pic}.s.jpg")
                         else
                             for (element in feed.picArr)
-                                if ((PrefManager.imageQuality == "origin" ||
-                                            (PrefManager.imageQuality == "auto" && NetWorkUtil.isWifiConnected()))
-                                    && element.endsWith("gif")
-                                )
-                                    urlList.add(element)
-                                else urlList.add("$element.s.jpg")
+                               urlList.add("$element.s.jpg")
                         setUrlList(urlList)
                     }
                 } else {

@@ -243,13 +243,7 @@ class NineGridImageView @JvmOverloads constructor(
                         imgWidth = replace.substring(from + 1, middle).toInt()
                         imgHeight = replace.substring(middle + 1, end).toInt()
                     }
-                    if (((((PrefManager.imageQuality == "auto"
-                                && !NetWorkUtil.isWifiConnected())
-                                || PrefManager.imageQuality == "thumbnail")
-                                || isCompress)
-                                && replace.endsWith("gif"))
-                        || imgHeight > imgWidth * 22f / 9f
-                    ) {
+                    if (replace.endsWith("gif") || imgHeight > imgWidth * 22f / 9f) {
                         labelBackground = ThemeUtils.getThemeAttrColor(
                             context,
                             rikka.preference.simplemenu.R.attr.colorPrimary

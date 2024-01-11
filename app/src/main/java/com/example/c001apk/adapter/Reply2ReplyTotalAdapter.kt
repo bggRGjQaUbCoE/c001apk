@@ -399,12 +399,7 @@ class Reply2ReplyTotalAdapter(
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
                         for (element in reply.picArr)
-                            if ((PrefManager.imageQuality == "origin" ||
-                                        (PrefManager.imageQuality == "auto" && NetWorkUtil.isWifiConnected()))
-                                && element.endsWith("gif")
-                            )
-                                urlList.add(element)
-                            else urlList.add("$element.s.jpg")
+                            urlList.add("$element.s.jpg")
                         setUrlList(urlList)
                     }
                 } else {
