@@ -26,6 +26,7 @@ import com.example.c001apk.util.CountUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.RecyclerView.checkForGaps
 import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TopicBlackListUtil
@@ -92,15 +93,16 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         }
 
         binding.followBtn.setOnClickListener {
-            if (viewModel.followType) {
-                viewModel.postFollowUnFollow = true
-                viewModel.url = "/v6/user/unfollow"
-                viewModel.postFollowUnFollow()
-            } else {
-                viewModel.postFollowUnFollow = true
-                viewModel.url = "/v6/user/follow"
-                viewModel.postFollowUnFollow()
-            }
+            if (PrefManager.isLogin)
+                if (viewModel.followType) {
+                    viewModel.postFollowUnFollow = true
+                    viewModel.url = "/v6/user/unfollow"
+                    viewModel.postFollowUnFollow()
+                } else {
+                    viewModel.postFollowUnFollow = true
+                    viewModel.url = "/v6/user/follow"
+                    viewModel.postFollowUnFollow()
+                }
         }
 
         viewModel.userData.observe(this) { result ->
@@ -160,7 +162,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                         binding.indicator.parent.isIndeterminate = false
                         binding.indicator.parent.visibility = View.GONE
                         binding.swipeRefresh.isRefreshing = false
-                        mAdapter.notifyItemChanged(viewModel.dataList.size)
+                        mAdapter.notifyItemChanged(viewModel.feedList.size)
                         return@observe
                     } else if (!feed.data.isNullOrEmpty()) {
                         if (viewModel.isRefreshing) viewModel.feedList.clear()

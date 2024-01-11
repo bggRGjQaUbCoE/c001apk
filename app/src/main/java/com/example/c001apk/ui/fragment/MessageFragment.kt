@@ -386,10 +386,10 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
         binding.level.text = "Lv.${PrefManager.level}"
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
         binding.progress.max =
-            if (PrefManager.nextLevelExperience != "") PrefManager.nextLevelExperience.toInt()
+            if (PrefManager.nextLevelExperience != "" && PrefManager.nextLevelExperience != "null") PrefManager.nextLevelExperience.toInt()
             else -1
         binding.progress.progress =
-            if (PrefManager.experience != "") PrefManager.experience.toInt()
+            if (PrefManager.experience != "" && PrefManager.experience != "null") PrefManager.experience.toInt()
             else -1
         if (PrefManager.userAvatar.isNotEmpty())
             ImageUtil.showIMG(binding.avatar, PrefManager.userAvatar)

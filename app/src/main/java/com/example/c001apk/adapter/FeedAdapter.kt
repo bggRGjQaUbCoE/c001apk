@@ -37,7 +37,6 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
-import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.NetWorkUtil.openLinkDyh
 import com.example.c001apk.util.PrefManager
@@ -1284,10 +1283,14 @@ class FeedAdapter(
             R.id.block -> {
                 BlackListUtil.saveUid(uid)
                 if (rPosition == null) {
-                    replyList.removeAt(position - 2)
+                    replyList.removeAt(
+                        if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
+                        else position - 2
+                    )
                     notifyItemRemoved(position)
                 } else {
-                    replyList[position - 2].replyRows?.removeAt(rPosition!!)
+                    replyList[if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
+                    else position - 2].replyRows?.removeAt(rPosition!!)
                     notifyItemChanged(position)
                 }
             }

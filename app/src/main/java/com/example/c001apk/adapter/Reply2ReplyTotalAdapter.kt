@@ -26,7 +26,6 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
-import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
