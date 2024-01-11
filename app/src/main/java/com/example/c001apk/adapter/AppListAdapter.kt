@@ -1,6 +1,5 @@
 package com.example.c001apk.adapter
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.util.AppUtils
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.LocalAppIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,9 +32,9 @@ class AppListAdapter(private val appList: List<AppItem>) :
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
-            val intent = Intent(parent.context, AppActivity::class.java)
-            intent.putExtra("id", viewHolder.packageName.text)
-            parent.context.startActivity(intent)
+            IntentUtil.startActivity<AppActivity>(parent.context) {
+                putExtra("id", viewHolder.packageName.text)
+            }
         }
         return viewHolder
     }

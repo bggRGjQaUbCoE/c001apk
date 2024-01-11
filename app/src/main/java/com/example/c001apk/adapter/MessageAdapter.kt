@@ -33,6 +33,7 @@ import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.google.android.material.imageview.ShapeableImageView
@@ -156,22 +157,26 @@ class MessageAdapter(
                     .inflate(R.layout.item_message_fff, parent, false)
                 val viewHolder = FFFViewHolder(view)
                 if (PrefManager.isLogin) {
-                    val intent = Intent(parent.context, FFFListActivity::class.java)
-                    intent.putExtra("uid", PrefManager.uid)
                     viewHolder.feedLayout.setOnClickListener {
-                        intent.putExtra("isEnable", false)
-                        intent.putExtra("type", "feed")
-                        parent.context.startActivity(intent)
+                        IntentUtil.startActivity<FFFListActivity>(parent.context) {
+                            putExtra("uid", PrefManager.uid)
+                            putExtra("isEnable", false)
+                            putExtra("type", "feed")
+                        }
                     }
                     viewHolder.followLayout.setOnClickListener {
-                        intent.putExtra("isEnable", true)
-                        intent.putExtra("type", "follow")
-                        parent.context.startActivity(intent)
+                        IntentUtil.startActivity<FFFListActivity>(parent.context) {
+                            putExtra("uid", PrefManager.uid)
+                            putExtra("isEnable", true)
+                            putExtra("type", "follow")
+                        }
                     }
                     viewHolder.fansLayout.setOnClickListener {
-                        intent.putExtra("isEnable", false)
-                        intent.putExtra("type", "fans")
-                        parent.context.startActivity(intent)
+                        IntentUtil.startActivity<FFFListActivity>(parent.context) {
+                            putExtra("uid", PrefManager.uid)
+                            putExtra("isEnable", false)
+                            putExtra("type", "fans")
+                        }
                     }
                 }
                 viewHolder
@@ -183,34 +188,35 @@ class MessageAdapter(
                 val viewHolder = MessViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        val intent = Intent(parent.context, MessageActivity::class.java)
-                        when (viewHolder.title.text) {
-                            "@我的动态" -> {
-                                atme = 0
-                                intent.putExtra("type", "atMe")
-                            }
+                        IntentUtil.startActivity<MessageActivity>(parent.context) {
+                            when (viewHolder.title.text) {
+                                "@我的动态" -> {
+                                    atme = 0
+                                    putExtra("type", "atMe")
+                                }
 
-                            "@我的评论" -> {
-                                atcommentme = 0
-                                intent.putExtra("type", "atCommentMe")
-                            }
+                                "@我的评论" -> {
+                                    atcommentme = 0
+                                    putExtra("type", "atCommentMe")
+                                }
 
-                            "我收到的赞" -> {
-                                feedlike = 0
-                                intent.putExtra("type", "feedLike")
-                            }
+                                "我收到的赞" -> {
+                                    feedlike = 0
+                                    putExtra("type", "feedLike")
+                                }
 
-                            "好友关注" -> {
-                                contacts_follow = 0
-                                intent.putExtra("type", "contactsFollow")
-                            }
+                                "好友关注" -> {
+                                    contacts_follow = 0
+                                    putExtra("type", "contactsFollow")
+                                }
 
-                            "私信" -> {
-                                message = 0
-                                intent.putExtra("type", "list")
+                                "私信" -> {
+                                    message = 0
+                                    putExtra("type", "list")
+                                }
                             }
                         }
-                        parent.context.startActivity(intent)
+
                     }
                     viewHolder.badge.visibility = View.GONE
                 }
@@ -222,32 +228,32 @@ class MessageAdapter(
                     .inflate(R.layout.item_feed_content_reply_item, parent, false)
                 val viewHolder = FeedAdapter.FeedContentReplyViewHolder(view)
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.uname.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.itemView.setOnClickListener {
                     when (viewHolder.type) {
                         "feed" -> {
-                            val intent = Intent(parent.context, FeedActivity::class.java)
-                            intent.putExtra("type", "feed")
-                            intent.putExtra("viewReply", true)
-                            intent.putExtra("id", viewHolder.id)
-                            intent.putExtra("rid", viewHolder.rid)
-                            intent.putExtra("uid", viewHolder.uid)
-                            intent.putExtra("uname", viewHolder.uname.text)
-                            parent.context.startActivity(intent)
+                            IntentUtil.startActivity<FeedActivity>(parent.context) {
+                                putExtra("type", "feed")
+                                putExtra("viewReply", true)
+                                putExtra("id", viewHolder.id)
+                                putExtra("rid", viewHolder.rid)
+                                putExtra("uid", viewHolder.uid)
+                                putExtra("uname", viewHolder.uname.text)
+                            }
                         }
 
                         "link" -> {
-                            val intent = Intent(parent.context, WebViewActivity::class.java)
-                            intent.putExtra("url", viewHolder.url)
-                            parent.context.startActivity(intent)
+                            IntentUtil.startActivity<WebViewActivity>(parent.context) {
+                                putExtra("url", viewHolder.url)
+                            }
                         }
 
                         "null" -> {
@@ -291,48 +297,44 @@ class MessageAdapter(
                 val viewHolder = MineViewHolder(view)
                 viewHolder.favLayout.setOnClickListener {
                     if (PrefManager.isLogin)
-                        parent.context.startActivity(
-                            Intent(
-                                parent.context,
-                                CollectionActivity::class.java
-                            )
-                        )
+                        IntentUtil.startActivity<CollectionActivity>(parent.context) {
+                        }
                 }
                 viewHolder.likeLayout.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        val intent = Intent(parent.context, FFFListActivity::class.java)
-                        intent.putExtra("isEnable", false)
-                        intent.putExtra("type", "like")
-                        intent.putExtra("uid", PrefManager.uid)
-                        parent.context.startActivity(intent)
+                        IntentUtil.startActivity<FFFListActivity>(parent.context) {
+                            putExtra("isEnable", false)
+                            putExtra("type", "like")
+                            putExtra("uid", PrefManager.uid)
+                        }
                     }
                 }
                 viewHolder.replyLayout.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        val intent = Intent(parent.context, FFFListActivity::class.java)
-                        intent.putExtra("isEnable", true)
-                        intent.putExtra("type", "reply")
-                        intent.putExtra("uid", PrefManager.uid)
-                        parent.context.startActivity(intent)
+                        IntentUtil.startActivity<FFFListActivity>(parent.context) {
+                            putExtra("isEnable", true)
+                            putExtra("type", "reply")
+                            putExtra("uid", PrefManager.uid)
+                        }
                     }
                 }
                 viewHolder.localFavLayout.setOnClickListener {
-                    val intent = Intent(parent.context, HistoryActivity::class.java)
-                    intent.putExtra("type", "favorite")
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<HistoryActivity>(parent.context) {
+                        putExtra("type", "favorite")
+                    }
                 }
                 viewHolder.historyLayout.setOnClickListener {
-                    val intent = Intent(parent.context, HistoryActivity::class.java)
-                    intent.putExtra("type", "browse")
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<HistoryActivity>(parent.context) {
+                        putExtra("type", "browse")
+                    }
                 }
                 viewHolder.freqLayout.setOnClickListener {
                     if (PrefManager.isLogin) {
-                        val intent = Intent(parent.context, FFFListActivity::class.java)
-                        intent.putExtra("isEnable", false)
-                        intent.putExtra("type", "recentHistory")
-                        intent.putExtra("uid", PrefManager.uid)
-                        parent.context.startActivity(intent)
+                        IntentUtil.startActivity<FFFListActivity>(parent.context) {
+                            putExtra("isEnable", false)
+                            putExtra("type", "recentHistory")
+                            putExtra("uid", PrefManager.uid)
+                        }
                     }
                 }
                 viewHolder

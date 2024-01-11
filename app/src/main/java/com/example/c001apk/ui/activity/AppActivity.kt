@@ -21,6 +21,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
@@ -237,11 +238,11 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                 if (viewModel.appId.isNullOrEmpty() || viewModel.title.isNullOrEmpty()) {
                     Toast.makeText(this, "加载中...", Toast.LENGTH_SHORT).show()
                 } else {
-                    val intent = Intent(this, SearchActivity::class.java)
-                    intent.putExtra("pageType", "apk")
-                    intent.putExtra("pageParam", viewModel.appId)
-                    intent.putExtra("title", viewModel.title)
-                    startActivity(intent)
+                    IntentUtil.startActivity<SearchActivity>(this) {
+                        putExtra("pageType", "apk")
+                        putExtra("pageParam", viewModel.appId)
+                        putExtra("title", viewModel.title)
+                    }
                 }
             }
 

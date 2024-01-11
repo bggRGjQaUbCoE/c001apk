@@ -1,7 +1,6 @@
 package com.example.c001apk.adapter
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +14,7 @@ import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.imageview.ShapeableImageView
 
@@ -49,11 +49,12 @@ class ImageTextScrollCardAdapter(
         view.layoutParams.width = (imageWidth - imageWidth / 3)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
-            val intent = Intent(parent.context, FeedActivity::class.java)
-            intent.putExtra("type", "feedArticle")
-            intent.putExtra("id", viewHolder.id)
-            intent.putExtra("uid", viewHolder.uid)
-            intent.putExtra("uname", viewHolder.uname)
+            IntentUtil.startActivity<FeedActivity>(parent.context) {
+                putExtra("type", "feedArticle")
+                putExtra("id", viewHolder.id)
+                putExtra("uid", viewHolder.uid)
+                putExtra("uname", viewHolder.uname)
+            }
             if (PrefManager.isRecordHistory)
                 HistoryUtil.saveHistory(
                     viewHolder.id,
@@ -64,7 +65,6 @@ class ImageTextScrollCardAdapter(
                     viewHolder.message,
                     viewHolder.pubDate
                 )
-            parent.context.startActivity(intent)
         }
         return viewHolder
     }

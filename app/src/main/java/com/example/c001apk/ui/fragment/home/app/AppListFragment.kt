@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.fragment.home.app
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +22,7 @@ import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.DensityTool
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.RecyclerView.checkForGaps
 import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.UpdateListUtil
@@ -76,8 +76,8 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             layoutParams = lp
             (layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
             setOnClickListener {
-                val intent = Intent(requireContext(), AppUpdateActivity::class.java)
-                startActivity(intent)
+                IntentUtil.startActivity<AppUpdateActivity>(requireContext()) {
+                }
             }
         }
     }

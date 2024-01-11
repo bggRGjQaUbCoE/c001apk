@@ -2,7 +2,6 @@ package com.example.c001apk.ui.fragment.settings
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +25,7 @@ import com.example.c001apk.ui.activity.SBCKActivity
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.CacheDataManager
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -167,13 +167,15 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("about")?.summary =
             "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
         findPreference<Preference>("about")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), AboutActivity::class.java))
+            IntentUtil.startActivity<AboutActivity>(requireContext()) {
+            }
             true
         }
 
 
         findPreference<Preference>("sbparams")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), SBCKActivity::class.java))
+            IntentUtil.startActivity<SBCKActivity>(requireContext()) {
+            }
             true
         }
 
@@ -204,16 +206,16 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<Preference>("userBlackList")?.setOnPreferenceClickListener {
-            val intent = Intent(requireContext(), BlackListActivity::class.java)
-            intent.putExtra("type", "user")
-            startActivity(intent)
+            IntentUtil.startActivity<BlackListActivity>(requireContext()) {
+                putExtra("type", "user")
+            }
             true
         }
 
         findPreference<Preference>("topicBlackList")?.setOnPreferenceClickListener {
-            val intent = Intent(requireContext(), BlackListActivity::class.java)
-            intent.putExtra("type", "topic")
-            startActivity(intent)
+            IntentUtil.startActivity<BlackListActivity>(requireContext()) {
+                putExtra("type", "topic")
+            }
             true
         }
 

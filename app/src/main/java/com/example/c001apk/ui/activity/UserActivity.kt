@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.text.SpannableString
@@ -292,16 +291,19 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         } else {
             binding.followBtn.text = "已关注"
         }
-        val intent = Intent(this, FFFListActivity::class.java)
-        intent.putExtra("uid", viewModel.uid)
-        intent.putExtra("isEnable", false)
         binding.follow.setOnClickListener {
-            intent.putExtra("type", "follow")
-            startActivity(intent)
+            IntentUtil.startActivity<FFFListActivity>(this) {
+                putExtra("uid", viewModel.uid)
+                putExtra("isEnable", false)
+                putExtra("type", "follow")
+            }
         }
         binding.fans.setOnClickListener {
-            intent.putExtra("type", "fans")
-            startActivity(intent)
+            IntentUtil.startActivity<FFFListActivity>(this) {
+                putExtra("uid", viewModel.uid)
+                putExtra("isEnable", false)
+                putExtra("type", "fans")
+            }
         }
     }
 
@@ -481,11 +483,11 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             android.R.id.home -> finish()
 
             R.id.search -> {
-                val intent = Intent(this, SearchActivity::class.java)
-                intent.putExtra("pageType", "user")
-                intent.putExtra("pageParam", viewModel.uid)
-                intent.putExtra("title", binding.name.text)
-                startActivity(intent)
+                IntentUtil.startActivity<SearchActivity>(this) {
+                    putExtra("pageType", "user")
+                    putExtra("pageParam", viewModel.uid)
+                    putExtra("title", binding.name.text)
+                }
             }
 
             R.id.block -> {
@@ -504,12 +506,12 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             }
 
             R.id.report -> {
-                val intent = Intent(this, WebViewActivity::class.java)
-                intent.putExtra(
-                    "url",
-                    "https://m.coolapk.com/mp/do?c=user&m=report&id=${viewModel.uid}"
-                )
-                this.startActivity(intent)
+                IntentUtil.startActivity<WebViewActivity>(this) {
+                    putExtra(
+                        "url",
+                        "https://m.coolapk.com/mp/do?c=user&m=report&id=${viewModel.uid}"
+                    )
+                }
             }
 
         }

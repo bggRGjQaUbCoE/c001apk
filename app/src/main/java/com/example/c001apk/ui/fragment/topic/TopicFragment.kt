@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.topic
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -21,6 +20,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -311,17 +311,21 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             android.R.id.home -> requireActivity().finish()
 
             R.id.search -> {
-                val intent = Intent(activity, SearchActivity::class.java)
                 if (viewModel.type == "topic") {
-                    intent.putExtra("pageType", "tag")
-                    intent.putExtra("pageParam", viewModel.url.toString().replace("/t/", ""))
-                    intent.putExtra("title", viewModel.url.toString().replace("/t/", ""))
+                    IntentUtil.startActivity<SearchActivity>(requireContext()) {
+                        putExtra("type", "topic")
+                        putExtra("pageType", "tag")
+                        putExtra("pageParam", viewModel.url.toString().replace("/t/", ""))
+                        putExtra("title", viewModel.url.toString().replace("/t/", ""))
+                    }
                 } else {
-                    intent.putExtra("pageType", "product_phone")
-                    intent.putExtra("pageParam", viewModel.id)
-                    intent.putExtra("title", viewModel.title)
+                    IntentUtil.startActivity<SearchActivity>(requireContext()) {
+                        putExtra("type", "topic")
+                        putExtra("pageType", "product_phone")
+                        putExtra("pageParam", viewModel.id)
+                        putExtra("title", viewModel.title)
+                    }
                 }
-                requireActivity().startActivity(intent)
             }
 
             R.id.topicLatestReply -> {

@@ -2,7 +2,6 @@ package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
@@ -26,6 +25,7 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
@@ -85,14 +85,14 @@ class Reply2ReplyTotalAdapter(
                     .inflate(R.layout.item_reply_to_reply_item, parent, false)
                 val viewHolder = ReplyViewHolder(view)
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
@@ -417,12 +417,12 @@ class Reply2ReplyTotalAdapter(
             }
 
             R.id.report -> {
-                val intent = Intent(mContext, WebViewActivity::class.java)
-                intent.putExtra(
-                    "url",
-                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$rid"
-                )
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<WebViewActivity>(mContext) {
+                    putExtra(
+                        "url",
+                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$rid"
+                    )
+                }
             }
 
             R.id.delete -> {

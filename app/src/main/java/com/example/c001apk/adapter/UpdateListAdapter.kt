@@ -19,6 +19,7 @@ import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.activity.AppActivity
 import com.example.c001apk.util.AppUtils
 import com.example.c001apk.util.DateUtils
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.http2https
 import com.example.c001apk.viewmodel.AppViewModel
 
@@ -71,9 +72,9 @@ class UpdateListAdapter(
             else -> ""
         }
         holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, AppActivity::class.java)
-            intent.putExtra("id", app.packageName)
-            holder.itemView.context.startActivity(intent)
+            IntentUtil.startActivity<AppActivity>(holder.itemView.context) {
+                putExtra("id", app.packageName)
+            }
         }
         holder.btnUpdate.apply {
             setOnClickListener {

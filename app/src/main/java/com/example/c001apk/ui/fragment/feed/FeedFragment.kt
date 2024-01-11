@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -621,9 +620,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
             }
         }
         binding.avatar1.setOnClickListener {
-            val intent = Intent(requireContext(), UserActivity::class.java)
-            intent.putExtra("id", viewModel.uid)
-            requireActivity().startActivity(intent)
+            IntentUtil.startActivity<UserActivity>(requireContext()) {
+                putExtra("id", viewModel.uid)
+            }
         }
         mAdapter.setListType(viewModel.listType)
         binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
@@ -846,12 +845,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
                     }
 
                     R.id.report -> {
-                        val intent = Intent(requireContext(), WebViewActivity::class.java)
-                        intent.putExtra(
-                            "url",
-                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=${viewModel.id}"
-                        )
-                        requireContext().startActivity(intent)
+                        IntentUtil.startActivity<WebViewActivity>(requireContext()) {
+                            putExtra(
+                                "url",
+                                "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=${viewModel.id}"
+                            )
+                        }
                     }
 
 

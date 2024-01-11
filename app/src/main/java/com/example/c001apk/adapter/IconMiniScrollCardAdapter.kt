@@ -1,6 +1,5 @@
 package com.example.c001apk.adapter
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import com.example.c001apk.R
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.TopicActivity
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 
 class IconMiniScrollCardAdapter(
     private val iconMiniScrollCardList: List<HomeFeedResponse.Entities>
@@ -32,12 +32,12 @@ class IconMiniScrollCardAdapter(
                 .inflate(R.layout.item_home_icon_mini_scroll_card_item, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
-            val intent = Intent(parent.context, TopicActivity::class.java)
-            intent.putExtra("type", viewHolder.entityType)
-            intent.putExtra("title", viewHolder.title.text)
-            intent.putExtra("url", viewHolder.url)
-            intent.putExtra("id", viewHolder.id)
-            parent.context.startActivity(intent)
+            IntentUtil.startActivity<TopicActivity>(parent.context) {
+                putExtra("type", viewHolder.entityType)
+                putExtra("title", viewHolder.title.text)
+                putExtra("url", viewHolder.url)
+                putExtra("id", viewHolder.id)
+            }
         }
         return viewHolder
     }

@@ -46,57 +46,57 @@ object NetWorkUtil {
             .replace("coolapk.com", "")
 
         if (replace.startsWith("/feed/")) {
-            val intent = Intent(context, FeedActivity::class.java)
             val id = if (replace.contains("shareKey"))
                 replace.substring(6, replace.indexOf("?shareKey"))
             else replace.replace("/feed/", "")
-            intent.putExtra("type", "feed")
-            intent.putExtra("id", id)
-            context.startActivity(intent)
+            IntentUtil.startActivity<FeedActivity>(context) {
+                putExtra("type", "feed")
+                putExtra("id", id)
+            }
         } else if (replace.startsWith("#/feed/")) {
-            val intent = Intent(context, CarouselActivity::class.java)
-            intent.putExtra("title", title)
-            intent.putExtra("url", url)
-            context.startActivity(intent)
+            IntentUtil.startActivity<CarouselActivity>(context) {
+                putExtra("title", title)
+                putExtra("url", url)
+            }
         } else if (replace.startsWith("/apk/") || replace.startsWith("/game/")) {
-            val intent = Intent(context, AppActivity::class.java)
-            intent.putExtra("id", replace.replace("/apk/", "").replace("/game/", ""))
-            context.startActivity(intent)
+            IntentUtil.startActivity<AppActivity>(context) {
+                putExtra("id", replace.replace("/apk/", "").replace("/game/", ""))
+            }
         } else if (replace.startsWith("/u/")) {
-            val intent = Intent(context, UserActivity::class.java)
-            intent.putExtra("id", replace.replace("/u/", ""))
-            context.startActivity(intent)
+            IntentUtil.startActivity<UserActivity>(context) {
+                putExtra("id", replace.replace("/u/", ""))
+            }
         } else if (replace.startsWith("/t/")) {
             if (replace.contains("?type=8")) {
-                val intent = Intent(context, CoolPicActivity::class.java)
-                intent.putExtra("title", replace.replace("/t/", "").replace("?type=8", ""))
-                context.startActivity(intent)
+                IntentUtil.startActivity<CoolPicActivity>(context) {
+                    putExtra("title", replace.replace("/t/", "").replace("?type=8", ""))
+                }
             } else {
-                val intent = Intent(context, TopicActivity::class.java)
-                intent.putExtra("type", "topic")
-                intent.putExtra(
-                    "url",
-                    if (replace.contains("?type=")) replace.substring(3, replace.indexOf("?"))
-                    else replace.replace("/t/", "")
-                )
-                intent.putExtra(
-                    "title",
-                    if (replace.contains("?type=")) replace.substring(3, replace.indexOf("?"))
-                    else replace.replace("/t/", "")
-                )
-                context.startActivity(intent)
+                IntentUtil.startActivity<TopicActivity>(context) {
+                    putExtra("type", "topic")
+                    putExtra(
+                        "url",
+                        if (replace.contains("?type=")) replace.substring(3, replace.indexOf("?"))
+                        else replace.replace("/t/", "")
+                    )
+                    putExtra(
+                        "title",
+                        if (replace.contains("?type=")) replace.substring(3, replace.indexOf("?"))
+                        else replace.replace("/t/", "")
+                    )
+                }
             }
         } else if (replace.startsWith("/product/")) {
-            val intent = Intent(context, TopicActivity::class.java)
-            intent.putExtra("type", "product")
-            intent.putExtra("title", title)
-            intent.putExtra("id", replace.replace("/product/", ""))
-            context.startActivity(intent)
+            IntentUtil.startActivity<TopicActivity>(context) {
+                putExtra("type", "product")
+                putExtra("title", title)
+                putExtra("id", replace.replace("/product/", ""))
+            }
         } else if (replace.startsWith("#/page?url=") || replace.startsWith("/page?url=")) {
-            val intent = Intent(context, CarouselActivity::class.java)
-            intent.putExtra("url", replace.replace("#/page?url=", "").replace("/page?url=", ""))
-            intent.putExtra("title", title)
-            context.startActivity(intent)
+            IntentUtil.startActivity<CarouselActivity>(context) {
+                putExtra("url", replace.replace("#/page?url=", "").replace("/page?url=", ""))
+                putExtra("title", title)
+            }
         } else if (replace.startsWith("image.coolapk.com")) {
             ImageUtil.startBigImgViewSimple(context, url.http2https())
         } else if (url.startsWith("https://") || url.startsWith("http://")) {
@@ -111,9 +111,9 @@ object NetWorkUtil {
                     Log.w("error", "Activity was not found for intent, $intent")
                 }
             } else {
-                val intent = Intent(context, WebViewActivity::class.java)
-                intent.putExtra("url", url)
-                context.startActivity(intent)
+                IntentUtil.startActivity<WebViewActivity>(context) {
+                    putExtra("url", url)
+                }
             }
         } else {
             Toast.makeText(context, "unsupported url: $url}", Toast.LENGTH_SHORT).show()
@@ -123,19 +123,19 @@ object NetWorkUtil {
     fun openLinkDyh(type: String, mContext: Context, url: String, id: String, title: String?) {
         when (type) {
             "feedRelation" -> {
-                val intent = Intent(mContext, DyhActivity::class.java)
-                intent.putExtra("id", id)
-                intent.putExtra("title", title)
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<DyhActivity>(mContext) {
+                    putExtra("id", id)
+                    putExtra("title", title)
+                }
             }
 
             "topic", "product" -> {
-                val intent = Intent(mContext, TopicActivity::class.java)
-                intent.putExtra("type", type)
-                intent.putExtra("title", title)
-                intent.putExtra("url", url)
-                intent.putExtra("id", id)
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<TopicActivity>(mContext) {
+                    putExtra("type", type)
+                    putExtra("title", title)
+                    putExtra("url", url)
+                    putExtra("id", id)
+                }
             }
 
             else -> openLink(mContext, url, title)

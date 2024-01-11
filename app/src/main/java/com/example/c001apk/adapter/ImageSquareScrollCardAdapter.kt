@@ -1,7 +1,6 @@
 package com.example.c001apk.adapter
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +13,7 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.activity.CoolPicActivity
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImageSquareScrollCardAdapter(
@@ -44,9 +44,9 @@ class ImageSquareScrollCardAdapter(
         view.layoutParams.width = (imageWidth / 5)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
-            val intent = Intent(parent.context, CoolPicActivity::class.java)
-            intent.putExtra("title", viewHolder.title.text.toString().replace("#", ""))
-            parent.context.startActivity(intent)
+            IntentUtil.startActivity<CoolPicActivity>(parent.context) {
+                putExtra("title", viewHolder.title.text.toString().replace("#", ""))
+            }
         }
         return viewHolder
     }

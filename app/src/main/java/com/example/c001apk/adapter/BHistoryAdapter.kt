@@ -1,7 +1,6 @@
 package com.example.c001apk.adapter
 
 import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -23,6 +22,7 @@ import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
@@ -89,23 +89,23 @@ class BHistoryAdapter(
                     .inflate(R.layout.item_history_feed, parent, false)
                 val viewHolder = HistoryViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("type", "feed")
+                        putExtra("id", viewHolder.id)
+                        putExtra("uid", viewHolder.uid)
+                        putExtra("uname", viewHolder.uname.text)
+                    }
                 }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.expand.setOnClickListener {
                     uid = viewHolder.uid
@@ -259,12 +259,12 @@ class BHistoryAdapter(
             }
 
             R.id.report -> {
-                val intent = Intent(mContext, WebViewActivity::class.java)
-                intent.putExtra(
-                    "url",
-                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
-                )
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<WebViewActivity>(mContext) {
+                    putExtra(
+                        "url",
+                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
+                    )
+                }
             }
 
             R.id.delete -> {

@@ -41,7 +41,6 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
-import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
 import com.example.c001apk.view.RoundImageView

@@ -114,5 +114,4 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
         }
     }
 
-
 }

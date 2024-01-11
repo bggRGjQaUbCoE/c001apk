@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.fragment
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
@@ -27,6 +26,7 @@ import com.example.c001apk.util.CookieUtil.contacts_follow
 import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.RecyclerView.checkForGaps
 import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
@@ -55,7 +55,8 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
         viewModel.url = "/v6/notification/list"
 
         binding.clickToLogin.setOnClickListener {
-            startActivity(Intent(activity, LoginActivity::class.java))
+            IntentUtil.startActivity<LoginActivity>(requireContext()) {
+            }
         }
 
         initRefresh()

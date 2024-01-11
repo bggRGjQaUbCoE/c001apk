@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -18,6 +17,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.Tab
@@ -120,13 +120,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
 
     private fun initMenu() {
         binding.search.setOnClickListener {
-            requireActivity().startActivity(Intent(activity, SearchActivity::class.java))
+            IntentUtil.startActivity<SearchActivity>(requireContext()) {
+            }
         }
 
         binding.menu.setOnClickListener {
-            val intent = Intent(activity, CopyActivity::class.java)
-            intent.putExtra("type", "homeMenu")
-            requireActivity().startActivity(intent)
+            IntentUtil.startActivity<CopyActivity>(requireContext()) {
+                putExtra("type", "homeMenu")
+            }
         }
     }
 

@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.fragment.feed
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -428,12 +427,12 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                     }
 
                     R.id.report -> {
-                        val intent = Intent(requireContext(), WebViewActivity::class.java)
-                        intent.putExtra(
-                            "url",
-                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=${viewModel.id}"
-                        )
-                        requireContext().startActivity(intent)
+                        IntentUtil.startActivity<WebViewActivity>(requireContext()) {
+                            putExtra(
+                                "url",
+                                "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=${viewModel.id}"
+                            )
+                        }
                     }
 
 
@@ -558,12 +557,12 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
         uname: String,
         type: String
     ) {
-        val intent = Intent(requireContext(), FeedActivity::class.java)
-        intent.putExtra("type", "feed")
-        intent.putExtra("id", id)
-        intent.putExtra("uid", uid)
-        intent.putExtra("uname", uname)
-        requireContext().startActivity(intent)
+        IntentUtil.startActivity<FeedActivity>(requireContext()) {
+            putExtra("type", "feed")
+            putExtra("id", id)
+            putExtra("uid", uid)
+            putExtra("uname", uname)
+        }
     }
 
     override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {

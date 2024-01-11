@@ -2,7 +2,6 @@ package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -37,6 +36,7 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.NetWorkUtil.openLinkDyh
 import com.example.c001apk.util.PrefManager
@@ -207,9 +207,9 @@ class FeedAdapter(
                         .inflate(R.layout.item_feed_article_content_item, parent, false)
                 val viewHolder = TextViewHolder(view)
                 viewHolder.textView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.textView.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.textView.text.toString())
+                    }
                     true
                 }
                 viewHolder
@@ -251,14 +251,14 @@ class FeedAdapter(
                     )
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.itemView.setOnClickListener {
@@ -331,15 +331,15 @@ class FeedAdapter(
                     .inflate(R.layout.item_feed_content, parent, false)
                 val viewHolder = FeedContentViewHolder(view)
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
@@ -1296,12 +1296,12 @@ class FeedAdapter(
             }
 
             R.id.report -> {
-                val intent = Intent(mContext, WebViewActivity::class.java)
-                intent.putExtra(
-                    "url",
-                    "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$id"
-                )
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<WebViewActivity>(mContext) {
+                    putExtra(
+                        "url",
+                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$id"
+                    )
+                }
             }
 
             R.id.delete -> {
@@ -1309,9 +1309,9 @@ class FeedAdapter(
             }
 
             R.id.copy -> {
-                val intent = Intent(mContext, CopyActivity::class.java)
-                intent.putExtra("text", text)
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<CopyActivity>(mContext) {
+                    putExtra("text", text)
+                }
             }
 
             R.id.show -> {

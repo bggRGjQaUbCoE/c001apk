@@ -2,7 +2,6 @@ package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.Html
@@ -44,6 +43,7 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.NetWorkUtil.openLinkDyh
 import com.example.c001apk.util.PrefManager
@@ -268,11 +268,12 @@ class AppAdapter(
                         .inflate(R.layout.item_home_feed, parent, false)
                 val viewHolder = FeedViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", viewHolder.feedType)
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("type", viewHolder.feedType)
+                        putExtra("id", viewHolder.id)
+                        putExtra("uid", viewHolder.uid)
+                        putExtra("uname", viewHolder.uname.text)
+                    }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
                             viewHolder.id,
@@ -283,15 +284,15 @@ class AppAdapter(
                             viewHolder.message.text.toString(),
                             viewHolder.pubDataRaw
                         )
-                    parent.context.startActivity(intent)
                 }
                 viewHolder.reply.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", viewHolder.feedType)
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    intent.putExtra("viewReply", true)
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("type", viewHolder.feedType)
+                        putExtra("id", viewHolder.id)
+                        putExtra("uid", viewHolder.uid)
+                        putExtra("uname", viewHolder.uname.text)
+                        putExtra("viewReply", true)
+                    }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
                             viewHolder.id,
@@ -302,15 +303,15 @@ class AppAdapter(
                             viewHolder.message.text.toString(),
                             viewHolder.pubDataRaw
                         )
-                    parent.context.startActivity(intent)
                 }
                 viewHolder.hotReply.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", viewHolder.feedType)
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
-                    intent.putExtra("viewReply", true)
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("type", viewHolder.feedType)
+                        putExtra("id", viewHolder.id)
+                        putExtra("uid", viewHolder.uid)
+                        putExtra("uname", viewHolder.uname.text)
+                        putExtra("viewReply", true)
+                    }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
                             viewHolder.id,
@@ -321,24 +322,23 @@ class AppAdapter(
                             viewHolder.message.text.toString(),
                             viewHolder.pubDataRaw
                         )
-                    parent.context.startActivity(intent)
                 }
                 viewHolder.hotReply.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.hotReply.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.hotReply.text.toString())
+                    }
                     true
                 }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.isLogin) {
@@ -403,9 +403,9 @@ class AppAdapter(
                         .inflate(R.layout.item_search_user, parent, false)
                 val viewHolder = UserViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.followBtn.setOnClickListener {
                     appListener?.onPostFollow(
@@ -423,12 +423,12 @@ class AppAdapter(
                         .inflate(R.layout.item_search_topic, parent, false)
                 val viewHolder = TopicProductViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, TopicActivity::class.java)
-                    intent.putExtra("type", viewHolder.entityType)
-                    intent.putExtra("title", viewHolder.title.text)
-                    intent.putExtra("url", viewHolder.url)
-                    intent.putExtra("id", viewHolder.id)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<TopicActivity>(parent.context) {
+                        putExtra("type", viewHolder.entityType)
+                        putExtra("title", viewHolder.title.text)
+                        putExtra("url", viewHolder.url)
+                        putExtra("id", viewHolder.id)
+                    }
                 }
                 viewHolder
             }
@@ -439,9 +439,9 @@ class AppAdapter(
                         .inflate(R.layout.item_search_topic, parent, false)
                 val viewHolder = AppViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, AppActivity::class.java)
-                    intent.putExtra("id", viewHolder.apkName)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<AppActivity>(parent.context) {
+                        putExtra("id", viewHolder.apkName)
+                    }
                 }
                 viewHolder
             }
@@ -452,11 +452,12 @@ class AppAdapter(
                         .inflate(R.layout.item_feed_vote, parent, false)
                 val viewHolder = FeedVoteViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", viewHolder.feedType)
-                    intent.putExtra("id", viewHolder.id)
-                    intent.putExtra("uid", viewHolder.uid)
-                    intent.putExtra("uname", viewHolder.uname.text)
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("type", viewHolder.feedType)
+                        putExtra("id", viewHolder.id)
+                        putExtra("uid", viewHolder.uid)
+                        putExtra("uname", viewHolder.uname.text)
+                    }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
                             viewHolder.id,
@@ -467,18 +468,17 @@ class AppAdapter(
                             viewHolder.message.text.toString(),
                             viewHolder.pubDataRaw
                         )
-                    parent.context.startActivity(intent)
                 }
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.expand.setOnClickListener {
                     entityType = "feed"
@@ -504,27 +504,28 @@ class AppAdapter(
                         .inflate(R.layout.item_feed_reply, parent, false)
                 val viewHolder = FeedReplyViewHolder(view)
                 viewHolder.itemView.setOnLongClickListener {
-                    val intent = Intent(parent.context, CopyActivity::class.java)
-                    intent.putExtra("text", viewHolder.message.text.toString())
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.message.text.toString())
+                    }
                     true
                 }
                 viewHolder.avatar.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.uname.setOnClickListener {
-                    val intent = Intent(parent.context, UserActivity::class.java)
-                    intent.putExtra("id", viewHolder.uid)
-                    parent.context.startActivity(intent)
+                    IntentUtil.startActivity<UserActivity>(parent.context) {
+                        putExtra("id", viewHolder.uid)
+                    }
                 }
                 viewHolder.feed.setOnClickListener {
-                    val intent = Intent(parent.context, FeedActivity::class.java)
-                    intent.putExtra("type", "feed")
-                    intent.putExtra("id", viewHolder.feedId)
-                    intent.putExtra("uid", viewHolder.feedUid)
-                    intent.putExtra("uname", viewHolder.feedUname.text)
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("type", "feed")
+                        putExtra("id", viewHolder.feedId)
+                        putExtra("uid", viewHolder.feedUid)
+                        putExtra("uname", viewHolder.feedUname.text)
+                    }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
                             viewHolder.id,
@@ -535,7 +536,6 @@ class AppAdapter(
                             viewHolder.message.text.toString(),
                             viewHolder.pubDataRaw
                         )
-                    parent.context.startActivity(intent)
                 }
                 viewHolder.like.setOnClickListener {
                     if (PrefManager.SZLMID == "") {
@@ -1618,15 +1618,15 @@ class AppAdapter(
             }
 
             R.id.report -> {
-                val intent = Intent(mContext, WebViewActivity::class.java)
-                intent.putExtra(
-                    "url",
-                    if (entityType == "feed_reply")
-                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$fid"
-                    else
-                        "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
-                )
-                mContext.startActivity(intent)
+                IntentUtil.startActivity<WebViewActivity>(mContext) {
+                    putExtra(
+                        "url",
+                        if (entityType == "feed_reply")
+                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$fid"
+                        else
+                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$fid"
+                    )
+                }
             }
 
             R.id.delete -> {

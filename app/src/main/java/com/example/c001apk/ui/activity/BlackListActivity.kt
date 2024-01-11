@@ -2,7 +2,6 @@ package com.example.c001apk.ui.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -20,6 +19,7 @@ import com.example.c001apk.logic.database.BlackListDatabase
 import com.example.c001apk.logic.database.TopicBlackListDatabase
 import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
+import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -301,18 +301,18 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     override fun onItemClick(keyword: String) {
         when (viewModel.type) {
             "user" -> {
-                val intent = Intent(this, UserActivity::class.java)
-                intent.putExtra("id", keyword)
-                this.startActivity(intent)
+                IntentUtil.startActivity<UserActivity>(this) {
+                    putExtra("id", keyword)
+                }
             }
 
             "topic" -> {
-                val intent = Intent(this, TopicActivity::class.java)
-                intent.putExtra("type", "topic")
-                intent.putExtra("title", keyword)
-                intent.putExtra("url", keyword)
-                intent.putExtra("id", "")
-                this.startActivity(intent)
+                IntentUtil.startActivity<TopicActivity>(this) {
+                    putExtra("type", "topic")
+                    putExtra("title", keyword)
+                    putExtra("url", keyword)
+                    putExtra("id", "")
+                }
             }
         }
 

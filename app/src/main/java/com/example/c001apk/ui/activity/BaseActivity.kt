@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.viewbinding.ViewBinding
+import com.example.c001apk.R
 import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ThemeUtils
@@ -55,4 +56,10 @@ abstract class BaseActivity<VB : ViewBinding> : MaterialActivity() {
             theme.applyStyle(ThemeUtils.colorThemeStyleRes, true)
         theme.applyStyle(ThemeUtils.getNightThemeStyleRes(this), true) //blackDarkMode
     }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(R.anim.left_in, R.anim.right_out)
+    }
+
 }
