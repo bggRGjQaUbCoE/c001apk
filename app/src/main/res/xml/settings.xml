@@ -18,7 +18,6 @@
             android:disableDependentsState="true"
             android:icon="@drawable/outline_palette_24"
             android:key="followSystemAccent"
-            android:summary="@string/settings_system_theme_color"
             android:title="@string/settings_system_theme_color" />
         <rikka.preference.SimpleMenuPreference
             android:defaultValue="DEFAULT"

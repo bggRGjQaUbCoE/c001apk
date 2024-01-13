@@ -58,7 +58,8 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
 
         if (!viewModel.uname.isNullOrEmpty()) {
             showUserInfo()
-            binding.followBtn.visibility = View.VISIBLE
+            binding.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
+            else View.GONE
             binding.infoLayout.visibility = View.VISIBLE
         } else if (viewModel.errorMessage != null) {
             showErrorMessage()
@@ -203,7 +204,8 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                 else
                     mAdapter.notifyDataSetChanged()
                 binding.infoLayout.visibility = View.VISIBLE
-                binding.followBtn.visibility = View.VISIBLE
+                binding.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
+                else View.GONE
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
                 binding.swipeRefresh.isRefreshing = false
@@ -270,6 +272,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
 
     }
 
+    @SuppressLint("SetTextI18n")
     private fun showUserInfo() {
         binding.collapsingToolbar.title = viewModel.uname
         binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
@@ -277,7 +280,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         ImageUtil.showUserCover(binding.cover, viewModel.cover)
         ImageUtil.showIMG(binding.avatar, viewModel.avatar)
         binding.name.text = viewModel.uname
-        binding.uid.text = viewModel.uid
+        binding.uid.text = "uid: ${viewModel.uid}"
         binding.level.text = viewModel.level
         binding.level.visibility = View.VISIBLE
         if (viewModel.bio.isNullOrEmpty()) binding.bio.visibility = View.GONE

@@ -11,11 +11,14 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/pubDate"
+        app:layout_constraintDimensionRatio="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearance="@style/circleImageStyle" />
+        app:shapeAppearance="@style/circleImageStyle"
+        tools:src="#123456" />
 
     <com.example.c001apk.view.LinkTextView
         android:id="@+id/uname"
@@ -55,11 +58,14 @@
 
     <TextView
         android:id="@+id/device"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:textColor="@android:color/darker_gray"
         android:textSize="13sp"
+        app:layout_constraintEnd_toStartOf="@id/follow"
         app:layout_constraintStart_toEndOf="@id/pubDate"
         app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -199,7 +205,7 @@
             android:src="@drawable/ic_link"
             android:tint="@color/wb"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="H, 1"
+            app:layout_constraintDimensionRatio="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearance="@style/searchTopicRadius" />

@@ -54,24 +54,33 @@
                     app:shapeAppearance="@style/circleImageStyle"
                     tools:ignore="ContentDescription" />
 
+                <TextView
+                    android:id="@+id/name"
+                    style="@style/UserTextColor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="20dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/avatar" />
+
                 <LinearLayout
                     android:id="@+id/info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="4dp"
                     android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/avatar">
-
-                    <TextView
-                        android:id="@+id/name"
-                        style="@style/UserTextColor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    app:layout_constraintTop_toBottomOf="@id/name">
 
                     <TextView
                         android:id="@+id/uid"
@@ -79,7 +88,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginStart="5dp"
                         android:textSize="16sp" />
 
                     <TextView
@@ -87,7 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginStart="5dp"
+                        android:layout_marginStart="10dp"
                         android:background="@drawable/pic_count_bg"
                         android:paddingStart="5dp"
                         android:paddingEnd="5dp"
@@ -99,13 +107,15 @@
                 <TextView
                     android:id="@+id/bio"
                     style="@style/UserTextColor"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="20dp"
+                    android:ellipsize="end"
                     android:gravity="center"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
+                    android:maxLines="1"
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -115,7 +125,7 @@
                     android:id="@+id/info2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="4dp"
                     android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -155,7 +165,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/info2" />

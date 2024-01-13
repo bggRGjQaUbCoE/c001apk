@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="20dp"
                 android:background="?attr/actionBarItemBackground"
                 android:src="@drawable/ic_menu" />
 

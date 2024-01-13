@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
@@ -16,18 +17,23 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/device"
+            app:layout_constraintDimensionRatio="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/circleImageStyle" />
+            app:shapeAppearance="@style/circleImageStyle"
+            tools:src="#123456" />
 
         <ImageButton
             android:id="@+id/expand"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="?actionBarItemBackground"
             android:src="@drawable/ic_expand_more"
+            app:layout_constraintBottom_toTopOf="@id/device"
+            app:layout_constraintDimensionRatio="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -58,10 +64,13 @@
 
         <TextView
             android:id="@+id/device"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/from"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -131,9 +140,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:background="@drawable/selector_bg_12"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/selector_bg_12"
             android:lineSpacingMultiplier="1.2"
             android:padding="10dp"
             app:layout_constraintStart_toStartOf="parent"

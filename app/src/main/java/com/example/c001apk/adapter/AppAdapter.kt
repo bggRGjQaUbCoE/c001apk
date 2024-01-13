@@ -408,11 +408,12 @@ class AppAdapter(
                     }
                 }
                 viewHolder.followBtn.setOnClickListener {
-                    appListener?.onPostFollow(
-                        viewHolder.isFollow,
-                        viewHolder.uid,
-                        viewHolder.bindingAdapterPosition
-                    )
+                    if (PrefManager.isLogin)
+                        appListener?.onPostFollow(
+                            viewHolder.isFollow,
+                            viewHolder.uid,
+                            viewHolder.bindingAdapterPosition
+                        )
                 }
                 viewHolder
             }
@@ -591,7 +592,8 @@ class AppAdapter(
                     openLink(
                         parent.context,
                         viewHolder.url,
-                        viewHolder.uname.text.toString().replace("话题: ", "").replace("数码: ", ""))
+                        viewHolder.uname.text.toString().replace("话题: ", "").replace("数码: ", "")
+                    )
                 }
                 viewHolder
             }
@@ -786,7 +788,7 @@ class AppAdapter(
                     holder.device.setCompoundDrawables(drawable, null, null, null)
                     holder.device.visibility = View.VISIBLE
                 } else {
-                    holder.device.visibility = View.GONE
+                    holder.device.visibility = View.INVISIBLE
                 }
 
                 if (feed.message == "") {
@@ -941,7 +943,7 @@ class AppAdapter(
                     holder.device.setCompoundDrawables(drawable, null, null, null)
                     holder.device.visibility = View.VISIBLE
                 } else {
-                    holder.device.visibility = View.GONE
+                    holder.device.visibility = View.INVISIBLE
                 }
                 holder.pubDate.text = DateUtils.fromToday(feed.dateline)
 
@@ -1144,6 +1146,8 @@ class AppAdapter(
                         holder.followBtn.text = "已关注"
                         holder.followBtn.setTextColor(mContext.getColor(android.R.color.darker_gray))
                     }
+                    holder.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
+                    else View.GONE
                     ImageUtil.showIMG(holder.avatar, user.userAvatar)
                 }
             }
@@ -1311,7 +1315,7 @@ class AppAdapter(
                     holder.device.setCompoundDrawables(drawable, null, null, null)
                     holder.device.visibility = View.VISIBLE
                 } else {
-                    holder.device.visibility = View.GONE
+                    holder.device.visibility = View.INVISIBLE
                 }
                 holder.pubDate.text = DateUtils.fromToday(feed.dateline)
                 val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!
@@ -1399,7 +1403,7 @@ class AppAdapter(
                             urlList.add("${feed.pic}.s.jpg")
                         else
                             for (element in feed.picArr)
-                               urlList.add("$element.s.jpg")
+                                urlList.add("$element.s.jpg")
                         setUrlList(urlList)
                     }
                 } else {
