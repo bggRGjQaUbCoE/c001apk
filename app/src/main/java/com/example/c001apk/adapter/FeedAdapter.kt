@@ -774,7 +774,6 @@ class FeedAdapter(
                     if (feed.data?.forwardSourceFeed != null) {
                         holder.forwardedId = feed.data.forwardSourceFeed.id
                         holder.forwarded.visibility = View.VISIBLE
-                        holder.forwarded.background = mContext.getDrawable(R.drawable.selector_bg_12_feed)
                         val forwardedMess =
                             "<a class=\"feed-link-uname\" href=\"/u/${feed.data.forwardSourceFeed.uid}\">@${feed.data.forwardSourceFeed.username}</a>: ${feed.data.forwardSourceFeed.message}"
                         holder.forwardedMess.movementMethod =

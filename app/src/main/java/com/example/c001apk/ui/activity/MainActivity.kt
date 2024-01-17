@@ -77,11 +77,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
                 }
             }
 
-            registerOnPageChangeCallback(object :
-                ViewPager2.OnPageChangeCallback() {
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
-                    navView.menu.getItem(position)?.isChecked = true
                     when (position) {
                         0 -> onBackPressedCallback.isEnabled = false
                         1 -> onBackPressedCallback.isEnabled = true
@@ -101,7 +99,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
             setOnItemSelectedListener {
                 when (it.itemId) {
                     R.id.navigation_home -> {
-                        onBackPressedCallback.isEnabled = false
                         if (binding.viewPager.currentItem == 0)
                             controller?.onReturnTop()
                         else
@@ -109,14 +106,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
                     }
 
                     R.id.navigation_message -> {
-                        onBackPressedCallback.isEnabled = true
                         binding.viewPager.setCurrentItem(1, true)
                         if (viewModel.badge != 0)
                             navView.removeBadge(R.id.navigation_message)
                     }
 
                     R.id.navigation_setting -> {
-                        onBackPressedCallback.isEnabled = true
                         binding.viewPager.setCurrentItem(2, true)
                     }
 
@@ -227,8 +222,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
     private val onBackPressedCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             if (binding.viewPager.currentItem != 0) {
+                this.isEnabled = false
                 showNavigationView()
-                binding.viewPager.setCurrentItem(0, true)
+                navView.selectedItemId = navView.menu.getItem(0).itemId
             }
         }
     }

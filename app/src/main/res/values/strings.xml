@@ -25,6 +25,7 @@
     <string name="dark_theme_follow_system">@string/follow_system</string>
 
     <!-- Colors -->
+    <string name="color_default">默认</string>
     <string name="color_sakura">樱花</string>
     <string name="color_red">红色</string>
     <string name="color_pink">粉色</string>

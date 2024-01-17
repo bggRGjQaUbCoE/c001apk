@@ -145,4 +145,12 @@
         <attr name="android:orientation" />
     </declare-styleable>
 
+    <declare-styleable name="NineImageView">
+        <attr name="nineImageHorizontalSpace" format="dimension" />
+        <attr name="nineImageVerticalSpace" format="dimension" />
+        <attr name="nineImageRadius" format="dimension" />
+        <attr name="nineImageRatio" format="float" />
+        <attr name="nineImageColumns" format="integer" />
+    </declare-styleable>
+
 </resources>

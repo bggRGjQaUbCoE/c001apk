@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
-import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivitySearchBinding
 import com.example.c001apk.ui.fragment.search.SearchFragment
@@ -22,7 +21,6 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
                     R.id.searchFragment,
                     SearchFragment.newInstance(pageType, pageParam, title)
                 )
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }
     }

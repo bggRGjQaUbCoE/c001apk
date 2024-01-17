@@ -241,9 +241,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:background="@drawable/selector_bg_12_forward"
+        android:background="@drawable/round_corners_12"
+        android:foreground="@drawable/selector_bg_12_carousel"
         android:orientation="vertical"
-        android:padding="5dp"
+        android:padding="7dp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/extraUrlLayout">

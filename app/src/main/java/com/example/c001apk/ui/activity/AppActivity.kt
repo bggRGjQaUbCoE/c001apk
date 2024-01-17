@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -167,24 +166,34 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
         ImageUtil.showIMG(binding.logo, viewModel.logo)
         if (viewModel.type == "apk")
-            viewModel.getDownloadLink()
+            binding.btnDownload.visibility = View.VISIBLE
+        binding.btnDownload.setOnClickListener {
+            if (viewModel.collectionUrl.isNullOrEmpty()) {
+                viewModel.isNew = true
+                viewModel.getDownloadLink()
+            } else
+                downloadApp()
+        }
         viewModel.downloadLinkData.observe(this@AppActivity) { result ->
-            val link = result.getOrNull()
-            if (link != null) {
-                binding.btnDownload.visibility = View.VISIBLE
-                viewModel.collectionUrl = link
-            } else {
-                result.exceptionOrNull()?.printStackTrace()
+            if (viewModel.isNew) {
+                viewModel.isNew = false
+                val link = result.getOrNull()
+                if (!link.isNullOrEmpty()) {
+                    viewModel.collectionUrl = link
+                    downloadApp()
+                } else {
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
         }
-        binding.btnDownload.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.collectionUrl))
-            try {
-                startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(this@AppActivity, "打开失败", Toast.LENGTH_SHORT).show()
-                Log.w("error", "Activity was not found for intent, $intent")
-            }
+    }
+
+    private fun downloadApp() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.collectionUrl)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this@AppActivity, "下载失败", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
         }
     }
 

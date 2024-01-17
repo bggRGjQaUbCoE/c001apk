@@ -58,5 +58,4 @@
         <item>@string/color_blue_grey</item>
     </string-array>
 
-    <string name="color_default">默认</string>
 </resources>

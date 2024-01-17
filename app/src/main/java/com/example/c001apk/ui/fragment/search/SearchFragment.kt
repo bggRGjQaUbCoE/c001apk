@@ -35,12 +35,11 @@ import kotlinx.coroutines.launch
 class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private lateinit var mAdapter: HistoryAdapter
-    private lateinit var mLayoutManager: FlexboxLayoutManager
+    private var mAdapter: HistoryAdapter? = null
+    private var mLayoutManager: FlexboxLayoutManager? = null
     private val searchHistoryDao by lazy {
         SearchHistoryDatabase.getDatabase(this@SearchFragment.requireContext()).searchHistoryDao()
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,17 +66,14 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (viewModel.historyList.isEmpty())
+        if (viewModel.historyList.isEmpty()) {
             binding.historyLayout.visibility = View.GONE
-        else
+            viewModel.isNew = true
+            viewModel.getBlackList("history", requireContext())
+        } else
             binding.historyLayout.visibility = View.VISIBLE
 
         initView()
-        if (viewModel.historyList.isEmpty()) {
-            viewModel.isNew = true
-            viewModel.getBlackList("history", requireContext())
-        }
-
         initEditText()
         initEdit()
         initButton()
@@ -94,7 +90,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                         binding.historyLayout.visibility = View.GONE
                     else
                         binding.historyLayout.visibility = View.VISIBLE
-                    mAdapter.notifyDataSetChanged()
+                    mAdapter?.notifyDataSetChanged()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     throw IllegalArgumentException("searchFragment: fail to load keyword: ${e.message}")
@@ -105,11 +101,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
     }
 
     private fun initView() {
-        mLayoutManager = FlexboxLayoutManager(activity)
-        mLayoutManager.flexDirection = FlexDirection.ROW
-        mLayoutManager.flexWrap = FlexWrap.WRAP
+        mLayoutManager = FlexboxLayoutManager(requireContext(), FlexDirection.ROW, FlexWrap.WRAP)
         mAdapter = HistoryAdapter(viewModel.historyList)
-        mAdapter.setOnItemClickListener(this)
+        mAdapter?.setOnItemClickListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
@@ -128,7 +122,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                             searchHistoryDao.deleteAll()
                         }
                         viewModel.historyList.clear()
-                        mAdapter.notifyDataSetChanged()
+                        mAdapter?.notifyDataSetChanged()
                         binding.historyLayout.visibility = View.GONE
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -167,9 +161,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
     private fun search() {
         if (binding.editText.text.toString() == "") {
             Toast.makeText(activity, "请输入关键词", Toast.LENGTH_SHORT).show()
-            //hideKeyBoard()
         } else {
-            //hideKeyBoard()
             requireActivity().supportFragmentManager
                 .beginTransaction()
                 .replace(
@@ -191,15 +183,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         }
     }
 
-    /*private fun hideKeyBoard() {
-        val im =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        im.hideSoftInputFromWindow(
-            requireActivity().currentFocus!!.windowToken,
-            InputMethodManager.HIDE_NOT_ALWAYS
-        )
-    }
-*/
     @SuppressLint("RestrictedApi")
     private fun initEditText() {
         binding.editText.apply {
@@ -242,11 +225,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         }
     }
 
-    /*override fun onStart() {
-        super.onStart()
-        initEditText()
-    }
-*/
     override fun onItemClick(keyword: String) {
         binding.editText.setText(keyword)
         binding.editText.setSelection(keyword.length)
@@ -261,9 +239,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                 }
                 searchHistoryDao.insert(SearchHistory(keyword))
             }
-            viewModel.historyList.remove(keyword)
+            val index = viewModel.historyList.indexOf(keyword)
+            if (index != -1) {
+                viewModel.historyList.removeAt(index)
+                mAdapter?.notifyItemRemoved(index)
+            }
             viewModel.historyList.add(0, keyword)
-            mAdapter.notifyItemInserted(0)
+            mAdapter?.notifyItemInserted(0)
         } catch (e: Exception) {
             e.printStackTrace()
             throw IllegalArgumentException("searchFragment: fail to update keyword: ${e.message}")
@@ -278,11 +260,17 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             }
             val position = viewModel.historyList.indexOf(keyword)
             viewModel.historyList.removeAt(position)
-            mAdapter.notifyItemRemoved(position)
+            mAdapter?.notifyItemRemoved(position)
         } catch (e: Exception) {
             e.printStackTrace()
             throw IllegalArgumentException("searchFragment: fail to delete keyword: ${e.message}")
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mLayoutManager = null
+        mAdapter = null
     }
 
 }
