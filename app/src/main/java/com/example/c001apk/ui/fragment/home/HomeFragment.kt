@@ -36,6 +36,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
     }
+    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -78,21 +79,24 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
                     initMenuList()
                 }
             }
-            viewModel.fragmentList.apply {
-                for (element in viewModel.tabList) {
-                    when (element) {
-                        "关注" -> add(HomeFeedFragment.newInstance("follow"))
-                        "应用" -> add(AppListFragment())
-                        "头条" -> add(HomeFeedFragment.newInstance("feed"))
-                        "热榜" -> add(HomeFeedFragment.newInstance("rank"))
-                        "话题" -> add(TopicFragment.newInstance("topic"))
-                        "数码" -> add(TopicFragment.newInstance("product"))
-                        "酷图" -> add(HomeFeedFragment.newInstance("coolPic"))
-                    }
-                }
-            }
             withContext(Dispatchers.Main) {
                 initView()
+            }
+        }
+    }
+
+    private fun initFragmentList() {
+        fragmentList.apply {
+            for (element in viewModel.tabList) {
+                when (element) {
+                    "关注" -> add(HomeFeedFragment.newInstance("follow"))
+                    "应用" -> add(AppListFragment())
+                    "头条" -> add(HomeFeedFragment.newInstance("feed"))
+                    "热榜" -> add(HomeFeedFragment.newInstance("rank"))
+                    "话题" -> add(TopicFragment.newInstance("topic"))
+                    "数码" -> add(TopicFragment.newInstance("product"))
+                    "酷图" -> add(HomeFeedFragment.newInstance("coolPic"))
+                }
             }
         }
     }
@@ -132,10 +136,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
     }
 
     private fun initView() {
+        initFragmentList()
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment {
-                return viewModel.fragmentList[position]
+                return fragmentList[position]
             }
 
             override fun getItemCount() = viewModel.tabList.size

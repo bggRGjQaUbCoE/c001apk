@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -26,6 +27,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
+    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     companion object {
         @JvmStatic
@@ -82,8 +84,8 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
 
     private fun initData() {
         if (viewModel.pageType.isNullOrEmpty()) {
-            viewModel.searchTabList = arrayOf("动态", "应用", "数码", "用户", "话题")
-            viewModel.searchFragmentList.run {
+            viewModel.tabList = arrayListOf("动态", "应用", "数码", "用户", "话题")
+            fragmentList.run {
                 add(
                     SearchContentFragment.newInstance(
                         viewModel.keyWord.toString(),
@@ -127,8 +129,8 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
             }
         } else {
             binding.tabLayout.visibility = View.GONE
-            viewModel.searchTabList = arrayOf("null")
-            viewModel.searchFragmentList
+            viewModel.tabList = arrayListOf("null")
+            fragmentList
                 .add(
                     SearchContentFragment.newInstance(
                         viewModel.keyWord.toString(),
@@ -142,13 +144,13 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     }
 
     private fun initView() {
-        binding.viewPager.offscreenPageLimit = viewModel.searchTabList.size
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = viewModel.searchFragmentList[position]
-            override fun getItemCount() = viewModel.searchTabList.size
+            override fun createFragment(position: Int) = fragmentList[position]
+            override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = viewModel.searchTabList[position]
+            tab.text = viewModel.tabList[position]
         }.attach()
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {}

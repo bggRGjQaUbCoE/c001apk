@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,7 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.ActivityCarouselBinding
+import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.topic.TopicContentFragment
 import com.example.c001apk.util.BlackListUtil
@@ -36,6 +38,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var mCheckForGapMethod: Method
     private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
+    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onResume() {
         super.onResume()
@@ -111,11 +114,10 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                         if (binding.tabLayout.visibility == View.VISIBLE) {
                             for (element in response.data[index].entities) {
                                 viewModel.tabList.add(element.title)
-                                viewModel.fragmentList.add(
-                                    TopicContentFragment.newInstance(
+                                viewModel.topicList.add(
+                                    TopicBean(
                                         element.url,
-                                        element.title,
-                                        false
+                                        element.title
                                     )
                                 )
                                 initView()
@@ -322,14 +324,27 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     }
 
     private fun initView() {
+        initFragmentList()
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = viewModel.fragmentList[position]
+            override fun createFragment(position: Int) = fragmentList[position]
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
+    }
+
+    private fun initFragmentList() {
+        for (element in viewModel.topicList) {
+            fragmentList.add(
+                TopicContentFragment.newInstance(
+                    element.url,
+                    element.title,
+                    false
+                )
+            )
+        }
     }
 
 

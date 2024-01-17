@@ -3,7 +3,6 @@ package com.example.c001apk.viewmodel
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
@@ -18,6 +17,7 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.logic.model.MessageResponse
+import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.logic.network.Repository
@@ -245,8 +245,7 @@ class AppViewModel : ViewModel() {
     }
 
     val menuList = ArrayList<HomeMenu>()
-    val tabList = ArrayList<String>()
-    val fragmentList = ArrayList<Fragment>()
+    var tabList = ArrayList<String>()
 
     var isResume = true
 
@@ -552,8 +551,8 @@ class AppViewModel : ViewModel() {
 
     var isInitial = true
 
-
     var titleList = ArrayList<String>()
+    val topicList: MutableList<TopicBean> = ArrayList()
 
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
 
@@ -622,10 +621,6 @@ class AppViewModel : ViewModel() {
     fun getProductLayout() {
         getProductLayoutLiveData.value = getProductLayoutLiveData.value
     }
-
-    var searchTabList = emptyArray<String>()
-    var searchFragmentList = ArrayList<Fragment>()
-
 
     private val postFollowUnFollowLiveData = MutableLiveData<String>()
 

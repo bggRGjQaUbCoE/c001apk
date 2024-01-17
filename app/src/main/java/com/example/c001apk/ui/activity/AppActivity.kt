@@ -33,6 +33,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private var subscribe: MenuItem? = null
     override var tabController: IOnTabClickListener? = null
+    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,11 +91,6 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                             add("最新发布")
                             add("热度排序")
                         }
-                        viewModel.fragmentList.apply {
-                            add(AppFragment.newInstance("reply", viewModel.id.toString()))
-                            add(AppFragment.newInstance("pub", viewModel.id.toString()))
-                            add(AppFragment.newInstance("hot", viewModel.id.toString()))
-                        }
                         initView()
                     } else {
                         viewModel.errorMessage = appInfo.data.commentStatusText
@@ -134,9 +130,10 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun initView() {
+        initFragmentList()
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int): Fragment = viewModel.fragmentList[position]
+            override fun createFragment(position: Int): Fragment = fragmentList[position]
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
@@ -203,6 +200,14 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             initView()
         } else if (viewModel.commentStatusText != "允许评论" && viewModel.type != "appForum") {
             showErrorMessage()
+        }
+    }
+
+    private fun initFragmentList() {
+        fragmentList.apply {
+            add(AppFragment.newInstance("reply", viewModel.id.toString()))
+            add(AppFragment.newInstance("pub", viewModel.id.toString()))
+            add(AppFragment.newInstance("hot", viewModel.id.toString()))
         }
     }
 

@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
+import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.vertical.adapter.TabAdapter
@@ -20,6 +21,7 @@ import com.google.android.material.R
 class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,8 +88,8 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
                     if (viewModel.titleList.isEmpty()) {
                         for (element in topic?.data!![0].entities) {
                             viewModel.titleList.add(element.title)
-                            viewModel.fragmentList.add(
-                                HomeTopicContentFragment.newInstance(
+                            viewModel.topicList.add(
+                                TopicBean(
                                     element.url,
                                     element.title
                                 )
@@ -113,8 +115,8 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
                     if (viewModel.titleList.isEmpty()) {
                         for (element in data?.data!!) {
                             viewModel.titleList.add(element.title)
-                            viewModel.fragmentList.add(
-                                HomeTopicContentFragment.newInstance(
+                            viewModel.topicList.add(
+                                TopicBean(
                                     element.url,
                                     element.title
                                 )
@@ -150,6 +152,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
     private fun initView() {
         if (viewModel.titleList.isNotEmpty()) {
+            for (element in viewModel.topicList) {
+                fragmentList.add(HomeTopicContentFragment.newInstance(element.url, element.title))
+            }
             binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
             binding.tabLayout.setupWithViewPager(binding.viewPager)
             binding.indicator.parent.isIndeterminate = false
@@ -165,11 +170,11 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
     private inner class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm), TabAdapter {
 
         override fun getItem(position: Int): Fragment {
-            return viewModel.fragmentList[position]
+            return fragmentList[position]
         }
 
         override fun getCount(): Int {
-            return viewModel.fragmentList.size
+            return viewModel.titleList.size
         }
 
         override fun getBadge(position: Int): ITabView.TabBadge? {

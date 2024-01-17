@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
@@ -12,6 +13,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,23 +42,27 @@ class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
                 add("热门")
                 add("最新")
             }
-            viewModel.fragmentList.apply {
-                add(CollectionFragment.newInstance("recommend", viewModel.title.toString()))
-                add(CollectionFragment.newInstance("hot", viewModel.title.toString()))
-                add(CollectionFragment.newInstance("newest", viewModel.title.toString()))
-            }
         }
     }
 
     private fun initView() {
+        initFragmentList()
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = viewModel.fragmentList[position]
+            override fun createFragment(position: Int) = fragmentList[position]
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
+    }
+
+    private fun initFragmentList() {
+        fragmentList.apply {
+            add(CollectionFragment.newInstance("recommend", viewModel.title.toString()))
+            add(CollectionFragment.newInstance("hot", viewModel.title.toString()))
+            add(CollectionFragment.newInstance("newest", viewModel.title.toString()))
+        }
     }
 
 }
