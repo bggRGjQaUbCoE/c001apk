@@ -11,6 +11,7 @@ data class HomeFeedResponse(
 ) {
 
     data class Data(
+        val forwardSourceFeed: MessageResponse.ForwardSourceFeed?,
         @SerializedName("comment_num") val commentNum: String?,
         @SerializedName("fans_num") val fansNum: String?,
         @SerializedName("target_type") val targetType: String?,

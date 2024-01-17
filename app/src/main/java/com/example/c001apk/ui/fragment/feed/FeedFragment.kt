@@ -29,8 +29,6 @@ import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
-import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
-import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.DateUtils
@@ -58,8 +56,7 @@ import java.lang.reflect.Method
 import java.net.URLDecoder
 
 
-class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMoreReplyListener,
-    IOnPublishClickListener {
+class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublishClickListener {
 
     private val viewModel by lazy { ViewModelProvider(requireActivity())[AppViewModel::class.java] }
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
@@ -1006,26 +1003,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnShowMo
         viewModel.replyData["replyAndForward"] = replyAndForward
         viewModel.isPostReply = true
         viewModel.postReply()
-    }
-
-    override fun onShowMoreReply(position: Int, uid: String, id: String) {
-        viewModel.isShowMoreReply = true
-        var index = 0
-        for (element in viewModel.feedReplyList) {
-            if (element.id == id)
-                break
-            else
-                index++
-        }
-        val mBottomSheetDialogFragment =
-            Reply2ReplyBottomSheetDialog.newInstance(position, viewModel.uid.toString(), uid, id)
-        mBottomSheetDialogFragment.oriReply.add(viewModel.feedReplyList[index])
-        mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        IOnShowMoreReplyContainer.controller = this
     }
 
 }

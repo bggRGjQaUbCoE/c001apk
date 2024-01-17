@@ -155,7 +155,7 @@
         android:layout_marginTop="10dp"
         android:textColor="@android:color/darker_gray"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/extraUrlLayout" />
+        app:layout_constraintTop_toBottomOf="@id/forwarded" />
 
     <TextView
         android:id="@+id/like"
@@ -235,6 +235,36 @@
             app:layout_constraintStart_toEndOf="@id/cover"
             app:layout_constraintTop_toBottomOf="@id/extraTitle" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/forwarded"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/selector_bg_12_forward"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/extraUrlLayout">
+
+        <com.example.c001apk.view.LinkTextView
+            android:id="@+id/forwardedMess"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:lineSpacingMultiplier="1.2"
+            android:textSize="15sp" />
+
+        <com.example.c001apk.view.ninegridimageview.NineGridImageView
+            android:id="@+id/forwardedPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <HorizontalScrollView
         android:id="@+id/dyhLayout"

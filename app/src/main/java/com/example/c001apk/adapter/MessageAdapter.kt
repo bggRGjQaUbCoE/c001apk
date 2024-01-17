@@ -241,12 +241,9 @@ class MessageAdapter(
                     when (viewHolder.type) {
                         "feed" -> {
                             IntentUtil.startActivity<FeedActivity>(parent.context) {
-                                putExtra("type", "feed")
                                 putExtra("viewReply", true)
                                 putExtra("id", viewHolder.id)
                                 putExtra("rid", viewHolder.rid)
-                                putExtra("uid", viewHolder.uid)
-                                putExtra("uname", viewHolder.uname.text)
                             }
                         }
 

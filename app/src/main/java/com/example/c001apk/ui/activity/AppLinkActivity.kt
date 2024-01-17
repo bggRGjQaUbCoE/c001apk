@@ -14,10 +14,7 @@ class AppLinkActivity : MaterialActivity() {
 
         if (data.toString().startsWith("coolmarket://feed/")) {
             IntentUtil.startActivity<FeedActivity>(this) {
-                putExtra("type", "feed")
                 putExtra("id", data.toString().replace("coolmarket://feed/", ""))
-                putExtra("uid", "")
-                putExtra("uname", "")
             }
         } else {
             openLink(this, data.toString(), null)

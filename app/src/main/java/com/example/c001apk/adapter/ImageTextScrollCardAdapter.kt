@@ -50,10 +50,7 @@ class ImageTextScrollCardAdapter(
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener {
             IntentUtil.startActivity<FeedActivity>(parent.context) {
-                putExtra("type", "feedArticle")
                 putExtra("id", viewHolder.id)
-                putExtra("uid", viewHolder.uid)
-                putExtra("uname", viewHolder.uname)
             }
             if (PrefManager.isRecordHistory)
                 HistoryUtil.saveHistory(

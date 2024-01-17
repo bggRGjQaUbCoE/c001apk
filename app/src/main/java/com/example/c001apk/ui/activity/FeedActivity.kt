@@ -19,11 +19,11 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.type = intent.getStringExtra("type")
+        //viewModel.type = intent.getStringExtra("type")
         viewModel.id = intent.getStringExtra("id")
         viewModel.rid = intent.getStringExtra("rid")
-        viewModel.uid = intent.getStringExtra("uid")
-        viewModel.uname = intent.getStringExtra("uname")
+        //viewModel.uid = intent.getStringExtra("uid")
+        //viewModel.uname = intent.getStringExtra("uname")
         if (viewModel.isViewReply == null)
             viewModel.isViewReply = intent.getBooleanExtra("viewReply", false)
 

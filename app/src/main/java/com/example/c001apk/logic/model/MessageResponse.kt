@@ -56,6 +56,7 @@ data class MessageResponse(
 
     data class ForwardSourceFeed(
         val entityType: String,
+        val feedType: String,
         val id: String,
         val username: String,
         val uid: String,

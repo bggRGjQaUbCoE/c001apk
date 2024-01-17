@@ -90,10 +90,7 @@ class BHistoryAdapter(
                 val viewHolder = HistoryViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", "feed")
                         putExtra("id", viewHolder.id)
-                        putExtra("uid", viewHolder.uid)
-                        putExtra("uname", viewHolder.uname.text)
                     }
                 }
                 viewHolder.itemView.setOnLongClickListener {

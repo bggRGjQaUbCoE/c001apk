@@ -140,6 +140,10 @@ class AppAdapter(
         val linearAdapterLayout: LinearAdapterLayout = view.findViewById(R.id.linearAdapterLayout)
         val expand: ImageButton = view.findViewById(R.id.expand)
         val hotReply: TextView = view.findViewById(R.id.hotReply)
+        val forwarded: LinearLayout = view.findViewById(R.id.forwarded)
+        val forwardedMess: LinkTextView = view.findViewById(R.id.forwardedMess)
+        val forwardedPic: NineGridImageView = view.findViewById(R.id.forwardedPic)
+        var forwardedId: String? = null
     }
 
     class ImageTextScrollCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -269,10 +273,7 @@ class AppAdapter(
                 val viewHolder = FeedViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", viewHolder.feedType)
                         putExtra("id", viewHolder.id)
-                        putExtra("uid", viewHolder.uid)
-                        putExtra("uname", viewHolder.uname.text)
                     }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
@@ -287,10 +288,7 @@ class AppAdapter(
                 }
                 viewHolder.reply.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", viewHolder.feedType)
                         putExtra("id", viewHolder.id)
-                        putExtra("uid", viewHolder.uid)
-                        putExtra("uname", viewHolder.uname.text)
                         putExtra("viewReply", true)
                     }
                     if (PrefManager.isRecordHistory)
@@ -306,10 +304,7 @@ class AppAdapter(
                 }
                 viewHolder.hotReply.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", viewHolder.feedType)
                         putExtra("id", viewHolder.id)
-                        putExtra("uid", viewHolder.uid)
-                        putExtra("uname", viewHolder.uname.text)
                         putExtra("viewReply", true)
                     }
                     if (PrefManager.isRecordHistory)
@@ -355,9 +350,24 @@ class AppAdapter(
                         }
                     }
                 }
-                viewHolder.multiImage.apply {
-                    appListener = this@AppAdapter.appListener
+
+                viewHolder.multiImage.appListener = this@AppAdapter.appListener
+
+                viewHolder.forwardedPic.appListener = this@AppAdapter.appListener
+
+                viewHolder.forwarded.setOnClickListener {
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("id", viewHolder.forwardedId)
+                    }
                 }
+
+                viewHolder.forwarded.setOnLongClickListener {
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.forwardedMess.text.toString())
+                    }
+                    true
+                }
+
                 viewHolder.expand.setOnClickListener {
                     entityType = "feed"
                     fid = viewHolder.id
@@ -454,10 +464,7 @@ class AppAdapter(
                 val viewHolder = FeedVoteViewHolder(view)
                 viewHolder.itemView.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", viewHolder.feedType)
                         putExtra("id", viewHolder.id)
-                        putExtra("uid", viewHolder.uid)
-                        putExtra("uname", viewHolder.uname.text)
                     }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
@@ -522,10 +529,7 @@ class AppAdapter(
                 }
                 viewHolder.feed.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", "feed")
                         putExtra("id", viewHolder.feedId)
-                        putExtra("uid", viewHolder.feedUid)
-                        putExtra("uname", viewHolder.feedUname.text)
                     }
                     if (PrefManager.isRecordHistory)
                         HistoryUtil.saveHistory(
@@ -1434,6 +1438,48 @@ class AppAdapter(
                     SpannableStringBuilderUtil.isReturn = true
                 } else
                     holder.hotReply.visibility = View.GONE
+
+                if (feed.forwardSourceFeed != null) {
+                    holder.forwardedId = feed.forwardSourceFeed.id
+                    holder.forwarded.visibility = View.VISIBLE
+                    val forwardedMess =
+                        "<a class=\"feed-link-uname\" href=\"/u/${feed.forwardSourceFeed.uid}\">@${feed.forwardSourceFeed.username}</a>: ${feed.forwardSourceFeed.message}"
+                    holder.forwardedMess.movementMethod =
+                        LinkTextView.LocalLinkMovementMethod.getInstance()
+                    holder.forwardedMess.text = SpannableStringBuilderUtil.setText(
+                        mContext,
+                        forwardedMess,
+                        (holder.forwardedMess.textSize * 1.3).toInt(),
+                        feed.forwardSourceFeed.picArr
+                    )
+                    if (!feed.forwardSourceFeed.picArr.isNullOrEmpty()) {
+                        holder.forwardedPic.visibility = View.VISIBLE
+                        if (feed.forwardSourceFeed.picArr.size == 1 || feed.forwardSourceFeed.feedType == "feedArticle") {
+                            val from = feed.forwardSourceFeed.pic.lastIndexOf("@")
+                            val middle = feed.forwardSourceFeed.pic.lastIndexOf("x")
+                            val end = feed.forwardSourceFeed.pic.lastIndexOf(".")
+                            if (from != -1 && middle != -1 && end != -1) {
+                                val width =
+                                    feed.forwardSourceFeed.pic.substring(from + 1, middle).toInt()
+                                val height =
+                                    feed.forwardSourceFeed.pic.substring(middle + 1, end).toInt()
+                                holder.forwardedPic.imgHeight = height
+                                holder.forwardedPic.imgWidth = width
+                            }
+                        }
+                        holder.forwardedPic.apply {
+                            val urlList: MutableList<String> = ArrayList()
+                            if (feed.forwardSourceFeed.feedType == "feedArticle" && imgWidth > imgHeight)
+                                urlList.add("${feed.forwardSourceFeed.pic}.s.jpg")
+                            else
+                                for (element in feed.forwardSourceFeed.picArr)
+                                    urlList.add("$element.s.jpg")
+                            setUrlList(urlList)
+                        }
+                    } else
+                        holder.forwardedPic.visibility = View.GONE
+                } else
+                    holder.forwarded.visibility = View.GONE
 
                 if (feed.targetRow?.id == null && feed.relationRows.isNullOrEmpty())
                     holder.dyhLayout.visibility = View.GONE

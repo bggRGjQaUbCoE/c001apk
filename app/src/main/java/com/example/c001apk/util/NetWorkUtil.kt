@@ -50,7 +50,6 @@ object NetWorkUtil {
                 replace.substring(6, replace.indexOf("?shareKey"))
             else replace.replace("/feed/", "")
             IntentUtil.startActivity<FeedActivity>(context) {
-                putExtra("type", "feed")
                 putExtra("id", id)
             }
         } else if (replace.startsWith("#/feed/")) {

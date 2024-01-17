@@ -105,30 +105,21 @@ class MessageContentAdapter(
                 viewHolder.itemView.setOnClickListener {
                     if (viewHolder.entityType == "feed") {
                         IntentUtil.startActivity<FeedActivity>(parent.context) {
-                            putExtra("type", "feed")
                             putExtra("id", viewHolder.id)
-                            putExtra("uid", viewHolder.uid)
-                            putExtra("uname", viewHolder.uname.text)
                         }
                     }
                 }
                 viewHolder.forward.setOnClickListener {
                     if (viewHolder.forwardEntityType == "feed") {
                         IntentUtil.startActivity<FeedActivity>(parent.context) {
-                            putExtra("type", "feed")
                             putExtra("id", viewHolder.forwardId)
-                            putExtra("uid", viewHolder.forwardUid)
-                            putExtra("uname", viewHolder.forwardUname)
                         }
                     }
                 }
                 viewHolder.forwardMessage.setOnClickListener {
                     if (viewHolder.forwardEntityType == "feed") {
                         IntentUtil.startActivity<FeedActivity>(parent.context) {
-                            putExtra("type", "feed")
                             putExtra("id", viewHolder.forwardId)
-                            putExtra("uid", viewHolder.forwardUid)
-                            putExtra("uname", viewHolder.forwardUname)
                         }
                     }
                 }
@@ -153,10 +144,7 @@ class MessageContentAdapter(
                 }
                 viewHolder.forward1.setOnClickListener {
                     IntentUtil.startActivity<FeedActivity>(parent.context) {
-                        putExtra("type", "feed")
                         putExtra("id", viewHolder.forwardId1)
-                        putExtra("uid", viewHolder.forwardUid1)
-                        putExtra("uname", viewHolder.forwardUname1.text)
                     }
                 }
                 viewHolder

@@ -6,7 +6,6 @@ import android.text.TextPaint
 import android.text.style.ClickableSpan
 import android.view.View
 import androidx.appcompat.widget.ThemeUtils
-import com.example.c001apk.ui.fragment.minterface.IOnShowMoreReplyContainer
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.http2https
@@ -32,10 +31,7 @@ internal class MyURLSpan(
         if (mUrl == "") {
             return
         } else if (mUrl.contains("/feed/replyList")) {
-            if (isReturn)
-                return
-            val id = mUrl.replace("/feed/replyList?id=", "")
-            IOnShowMoreReplyContainer.controller?.onShowMoreReply(position, uid, id)
+            return
         } else if (mUrl.contains("image.coolapk.com")) {
             if (imgList == null) {
                 ImageUtil.startBigImgViewSimple(mContext, mUrl.http2https())

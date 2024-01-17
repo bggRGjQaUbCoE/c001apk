@@ -558,10 +558,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
         type: String
     ) {
         IntentUtil.startActivity<FeedActivity>(requireContext()) {
-            putExtra("type", "feed")
             putExtra("id", id)
-            putExtra("uid", uid)
-            putExtra("uname", uname)
         }
     }
 

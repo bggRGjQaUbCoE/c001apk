@@ -30,6 +30,7 @@ import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
+import com.example.c001apk.ui.activity.FeedActivity
 import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.AppListener
@@ -175,6 +176,10 @@ class FeedAdapter(
         val extraUrlLayout: ConstraintLayout = view.findViewById(R.id.extraUrlLayout)
         val extraTitle: TextView = view.findViewById(R.id.extraTitle)
         val extraUrl: TextView = view.findViewById(R.id.extraUrl)
+        val forwarded: LinearLayout = view.findViewById(R.id.forwarded)
+        val forwardedMess: LinkTextView = view.findViewById(R.id.forwardedMess)
+        val forwardedPic: NineGridImageView = view.findViewById(R.id.forwardedPic)
+        var forwardedId: String? = null
     }
 
     class TopViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -356,9 +361,24 @@ class FeedAdapter(
                         }
                     }
                 }
-                viewHolder.multiImage.apply {
-                    appListener = this@FeedAdapter.appListener
+
+                viewHolder.multiImage.appListener = this@FeedAdapter.appListener
+
+                viewHolder.forwardedPic.appListener = this@FeedAdapter.appListener
+
+                viewHolder.forwarded.setOnClickListener {
+                    IntentUtil.startActivity<FeedActivity>(parent.context) {
+                        putExtra("id", viewHolder.forwardedId)
+                    }
                 }
+
+                viewHolder.forwarded.setOnLongClickListener {
+                    IntentUtil.startActivity<CopyActivity>(parent.context) {
+                        putExtra("text", viewHolder.forwardedMess.text.toString())
+                    }
+                    true
+                }
+
                 viewHolder.follow.visibility =
                     if (PrefManager.isLogin) View.VISIBLE
                     else View.GONE
@@ -750,6 +770,51 @@ class FeedAdapter(
                             null
                         )
                     }
+
+                    if (feed.data?.forwardSourceFeed != null) {
+                        holder.forwardedId = feed.data.forwardSourceFeed.id
+                        holder.forwarded.visibility = View.VISIBLE
+                        holder.forwarded.background = mContext.getDrawable(R.drawable.selector_bg_12_feed)
+                        val forwardedMess =
+                            "<a class=\"feed-link-uname\" href=\"/u/${feed.data.forwardSourceFeed.uid}\">@${feed.data.forwardSourceFeed.username}</a>: ${feed.data.forwardSourceFeed.message}"
+                        holder.forwardedMess.movementMethod =
+                            LinkTextView.LocalLinkMovementMethod.getInstance()
+                        holder.forwardedMess.text = SpannableStringBuilderUtil.setText(
+                            mContext,
+                            forwardedMess,
+                            (holder.forwardedMess.textSize * 1.3).toInt(),
+                            feed.data.forwardSourceFeed.picArr
+                        )
+                        if (!feed.data.forwardSourceFeed.picArr.isNullOrEmpty()) {
+                            holder.forwardedPic.visibility = View.VISIBLE
+                            if (feed.data.forwardSourceFeed.picArr.size == 1 || feed.data.forwardSourceFeed.feedType == "feedArticle") {
+                                val from = feed.data.forwardSourceFeed.pic.lastIndexOf("@")
+                                val middle = feed.data.forwardSourceFeed.pic.lastIndexOf("x")
+                                val end = feed.data.forwardSourceFeed.pic.lastIndexOf(".")
+                                if (from != -1 && middle != -1 && end != -1) {
+                                    val width =
+                                        feed.data.forwardSourceFeed.pic.substring(from + 1, middle)
+                                            .toInt()
+                                    val height =
+                                        feed.data.forwardSourceFeed.pic.substring(middle + 1, end)
+                                            .toInt()
+                                    holder.forwardedPic.imgHeight = height
+                                    holder.forwardedPic.imgWidth = width
+                                }
+                            }
+                            holder.forwardedPic.apply {
+                                val urlList: MutableList<String> = ArrayList()
+                                if (feed.data.forwardSourceFeed.feedType == "feedArticle" && imgWidth > imgHeight)
+                                    urlList.add("${feed.data.forwardSourceFeed.pic}.s.jpg")
+                                else
+                                    for (element in feed.data.forwardSourceFeed.picArr)
+                                        urlList.add("$element.s.jpg")
+                                setUrlList(urlList)
+                            }
+                        } else
+                            holder.forwardedPic.visibility = View.GONE
+                    } else
+                        holder.forwarded.visibility = View.GONE
 
                     if (!feed.data?.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
