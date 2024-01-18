@@ -31,7 +31,6 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
         val recyclerView =
             super.onCreateRecyclerView(inflater, parent, savedInstanceState)
         recyclerView.apply {
-            //overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             isVerticalScrollBarEnabled = false
         }
         return recyclerView

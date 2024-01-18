@@ -17,12 +17,9 @@ import com.example.c001apk.adapter.MessageContentAdapter
 import com.example.c001apk.databinding.ActivityMessageBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
-import java.lang.reflect.Method
 
 class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
 
@@ -30,8 +27,6 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
     private lateinit var mAdapter: MessageContentAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,11 +186,6 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result)
-                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
@@ -257,13 +247,6 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
         mLayoutManager = LinearLayoutManager(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager =

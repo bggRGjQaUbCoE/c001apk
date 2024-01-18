@@ -160,7 +160,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
 
     private fun search() {
         if (binding.editText.text.toString() == "") {
-            Toast.makeText(activity, "请输入关键词", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "请输入关键词", Toast.LENGTH_SHORT).show()
         } else {
             requireActivity().supportFragmentManager
                 .beginTransaction()

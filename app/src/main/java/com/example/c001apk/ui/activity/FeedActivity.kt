@@ -3,7 +3,6 @@ package com.example.c001apk.ui.activity
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding

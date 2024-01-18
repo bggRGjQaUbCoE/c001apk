@@ -22,8 +22,6 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.view.VoteItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
@@ -32,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.reflect.Method
 
 class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
@@ -42,8 +39,6 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
     private val feedFavoriteDao by lazy {
         FeedFavoriteDatabase.getDatabase(this@FeedVoteFragment.requireContext()).feedFavoriteDao()
     }
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -267,7 +262,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                             1
                         mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -287,7 +282,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                             0
                         mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -302,12 +297,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.feedContentList.isNotEmpty() && !viewModel.isEnd) {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
+                    if (viewModel.feedContentList.isNotEmpty() && !viewModel.isEnd && isAdded) {
                         val positions = mLayoutManager.findLastVisibleItemPositions(null)
                         for (pos in positions) {
                             if (pos > viewModel.lastVisibleItemPosition) {
@@ -526,12 +516,6 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
         )
         mAdapter.setAppListener(this)
         mLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
-        // https://codeantenna.com/a/2NDTnG37Vg
-        mCheckForGapMethod = checkForGaps
-        mCheckForGapMethod.isAccessible = true
-        mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-        mMarkItemDecorInsetsDirtyMethod.isAccessible = true
 
         binding.recyclerView.apply {
             adapter = mAdapter

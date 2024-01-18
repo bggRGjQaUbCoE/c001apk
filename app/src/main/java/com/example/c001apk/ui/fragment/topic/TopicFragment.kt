@@ -228,7 +228,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
     private fun initView(tabSelected: Int?) {
         initFragmentList()
-        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) = fragmentList[position]
             override fun getItemCount() = viewModel.tabList.size

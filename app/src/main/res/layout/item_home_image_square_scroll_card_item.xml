@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/selector_bg_12">
+    android:background="@drawable/round_corners_12_win"
+    android:foreground="@drawable/selector_bg_12_trans">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageSquareScrollCard"

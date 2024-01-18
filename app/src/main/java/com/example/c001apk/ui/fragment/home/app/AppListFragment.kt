@@ -23,15 +23,12 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.UpdateListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.lang.reflect.Method
 
 class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener {
 
@@ -40,8 +37,6 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
     private lateinit var mLayoutManager: LinearLayoutManager
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -87,16 +82,11 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {}
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.appList.isNotEmpty()) {
+                if (viewModel.appList.isNotEmpty() && isAdded) {
                     if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         viewModel.firstCompletelyVisibleItemPosition =
                             mLayoutManager.findFirstCompletelyVisibleItemPosition()
                     } else {
-                        val result =
-                            mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                        if (result)
-                            mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                         val positions = sLayoutManager.findFirstCompletelyVisibleItemPositions(null)
                         for (pos in positions) {
                             if (pos < viewModel.firstCompletelyVisibleItemPosition) {
@@ -133,16 +123,9 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
     @SuppressLint("NotifyDataSetChanged")
     private fun initView() {
         mAdapter = AppListAdapter(viewModel.appList)
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
         binding.recyclerView.apply {
             itemAnimator = null
             adapter = mAdapter
@@ -207,8 +190,8 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             refreshData()
         } else {
-            binding.recyclerView.smoothScrollToPosition(0)
-            //refreshData()
+            viewModel.firstCompletelyVisibleItemPosition = 0
+            binding.recyclerView.scrollToPosition(0)
         }
     }
 

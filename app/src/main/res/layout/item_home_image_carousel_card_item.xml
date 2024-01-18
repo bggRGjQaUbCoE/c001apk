@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:foreground="@drawable/selector_bg_12_carousel">
+    android:foreground="@drawable/selector_bg_12_trans">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageCarouselCard"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/cover"
         android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="H, 3:1"
         app:layout_constraintStart_toStartOf="parent"

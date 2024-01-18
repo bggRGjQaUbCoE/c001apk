@@ -15,12 +15,9 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.databinding.FragmentCollectionBinding
 import com.example.c001apk.ui.fragment.minterface.AppListener
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
-import java.lang.reflect.Method
 
 class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListener {
 
@@ -28,8 +25,6 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -158,16 +153,9 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
     private fun initView() {
         mAdapter = AppAdapter(requireContext(), viewModel.dataList)
         mAdapter.setAppListener(this)
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager =
@@ -219,16 +207,11 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.dataList.isNotEmpty() && !viewModel.isEnd) {
+                    if (viewModel.dataList.isNotEmpty() && !viewModel.isEnd && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result)
-                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {

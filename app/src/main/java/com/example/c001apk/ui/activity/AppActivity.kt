@@ -130,7 +130,6 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
     private fun initView() {
         initFragmentList()
-        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment = fragmentList[position]
             override fun getItemCount() = viewModel.tabList.size

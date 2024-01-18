@@ -154,4 +154,16 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="ThemeOverlay.MaterialAlertDialog.Rounded" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.Rounded</item>
+    </style>
+
+    <style name="MaterialAlertDialog.Rounded" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="shapeAppearance">@style/ShapeAppearance.MaterialAlertDialog.Rounded</item>
+    </style>
+
+    <style name="ShapeAppearance.MaterialAlertDialog.Rounded" parent="">
+        <item name="cornerSize">12dp</item>
+    </style>
+
 </resources>

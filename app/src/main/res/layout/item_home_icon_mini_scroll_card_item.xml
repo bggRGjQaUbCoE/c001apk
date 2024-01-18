@@ -5,7 +5,8 @@
     android:id="@+id/parentLayout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/selector_bg_20"
+    android:background="@drawable/round_corners_20_win"
+    android:foreground="@drawable/selector_bg_20_trans"
     android:padding="5dp">
 
     <com.google.android.material.imageview.ShapeableImageView

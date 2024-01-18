@@ -957,7 +957,6 @@ class AppAdapter(
                     holder.message.visibility = View.VISIBLE
                     holder.message.movementMethod =
                         LinkTextView.LocalLinkMovementMethod.getInstance()
-                    holder.message.highlightColor = Color.TRANSPARENT
                     holder.message.text = SpannableStringBuilderUtil.setText(
                         mContext,
                         feed.message,
@@ -1380,7 +1379,6 @@ class AppAdapter(
                     )
 
                 holder.message.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
-                holder.message.highlightColor = Color.TRANSPARENT
                 holder.message.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     feed.message,

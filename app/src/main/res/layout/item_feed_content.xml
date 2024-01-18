@@ -189,21 +189,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:background="@drawable/selector_bg_12_feed"
+        android:background="@drawable/round_corners_12"
         android:clickable="true"
         android:focusable="true"
+        android:foreground="@drawable/selector_bg_12_trans"
         android:padding="7dp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/multiImage">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/cover"
+            android:id="@+id/extraPic"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="?attr/colorPrimary"
-            android:src="@drawable/ic_link"
-            android:tint="@color/wb"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1"
             app:layout_constraintStart_toStartOf="parent"
@@ -219,7 +217,7 @@
             android:maxLines="1"
             android:singleLine="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/cover"
+            app:layout_constraintStart_toEndOf="@id/extraPic"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -232,7 +230,7 @@
             android:maxLines="1"
             android:singleLine="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/cover"
+            app:layout_constraintStart_toEndOf="@id/extraPic"
             app:layout_constraintTop_toBottomOf="@id/extraTitle" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -242,7 +240,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:background="@drawable/round_corners_12"
-        android:foreground="@drawable/selector_bg_12_carousel"
+        android:foreground="@drawable/selector_bg_12_trans"
         android:orientation="vertical"
         android:padding="7dp"
         android:visibility="gone"

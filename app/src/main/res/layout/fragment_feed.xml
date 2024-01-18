@@ -225,15 +225,9 @@
         android:visibility="gone"
         tools:ignore="ContentDescription" />
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
+    <include
         android:id="@+id/indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@drawable/text_scroll_bg"
-        android:indeterminate="false"
-        android:padding="5dp"
-        android:visibility="gone" />
+        layout="@layout/item_indicator" />
 
     <include
         android:id="@+id/errorMessage"

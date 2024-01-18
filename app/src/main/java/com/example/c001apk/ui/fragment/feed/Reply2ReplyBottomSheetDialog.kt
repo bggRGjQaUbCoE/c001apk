@@ -26,15 +26,12 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import java.lang.reflect.Method
 import java.net.URLDecoder
 
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
@@ -47,8 +44,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         fun newInstance(
@@ -204,7 +199,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -222,7 +217,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -239,7 +234,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         if (response.data.messageStatus == 1 || response.data.messageStatus == 2) {
                             bottomSheetDialog.editText.text = null
                             if (response.data.messageStatus == 1)
-                                Toast.makeText(activity, "回复成功", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT).show()
                             bottomSheetDialog.cancel()
                             viewModel.replyTotalList.add(
                                 viewModel.r2rPosition + 1,
@@ -267,7 +262,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                             mAdapter.notifyItemInserted(viewModel.r2rPosition + 1)
                         }
                     } else {
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -306,16 +301,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.replyTotalList.isNotEmpty() && !viewModel.isEnd)
+                    if (viewModel.replyTotalList.isNotEmpty() && !viewModel.isEnd && isAdded)
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result)
-                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
@@ -367,17 +357,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                 viewModel.position,
                 viewModel.replyTotalList
             )
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         mAdapter.setAppListener(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager =
@@ -422,7 +405,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     ) {
         if (PrefManager.isLogin) {
             if (PrefManager.SZLMID == "") {
-                Toast.makeText(activity, "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
             } else {
                 viewModel.rPosition = rPosition
                 r2rPosition?.let { viewModel.r2rPosition = r2rPosition }

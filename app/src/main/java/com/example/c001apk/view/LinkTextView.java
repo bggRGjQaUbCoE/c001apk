@@ -1,6 +1,7 @@
 package com.example.c001apk.view;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
@@ -15,6 +16,11 @@ import android.widget.TextView;
 
 //https://stackoverflow.com/questions/8558732
 public class LinkTextView extends rikka.material.widget.FakeFontWeightMaterialTextView {
+
+    @Override
+    public int getHighlightColor() {
+        return Color.TRANSPARENT;
+    }
 
     boolean dontConsumeNonUrlClicks = true;
     boolean linkHit;

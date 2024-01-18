@@ -18,13 +18,10 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
-import java.lang.reflect.Method
 
 class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IOnTabClickListener {
 
@@ -32,8 +29,6 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -174,16 +169,9 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
     private fun initView() {
         mAdapter = AppAdapter(requireContext(), viewModel.appCommentList)
         mAdapter.setAppListener(this)
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager =
@@ -225,17 +213,13 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.appCommentList.isNotEmpty()) {
+                    if (viewModel.appCommentList.isNotEmpty() && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                             viewModel.firstCompletelyVisibleItemPosition =
                                 mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result) mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
@@ -311,7 +295,10 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()
-        } else binding.recyclerView.scrollToPosition(0)
+        } else {
+            viewModel.firstCompletelyVisibleItemPosition = 0
+            binding.recyclerView.scrollToPosition(0)
+        }
     }
 
     override fun onReload() {

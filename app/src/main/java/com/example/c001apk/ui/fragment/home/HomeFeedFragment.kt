@@ -31,8 +31,6 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
@@ -43,7 +41,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
-import java.lang.reflect.Method
 
 
 class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, IOnTabClickListener,
@@ -55,8 +52,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     companion object {
         @JvmStatic
@@ -275,7 +270,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                         viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -294,7 +289,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                         viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -308,12 +303,12 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 val response = result.getOrNull()
                 if (response != null) {
                     if (response.id != null) {
-                        Toast.makeText(activity, "发布成功", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "发布成功", Toast.LENGTH_SHORT).show()
                         bottomSheetDialog.editText.text = null
                         bottomSheetDialog.dismiss()
                     } else {
                         response.message?.let {
-                            Toast.makeText(activity, it, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
                         }
                         if (response.messageStatus == "err_request_captcha") {
                             viewModel.isGetCaptcha = true
@@ -322,7 +317,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                         }
                     }
                 } else {
-                    Toast.makeText(activity, "response is null", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "response is null", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -372,7 +367,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 val response = result.getOrNull()
                 response?.let {
                     if (response.data != null) {
-                        Toast.makeText(activity, response.data, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
                         if (response.data == "验证通过") {
                             viewModel.isCreateFeed = true
                             bottomSheetDialog.editText.text = null
@@ -380,7 +375,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                             //viewModel.postCreateFeed()
                         }
                     } else if (response.message != null) {
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                         if (response.message == "请输入正确的图形验证码") {
                             viewModel.isGetCaptcha = true
                             viewModel.timeStamp = System.currentTimeMillis() / 1000
@@ -449,7 +444,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             }
             binding.fab.setOnClickListener {
                 if (PrefManager.SZLMID == "") {
-                    Toast.makeText(activity, "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
                 } else {
                     bottomSheetDialog.show()
                 }
@@ -464,18 +459,13 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.homeFeedList.isNotEmpty()) {
+                    if (viewModel.homeFeedList.isNotEmpty() && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                             viewModel.firstCompletelyVisibleItemPosition =
                                 mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result)
-                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
@@ -607,16 +597,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
     private fun initView() {
         mAdapter = AppAdapter(requireContext(), viewModel.homeFeedList)
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
 
         mAdapter.setAppListener(this)
         binding.recyclerView.apply {
@@ -695,6 +677,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 binding.swipeRefresh.isRefreshing = true
                 refreshData()
             } else {
+                viewModel.firstCompletelyVisibleItemPosition = 0
                 binding.recyclerView.scrollToPosition(0)
                 binding.swipeRefresh.isRefreshing = true
                 refreshData()

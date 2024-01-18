@@ -138,7 +138,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             val newMode = (newValue as String).toInt()
             if (PrefManager.darkTheme != newMode) {
                 AppCompatDelegate.setDefaultNightMode(newMode)
-                activity?.recreate()
             }
             true
         }

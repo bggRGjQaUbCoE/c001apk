@@ -227,7 +227,7 @@ class NineGridImageView @JvmOverloads constructor(
                     strokeWidth = 1.dp.toFloat()
                     strokeColor = context.getColorStateList(R.color.cover)
                     setBackgroundColor(context.getColor(R.color.cover))
-                    foreground = context.getDrawable(R.drawable.selector_bg_12_carousel)
+                    foreground = context.getDrawable(R.drawable.selector_bg_12_trans)
                     if (ResourceUtils.isNightMode(context.resources.configuration)
                         && PrefManager.isColorFilter
                     )

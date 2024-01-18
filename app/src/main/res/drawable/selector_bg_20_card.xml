@@ -1,9 +1,0 @@
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?colorControlHighlight">
-    <item>
-        <shape>
-            <corners android:radius="20dp" />
-            <solid android:color="@color/home_card_background_color" />
-        </shape>
-    </item>
-</ripple>

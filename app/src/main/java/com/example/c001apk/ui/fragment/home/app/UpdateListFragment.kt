@@ -47,7 +47,7 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
 
     private fun initView() {
         mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate, viewModel, this.requireActivity())
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager

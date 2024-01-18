@@ -134,23 +134,8 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
         findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows = false
         findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows = false
 
-
-        /*val decorView = requireActivity().window.decorView
-        decorView.viewTreeObserver.addOnGlobalLayoutListener {
-            val rect = Rect()
-            decorView.getWindowVisibleDisplayFrame(rect)
-            val height = decorView.height - rect.bottom
-            if (realKeyboardHeight == 0 && height != 0) {
-                realKeyboardHeight = height
-                emojiPanel.layoutParams.height = realKeyboardHeight
-            } else if (realKeyboardHeight == 0) {
-                emojiPanel.layoutParams.height = -2
-            }
-        }*/
-
         emotion.setOnClickListener {
             if (emojiPanel.visibility != View.VISIBLE) {
-                //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                 emojiPanel.visibility = View.VISIBLE
                 indicator.visibility = View.VISIBLE
                 val keyboard =
@@ -161,9 +146,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                     ContextCompat.getColor(context, android.R.color.darker_gray)
                 )
                 emotion.setImageDrawable(drawableKeyboard)
-                //imm.hideSoftInputFromWindow(view.windowToken, 0)
             } else {
-                //requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                 emojiPanel.visibility = View.GONE
                 indicator.visibility = View.GONE
                 val face = ContextCompat.getDrawable(context, R.drawable.ic_face)
@@ -173,7 +156,6 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                     ContextCompat.getColor(context, android.R.color.darker_gray)
                 )
                 emotion.setImageDrawable(drawableFace)
-                //imm.showSoftInput(editText, 0)
             }
         }
 

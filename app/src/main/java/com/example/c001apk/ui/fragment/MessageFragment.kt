@@ -28,13 +28,10 @@ import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.lang.reflect.Method
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -45,8 +42,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
     private lateinit var mAdapter: MessageAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -232,16 +227,11 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.messageList.isNotEmpty() && !viewModel.isEnd) {
+                    if (viewModel.messageList.isNotEmpty() && !viewModel.isEnd && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result)
-                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
@@ -289,17 +279,10 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             viewModel.messCountList,
             viewModel.messageList
         )
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         mAdapter.setIOnNotiLongClickListener(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager =

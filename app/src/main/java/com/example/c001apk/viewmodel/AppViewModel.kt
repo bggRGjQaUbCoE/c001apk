@@ -88,9 +88,9 @@ class AppViewModel : ViewModel() {
     var type: String? = null //feed reply
 
     var rPosition: Int? = null
-    var firstVisibleItemPosition = -1
-    var firstCompletelyVisibleItemPosition = -1
-    var lastVisibleItemPosition = -1
+    var firstVisibleItemPosition = 0
+    var firstCompletelyVisibleItemPosition = 0
+    var lastVisibleItemPosition = 0
     var likeReplyPosition = -1
 
     val feedContentList = ArrayList<FeedContentResponse>()

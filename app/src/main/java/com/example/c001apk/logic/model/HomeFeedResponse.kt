@@ -25,6 +25,7 @@ data class HomeFeedResponse(
         val likeTime: Long?,
         @SerializedName("extra_title") val extraTitle: String?,
         @SerializedName("extra_url") val extraUrl: String?,
+        @SerializedName("extra_pic") val extraPic: String?,
         val feedTypeName: String?,
         val vote: Vote?,
         @SerializedName("message_cover") val messageCover: String?,

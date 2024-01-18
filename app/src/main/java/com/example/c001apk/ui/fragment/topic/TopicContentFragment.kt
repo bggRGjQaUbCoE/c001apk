@@ -21,13 +21,10 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.RecyclerView.checkForGaps
-import com.example.c001apk.util.RecyclerView.markItemDecorInsetsDirty
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.viewmodel.AppViewModel
-import java.lang.reflect.Method
 
 class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener,
     IOnSearchMenuClickListener, IOnTabClickListener {
@@ -36,8 +33,6 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private lateinit var mCheckForGapMethod: Method
-    private lateinit var mMarkItemDecorInsetsDirtyMethod: Method
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,7 +171,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -195,7 +191,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                         viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -210,18 +207,13 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.topicDataList.isNotEmpty()) {
+                    if (viewModel.topicDataList.isNotEmpty() && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                             viewModel.firstCompletelyVisibleItemPosition =
                                 mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
-                            val result =
-                                mCheckForGapMethod.invoke(binding.recyclerView.layoutManager) as Boolean
-                            if (result)
-                                mMarkItemDecorInsetsDirtyMethod.invoke(binding.recyclerView)
-
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
@@ -269,16 +261,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     private fun initView() {
         mAdapter = AppAdapter(requireContext(), viewModel.topicDataList)
         mAdapter.setAppListener(this)
-        mLayoutManager = LinearLayoutManager(activity)
+        mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // https://codeantenna.com/a/2NDTnG37Vg
-            mCheckForGapMethod = checkForGaps
-            mCheckForGapMethod.isAccessible = true
-            mMarkItemDecorInsetsDirtyMethod = markItemDecorInsetsDirty
-            mMarkItemDecorInsetsDirtyMethod.isAccessible = true
-        }
 
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -373,8 +357,10 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()
-        } else
+        } else {
+            viewModel.firstCompletelyVisibleItemPosition = 0
             binding.recyclerView.scrollToPosition(0)
+        }
     }
 
     override fun onReload() {

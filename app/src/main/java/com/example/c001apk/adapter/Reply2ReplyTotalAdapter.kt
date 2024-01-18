@@ -270,14 +270,14 @@ class Reply2ReplyTotalAdapter(
                         } else {
                             it.background = mContext.getDrawable(R.drawable.text_card_bg)
                         }
-                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_carousel)
+                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_trans)
                     } else {
                         if (position == 0) {
                             it.setBackgroundColor(Color.TRANSPARENT)
                         } else {
                             it.setBackgroundColor(mContext.getColor(R.color.home_card_background_color))
                         }
-                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_carousel)
+                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_trans)
                     }
                 }
 

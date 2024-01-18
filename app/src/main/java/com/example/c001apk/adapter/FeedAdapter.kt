@@ -2,6 +2,7 @@ package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -110,15 +111,13 @@ class FeedAdapter(
     }
 
     class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val imageView: NineGridImageView =
-            view.findViewById(R.id.imageView)
+        val imageView: NineGridImageView = view.findViewById(R.id.imageView)
         val description: TextView = view.findViewById(R.id.description)
     }
 
     class UrlViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var url = ""
-        val shareUrl: MaterialCardView =
-            view.findViewById(R.id.shareUrl)
+        val shareUrl: MaterialCardView = view.findViewById(R.id.shareUrl)
         val urlTitle: TextView = view.findViewById(R.id.urlTitle)
     }
 
@@ -174,6 +173,7 @@ class FeedAdapter(
         val rightOption: Button = view.findViewById(R.id.rightOption)
         val voteOptions: LinearAdapterLayout = view.findViewById(R.id.voteOptions)
         val extraUrlLayout: ConstraintLayout = view.findViewById(R.id.extraUrlLayout)
+        val extraPic: ShapeableImageView = view.findViewById(R.id.extraPic)
         val extraTitle: TextView = view.findViewById(R.id.extraTitle)
         val extraUrl: TextView = view.findViewById(R.id.extraUrl)
         val forwarded: LinearLayout = view.findViewById(R.id.forwarded)
@@ -534,8 +534,7 @@ class FeedAdapter(
                         val index =
                             if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
                             else position - 2
-                        (holder as FeedContentReplyViewHolder).like.text =
-                            replyList[index].likenum
+                        (holder as FeedContentReplyViewHolder).like.text = replyList[index].likenum
                         holder.isLike = replyList[index].userAction?.like == 1
                         val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
                         drawableLike.setBounds(
@@ -572,7 +571,7 @@ class FeedAdapter(
         }
     }
 
-    @SuppressLint("SetTextI18n", "RestrictedApi")
+    @SuppressLint("SetTextI18n", "RestrictedApi", "ResourceAsColor")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
 
@@ -679,6 +678,21 @@ class FeedAdapter(
                             holder.extraUrl.text = feed.data.extraUrl
                             feed.data.extraTitle?.let {
                                 holder.extraTitle.text = it
+                            }
+                            if (!feed.data.extraPic.isNullOrEmpty()) {
+                                ImageUtil.showIMG(holder.extraPic, feed.data.extraPic)
+                            } else {
+                                holder.extraPic.apply {
+                                    setBackgroundColor(
+                                        ThemeUtils.getThemeAttrColor(
+                                            mContext,
+                                            rikka.preference.simplemenu.R.attr.colorPrimary
+                                        )
+                                    )
+                                    val link = mContext.getDrawable(R.drawable.ic_link)
+                                    link!!.setTint(mContext.getColor(R.color.wb))
+                                    setImageDrawable(link)
+                                }
                             }
                         }
                     } else holder.extraUrlLayout.visibility = View.GONE
@@ -1015,8 +1029,8 @@ class FeedAdapter(
             is TextViewHolder -> {
                 val item = articleList[position]
                 holder.textView.visibility = View.VISIBLE
-                holder.textView.movementMethod =
-                    LinkMovementMethod.getInstance()
+                holder.textView.highlightColor = Color.TRANSPARENT
+                holder.textView.movementMethod = LinkMovementMethod.getInstance()
                 holder.textView.text = SpannableStringBuilderUtil.setText(
                     mContext,
                     item.message.toString(),
@@ -1032,17 +1046,12 @@ class FeedAdapter(
                 holder.imageView.visibility = View.VISIBLE
                 val urlList = ArrayList<String>()
                 urlList.add("${item.url}.s.jpg")
-                val from =
-                    item.url!!.lastIndexOf("@")
-                val middle =
-                    item.url.lastIndexOf("x")
-                val end =
-                    item.url.lastIndexOf(".")
+                val from = item.url!!.lastIndexOf("@")
+                val middle = item.url.lastIndexOf("x")
+                val end = item.url.lastIndexOf(".")
                 if (from != -1 && middle != -1 && end != -1) {
-                    val width =
-                        item.url.substring(from + 1, middle).toInt()
-                    val height =
-                        item.url.substring(middle + 1, end).toInt()
+                    val width = item.url.substring(from + 1, middle).toInt()
+                    val height = item.url.substring(middle + 1, end).toInt()
                     holder.imageView.imgHeight = height
                     holder.imageView.imgWidth = width
                 }
@@ -1073,10 +1082,10 @@ class FeedAdapter(
                     holder.itemView.also {
                         if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
                             it.background = mContext.getDrawable(R.drawable.text_card_bg)
-                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_carousel)
+                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_trans)
                             holder.replyLayout.setCardBackgroundColor(mContext.getColor(R.color.reply2reply_card_background_color))
                         } else {
-                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_carousel)
+                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_trans)
                             holder.replyLayout.setCardBackgroundColor(mContext.getColor(R.color.home_card_background_color))
                         }
                     }
@@ -1285,8 +1294,7 @@ class FeedAdapter(
                                         id = replyData.id
                                         uid = replyData.uid
                                         ruid = reply.uid
-                                        this@FeedAdapter.position =
-                                            holder.bindingAdapterPosition
+                                        this@FeedAdapter.position = holder.bindingAdapterPosition
                                         this@FeedAdapter.rPosition = position1
                                         val popup = PopupMenu(mContext, it)
                                         val inflater = popup.menuInflater

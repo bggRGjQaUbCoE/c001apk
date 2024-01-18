@@ -137,7 +137,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
 
     private fun initView() {
         initFragmentList()
-        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment {
                 return fragmentList[position]
