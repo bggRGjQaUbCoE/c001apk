@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,7 +32,6 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onResume() {
         super.onResume()
@@ -306,28 +304,20 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     }
 
     private fun initView() {
-        initFragmentList()
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = fragmentList[position]
+            override fun createFragment(position: Int) =
+                TopicContentFragment.newInstance(
+                    viewModel.topicList[position].url,
+                    viewModel.topicList[position].title,
+                    false
+                )
+
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
     }
-
-    private fun initFragmentList() {
-        for (element in viewModel.topicList) {
-            fragmentList.add(
-                TopicContentFragment.newInstance(
-                    element.url,
-                    element.title,
-                    false
-                )
-            )
-        }
-    }
-
 
     private fun initData() {
         if (viewModel.carouselList.isEmpty()) {

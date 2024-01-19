@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,7 +32,6 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
     private lateinit var mAdapter: AppAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -244,11 +242,23 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
     }
 
     private fun initViewPager() {
-        initFragmentList()
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int): Fragment {
-                return fragmentList[position]
-            }
+            override fun createFragment(position: Int) =
+                if (viewModel.type == "follow") {
+                    when (position) {
+                        0 -> FollowFragment.newInstance("follow")
+                        1 -> FollowFragment.newInstance("topic")
+                        2 -> FollowFragment.newInstance("product")
+                        3 -> FollowFragment.newInstance("apk")
+                        else -> throw IllegalArgumentException()
+                    }
+                } else {
+                    when (position) {
+                        0 -> FollowFragment.newInstance("reply")
+                        1 -> FollowFragment.newInstance("replyToMe")
+                        else -> throw IllegalArgumentException()
+                    }
+                }
 
             override fun getItemCount() = viewModel.tabList.size
 
@@ -256,22 +266,6 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
-    }
-
-    private fun initFragmentList() {
-        if (viewModel.type == "follow") {
-            fragmentList.apply {
-                add(FollowFragment.newInstance("follow"))
-                add(FollowFragment.newInstance("topic"))
-                add(FollowFragment.newInstance("product"))
-                add(FollowFragment.newInstance("apk"))
-            }
-        } else if (viewModel.type == "reply") {
-            fragmentList.apply {
-                add(FollowFragment.newInstance("reply"))
-                add(FollowFragment.newInstance("replyToMe"))
-            }
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

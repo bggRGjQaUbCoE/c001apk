@@ -3,7 +3,6 @@ package com.example.c001apk.ui.fragment.search
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
@@ -23,7 +22,6 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
-    private val fragmentList: MutableList<Fragment> = ArrayList()
     private lateinit var type: MenuItem
     private lateinit var order: MenuItem
 
@@ -167,69 +165,68 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     }
 
     private fun initData() {
-        if (viewModel.pageType.isNullOrEmpty()) {
-            viewModel.tabList = arrayListOf("动态", "应用", "数码", "用户", "话题")
-            fragmentList.run {
-                add(
-                    SearchContentFragment.newInstance(
-                        viewModel.keyWord.toString(),
-                        "feed",
-                        null,
-                        null
-                    )
-                )
-                add(
-                    SearchContentFragment.newInstance(
-                        viewModel.keyWord.toString(),
-                        "apk",
-                        null,
-                        null
-                    )
-                )
-                add(
-                    SearchContentFragment.newInstance(
-                        viewModel.keyWord.toString(),
-                        "product",
-                        null,
-                        null
-                    )
-                )
-                add(
-                    SearchContentFragment.newInstance(
-                        viewModel.keyWord.toString(),
-                        "user",
-                        null,
-                        null
-                    )
-                )
-                add(
-                    SearchContentFragment.newInstance(
-                        viewModel.keyWord.toString(),
-                        "feedTopic",
-                        null,
-                        null
-                    )
-                )
+        viewModel.tabList =
+            if (viewModel.pageType.isNullOrEmpty())
+                arrayListOf("动态", "应用", "数码", "用户", "话题")
+            else {
+                binding.tabLayout.visibility = View.GONE
+                arrayListOf("null")
             }
-        } else {
-            binding.tabLayout.visibility = View.GONE
-            viewModel.tabList = arrayListOf("null")
-            fragmentList
-                .add(
+        initView()
+    }
+
+    private fun initView() {
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun createFragment(position: Int) =
+                if (viewModel.pageType.isNullOrEmpty()) {
+                    when (position) {
+                        0 -> SearchContentFragment.newInstance(
+                            viewModel.keyWord.toString(),
+                            "feed",
+                            null,
+                            null
+                        )
+
+                        1 -> SearchContentFragment.newInstance(
+                            viewModel.keyWord.toString(),
+                            "apk",
+                            null,
+                            null
+                        )
+
+                        2 -> SearchContentFragment.newInstance(
+                            viewModel.keyWord.toString(),
+                            "product",
+                            null,
+                            null
+                        )
+
+                        3 -> SearchContentFragment.newInstance(
+                            viewModel.keyWord.toString(),
+                            "user",
+                            null,
+                            null
+                        )
+
+                        4 -> SearchContentFragment.newInstance(
+                            viewModel.keyWord.toString(),
+                            "feedTopic",
+                            null,
+                            null
+                        )
+
+                        else -> throw IllegalArgumentException()
+                    }
+                } else {
                     SearchContentFragment.newInstance(
                         viewModel.keyWord.toString(),
                         "feed",
                         viewModel.pageType.toString(),
                         viewModel.pageParam.toString()
                     )
-                )
-        }
-        initView()
-    }
 
-    private fun initView() {
-        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = fragmentList[position]
+                }
+
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->

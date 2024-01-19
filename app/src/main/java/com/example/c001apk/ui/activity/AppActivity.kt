@@ -32,7 +32,6 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     private var subscribe: MenuItem? = null
     override var tabController: IOnTabClickListener? = null
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,9 +128,15 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun initView() {
-        initFragmentList()
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int): Fragment = fragmentList[position]
+            override fun createFragment(position: Int) =
+                when (position) {
+                    0 -> AppFragment.newInstance("reply", viewModel.id.toString())
+                    1 -> AppFragment.newInstance("pub", viewModel.id.toString())
+                    2 -> AppFragment.newInstance("hot", viewModel.id.toString())
+                    else -> throw IllegalArgumentException()
+                }
+
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
@@ -208,14 +213,6 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             initView()
         } else if (viewModel.commentStatusText != "允许评论" && viewModel.type != "appForum") {
             showErrorMessage()
-        }
-    }
-
-    private fun initFragmentList() {
-        fragmentList.apply {
-            add(AppFragment.newInstance("reply", viewModel.id.toString()))
-            add(AppFragment.newInstance("pub", viewModel.id.toString()))
-            add(AppFragment.newInstance("hot", viewModel.id.toString()))
         }
     }
 

@@ -21,7 +21,6 @@ import com.google.android.material.R
 class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,9 +151,6 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
     private fun initView() {
         if (viewModel.titleList.isNotEmpty()) {
-            for (element in viewModel.topicList) {
-                fragmentList.add(HomeTopicContentFragment.newInstance(element.url, element.title))
-            }
             binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
             binding.tabLayout.setupWithViewPager(binding.viewPager)
             binding.indicator.parent.isIndeterminate = false
@@ -168,9 +164,11 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
 
     private inner class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm), TabAdapter {
-
         override fun getItem(position: Int): Fragment {
-            return fragmentList[position]
+            return HomeTopicContentFragment.newInstance(
+                viewModel.topicList[position].url,
+                viewModel.topicList[position].title
+            )
         }
 
         override fun getCount(): Int {

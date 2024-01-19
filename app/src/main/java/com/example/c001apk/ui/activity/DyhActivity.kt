@@ -2,7 +2,6 @@ package com.example.c001apk.ui.activity
 
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.ActivityDyhDetailBinding
@@ -13,7 +12,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,19 +32,19 @@ class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
     }
 
     private fun initView() {
-        initFragmentList()
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = fragmentList[position]
+            override fun createFragment(position: Int) =
+                when (position) {
+                    0 -> DyhDetailFragment.newInstance(viewModel.id.toString(), "all")
+                    1 -> DyhDetailFragment.newInstance(viewModel.id.toString(), "square")
+                    else -> throw IllegalArgumentException()
+                }
+
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
-    }
-
-    private fun initFragmentList() {
-        fragmentList.add(DyhDetailFragment.newInstance(viewModel.id.toString(), "all"))
-        fragmentList.add(DyhDetailFragment.newInstance(viewModel.id.toString(), "square"))
     }
 
     private fun initBar() {

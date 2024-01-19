@@ -6,7 +6,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -42,7 +41,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
         TopicBlackListDatabase.getDatabase(requireContext()).blackListDao()
     }
     private lateinit var subscribe: MenuItem
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     companion object {
         @JvmStatic
@@ -227,9 +225,14 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     }
 
     private fun initView(tabSelected: Int?) {
-        initFragmentList()
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) = fragmentList[position]
+            override fun createFragment(position: Int) =
+                TopicContentFragment.newInstance(
+                    viewModel.topicList[position].url,
+                    viewModel.topicList[position].title,
+                    true
+                )
+
             override fun getItemCount() = viewModel.tabList.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
@@ -249,18 +252,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             }
 
         })
-    }
-
-    private fun initFragmentList() {
-        for (element in viewModel.topicList) {
-            fragmentList.add(
-                TopicContentFragment.newInstance(
-                    element.url,
-                    element.title,
-                    true
-                )
-            )
-        }
     }
 
     private fun getViewData() {

@@ -32,11 +32,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
     IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+
     override var tabController: IOnTabClickListener? = null
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
     }
-    private val fragmentList: MutableList<Fragment> = ArrayList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -85,22 +85,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         }
     }
 
-    private fun initFragmentList() {
-        fragmentList.apply {
-            for (element in viewModel.tabList) {
-                when (element) {
-                    "关注" -> add(HomeFeedFragment.newInstance("follow"))
-                    "应用" -> add(AppListFragment())
-                    "头条" -> add(HomeFeedFragment.newInstance("feed"))
-                    "热榜" -> add(HomeFeedFragment.newInstance("rank"))
-                    "话题" -> add(TopicFragment.newInstance("topic"))
-                    "数码" -> add(TopicFragment.newInstance("product"))
-                    "酷图" -> add(HomeFeedFragment.newInstance("coolPic"))
-                }
-            }
-        }
-    }
-
     private fun initMenuList() {
         homeMenuDao.apply {
             insert(HomeMenu(0, "关注", true))
@@ -136,10 +120,18 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
     }
 
     private fun initView() {
-        initFragmentList()
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment {
-                return fragmentList[position]
+                return when (viewModel.tabList[position]) {
+                    "关注" -> HomeFeedFragment.newInstance("follow")
+                    "应用" -> AppListFragment()
+                    "头条" -> HomeFeedFragment.newInstance("feed")
+                    "热榜" -> HomeFeedFragment.newInstance("rank")
+                    "话题" -> TopicFragment.newInstance("topic")
+                    "数码" -> TopicFragment.newInstance("product")
+                    "酷图" -> HomeFeedFragment.newInstance("coolPic")
+                    else -> throw IllegalArgumentException()
+                }
             }
 
             override fun getItemCount() = viewModel.tabList.size
