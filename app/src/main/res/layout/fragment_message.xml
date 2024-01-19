@@ -47,13 +47,13 @@
                     android:id="@+id/avatar"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:background="@color/cover"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="H, 1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:shapeAppearance="@style/circleImageStyle"
-                    tools:ignore="ContentDescription"
-                    tools:src="#123456" />
+                    tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/name"

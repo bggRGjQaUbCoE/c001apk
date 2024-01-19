@@ -20,7 +20,7 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
 
         //viewModel.type = intent.getStringExtra("type")
         viewModel.id = intent.getStringExtra("id")
-        viewModel.rid = intent.getStringExtra("rid")
+        viewModel.frid = intent.getStringExtra("rid")
         //viewModel.uid = intent.getStringExtra("uid")
         //viewModel.uname = intent.getStringExtra("uname")
         if (viewModel.isViewReply == null)

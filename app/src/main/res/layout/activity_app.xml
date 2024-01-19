@@ -40,12 +40,12 @@
                     android:id="@+id/logo"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
+                    android:background="@color/cover"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:shapeAppearance="@style/iconMiniScrollCardRadius"
-                    tools:ignore="ContentDescription"
-                    tools:src="#123456" />
+                    tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/name"

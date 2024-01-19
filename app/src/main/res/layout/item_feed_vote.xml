@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="false"
@@ -19,12 +18,12 @@
             android:id="@+id/avatar"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@color/cover"
             app:layout_constraintBottom_toBottomOf="@id/pubDate"
             app:layout_constraintDimensionRatio="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/circleImageStyle"
-            tools:src="#123456" />
+            app:shapeAppearance="@style/circleImageStyle" />
 
         <com.example.c001apk.view.LinkTextView
             android:id="@+id/uname"

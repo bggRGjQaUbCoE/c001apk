@@ -272,7 +272,7 @@ class MessageContentAdapter(
                         holder.device.setCompoundDrawables(drawable, null, null, null)
                         holder.device.visibility = View.VISIBLE
                     } else {
-                        holder.device.visibility = View.GONE
+                        holder.device.visibility = View.INVISIBLE
                     }
                     holder.pubDate.text = DateUtils.fromToday(message.dateline)
                     val drawable1: Drawable = mContext.getDrawable(R.drawable.ic_date)!!

@@ -412,6 +412,10 @@ class MessageAdapter(
             }
 
             is FeedAdapter.FeedContentReplyViewHolder -> {
+
+                holder.itemView.background = mContext.getDrawable(R.drawable.round_corners_12)
+                holder.itemView.foreground = mContext.getDrawable(R.drawable.selector_bg_12_trans)
+
                 val noti = notiList[position - 6]
                 holder.notiId = noti.id
                 val doc: Document = Jsoup.parse(noti.note)

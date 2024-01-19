@@ -19,21 +19,21 @@
             android:id="@+id/avatar"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@color/cover"
             android:scaleType="fitXY"
             app:layout_constraintDimensionRatio="H, 1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/circleImageStyle"
-            tools:src="#123456" />
+            app:shapeAppearance="@style/circleImageStyle" />
 
         <TextView
             android:id="@+id/uname"
             android:layout_width="0dp"
-            app:layout_constraintEnd_toStartOf="@id/followBtn"
-            android:maxLines="1"
-            android:ellipsize="end"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintEnd_toStartOf="@id/followBtn"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toTopOf="parent" />
 

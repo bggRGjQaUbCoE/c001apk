@@ -28,24 +28,24 @@
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/avatar1"
+                    android:id="@+id/avatar"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:background="@color/cover"
                     app:layout_constraintBottom_toBottomOf="@id/date"
                     app:layout_constraintDimensionRatio="1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearance="@style/circleImageStyle"
-                    tools:src="#123456" />
+                    app:shapeAppearance="@style/circleImageStyle" />
 
                 <TextView
-                    android:id="@+id/name1"
+                    android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    app:layout_constraintStart_toEndOf="@id/avatar1"
+                    app:layout_constraintStart_toEndOf="@id/avatar"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="name" />
 
@@ -57,22 +57,22 @@
                     android:maxLines="1"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="13sp"
-                    app:layout_constraintStart_toEndOf="@id/avatar1"
-                    app:layout_constraintTop_toBottomOf="@id/name1"
+                    app:layout_constraintStart_toEndOf="@id/avatar"
+                    app:layout_constraintTop_toBottomOf="@id/name"
                     tools:text="date" />
 
                 <TextView
                     android:id="@+id/device"
                     android:layout_width="0dp"
-                    app:layout_constraintEnd_toEndOf="parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="13sp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/date"
-                    app:layout_constraintTop_toBottomOf="@id/name1"
+                    app:layout_constraintTop_toBottomOf="@id/name"
                     tools:text="device" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

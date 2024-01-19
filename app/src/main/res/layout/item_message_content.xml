@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="false"
-    android:focusable="true"
+    android:focusable="false"
     app:cardBackgroundColor="@color/home_card_background_color"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
@@ -17,8 +17,11 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/cover"
+            app:layout_constraintBottom_toBottomOf="@id/device"
+            app:layout_constraintDimensionRatio="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearance="@style/circleImageStyle" />
@@ -104,7 +107,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/reply2reply_card_background_color"
+                android:background="@drawable/round_corners_12_win"
+                android:foreground="@drawable/selector_bg_12_trans"
                 android:padding="5dp">
 
                 <com.example.c001apk.view.LinkTextView
@@ -155,13 +159,15 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/reply2reply_card_background_color"
+                android:background="@drawable/round_corners_12_win"
+                android:foreground="@drawable/selector_bg_12_trans"
                 android:padding="5dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/forward1Pic"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:background="@color/cover"
                     android:scaleType="centerCrop"
                     app:layout_constraintDimensionRatio="H, 1"
                     app:layout_constraintStart_toStartOf="parent"

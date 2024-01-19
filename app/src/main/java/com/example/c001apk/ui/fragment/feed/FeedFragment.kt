@@ -627,7 +627,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                 }
             }
         }
-        binding.avatar1.setOnClickListener {
+        binding.avatar.setOnClickListener {
             IntentUtil.startActivity<UserActivity>(requireContext()) {
                 putExtra("id", viewModel.uid)
             }
@@ -674,8 +674,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
     }
 
     private fun showTitleProfile() {
-        if (binding.name1.text.isNullOrEmpty()) {
-            binding.name1.text = viewModel.funame
+        if (binding.name.text.isNullOrEmpty()) {
+            binding.name.text = viewModel.funame
             binding.date.text = DateUtils.fromToday(viewModel.dateLine)
             if (!viewModel.device.isNullOrEmpty()) {
                 binding.device.text = viewModel.device
@@ -689,7 +689,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                 )
                 binding.device.setCompoundDrawables(drawable, null, null, null)
             }
-            ImageUtil.showIMG(binding.avatar1, viewModel.avatar)
+            ImageUtil.showIMG(binding.avatar, viewModel.avatar)
         }
         binding.titleProfile.visibility = View.VISIBLE
     }

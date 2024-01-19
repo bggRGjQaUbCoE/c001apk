@@ -27,8 +27,6 @@ SOFTWARE.
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.ViewGroup
@@ -48,8 +46,6 @@ import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import net.mikaelzero.mojito.tools.Utils.dip2px
 import rikka.core.util.ResourceUtils
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 
 
 class NineGridImageView @JvmOverloads constructor(
@@ -263,47 +259,12 @@ class NineGridImageView @JvmOverloads constructor(
                     )
                 Glide.with(context)
                     .load(newUrl)
+                    .error(context.getDrawable(R.drawable.load_failed))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .skipMemoryCache(false)
                     .into(imageView)
             }
         }
-    }
-
-    // https://my.oschina.net/ososchina/blog/495861
-    private fun compressImage(image: Bitmap): Bitmap? {
-        val baos = ByteArrayOutputStream()
-        image.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        var options = 90
-        val length = baos.toByteArray().size / 1024
-        if (length > 5000) {
-            //重置baos即清空baos
-            baos.reset()
-            //质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
-            image.compress(Bitmap.CompressFormat.JPEG, 10, baos)
-        } else if (length > 4000) {
-            baos.reset()
-            image.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-        } else if (length > 3000) {
-            baos.reset()
-            image.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-        } else if (length > 2000) {
-            baos.reset()
-            image.compress(Bitmap.CompressFormat.JPEG, 70, baos)
-        }
-        //循环判断如果压缩后图片是否大于1M,大于继续压缩
-        while (baos.toByteArray().size / 1024 > 1024) {
-            //重置baos即清空baos
-            baos.reset()
-            //这里压缩options%，把压缩后的数据存放到baos中
-            image.compress(Bitmap.CompressFormat.JPEG, options, baos)
-            //每次都减少10
-            options -= 10
-        }
-        //把压缩后的数据baos存放到ByteArrayInputStream中
-        val isBm = ByteArrayInputStream(baos.toByteArray())
-        //把ByteArrayInputStream数据生成图片
-        return BitmapFactory.decodeStream(isBm, null, null)
     }
 
 }

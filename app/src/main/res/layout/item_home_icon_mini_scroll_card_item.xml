@@ -13,6 +13,7 @@
         android:id="@+id/iconMiniScrollCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/cover"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="H, 1"

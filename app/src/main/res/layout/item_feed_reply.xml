@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
-    android:focusable="true"
+    android:clickable="false"
+    android:focusable="false"
     app:cardBackgroundColor="@color/home_card_background_color"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
@@ -16,8 +16,11 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/cover"
+            app:layout_constraintBottom_toBottomOf="@id/device"
+            app:layout_constraintDimensionRatio="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearance="@style/circleImageStyle" />
@@ -106,9 +109,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/text_scroll_bg"
+            android:background="@drawable/round_corners_12_win"
             android:clickable="true"
             android:focusable="true"
+            android:foreground="@drawable/selector_bg_12_trans"
             android:padding="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/message">
