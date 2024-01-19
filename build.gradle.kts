@@ -3,7 +3,7 @@ plugins {
     id("com.android.application") version "8.2.1" apply false
     id("org.jetbrains.kotlin.android") version "1.9.22" apply false
     id("dev.rikka.tools.materialthemebuilder") version "1.4.1"
-    id("com.google.devtools.ksp") version "1.9.22-1.0.16" apply false
+    id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
 }
 buildscript {
     dependencies {
