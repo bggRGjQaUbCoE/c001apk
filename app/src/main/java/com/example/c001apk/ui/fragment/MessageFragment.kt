@@ -254,9 +254,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.messageList.isNotEmpty()) {
                     if (dy > 0) {
-                        (activity as INavViewContainer).hideNavigationView()
+                        (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
-                        (activity as INavViewContainer).showNavigationView()
+                        (activity as? INavViewContainer)?.showNavigationView()
                     }
                 }
             }

@@ -96,9 +96,9 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
                     }
 
                     if (dy > 0) {
-                        (activity as INavViewContainer).hideNavigationView()
+                        (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
-                        (activity as INavViewContainer).showNavigationView()
+                        (activity as? INavViewContainer)?.showNavigationView()
                     }
                 }
             }
@@ -176,8 +176,13 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             initScroll()
         }
 
-        (requireParentFragment() as IOnTabClickContainer).tabController = this
+        (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
     }
 
     private fun refreshData() {
@@ -187,6 +192,7 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
+        binding.recyclerView.stopScroll()
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             refreshData()
         } else {

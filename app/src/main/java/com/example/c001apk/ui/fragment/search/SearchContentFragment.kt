@@ -57,11 +57,17 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        (requireParentFragment() as? IOnSearchMenuClickContainer)?.controller = null
+        (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
+    }
+
     override fun onResume() {
         super.onResume()
 
-        (requireParentFragment() as IOnSearchMenuClickContainer).controller = this
-        (requireParentFragment() as IOnTabClickContainer).tabController = this
+        (requireParentFragment() as? IOnSearchMenuClickContainer)?.controller = this
+        (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -369,6 +375,7 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
+        binding.recyclerView.stopScroll()
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()

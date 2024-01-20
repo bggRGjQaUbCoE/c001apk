@@ -276,10 +276,15 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
 
     override fun onShowCollection(id: String, title: String) {}
 
+    override fun onPause() {
+        super.onPause()
+        (requireContext() as? IOnTabClickContainer)?.tabController = null
+    }
+
     override fun onResume() {
         super.onResume()
 
-        (requireContext() as IOnTabClickContainer).tabController = this
+        (requireContext() as? IOnTabClickContainer)?.tabController = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -292,6 +297,7 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener, IO
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
+        binding.recyclerView.stopScroll()
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()

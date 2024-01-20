@@ -74,9 +74,14 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), Ap
                     if (viewModel.isRefreshing) viewModel.topicDataList.clear()
                     if (viewModel.isRefreshing || viewModel.isLoadMore) {
                         viewModel.listSize = viewModel.topicDataList.size
-                        for (element in data?.data!!) if (element.entityType == "topic" || element.entityType == "product") viewModel.topicDataList.add(
-                            element
-                        )
+                        for (element in data?.data!!)
+                            if (element.entityType == "topic"
+                                || element.entityType == "product"
+                            )
+                                viewModel.topicDataList.add(
+                                    element.also {
+                                        it.description = "home"
+                                    })
                         viewModel.lastItem = viewModel.topicDataList.last().id
                     }
                     viewModel.loadState = mAdapter.LOADING_COMPLETE

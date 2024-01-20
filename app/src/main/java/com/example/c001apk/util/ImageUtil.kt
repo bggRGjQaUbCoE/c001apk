@@ -82,19 +82,31 @@ object ImageUtil {
             url?.http2https(),
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
-        Glide
-            .with(view)
-            .load(newUrl).apply {
-                if (ResourceUtils.isNightMode(view.context.resources.configuration)
-                    && PrefManager.isColorFilter
-                )
-                    transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
-            }
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(withCrossFade(100))
-            .skipMemoryCache(false)
-            .dontAnimate()
-            .into(view)
+        if (url?.endsWith(".gif") == true)
+            Glide
+                .with(view)
+                .asGif()
+                .load(newUrl).apply {
+                    if (ResourceUtils.isNightMode(view.context.resources.configuration)
+                        && PrefManager.isColorFilter
+                    )
+                        transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
+                }
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .skipMemoryCache(false)
+                .into(view)
+        else
+            Glide
+                .with(view)
+                .load(newUrl).apply {
+                    if (ResourceUtils.isNightMode(view.context.resources.configuration)
+                        && PrefManager.isColorFilter
+                    )
+                        transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
+                }
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .skipMemoryCache(false)
+                .into(view)
     }
 
     private suspend fun saveImageToGallery(ctx: Context, imageUrl: String): Boolean =

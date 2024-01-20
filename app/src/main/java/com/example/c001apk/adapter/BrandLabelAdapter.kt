@@ -62,7 +62,7 @@ class BrandLabelAdapter(
                 )
             )
             holder.title.setBackgroundColor(
-                context.getColor(R.color.cover)
+                context.getColor(R.color.home_card_background_color)
             )
             holder.indicator.setBackgroundColor(
                 ThemeUtils.getThemeAttrColor(

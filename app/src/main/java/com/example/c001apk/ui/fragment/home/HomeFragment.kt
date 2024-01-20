@@ -5,6 +5,9 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.absinthe.libraries.utils.extensions.addPaddingEnd
+import com.absinthe.libraries.utils.extensions.dp
+import com.absinthe.libraries.utils.extensions.paddingEndCompat
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.logic.database.HomeMenuDatabase
 import com.example.c001apk.logic.model.HomeMenu
@@ -32,7 +35,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
     IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
-
     override var tabController: IOnTabClickListener? = null
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
@@ -120,6 +122,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
     }
 
     private fun initView() {
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int): Fragment {
                 return when (viewModel.tabList[position]) {
@@ -151,9 +154,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         tabController?.onReturnTop(true)
     }
 
+    override fun onPause() {
+        super.onPause()
+        (requireContext() as? IOnBottomClickContainer)?.controller = null
+    }
+
     override fun onResume() {
         super.onResume()
-        (requireContext() as IOnBottomClickContainer).controller = this
+        (requireContext() as? IOnBottomClickContainer)?.controller = this
     }
 
 }

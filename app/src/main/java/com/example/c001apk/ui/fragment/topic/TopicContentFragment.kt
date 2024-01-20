@@ -55,6 +55,15 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             }
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (viewModel.isEnable)
+            (requireParentFragment() as IOnTabClickContainer).tabController = null
+
+        if (viewModel.title == "讨论")
+            (requireParentFragment() as IOnSearchMenuClickContainer).controller = null
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -354,6 +363,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
+        binding.recyclerView.stopScroll()
         if (viewModel.firstCompletelyVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()

@@ -488,9 +488,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.homeFeedList.isNotEmpty()) {
                     if (dy > 0) {
-                        (activity as INavViewContainer).hideNavigationView()
+                        (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
-                        (activity as INavViewContainer).showNavigationView()
+                        (activity as? INavViewContainer)?.showNavigationView()
                     }
                 }
             }
@@ -616,10 +616,15 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
+    }
+
     override fun onResume() {
         super.onResume()
 
-        (requireParentFragment() as IOnTabClickContainer).tabController = this
+        (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -672,6 +677,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onReturnTop(isRefresh: Boolean?) {
+        binding.recyclerView.stopScroll()
         if (isRefresh!!) {
             if (viewModel.firstCompletelyVisibleItemPosition == 0) {
                 binding.swipeRefresh.isRefreshing = true

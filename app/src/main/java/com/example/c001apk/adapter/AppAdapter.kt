@@ -54,6 +54,7 @@ import com.example.c001apk.view.LinearItemDecoration1
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.circleindicator.CircleIndicator3
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
@@ -186,6 +187,7 @@ class AppAdapter(
     }
 
     class TopicProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val parent: MaterialCardView = view.findViewById(R.id.parent)
         val title: TextView = view.findViewById(R.id.title)
         val hotNum: TextView = view.findViewById(R.id.hotNum)
         val commentNum: TextView = view.findViewById(R.id.commentNum)
@@ -1101,6 +1103,18 @@ class AppAdapter(
 
             is TopicProductViewHolder -> {
                 val topic = dataList[position]
+                if (topic.description == "home") {
+                    holder.parent.setCardBackgroundColor(
+                        ThemeUtils.getThemeAttrColor(
+                            mContext,
+                            android.R.attr.windowBackground
+                        )
+                    )
+                } else {
+                    holder.parent.setCardBackgroundColor(
+                        mContext.getColor(R.color.home_card_background_color)
+                    )
+                }
                 holder.title.text = topic.title
                 holder.id = topic.id
                 holder.url = topic.url

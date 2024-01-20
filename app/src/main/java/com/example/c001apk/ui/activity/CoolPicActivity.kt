@@ -44,6 +44,7 @@ class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
     }
 
     private fun initView() {
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 when (position) {

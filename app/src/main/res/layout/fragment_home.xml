@@ -17,7 +17,7 @@
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -27,10 +27,22 @@
                 style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:tabMinWidth="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/search"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tabGravity="fill"
                 app:tabMode="auto"
                 app:tabRippleColor="@android:color/transparent" />
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="78dp"
+                android:background="@drawable/home_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/search"
@@ -39,21 +51,27 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:background="?attr/actionBarItemBackground"
+                android:background="?actionBarItemBackground"
                 android:src="@drawable/ic_search"
-                android:tooltipText="@string/search" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/menu"
+                app:layout_constraintStart_toEndOf="@id/tabLayout"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="20dp"
-                android:background="?attr/actionBarItemBackground"
-                android:src="@drawable/ic_menu" />
+                android:layout_marginEnd="10dp"
+                android:background="?actionBarItemBackground"
+                android:src="@drawable/ic_menu"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
             android:layout_width="match_parent"

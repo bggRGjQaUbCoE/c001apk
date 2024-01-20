@@ -242,6 +242,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
     }
 
     private fun initViewPager() {
+        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 if (viewModel.type == "follow") {

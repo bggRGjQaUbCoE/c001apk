@@ -52,9 +52,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                     super.onScrolled(recyclerView, dx, dy)
 
                     if (dy > 0) {
-                        (activity as INavViewContainer).hideNavigationView()
+                        (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
-                        (activity as INavViewContainer).showNavigationView()
+                        (activity as? INavViewContainer)?.showNavigationView()
                     }
 
                 }
