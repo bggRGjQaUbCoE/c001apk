@@ -12,6 +12,7 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -28,6 +29,7 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
+import kotlin.system.exitProcess
 
 
 class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
@@ -45,50 +47,45 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         link?.let {
             loadUrlInWebView(it.http2https())
         }
-
-        if (SDK_INT >= 32) {
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
-                try {
-                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(
-                        binding.webView.settings,
-                        true
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        } else {
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-                val nightModeFlags =
-                    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-                if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-                    WebSettingsCompat.setForceDark(
-                        binding.webView.settings,
-                        WebSettingsCompat.FORCE_DARK_ON
-                    )
-                }
-            }
-        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun loadUrlInWebView(url: String) {
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            setSupportZoom(true)
-            builtInZoomControls = true
-            cacheMode = WebSettings.LOAD_NO_CACHE
-            defaultTextEncodingName = "UTF-8"
-            allowContentAccess = true
-            useWideViewPort = true
-            loadWithOverviewMode = true
-            javaScriptCanOpenWindowsAutomatically = true
-            loadsImagesAutomatically = true
-            allowFileAccess = false
-            //isAlgorithmicDarkeningAllowed = true
-            //WebView.setWebContentsDebuggingEnabled(true)
-            userAgentString = PrefManager.USER_AGENT
+        binding.webView.settings.also {
+            it.javaScriptEnabled = true
+            it.domStorageEnabled = true
+            it.setSupportZoom(true)
+            it.builtInZoomControls = true
+            it.displayZoomControls = false
+            it.cacheMode = WebSettings.LOAD_NO_CACHE
+            it.defaultTextEncodingName = "UTF-8"
+            it.allowContentAccess = true
+            it.useWideViewPort = true
+            it.loadWithOverviewMode = true
+            it.javaScriptCanOpenWindowsAutomatically = true
+            it.loadsImagesAutomatically = true
+            it.allowFileAccess = false
+            it.userAgentString = PrefManager.USER_AGENT
+            if (SDK_INT >= 32) {
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(
+                        it,
+                        true
+                    )
+                }
+            } else {
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                    val nightModeFlags =
+                        resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                    if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                        WebSettingsCompat.setForceDark(
+                            it,
+                            WebSettingsCompat.FORCE_DARK_ON
+                        )
+
+                    }
+                }
+            }
         }
         CookieManager.getInstance().apply {
             setAcceptThirdPartyCookies(binding.webView, false)
@@ -225,6 +222,34 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             return true
         }
         return super.onKeyDown(keyCode, event) //退出H5界面
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onDestroy() {
+        try {
+            binding.webView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null)
+            binding.webView.loadUrl("about:blank")
+            binding.webView.parent?.let {
+                (it as ViewGroup).removeView(binding.webView)
+            }
+            binding.webView.stopLoading()
+            binding.webView.settings.javaScriptEnabled = false
+            binding.webView.clearHistory()
+            binding.webView.clearCache(true)
+            binding.webView.removeAllViewsInLayout()
+            binding.webView.removeAllViews()
+            binding.webView.setOnTouchListener(null)
+            binding.webView.setOnKeyListener(null)
+            binding.webView.onFocusChangeListener = null
+            binding.webView.webChromeClient = null
+            binding.webView.onPause()
+            binding.webView.removeAllViews()
+            binding.webView.destroy()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        super.onDestroy()
+        exitProcess(0)
     }
 
 }
