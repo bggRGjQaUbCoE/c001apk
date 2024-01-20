@@ -3,22 +3,22 @@ package com.example.c001apk.ui.fragment.home.topic
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.R
+import com.example.c001apk.adapter.BrandLabelAdapter
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
-import com.example.c001apk.view.vertical.adapter.TabAdapter
-import com.example.c001apk.view.vertical.widget.ITabView
+import com.example.c001apk.view.MyLinearSmoothScroller
 import com.example.c001apk.viewmodel.AppViewModel
-import com.google.android.material.R
 
-class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
+
+class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
+    BrandLabelAdapter.OnLabelClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
 
@@ -67,16 +67,16 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
                 viewModel.getProductList()
         }
 
-        binding.tabLayout.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
-            val contentView: View = binding.tabLayout.getChildAt(0)
-            if (oldScrollY in 1..<scrollY) {
-                (activity as INavViewContainer).hideNavigationView()
-            } else if (scrollY < oldScrollY
-                && contentView.measuredHeight > (binding.tabLayout.scrollY + binding.tabLayout.height)
-            ) {
-                (activity as INavViewContainer).showNavigationView()
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0) {
+                    (activity as INavViewContainer).hideNavigationView()
+                } else if (dy < 0) {
+                    (activity as INavViewContainer).showNavigationView()
+                }
             }
-        }
+        })
 
         viewModel.dataListData.observe(viewLifecycleOwner) { result ->
             if (viewModel.isNew) {
@@ -84,9 +84,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
                 val topic = result.getOrNull()
                 if (!topic?.data.isNullOrEmpty()) {
-                    if (viewModel.titleList.isEmpty()) {
+                    if (viewModel.tabList.isEmpty()) {
                         for (element in topic?.data!![0].entities) {
-                            viewModel.titleList.add(element.title)
+                            viewModel.tabList.add(element.title)
                             viewModel.topicList.add(
                                 TopicBean(
                                     element.url,
@@ -111,9 +111,9 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
                 val data = result.getOrNull()
                 if (!data?.data.isNullOrEmpty()) {
-                    if (viewModel.titleList.isEmpty()) {
+                    if (viewModel.tabList.isEmpty()) {
                         for (element in data?.data!!) {
-                            viewModel.titleList.add(element.title)
+                            viewModel.tabList.add(element.title)
                             viewModel.topicList.add(
                                 TopicBean(
                                     element.url,
@@ -136,7 +136,7 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
 
 
     private fun initData() {
-        if (viewModel.titleList.isEmpty()) {
+        if (viewModel.tabList.isEmpty()) {
             binding.indicator.parent.isIndeterminate = true
             binding.indicator.parent.visibility = View.VISIBLE
             viewModel.isNew = true
@@ -150,9 +150,16 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
     }
 
     private fun initView() {
-        if (viewModel.titleList.isNotEmpty()) {
-            binding.viewPager.adapter = MyPagerAdapter(childFragmentManager)
-            binding.tabLayout.setupWithViewPager(binding.viewPager)
+        if (viewModel.tabList.isNotEmpty()) {
+            binding.recyclerView.apply {
+                adapter = BrandLabelAdapter(requireContext(), viewModel.tabList).also {
+                    it.setCurrentPosition(viewModel.position)
+                    it.setOnLabelClickListener(this@TopicFragment)
+                }
+                layoutManager = LinearLayoutManager(requireContext())
+
+            }
+            onLabelClicked(viewModel.position)
             binding.indicator.parent.isIndeterminate = false
             binding.indicator.parent.visibility = View.GONE
             binding.errorLayout.parent.visibility = View.GONE
@@ -162,54 +169,40 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>() {
         }
     }
 
-
-    private inner class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm), TabAdapter {
-        override fun getItem(position: Int): Fragment {
-            return HomeTopicContentFragment.newInstance(
-                viewModel.topicList[position].url,
-                viewModel.topicList[position].title
+    override fun onLabelClicked(position: Int) {
+        viewModel.position = position
+        scrollToCenter()
+        val transaction: FragmentTransaction = childFragmentManager.beginTransaction()
+        hideFragment(transaction)
+        if (childFragmentManager.findFragmentByTag("$position") == null) {
+            transaction.add(
+                R.id.framView,
+                HomeTopicContentFragment.newInstance(
+                    viewModel.topicList[position].url,
+                    viewModel.topicList[position].title
+                ),
+                "$position"
+            )
+        } else {
+            transaction.show(
+                childFragmentManager.findFragmentByTag("$position")!!
             )
         }
-
-        override fun getCount(): Int {
-            return viewModel.titleList.size
-        }
-
-        override fun getBadge(position: Int): ITabView.TabBadge? {
-            return null
-        }
-
-        override fun getIcon(position: Int): ITabView.TabIcon? {
-            return null
-        }
-
-        @SuppressLint("RestrictedApi")
-        override fun getTitle(position: Int): ITabView.TabTitle {
-            return ITabView.TabTitle.Builder()
-                .setContent(viewModel.titleList[position])
-                .setTextColor(
-                    ThemeUtils.getThemeAttrColor(
-                        requireContext(),
-                        R.attr.colorPrimary
-                    ), ThemeUtils.getThemeAttrColor(
-                        requireContext(),
-                        R.attr.colorControlNormal
-                    )
-                )
-                .build()
-        }
-
-        /*override fun getPageTitle(position: Int): CharSequence {
-            return titleList[position]
-        }*/
-
-        override fun getBackground(position: Int): Int {
-            return -1
-        }
-
-        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {}
-
+        transaction.commit()
     }
 
+    private fun scrollToCenter() {
+        val scroller = MyLinearSmoothScroller(binding.recyclerView.context)
+        scroller.targetPosition = viewModel.position
+        binding.recyclerView.layoutManager?.startSmoothScroll(scroller)
+    }
+
+    private fun hideFragment(transaction: FragmentTransaction) {
+        for (position in 0 until viewModel.tabList.size) {
+            childFragmentManager.findFragmentByTag("$position")?.let {
+                transaction.hide(it)
+            }
+        }
+    }
 
 }

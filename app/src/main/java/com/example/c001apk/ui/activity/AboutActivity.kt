@@ -144,14 +144,6 @@ class AboutActivity : AbsAboutActivity() {
         items.add(License("jsoup", "jhy", License.MIT, "https://github.com/jhy/jsoup"))
         items.add(
             License(
-                "VerticalTabLayout",
-                "qstumn",
-                License.APACHE_2,
-                "https://github.com/qstumn/VerticalTabLayout"
-            )
-        )
-        items.add(
-            License(
                 "NineGridImageView",
                 "plain-dev",
                 License.MIT,

@@ -551,7 +551,6 @@ class AppViewModel : ViewModel() {
 
     var isInitial = true
 
-    var titleList = ArrayList<String>()
     val topicList: MutableList<TopicBean> = ArrayList()
 
     val topicDataList = ArrayList<HomeFeedResponse.Data>()
