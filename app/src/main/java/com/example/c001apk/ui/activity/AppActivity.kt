@@ -10,7 +10,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
@@ -22,7 +21,9 @@ import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.viewmodel.AppViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.tabs.TabLayoutMediator
@@ -263,6 +264,21 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                 else "/v6/apk/follow"
                 viewModel.fid = viewModel.appId
                 viewModel.getFollow()
+            }
+
+            R.id.block -> {
+                MaterialAlertDialogBuilder(this).apply {
+                    val title =
+                        if (viewModel.type == "topic") viewModel.url.toString()
+                            .replace("/t/", "")
+                        else viewModel.title
+                    setTitle("确定将 $title 加入黑名单？")
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        TopicBlackListUtil.saveTopic(viewModel.title.toString())
+                    }
+                    show()
+                }
             }
         }
         return true

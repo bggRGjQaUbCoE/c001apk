@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
-import com.example.c001apk.logic.database.TopicBlackListDatabase
-import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.BaseFragment
@@ -19,13 +17,11 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
     IOnTabClickContainer {
@@ -33,9 +29,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
-    private val topicBlackListDao by lazy {
-        TopicBlackListDatabase.getDatabase(requireContext()).blackListDao()
-    }
     private lateinit var subscribe: MenuItem
     private lateinit var order: MenuItem
 
@@ -283,11 +276,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                             setTitle("确定将 $title 加入黑名单？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    if (!topicBlackListDao.isExist(viewModel.title.toString())) {
-                                        topicBlackListDao.insert(SearchHistory(viewModel.title.toString()))
-                                    }
-                                }
+                                TopicBlackListUtil.saveTopic(viewModel.title.toString())
                             }
                             show()
                         }
