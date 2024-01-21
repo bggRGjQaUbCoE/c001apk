@@ -42,14 +42,16 @@ jobs:
             echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}' >> local.properties
           fi
 
-      - name: Cache gradle
+      - name: Cache Gradle Dependencies
         uses: actions/cache@v3.3.2
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-
+            !~/.gradle/caches/build-cache-*
+          key: gradle-deps-core-${{ hashFiles('**/build.gradle.kts', '**/build.gradle', '**/libs.versions.toml') }}
+          restore-keys: |
+            gradle-deps
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
