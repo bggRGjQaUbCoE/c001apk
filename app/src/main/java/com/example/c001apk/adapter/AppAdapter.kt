@@ -1315,7 +1315,7 @@ class AppAdapter(
                 holder.uname.movementMethod = LinkTextView.LocalLinkMovementMethod.getInstance()
                 SpannableStringBuilderUtil.isColor = false
                 ImageUtil.showIMG(holder.avatar, feed.userAvatar)
-                if (feed.feedType == "feedArticle" || feed.feedType == "vote") {
+                if (!feed.messageTitle.isNullOrEmpty()) {
                     holder.messageTitle.visibility = View.VISIBLE
                     holder.messageTitle.text = feed.messageTitle
                 } else

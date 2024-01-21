@@ -57,6 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:textColor="@android:color/darker_gray"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -66,6 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:textColor="@android:color/darker_gray"
+            android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/pubDate"
             app:layout_constraintTop_toBottomOf="@id/uname" />

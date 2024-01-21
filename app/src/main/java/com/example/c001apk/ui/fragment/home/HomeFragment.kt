@@ -1,13 +1,15 @@
 package com.example.c001apk.ui.fragment.home
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
+import android.widget.TextView
+import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.absinthe.libraries.utils.extensions.addPaddingEnd
-import com.absinthe.libraries.utils.extensions.dp
-import com.absinthe.libraries.utils.extensions.paddingEndCompat
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.logic.database.HomeMenuDatabase
 import com.example.c001apk.logic.model.HomeMenu
@@ -50,9 +52,47 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         initMenu()
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: Tab?) {}
+            @SuppressLint("RestrictedApi")
+            override fun onTabSelected(tab: Tab?) {
+                viewModel.position = tab!!.position
+                val textView = TextView(requireContext())
+                val selectedSize = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_PX,
+                    17f,
+                    resources.displayMetrics
+                )
+                textView.paint.isFakeBoldText = true
+                textView.gravity = Gravity.CENTER_HORIZONTAL
+                textView.setTextColor(
+                    ThemeUtils.getThemeAttrColor(
+                        requireContext(),
+                        rikka.preference.simplemenu.R.attr.colorPrimary
+                    )
+                )
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, selectedSize)
+                textView.text = tab.text
+                tab.setCustomView(textView)
+            }
 
+            @SuppressLint("RestrictedApi")
             override fun onTabUnselected(tab: Tab?) {
+                val textView = TextView(requireContext())
+                val selectedSize = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_PX,
+                    15f,
+                    resources.displayMetrics
+                )
+                textView.paint.isFakeBoldText = false
+                textView.gravity = Gravity.CENTER_HORIZONTAL
+                textView.setTextColor(
+                    ThemeUtils.getThemeAttrColor(
+                        requireContext(),
+                        rikka.preference.simplemenu.R.attr.colorControlNormal
+                    )
+                )
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, selectedSize)
+                textView.text = tab?.text
+                tab?.setCustomView(textView)
             }
 
             override fun onTabReselected(tab: Tab?) {
@@ -121,6 +161,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private fun initView() {
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
@@ -147,6 +188,24 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
             viewModel.isInitial = false
             if (viewModel.tabList.contains("头条"))
                 binding.viewPager.setCurrentItem(viewModel.tabList.indexOf("头条"), false)
+        } else {
+            val textView = TextView(requireContext())
+            val selectedSize = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_PX,
+                17f,
+                resources.displayMetrics
+            )
+            textView.paint.isFakeBoldText = true
+            textView.gravity = Gravity.CENTER_HORIZONTAL
+            textView.setTextColor(
+                ThemeUtils.getThemeAttrColor(
+                    requireContext(),
+                    rikka.preference.simplemenu.R.attr.colorPrimary
+                )
+            )
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, selectedSize)
+            textView.text = binding.tabLayout.getTabAt(viewModel.position)?.text
+            binding.tabLayout.getTabAt(viewModel.position)?.setCustomView(textView)
         }
     }
 

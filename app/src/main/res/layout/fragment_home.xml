@@ -32,8 +32,12 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:tabGravity="fill"
+                app:tabIndicatorFullWidth="false"
+                app:tabMinWidth="0dp"
+                app:tabMaxWidth="0dp"
                 app:tabMode="auto"
-                app:tabRippleColor="@android:color/transparent" />
+                app:tabRippleColor="@android:color/transparent"
+                app:tabTextAppearance="@style/TabText" />
 
             <View
                 android:layout_width="20dp"

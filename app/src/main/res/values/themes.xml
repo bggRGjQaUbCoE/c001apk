@@ -166,4 +166,9 @@
         <item name="cornerSize">12dp</item>
     </style>
 
+    <style name="TabText">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/colorControlNormal</item>
+    </style>
+
 </resources>
