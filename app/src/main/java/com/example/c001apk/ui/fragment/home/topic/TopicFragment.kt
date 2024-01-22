@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.home.topic
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.FragmentTransaction
@@ -49,7 +48,6 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -176,7 +174,7 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
         hideFragment(transaction)
         if (childFragmentManager.findFragmentByTag("$position") == null) {
             transaction.add(
-                R.id.framView,
+                R.id.frameView,
                 HomeTopicContentFragment.newInstance(
                     viewModel.topicList[position].url,
                     viewModel.topicList[position].title

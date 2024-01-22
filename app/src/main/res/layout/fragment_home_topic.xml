@@ -20,11 +20,11 @@
             android:scrollbars="none" />
 
         <FrameLayout
-            android:id="@+id/framView"
+            android:id="@+id/frameView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.78"
-            android:background="@color/home_card_background_color" />
+            android:background="@drawable/home_topic_bg" />
 
     </LinearLayout>
 
