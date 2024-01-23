@@ -147,7 +147,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                 binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
                 if (viewModel.isRefreshReply)
                     mAdapter.notifyDataSetChanged()
-                else if (viewModel.isLoadMore)
+                else {
                     if (viewModel.isEnd)
                         mAdapter.notifyItemChanged(viewModel.itemCount + viewModel.feedReplyList.size + 1)
                     else
@@ -155,8 +155,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                             viewModel.itemCount + viewModel.listSize + 1,
                             viewModel.feedReplyList.size - viewModel.listSize + 1
                         )
-                else
-                    mAdapter.notifyDataSetChanged()
+                }
                 viewModel.isRefreshReply = false
                 viewModel.isRefreshing = false
                 binding.indicator.parent.isIndeterminate = false
@@ -459,8 +458,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
-                            val last = sLayoutManager.findLastVisibleItemPositions(null)
-                            for (pos in last) {
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
+                            for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -864,7 +864,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                                 feedFavoriteDao.delete(viewModel.id.toString())
                                 withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
-                                    ToastUtil.toast("已取消收藏")
+                                    ToastUtil.toast(requireContext(), "已取消收藏")
                                 }
                             } else {
                                 try {
@@ -880,11 +880,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
                                     feedFavoriteDao.insert(fav)
                                     withContext(Dispatchers.Main) {
                                         favorite.title = "取消收藏"
-                                        ToastUtil.toast("已收藏")
+                                        ToastUtil.toast(requireContext(), "已收藏")
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
-                                    ToastUtil.toast("请稍后再试")
+                                    ToastUtil.toast(requireContext(), "请稍后再试")
                                 }
                             }
 
@@ -1010,6 +1010,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), AppListener, IOnPublis
         viewModel.replyData["replyAndForward"] = replyAndForward
         viewModel.isPostReply = true
         viewModel.postReply()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

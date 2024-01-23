@@ -49,6 +49,8 @@ class MessageAdapter(
     private val notiList: ArrayList<MessageResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
+    var popup: PopupMenu? = null
+
     private var iOnNotiLongClickListener: IOnNotiLongClickListener? = null
 
     fun setIOnNotiLongClickListener(iOnNotiLongClickListener: IOnNotiLongClickListener) {
@@ -277,13 +279,13 @@ class MessageAdapter(
                     id = viewHolder.notiId
                     uname = viewHolder.uname.text.toString()
                     position = viewHolder.bindingAdapterPosition
-                    val popup = PopupMenu(mContext, it)
-                    val inflater = popup.menuInflater
-                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
-                    popup.menu.findItem(R.id.copy).isVisible = false
-                    popup.menu.findItem(R.id.show).isVisible = false
-                    popup.setOnMenuItemClickListener(this@MessageAdapter)
-                    popup.show()
+                    popup = PopupMenu(mContext, it)
+                    val inflater = popup?.menuInflater
+                    inflater?.inflate(R.menu.feed_reply_menu, popup?.menu)
+                    popup?.menu?.findItem(R.id.copy)?.isVisible = false
+                    popup?.menu?.findItem(R.id.show)?.isVisible = false
+                    popup?.setOnMenuItemClickListener(this@MessageAdapter)
+                    popup?.show()
                 }
                 viewHolder
             }
@@ -508,7 +510,9 @@ class MessageAdapter(
                 )
             }
         }
-        return false
+        popup?.dismiss()
+        popup = null
+        return true
     }
 
 }

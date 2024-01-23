@@ -270,7 +270,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                         viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -289,7 +290,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                         viewModel.homeFeedList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -375,7 +377,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                             //viewModel.postCreateFeed()
                         }
                     } else if (response.message != null) {
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                         if (response.message == "请输入正确的图形验证码") {
                             viewModel.isGetCaptcha = true
                             viewModel.timeStamp = System.currentTimeMillis() / 1000
@@ -444,7 +447,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
             }
             binding.fab.setOnClickListener {
                 if (PrefManager.SZLMID == "") {
-                    Toast.makeText(requireContext(), "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "数字联盟ID不能为空", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     bottomSheetDialog.show()
                 }
@@ -467,6 +471,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
                                 mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -796,6 +801,14 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), AppListener, I
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

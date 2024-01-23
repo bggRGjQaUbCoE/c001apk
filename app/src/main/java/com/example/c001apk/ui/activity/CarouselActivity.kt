@@ -239,6 +239,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -390,6 +391,14 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

@@ -149,7 +149,8 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                         viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -168,7 +169,8 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                         viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -245,6 +247,7 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -308,6 +311,14 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

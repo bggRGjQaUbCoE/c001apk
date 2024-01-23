@@ -323,6 +323,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -459,6 +460,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             0
         )
         itemReport?.title = spannableString2
+        itemReport?.isVisible = PrefManager.isLogin
 
         return true
     }
@@ -538,6 +540,14 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

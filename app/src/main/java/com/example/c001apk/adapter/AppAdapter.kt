@@ -43,6 +43,7 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.ImageUtil.getImageLp
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.NetWorkUtil.openLinkDyh
@@ -64,6 +65,8 @@ class AppAdapter(
     private val dataList: ArrayList<HomeFeedResponse.Data>
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    var popup: PopupMenu? = null
 
     private var entityType = ""
     private var fid = ""
@@ -375,15 +378,16 @@ class AppAdapter(
                     fid = viewHolder.id
                     uid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
-                    val popup = PopupMenu(mContext, it)
-                    val inflater = popup.menuInflater
-                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
-                    popup.menu.findItem(R.id.copy).isVisible = false
-                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
-                    popup.menu.findItem(R.id.show).isVisible = false
-                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
-                    popup.setOnMenuItemClickListener(this@AppAdapter)
-                    popup.show()
+                    popup = PopupMenu(mContext, it)
+                    val inflater = popup?.menuInflater
+                    inflater?.inflate(R.menu.feed_reply_menu, popup?.menu)
+                    popup?.menu?.findItem(R.id.copy)?.isVisible = false
+                    popup?.menu?.findItem(R.id.delete)?.isVisible =
+                        PrefManager.uid == viewHolder.uid
+                    popup?.menu?.findItem(R.id.show)?.isVisible = false
+                    popup?.menu?.findItem(R.id.report)?.isVisible = PrefManager.isLogin
+                    popup?.setOnMenuItemClickListener(this@AppAdapter)
+                    popup?.show()
                 }
                 viewHolder
             }
@@ -1388,7 +1392,7 @@ class AppAdapter(
                     holder.from.visibility = View.GONE
                 else
                     holder.from.text = Html.fromHtml(
-                        feed.infoHtml.replace("\n", " <br />"),
+                        feed.infoHtml,
                         Html.FROM_HTML_MODE_COMPACT
                     )
 
@@ -1403,15 +1407,9 @@ class AppAdapter(
                 if (!feed.picArr.isNullOrEmpty()) {
                     holder.multiImage.visibility = View.VISIBLE
                     if (feed.picArr.size == 1 || feed.feedType == "feedArticle") {
-                        val from = feed.pic.lastIndexOf("@")
-                        val middle = feed.pic.lastIndexOf("x")
-                        val end = feed.pic.lastIndexOf(".")
-                        if (from != -1 && middle != -1 && end != -1) {
-                            val width = feed.pic.substring(from + 1, middle).toInt()
-                            val height = feed.pic.substring(middle + 1, end).toInt()
-                            holder.multiImage.imgHeight = height
-                            holder.multiImage.imgWidth = width
-                        }
+                        val imageLp = getImageLp(feed.pic)
+                        holder.multiImage.imgWidth = imageLp.first
+                        holder.multiImage.imgHeight = imageLp.second
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
@@ -1467,17 +1465,9 @@ class AppAdapter(
                     if (!feed.forwardSourceFeed.picArr.isNullOrEmpty()) {
                         holder.forwardedPic.visibility = View.VISIBLE
                         if (feed.forwardSourceFeed.picArr.size == 1 || feed.forwardSourceFeed.feedType == "feedArticle") {
-                            val from = feed.forwardSourceFeed.pic.lastIndexOf("@")
-                            val middle = feed.forwardSourceFeed.pic.lastIndexOf("x")
-                            val end = feed.forwardSourceFeed.pic.lastIndexOf(".")
-                            if (from != -1 && middle != -1 && end != -1) {
-                                val width =
-                                    feed.forwardSourceFeed.pic.substring(from + 1, middle).toInt()
-                                val height =
-                                    feed.forwardSourceFeed.pic.substring(middle + 1, end).toInt()
-                                holder.forwardedPic.imgHeight = height
-                                holder.forwardedPic.imgWidth = width
-                            }
+                            val imageLp = getImageLp(feed.forwardSourceFeed.pic)
+                            holder.forwardedPic.imgWidth = imageLp.first
+                            holder.forwardedPic.imgHeight = imageLp.second
                         }
                         holder.forwardedPic.apply {
                             val urlList: MutableList<String> = ArrayList()
@@ -1581,7 +1571,7 @@ class AppAdapter(
             is ImageTextScrollCardViewHolder -> {
                 val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
                 for (element in dataList[position].entities) {
-                    if (element.entityType == "feed")
+                    if (element.entityType == "feed" && !BlackListUtil.checkUid(element.userInfo.uid))
                         imageTextScrollCard.add(element)
                 }
                 val mAdapter = ImageTextScrollCardAdapter(mContext, imageTextScrollCard)
@@ -1589,14 +1579,6 @@ class AppAdapter(
                 mLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
                 holder.title.text = dataList[position].title
                 holder.title.setPadding(10.dp, 10.dp, 10.dp, 0)
-                /*val drawable: Drawable = mContext.getDrawable(R.drawable.ic_forward)!!
-                drawable.setBounds(
-                    0,
-                    0,
-                    holder.title.textSize.toInt(),
-                    holder.title.textSize.toInt()
-                )
-                holder.title.setCompoundDrawables(null, null, drawable, null)*/
                 holder.recyclerView.apply {
                     adapter = mAdapter
                     layoutManager = mLayoutManager
@@ -1695,7 +1677,9 @@ class AppAdapter(
                 appListener?.onDeleteFeedReply(fid, position, null)
             }
         }
-        return false
+        popup?.dismiss()
+        popup = null
+        return true
     }
 
 }

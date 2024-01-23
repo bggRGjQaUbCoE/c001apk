@@ -51,7 +51,7 @@ class UpdateListAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = updateList[position]
-        Glide.with(holder.itemView.context).load(app.logo.http2https()).into(holder.icon)
+        Glide.with(holder.itemView.context).load(app.logo.http2https).into(holder.icon)
         holder.appName.text = app.title
         holder.appName.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT // 刷新宽度
         if (app.localVersionName == null) {

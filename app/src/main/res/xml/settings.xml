@@ -86,12 +86,6 @@
             android:icon="@drawable/ic_emoji"
             android:key="showEmoji"
             android:title="@string/show_emoji" />
-        <rikka.material.preference.MaterialSwitchPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_clear_all"
-            android:key="isClearKeyWord"
-            android:title="@string/clear_Key_word"
-            />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/others">

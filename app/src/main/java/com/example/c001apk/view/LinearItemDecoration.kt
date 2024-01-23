@@ -87,7 +87,8 @@ class ReplyItemDecoration(
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        outRect.top = space
+        if (parent.getChildAdapterPosition(view) != 0)
+            outRect.top = space
     }
 
 }

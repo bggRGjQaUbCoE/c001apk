@@ -37,8 +37,17 @@ class StickyItemDecorator(
         for (i in 0 until childCount) {
             val view = parent.getChildAt(i)
             val index = parent.getChildAdapterPosition(view)
-            if (index >= itemCount) {
-                val dividerTop = view.top.toFloat() - space
+            if (index == itemCount - 1) {
+                val dividerTop = view.bottom.toFloat() + 12.dp
+                val dividerLeft = parent.paddingLeft
+                val dividerBottom = view.bottom + 12.dp + 1
+                val dividerRight = parent.width - parent.paddingRight
+                c.drawRect(
+                    dividerLeft.toFloat(), dividerTop, dividerRight.toFloat(),
+                    dividerBottom.toFloat(), mPaint
+                )
+            } else if (index > itemCount) {
+                val dividerTop = view.top.toFloat() - 1
                 val dividerLeft = parent.paddingLeft
                 val dividerBottom = view.top
                 val dividerRight = parent.width - parent.paddingRight
@@ -47,7 +56,6 @@ class StickyItemDecorator(
                     dividerBottom.toFloat(), mPaint
                 )
             }
-
         }
     }
 
@@ -74,12 +82,18 @@ class StickyItemDecorator(
         state: RecyclerView.State
     ) {
         val position = parent.getChildAdapterPosition(view)
-        if (position >= itemCount) {
-            outRect.top = space
+        if (position <= itemCount) {
+            if (position == 0)
+                outRect.top = 12.dp
+            if (position < itemCount)
+                outRect.bottom =
+                    if (position == itemCount - 1) 12.dp + 1
+                    else 12.dp
+            outRect.left = 15.dp
+            outRect.right = 15.dp
         }
-        if (itemCount != 1 && position == itemCount - 1) {
-            outRect.bottom = 10.dp
-        }
+        if (position > itemCount)
+            outRect.top = 1
     }
 
 }

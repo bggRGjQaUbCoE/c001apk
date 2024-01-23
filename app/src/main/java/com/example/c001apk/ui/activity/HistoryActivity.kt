@@ -126,4 +126,12 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
+    }
+
 }

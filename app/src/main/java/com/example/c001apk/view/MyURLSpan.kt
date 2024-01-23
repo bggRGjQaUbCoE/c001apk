@@ -34,7 +34,7 @@ internal class MyURLSpan(
             return
         } else if (mUrl.contains("image.coolapk.com")) {
             if (imgList == null) {
-                ImageUtil.startBigImgViewSimple(mContext, mUrl.http2https())
+                ImageUtil.startBigImgViewSimple(mContext, mUrl.http2https)
             } else {
                 ImageUtil.startBigImgViewSimple(mContext, imgList)
             }

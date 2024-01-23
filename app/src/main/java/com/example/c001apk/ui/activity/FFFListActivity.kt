@@ -320,6 +320,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -455,6 +456,14 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), AppListener {
     override fun onReload() {
         viewModel.isEnd = true
         loadMore()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

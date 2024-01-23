@@ -92,7 +92,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "followSystemAccent" -> PrefManager.followSystemAccent
                 "showEmoji" -> PrefManager.showEmoji
                 "customToken" -> PrefManager.customToken
-                "isClearKeyWord" -> PrefManager.isClearKeyWord
                 "isRecordHistory" -> PrefManager.isRecordHistory
                 "isIconMiniCard" -> PrefManager.isIconMiniCard
                 "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside
@@ -107,7 +106,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "followSystemAccent" -> PrefManager.followSystemAccent = value
                 "showEmoji" -> PrefManager.showEmoji = value
                 "customToken" -> PrefManager.customToken = value
-                "isClearKeyWord" -> PrefManager.isClearKeyWord = value
                 "isRecordHistory" -> PrefManager.isRecordHistory = value
                 "isIconMiniCard" -> PrefManager.isIconMiniCard = value
                 "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside = value
@@ -121,18 +119,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = SettingsPreferenceDataStore()
         setPreferencesFromResource(R.xml.settings, rootKey)
-
-        /*if (PrefManager.isLogin) {
-            val displayOptions = findPreference("login_preference_settings") as PreferenceCategory?
-            preferenceScreen.removePreference(displayOptions!!)
-        } else {
-            val displayOptions = findPreference("logout_preference_settings") as PreferenceCategory?
-            preferenceScreen.removePreference(displayOptions!!)
-        }*/
-
-        //val displayOptions= findPreference("login_preference_settings") as PreferenceCategory?
-        //displayOptions!!.removePreference(findPreference("login")!!)
-
 
         findPreference<SimpleMenuPreference>("darkTheme")?.setOnPreferenceChangeListener { _, newValue ->
             val newMode = (newValue as String).toInt()

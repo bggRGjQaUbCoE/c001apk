@@ -19,8 +19,21 @@ object DensityTool {
         }
     }
 
+    @SuppressLint("InternalInsetResource", "DiscouragedApi")
+    fun getStatusBarHeight(context: Context): Int {
+        val resourceId: Int = context.resources
+            .getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0)
+            return context.resources.getDimensionPixelSize(resourceId)
+        return 0
+    }
+
     fun getScreenWidth(context: Context): Int {
         return context.resources.displayMetrics.widthPixels
+    }
+
+    fun getScreenHeight(context: Context): Int {
+        return context.resources.displayMetrics.heightPixels
     }
 
 }

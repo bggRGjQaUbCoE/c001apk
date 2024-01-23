@@ -32,19 +32,21 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.widget.ThemeUtils
+import androidx.core.content.ContextCompat
 import com.absinthe.libraries.utils.extensions.dp
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.AppListener
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
 import com.example.c001apk.view.RoundImageView
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
-import net.mikaelzero.mojito.tools.Utils.dip2px
 import rikka.core.util.ResourceUtils
 
 
@@ -70,19 +72,13 @@ class NineGridImageView @JvmOverloads constructor(
     private var columns: Int = 0
     private var rows: Int = 0
 
-
-    private val itemGap = 5f
-    private var gap: Int = 0
-
-    init {
-        gap = dip2px(context, itemGap)
-    }
+    private var gap: Int = 5.dp
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val sizeWidth = MeasureSpec.getSize(widthMeasureSpec)
         totalWidth = sizeWidth - paddingLeft - paddingRight
-        val defaultWidth = (totalWidth - gap * (3 - 1)) / 3
+        var defaultWidth = (totalWidth - gap * (3 - 1)) / 3
         if (urlList != null && urlList!!.isNotEmpty()) {
             val childrenCount = urlList!!.size
             if (childrenCount == 1) {
@@ -114,6 +110,10 @@ class NineGridImageView @JvmOverloads constructor(
                     singleWidth = defaultWidth * 2
                     singleHeight = defaultWidth * 2
                 }
+            } else if (childrenCount == 2) {
+                defaultWidth = (totalWidth - gap * (2 - 1)) / 2
+                singleWidth = defaultWidth
+                singleHeight = defaultWidth
             } else {
                 singleWidth = defaultWidth
                 singleHeight = defaultWidth
@@ -205,14 +205,14 @@ class NineGridImageView @JvmOverloads constructor(
 
     fun getImageViewAt(position: Int) = getChildAt(position) as? ImageView
 
-    @SuppressLint("RestrictedApi", "ResourceAsColor", "InflateParams")
+    @SuppressLint("RestrictedApi")
     fun setUrlList(urlList: List<String>?) {
         if (urlList != null) {
             this.urlList = urlList
             generateChildrenLayout(urlList.size)
             removeAllViews()
 
-            for (url in urlList) {
+            urlList.forEach {
                 val imageView = RoundImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
                     .setAllCorners(RoundedCornerTreatment())
@@ -221,23 +221,15 @@ class NineGridImageView @JvmOverloads constructor(
                 imageView.apply {
                     shapeAppearanceModel = shapePathModel
                     strokeWidth = 1.dp.toFloat()
-                    strokeColor = context.getColorStateList(R.color.cover)
+                    strokeColor = ContextCompat.getColorStateList(context, R.color.image_stroke)
+                    setPadding(1.dp, 1.dp, 1.dp, 1.dp)
                     setBackgroundColor(context.getColor(R.color.cover))
                     foreground = context.getDrawable(R.drawable.selector_bg_12_trans)
-                    if (ResourceUtils.isNightMode(context.resources.configuration)
-                        && PrefManager.isColorFilter
-                    )
-                        setColorFilter(Color.parseColor("#2D000000"))
                     scaleType = ImageView.ScaleType.CENTER_CROP
-                    val replace = url.replace(".s.jpg", "")
-                        .replace(".s.jpg", "")
-                    val from = replace.lastIndexOf("@")
-                    val middle = replace.lastIndexOf("x")
-                    val end = replace.lastIndexOf(".")
-                    if (from != -1 && middle != -1 && end != -1) {
-                        imgWidth = replace.substring(from + 1, middle).toInt()
-                        imgHeight = replace.substring(middle + 1, end).toInt()
-                    }
+                    val replace = it.replace(".s.jpg", "")
+                    val imageLp = ImageUtil.getImageLp(replace)
+                    imgWidth = imageLp.first
+                    imgHeight = imageLp.second
                     if (replace.endsWith("gif") || imgHeight > imgWidth * 22f / 9f) {
                         labelBackground = ThemeUtils.getThemeAttrColor(
                             context,
@@ -251,18 +243,7 @@ class NineGridImageView @JvmOverloads constructor(
                     }
                 }
                 addView(imageView, generateDefaultLayoutParams())
-                val newUrl =
-                    GlideUrl(
-                        url.http2https(),
-                        LazyHeaders.Builder().addHeader("User-Agent", PrefManager.USER_AGENT)
-                            .build()
-                    )
-                Glide.with(context)
-                    .load(newUrl)
-                    .error(context.getDrawable(R.drawable.load_failed))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .skipMemoryCache(false)
-                    .into(imageView)
+                ImageUtil.showIMG(imageView, it)
             }
         }
     }

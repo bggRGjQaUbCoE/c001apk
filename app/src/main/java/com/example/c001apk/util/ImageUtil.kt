@@ -61,25 +61,23 @@ object ImageUtil {
 
     fun showUserCover(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
-            url?.http2https(),
+            url?.http2https,
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         Glide
             .with(view)
             .load(newUrl)
-            //.apply(bitmapTransform(BlurTransformation(25, 1)))
             .transform(ColorFilterTransformation(Color.parseColor("#8A000000")))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(withCrossFade(100))
+            .transition(withCrossFade())
             .skipMemoryCache(false)
-            //.dontAnimate()
             .into(view)
     }
 
     @SuppressLint("CheckResult")
     fun showIMG(view: ImageView, url: String?) {
         val newUrl = GlideUrl(
-            url?.http2https(),
+            url?.http2https,
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         if (url?.endsWith(".gif") == true)
@@ -92,6 +90,7 @@ object ImageUtil {
                     )
                         transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
                 }
+                .transition(withCrossFade())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .skipMemoryCache(false)
                 .into(view)
@@ -104,6 +103,7 @@ object ImageUtil {
                     )
                         transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
                 }
+                .transition(withCrossFade())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .skipMemoryCache(false)
                 .into(view)
@@ -119,7 +119,7 @@ object ImageUtil {
             try {
                 val file = Glide.with(ctx)
                     .asFile()
-                    .load(imageUrl.http2https())
+                    .load(imageUrl.http2https)
                     .submit()
                     .get()
                 val image = File(imagesDir, filename)
@@ -165,9 +165,9 @@ object ImageUtil {
         )
         if (imageCheckDir.exists()) {
             if (isEnd)
-                ToastUtil.toast("文件已存在")
+                ToastUtil.toast(context, "文件已存在")
         } else {
-            downloadPicture(context, url.http2https(), filename, isEnd)
+            downloadPicture(context, url.http2https, filename, isEnd)
         }
     }
 
@@ -189,10 +189,10 @@ object ImageUtil {
                                 saveImage(context, url, true)
                             } else {
                                 var isEnd = false
-                                for (mUrl in urlList) {
-                                    if (urlList.indexOf(mUrl) == urlList.size - 1)
+                                urlList.forEach {
+                                    if (urlList.indexOf(it) == urlList.size - 1)
                                         isEnd = true
-                                    saveImage(context, mUrl, isEnd)
+                                    saveImage(context, it, isEnd)
                                 }
                             }
                         }
@@ -223,7 +223,7 @@ object ImageUtil {
                                     )
                                 }
                             } else {
-                                ToastUtil.toast("分享失败")
+                                ToastUtil.toast(context, "分享失败")
                             }
                         }
                     }
@@ -245,12 +245,12 @@ object ImageUtil {
     ) {
         val thumbList: MutableList<String> = ArrayList()
         val originList: MutableList<String> = ArrayList()
-        for (url in urlList) {
-            if (url.endsWith(".s.jpg"))
-                originList.add(url.replace(".s.jpg", "").http2https())
+        urlList.forEach {
+            if (it.endsWith(".s.jpg"))
+                originList.add(it.replace(".s.jpg", "").http2https)
             else
-                originList.add(url.http2https())
-            thumbList.add(url.http2https())
+                originList.add(it.http2https)
+            thumbList.add(it.http2https)
         }
         Mojito.start(imageView.context) {
             urls(thumbList, originList)
@@ -324,9 +324,9 @@ object ImageUtil {
     ) {
         val thumbList = ArrayList<String>()
         val originList = ArrayList<String>()
-        for (url in imgList) {
-            thumbList.add("${url.http2https()}.s.jpg")
-            originList.add(url.http2https())
+        imgList.forEach {
+            thumbList.add("${it.http2https}.s.jpg")
+            originList.add(it.http2https)
         }
         Mojito.start(context) {
             urls(thumbList, originList)
@@ -372,7 +372,7 @@ object ImageUtil {
         imageView: ImageView,
         url: String
     ) {
-        imageView.mojito(url.http2https()) {
+        imageView.mojito(url.http2https) {
             progressLoader {
                 DefaultPercentProgress()
             }
@@ -385,7 +385,7 @@ object ImageUtil {
                     position: Int
                 ) {
                     if (fragmentActivity != null) {
-                        showSaveImgDialog(fragmentActivity, url.http2https(), null)
+                        showSaveImgDialog(fragmentActivity, url.http2https, null)
                     } else {
                         Log.i("Mojito", "fragmentActivity is null, skip save image")
                     }
@@ -398,41 +398,8 @@ object ImageUtil {
         context: Context,
         url: String
     ) {
-        startBigImgViewSimple(context, listOf(url.http2https()))
+        startBigImgViewSimple(context, listOf(url.http2https))
     }
-
-    /*fun showPaletteColor(imageView: ImageView, url: String?) {
-        val newUrl = GlideUrl(
-            url,
-            LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
-        )
-        Glide.with(context)
-            .asBitmap()
-            .load(newUrl)
-            .into(object : CustomTarget<Bitmap?>() {
-                override fun onResourceReady(
-                    resource: Bitmap,
-                    transition: Transition<in Bitmap?>?
-                ) {
-                    Palette.from(resource).generate { palette ->
-                        if (palette != null) {
-                            val vibrantSwatch = palette.vibrantSwatch
-                            val darkVibrantSwatch = palette.darkVibrantSwatch
-                            val lightVibrantSwatch = palette.lightVibrantSwatch
-                            val mutedSwatch = palette.mutedSwatch
-                            val darkMutedSwatch = palette.darkMutedSwatch
-                            val lightMutedSwatch = palette.lightMutedSwatch
-
-                            if (darkVibrantSwatch != null) {
-                                imageView.setBackgroundColor(darkVibrantSwatch.rgb)
-                            }
-                        }
-                    }
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-            })
-    }*/
 
 
     // 将File 转化为 content://URI
@@ -471,7 +438,7 @@ object ImageUtil {
 
     private fun downloadPicture(context: Context, url: String?, fileName: String, isEnd: Boolean) {
         val newUrl = GlideUrl(
-            url?.http2https(),
+            url?.http2https,
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
         Glide.with(context).downloadOnly().load(newUrl).into(object : FileTarget() {
@@ -564,6 +531,19 @@ object ImageUtil {
         }
         Log.d("getImageTypeWithMime", "getImageTypeWithMime: path = $path, type2 = $type")
         return type
+    }
+
+    fun getImageLp(url: String): Pair<Int, Int> {
+        var imgWidth = 1
+        var imgHeight = 1
+        val at = url.lastIndexOf("@")
+        val x = url.lastIndexOf("x")
+        val dot = url.lastIndexOf(".")
+        if (at != -1 && x != -1 && dot != -1) {
+            imgWidth = url.substring(at + 1, x).toInt()
+            imgHeight = url.substring(x + 1, dot).toInt()
+        }
+        return Pair(imgWidth, imgHeight)
     }
 
 }

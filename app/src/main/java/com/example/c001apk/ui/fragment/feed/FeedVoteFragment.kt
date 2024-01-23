@@ -262,7 +262,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                             1
                         mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -282,7 +283,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                             0
                         mAdapter.notifyItemChanged(viewModel.likeReplyPosition + 1, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -299,6 +301,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
 
                     if (viewModel.feedContentList.isNotEmpty() && !viewModel.isEnd && isAdded) {
                         val positions = mLayoutManager.findLastVisibleItemPositions(null)
+                        viewModel.lastVisibleItemPosition = positions[0]
                         for (pos in positions) {
                             if (pos > viewModel.lastVisibleItemPosition) {
                                 viewModel.lastVisibleItemPosition = pos
@@ -432,7 +435,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                                 feedFavoriteDao.delete(viewModel.id.toString())
                                 withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
-                                    ToastUtil.toast("已取消收藏")
+                                    ToastUtil.toast(requireContext(), "已取消收藏")
                                 }
                             } else {
                                 try {
@@ -448,11 +451,11 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
                                     feedFavoriteDao.insert(fav)
                                     withContext(Dispatchers.Main) {
                                         favorite.title = "取消收藏"
-                                        ToastUtil.toast("已收藏")
+                                        ToastUtil.toast(requireContext(), "已收藏")
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
-                                    ToastUtil.toast("请稍后再试")
+                                    ToastUtil.toast(requireContext(), "请稍后再试")
                                 }
                             }
 
@@ -574,6 +577,14 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>(), AppListener {
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

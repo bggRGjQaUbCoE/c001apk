@@ -45,7 +45,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
 
         link = intent.getStringExtra("url")
         link?.let {
-            loadUrlInWebView(it.http2https())
+            loadUrlInWebView(it.http2https)
         }
     }
 
@@ -190,7 +190,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
 
             R.id.copyLink -> {
                 link?.let {
-                    copyText(this, it.http2https())
+                    copyText(this, it.http2https)
                 }
             }
 

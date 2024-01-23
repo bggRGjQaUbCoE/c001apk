@@ -14,8 +14,10 @@ import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.activity.CopyActivity
@@ -25,6 +27,7 @@ import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.ImageUtil.getImageLp
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
@@ -40,6 +43,8 @@ class Reply2ReplyTotalAdapter(
     private val position: Int,
     private val replyList: ArrayList<TotalReplyResponse.Data>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
+
+    var popup: PopupMenu? = null
 
     private var appListener: AppListener? = null
 
@@ -127,14 +132,15 @@ class Reply2ReplyTotalAdapter(
                     rid = viewHolder.id
                     ruid = viewHolder.uid
                     rposition = viewHolder.bindingAdapterPosition
-                    val popup = PopupMenu(mContext, it)
-                    val inflater = popup.menuInflater
-                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
-                    popup.menu.findItem(R.id.copy).isVisible = false
-                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
-                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
-                    popup.setOnMenuItemClickListener(this@Reply2ReplyTotalAdapter)
-                    popup.show()
+                    popup = PopupMenu(mContext, it)
+                    val inflater = popup?.menuInflater
+                    inflater?.inflate(R.menu.feed_reply_menu, popup?.menu)
+                    popup?.menu?.findItem(R.id.copy)?.isVisible = false
+                    popup?.menu?.findItem(R.id.delete)?.isVisible =
+                        PrefManager.uid == viewHolder.uid
+                    popup?.menu?.findItem(R.id.report)?.isVisible = PrefManager.isLogin
+                    popup?.setOnMenuItemClickListener(this@Reply2ReplyTotalAdapter)
+                    popup?.show()
                 }
                 viewHolder
             }
@@ -269,8 +275,9 @@ class Reply2ReplyTotalAdapter(
                             it.setBackgroundColor(Color.TRANSPARENT)
                         } else {
                             it.background = mContext.getDrawable(R.drawable.text_card_bg)
+                            it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_trans)
+                            it.setPadding(10.dp)
                         }
-                        it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_trans)
                     } else {
                         if (position == 0) {
                             it.setBackgroundColor(Color.TRANSPARENT)
@@ -278,6 +285,7 @@ class Reply2ReplyTotalAdapter(
                             it.setBackgroundColor(mContext.getColor(R.color.home_card_background_color))
                         }
                         it.foreground = mContext.getDrawable(R.drawable.selector_bg_trans)
+                        it.setPadding(15.dp, 12.dp, 15.dp, 12.dp)
                     }
                 }
 
@@ -385,15 +393,9 @@ class Reply2ReplyTotalAdapter(
                 if (!reply.picArr.isNullOrEmpty()) {
                     holder.multiImage.visibility = View.VISIBLE
                     if (reply.picArr.size == 1) {
-                        val from = reply.pic.lastIndexOf("@")
-                        val middle = reply.pic.lastIndexOf("x")
-                        val end = reply.pic.lastIndexOf(".")
-                        if (from != -1 && middle != -1 && end != -1) {
-                            val width = reply.pic.substring(from + 1, middle).toInt()
-                            val height = reply.pic.substring(middle + 1, end).toInt()
-                            holder.multiImage.imgHeight = height
-                            holder.multiImage.imgWidth = width
-                        }
+                        val imageLp = getImageLp(reply.pic)
+                        holder.multiImage.imgWidth = imageLp.first
+                        holder.multiImage.imgHeight = imageLp.second
                     }
                     holder.multiImage.apply {
                         val urlList: MutableList<String> = ArrayList()
@@ -433,7 +435,9 @@ class Reply2ReplyTotalAdapter(
                 appListener?.onShowTotalReply(rposition, ruid, rid, null)
             }
         }
-        return false
+        popup?.dismiss()
+        popup = null
+        return true
     }
 
 }

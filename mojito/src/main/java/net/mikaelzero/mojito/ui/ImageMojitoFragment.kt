@@ -404,6 +404,12 @@ class ImageMojitoFragment : Fragment(), IMojitoFragment, OnMojitoViewCallback {
         super.onDestroyView()
         _binding = null
         mImageLoader?.cancel(showView.hashCode())
+        iProgress = null
+        fragmentCoverLoader = null
+        contentLoader = null
+        mViewLoadFactory = null
+        showView = null
+        mImageLoader = null
     }
 
     companion object {

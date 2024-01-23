@@ -6,11 +6,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="12dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="12dp">
+    android:orientation="horizontal">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -22,6 +18,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:background="@color/cover"
+            android:foreground="@drawable/selector_bg_avatar"
             app:shapeAppearance="@style/circleImageStyle" />
 
         <TextView
@@ -117,6 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:visibility="gone"
+            app:cardBackgroundColor="@color/home_card_background_color"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/pubDate"
             app:strokeWidth="0dp">

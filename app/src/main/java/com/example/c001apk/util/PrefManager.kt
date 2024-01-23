@@ -12,7 +12,6 @@ object PrefManager {
     private const val PREF_FOLLOW_SYSTEM_ACCENT = "follow_system_accent"
     private const val PREF_THEME_COLOR = "theme_color"
     private const val SHOW_EMOJI = "show_emoji"
-    private const val ALL_HUAJI = "all_huaji"
     private const val UID = "uid"
     private const val NAME = "name"
     private const val TOKEN = "token"
@@ -82,10 +81,6 @@ object PrefManager {
     var customToken: Boolean
         get() = pref.getBoolean("customToken", false)
         set(value) = pref.edit().putBoolean("customToken", value).apply()
-
-    var isClearKeyWord: Boolean
-        get() = pref.getBoolean("isClearKeyWord", false)
-        set(value) = pref.edit().putBoolean("isClearKeyWord", value).apply()
 
     var VERSION_NAME: String
         get() = pref.getString("VERSION_NAME", Constants.VERSION_NAME)!!

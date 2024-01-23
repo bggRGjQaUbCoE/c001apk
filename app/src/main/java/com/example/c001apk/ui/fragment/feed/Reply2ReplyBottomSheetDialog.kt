@@ -199,7 +199,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 1
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -217,7 +218,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 0
                         mAdapter.notifyItemChanged(viewModel.likePosition, "like")
                     } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                 } else {
                     result.exceptionOrNull()?.printStackTrace()
                 }
@@ -234,7 +236,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                         if (response.data.messageStatus == 1 || response.data.messageStatus == 2) {
                             bottomSheetDialog.editText.text = null
                             if (response.data.messageStatus == 1)
-                                Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT)
+                                    .show()
                             bottomSheetDialog.cancel()
                             viewModel.replyTotalList.add(
                                 viewModel.r2rPosition + 1,
@@ -262,7 +265,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                             mAdapter.notifyItemInserted(viewModel.r2rPosition + 1)
                         }
                     } else {
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             }
@@ -307,6 +311,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -465,6 +470,14 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

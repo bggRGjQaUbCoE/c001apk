@@ -18,6 +18,7 @@ import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.home.app.AppListFragment
 import com.example.c001apk.ui.fragment.home.topic.TopicFragment
+import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
@@ -98,8 +99,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
             override fun onTabReselected(tab: Tab?) {
                 if (tab?.text == "关注")
                     tabController?.onReturnTop(false)
-                else
+                else {
                     tabController?.onReturnTop(true)
+                    (activity as? INavViewContainer)?.showNavigationView()
+                }
             }
 
         })

@@ -21,7 +21,6 @@ import com.example.c001apk.logic.database.SearchHistoryDatabase
 import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
-import com.example.c001apk.util.PrefManager
 import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -178,8 +177,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                 .addToBackStack(null)
                 .commit()
             updateHistory(binding.editText.text.toString())
-            if (PrefManager.isClearKeyWord)
-                binding.editText.text = null
         }
     }
 

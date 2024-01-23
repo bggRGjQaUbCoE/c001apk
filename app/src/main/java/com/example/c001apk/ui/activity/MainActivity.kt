@@ -37,7 +37,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import java.net.URLEncoder
 
-
 class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContainer,
     INavViewContainer {
 
@@ -46,7 +45,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
     override var controller: IOnBottomClickListener? = null
     private lateinit var navView: NavigationBarView
 
-    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -241,7 +239,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
         }
     }
 
-    // from libchecker
+    // from LibChecker
     /**
      * 覆盖掉 BottomNavigationView 内部的 OnApplyWindowInsetsListener 并避免其被软键盘顶起来
      * @see BottomNavigationView.applyWindowInsets

@@ -19,6 +19,7 @@ import com.example.c001apk.ui.activity.UserActivity
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.ImageUtil.getImageLp
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
@@ -378,18 +379,9 @@ class MessageContentAdapter(
                     if (!message.forwardSourceFeed.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
                         if (message.forwardSourceFeed.picArr.size == 1) {
-                            val from = message.forwardSourceFeed.pic.lastIndexOf("@")
-                            val middle = message.forwardSourceFeed.pic.lastIndexOf("x")
-                            val end = message.forwardSourceFeed.pic.lastIndexOf(".")
-                            if (from != -1 && middle != -1 && end != -1) {
-                                val width =
-                                    message.forwardSourceFeed.pic.substring(from + 1, middle)
-                                        .toInt()
-                                val height =
-                                    message.forwardSourceFeed.pic.substring(middle + 1, end).toInt()
-                                holder.multiImage.imgHeight = height
-                                holder.multiImage.imgWidth = width
-                            }
+                            val imageLp = getImageLp(message.forwardSourceFeed.pic)
+                            holder.multiImage.imgWidth = imageLp.first
+                            holder.multiImage.imgHeight = imageLp.second
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()

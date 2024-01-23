@@ -232,6 +232,7 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
                                 mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
                             for (pos in positions) {
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
@@ -388,6 +389,14 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(), AppList
     override fun onReload() {
         viewModel.isEnd = false
         loadMore()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::mAdapter.isInitialized && mAdapter.popup != null) {
+            mAdapter.popup?.dismiss()
+            mAdapter.popup = null
+        }
     }
 
 }

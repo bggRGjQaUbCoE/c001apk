@@ -2,7 +2,9 @@ package net.mikaelzero.mojito.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.view.*
+import android.view.KeyEvent
+import android.view.Window
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
@@ -14,7 +16,12 @@ import net.mikaelzero.mojito.bean.FragmentConfig
 import net.mikaelzero.mojito.bean.ViewPagerBean
 import net.mikaelzero.mojito.bean.ViewParams
 import net.mikaelzero.mojito.databinding.ActivityImageBinding
-import net.mikaelzero.mojito.interfaces.*
+import net.mikaelzero.mojito.interfaces.ActivityCoverLoader
+import net.mikaelzero.mojito.interfaces.IIndicator
+import net.mikaelzero.mojito.interfaces.IMojitoActivity
+import net.mikaelzero.mojito.interfaces.IMojitoFragment
+import net.mikaelzero.mojito.interfaces.IProgress
+import net.mikaelzero.mojito.interfaces.OnMojitoListener
 import net.mikaelzero.mojito.loader.FragmentCoverLoader
 import net.mikaelzero.mojito.loader.InstanceLoader
 import net.mikaelzero.mojito.loader.MultiContentLoader
@@ -32,7 +39,10 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
     override fun onCreate(savedInstanceState: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
         if (Mojito.mojitoConfig().transparentNavigationBar()) {
             ImmersionBar.with(this).transparentBar().init()
         } else {
@@ -72,9 +82,11 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
                 viewParams == null -> {
                     null
                 }
+
                 i >= viewParams!!.size -> {
                     null
                 }
+
                 else -> {
                     viewParams?.get(i)
                 }
@@ -88,7 +100,8 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
                 )
             )
         }
-        imageViewPagerAdapter = object : FragmentPagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+        imageViewPagerAdapter = object :
+            FragmentPagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             override fun getItem(position: Int): Fragment {
                 val fragment = fragmentMap[position]
                 return if (fragment == null) {
@@ -123,7 +136,11 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
 
             }
 
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
 
             }
 
@@ -186,4 +203,18 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
     override fun getContext(): Context {
         return this
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        progressLoader = null
+        fragmentCoverLoader = null
+        multiContentLoader = null
+        iIndicator = null
+        activityCoverLoader = null
+        onMojitoListener = null
+        viewParams = null
+
+    }
+
 }

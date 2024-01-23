@@ -19,14 +19,13 @@
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:progressDrawable="@drawable/progress_bar"
-            android:visibility="visible" />
+            android:layout_height="3dp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:background="?attr/colorSurfaceVariant" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <WebView

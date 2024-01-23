@@ -97,7 +97,7 @@ object NetWorkUtil {
                 putExtra("title", title)
             }
         } else if (replace.startsWith("image.coolapk.com")) {
-            ImageUtil.startBigImgViewSimple(context, url.http2https())
+            ImageUtil.startBigImgViewSimple(context, url.http2https)
         } else if (url.startsWith("https://") || url.startsWith("http://")) {
             if (PrefManager.isOpenLinkOutside) {
                 val intent = Intent()

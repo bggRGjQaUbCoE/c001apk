@@ -23,6 +23,7 @@ import androidx.appcompat.widget.ThemeUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
@@ -37,7 +38,9 @@ import com.example.c001apk.ui.activity.WebViewActivity
 import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.DateUtils
+import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.ImageUtil
+import com.example.c001apk.util.ImageUtil.getImageLp
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.NetWorkUtil.openLinkDyh
@@ -50,7 +53,6 @@ import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.imageview.ShapeableImageView
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 
 class FeedAdapter(
@@ -60,7 +62,13 @@ class FeedAdapter(
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), PopupMenu.OnMenuItemClickListener {
 
+    var popup: PopupMenu? = null
+
     private lateinit var articleList: ArrayList<FeedArticleContentBean.Data>
+
+    private var mItemCount = 1
+
+    private var height = -1
 
     private var extraKey: String? = null
 
@@ -117,15 +125,7 @@ class FeedAdapter(
 
     class UrlViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var url = ""
-        val shareUrl: MaterialCardView = view.findViewById(R.id.shareUrl)
         val urlTitle: TextView = view.findViewById(R.id.urlTitle)
-    }
-
-    class FootViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val footerLayout: FrameLayout = view.findViewById(R.id.footerLayout)
-        val indicator: CircularProgressIndicator = view.findViewById(R.id.indicator)
-        val noMore: TextView = view.findViewById(R.id.noMore)
-        val retry: Button = view.findViewById(R.id.retry)
     }
 
     class FeedContentReplyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -199,7 +199,7 @@ class FeedAdapter(
             -1 -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_rv_footer, parent, false)
-                val viewHolder = FootViewHolder(view)
+                val viewHolder = AppAdapter.FootViewHolder(view)
                 viewHolder.retry.setOnClickListener {
                     appListener?.onReload()
                 }
@@ -209,7 +209,7 @@ class FeedAdapter(
             0 -> {
                 val view =
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_feed_article_content_item, parent, false)
+                        .inflate(R.layout.item_feed_article_text, parent, false)
                 val viewHolder = TextViewHolder(view)
                 viewHolder.textView.setOnLongClickListener {
                     IntentUtil.startActivity<CopyActivity>(parent.context) {
@@ -223,7 +223,7 @@ class FeedAdapter(
             1 -> {
                 val view =
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_feed_article_content_item, parent, false)
+                        .inflate(R.layout.item_feed_article_image, parent, false)
                 val viewHolder = ImageViewHolder(view)
                 viewHolder.imageView.apply {
                     appListener = this@FeedAdapter.appListener
@@ -234,9 +234,9 @@ class FeedAdapter(
             2 -> {
                 val view =
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_feed_article_content_item, parent, false)
+                        .inflate(R.layout.item_feed_article_share_url, parent, false)
                 val viewHolder = UrlViewHolder(view)
-                viewHolder.shareUrl.setOnClickListener {
+                viewHolder.urlTitle.setOnClickListener {
                     openLink(parent.context, viewHolder.url, viewHolder.urlTitle.text.toString())
                 }
                 viewHolder
@@ -300,14 +300,15 @@ class FeedAdapter(
                     uid = viewHolder.uid
                     ruid = viewHolder.uid
                     position = viewHolder.bindingAdapterPosition
-                    val popup = PopupMenu(mContext, it)
-                    val inflater = popup.menuInflater
-                    inflater.inflate(R.menu.feed_reply_menu, popup.menu)
-                    popup.menu.findItem(R.id.copy).isVisible = false
-                    popup.menu.findItem(R.id.delete).isVisible = PrefManager.uid == viewHolder.uid
-                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
-                    popup.setOnMenuItemClickListener(this@FeedAdapter)
-                    popup.show()
+                    popup = PopupMenu(mContext, it)
+                    val inflater = popup?.menuInflater
+                    inflater?.inflate(R.menu.feed_reply_menu, popup?.menu)
+                    popup?.menu?.findItem(R.id.copy)?.isVisible = false
+                    popup?.menu?.findItem(R.id.delete)?.isVisible =
+                        PrefManager.uid == viewHolder.uid
+                    popup?.menu?.findItem(R.id.report)?.isVisible = PrefManager.isLogin
+                    popup?.setOnMenuItemClickListener(this@FeedAdapter)
+                    popup?.show()
                 }
                 viewHolder
             }
@@ -316,6 +317,11 @@ class FeedAdapter(
                 val view: View =
                     LayoutInflater.from(parent.context).inflate(R.layout.item_top, parent, false)
                 val viewHolder = TopViewHolder(view)
+                view.measure(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                height = view.measuredHeight
                 viewHolder.lastUpdate.setOnClickListener {
                     appListener?.onRefreshReply("lastupdate_desc")
                 }
@@ -451,6 +457,7 @@ class FeedAdapter(
                         articleList.add(element)
                 }
 
+                mItemCount = articleList.size
                 articleList.size + replyList.size + 2
             } else replyList.size + 3
         }
@@ -531,9 +538,7 @@ class FeedAdapter(
 
                 3 -> {
                     if (payloads[0] == "like") {
-                        val index =
-                            if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
-                            else position - 2
+                        val index = position - mItemCount - 1
                         (holder as FeedContentReplyViewHolder).like.text = replyList[index].likenum
                         holder.isLike = replyList[index].userAction?.like == 1
                         val drawableLike: Drawable = mContext.getDrawable(R.drawable.ic_like)!!
@@ -800,20 +805,12 @@ class FeedAdapter(
                         )
                         if (!feed.data.forwardSourceFeed.picArr.isNullOrEmpty()) {
                             holder.forwardedPic.visibility = View.VISIBLE
-                            if (feed.data.forwardSourceFeed.picArr.size == 1 || feed.data.forwardSourceFeed.feedType == "feedArticle") {
-                                val from = feed.data.forwardSourceFeed.pic.lastIndexOf("@")
-                                val middle = feed.data.forwardSourceFeed.pic.lastIndexOf("x")
-                                val end = feed.data.forwardSourceFeed.pic.lastIndexOf(".")
-                                if (from != -1 && middle != -1 && end != -1) {
-                                    val width =
-                                        feed.data.forwardSourceFeed.pic.substring(from + 1, middle)
-                                            .toInt()
-                                    val height =
-                                        feed.data.forwardSourceFeed.pic.substring(middle + 1, end)
-                                            .toInt()
-                                    holder.forwardedPic.imgHeight = height
-                                    holder.forwardedPic.imgWidth = width
-                                }
+                            if (feed.data.forwardSourceFeed.picArr.size == 1
+                                || feed.data.forwardSourceFeed.feedType == "feedArticle"
+                            ) {
+                                val imageLp = getImageLp(feed.data.forwardSourceFeed.pic)
+                                holder.forwardedPic.imgWidth = imageLp.first
+                                holder.forwardedPic.imgHeight = imageLp.second
                             }
                             holder.forwardedPic.apply {
                                 val urlList: MutableList<String> = ArrayList()
@@ -832,15 +829,9 @@ class FeedAdapter(
                     if (!feed.data?.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
                         if (feed.data?.picArr?.size == 1) {
-                            val from = feed.data.pic.lastIndexOf("@")
-                            val middle = feed.data.pic.lastIndexOf("x")
-                            val end = feed.data.pic.lastIndexOf(".")
-                            if (from != -1 && middle != -1 && end != -1) {
-                                val width = feed.data.pic.substring(from + 1, middle).toInt()
-                                val height = feed.data.pic.substring(middle + 1, end).toInt()
-                                holder.multiImage.imgHeight = height
-                                holder.multiImage.imgWidth = width
-                            }
+                            val imageLp = getImageLp(feed.data.pic)
+                            holder.multiImage.imgWidth = imageLp.first
+                            holder.multiImage.imgHeight = imageLp.second
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
@@ -877,7 +868,7 @@ class FeedAdapter(
                                 val parentLayout: ConstraintLayout =
                                     view.findViewById(R.id.parentLayout)
                                 parentLayout.background =
-                                    mContext.getDrawable(R.drawable.selector_bg_20_feed)
+                                    mContext.getDrawable(R.drawable.round_corners_20)
                                 val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
                                 val title: TextView = view.findViewById(R.id.title)
                                 val type: String
@@ -940,18 +931,20 @@ class FeedAdapter(
                 }
             }
 
-            is FootViewHolder -> {
+            is AppAdapter.FootViewHolder -> {
                 val lp = holder.itemView.layoutParams
                 if (lp is StaggeredGridLayoutManager.LayoutParams) {
                     lp.isFullSpan = true
                 } else {
                     holder.footerLayout.layoutParams =
-                        if (loadState == LOADING_REPLY)
+                        if (loadState == LOADING_REPLY) {
                             FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.MATCH_PARENT
+                                DensityTool.getScreenHeight(mContext) -
+                                        DensityTool.getStatusBarHeight(mContext)
+                                        - height - 64.dp - -2
                             )
-                        else
+                        } else
                             FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT,
                                 FrameLayout.LayoutParams.WRAP_CONTENT
@@ -1028,7 +1021,6 @@ class FeedAdapter(
 
             is TextViewHolder -> {
                 val item = articleList[position]
-                holder.textView.visibility = View.VISIBLE
                 holder.textView.highlightColor = Color.TRANSPARENT
                 holder.textView.movementMethod = LinkMovementMethod.getInstance()
                 holder.textView.text = SpannableStringBuilderUtil.setText(
@@ -1043,18 +1035,11 @@ class FeedAdapter(
 
             is ImageViewHolder -> {
                 val item = articleList[position]
-                holder.imageView.visibility = View.VISIBLE
                 val urlList = ArrayList<String>()
                 urlList.add("${item.url}.s.jpg")
-                val from = item.url!!.lastIndexOf("@")
-                val middle = item.url.lastIndexOf("x")
-                val end = item.url.lastIndexOf(".")
-                if (from != -1 && middle != -1 && end != -1) {
-                    val width = item.url.substring(from + 1, middle).toInt()
-                    val height = item.url.substring(middle + 1, end).toInt()
-                    holder.imageView.imgHeight = height
-                    holder.imageView.imgWidth = width
-                }
+                val imageLp = getImageLp(item.url!!)
+                holder.imageView.imgWidth = imageLp.first
+                holder.imageView.imgHeight = imageLp.second
                 holder.imageView.isCompress = true
                 holder.imageView.setUrlList(urlList)
                 if (item.description.isNullOrEmpty())
@@ -1071,7 +1056,6 @@ class FeedAdapter(
 
             is UrlViewHolder -> {
                 val item = articleList[position]
-                holder.shareUrl.visibility = View.VISIBLE
                 holder.urlTitle.text = item.title.toString()
                 holder.url = item.url.toString()
             }
@@ -1083,16 +1067,14 @@ class FeedAdapter(
                         if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
                             it.background = mContext.getDrawable(R.drawable.text_card_bg)
                             it.foreground = mContext.getDrawable(R.drawable.selector_bg_12_trans)
-                            holder.replyLayout.setCardBackgroundColor(mContext.getColor(R.color.reply2reply_card_background_color))
+                            it.setPadding(10.dp)
                         } else {
                             it.foreground = mContext.getDrawable(R.drawable.selector_bg_trans)
-                            holder.replyLayout.setCardBackgroundColor(mContext.getColor(R.color.home_card_background_color))
+                            it.setPadding(15.dp, 12.dp, 15.dp, 12.dp)
                         }
                     }
 
-                    val reply = if (feedList[0].data?.feedType == "feedArticle")
-                        replyList[position - articleList.size - 1]
-                    else replyList[position - 2]
+                    val reply = replyList[position - mItemCount - 1]
 
                     holder.vote.visibility = View.GONE
 
@@ -1108,8 +1090,7 @@ class FeedAdapter(
                     val replyTag =
                         when (haveTop) {
                             true -> {
-                                if (position == 2)
-                                    " [置顶]"
+                                if (position == mItemCount + 1) " [置顶]"
                                 else ""
                             }
 
@@ -1211,6 +1192,14 @@ class FeedAdapter(
                         }
                         if (sortedList.isNotEmpty()) {
                             holder.replyLayout.visibility = View.VISIBLE
+                            if (holder.itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                                holder.replyLayout.setCardBackgroundColor(
+                                    ThemeUtils.getThemeAttrColor(
+                                        mContext,
+                                        android.R.attr.windowBackground
+                                    )
+                                )
+                            }
                             holder.linearAdapterLayout.adapter = object : BaseAdapter() {
                                 override fun getCount(): Int = sortedList.size
                                 override fun getItem(p0: Int): Any = 0
@@ -1225,7 +1214,6 @@ class FeedAdapter(
                                         parent,
                                         false
                                     )
-
                                     val replyData = sortedList[position1]
                                     val textView: TextView = view.findViewById(R.id.reply)
                                     textView.highlightColor = ColorUtils.setAlphaComponent(
@@ -1237,14 +1225,14 @@ class FeedAdapter(
 
                                     val replyTag1 =
                                         when (replyData.uid) {
-                                            replyData.feedUid -> " [楼主] "
+                                            reply.feedUid -> " [楼主] "
                                             reply.uid -> " [层主] "
                                             else -> ""
                                         }
 
                                     val rReplyTag =
                                         when (replyData.ruid) {
-                                            replyData.feedUid -> " [楼主] "
+                                            reply.feedUid -> " [楼主] "
                                             reply.uid -> " [层主] "
                                             else -> ""
                                         }
@@ -1325,15 +1313,9 @@ class FeedAdapter(
                     if (!reply.picArr.isNullOrEmpty()) {
                         holder.multiImage.visibility = View.VISIBLE
                         if (reply.picArr.size == 1) {
-                            val from = reply.pic.lastIndexOf("@")
-                            val middle = reply.pic.lastIndexOf("x")
-                            val end = reply.pic.lastIndexOf(".")
-                            if (from != -1 && middle != -1 && end != -1) {
-                                val width = reply.pic.substring(from + 1, middle).toInt()
-                                val height = reply.pic.substring(middle + 1, end).toInt()
-                                holder.multiImage.imgHeight = height
-                                holder.multiImage.imgWidth = width
-                            }
+                            val imageLp = getImageLp(reply.pic)
+                            holder.multiImage.imgWidth = imageLp.first
+                            holder.multiImage.imgHeight = imageLp.second
                         }
                         holder.multiImage.apply {
                             val urlList: MutableList<String> = ArrayList()
@@ -1355,14 +1337,10 @@ class FeedAdapter(
             R.id.block -> {
                 BlackListUtil.saveUid(uid)
                 if (rPosition == null) {
-                    replyList.removeAt(
-                        if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
-                        else position - 2
-                    )
+                    replyList.removeAt(position - mItemCount - 1)
                     notifyItemRemoved(position)
                 } else {
-                    replyList[if (feedList[0].data?.feedType == "feedArticle") position - articleList.size - 1
-                    else position - 2].replyRows?.removeAt(rPosition!!)
+                    replyList[position - mItemCount - 1].replyRows?.removeAt(rPosition!!)
                     notifyItemChanged(position)
                 }
             }
@@ -1390,7 +1368,9 @@ class FeedAdapter(
                 appListener?.onShowTotalReply(position, ruid, id, rPosition)
             }
         }
-        return false
+        popup?.dismiss()
+        popup = null
+        return true
     }
 
 }

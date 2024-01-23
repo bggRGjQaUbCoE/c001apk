@@ -57,8 +57,7 @@ object SpannableStringBuilderUtil {
         imgList: List<String>?
     ): SpannableStringBuilder {
         val mess = Html.fromHtml(
-            StringBuilder(text).append(" ").toString()
-                .replace("\n", " <br />"),
+            text.replace("\n", " <br/>") + "\u3000",
             Html.FROM_HTML_MODE_COMPACT
         )
         val builder = SpannableStringBuilder(mess)
@@ -68,16 +67,16 @@ object SpannableStringBuilderUtil {
             0, mess.length,
             URLSpan::class.java
         )
-        for (url in urls) {
-            val myURLSpan = MyURLSpan(mContext, url.url, imgList)
+        urls.forEach {
+            val myURLSpan = MyURLSpan(mContext, it.url, imgList)
             myURLSpan.setData(position, uid)
             myURLSpan.isColor = isColor
             myURLSpan.isReturn = isReturn
-            val start = builder.getSpanStart(url)
-            val end = builder.getSpanEnd(url)
-            val flags = builder.getSpanFlags(url)
+            val start = builder.getSpanStart(it)
+            val end = builder.getSpanEnd(it)
+            val flags = builder.getSpanFlags(it)
             builder.setSpan(myURLSpan, start, end, flags)
-            builder.removeSpan(url)
+            builder.removeSpan(it)
         }
         while (matcher.find()) {
             val group = matcher.group()
@@ -109,8 +108,7 @@ object SpannableStringBuilderUtil {
         imgList: List<String>?
     ): SpannableStringBuilder {
         val mess = Html.fromHtml(
-            StringBuilder(text).append(" ").toString()
-                .replace("\n", " <br />"),
+            text.replace("\n", " <br/>") + "\u3000",
             Html.FROM_HTML_MODE_COMPACT
         )
         val builder = SpannableStringBuilder(mess)
@@ -120,15 +118,15 @@ object SpannableStringBuilderUtil {
             0, mess.length,
             URLSpan::class.java
         )
-        for (url in urls) {
-            val myURLSpan = MyURLSpan(mContext, url.url, imgList)
+        urls.forEach {
+            val myURLSpan = MyURLSpan(mContext, it.url, imgList)
             myURLSpan.setData(position, uid)
             myURLSpan.isColor = isColor
-            val start = builder.getSpanStart(url)
-            val end = builder.getSpanEnd(url)
-            val flags = builder.getSpanFlags(url)
+            val start = builder.getSpanStart(it)
+            val end = builder.getSpanEnd(it)
+            val flags = builder.getSpanFlags(it)
             builder.setSpan(myURLSpan, start, end, flags)
-            builder.removeSpan(url)
+            builder.removeSpan(it)
         }
         while (matcher.find()) {
             val group = matcher.group()

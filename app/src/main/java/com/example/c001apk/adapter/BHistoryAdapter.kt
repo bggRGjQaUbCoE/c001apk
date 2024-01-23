@@ -27,7 +27,9 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinkTextView
 import com.google.android.material.imageview.ShapeableImageView
-import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class BHistoryAdapter(
@@ -41,6 +43,8 @@ class BHistoryAdapter(
     private val feedFavoriteDao by lazy {
         FeedFavoriteDatabase.getDatabase(mContext).feedFavoriteDao()
     }
+
+    var popup: PopupMenu? = null
 
     private var dataList = ArrayList<Any>()
     private var type = ""
@@ -108,12 +112,12 @@ class BHistoryAdapter(
                     uid = viewHolder.uid
                     fid = viewHolder.id
                     position = viewHolder.bindingAdapterPosition
-                    val popup = PopupMenu(mContext, it)
-                    val inflater = popup.menuInflater
-                    inflater.inflate(R.menu.feed_history_menu, popup.menu)
-                    popup.menu.findItem(R.id.report).isVisible = PrefManager.isLogin
-                    popup.setOnMenuItemClickListener(this@BHistoryAdapter)
-                    popup.show()
+                    popup = PopupMenu(mContext, it)
+                    val inflater = popup?.menuInflater
+                    inflater?.inflate(R.menu.feed_history_menu, popup?.menu)
+                    popup?.menu?.findItem(R.id.report)?.isVisible = PrefManager.isLogin
+                    popup?.setOnMenuItemClickListener(this@BHistoryAdapter)
+                    popup?.show()
                 }
                 viewHolder
             }
@@ -267,7 +271,7 @@ class BHistoryAdapter(
             R.id.delete -> {
                 dataList.removeAt(position)
                 notifyItemRemoved(position)
-                thread {
+                CoroutineScope(Dispatchers.IO).launch {
                     if (type == "browse")
                         browseHistoryDao.delete(fid)
                     else
@@ -275,7 +279,9 @@ class BHistoryAdapter(
                 }
             }
         }
-        return false
+        popup?.dismiss()
+        popup = null
+        return true
     }
 
 }

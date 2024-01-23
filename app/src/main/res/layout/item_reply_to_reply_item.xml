@@ -3,18 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:foreground="?attr/selectableItemBackground"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="12dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="12dp">
+    android:orientation="horizontal">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/avatar"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:background="@color/cover"
+        android:foreground="@drawable/selector_bg_avatar"
         app:shapeAppearance="@style/circleImageStyle" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
