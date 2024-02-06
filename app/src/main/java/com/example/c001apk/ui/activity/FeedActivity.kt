@@ -108,7 +108,6 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
                         else -> FeedFragment()
                     }
                 )
-                //.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }
     }

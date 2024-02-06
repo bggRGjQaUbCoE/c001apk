@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.ThemeUtils
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -265,12 +264,16 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
     override fun onShowCollection(id: String, title: String) {
         requireActivity().supportFragmentManager
             .beginTransaction()
+            .setCustomAnimations(
+                R.anim.right_in,
+                R.anim.left_out_fragment,
+                R.anim.left_in,
+                R.anim.right_out
+            )
             .replace(
                 R.id.fragment,
-                newInstance(id, title),
-                null
+                newInstance(id, title)
             )
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             .addToBackStack(null)
             .commit()
     }

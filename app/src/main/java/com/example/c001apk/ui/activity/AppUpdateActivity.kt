@@ -2,7 +2,6 @@ package com.example.c001apk.ui.activity
 
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityAppUpdateBinding
 import com.example.c001apk.ui.fragment.home.app.UpdateListFragment
@@ -19,7 +18,6 @@ class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.appUpdateFragment, UpdateListFragment())
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             .commit()
     }
 

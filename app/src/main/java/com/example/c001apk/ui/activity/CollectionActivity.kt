@@ -1,7 +1,6 @@
 package com.example.c001apk.ui.activity
 
 import android.os.Bundle
-import androidx.fragment.app.FragmentTransaction
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityCollectionBinding
 import com.example.c001apk.ui.fragment.CollectionFragment
@@ -18,7 +17,6 @@ class CollectionActivity : BaseActivity<ActivityCollectionBinding>() {
                     R.id.fragment,
                     CollectionFragment()
                 )
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit()
         }
     }

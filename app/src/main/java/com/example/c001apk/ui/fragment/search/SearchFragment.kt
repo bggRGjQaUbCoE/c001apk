@@ -12,7 +12,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.adapter.HistoryAdapter
@@ -163,6 +162,12 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         } else {
             requireActivity().supportFragmentManager
                 .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.right_in,
+                    R.anim.left_out_fragment,
+                    R.anim.left_in,
+                    R.anim.right_out
+                )
                 .replace(
                     R.id.searchFragment,
                     SearchResultFragment.newInstance(
@@ -170,14 +175,19 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                         viewModel.pageType,
                         viewModel.pageParam,
                         viewModel.title
-                    ),
-                    null
+                    )
                 )
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null)
                 .commit()
             updateHistory(binding.editText.text.toString())
+            hideKeyBoard()
         }
+    }
+
+    private fun hideKeyBoard() {
+        binding.editText.clearFocus()
+        (requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(binding.editText.windowToken, 0)
     }
 
     @SuppressLint("RestrictedApi")
@@ -192,9 +202,8 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             isFocusable = true
             isFocusableInTouchMode = true
             requestFocus()
-            val imm =
-                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(binding.editText, 0)
+            (requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .showSoftInput(binding.editText, 0)
             imeOptions = EditorInfo.IME_ACTION_SEARCH
             inputType = EditorInfo.TYPE_CLASS_TEXT
             hint = if (!viewModel.pageType.isNullOrEmpty()) "在 ${viewModel.title} 中搜索"
