@@ -10,6 +10,7 @@ data class CheckResponse(
 ) {
 
     data class Data(
+        val id: String?,
         val status: Int,
         @SerializedName("message_status") val messageStatus: Int?,
         val uid: String,

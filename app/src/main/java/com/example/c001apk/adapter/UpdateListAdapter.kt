@@ -1,32 +1,26 @@
 package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.activity.AppActivity
+import com.example.c001apk.ui.fragment.home.app.UpdateListViewModel
 import com.example.c001apk.util.AppUtils
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.http2https
-import com.example.c001apk.viewmodel.AppViewModel
 
 class UpdateListAdapter(
     private val updateList: List<UpdateCheckResponse.Data>,
-    private val viewModel: AppViewModel,
-    private val activity: FragmentActivity
+    private val viewModel: UpdateListViewModel,
 ) :
     RecyclerView.Adapter<UpdateListAdapter.ViewHolder>() {
 
@@ -54,11 +48,11 @@ class UpdateListAdapter(
         Glide.with(holder.itemView.context).load(app.logo.http2https).into(holder.icon)
         holder.appName.text = app.title
         holder.appName.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT // 刷新宽度
-        if (app.localVersionName == null) {
+        if (app.localVersionName == null || app.localVersionName == "null") {
             app.localVersionName =
                 AppUtils.getAppVersionName(holder.itemView.context, app.packageName)
         }
-        if (app.localVersionCode == null) {
+        if (app.localVersionCode == null || app.localVersionCode == -1L) {
             app.localVersionCode =
                 AppUtils.getAppVersionCode(holder.itemView.context, app.packageName)
         }
@@ -78,23 +72,9 @@ class UpdateListAdapter(
         }
         holder.btnUpdate.apply {
             setOnClickListener {
-                viewModel.downloadLinkData.observe(activity) { result ->
-                    val link = result.getOrNull()
-                    if (link != null) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                        try {
-                            activity.startActivity(intent)
-                        } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(activity, "打开失败", Toast.LENGTH_SHORT).show()
-                            e.printStackTrace()
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
                 viewModel.packageName = app.packageName
                 viewModel.versionCode = app.apkversioncode.toString()
-                viewModel.getDownloadLink()
+                viewModel.onGetDownloadLink()
             }
         }
         holder.updateLog.apply {

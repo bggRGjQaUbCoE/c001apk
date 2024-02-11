@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.activity
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,7 +16,6 @@ import com.example.c001apk.logic.model.BrowseHistory
 import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +23,7 @@ import kotlinx.coroutines.launch
 
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[HistoryViewModel::class.java] }
     private lateinit var mAdapter: BHistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private val browseHistoryDao by lazy {
@@ -35,7 +33,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         FeedFavoriteDatabase.getDatabase(this).feedFavoriteDao()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -50,27 +47,30 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
         initBar()
         initView()
-        if (viewModel.bHistoryList.isEmpty()) {
+        if (viewModel.listSize == -1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             viewModel.getBrowseList(viewModel.type.toString(), this)
         }
 
-        viewModel.browseLiveData.observe(this) {
-            viewModel.bHistoryList.clear()
-            for (element in it) {
-                if (viewModel.type == "browse") {
-                    if (!BlackListUtil.checkUid((element as BrowseHistory).uid))
-                        viewModel.bHistoryList.add(element)
-                } else {
-                    if (!BlackListUtil.checkUid((element as FeedFavorite).uid))
-                        viewModel.bHistoryList.add(element)
+        viewModel.browseLiveData.observe(this) { list ->
+            if (list.isNullOrEmpty())
+                mAdapter.setDataListData(viewModel.type.toString(), emptyList())
+            else {
+                val bHistoryList: MutableList<Any> = ArrayList()
+                for (element in list) {
+                    if (viewModel.type == "browse") {
+                        if (!BlackListUtil.checkUid((element as BrowseHistory).uid))
+                            bHistoryList.add(element)
+                    } else {
+                        if (!BlackListUtil.checkUid((element as FeedFavorite).uid))
+                            bHistoryList.add(element)
+                    }
                 }
+                mAdapter.setDataListData(viewModel.type.toString(), bHistoryList)
             }
-            mAdapter.setDataListData(viewModel.type.toString(), viewModel.bHistoryList)
             binding.indicator.parent.visibility = View.GONE
             binding.indicator.parent.isIndeterminate = false
-            mAdapter.notifyDataSetChanged()
         }
 
     }
@@ -85,7 +85,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
@@ -100,8 +99,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                             if (viewModel.type == "browse") browseHistoryDao.deleteAll()
                             else feedFavoriteDao.deleteAll()
                         }
-                        viewModel.bHistoryList.clear()
-                        mAdapter.notifyDataSetChanged()
+                        viewModel.browseLiveData.postValue(emptyList())
                     }
                     show()
                 }
@@ -112,25 +110,12 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     private fun initView() {
         mLayoutManager = LinearLayoutManager(this)
-        mAdapter = when (viewModel.type) {
-            "browse" -> BHistoryAdapter(this)
-            "favorite" -> BHistoryAdapter(this)
-            else -> throw IllegalArgumentException("error type: ${viewModel.type}")
-        }
-
+        mAdapter = BHistoryAdapter(viewModel.ItemClickListener())
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(10.dp))
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
         }
     }
 

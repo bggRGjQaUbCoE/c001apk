@@ -1,204 +1,259 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="true"
-    android:focusable="true"
-    app:cardBackgroundColor="@color/home_card_background_color"
-    app:cardElevation="0dp"
-    app:strokeWidth="0dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.example.c001apk.util.DateUtils" />
+
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.HomeFeedResponse.Data" />
+
+        <variable
+            name="likeData"
+            type="com.example.c001apk.logic.model.Like" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{(view) -> listener.onViewFeed(view, data.id, data.userInfo.uid, data.userInfo.username, data.userInfo.userAvatar, data.deviceTitle, data.message, String.valueOf(data.dateline), null, null)}"
+        android:onLongClick="@{(view) -> listener.onCopyText(view, data.message)}"
+        app:cardBackgroundColor="@color/home_card_background_color"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/avatar"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/cover"
-            android:foreground="@drawable/selector_bg_avatar"
-            app:layout_constraintBottom_toBottomOf="@id/device"
-            app:layout_constraintDimensionRatio="1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/circleImageStyle" />
-
-        <ImageButton
-            android:id="@+id/expand"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="?actionBarItemBackground"
-            android:src="@drawable/ic_expand_more"
-            app:layout_constraintBottom_toTopOf="@id/device"
-            app:layout_constraintDimensionRatio="1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.example.c001apk.view.LinkTextView
-            android:id="@+id/uname"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:clickable="true"
-            android:ellipsize="end"
-            android:focusable="true"
-            android:lines="1"
-            android:maxLines="1"
-            android:singleLine="true"
-            app:layout_constraintEnd_toStartOf="@id/expand"
-            app:layout_constraintStart_toEndOf="@id/avatar"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/from"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/avatar"
-            app:layout_constraintTop_toBottomOf="@id/uname" />
-
-        <TextView
-            android:id="@+id/device"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/from"
-            app:layout_constraintTop_toBottomOf="@id/uname" />
-
-        <TextView
-            android:id="@+id/messageTitle"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:lineSpacingMultiplier="1.3"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/avatar" />
+            android:padding="10dp">
 
-        <com.example.c001apk.view.LinkTextView
-            android:id="@+id/message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:lineSpacingMultiplier="1.3"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/messageTitle" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/avatar"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/cover"
+                android:foreground="@drawable/selector_bg_avatar"
+                android:onClick="@{(view) -> listener.onViewUser(view, data.userInfo.uid)}"
+                app:layout_constraintBottom_toBottomOf="@id/device"
+                app:layout_constraintDimensionRatio="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:setImage="@{data.userInfo.userAvatar}"
+                app:shapeAppearance="@style/circleImageStyle" />
 
-        <TextView
-            android:id="@+id/pubDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/forwarded" />
-
-        <TextView
-            android:id="@+id/like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/actionBarItemBackground"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <TextView
-            android:id="@+id/reply"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="?attr/actionBarItemBackground"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
-            app:layout_constraintEnd_toStartOf="@id/like" />
-
-        <com.example.c001apk.view.ninegridimageview.NineGridImageView
-            android:id="@+id/multiImage"
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/message" />
-
-        <TextView
-            android:id="@+id/hotReply"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/round_corners_12_win"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="@drawable/selector_bg_12_trans"
-            android:lineSpacingMultiplier="1.2"
-            android:padding="10dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multiImage" />
-
-        <LinearLayout
-            android:id="@+id/forwarded"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/round_corners_12_win"
-            android:foreground="@drawable/selector_bg_12_trans"
-            android:orientation="vertical"
-            android:padding="7dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/hotReply">
+            <ImageView
+                android:id="@+id/expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?actionBarItemBackground"
+                android:src="@drawable/ic_expand_more"
+                app:layout_constraintDimensionRatio="1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.example.c001apk.view.LinkTextView
-                android:id="@+id/forwardedMess"
-                android:layout_width="match_parent"
+                android:id="@+id/uname"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:clickable="true"
+                android:ellipsize="end"
                 android:focusable="true"
-                android:lineSpacingMultiplier="1.2"
-                android:textSize="15sp" />
+                android:lines="1"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="@{data.userInfo.username}"
+                app:layout_constraintEnd_toStartOf="@id/expand"
+                app:layout_constraintStart_toEndOf="@id/avatar"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.c001apk.view.ninegridimageview.NineGridImageView
-                android:id="@+id/forwardedPic"
+            <TextView
+                android:id="@+id/from"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="13sp"
+                android:visibility="@{data.infoHtml.isEmpty || data.infoHtml == null ? View.GONE : View.VISIBLE}"
+                app:customText="@{data.infoHtml}"
+                app:isHtml="@{true}"
+
+                app:layout_constraintStart_toEndOf="@id/avatar"
+                app:layout_constraintTop_toBottomOf="@id/uname" />
+
+            <TextView
+                android:id="@+id/device"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="13sp"
+                android:visibility="@{data.deviceTitle.isEmpty || data.deviceTitle == null ? View.INVISIBLE : View.VISIBLE}"
+                app:customText="@{data.deviceTitle}"
+                app:icon="@{@drawable/ic_device1}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/from"
+                app:layout_constraintTop_toBottomOf="@id/uname" />
+
+            <TextView
+                android:id="@+id/messageTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:visibility="gone" />
+                android:lineSpacingMultiplier="1.3"
+                android:text="@{data.messageTitle}"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="@{data.messageTitle.isEmpty || data.messageTitle == null ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/avatar" />
 
-        </LinearLayout>
+            <com.example.c001apk.view.LinkTextView
+                android:id="@+id/message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:lineSpacingMultiplier="1.3"
+                android:text="@{data.message}"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/messageTitle" />
 
-        <HorizontalScrollView
-            android:id="@+id/dyhLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:scrollbars="none"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pubDate">
-
-            <com.example.c001apk.view.LinearAdapterLayout
-                android:id="@+id/linearAdapterLayout"
+            <TextView
+                android:id="@+id/pubDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" />
-        </HorizontalScrollView>
+                android:layout_marginTop="10dp"
+                android:text="@{DateUtils.fromToday(data.dateline)}"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/forwarded" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/actionBarItemBackground"
+                android:text="@{likeData.likeNum}"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:setLike="@{likeData.isLike}" />
 
-</com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/reply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="?attr/actionBarItemBackground"
+                android:onClick="@{(view) -> listener.onViewFeed(view, data.id, data.userInfo.uid, data.userInfo.username, data.userInfo.userAvatar, data.deviceTitle, data.message, String.valueOf(data.dateline), null, true)}"
+                android:textColor="@android:color/darker_gray"
+                app:customText="@{data.replynum}"
+                app:icon="@{@drawable/ic_message}"
+                app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
+                app:layout_constraintEnd_toStartOf="@id/like" />
+
+            <com.example.c001apk.view.ninegridimageview.NineGridImageView
+                android:id="@+id/multiImage"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginTop="10dp"
+                app:feedType="@{data.feedType}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/message"
+                app:picArr="@{data.picArr}" />
+
+            <TextView
+                android:id="@+id/hotReply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_corners_12_win"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="@drawable/selector_bg_12_trans"
+                android:lineSpacingMultiplier="1.2"
+                android:onClick="@{(view) -> listener.onViewFeed(view, data.id, data.userInfo.uid, data.userInfo.username, data.userInfo.userAvatar, data.deviceTitle, data.message, String.valueOf(data.dateline), null, true)}"
+                android:onLongClick="@{(view) -> listener.onCopyText(view, data.replyRows[0].message)}"
+                android:padding="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/multiImage"
+                app:setHotReply="@{data}" />
+
+            <LinearLayout
+                android:id="@+id/forwarded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_corners_12_win"
+                android:foreground="@drawable/selector_bg_12_trans"
+                android:onClick="@{(view) -> listener.onViewFeed(view, data.forwardSourceFeed.id, ``, ``, ``, ``, ``, ``, null, null)}"
+                android:orientation="vertical"
+                android:onLongClick="@{(view) -> listener.onCopyText(view, data.forwardSourceFeed.message)}"
+                android:padding="7dp"
+                android:visibility="@{data.forwardSourceFeed == null ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hotReply">
+
+                <com.example.c001apk.view.LinkTextView
+                    android:id="@+id/forwardedMess"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:lineSpacingMultiplier="1.2"
+                    android:text="@{data.forwardSourceFeed.message}"
+                    android:textSize="15sp" />
+
+                <com.example.c001apk.view.ninegridimageview.NineGridImageView
+                    android:id="@+id/forwardedPic"
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="10dp"
+                    app:feedType="@{data.forwardSourceFeed.feedType}"
+                    app:picArr="@{data.forwardSourceFeed.picArr}" />
+
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/dyhLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:scrollbars="none"
+                android:visibility="@{data.targetRow.id == null &amp;&amp; (data.relationRows.size() == 0 || data.relationRows==null) ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pubDate">
+
+                <com.example.c001apk.view.LinearAdapterLayout
+                    android:id="@+id/linearAdapterLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:isFeedContent="@{false}"
+                    app:relationRows="@{data.relationRows}"
+                    app:targetRow="@{data.targetRow}" />
+
+            </HorizontalScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

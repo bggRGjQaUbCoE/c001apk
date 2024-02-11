@@ -2,6 +2,7 @@ package com.example.c001apk.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.c001apk.adapter.HomeMenuAdapter
@@ -31,9 +32,12 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val text: String? = intent.getStringExtra("text")
-        text?.let {
-            binding.textView.text = it
+        intent.getStringExtra("text")?.let {
+            binding.textView.text = Html.fromHtml(
+                it.replace("\n", " <br/>"),
+                Html.FROM_HTML_MODE_COMPACT
+            ).toString()
+            return
         }
 
         val type: String? = intent.getStringExtra("type")

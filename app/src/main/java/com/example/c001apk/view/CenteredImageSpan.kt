@@ -5,10 +5,8 @@ import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.text.style.ImageSpan
 
-class CenteredImageSpan(drawableRes: Drawable, textSize: Int) :
+class CenteredImageSpan(drawableRes: Drawable, private val size: Int, private val group: String?) :
     ImageSpan(drawableRes) {
-
-    val size = textSize
 
     override fun getSize(
         paint: Paint,
@@ -17,8 +15,9 @@ class CenteredImageSpan(drawableRes: Drawable, textSize: Int) :
         end: Int,
         fm: Paint.FontMetricsInt?
     ): Int {
-        //return super.getSize(paint, text, start, end, fm)
-        return size
+        return if (group == "[楼主]" || group == "[层主]" || group == "[置顶]")
+            super.getSize(paint, text, start, end, fm)
+        else size
     }
 
     override fun draw(

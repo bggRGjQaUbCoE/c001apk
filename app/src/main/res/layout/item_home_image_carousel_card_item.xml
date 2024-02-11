@@ -1,36 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:foreground="@drawable/selector_bg_12_trans">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/imageCarouselCard"
+    <data>
+
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.IconLinkGridCardBean" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/cover"
-        android:scaleType="centerCrop"
-        app:layout_constraintDimensionRatio="H, 3:1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearance="@style/searchTopicRadius" />
+        android:layout_height="match_parent"
+        android:foreground="@drawable/selector_bg_12_trans"
+        android:onClick="@{(view) -> listener.onOpenLink(view, data.url, data.title.replace(`_首页轮播`, ``))}">
 
-    <TextView
-        android:id="@+id/count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="@drawable/pic_count_bg"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:textColor="@color/count_text"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="SmallSp"
-        tools:text="1/1" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageCarouselCard"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/cover"
+            android:scaleType="centerCrop"
+            app:layout_constraintDimensionRatio="H, 3:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:setImage="@{data.pic}"
+            app:shapeAppearance="@style/searchTopicRadius" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/pic_count_bg"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:textColor="@color/count_text"
+            android:textSize="10sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="SmallSp"
+            tools:text="1/1" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -52,6 +52,13 @@ object NetWorkUtil {
             IntentUtil.startActivity<FeedActivity>(context) {
                 putExtra("id", id)
             }
+        } else if (replace.startsWith("/picture/")) {
+            val id = if (replace.contains("shareKey"))
+                replace.substring(6, replace.indexOf("?shareKey"))
+            else replace.replace("/picture/", "")
+            IntentUtil.startActivity<FeedActivity>(context) {
+                putExtra("id", id)
+            }
         } else if (replace.startsWith("#/feed/")) {
             IntentUtil.startActivity<CarouselActivity>(context) {
                 putExtra("title", title)

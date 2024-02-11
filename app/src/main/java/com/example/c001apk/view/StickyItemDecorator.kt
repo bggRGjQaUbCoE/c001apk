@@ -1,17 +1,15 @@
 package com.example.c001apk.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
-import androidx.appcompat.widget.ThemeUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.util.Utils.getColorFromAttr
 
-@SuppressLint("RestrictedApi")
 class StickyItemDecorator(
     context: Context,
     private val space: Int,
@@ -25,8 +23,7 @@ class StickyItemDecorator(
     init {
         mPaint.isAntiAlias = true
         mPaint.color =
-            ThemeUtils.getThemeAttrColor(
-                context,
+            context.getColorFromAttr(
                 com.google.android.material.R.attr.colorSurfaceVariant
             )
     }

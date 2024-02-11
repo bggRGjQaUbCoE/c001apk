@@ -1,36 +1,33 @@
 package com.example.c001apk.ui.fragment.topic
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
-import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
+import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.BaseFragment
-import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
-import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.TopicBlackListUtil
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 
-class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppListener,
+class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     IOnSearchMenuClickListener, IOnTabClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[TopicContentViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
@@ -39,7 +36,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
         arguments?.let {
             viewModel.url = it.getString("url")
             viewModel.title = it.getString("title")
-            viewModel.isEnable = it.getBoolean("isEnable")
+            viewModel.isEnable = it.getBoolean("isEnable", false)
         }
     }
 
@@ -57,7 +54,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
 
     override fun onPause() {
         super.onPause()
-        if (viewModel.isEnable)
+        if (viewModel.isEnable == true)
             (requireParentFragment() as IOnTabClickContainer).tabController = null
 
         if (viewModel.title == "讨论")
@@ -67,7 +64,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     override fun onResume() {
         super.onResume()
 
-        if (viewModel.isEnable)
+        if (viewModel.isEnable == true)
             (requireParentFragment() as IOnTabClickContainer).tabController = this
 
         if (viewModel.title == "讨论")
@@ -79,11 +76,44 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             initData()
             initRefresh()
             initScroll()
+            initObserve()
         }
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    private fun initObserve() {
+        viewModel.toastText.observe(viewLifecycleOwner){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.changeState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
+                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+            }
+        }
+
+        viewModel.topicData.observe(viewLifecycleOwner) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
+
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
+                }
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -92,120 +122,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             initData()
             initRefresh()
             initScroll()
-        }
-
-        viewModel.topicDataLiveData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val data = result.getOrNull()
-                if (data != null) {
-                    if (!data.message.isNullOrEmpty()) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = data.message
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        viewModel.isEnd = true
-                        viewModel.isLoadMore = false
-                        viewModel.isRefreshing = false
-                        binding.swipeRefresh.isRefreshing = false
-                        binding.indicator.parent.isIndeterminate = false
-                        binding.indicator.parent.visibility = View.GONE
-                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
-                        return@observe
-                    } else if (!data.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing)
-                            viewModel.topicDataList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.lastItem = data.data.last().id
-                            viewModel.listSize = viewModel.topicDataList.size
-                            for (element in data.data) {
-                                if (element.id == viewModel.lastItem)
-                                    continue
-                                if (element.entityType == "feed"
-                                    || element.entityType == "topic"
-                                    || element.entityType == "product"
-                                    || element.entityType == "user"
-                                )
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
-                                            element.tags + element.ttitle
-                                        )
-                                    )
-                                        viewModel.topicDataList.add(element)
-                            }
-                        }
-                        viewModel.loadState = mAdapter.LOADING_COMPLETE
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                    } else if (data.data?.isEmpty() == true) {
-                        if (viewModel.isRefreshing)
-                            viewModel.topicDataList.clear()
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        viewModel.isEnd = true
-                    }
-                } else {
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.topicDataList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
-            }
-        }
-
-        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostLikeFeed) {
-                viewModel.isPostLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.topicDataList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.topicDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostUnLikeFeed) {
-                viewModel.isPostUnLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.topicDataList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.topicDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
+            initObserve()
         }
 
     }
@@ -216,11 +133,11 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.topicDataList.isNotEmpty() && isAdded) {
+                    if (viewModel.listSize != -1 && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
-                            viewModel.firstCompletelyVisibleItemPosition =
+                            viewModel.firstVisibleItemPosition =
                                 mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
@@ -233,7 +150,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.topicDataList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -245,19 +162,13 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.topicDataList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getTopicData()
+        viewModel.fetchTopicData()
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireContext(),
+            requireContext().getColorFromAttr(
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
@@ -269,13 +180,13 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(requireContext(), viewModel.topicDataList)
-        mAdapter.setAppListener(this)
+        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -288,18 +199,14 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
     }
 
     private fun initData() {
-        if (viewModel.topicDataList.isEmpty()) {
+        if (viewModel.listSize == -1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             refreshData()
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.topicDataList.size)
         }
     }
 
     private fun refreshData() {
-        viewModel.subtitle = ""
         viewModel.firstVisibleItemPosition = -1
         viewModel.lastVisibleItemPosition = -1
         viewModel.lastItem = null
@@ -307,43 +214,10 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.isNew = true
-        viewModel.getTopicData()
+        viewModel.fetchTopicData()
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
 
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-    }
-
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeFeedId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeFeed = true
-            viewModel.postUnLikeFeed()
-        } else {
-            viewModel.isPostLikeFeed = true
-            viewModel.postLikeFeed()
-        }
-    }
-
-    override fun onRefreshReply(listType: String) {}
-
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
-
-    override fun onShowCollection(id: String, title: String) {}
-
-    @SuppressLint("NotifyDataSetChanged")
     override fun onSearch(type: String, value: String, id: String?) {
         viewModel.title = value
         when (value) {
@@ -356,8 +230,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
             "最新发布" -> viewModel.url =
                 "/page?url=/product/feedList?type=feed&id=$id&ignoreEntityById=1&listType=dateline_desc"
         }
-        viewModel.topicDataList.clear()
-        mAdapter.notifyDataSetChanged()
+        viewModel.topicData.postValue(emptyList())
         binding.indicator.parent.visibility = View.VISIBLE
         binding.indicator.parent.isIndeterminate = true
         refreshData()
@@ -365,25 +238,18 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(), AppLis
 
     override fun onReturnTop(isRefresh: Boolean?) {
         binding.recyclerView.stopScroll()
-        if (viewModel.firstCompletelyVisibleItemPosition == 0) {
+        if (viewModel.firstVisibleItemPosition == 0) {
             binding.swipeRefresh.isRefreshing = true
             refreshData()
         } else {
-            viewModel.firstCompletelyVisibleItemPosition = 0
+            viewModel.firstVisibleItemPosition = 0
             binding.recyclerView.scrollToPosition(0)
         }
     }
 
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
         }
     }
 

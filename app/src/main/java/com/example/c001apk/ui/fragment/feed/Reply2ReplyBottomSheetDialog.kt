@@ -9,37 +9,42 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
+import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.Reply2ReplyTotalAdapter
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
+import com.example.c001apk.databinding.ItemCaptchaBinding
+import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
-import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
-import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import java.net.URLDecoder
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
-    IOnPublishClickListener {
+class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[Reply2ReplyBottomSheetViewModel::class.java] }
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
@@ -64,17 +69,14 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     }
 
     private fun setData() {
-        val args = arguments
-        viewModel.id = args!!.getString("ID", "")
-        viewModel.fuid = args.getString("FUID", "")
-        viewModel.uid = args.getString("UID", "")
-        viewModel.position = args.getInt("POSITION")
+        arguments?.let {
+            viewModel.id = it.getString("ID", "")
+            viewModel.fuid = it.getString("FUID", "")
+            viewModel.uid = it.getString("UID", "")
+            viewModel.position = it.getInt("POSITION")
+            viewModel.oriReply = oriReply
+        }
     }
-
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialog_Md3)
-    }*/
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
         object : BottomSheetDialog(requireContext(), theme) {
@@ -107,7 +109,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged", "InflateParams")
+    @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -115,6 +117,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         initView()
         initData()
         initScroll()
+        initObserve()
 
         if (PrefManager.isLogin) {
             val view1 = LayoutInflater.from(context)
@@ -132,166 +135,75 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
             }
         }
 
-        viewModel.replyTotalLiveData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    }
 
-                val reply = result.getOrNull()
-                if (reply?.message != null) {
-                    viewModel.errorMessage = reply.message
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    showReplyErrorMessage()
-                    return@observe
-                } else if (!reply?.data.isNullOrEmpty()) {
-                    if (!viewModel.isLoadMore) {
-                        viewModel.replyTotalList.clear()
-                        viewModel.replyTotalList.addAll(oriReply)
+    private fun initObserve() {
+        viewModel.createDialog.observe(viewLifecycleOwner) { event ->
+            event?.getContentIfNotHandledOrReturnNull()?.let {
+                val binding = ItemCaptchaBinding.inflate(
+                    LayoutInflater.from(requireContext()), null, false
+                )
+                binding.captchaImg.setImageBitmap(it)
+                binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
+                    requireContext().getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimaryDark),
+                    128
+                )
+                MaterialAlertDialogBuilder(requireContext()).apply {
+                    setView(binding.root)
+                    setTitle("captcha")
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton("验证并继续") { _, _ ->
+                        viewModel.requestValidateData = HashMap()
+                        viewModel.requestValidateData["type"] = "err_request_captcha"
+                        viewModel.requestValidateData["code"] = binding.captchaText.text.toString()
+                        viewModel.requestValidateData["mobile"] = ""
+                        viewModel.requestValidateData["idcard"] = ""
+                        viewModel.requestValidateData["name"] = ""
+                        viewModel.onPostRequestValidate()
                     }
-                    viewModel.listSize = viewModel.replyTotalList.size
-                    for (element in reply?.data!!)
-                        if (element.entityType == "feed_reply")
-                            if (!BlackListUtil.checkUid(element.uid))
-                                viewModel.replyTotalList.add(element)
-                    viewModel.loadState = mAdapter.LOADING_COMPLETE
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                } else if (reply?.data?.isEmpty() == true) {
-                    if (viewModel.replyTotalList.isEmpty())
-                        viewModel.replyTotalList.addAll(oriReply)
-                    viewModel.loadState = mAdapter.LOADING_END
-                    mAdapter.setLoadState(viewModel.loadState, null)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                } else {
-                    if (viewModel.replyTotalList.isEmpty())
-                        viewModel.replyTotalList.addAll(oriReply)
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
+                    show()
                 }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.replyTotalList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
+            }
+        }
+
+        viewModel.closeSheet.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it && ::bottomSheetDialog.isInitialized && bottomSheetDialog.isShowing) {
+                    bottomSheetDialog.editText.text = null
+                    bottomSheetDialog.dismiss()
+                }
+            }
+        }
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.changeState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
-                viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
             }
         }
 
-        viewModel.likeReplyData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostLikeReply) {
-                viewModel.isPostLikeReply = false
+        viewModel.totalReplyData.observe(viewLifecycleOwner) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
 
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
-                        viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
                 }
             }
         }
-
-        viewModel.unLikeReplyData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostUnLikeReply) {
-                viewModel.isPostUnLikeReply = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.replyTotalList[viewModel.likePosition].likenum = response.data
-                        viewModel.replyTotalList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.postReplyData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostReply) {
-                viewModel.isPostReply = false
-
-                val response = result.getOrNull()
-                response?.let {
-                    if (response.data != null) {
-                        if (response.data.messageStatus == 1 || response.data.messageStatus == 2) {
-                            bottomSheetDialog.editText.text = null
-                            if (response.data.messageStatus == 1)
-                                Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT)
-                                    .show()
-                            bottomSheetDialog.cancel()
-                            viewModel.replyTotalList.add(
-                                viewModel.r2rPosition + 1,
-                                TotalReplyResponse.Data(
-                                    null,
-                                    "feed_reply",
-                                    viewModel.id.toString(),
-                                    viewModel.ruid.toString(),
-                                    PrefManager.uid,
-                                    viewModel.id.toString(),
-                                    URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                    viewModel.uname.toString(),
-                                    viewModel.replyData["message"].toString(),
-                                    "",
-                                    null,
-                                    System.currentTimeMillis() / 1000,
-                                    "0",
-                                    "0",
-                                    PrefManager.userAvatar,
-                                    ArrayList(),
-                                    0,
-                                    TotalReplyResponse.UserAction(0)
-                                )
-                            )
-                            mAdapter.notifyItemInserted(viewModel.r2rPosition + 1)
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            }
-        }
-
-        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data == "删除成功") {
-                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
-                        viewModel.replyTotalList.removeAt(viewModel.position)
-                        mAdapter.notifyItemRemoved(viewModel.position)
-                    } else if (!response.message.isNullOrEmpty()) {
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
     }
 
     private fun showReplyErrorMessage() {
@@ -305,7 +217,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.replyTotalList.isNotEmpty() && !viewModel.isEnd && isAdded)
+                    if (viewModel.listSize != -1 && !viewModel.isEnd && isAdded)
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -319,7 +231,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
                             }
                         }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.replyTotalList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -331,43 +243,33 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getReplyTotal()
+        viewModel.fetchReplyTotal()
     }
 
     private fun initData() {
-        if (viewModel.replyTotalList.isEmpty()) {
+        if (viewModel.listSize == -1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             viewModel.isEnd = false
             viewModel.isLoadMore = false
-            viewModel.isNew = true
-            viewModel.getReplyTotal()
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.replyTotalList.size)
+            viewModel.fetchReplyTotal()
         }
     }
 
     private fun initView() {
         mAdapter =
             Reply2ReplyTotalAdapter(
-                requireContext(),
+                ItemClickListener(),
                 viewModel.fuid.toString(),
                 viewModel.uid.toString(),
-                viewModel.position,
-                viewModel.replyTotalList
             )
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(requireContext())
-        mAdapter.setAppListener(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -392,38 +294,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         }
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {
-        val mBottomSheetDialogFragment = newInstance(position, viewModel.fuid.toString(), uid, id)
-        mBottomSheetDialogFragment.oriReply.add(viewModel.replyTotalList[position])
-        mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
-    }
 
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-        if (PrefManager.isLogin) {
-            if (PrefManager.SZLMID == "") {
-                Toast.makeText(requireContext(), "数字联盟ID不能为空", Toast.LENGTH_SHORT).show()
-            } else {
-                viewModel.rPosition = rPosition
-                r2rPosition?.let { viewModel.r2rPosition = r2rPosition }
-                viewModel.rid = id
-                viewModel.ruid = uid
-                viewModel.uname = uname
-                viewModel.type = type
-                initReply()
-            }
-        }
-    }
-
-    @SuppressLint("InflateParams", "RestrictedApi")
+    @SuppressLint("InflateParams")
     private fun initReply() {
         bottomSheetDialog.apply {
             rid = viewModel.rid.toString()
@@ -434,49 +306,67 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), AppListener,
         }
     }
 
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeReplyId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeReply = true
-            viewModel.postUnLikeReply()
-        } else {
-            viewModel.isPostLikeReply = true
-            viewModel.postLikeReply()
-        }
-    }
-
-    override fun onRefreshReply(listType: String) {}
-
     override fun onPublish(message: String, replyAndForward: String) {
         viewModel.replyData["message"] = message
         viewModel.replyData["replyAndForward"] = replyAndForward
-        viewModel.isPostReply = true
-        viewModel.postReply()
+        viewModel.onPostReply()
     }
 
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {
-        viewModel.rPosition = null
-        viewModel.rPosition = rPosition
-        viewModel.isNew = true
-        viewModel.position = position
-        viewModel.url = "/v6/feed/deleteReply"
-        viewModel.deleteId = id
-        viewModel.postDelete()
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
+        }
     }
 
-    override fun onShowCollection(id: String, title: String) {}
+    inner class ItemClickListener : ItemListener {
+        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
+            viewModel.onPostLikeReply(id, position, likeData)
+        }
 
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
+        override fun onReply(
+            id: String,
+            uid: String,
+            username: String?,
+            position: Int,
+            rPosition: Int?
+        ) {
+            if (PrefManager.isLogin) {
+                if (PrefManager.SZLMID == "") {
+                    Toast.makeText(requireContext(), Constants.SZLM_ID, Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    viewModel.rid = id
+                    viewModel.ruid = uid
+                    viewModel.uname = username
+                    viewModel.position = position
+                    initReply()
+                }
+            }
+        }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
+        override fun onBlockUser(uid: String, position: Int) {
+            super.onBlockUser(uid, position)
+            val currentList = viewModel.totalReplyData.value!!.toMutableList()
+            currentList.removeAt(position)
+            viewModel.totalReplyData.postValue(currentList)
+        }
+
+        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
+            viewModel.postDeleteFeedReply("/v6/feed/deleteReply", id, position)
+        }
+
+        override fun showTotalReply(id: String, uid: String, position: Int, rPosition: Int?) {
+            val mBottomSheetDialogFragment =
+                newInstance(
+                    position,
+                    viewModel.uid.toString(),
+                    uid,
+                    id
+                )
+            val feedReplyList = viewModel.totalReplyData.value!!
+            mBottomSheetDialogFragment.oriReply.add(feedReplyList[position])
+
+            mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
         }
     }
 

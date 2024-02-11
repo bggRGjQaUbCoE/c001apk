@@ -1,13 +1,12 @@
 package com.example.c001apk.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.text.TextPaint
 import android.text.style.ClickableSpan
 import android.view.View
-import androidx.appcompat.widget.ThemeUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.util.http2https
 
 internal class MyURLSpan(
@@ -43,12 +42,10 @@ internal class MyURLSpan(
         }
     }
 
-    @SuppressLint("RestrictedApi")
     override fun updateDrawState(ds: TextPaint) {
         super.updateDrawState(ds)
         if (isColor)
-            ds.color = ThemeUtils.getThemeAttrColor(
-                mContext,
+            ds.color = mContext.getColorFromAttr(
                 com.google.android.material.R.attr.colorControlNormal
             ) //设置文本颜色
         ds.isUnderlineText = false //取消下划线

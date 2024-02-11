@@ -1,40 +1,73 @@
 package com.example.c001apk.ui.fragment.home.app
 
-import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.widget.ThemeUtils
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.UpdateListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
+import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.fragment.BaseFragment
-import com.example.c001apk.util.UpdateListUtil
+import com.example.c001apk.ui.fragment.search.SearchContentFragment
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 
 class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[UpdateListViewModel::class.java] }
     private lateinit var mAdapter: UpdateListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var appsUpdateList: List<UpdateCheckResponse.Data>
+
+    companion object {
+        @JvmStatic
+        fun newInstance(appsUpdateList: ArrayList<UpdateCheckResponse.Data>) =
+            UpdateListFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelableArrayList("list", appsUpdateList)
+                }
+            }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            appsUpdateList =
+                it.getParcelableArrayList<UpdateCheckResponse.Data>("list") as List<UpdateCheckResponse.Data>
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!viewModel.isInit) {
-            initView()
-            initRefresh()
-        }
+        initView()
+        initRefresh()
+        initObserve()
 
     }
 
-    @SuppressLint("RestrictedApi")
+    private fun initObserve() {
+        viewModel.doNext.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let { link ->
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                try {
+                    requireContext().startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(requireContext(), "打开失败", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireContext(),
+            requireContext().getColorFromAttr(
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
@@ -46,7 +79,7 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
     }
 
     private fun initView() {
-        mAdapter = UpdateListAdapter(UpdateListUtil.appsUpdate, viewModel, this.requireActivity())
+        mAdapter = UpdateListAdapter(appsUpdateList, viewModel)
         mLayoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -55,16 +88,6 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
                 addItemDecoration(LinearItemDecoration(10.dp))
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        if (viewModel.isInit) {
-            viewModel.isInit = false
-            initView()
-            initRefresh()
-        }
-    }
-
 
     private fun refreshData() {
         binding.swipeRefresh.isRefreshing = true

@@ -1,205 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="false"
-    android:focusable="false"
-    app:cardBackgroundColor="@color/home_card_background_color"
-    app:cardElevation="0dp"
-    app:strokeWidth="0dp">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.example.c001apk.util.DateUtils" />
+
+        <variable
+            name="type"
+            type="String" />
+
+        <variable
+            name="likeData"
+            type="com.example.c001apk.logic.model.Like" />
+
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.MessageResponse.Data" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:clickable="false"
+        android:focusable="false"
+        android:onClick="@{(view) -> listener.onViewFeed(view, data.id, ``, ``, ``, ``, ``, ``, null, null)}"
+        app:cardBackgroundColor="@color/home_card_background_color"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/avatar"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/cover"
-            android:foreground="@drawable/selector_bg_avatar"
-            app:layout_constraintBottom_toBottomOf="@id/device"
-            app:layout_constraintDimensionRatio="1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/circleImageStyle" />
-
-        <TextView
-            android:id="@+id/uname"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            app:layout_constraintStart_toEndOf="@id/avatar"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/follow"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="关注" />
-
-        <TextView
-            android:id="@+id/device"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/avatar"
-            app:layout_constraintTop_toBottomOf="@id/uname" />
-
-        <com.example.c001apk.view.LinkTextView
-            android:id="@+id/message"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:lineSpacingMultiplier="1.3"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/avatar" />
+            android:padding="10dp">
 
-        <TextView
-            android:id="@+id/pubDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/forward1" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/avatar"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/cover"
+                android:foreground="@drawable/selector_bg_avatar"
+                android:onClick="@{(view) -> listener.onViewUser(view, type == `feedLike` ? data.likeUid : data.uid)}"
+                app:layout_constraintBottom_toBottomOf="@id/device"
+                app:layout_constraintDimensionRatio="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:setImage="@{type == `feedLike` ? data.likeAvatar : data.userAvatar}"
+                app:shapeAppearance="@style/circleImageStyle" />
 
-        <TextView
-            android:id="@+id/like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/actionBarItemBackground"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:id="@+id/uname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@{type == `feedLike` ? data.likeUsername : data.username}"
+                app:layout_constraintStart_toEndOf="@id/avatar"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/reply"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
-            app:layout_constraintEnd_toStartOf="@id/like" />
+            <TextView
+                android:id="@+id/follow"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="关注" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/forward"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-            app:cardElevation="0dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/message"
-            app:strokeWidth="0dp">
+            <TextView
+                android:id="@+id/device"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="13sp"
+                android:visibility="@{data.deviceTitle.isEmpty || data.deviceTitle == null ? View.INVISIBLE : View.VISIBLE}"
+                app:customText="@{data.deviceTitle}"
+                app:icon="@{@drawable/ic_device}"
+                app:layout_constraintStart_toEndOf="@id/avatar"
+                app:layout_constraintTop_toBottomOf="@id/uname" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.example.c001apk.view.LinkTextView
+                android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/round_corners_12_win"
-                android:foreground="@drawable/selector_bg_12_trans"
-                android:padding="5dp">
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:lineSpacingMultiplier="1.3"
+                android:text="@{type == `feedLike` ? `赞了你的` + data.infoHtml : data.message}"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/avatar" />
 
-                <com.example.c001apk.view.LinkTextView
-                    android:id="@+id/forwardTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/pubDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@android:color/darker_gray"
+                app:customText="@{type == `feedLike` ? String.valueOf(DateUtils.fromToday(data.likeTime)) : String.valueOf(DateUtils.fromToday(data.dateline))}"
+                app:icon="@{@drawable/ic_date}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/forward1" />
 
-                <com.example.c001apk.view.LinkTextView
-                    android:id="@+id/forwardMessage"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/forwardTitle" />
+            <TextView
+                android:id="@+id/like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/actionBarItemBackground"
+                android:text="@{likeData == null ? `` : likeData.likeNum}"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:setLike="@{likeData.isLike}" />
 
-                <com.example.c001apk.view.ninegridimageview.NineGridImageView
-                    android:id="@+id/multiImage"
+            <TextView
+                android:id="@+id/reply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:textColor="@android:color/darker_gray"
+                app:customText="@{data.replynum}"
+                app:icon="@{@drawable/ic_message}"
+                app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
+                app:layout_constraintEnd_toStartOf="@id/like" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/forward"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:onClick="@{(view) -> listener.onViewFeed(view, data.forwardSourceFeed.id, ``, ``, ``, ``, ``, ``, null, null)}"
+                android:onLongClick="@{(view) -> listener.onCopyText(view, data.forwardSourceFeed.message)}"
+                android:visibility="@{data.forwardSourceFeed == null ? View.GONE : View.VISIBLE}"
+                app:cardElevation="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/message"
+                app:strokeWidth="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:visibility="gone"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/forwardMessage" />
+                    android:background="@drawable/round_corners_12_win"
+                    android:foreground="@drawable/selector_bg_12_trans"
+                    android:padding="5dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <com.example.c001apk.view.LinkTextView
+                        android:id="@+id/forwardTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@{data.forwardSourceFeed.messageTitle}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-        </com.google.android.material.card.MaterialCardView>
+                    <com.example.c001apk.view.LinkTextView
+                        android:id="@+id/forwardMessage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@{data.forwardSourceFeed.message}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/forwardTitle" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/forward1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:visibility="visible"
-            app:cardElevation="0dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/forward"
-            app:strokeWidth="0dp">
+                    <com.example.c001apk.view.ninegridimageview.NineGridImageView
+                        android:id="@+id/multiImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp"
+                        android:layout_marginTop="10dp"
+                        app:feedType="@{data.forwardSourceFeed.feedType}"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/forwardMessage"
+                        app:picArr="@{data.forwardSourceFeed.picArr}" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/forward1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/round_corners_12_win"
-                android:foreground="@drawable/selector_bg_12_trans"
-                android:padding="5dp">
+                android:layout_marginTop="10dp"
+                android:onClick="@{(view) -> listener.onViewFeed(view, type == `feedLike` ? data.fid : data.feed.id, ``, ``, ``, ``, ``, ``, null, null)}"
+                android:visibility="@{data.feed == null ? View.GONE : View.VISIBLE}"
+                app:cardElevation="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/forward"
+                app:strokeWidth="0dp">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/forward1Pic"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@color/cover"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintDimensionRatio="H, 1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearance="@style/searchTopicRadius" />
-
-                <TextView
-                    android:id="@+id/forwardUname1"
-                    android:layout_width="0dp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/forward1Pic"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:background="@drawable/round_corners_12_win"
+                    android:foreground="@drawable/selector_bg_12_trans"
+                    android:padding="5dp">
 
-                <TextView
-                    android:id="@+id/forwardMessage1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="5dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/forward1Pic"
-                    app:layout_constraintTop_toBottomOf="@id/forwardUname1" />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/forward1Pic"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@color/cover"
+                        android:scaleType="centerCrop"
+                        android:visibility="@{type == `feedLike` ? View.GONE : View.VISIBLE}"
+                        app:layout_constraintDimensionRatio="H, 1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:setImage="@{data.feed.pic}"
+                        app:shapeAppearance="@style/searchTopicRadius" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/forwardUname1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@{type == `feedLike` ? data.username : data.feed.username}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/forward1Pic"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-        </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/forwardMessage1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:text="@{type == `feedLike` ? data.message : data.feed.message}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/forward1Pic"
+                        app:layout_constraintTop_toBottomOf="@id/forwardUname1" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

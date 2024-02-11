@@ -101,17 +101,11 @@ object Network {
     suspend fun getFollowList(url: String, uid: String, page: Int) =
         apiService.getFollowList(url, uid, page).await()
 
-    suspend fun postLikeFeed(id: String) =
-        apiService.postLikeFeed(id).await()
+    suspend fun postLikeFeed(url:String, id: String) =
+        apiService.postLikeFeed(url, id).await()
 
-    suspend fun postUnLikeFeed(id: String) =
-        apiService.postUnLikeFeed(id).await()
-
-    suspend fun postLikeReply(id: String) =
-        apiService.postLikeReply(id).await()
-
-    suspend fun postUnLikeReply(id: String) =
-        apiService.postUnLikeReply(id).await()
+    suspend fun postLikeReply(url:String, id: String) =
+        apiService.postLikeReply(url, id).await()
 
     suspend fun checkLoginInfo() =
         apiService.checkLoginInfo().response()

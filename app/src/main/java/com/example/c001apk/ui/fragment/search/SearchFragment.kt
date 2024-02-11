@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.search
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -10,7 +9,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
@@ -20,7 +18,7 @@ import com.example.c001apk.logic.database.SearchHistoryDatabase
 import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
-import com.example.c001apk.viewmodel.AppViewModel
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -32,7 +30,7 @@ import kotlinx.coroutines.launch
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[SearchViewModel::class.java] }
     private var mAdapter: HistoryAdapter? = null
     private var mLayoutManager: FlexboxLayoutManager? = null
     private val searchHistoryDao by lazy {
@@ -60,16 +58,14 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (viewModel.historyList.isEmpty()) {
-            binding.historyLayout.visibility = View.GONE
-            viewModel.isNew = true
+        if (viewModel.listSize == -1) {
+            binding.clearAll.visibility = View.GONE
             viewModel.getBlackList("history", requireContext())
         } else
-            binding.historyLayout.visibility = View.VISIBLE
+            binding.clearAll.visibility = View.VISIBLE
 
         initView()
         initEditText()
@@ -78,29 +74,19 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         initClearHistory()
 
         viewModel.blackListLiveData.observe(viewLifecycleOwner) {
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                try {
-                    viewModel.historyList.clear()
-                    viewModel.historyList.addAll(it)
-                    if (viewModel.historyList.isEmpty())
-                        binding.historyLayout.visibility = View.GONE
-                    else
-                        binding.historyLayout.visibility = View.VISIBLE
-                    mAdapter?.notifyDataSetChanged()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    throw IllegalArgumentException("searchFragment: fail to load keyword: ${e.message}")
-                }
-            }
+            viewModel.listSize = it.size
+            mAdapter?.submitList(it)
+            if (it.isEmpty())
+                binding.clearAll.visibility = View.GONE
+            else
+                binding.clearAll.visibility = View.VISIBLE
         }
 
     }
 
     private fun initView() {
         mLayoutManager = FlexboxLayoutManager(requireContext(), FlexDirection.ROW, FlexWrap.WRAP)
-        mAdapter = HistoryAdapter(viewModel.historyList)
+        mAdapter = HistoryAdapter()
         mAdapter?.setOnItemClickListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -108,7 +94,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initClearHistory() {
         binding.clearAll.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext()).apply {
@@ -119,9 +104,8 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                         CoroutineScope(Dispatchers.IO).launch {
                             searchHistoryDao.deleteAll()
                         }
-                        viewModel.historyList.clear()
-                        mAdapter?.notifyDataSetChanged()
-                        binding.historyLayout.visibility = View.GONE
+                        viewModel.blackListLiveData.postValue(emptyList())
+                        binding.clearAll.visibility = View.GONE
                     } catch (e: Exception) {
                         e.printStackTrace()
                         throw IllegalArgumentException("searchFragment: fail to clear keyword: ${e.message}")
@@ -190,13 +174,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             .hideSoftInputFromWindow(binding.editText.windowToken, 0)
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initEditText() {
         binding.editText.apply {
             highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
-                    rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                requireContext().getColorFromAttr(
+                    rikka.preference.simplemenu.R.attr.colorPrimary
                 ), 128
             )
             isFocusable = true
@@ -245,28 +227,26 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                 }
                 searchHistoryDao.insert(SearchHistory(keyword))
             }
-            val index = viewModel.historyList.indexOf(keyword)
-            if (index != -1) {
-                viewModel.historyList.removeAt(index)
-                mAdapter?.notifyItemRemoved(index)
-            }
-            viewModel.historyList.add(0, keyword)
-            mAdapter?.notifyItemInserted(0)
+            val currentList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
+            val index = currentList.indexOf(keyword)
+            if (index != -1)
+                currentList.removeAt(index)
+            currentList.add(0, keyword)
+            viewModel.blackListLiveData.postValue(currentList)
         } catch (e: Exception) {
             e.printStackTrace()
             throw IllegalArgumentException("searchFragment: fail to update keyword: ${e.message}")
         }
-
     }
 
-    override fun onItemDeleteClick(keyword: String) {
+    override fun onItemDeleteClick(position: Int, keyword: String) {
         try {
             CoroutineScope(Dispatchers.IO).launch {
                 searchHistoryDao.delete(keyword)
             }
-            val position = viewModel.historyList.indexOf(keyword)
-            viewModel.historyList.removeAt(position)
-            mAdapter?.notifyItemRemoved(position)
+            val currentList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
+            currentList.removeAt(position)
+            viewModel.blackListLiveData.postValue(currentList)
         } catch (e: Exception) {
             e.printStackTrace()
             throw IllegalArgumentException("searchFragment: fail to delete keyword: ${e.message}")

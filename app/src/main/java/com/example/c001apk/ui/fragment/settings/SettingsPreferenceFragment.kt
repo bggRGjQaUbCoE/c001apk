@@ -115,7 +115,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
     }
 
-    @SuppressLint("SetTextI18n", "RestrictedApi", "InflateParams")
+    @SuppressLint("SetTextI18n", "InflateParams")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = SettingsPreferenceDataStore()
         setPreferencesFromResource(R.xml.settings, rootKey)

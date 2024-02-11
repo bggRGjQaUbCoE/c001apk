@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.example.c001apk.view.ninegridimageview.NineGridImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <data>
 
-    <TextView
-        android:id="@+id/description"
+        <import type="android.view.View" />
+
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.FeedArticleContentBean.Data" />
+
+    </data>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center_horizontal"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="13sp"
-        android:visibility="gone" />
+        android:orientation="vertical">
 
-</LinearLayout>
+        <com.example.c001apk.view.ninegridimageview.NineGridImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:setArticleImage="@{data}" />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_horizontal"
+            android:text="@{data.description}"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp"
+            android:visibility="@{data.description.isEmpty || data.description == null ? View.GONE : View.VISIBLE}" />
+
+    </LinearLayout>
+
+</layout>

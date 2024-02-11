@@ -8,7 +8,16 @@ plugins {
     id("dev.rikka.tools.materialthemebuilder")
     id("com.google.devtools.ksp")
     id("stringfog")
+    id("kotlin-kapt")
+    id("kotlin-parcelize")
 }
+
+apply(plugin = "kotlin-kapt")
+
+kapt {
+    generateStubs = true
+}
+
 apply(plugin = "stringfog")
 
 configure<com.github.megatronking.stringfog.plugin.StringFogExtension> {
@@ -123,6 +132,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
         buildConfig = true
     }
     defaultConfig {

@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
-import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
@@ -18,7 +17,6 @@ import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -26,7 +24,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
     IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var subscribe: MenuItem
@@ -69,137 +67,44 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             initBar()
         }
 
+        initObserve()
+
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.visibility = View.GONE
             getViewData()
         }
 
-        viewModel.topicLayoutLiveData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    }
 
-                val data = result.getOrNull()
-                if (data?.data != null) {
-                    viewModel.isFollow = data.data.userAction?.follow == 1
-                    if (viewModel.tabList.isEmpty()) {
-                        viewModel.id = data.data.id
-                        viewModel.type = data.data.entityType
-                        viewModel.subtitle = data.data.intro
+    private fun initObserve() {
 
-                        for (element in data.data.tabList) {
-                            viewModel.tabList.add(element.title)
-                            viewModel.topicList.add(
-                                TopicBean(
-                                    element.url,
-                                    element.title
-                                )
-                            )
-                        }
-                        var tabSelected = 0
-                        for (element in data.data.tabList) {
-                            if (data.data.selectedTab == element.pageName) break
-                            else tabSelected++
-                        }
-                        initView(tabSelected)
-                        initBar()
-                    }
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
+        viewModel.afterFollow.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it.second, Toast.LENGTH_SHORT).show()
+                if (it.first) {
+                    initSub()
+                }
+            }
+        }
+
+        viewModel.doNext.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    initView(viewModel.tabSelected)
+                    initBar()
                 } else {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
                     binding.errorLayout.parent.visibility = View.VISIBLE
-                    result.exceptionOrNull()?.printStackTrace()
                 }
-            }
-        }
-
-        viewModel.productLayoutLiveData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val data = result.getOrNull()
-                if (data?.data != null) {
-                    viewModel.isFollow = data.data.userAction?.follow == 1
-                    if (viewModel.tabList.isEmpty()) {
-                        viewModel.subtitle = data.data.intro
-
-                        for (element in data.data.tabList) {
-                            viewModel.tabList.add(element.title)
-                            viewModel.topicList.add(
-                                TopicBean(
-                                    element.url,
-                                    element.title
-                                )
-                            )
-                        }
-                        var tabSelected = 0
-                        for (element in data.data.tabList) {
-                            if (data.data.selectedTab == element.pageName) break
-                            else tabSelected++
-                        }
-                        initView(tabSelected)
-                        initBar()
-                    }
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                } else {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    binding.errorLayout.parent.visibility = View.VISIBLE
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.getFollowData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (!response.message.isNullOrEmpty()) {
-                        if (response.message.contains("关注成功")) {
-                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                                .show()
-                            viewModel.isFollow = !viewModel.isFollow
-                            initSub()
-                        } else
-                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                                .show()
-                    }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.postFollowData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (!response.message.isNullOrEmpty()) {
-                        if (response.message.contains("手机吧成功")) {
-                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                                .show()
-                            viewModel.isFollow = !viewModel.isFollow
-                            initSub()
-                        } else
-                            Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                                .show()
-                    }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
             }
         }
 
     }
 
     private fun initSub() {
-        subscribe.title = if (viewModel.isFollow) "取消关注"
+        subscribe.title =
+            if (viewModel.isFollow) "取消关注"
         else "关注"
     }
 
@@ -285,19 +190,21 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                     R.id.subscribe -> {
                         when (viewModel.type) {
                             "topic" -> {
-                                viewModel.isNew = true
-                                viewModel.followUrl = if (viewModel.isFollow) "/v6/feed/unFollowTag"
-                                else "/v6/feed/followTag"
+                                viewModel.followUrl =
+                                    if (viewModel.isFollow) "/v6/feed/unFollowTag"
+                                    else "/v6/feed/followTag"
                                 viewModel.tag = viewModel.url.toString().replace("/t/", "")
-                                viewModel.getFollow()
+                                viewModel.onGetFollow()
                             }
 
                             "product" -> {
-                                viewModel.isNew = true
-                                viewModel.postFollow["id"] = viewModel.id.toString()
-                                viewModel.postFollow["status"] = if (viewModel.isFollow) "0"
-                                else "1"
-                                viewModel.postFollow()
+                                if (viewModel.postFollowData.isNullOrEmpty())
+                                    viewModel.postFollowData = HashMap()
+                                viewModel.postFollowData!!["id"] = viewModel.id.toString()
+                                viewModel.postFollowData!!["status"] =
+                                    if (viewModel.isFollow) "0"
+                                    else "1"
+                                viewModel.onPostFollow()
                             }
 
                             else -> Toast.makeText(
@@ -358,12 +265,11 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     private fun getViewData() {
         binding.indicator.parent.visibility = View.VISIBLE
         binding.indicator.parent.isIndeterminate = true
-        viewModel.isNew = true
         if (viewModel.type == "topic") {
             viewModel.url = viewModel.url.toString().replace("/t/", "")
-            viewModel.getTopicLayout()
+            viewModel.fetchTopicLayout()
         } else if (viewModel.type == "product") {
-            viewModel.getProductLayout()
+            viewModel.fetchProductLayout()
         }
     }
 

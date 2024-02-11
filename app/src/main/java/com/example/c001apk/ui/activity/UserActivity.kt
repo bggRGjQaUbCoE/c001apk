@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.activity
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.text.SpannableString
@@ -9,41 +8,33 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
+import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.databinding.ActivityUserBinding
-import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.ClipboardUtil.copyText
-import com.example.c001apk.util.CountUtil
-import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TopicBlackListUtil
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
-class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
+class UserActivity : BaseActivity<ActivityUserBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[UserViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
-    @SuppressLint(
-        "ResourceAsColor", "SetTextI18n", "NotifyDataSetChanged", "UseCompatLoadingForDrawables",
-        "RestrictedApi", "ResourceType"
-    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,34 +42,17 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        if (!viewModel.uname.isNullOrEmpty()) {
-            showUserInfo()
-            binding.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
-            else View.GONE
+        if (viewModel.userData != null)
             binding.infoLayout.visibility = View.VISIBLE
-        } else if (viewModel.errorMessage != null) {
+        else if (viewModel.errorMessage != null) {
             showErrorMessage()
         }
+
         initView()
         initData()
         initRefresh()
         initScroll()
-
-        binding.avatar.setOnClickListener {
-            ImageUtil.startBigImgViewSimple(binding.avatar, viewModel.avatar.toString())
-        }
-
-        binding.cover.setOnClickListener {
-            ImageUtil.startBigImgViewSimple(binding.cover, viewModel.cover.toString())
-        }
-
-        binding.name.setOnClickListener {
-            copyText(this, viewModel.uname.toString())
-        }
-
-        binding.uid.setOnClickListener {
-            copyText(this, viewModel.uid.toString())
-        }
+        initObserve()
 
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.visibility = View.GONE
@@ -90,219 +64,82 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         binding.followBtn.setOnClickListener {
             if (PrefManager.isLogin)
                 if (viewModel.followType) {
-                    viewModel.postFollowUnFollow = true
                     viewModel.url = "/v6/user/unfollow"
-                    viewModel.postFollowUnFollow()
+                    viewModel.onPostFollowUnFollow()
                 } else {
-                    viewModel.postFollowUnFollow = true
                     viewModel.url = "/v6/user/follow"
-                    viewModel.postFollowUnFollow()
+                    viewModel.onPostFollowUnFollow()
                 }
         }
-
-        viewModel.userData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val user = result.getOrNull()
-                if (user?.message != null) {
-                    viewModel.errorMessage = user.message
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    showErrorMessage()
-                    return@observe
-                } else if (user?.data != null) {
-                    viewModel.uid = user.data.uid
-                    viewModel.followType = user.data.isFollow == 1
-                    viewModel.avatar = user.data.userAvatar
-                    viewModel.cover = user.data.cover
-                    viewModel.uname = user.data.username
-                    viewModel.avatar = user.data.userAvatar
-                    viewModel.cover = user.data.cover
-                    viewModel.level = "Lv.${user.data.level}"
-                    viewModel.bio = user.data.bio
-                    viewModel.like = "${CountUtil.view(user.data.beLikeNum)}获赞"
-                    viewModel.follow = "${CountUtil.view(user.data.follow)}关注"
-                    viewModel.fans = "${CountUtil.view(user.data.fans)}粉丝"
-                    viewModel.loginTime = DateUtils.fromToday(user.data.logintime) + "活跃"
-                    showUserInfo()
-
-                    viewModel.uid = user.data.uid
-                    viewModel.isRefreshing = true
-                    viewModel.isNew = true
-                    viewModel.getUserFeed()
-                } else {
-                    viewModel.uid = null
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    binding.errorLayout.parent.visibility = View.VISIBLE
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.userFeedData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val feed = result.getOrNull()
-                if (feed != null) {
-                    if (!feed.message.isNullOrEmpty()) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = feed.message
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        viewModel.isEnd = true
-                        viewModel.isLoadMore = false
-                        viewModel.isRefreshing = false
-                        binding.indicator.parent.isIndeterminate = false
-                        binding.indicator.parent.visibility = View.GONE
-                        binding.swipeRefresh.isRefreshing = false
-                        mAdapter.notifyItemChanged(viewModel.feedList.size)
-                        return@observe
-                    } else if (!feed.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing) viewModel.feedList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.listSize = viewModel.feedList.size
-                            for (element in feed.data) {
-                                if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
-                                            element.tags + element.ttitle
-                                        )
-                                    )
-                                        viewModel.feedList.add(element)
-                            }
-                        }
-                        viewModel.loadState = mAdapter.LOADING_COMPLETE
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                    } else if (feed.data?.isEmpty() == true) {
-                        if (viewModel.isRefreshing) viewModel.feedList.clear()
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        viewModel.isEnd = true
-                    }
-                } else {
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.feedList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.feedList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
-                binding.infoLayout.visibility = View.VISIBLE
-                binding.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
-                else View.GONE
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreshing = false
-                viewModel.isLoadMore = false
-            }
-        }
-
-        viewModel.likeFeedData.observe(this) { result ->
-            if (viewModel.isPostLikeFeed) {
-                viewModel.isPostLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.feedList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.feedList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.unLikeFeedData.observe(this) { result ->
-            if (viewModel.isPostUnLikeFeed) {
-                viewModel.isPostUnLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.feedList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.feedList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.postFollowUnFollowData.observe(this) { result ->
-            if (viewModel.postFollowUnFollow) {
-                viewModel.postFollowUnFollow = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (viewModel.followType) {
-                        binding.followBtn.text = "关注"
-                    } else {
-                        binding.followBtn.text = "已关注"
-                    }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
 
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun showUserInfo() {
-        binding.collapsingToolbar.title = viewModel.uname
-        binding.collapsingToolbar.setCollapsedTitleTextColor(this.getColor(R.color.white))
-        binding.collapsingToolbar.setExpandedTitleColor(this.getColor(com.google.android.material.R.color.mtrl_btn_transparent_bg_color))
-        ImageUtil.showUserCover(binding.cover, viewModel.cover)
-        ImageUtil.showIMG(binding.avatar, viewModel.avatar)
-        binding.name.text = viewModel.uname
-        binding.uid.text = "uid: ${viewModel.uid}"
-        binding.level.text = viewModel.level
-        binding.level.visibility = View.VISIBLE
-        if (viewModel.bio.isNullOrEmpty()) binding.bio.visibility = View.GONE
-        else binding.bio.text = viewModel.bio
-        binding.like.text = viewModel.like
-        binding.follow.text = viewModel.follow
-        binding.fans.text = viewModel.fans
-        binding.loginTime.text = viewModel.loginTime
-        if (!viewModel.followType) {
-            binding.followBtn.text = "关注"
-        } else {
-            binding.followBtn.text = "已关注"
-        }
-        binding.follow.setOnClickListener {
-            IntentUtil.startActivity<FFFListActivity>(this) {
-                putExtra("uid", viewModel.uid)
-                putExtra("isEnable", false)
-                putExtra("type", "follow")
+    private fun initObserve() {
+        viewModel.toastText.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         }
-        binding.fans.setOnClickListener {
-            IntentUtil.startActivity<FFFListActivity>(this) {
-                putExtra("uid", viewModel.uid)
-                putExtra("isEnable", false)
-                putExtra("type", "fans")
+
+        viewModel.afterFollow.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (viewModel.followType) {
+                    binding.followBtn.text = "已关注"
+                } else {
+                    binding.followBtn.text = "关注"
+                }
             }
         }
+
+        viewModel.showError.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    showErrorMessage()
+                } else {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    binding.errorLayout.parent.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        viewModel.showUser.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    binding.userData = viewModel.userData
+                    binding.listener = viewModel.ItemClickListener()
+                    binding.infoLayout.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        viewModel.changeState.observe(this) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
+                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+            }
+        }
+
+        viewModel.feedData.observe(this) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
+
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
+                }
+            }
+        }
+
     }
 
     private fun showErrorMessage() {
@@ -317,7 +154,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.feedList.isNotEmpty() && !viewModel.isEnd) {
+                    if (viewModel.listSize != -1 && !viewModel.isEnd) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -332,7 +169,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.feedList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -344,19 +181,14 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.feedList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getUserFeed()
+        viewModel.fetchUserFeed()
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                this, rikka.preference.simplemenu.R.attr.colorPrimary
+            this.getColorFromAttr(
+                rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
@@ -374,32 +206,28 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
             refreshData()
         } else if (viewModel.uid == null) {
             binding.errorLayout.parent.visibility = View.VISIBLE
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.feedList.size)
         }
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
-        viewModel.lastVisibleItemPosition = -1
+        viewModel.firstVisibleItemPosition = 0
+        viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
-        if (viewModel.id.isNullOrEmpty())
-            viewModel.id = intent.getStringExtra("id")
-        viewModel.isNew = true
-        viewModel.getUser()
+        if (viewModel.uid.isNullOrEmpty())
+            viewModel.uid = intent.getStringExtra("id")
+        viewModel.fetchUser()
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(this, viewModel.feedList)
-        mAdapter.setAppListener(this)
+        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -411,7 +239,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         }
     }
 
-    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.user_menu, menu)
 
@@ -419,8 +246,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         val spannableString = SpannableString(itemBlock?.title)
         spannableString.setSpan(
             ForegroundColorSpan(
-                ThemeUtils.getThemeAttrColor(
-                    this,
+                this.getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorControlNormal
                 )
             ),
@@ -435,8 +261,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         val spannableString1 = SpannableString(itemShare?.title)
         spannableString1.setSpan(
             ForegroundColorSpan(
-                ThemeUtils.getThemeAttrColor(
-                    this,
+                this.getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorControlNormal
                 )
             ),
@@ -450,8 +275,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         val spannableString2 = SpannableString(itemReport?.title)
         spannableString2.setSpan(
             ForegroundColorSpan(
-                ThemeUtils.getThemeAttrColor(
-                    this,
+                this.getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorControlNormal
                 )
             ),
@@ -505,48 +329,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>(), AppListener {
         return true
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
 
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-    }
-
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeFeedId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeFeed = true
-            viewModel.postUnLikeFeed()
-        } else {
-            viewModel.isPostLikeFeed = true
-            viewModel.postLikeFeed()
-        }
-    }
-
-    override fun onRefreshReply(listType: String) {}
-
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
-
-    override fun onShowCollection(id: String, title: String) {}
-
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
         }
     }
 

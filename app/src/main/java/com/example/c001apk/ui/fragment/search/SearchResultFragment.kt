@@ -12,14 +12,13 @@ import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
 class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     IOnSearchMenuClickContainer, IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[SearchContentViewModel::class.java] }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var type: MenuItem
@@ -176,7 +175,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     }
 
     private fun initView() {
-        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
+        binding.viewPager.offscreenPageLimit = viewModel.tabList?.size ?: 0
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 if (viewModel.pageType.isNullOrEmpty()) {
@@ -228,10 +227,10 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
 
                 }
 
-            override fun getItemCount() = viewModel.tabList.size
+            override fun getItemCount() = viewModel.tabList?.size ?: 0
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = viewModel.tabList[position]
+            tab.text = viewModel.tabList?.get(position)
         }.attach()
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {

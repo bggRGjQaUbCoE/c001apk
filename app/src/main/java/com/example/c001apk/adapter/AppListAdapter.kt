@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.c001apk.R
@@ -18,8 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AppListAdapter(private val appList: List<AppItem>) :
-    RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+class AppListAdapter :
+    ListAdapter<AppItem, AppListAdapter.ViewHolder>(AppListDiffCallback()) {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var icon: ImageView = itemView.findViewById(R.id.appIcon)
@@ -39,10 +41,8 @@ class AppListAdapter(private val appList: List<AppItem>) :
         return viewHolder
     }
 
-    override fun getItemCount() = appList.size
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val app = appList[position]
+        val app = currentList[position]
         Glide.with(holder.icon).load(LocalAppIcon(app.packageName)).into(holder.icon)
         CoroutineScope(Dispatchers.IO).launch {
             if (app.appName.isEmpty()) app.appName =
@@ -55,4 +55,20 @@ class AppListAdapter(private val appList: List<AppItem>) :
         holder.versionName.text = app.versionName
     }
 
+}
+
+class AppListDiffCallback : DiffUtil.ItemCallback<AppItem>() {
+    override fun areItemsTheSame(
+        oldItem: AppItem,
+        newItem: AppItem
+    ): Boolean {
+        return oldItem.packageName == newItem.packageName
+    }
+
+    override fun areContentsTheSame(
+        oldItem: AppItem,
+        newItem: AppItem
+    ): Boolean {
+        return oldItem.packageName == newItem.packageName
+    }
 }

@@ -1,9 +1,7 @@
 package com.example.c001apk.ui.activity
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -17,12 +15,9 @@ import com.example.c001apk.databinding.ActivityAppBinding
 import com.example.c001apk.ui.fragment.AppFragment
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
-import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -30,11 +25,10 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[ApkViewModel::class.java] }
     private var subscribe: MenuItem? = null
     override var tabController: IOnTabClickListener? = null
 
-    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,12 +37,13 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         if (!viewModel.title.isNullOrEmpty()) {
-            showAppInfo()
+            binding.appData = viewModel.appData
             binding.appLayout.visibility = View.VISIBLE
         } else if (viewModel.errorMessage != null) {
             showErrorMessage()
         }
         initData()
+        initObserve()
 
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.visibility = View.GONE
@@ -57,75 +52,56 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             refreshData()
         }
 
-        viewModel.appInfoData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    }
 
-                val appInfo = result.getOrNull()
-                if (appInfo?.message != null) {
-                    viewModel.errorMessage = appInfo.message
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
+    private fun initObserve() {
+        viewModel.showError.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    binding.appLayout.visibility = View.GONE
+                    binding.tabLayout.visibility = View.GONE
                     showErrorMessage()
-                    return@observe
-                } else if (appInfo?.data != null) {
-                    viewModel.isFollow = appInfo.data.userAction?.follow == 1
-                    viewModel.commentStatusText = appInfo.data.commentStatusText
-                    viewModel.title = appInfo.data.title
-                    viewModel.version =
-                        "版本: ${appInfo.data.version}(${appInfo.data.apkversioncode})"
-                    viewModel.size = "大小: ${appInfo.data.apksize}"
-                    viewModel.lastupdate = if (appInfo.data.lastupdate == null) "更新时间: null"
-                    else "更新时间: ${DateUtils.fromToday(appInfo.data.lastupdate)}"
-                    viewModel.logo = appInfo.data.logo
-                    viewModel.appId = appInfo.data.id
-                    viewModel.packageName = appInfo.data.apkname
-                    viewModel.versionCode = appInfo.data.apkversioncode
-                    viewModel.type = appInfo.data.entityType
-                    showAppInfo()
+                }
+            }
+        }
 
-                    if (viewModel.commentStatusText == "允许评论" || viewModel.type == "appForum") {
-                        viewModel.tabList.apply {
-                            add("最近回复")
-                            add("最新发布")
-                            add("热度排序")
-                        }
-                        initView()
-                    } else {
-                        viewModel.errorMessage = appInfo.data.commentStatusText
-                        showErrorMessage()
-                    }
-
-                    binding.appLayout.visibility = View.VISIBLE
+        viewModel.showAppInfo.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    binding.appData = viewModel.appData
                 } else {
+                    binding.appLayout.visibility = View.GONE
                     binding.errorLayout.parent.visibility = View.VISIBLE
-                    result.exceptionOrNull()?.printStackTrace()
                 }
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
             }
         }
 
-        viewModel.getFollowData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    response.data?.follow?.let {
-                        viewModel.isFollow = !viewModel.isFollow
-                        initSub()
-                        Toast.makeText(
-                            this, if (response.data.follow == 1) "关注成功"
-                            else "取消关注成功", Toast.LENGTH_SHORT
-                        ).show()
-                    }
+        viewModel.doNext.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    initView()
                 } else {
-                    result.exceptionOrNull()?.printStackTrace()
+                    binding.tabLayout.visibility = View.GONE
+                    showErrorMessage()
                 }
             }
         }
 
+        viewModel.download.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it)
+                    downloadApp()
+            }
+        }
+
+        viewModel.toastText.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                initSub()
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun initView() {
@@ -133,9 +109,9 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 when (position) {
-                    0 -> AppFragment.newInstance("reply", viewModel.id.toString())
-                    1 -> AppFragment.newInstance("pub", viewModel.id.toString())
-                    2 -> AppFragment.newInstance("hot", viewModel.id.toString())
+                    0 -> AppFragment.newInstance("reply", viewModel.appId.toString())
+                    1 -> AppFragment.newInstance("pub", viewModel.appId.toString())
+                    2 -> AppFragment.newInstance("hot", viewModel.appId.toString())
                     else -> throw IllegalArgumentException()
                 }
 
@@ -158,40 +134,10 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun showErrorMessage() {
-        binding.tabLayout.visibility = View.GONE
         binding.errorMessage.parent.visibility = View.VISIBLE
         binding.errorMessage.parent.text = viewModel.errorMessage
-    }
-
-    private fun showAppInfo() {
-        binding.name.text = viewModel.title
-        binding.version.text = viewModel.version
-        binding.size.text = viewModel.size
-        binding.updateTime.text = viewModel.lastupdate
-        binding.collapsingToolbar.title = viewModel.title
-        binding.collapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT)
-        ImageUtil.showIMG(binding.logo, viewModel.logo)
-        if (viewModel.type == "apk")
-            binding.btnDownload.visibility = View.VISIBLE
-        binding.btnDownload.setOnClickListener {
-            if (viewModel.collectionUrl.isNullOrEmpty()) {
-                viewModel.isNew = true
-                viewModel.getDownloadLink()
-            } else
-                downloadApp()
-        }
-        viewModel.downloadLinkData.observe(this@AppActivity) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-                val link = result.getOrNull()
-                if (!link.isNullOrEmpty()) {
-                    viewModel.collectionUrl = link
-                    downloadApp()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
+        binding.indicator.parent.isIndeterminate = false
+        binding.indicator.parent.visibility = View.GONE
     }
 
     private fun downloadApp() {
@@ -219,9 +165,9 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun refreshData() {
-        viewModel.id = intent.getStringExtra("id")
-        viewModel.isNew = true
-        viewModel.getAppInfo()
+        intent.getStringExtra("id")?.let {
+            viewModel.fetchAppInfo(it)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -259,11 +205,10 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             }
 
             R.id.subscribe -> {
-                viewModel.isNew = true
-                viewModel.followUrl = if (viewModel.isFollow) "/v6/apk/unFollow"
-                else "/v6/apk/follow"
-                viewModel.fid = viewModel.appId
-                viewModel.getFollow()
+                viewModel.followUrl =
+                    if (viewModel.isFollow) "/v6/apk/unFollow"
+                    else "/v6/apk/follow"
+                viewModel.onGetFollow()
             }
 
             R.id.block -> {

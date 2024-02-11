@@ -5,21 +5,25 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
+import com.example.c001apk.adapter.Event
+import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.MessageAdapter
+import com.example.c001apk.adapter.MessageFirstAdapter
+import com.example.c001apk.adapter.MessageSecondAdapter
+import com.example.c001apk.adapter.MessageThirdAdapter
 import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.activity.LoginActivity
 import com.example.c001apk.ui.activity.MainActivity
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
-import com.example.c001apk.ui.fragment.minterface.IOnNotiLongClickListener
 import com.example.c001apk.util.ActivityCollector
-import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.CookieUtil.atcommentme
 import com.example.c001apk.util.CookieUtil.atme
 import com.example.c001apk.util.CookieUtil.contacts_follow
@@ -28,36 +32,37 @@ import com.example.c001apk.util.CookieUtil.message
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.net.URLDecoder
-import java.net.URLEncoder
 
 
-class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClickListener {
+class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }
+    private val messageFirstAdapter by lazy { MessageFirstAdapter() }
+    private val messageSecondAdapter by lazy { MessageSecondAdapter() }
+    private val messageThirdAdapter by lazy { MessageThirdAdapter() }
     private lateinit var mAdapter: MessageAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
-    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        viewModel.url = "/v6/notification/list"
 
         binding.clickToLogin.setOnClickListener {
             IntentUtil.startActivity<LoginActivity>(requireContext()) {
             }
         }
 
-        initRefresh()
         initView()
         initScroll()
+        initRefresh()
         initMenu()
+        initObserve()
 
         if (PrefManager.isLogin) {
             binding.clickToLogin.visibility = View.GONE
@@ -69,9 +74,11 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             if (viewModel.isInit) {
                 viewModel.isInit = false
                 getData()
-            } else if (viewModel.isEnd) {
-                mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
+            } else {
+                if (viewModel.countList.isNotEmpty())
+                    messageFirstAdapter.setFFFList(viewModel.countList)
+                if (viewModel.messCountList.isNotEmpty())
+                    messageThirdAdapter.setBadgeList(viewModel.messCountList)
             }
             viewModel.messCountList.apply {
                 add(atme)
@@ -87,138 +94,51 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             binding.levelLayout.visibility = View.INVISIBLE
             binding.progress.visibility = View.INVISIBLE
         }
+    }
 
-        viewModel.profileDataLiveData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    private fun initObserve() {
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
 
-                val data = result.getOrNull()
-                if (data?.data != null) {
-                    viewModel.countList.clear()
-                    viewModel.countList.apply {
-                        add(data.data.feed)
-                        add(data.data.follow)
-                        add(data.data.fans)
-                    }
-                    PrefManager.username = URLEncoder.encode(data.data.username, "UTF-8")
-                    PrefManager.userAvatar = data.data.userAvatar
-                    PrefManager.level = data.data.level
-                    PrefManager.experience = data.data.experience.toString()
-                    PrefManager.nextLevelExperience = data.data.nextLevelExperience.toString()
-                    showProfile()
+        viewModel.doWhat.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                when (it) {
+                    "showProfile" -> showProfile()
 
-                    viewModel.isNew = true
-                    viewModel.getMessage()
-                } else {
-                    viewModel.isEnd = true
-                    viewModel.isRefreshing = false
-                    viewModel.isLoadMore = false
-                    binding.swipeRefresh.isRefreshing = false
-                    result.exceptionOrNull()?.printStackTrace()
+                    "isRefreshing" -> binding.swipeRefresh.isRefreshing = false
+
+                    "countList" -> messageFirstAdapter.setFFFList(viewModel.countList)
+
+                    "messCountList" -> messageThirdAdapter.setBadgeList(viewModel.messCountList)
                 }
             }
         }
 
-        viewModel.messageData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val feed = result.getOrNull()
-                if (feed != null) {
-                    if (!feed.message.isNullOrEmpty()) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = feed.message
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        viewModel.isEnd = true
-                        viewModel.isLoadMore = false
-                        viewModel.isRefreshing = false
-                        binding.swipeRefresh.isRefreshing = false
-                        mAdapter.notifyItemChanged(viewModel.messageList.size)
-                        return@observe
-                    } else if (!feed.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing)
-                            viewModel.messageList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.listSize = viewModel.messageList.size
-                            for (element in feed.data)
-                                if (element.entityType == "notification")
-                                    if (!BlackListUtil.checkUid(element.fromuid))
-                                        viewModel.messageList.add(element)
-                        }
-                        viewModel.loadState = mAdapter.LOADING_COMPLETE
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                    } else if (feed.data?.isEmpty() == true) {
-                        if (viewModel.isRefreshing)
-                            viewModel.messageList.clear()
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        viewModel.isEnd = true
-                    }
-                } else {
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize + 6,
-                            viewModel.messageList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
-                viewModel.isLoadMore = false
+        viewModel.changeState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
                 binding.swipeRefresh.isRefreshing = false
+                viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
             }
         }
 
-        viewModel.checkLoginInfoData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isGetCheckLoginInfo) {
-                viewModel.isGetCheckLoginInfo = false
+        viewModel.messageData.observe(viewLifecycleOwner) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
 
-                val response = result.getOrNull()
-                response?.let {
-                    response.body()?.let {
-                        if (response.body()?.data?.token != null) {
-                            val login = response.body()?.data!!
-                            viewModel.messCountList.apply {
-                                add(login.notifyCount.atme)
-                                add(login.notifyCount.atcommentme)
-                                add(login.notifyCount.feedlike)
-                                add(login.notifyCount.contactsFollow)
-                                add(login.notifyCount.message)
-                            }
-                        }
-                    }
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
                 }
             }
         }
-
-        viewModel.postDeleteData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data == "删除成功") {
-                        Toast.makeText(requireContext(), response.data, Toast.LENGTH_SHORT).show()
-                        viewModel.messageList.removeAt(viewModel.position - 6)
-                        mAdapter.notifyItemRemoved(viewModel.position)
-                    } else if (!response.message.isNullOrEmpty()) {
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
     }
 
     private fun initScroll() {
@@ -227,7 +147,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.messageList.isNotEmpty() && !viewModel.isEnd && isAdded) {
+                    if (viewModel.listSize != -1 && !viewModel.isEnd && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -242,8 +162,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.messageList.size + 6
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 6
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
+                        && !binding.swipeRefresh.isShown
                     ) {
                         viewModel.page++
                         loadMore()
@@ -253,7 +174,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.messageList.isNotEmpty()) {
+                if (viewModel.listSize != -1) {
                     if (dy > 0) {
                         (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
@@ -265,27 +186,19 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.messageList.size + 6)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getMessage()
+        viewModel.fetchMessage()
     }
 
     private fun initView() {
-        mAdapter = MessageAdapter(
-            requireContext(),
-            viewModel.countList,
-            viewModel.messCountList,
-            viewModel.messageList
-        )
+        mAdapter = MessageAdapter(ItemClickListener())
+        messageThirdAdapter.setBadgeList(listOf(atme, atcommentme, feedlike, contacts_follow))
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(requireContext())
-        mAdapter.setIOnNotiLongClickListener(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter(messageFirstAdapter, messageSecondAdapter, messageThirdAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -297,20 +210,17 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
         }
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireContext(),
+            requireContext().getColorFromAttr(
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
             getData()
             if (PrefManager.isLogin) {
-                viewModel.isGetCheckLoginInfo = true
                 viewModel.messCountList.clear()
-                viewModel.getCheckLoginInfo()
+                viewModel.fetchCheckLoginInfo()
             }
         }
     }
@@ -319,19 +229,16 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
         if (PrefManager.isLogin) {
             binding.swipeRefresh.isRefreshing = true
             viewModel.uid = PrefManager.uid
-            viewModel.isNew = true
             viewModel.page = 1
             viewModel.isEnd = false
             viewModel.isRefreshing = true
             viewModel.isLoadMore = false
-            viewModel.getProfile()
+            viewModel.fetchProfile()
         } else
             binding.swipeRefresh.isRefreshing = false
-
     }
 
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initMenu() {
         binding.toolBar.apply {
             inflateMenu(R.menu.message_menu)
@@ -345,10 +252,11 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
                             setPositiveButton(android.R.string.ok) { _, _ ->
                                 viewModel.countList.clear()
                                 viewModel.messCountList.clear()
-                                viewModel.messageList.clear()
+                                viewModel.doWhat.postValue(Event("countList"))
+                                viewModel.doWhat.postValue(Event("messCountList"))
+                                viewModel.messageData.postValue(emptyList())
                                 viewModel.isInit = true
                                 viewModel.isEnd = false
-                                mAdapter.notifyDataSetChanged()
                                 PrefManager.isLogin = false
                                 PrefManager.uid = ""
                                 PrefManager.username = ""
@@ -380,32 +288,32 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>(), IOnNotiLongClick
             ImageUtil.showIMG(binding.avatar, PrefManager.userAvatar)
     }
 
-    override fun onDeleteNoti(uname: String, id: String, position: Int) {
-        MaterialAlertDialogBuilder(requireContext()).apply {
-            setTitle("删除来自 $uname 的通知？")
-            setNegativeButton(android.R.string.cancel, null)
-            setPositiveButton(android.R.string.ok) { _, _ ->
-                viewModel.url = "/v6/notification/delete"
-                viewModel.isNew = true
-                viewModel.position = position
-                viewModel.deleteId = id
-                viewModel.postDelete()
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
+        }
+    }
+
+    inner class ItemClickListener : ItemListener {
+        override fun onBlockUser(uid: String, position: Int) {
+            super.onBlockUser(uid, position)
+            val currentList = viewModel.messageData.value!!.toMutableList()
+            currentList.removeAt(position)
+            viewModel.messageData.postValue(currentList)
+        }
+
+        override fun onMessLongClicked(uname: String, id: String, position: Int): Boolean {
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setTitle("删除来自 $uname 的通知？")
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    viewModel.onPostDelete(position, id)
+                }
+                show()
             }
-            show()
+            return true
         }
     }
 
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
-        }
-    }
 
 }

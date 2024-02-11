@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.FeedArticleContentBean.Data" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+    </data>
 
     <TextView
         android:id="@+id/urlTitle"
@@ -12,6 +21,8 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="@drawable/selector_bg_12_trans"
-        android:padding="10dp" />
+        android:onClick="@{(view) -> listener.onOpenLink(view, data.url, data.title)}"
+        android:padding="10dp"
+        android:text="@{data.title}" />
 
-</LinearLayout>
+</layout>

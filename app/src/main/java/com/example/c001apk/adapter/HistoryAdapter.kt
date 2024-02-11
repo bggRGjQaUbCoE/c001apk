@@ -3,14 +3,18 @@ package com.example.c001apk.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
 
-class HistoryAdapter(private var historyList: ArrayList<String>) :
-    RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+class HistoryAdapter(
+
+) :
+    ListAdapter<String, HistoryAdapter.ViewHolder>(HistoryDiffCallback()) {
 
     private lateinit var iOnItemClickListener: IOnItemClickListener
 
@@ -20,7 +24,7 @@ class HistoryAdapter(private var historyList: ArrayList<String>) :
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var keyWord: TextView = view.findViewById(R.id.keyWord)
-        val delete: ImageButton = view.findViewById(R.id.delete)
+        val delete: ImageView = view.findViewById(R.id.delete)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,21 +39,36 @@ class HistoryAdapter(private var historyList: ArrayList<String>) :
             true
         }
         viewHolder.delete.setOnClickListener {
-            val position = viewHolder.bindingAdapterPosition
-            iOnItemClickListener.onItemDeleteClick(historyList[position])
+            iOnItemClickListener.onItemDeleteClick(
+                viewHolder.bindingAdapterPosition,
+                viewHolder.keyWord.text.toString()
+            )
             viewHolder.delete.visibility = View.GONE
         }
         viewHolder.keyWord.setOnClickListener {
-            val position = viewHolder.bindingAdapterPosition
-            iOnItemClickListener.onItemClick(historyList[position])
+            iOnItemClickListener.onItemClick(viewHolder.keyWord.text.toString())
         }
         return viewHolder
     }
 
-    override fun getItemCount() = historyList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val keyWord = historyList[position]
-        holder.keyWord.text = keyWord
+        holder.keyWord.text = currentList[position]
+    }
+}
+
+class HistoryDiffCallback : DiffUtil.ItemCallback<String>() {
+    override fun areItemsTheSame(
+        oldItem: String,
+        newItem: String
+    ): Boolean {
+        return oldItem == newItem
+    }
+
+    override fun areContentsTheSame(
+        oldItem: String,
+        newItem: String
+    ): Boolean {
+        return oldItem == newItem
     }
 }

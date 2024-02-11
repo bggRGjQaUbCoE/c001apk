@@ -1,226 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    app:edgeToEdge="true">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.example.c001apk.util.DateUtils" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+        <variable
+            name="userData"
+            type="com.example.c001apk.logic.model.UserProfileResponse.Data" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        app:edgeToEdge="true">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsingToolbar"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/infoLayout"
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsingToolbar"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="invisible"
-                app:layout_collapseMode="parallax">
+                app:collapsedTitleTextColor="@color/white"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleTextColor="@android:color/transparent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:title="@{userData.username}">
 
-                <ImageView
-                    android:id="@+id/cover"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/infoLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_marginTop="?actionBarSize"
-                    android:background="@color/cover"
-                    android:foreground="@drawable/selector_bg_avatar"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearance="@style/circleImageStyle"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/name"
-                    style="@style/UserTextColor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    android:ellipsize="end"
                     android:gravity="center"
-                    android:maxLines="1"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/avatar" />
+                    android:orientation="vertical"
+                    android:visibility="invisible"
+                    app:layout_collapseMode="parallax">
 
-                <LinearLayout
-                    android:id="@+id/info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/name">
+                    <ImageView
+                        android:id="@+id/cover"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:fitsSystemWindows="true"
+                        android:onClick="@{(view) -> listener.loadImage(view, userData.cover)}"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:setCover="@{userData.cover}" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/avatar"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_marginTop="?actionBarSize"
+                        android:background="@color/cover"
+                        android:foreground="@drawable/selector_bg_avatar"
+                        android:onClick="@{(view) -> listener.loadImage(view, userData.userAvatar)}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:setImage="@{userData.userAvatar}"
+                        app:shapeAppearance="@style/circleImageStyle"
+                        tools:ignore="ContentDescription" />
 
                     <TextView
-                        android:id="@+id/uid"
+                        android:id="@+id/name"
                         style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:textSize="16sp" />
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:onClick="@{(view) -> listener.onCopyToClip(view, userData.username)}"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="@{userData.username}"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/avatar" />
 
-                    <TextView
-                        android:id="@+id/level"
+                    <LinearLayout
+                        android:id="@+id/info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="10dp"
-                        android:background="@drawable/pic_count_bg"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:textColor="@color/count_text"
-                        android:textSize="11sp"
-                        android:visibility="invisible" />
-                </LinearLayout>
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/name">
 
-                <TextView
-                    android:id="@+id/bio"
-                    style="@style/UserTextColor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:textSize="14sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/info" />
+                        <TextView
+                            android:id="@+id/uid"
+                            style="@style/UserTextColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:onClick="@{(view) -> listener.onCopyToClip(view, userData.uid)}"
+                            android:text="@{`UID: ` + userData.uid}"
+                            android:textSize="16sp" />
 
-                <LinearLayout
-                    android:id="@+id/info2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/bio">
+                        <TextView
+                            android:id="@+id/level"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/pic_count_bg"
+                            android:paddingStart="5dp"
+                            android:paddingEnd="5dp"
+                            android:text="@{`Lv.` + userData.level}"
+                            android:textColor="@color/count_text"
+                            android:textSize="11sp" />
+
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/like"
+                        android:id="@+id/bio"
                         style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:background="?attr/actionBarItemBackground"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:onClick="@{(view) -> listener.onCopyToClip(view, userData.bio)}"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="@{userData.bio}"
+                        android:textSize="14sp"
+                        android:visibility="@{userData.bio.isEmpty || userData.bio == null ? View.GONE : View.VISIBLE}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/info" />
+
+                    <LinearLayout
+                        android:id="@+id/info2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/bio">
+
+                        <TextView
+                            android:id="@+id/like"
+                            style="@style/UserTextColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:background="?attr/actionBarItemBackground"
+                            android:text="@{userData.beLikeNum + `获赞`}"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/follow"
+                            style="@style/UserTextColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="10dp"
+                            android:onClick="@{(view) -> listener.viewFFFList(view, userData.uid, false, `follow`)}"
+                            android:text="@{userData.follow + `关注`}"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/fans"
+                            style="@style/UserTextColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="10dp"
+                            android:onClick="@{(view) -> listener.viewFFFList(view, userData.uid, false, `fans`)}"
+                            android:text="@{userData.fans + `粉丝`}"
+                            android:textSize="14sp" />
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/follow"
+                        android:id="@+id/loginTime"
                         style="@style/UserTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginStart="10dp"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="4dp"
+                        android:text="@{DateUtils.fromToday(userData.logintime) + `活跃`}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/info2" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:theme="@style/OverflowMenu"
+                    app:layout_collapseMode="pin">
 
                     <TextView
-                        android:id="@+id/fans"
-                        style="@style/UserTextColor"
+                        android:id="@+id/followBtn"
+                        style="@style/Widget.Material3.Button.TextButton.Mod"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="10dp"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:text="@{userData.isFollow() == 1 ? `取消关注` : `关注`}"
+                        android:visibility="@{userData.isFollow() == null ? View.GONE : View.VISIBLE}"
+                        tools:text="关注" />
 
-                <TextView
-                    android:id="@+id/loginTime"
-                    style="@style/UserTextColor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/info2" />
+                </com.google.android.material.appbar.MaterialToolbar>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolBar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:theme="@style/OverflowMenu"
-                app:layout_collapseMode="pin">
+        </com.google.android.material.appbar.AppBarLayout>
 
-                <TextView
-                    android:id="@+id/followBtn"
-                    style="@style/Widget.Material3.Button.TextButton.Mod"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end|center_vertical"
-                    android:layout_marginEnd="10dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:visibility="gone"
-                    tools:text="关注" />
-            </com.google.android.material.appbar.MaterialToolbar>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:scrollbars="none"
-            app:fitsSystemWindowsInsets="bottom" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:scrollbars="none"
+                app:fitsSystemWindowsInsets="bottom" />
 
-    <include
-        android:id="@+id/indicator"
-        layout="@layout/item_indicator" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <include
-        android:id="@+id/errorMessage"
-        layout="@layout/item_error_message" />
+        <include
+            android:id="@+id/indicator"
+            layout="@layout/item_indicator" />
 
-    <include
-        android:id="@+id/errorLayout"
-        layout="@layout/item_error_layout" />
+        <include
+            android:id="@+id/errorMessage"
+            layout="@layout/item_error_message" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <include
+            android:id="@+id/errorLayout"
+            layout="@layout/item_error_layout" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

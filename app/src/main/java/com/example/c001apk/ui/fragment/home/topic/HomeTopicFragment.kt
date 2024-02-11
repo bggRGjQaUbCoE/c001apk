@@ -9,17 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.BrandLabelAdapter
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
-import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.view.MyLinearSmoothScroller
-import com.example.c001apk.viewmodel.AppViewModel
 
 
-class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
+class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
     BrandLabelAdapter.OnLabelClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[HomeTopicViewModel::class.java] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +29,7 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
     companion object {
         @JvmStatic
         fun newInstance(type: String) =
-            TopicFragment().apply {
+            HomeTopicFragment().apply {
                 arguments = Bundle().apply {
                     putString("TYPE", type)
                 }
@@ -44,6 +42,7 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
         if (viewModel.isInit) {
             viewModel.isInit = false
             initData()
+            initObserve()
         }
 
     }
@@ -51,18 +50,19 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!viewModel.isInit)
+        if (!viewModel.isInit) {
             initView()
+            initObserve()
+        }
 
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.visibility = View.GONE
             binding.indicator.parent.isIndeterminate = true
             binding.indicator.parent.visibility = View.VISIBLE
-            viewModel.isNew = true
             if (viewModel.type == "topic")
-                viewModel.getDataList()
+                viewModel.fetchTopicList()
             else
-                viewModel.getProductList()
+                viewModel.fetchProductList()
         }
 
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -76,60 +76,21 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
             }
         })
 
-        viewModel.dataListData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    }
 
-                val topic = result.getOrNull()
-                if (!topic?.data.isNullOrEmpty()) {
-                    if (viewModel.tabList.isEmpty()) {
-                        for (element in topic?.data!![0].entities) {
-                            viewModel.tabList.add(element.title)
-                            viewModel.topicList.add(
-                                TopicBean(
-                                    element.url,
-                                    element.title
-                                )
-                            )
-                        }
-                        initView()
-                    }
-                } else {
+    private fun initObserve() {
+        viewModel.doNext.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it)
+                    initView()
+                else {
                     binding.indicator.parent.isIndeterminate = false
                     binding.indicator.parent.visibility = View.GONE
                     binding.errorLayout.parent.visibility = View.VISIBLE
-                    result.exceptionOrNull()?.printStackTrace()
                 }
             }
+
         }
-
-        viewModel.productCategoryData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val data = result.getOrNull()
-                if (!data?.data.isNullOrEmpty()) {
-                    if (viewModel.tabList.isEmpty()) {
-                        for (element in data?.data!!) {
-                            viewModel.tabList.add(element.title)
-                            viewModel.topicList.add(
-                                TopicBean(
-                                    element.url,
-                                    element.title
-                                )
-                            )
-                        }
-                        initView()
-                    }
-                } else {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    binding.errorLayout.parent.visibility = View.VISIBLE
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
     }
 
 
@@ -137,22 +98,21 @@ class TopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
         if (viewModel.tabList.isEmpty()) {
             binding.indicator.parent.isIndeterminate = true
             binding.indicator.parent.visibility = View.VISIBLE
-            viewModel.isNew = true
             if (viewModel.type == "topic") {
                 viewModel.url = "/page?url=V11_VERTICAL_TOPIC"
                 viewModel.title = "话题"
-                viewModel.getDataList()
+                viewModel.fetchTopicList()
             } else
-                viewModel.getProductList()
+                viewModel.fetchProductList()
         }
     }
 
     private fun initView() {
         if (viewModel.tabList.isNotEmpty()) {
             binding.recyclerView.apply {
-                adapter = BrandLabelAdapter(requireContext(), viewModel.tabList).also {
+                adapter = BrandLabelAdapter(viewModel.tabList).also {
                     it.setCurrentPosition(viewModel.position)
-                    it.setOnLabelClickListener(this@TopicFragment)
+                    it.setOnLabelClickListener(this@HomeTopicFragment)
                 }
                 layoutManager = LinearLayoutManager(requireContext())
 

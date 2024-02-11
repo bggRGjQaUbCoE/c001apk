@@ -1,12 +1,10 @@
 package com.example.c001apk.ui.fragment.home
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -17,14 +15,14 @@ import com.example.c001apk.ui.activity.CopyActivity
 import com.example.c001apk.ui.activity.SearchActivity
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.home.app.AppListFragment
-import com.example.c001apk.ui.fragment.home.topic.TopicFragment
+import com.example.c001apk.ui.fragment.home.topic.HomeTopicFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnBottomClickListener
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickContainer
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.viewmodel.AppViewModel
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.Tab
 import com.google.android.material.tabs.TabLayoutMediator
@@ -37,7 +35,7 @@ import kotlinx.coroutines.withContext
 class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener,
     IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
     override var tabController: IOnTabClickListener? = null
     private val homeMenuDao by lazy {
         HomeMenuDatabase.getDatabase(requireContext()).homeMenuDao()
@@ -53,7 +51,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         initMenu()
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            @SuppressLint("RestrictedApi")
             override fun onTabSelected(tab: Tab?) {
                 viewModel.position = tab!!.position
                 val textView = TextView(requireContext())
@@ -65,8 +62,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
                 textView.paint.isFakeBoldText = true
                 textView.gravity = Gravity.CENTER_HORIZONTAL
                 textView.setTextColor(
-                    ThemeUtils.getThemeAttrColor(
-                        requireContext(),
+                    requireContext().getColorFromAttr(
                         rikka.preference.simplemenu.R.attr.colorPrimary
                     )
                 )
@@ -75,7 +71,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
                 tab.setCustomView(textView)
             }
 
-            @SuppressLint("RestrictedApi")
             override fun onTabUnselected(tab: Tab?) {
                 val textView = TextView(requireContext())
                 val selectedSize = TypedValue.applyDimension(
@@ -86,8 +81,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
                 textView.paint.isFakeBoldText = false
                 textView.gravity = Gravity.CENTER_HORIZONTAL
                 textView.setTextColor(
-                    ThemeUtils.getThemeAttrColor(
-                        requireContext(),
+                    requireContext().getColorFromAttr(
                         rikka.preference.simplemenu.R.attr.colorControlNormal
                     )
                 )
@@ -115,9 +109,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
             if (viewModel.menuList.isEmpty()) {
                 initMenuList()
             } else {
-                for (element in viewModel.menuList) {
-                    if (element.isEnable)
-                        viewModel.tabList.add(element.title)
+                viewModel.menuList.forEach {
+                    if (it.isEnable)
+                        viewModel.tabList.add(it.title)
                 }
                 if (viewModel.tabList.isEmpty()) {
                     homeMenuDao.deleteAll()
@@ -164,7 +158,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         }
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initView() {
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
@@ -174,8 +167,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
                     "应用" -> AppListFragment()
                     "头条" -> HomeFeedFragment.newInstance("feed")
                     "热榜" -> HomeFeedFragment.newInstance("rank")
-                    "话题" -> TopicFragment.newInstance("topic")
-                    "数码" -> TopicFragment.newInstance("product")
+                    "话题" -> HomeTopicFragment.newInstance("topic")
+                    "数码" -> HomeTopicFragment.newInstance("product")
                     "酷图" -> HomeFeedFragment.newInstance("coolPic")
                     else -> throw IllegalArgumentException()
                 }
@@ -187,8 +180,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
-        if (viewModel.isInitial) {
-            viewModel.isInitial = false
+        if (viewModel.isInit) {
+            viewModel.isInit = false
             if (viewModel.tabList.contains("头条"))
                 binding.viewPager.setCurrentItem(viewModel.tabList.indexOf("头条"), false)
         } else {
@@ -201,8 +194,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
             textView.paint.isFakeBoldText = true
             textView.gravity = Gravity.CENTER_HORIZONTAL
             textView.setTextColor(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimary
                 )
             )

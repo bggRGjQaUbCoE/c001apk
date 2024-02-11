@@ -36,7 +36,6 @@ interface ApiService {
     ): Call<HomeFeedResponse>
 
     @GET("/v6/feed/detail")
-    //@FormUrlEncoded
     fun getFeedContent(
         @Query("id") id: String,
         @Query("rid") rid: String?
@@ -125,23 +124,15 @@ interface ApiService {
         @Query("page") page: Int
     ): Call<HomeFeedResponse>
 
-    @POST("/v6/feed/like")
+    @POST
     fun postLikeFeed(
+        @Url url: String,
         @Query("id") id: String
     ): Call<LikeFeedResponse>
 
-    @POST("/v6/feed/unlike")
-    fun postUnLikeFeed(
-        @Query("id") id: String
-    ): Call<LikeFeedResponse>
-
-    @POST("/v6/feed/likeReply")
+    @POST
     fun postLikeReply(
-        @Query("id") id: String
-    ): Call<LikeReplyResponse>
-
-    @POST("/v6/feed/unLikeReply")
-    fun postUnLikeReply(
+        @Url url: String,
         @Query("id") id: String
     ): Call<LikeReplyResponse>
 

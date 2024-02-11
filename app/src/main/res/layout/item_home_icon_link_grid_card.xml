@@ -1,42 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="false"
-    app:cardBackgroundColor="@color/home_card_background_color"
-    app:cardElevation="0dp"
-    app:strokeWidth="0dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
+    <data>
+
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:clickable="false"
+        app:cardBackgroundColor="@color/home_card_background_color"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
 
-        <com.example.c001apk.view.NestedScrollableHost
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/viewPager"
+            <com.example.c001apk.view.NestedScrollableHost
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none" />
+                android:layout_height="wrap_content">
 
-        </com.example.c001apk.view.NestedScrollableHost>
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none" />
 
-        <com.example.c001apk.view.circleindicator.CircleIndicator3
-            android:id="@+id/indicator"
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="3dp"
-            app:ci_animator="@anim/indicator_animator"
-            app:ci_animator_reverse="@anim/indicator_animator_reverse"
-            app:ci_drawable="@drawable/black_radius_square"
-            app:ci_height="4dp"
-            app:ci_width="10dp" />
+            </com.example.c001apk.view.NestedScrollableHost>
 
-    </LinearLayout>
+            <com.example.c001apk.view.circleindicator.CircleIndicator3
+                android:id="@+id/indicator"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="3dp"
+                app:ci_animator="@anim/indicator_animator"
+                app:ci_animator_reverse="@anim/indicator_animator_reverse"
+                app:ci_drawable="@drawable/black_radius_square"
+                app:ci_height="4dp"
+                app:ci_width="10dp" />
 
-</com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.settings
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.DialogFragment
@@ -18,6 +16,7 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.DialogAboutBinding
 import com.example.c001apk.databinding.FragmentSettingsBinding
 import com.example.c001apk.ui.fragment.BaseFragment
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.material.app.LocaleDelegate
 
@@ -55,16 +54,14 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
     }
 
     class AboutDialog : DialogFragment() {
-        @SuppressLint("RestrictedApi")
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             val binding: DialogAboutBinding =
                 DialogAboutBinding.inflate(layoutInflater, null, false)
             binding.designAboutTitle.setText(R.string.app_name)
             binding.designAboutInfo.movementMethod = LinkMovementMethod.getInstance()
             binding.designAboutInfo.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
-                    rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                requireContext().getColorFromAttr(
+                    rikka.preference.simplemenu.R.attr.colorPrimary
                 ), 128
             )
             binding.designAboutInfo.text = HtmlCompat.fromHtml(

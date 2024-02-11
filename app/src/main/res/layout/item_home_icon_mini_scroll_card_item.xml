@@ -1,35 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/parentLayout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/round_corners_20_win"
-    android:foreground="@drawable/selector_bg_20_trans"
-    android:padding="5dp">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iconMiniScrollCard"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/cover"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="H, 1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearance="@style/circleImageStyle"
-        tools:src="@drawable/ic_home_outline" />
+    <data>
 
-    <TextView
-        android:id="@+id/title"
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.HomeFeedResponse.Entities" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parentLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:maxLines="1"
-        android:textSize="13sp"
-        app:layout_constraintStart_toEndOf="@id/iconMiniScrollCard"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="home" />
+        android:background="@drawable/round_corners_20_win"
+        android:foreground="@drawable/selector_bg_20_trans"
+        android:onClick="@{(view) -> listener.onViewTopic(view, data.entityType, data.title, data.url, data.id)}"
+        android:padding="5dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iconMiniScrollCard"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/cover"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="H, 1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:setImage="@{data.logo}"
+            app:shapeAppearance="@style/circleImageStyle"
+            tools:src="@drawable/ic_home_outline" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:maxLines="1"
+            android:text="@{data.title}"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@id/iconMiniScrollCard"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="home" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

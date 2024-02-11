@@ -5,26 +5,24 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
-import com.example.c001apk.R
+import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.MessageContentAdapter
 import com.example.c001apk.databinding.ActivityMessageBinding
-import com.example.c001apk.ui.fragment.minterface.AppListener
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 
-class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
+class MessageActivity : BaseActivity<ActivityMessageBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }
     private lateinit var mAdapter: MessageContentAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
@@ -39,106 +37,35 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
         initData()
         initRefresh()
         initScroll()
+        initObserve()
 
-        viewModel.messageData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    }
 
-                val feed = result.getOrNull()
-                if (feed != null) {
-                    if (!feed.message.isNullOrEmpty()) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = feed.message
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        viewModel.isEnd = true
-                        viewModel.isLoadMore = false
-                        viewModel.isRefreshing = false
-                        binding.indicator.parent.isIndeterminate = false
-                        binding.indicator.parent.visibility = View.GONE
-                        binding.swipeRefresh.isRefreshing = false
-                        mAdapter.notifyItemChanged(viewModel.messageList.size)
-                        return@observe
-                    } else if (!feed.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing) viewModel.messageList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.listSize = viewModel.messageList.size
-                            for (element in feed.data)
-                                if (element.entityType == "feed"
-                                    || element.entityType == "feed_reply"
-                                    || element.entityType == "notification"
-                                )
-                                    if (!BlackListUtil.checkUid(element.uid))
-                                        viewModel.messageList.add(element)
-                        }
-                        viewModel.loadState = mAdapter.LOADING_COMPLETE
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                    } else if (feed.data?.isEmpty() == true) {
-                        if (viewModel.isRefreshing) viewModel.messageList.clear()
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        viewModel.isEnd = true
-                    }
-                } else {
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.messageList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.messageList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
+    private fun initObserve() {
+        viewModel.changeState.observe(this) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
+                binding.swipeRefresh.isRefreshing = false
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
-                binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreshing = false
                 viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
             }
         }
 
-        viewModel.likeFeedData.observe(this) { result ->
-            if (viewModel.isPostLikeFeed) {
-                viewModel.isPostLikeFeed = false
+        viewModel.messageListData.observe(this) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
 
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.dataList[viewModel.likePosition].likenum = response.data.count
-                        viewModel.dataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
                 }
             }
         }
-
-        viewModel.unLikeFeedData.observe(this) { result ->
-            if (viewModel.isPostUnLikeFeed) {
-                viewModel.isPostUnLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.dataList[viewModel.likePosition].likenum = response.data.count
-                        viewModel.dataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -181,7 +108,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.messageList.isNotEmpty() && !viewModel.isEnd) {
+                    if (viewModel.listSize != -1 && !viewModel.isEnd) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -196,7 +123,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.messageList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -208,19 +135,14 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.messageList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getMessage()
+        viewModel.fetchMessage()
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                this, rikka.preference.simplemenu.R.attr.colorPrimary
+            this.getColorFromAttr(
+                rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
@@ -231,25 +153,21 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
     }
 
     private fun initData() {
-        if (viewModel.messageList.isEmpty()) {
+        if (viewModel.listSize == -1) {
             binding.indicator.parent.isIndeterminate = true
             binding.indicator.parent.visibility = View.VISIBLE
             refreshData()
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.messageList.size)
         }
     }
 
     private fun initView() {
-        mAdapter =
-            MessageContentAdapter(this, viewModel.type.toString(), viewModel.messageList)
-        mAdapter.setAppListener(this)
+        mAdapter = MessageContentAdapter(viewModel.type.toString(), viewModel.ItemClickListener())
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -262,12 +180,11 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
-        viewModel.lastVisibleItemPosition = -1
+        viewModel.firstVisibleItemPosition = 0
+        viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
-        viewModel.isNew = true
         when (viewModel.type) {
             "atMe" -> viewModel.url = "/v6/notification/atMeList"
             "atCommentMe" -> viewModel.url = "/v6/notification/atCommentMeList"
@@ -276,44 +193,13 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>(), AppListener {
             "list" -> viewModel.url = "/v6/message/list"
 
         }
-        viewModel.getMessage()
+        viewModel.fetchMessage()
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
-
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-    }
-
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeFeedId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeFeed = true
-            viewModel.postUnLikeFeed()
-        } else {
-            viewModel.isPostLikeFeed = true
-            viewModel.postLikeFeed()
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
         }
-    }
-
-    override fun onRefreshReply(listType: String) {}
-
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
-
-    override fun onShowCollection(id: String, title: String) {}
-
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
     }
 
 }

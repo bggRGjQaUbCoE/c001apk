@@ -3,13 +3,13 @@ package com.example.c001apk.util
 import android.content.Context
 import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.constant.Constants
-import com.example.c001apk.util.Utils.Companion.getBase64
-import com.example.c001apk.util.Utils.Companion.getMD5
-import com.example.c001apk.util.Utils.Companion.randomAndroidVersionRelease
-import com.example.c001apk.util.Utils.Companion.randomBrand
-import com.example.c001apk.util.Utils.Companion.randomDeviceModel
-import com.example.c001apk.util.Utils.Companion.randomManufacturer
-import com.example.c001apk.util.Utils.Companion.randomSdkInt
+import com.example.c001apk.util.Utils.getBase64
+import com.example.c001apk.util.Utils.getMD5
+import com.example.c001apk.util.Utils.randomAndroidVersionRelease
+import com.example.c001apk.util.Utils.randomBrand
+import com.example.c001apk.util.Utils.randomDeviceModel
+import com.example.c001apk.util.Utils.randomManufacturer
+import com.example.c001apk.util.Utils.randomSdkInt
 import org.mindrot.jbcrypt.BCrypt
 import java.util.Random
 

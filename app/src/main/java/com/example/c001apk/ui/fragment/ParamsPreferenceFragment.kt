@@ -41,7 +41,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
         setDivider(resources.getDrawable(R.drawable.divider, requireContext().theme))
     }
 
-    @SuppressLint("SetTextI18n", "RestrictedApi", "InflateParams")
+    @SuppressLint("SetTextI18n", "InflateParams")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.sb_params, null)
 

@@ -25,29 +25,19 @@ SOFTWARE.
 */
 
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.content.ContextCompat
 import com.absinthe.libraries.utils.extensions.dp
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.model.GlideUrl
-import com.bumptech.glide.load.model.LazyHeaders
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.example.c001apk.R
-import com.example.c001apk.ui.fragment.minterface.AppListener
+import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.util.ImageUtil
-import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.http2https
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.RoundImageView
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
-import rikka.core.util.ResourceUtils
 
 
 class NineGridImageView @JvmOverloads constructor(
@@ -59,7 +49,7 @@ class NineGridImageView @JvmOverloads constructor(
     var isCompress = false
 
     private var urlList: List<String>? = null
-    var appListener: AppListener? = null
+    var listener: ItemListener? = null
 
     var imgHeight = 1
     var imgWidth = 1
@@ -164,7 +154,7 @@ class NineGridImageView @JvmOverloads constructor(
                 childrenView.scaleType = ImageView.ScaleType.CENTER_CROP
             }
             childrenView.setOnClickListener {
-                appListener?.onClick(
+                listener?.onClick(
                     this,
                     childrenView,
                     urlList!!,
@@ -205,7 +195,6 @@ class NineGridImageView @JvmOverloads constructor(
 
     fun getImageViewAt(position: Int) = getChildAt(position) as? ImageView
 
-    @SuppressLint("RestrictedApi")
     fun setUrlList(urlList: List<String>?) {
         if (urlList != null) {
             this.urlList = urlList
@@ -231,8 +220,7 @@ class NineGridImageView @JvmOverloads constructor(
                     imgWidth = imageLp.first
                     imgHeight = imageLp.second
                     if (replace.endsWith("gif") || imgHeight > imgWidth * 22f / 9f) {
-                        labelBackground = ThemeUtils.getThemeAttrColor(
-                            context,
+                        labelBackground = context.getColorFromAttr(
                             rikka.preference.simplemenu.R.attr.colorPrimary
                         )
                         labelText = if (replace.endsWith("gif")) "GIF"

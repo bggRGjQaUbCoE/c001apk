@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -9,7 +8,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
-import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.ThemeUtils
@@ -27,6 +26,7 @@ import com.example.c001apk.ui.fragment.minterface.IOnPublishClickListener
 import com.example.c001apk.util.Emoji
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.circleindicator.CircleIndicator
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -67,19 +67,17 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
         }
     }
 
-    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         editText.highlightColor = ColorUtils.setAlphaComponent(
-            ThemeUtils.getThemeAttrColor(
-                context,
-                rikka.preference.simplemenu.R.attr.colorPrimaryDark
+            context.getColorFromAttr(
+                rikka.preference.simplemenu.R.attr.colorPrimary
             ), 128
         )
         val title: TextView = view.findViewById(R.id.title)
         val publish: TextView = view.findViewById(R.id.publish)
-        val emotion: ImageButton = view.findViewById(R.id.emotion)
+        val emotion: ImageView = view.findViewById(R.id.emotion)
         val emojiPanel: ViewPager = view.findViewById(R.id.emojiPanel)
         val indicator: CircleIndicator = view.findViewById(R.id.indicator)
         val forwardLayout: LinearLayout = view.findViewById(R.id.forwardLayout)

@@ -1,13 +1,12 @@
 package com.example.c001apk.ui.activity
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -15,21 +14,19 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
+import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.databinding.ActivityCarouselBinding
-import com.example.c001apk.logic.model.TopicBean
-import com.example.c001apk.ui.fragment.minterface.AppListener
 import com.example.c001apk.ui.fragment.topic.TopicContentFragment
-import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.TopicBlackListUtil
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
-class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
+class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[CarouselViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
@@ -41,7 +38,6 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -78,151 +74,93 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                 initBar(viewModel.title.toString())
         }
 
-        viewModel.carouselData.observe(this) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+        initObserve()
 
-                val response = result.getOrNull()
-                if (!response?.data.isNullOrEmpty()) {
+    }
 
-                    if (viewModel.isInit) {
-                        viewModel.isInit = false
+    private fun initObserve() {
+        viewModel.toastText.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
+        }
 
-                        viewModel.barTitle =
-                            if (response?.data!![response.data.size - 1].extraDataArr == null)
-                                viewModel.title
-                            else
-                                response.data[response.data.size - 1].extraDataArr?.pageTitle.toString()
-                        initBar(viewModel.barTitle.toString())
+        viewModel.initBar.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                initBar(viewModel.barTitle.toString())
+            }
+        }
 
-                        var index = 0
-                        for (element in response.data) {
-                            if (element.entityTemplate == "iconTabLinkGridCard") {
-                                binding.tabLayout.visibility = View.VISIBLE
-                                binding.viewPager.visibility = View.VISIBLE
-                                break
-                            } else index++
-                        }
+        viewModel.showView.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                binding.tabLayout.visibility = View.VISIBLE
+                binding.viewPager.visibility = View.VISIBLE
+            }
+        }
 
-                        if (binding.tabLayout.visibility == View.VISIBLE) {
-                            for (element in response.data[index].entities) {
-                                viewModel.tabList.add(element.title)
-                                viewModel.topicList.add(
-                                    TopicBean(
-                                        element.url,
-                                        element.title
-                                    )
-                                )
-                                initView()
-                            }
-                        } else {
-                            initRvView()
-                            initData()
-                            initRefresh()
-                            initScroll()
-                            binding.swipeRefresh.visibility = View.VISIBLE
-                            binding.recyclerView.visibility = View.VISIBLE
-                            for (element in response.data)
-                                if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
-                                            element.tags + element.ttitle
-                                        )
-                                    )
-                                        viewModel.carouselList.add(element)
-                            mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
-                            mAdapter.notifyDataSetChanged()
-                        }
-                    } else {
-                        if (viewModel.isRefreshing)
-                            viewModel.carouselList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.listSize = viewModel.carouselList.size
-                            for (element in response?.data!!)
-                                if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
-                                            element.tags + element.ttitle
-                                        )
-                                    )
-                                        viewModel.carouselList.add(element)
-                        }
-                        mAdapter.setLoadState(mAdapter.LOADING_COMPLETE, null)
-                        if (viewModel.isLoadMore)
-                            if (viewModel.isEnd)
-                                mAdapter.notifyItemChanged(viewModel.carouselList.size)
-                            else
-                                mAdapter.notifyItemRangeChanged(
-                                    viewModel.listSize,
-                                    viewModel.carouselList.size - viewModel.listSize + 1
-                                )
-                        else
-                            mAdapter.notifyDataSetChanged()
-                    }
-                } else if (response?.data?.isEmpty() == true) {
-                    if (viewModel.isRefreshing)
-                        viewModel.carouselList.clear()
-                    if (::mAdapter.isInitialized) {
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        mAdapter.notifyItemChanged(viewModel.carouselList.size)
-                    }
-                    viewModel.isEnd = true
-                } else {
-                    if (::mAdapter.isInitialized) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = getString(R.string.loading_failed)
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        mAdapter.notifyItemChanged(viewModel.carouselList.size)
-                    } else if (viewModel.carouselList.isEmpty())
-                        binding.errorLayout.parent.visibility = View.VISIBLE
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
+        viewModel.initView.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                initView()
+            }
+        }
+
+        viewModel.initRvView.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                initRvView()
+                initData()
+                initRefresh()
+                initScroll()
+                binding.swipeRefresh.visibility = View.VISIBLE
+                binding.recyclerView.visibility = View.VISIBLE
+            }
+        }
+
+        viewModel.error.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (::mAdapter.isInitialized) {
+                    viewModel.changeState.postValue(
+                        Pair(
+                            FooterAdapter.LoadState.LOADING_ERROR,
+                            getString(R.string.loading_failed)
+                        )
+                    )
+                } else if (viewModel.listSize == -1)
+                    binding.errorLayout.parent.visibility = View.VISIBLE
+            }
+        }
+
+        viewModel.finish.observe(this){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
                 binding.swipeRefresh.isRefreshing = false
             }
         }
 
-        viewModel.likeFeedData.observe(this) { result ->
-            if (viewModel.isPostLikeFeed) {
-                viewModel.isPostLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.carouselList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.carouselList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
+        viewModel.changeState.observe(this) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
+                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
             }
         }
 
-        viewModel.unLikeFeedData.observe(this) { result ->
-            if (viewModel.isPostUnLikeFeed) {
-                viewModel.isPostUnLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.carouselList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.carouselList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
+        viewModel.carouselData.observe(this) {
+            if (::mAdapter.isInitialized) {
+                mAdapter.submitList(it)
             }
+            viewModel.listSize = it.size
+
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.addAdapter(mAdapter)
+                adapter.addAdapter(footerAdapter)
+            }
+
         }
 
     }
@@ -233,7 +171,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.carouselList.isNotEmpty() && !viewModel.isEnd) {
+                    if (viewModel.listSize != -1 && !viewModel.isEnd) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -248,7 +186,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.carouselList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -261,19 +199,13 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.carouselList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getCarouselList()
+        viewModel.fetchCarouselList()
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                this,
+            this.getColorFromAttr(
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
@@ -285,13 +217,13 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     }
 
     private fun initRvView() {
-        mAdapter = AppAdapter(this, viewModel.carouselList)
-        mAdapter.setAppListener(this)
+        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(this)
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -322,25 +254,21 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
     }
 
     private fun initData() {
-        if (viewModel.carouselList.isEmpty()) {
+        if (viewModel.listSize == -1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             refreshData()
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.carouselList.size)
         }
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
-        viewModel.lastVisibleItemPosition = -1
+        viewModel.firstVisibleItemPosition = 0
+        viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.isNew = true
-        viewModel.getCarouselList()
+        viewModel.fetchCarouselList()
     }
 
     private fun initBar(title: String) {
@@ -356,49 +284,9 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), AppListener {
         return true
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
-
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-    }
-
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeFeedId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeFeed = true
-            viewModel.postUnLikeFeed()
-        } else {
-            viewModel.isPostLikeFeed = true
-            viewModel.postLikeFeed()
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
         }
     }
-
-    override fun onRefreshReply(listType: String) {}
-
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
-
-    override fun onShowCollection(id: String, title: String) {}
-
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
-        }
-    }
-
 }

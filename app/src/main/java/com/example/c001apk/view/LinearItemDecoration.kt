@@ -1,13 +1,12 @@
 package com.example.c001apk.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
-import androidx.appcompat.widget.ThemeUtils
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.extensions.getColorByAttr
 
 class LinearItemDecoration(private val space: Int) :
     RecyclerView.ItemDecoration() {
@@ -47,7 +46,6 @@ class LinearItemDecoration1(private val space: Int) :
 
 }
 
-@SuppressLint("RestrictedApi")
 class ReplyItemDecoration(
     context: Context,
     private val space: Int
@@ -59,8 +57,7 @@ class ReplyItemDecoration(
     init {
         mPaint.isAntiAlias = true
         mPaint.color =
-            ThemeUtils.getThemeAttrColor(
-                context,
+            context.getColorByAttr(
                 com.google.android.material.R.attr.colorSurfaceVariant
             )
     }

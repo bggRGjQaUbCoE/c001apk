@@ -3,13 +3,13 @@
 
     <item
         android:id="@+id/backup"
-        android:icon="@drawable/ic_backup"
+        android:icon="@drawable/outline_file_upload_24"
         android:showAsAction="always"
         android:title="@string/backup" />
 
     <item
         android:id="@+id/restore"
-        android:icon="@drawable/ic_restore"
+        android:icon="@drawable/outline_file_download_24"
         android:showAsAction="always"
         android:title="@string/restore" />
 

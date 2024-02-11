@@ -1,27 +1,28 @@
 package com.example.c001apk.ui.fragment
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.widget.ThemeUtils
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
+import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.databinding.FragmentCollectionBinding
-import com.example.c001apk.ui.fragment.minterface.AppListener
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 
-class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListener {
+class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[CollectionViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
@@ -39,12 +40,11 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.cId = it.getString("ID")
+            viewModel.id = it.getString("ID")
             viewModel.title = it.getString("TITLE")
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -53,75 +53,14 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
         initData()
         initRefresh()
         initScroll()
-
-        viewModel.collectionListData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
-
-                val data = result.getOrNull()
-                if (data != null) {
-                    if (!data.message.isNullOrEmpty()) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = data.message
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        viewModel.isEnd = true
-                        viewModel.isLoadMore = false
-                        viewModel.isRefreshing = false
-                        binding.indicator.parent.isIndeterminate = false
-                        binding.indicator.parent.visibility = View.GONE
-                        binding.swipeRefresh.isRefreshing = false
-                        mAdapter.notifyItemChanged(viewModel.dataList.size)
-                        return@observe
-                    } else if (!data.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing) viewModel.dataList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.listSize = viewModel.dataList.size
-                            for (element in data.data)
-                                if (element.entityType == "collection"
-                                    || element.entityType == "feed"
-                                )
-                                    viewModel.dataList.add(element)
-                        }
-                        viewModel.loadState = mAdapter.LOADING_COMPLETE
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                    } else {
-                        if (viewModel.isRefreshing) viewModel.dataList.clear()
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        viewModel.isEnd = true
-                    }
-                } else {
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.dataList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.dataList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                binding.swipeRefresh.isRefreshing = false
-                viewModel.isRefreshing = false
-                viewModel.isLoadMore = false
-            }
-        }
-
+        initObserve()
 
     }
 
     private fun initBar() {
-        if (viewModel.cId == "recommend"
-            || viewModel.cId == "hot"
-            || viewModel.cId == "newest"
+        if (viewModel.id == "recommend"
+            || viewModel.id == "hot"
+            || viewModel.id == "newest"
         )
             binding.appBar.visibility = View.GONE
         else
@@ -130,7 +69,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
                 else viewModel.title
                 setNavigationIcon(R.drawable.ic_back)
                 setNavigationOnClickListener {
-                    if (viewModel.cId.isNullOrEmpty())
+                    if (viewModel.id.isNullOrEmpty())
                         requireActivity().finish()
                     else
                         requireActivity().supportFragmentManager.popBackStack()
@@ -138,25 +77,55 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
             }
     }
 
+    private fun initObserve(){
+        viewModel.toastText.observe(viewLifecycleOwner){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.changeState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
+                binding.swipeRefresh.isRefreshing = false
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.visibility = View.GONE
+                viewModel.isLoadMore = false
+                viewModel.isRefreshing = false
+            }
+        }
+
+        viewModel.dataListData.observe(viewLifecycleOwner) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
+
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
+                }
+            }
+        }
+    }
+
     private fun initData() {
-        if (viewModel.dataList.isEmpty()) {
+        if (viewModel.listSize==-1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             refreshData()
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.dataList.size)
         }
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(requireContext(), viewModel.dataList)
-        mAdapter.setAppListener(this)
+        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -175,21 +144,18 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.isNew = true
-        viewModel.collectionUrl =
-            if (viewModel.cId.isNullOrEmpty()) "/v6/collection/list"
-            else if (viewModel.cId == "recommend") "/v6/picture/list?tag=${viewModel.title}&type=recommend"
-            else if (viewModel.cId == "hot") "/v6/picture/list?tag=${viewModel.title}&type=hot"
-            else if (viewModel.cId == "newest") "/v6/picture/list?tag=${viewModel.title}&type=newest"
+        viewModel.url =
+            if (viewModel.id.isNullOrEmpty()) "/v6/collection/list"
+            else if (viewModel.id == "recommend") "/v6/picture/list?tag=${viewModel.title}&type=recommend"
+            else if (viewModel.id == "hot") "/v6/picture/list?tag=${viewModel.title}&type=hot"
+            else if (viewModel.id == "newest") "/v6/picture/list?tag=${viewModel.title}&type=newest"
             else "/v6/collection/itemList"
-        viewModel.getCollectionList()
+        viewModel.fetchCollectionList()
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireContext(),
+            requireContext().getColorFromAttr(
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
@@ -206,7 +172,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.dataList.isNotEmpty() && !viewModel.isEnd && isAdded) {
+                    if (viewModel.listSize!=-1 && !viewModel.isEnd && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -221,7 +187,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.dataList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -233,62 +199,13 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), AppListene
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.dataList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getCollectionList()
+        viewModel.fetchCollectionList()
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
-
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-    }
-
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {}
-
-    override fun onRefreshReply(listType: String) {}
-
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
-
-    override fun onShowCollection(id: String, title: String) {
-        requireActivity().supportFragmentManager
-            .beginTransaction()
-            .setCustomAnimations(
-                R.anim.right_in,
-                R.anim.left_out_fragment,
-                R.anim.left_in,
-                R.anim.right_out
-            )
-            .replace(
-                R.id.fragment,
-                newInstance(id, title)
-            )
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
         }
     }
-
 }

@@ -1,30 +1,27 @@
 package com.example.c001apk.ui.fragment
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.ThemeUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
-import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
+import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.databinding.FragmentDyhDetailBinding
-import com.example.c001apk.ui.fragment.minterface.AppListener
-import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.TopicBlackListUtil
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
-import com.example.c001apk.viewmodel.AppViewModel
 
-class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener {
+class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[DyhViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
+    private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
@@ -48,6 +45,7 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
             initData()
             initRefresh()
             initScroll()
+            initObserve()
         }
 
     }
@@ -55,12 +53,11 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.dyhId = it.getString("id")
+            viewModel.id = it.getString("id")
             viewModel.type = it.getString("type")
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -69,146 +66,70 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
             initData()
             initRefresh()
             initScroll()
+            initObserve()
         }
 
-        viewModel.dyhDetailLiveData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isNew) {
-                viewModel.isNew = false
+    }
 
-                val data = result.getOrNull()
-                if (data != null) {
-                    if (!data.message.isNullOrEmpty()) {
-                        viewModel.loadState = mAdapter.LOADING_ERROR
-                        viewModel.errorMessage = data.message
-                        mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                        viewModel.isEnd = true
-                        viewModel.isLoadMore = false
-                        viewModel.isRefreshing = false
-                        binding.indicator.parent.isIndeterminate = false
-                        binding.indicator.parent.visibility = View.GONE
-                        binding.swipeRefresh.isRefreshing = false
-                        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
-                        return@observe
-                    } else if (!data.data.isNullOrEmpty()) {
-                        if (viewModel.isRefreshing)
-                            viewModel.dyhDataList.clear()
-                        if (viewModel.isRefreshing || viewModel.isLoadMore) {
-                            viewModel.listSize = viewModel.dyhDataList.size
-                            for (element in data.data)
-                                if (element.entityType == "feed")
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
-                                            element.tags + element.ttitle
-                                        )
-                                    )
-                                        viewModel.dyhDataList.add(element)
-                        }
-                        viewModel.loadState = mAdapter.LOADING_COMPLETE
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                    } else if (data.data?.isEmpty() == true) {
-                        if (viewModel.isRefreshing)
-                            viewModel.dyhDataList.clear()
-                        viewModel.loadState = mAdapter.LOADING_END
-                        mAdapter.setLoadState(viewModel.loadState, null)
-                        viewModel.isEnd = true
-                    }
-                } else {
-                    viewModel.loadState = mAdapter.LOADING_ERROR
-                    viewModel.errorMessage = getString(R.string.loading_failed)
-                    mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-                    viewModel.isEnd = true
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-                if (viewModel.isLoadMore)
-                    if (viewModel.isEnd)
-                        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
-                    else
-                        mAdapter.notifyItemRangeChanged(
-                            viewModel.listSize,
-                            viewModel.dyhDataList.size - viewModel.listSize + 1
-                        )
-                else
-                    mAdapter.notifyDataSetChanged()
+    private fun initObserve(){
+        viewModel.toastText.observe(viewLifecycleOwner){event->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.changeState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it.first, it.second)
+            footerAdapter.notifyItemChanged(0)
+            if (it.first != FooterAdapter.LoadState.LOADING) {
+                binding.swipeRefresh.isRefreshing = false
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
                 viewModel.isLoadMore = false
                 viewModel.isRefreshing = false
-                binding.swipeRefresh.isRefreshing = false
             }
         }
 
-        viewModel.likeFeedData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostLikeFeed) {
-                viewModel.isPostLikeFeed = false
+        viewModel.dataListData.observe(viewLifecycleOwner) {
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
 
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.dyhDataList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 1
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
+            val adapter = binding.recyclerView.adapter as ConcatAdapter
+            if (!adapter.adapters.contains(mAdapter)) {
+                adapter.apply {
+                    addAdapter(mAdapter)
+                    addAdapter(footerAdapter)
                 }
             }
         }
-
-        viewModel.unLikeFeedData.observe(viewLifecycleOwner) { result ->
-            if (viewModel.isPostUnLikeFeed) {
-                viewModel.isPostUnLikeFeed = false
-
-                val response = result.getOrNull()
-                if (response != null) {
-                    if (response.data != null) {
-                        viewModel.dyhDataList[viewModel.likePosition].likenum =
-                            response.data.count
-                        viewModel.dyhDataList[viewModel.likePosition].userAction?.like = 0
-                        mAdapter.notifyItemChanged(viewModel.likePosition, "like")
-                    } else
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT)
-                            .show()
-                } else {
-                    result.exceptionOrNull()?.printStackTrace()
-                }
-            }
-        }
-
     }
 
     private fun initData() {
-        if (viewModel.dyhDataList.isEmpty()) {
+        if (viewModel.listSize==-1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             refreshData()
-        } else {
-            mAdapter.setLoadState(viewModel.loadState, viewModel.errorMessage)
-            mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
         }
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
-        viewModel.lastVisibleItemPosition = -1
+        viewModel.firstVisibleItemPosition =0
+        viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.isNew = true
-        viewModel.getDyhDetail()
+        viewModel.fetchDyhDetail()
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(requireContext(), viewModel.dyhDataList)
-        mAdapter.setAppListener(this)
+        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter()
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -220,11 +141,9 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
         }
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            ThemeUtils.getThemeAttrColor(
-                requireContext(),
+            requireContext().getColorFromAttr(
                 rikka.preference.simplemenu.R.attr.colorPrimary
             )
         )
@@ -241,7 +160,7 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.dyhDataList.isNotEmpty() && !viewModel.isEnd && isAdded) {
+                    if (viewModel.listSize!=-1 && !viewModel.isEnd && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -256,7 +175,7 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.dyhDataList.size
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -268,57 +187,15 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>(), AppListener 
     }
 
     private fun loadMore() {
-        viewModel.loadState = mAdapter.LOADING
-        mAdapter.setLoadState(viewModel.loadState, null)
-        mAdapter.notifyItemChanged(viewModel.dyhDataList.size)
         viewModel.isLoadMore = true
-        viewModel.isNew = true
-        viewModel.getDyhDetail()
+        viewModel.fetchDyhDetail()
     }
 
-    override fun onShowTotalReply(position: Int, uid: String, id: String, rPosition: Int?) {}
-
-    override fun onPostFollow(isFollow: Boolean, uid: String, position: Int) {}
-
-    override fun onReply2Reply(
-        rPosition: Int,
-        r2rPosition: Int?,
-        id: String,
-        uid: String,
-        uname: String,
-        type: String
-    ) {
-    }
-
-    override fun onPostLike(type: String?, isLike: Boolean, id: String, position: Int?) {
-        viewModel.likeFeedId = id
-        viewModel.likePosition = position!!
-        if (isLike) {
-            viewModel.isPostUnLikeFeed = true
-            viewModel.postUnLikeFeed()
-        } else {
-            viewModel.isPostLikeFeed = true
-            viewModel.postLikeFeed()
+    inner class ReloadListener : FooterAdapter.FooterListener {
+        override fun onReLoad() {
+            loadMore()
         }
     }
 
-    override fun onRefreshReply(listType: String) {}
-
-    override fun onDeleteFeedReply(id: String, position: Int, rPosition: Int?) {}
-
-    override fun onShowCollection(id: String, title: String) {}
-
-    override fun onReload() {
-        viewModel.isEnd = false
-        loadMore()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (::mAdapter.isInitialized && mAdapter.popup != null) {
-            mAdapter.popup?.dismiss()
-            mAdapter.popup = null
-        }
-    }
 
 }

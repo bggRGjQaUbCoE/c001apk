@@ -1,29 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:foreground="@drawable/selector_bg_12_trans">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/imageTextScrollCard"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/cover"
-        android:scaleType="centerCrop"
-        app:layout_constraintDimensionRatio="H, 649:291"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearance="@style/textScrollImgRadius" />
+    <data>
 
-    <TextView
-        android:id="@+id/title"
+        <variable
+            name="data"
+            type="com.example.c001apk.logic.model.HomeFeedResponse.Entities" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_text_scroll_card_text_bg"
-        android:maxLines="2"
-        android:minLines="2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageTextScrollCard" />
+        android:onClick="@{(view) -> listener.onViewFeed(view, data.id, data.userInfo.uid, data.userInfo.username, data.userInfo.userAvatar, data.deviceTitle, data.message, String.valueOf(data.dateline), null, null)}"
+        android:foreground="@drawable/selector_bg_12_trans">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageTextScrollCard"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/cover"
+            android:scaleType="centerCrop"
+            app:setImage="@{data.pic}"
+            app:layout_constraintDimensionRatio="H, 649:291"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearance="@style/textScrollImgRadius" />
+
+        <TextView
+            android:id="@+id/title"
+            android:text="@{data.title}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_text_scroll_card_text_bg"
+            android:maxLines="2"
+            android:padding="10dp"
+            android:minLines="2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imageTextScrollCard" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

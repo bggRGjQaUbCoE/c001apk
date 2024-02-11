@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.activity
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -9,7 +8,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
@@ -19,8 +17,9 @@ import com.example.c001apk.logic.database.BlackListDatabase
 import com.example.c001apk.logic.database.TopicBlackListDatabase
 import com.example.c001apk.logic.model.SearchHistory
 import com.example.c001apk.ui.fragment.minterface.IOnItemClickListener
+import com.example.c001apk.ui.fragment.search.SearchViewModel
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.viewmodel.AppViewModel
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -36,7 +35,7 @@ import java.io.IOException
 
 class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[SearchViewModel::class.java] }
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
     private val blackListDao by lazy {
@@ -46,14 +45,13 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         TopicBlackListDatabase.getDatabase(this@BlackListActivity).blackListDao()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewModel.type = intent.getStringExtra("type")
 
         initView()
-        if (viewModel.historyList.isEmpty()) {
+        if (viewModel.listSize == -1) {
             when (viewModel.type) {
                 "user" -> viewModel.getBlackList("blacklist", this)
                 "topic" -> viewModel.getBlackList("topicBlacklist", this)
@@ -67,13 +65,12 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         initClearHistory()
 
         viewModel.blackListLiveData.observe(this) {
-            viewModel.historyList.clear()
-            viewModel.historyList.addAll(it)
-            if (viewModel.historyList.isEmpty())
+            viewModel.listSize = it.size
+            mAdapter.submitList(it)
+            if (it.isEmpty())
                 binding.clearAll.visibility = View.GONE
             else
                 binding.clearAll.visibility = View.VISIBLE
-            mAdapter.notifyDataSetChanged()
         }
 
     }
@@ -90,7 +87,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.backup -> {
-                        if (saveFile(Gson().toJson(viewModel.historyList)))
+                        if (saveFile(Gson().toJson(viewModel.blackListLiveData.value)))
                             backupSAFLauncher.launch(
                                 if (viewModel.type == "user") "user_blacklist.json"
                                 else "topic_blacklist.json"
@@ -160,7 +157,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                     Array<String>::class.java
                 )
                 for (element in json) {
-                    if (viewModel.historyList.indexOf(element) == -1)
+                    if (viewModel.blackListLiveData.value?.indexOf(element) == -1)
                         updateUid(element)
                 }
             }.onFailure {
@@ -180,12 +177,11 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         }
 
     private fun initButton() {
-        binding.search.setOnClickListener {
+        /*binding.search.setOnClickListener {
             checkUid()
-        }
+        }*/
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initClearHistory() {
         binding.clearAll.setOnClickListener {
             MaterialAlertDialogBuilder(this).apply {
@@ -198,8 +194,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                             "topic" -> topicBlackListDao.deleteAll()
                         }
                     }
-                    viewModel.historyList.clear()
-                    mAdapter.notifyDataSetChanged()
+                    viewModel.blackListLiveData.postValue(emptyList())
                     binding.clearAll.visibility = View.GONE
                 }
                 show()
@@ -211,7 +206,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         mLayoutManager = FlexboxLayoutManager(this)
         mLayoutManager.flexDirection = FlexDirection.ROW
         mLayoutManager.flexWrap = FlexWrap.WRAP
-        mAdapter = HistoryAdapter(viewModel.historyList)
+        mAdapter = HistoryAdapter()
         mAdapter.setOnItemClickListener(this)
         binding.recyclerView.apply {
             adapter = mAdapter
@@ -219,7 +214,6 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         }
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initEditText() {
         binding.title.text = when (viewModel.type) {
             "user" -> this.getString(R.string.user_black_list)
@@ -227,9 +221,8 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             else -> ""
         }
         binding.editText.highlightColor = ColorUtils.setAlphaComponent(
-            ThemeUtils.getThemeAttrColor(
-                this,
-                rikka.preference.simplemenu.R.attr.colorPrimaryDark
+            this.getColorFromAttr(
+                rikka.preference.simplemenu.R.attr.colorPrimary
             ), 128
         )
         binding.editText.hint = when (viewModel.type) {
@@ -265,8 +258,6 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     private fun checkUid() {
         if (binding.editText.text.toString() == "") {
             return
-            //Toast.makeText(this, "uid不能为空", Toast.LENGTH_SHORT).show()
-            //hideKeyBoard()
         } else {
             updateUid(binding.editText.text.toString())
             binding.editText.text = null
@@ -288,9 +279,10 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                 }
             }
         }
-        if (viewModel.historyList.indexOf(uid) == -1) {
-            viewModel.historyList.add(0, uid)
-            mAdapter.notifyItemInserted(0)
+        val blackList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
+        if (blackList.indexOf(uid) == -1) {
+            blackList.add(0, uid)
+            viewModel.blackListLiveData.postValue(blackList)
             if (binding.clearAll.visibility != View.VISIBLE)
                 binding.clearAll.visibility = View.VISIBLE
         } else {
@@ -318,16 +310,16 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
 
     }
 
-    override fun onItemDeleteClick(keyword: String) {
+    override fun onItemDeleteClick(position: Int, keyword: String) {
         CoroutineScope(Dispatchers.IO).launch {
             when (viewModel.type) {
                 "user" -> blackListDao.delete(keyword)
                 "topic" -> topicBlackListDao.delete(keyword)
             }
         }
-        val position = viewModel.historyList.indexOf(keyword)
-        viewModel.historyList.removeAt(position)
-        mAdapter.notifyItemRemoved(position)
+        val blackList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
+        blackList.removeAt(position)
+        viewModel.blackListLiveData.postValue(blackList)
     }
 
 }
