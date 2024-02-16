@@ -18,7 +18,8 @@ class FooterAdapter(private val listener: FooterListener) :
         LOADING,
         LOADING_COMPLETE,
         LOADING_END,
-        LOADING_ERROR
+        LOADING_ERROR,
+        LOADING_REPLY
     }
 
     private var loadState = LoadState.LOADING_COMPLETE
@@ -27,6 +28,7 @@ class FooterAdapter(private val listener: FooterListener) :
     fun setLoadState(loadState: LoadState, errorMessage: String?) {
         this.loadState = loadState
         this.errorMessage = errorMessage
+        notifyItemChanged(0)
     }
 
     class FooterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -50,11 +52,23 @@ class FooterAdapter(private val listener: FooterListener) :
         val lp = holder.itemView.layoutParams
         if (lp is StaggeredGridLayoutManager.LayoutParams) {
             lp.isFullSpan = true
+        } else {
+            holder.footerLayout.layoutParams =
+                if (loadState == LoadState.LOADING_REPLY) {
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                } else
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT
+                    )
         }
 
         when (loadState) {
-            LoadState.LOADING -> {
-                holder.footerLayout.visibility = View.VISIBLE
+
+            LoadState.LOADING, LoadState.LOADING_REPLY -> {
                 holder.indicator.visibility = View.VISIBLE
                 holder.indicator.isIndeterminate = true
                 holder.noMore.visibility = View.INVISIBLE
@@ -63,7 +77,6 @@ class FooterAdapter(private val listener: FooterListener) :
             }
 
             LoadState.LOADING_COMPLETE -> {
-                holder.footerLayout.visibility = View.INVISIBLE
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
                 holder.noMore.visibility = View.INVISIBLE
@@ -71,7 +84,6 @@ class FooterAdapter(private val listener: FooterListener) :
             }
 
             LoadState.LOADING_END -> {
-                holder.footerLayout.visibility = View.VISIBLE
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
                 holder.noMore.visibility = View.VISIBLE
@@ -80,7 +92,6 @@ class FooterAdapter(private val listener: FooterListener) :
             }
 
             LoadState.LOADING_ERROR -> {
-                holder.footerLayout.visibility = View.VISIBLE
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
                 holder.noMore.text = errorMessage

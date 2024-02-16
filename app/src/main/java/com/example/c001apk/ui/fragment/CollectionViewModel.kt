@@ -35,7 +35,6 @@ class CollectionViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
     val toastText = MutableLiveData<Event<String>>()
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
@@ -62,7 +61,6 @@ class CollectionViewModel : ViewModel() {
                         } else if (!data.data.isNullOrEmpty()) {
                             if (isRefreshing) dataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = dataList.size
                                 for (element in data.data)
                                     if (element.entityType == "collection"
                                         || element.entityType == "feed"

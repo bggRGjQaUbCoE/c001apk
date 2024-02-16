@@ -162,7 +162,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                             viewModel.firstVisibleItemPosition =
-                                mLayoutManager.findFirstCompletelyVisibleItemPosition()
+                                mLayoutManager.findFirstVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
@@ -272,7 +272,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
         viewModel.changeState.observe(viewLifecycleOwner) {
             footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
             if (it.first != FooterAdapter.LoadState.LOADING) {
                 binding.swipeRefresh.isRefreshing = false
                 binding.indicator.parent.isIndeterminate = false
@@ -287,7 +286,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             feedReplyAdapter.submitList(it)
             if (viewModel.isViewReply == true) {
                 viewModel.isViewReply = false
-                mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                if (viewModel.firstVisibleItemPosition > viewModel.itemCount)
+                    mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
             }
             if (dialog != null) {
                 dialog?.dismiss()
@@ -303,13 +303,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             viewModel.isTop?.let { feedReplyAdapter.setHaveTop(it, viewModel.topReplyId) }
             binding.titleProfile.visibility = View.GONE
             refresh()
-        } else {
+        }/* else {
             if (getScrollYDistance() >= 50.dp) {
                 // showTitleProfile()
             } else {
                 binding.titleProfile.visibility = View.GONE
             }
-        }
+        }*/
     }
 
     private fun refresh() {
@@ -325,7 +325,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
 
-    private fun getScrollYDistance(): Int {
+    /*private fun getScrollYDistance(): Int {
         val position = mLayoutManager.findFirstVisibleItemPosition()
         val firstVisibleChildView = mLayoutManager.findViewByPosition(position)
         var itemHeight = 0
@@ -335,7 +335,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             top = firstVisibleChildView.top
         }
         return position * itemHeight - top
-    }
+    }*/
 
     @SuppressLint("SetTextI18n")
     private fun initView() {
@@ -353,12 +353,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
         binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
         setListType()
-        mLayoutManager = OffsetLinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        if (viewModel.isViewReply == true) {
-            viewModel.isViewReply = false
-            mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
-        }
 
         binding.recyclerView.apply {
             adapter =
@@ -372,11 +366,21 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     binding.tabLayout.visibility = View.VISIBLE
+                    mLayoutManager = OffsetLinearLayoutManager(requireContext())
                     mLayoutManager
                 } else {
                     binding.tabLayout.visibility = View.GONE
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                     sLayoutManager
                 }
+            if (viewModel.isViewReply == true) {
+                viewModel.isViewReply = false
+                footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_REPLY, null)
+                mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+            } else {
+                footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
+            }
             if (itemDecorationCount == 0)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     addItemDecoration(
@@ -403,8 +407,10 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             setOnClickListener {
                 binding.recyclerView.stopScroll()
                 binding.titleProfile.visibility = View.GONE
-                mLayoutManager.scrollToPositionWithOffset(0, 0)
-                sLayoutManager.scrollToPositionWithOffset(0, 0)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager.scrollToPositionWithOffset(0, 0)
+                else
+                    sLayoutManager.scrollToPositionWithOffset(0, 0)
             }
             inflateMenu(R.menu.feed_menu)
             menu.findItem(R.id.showReply).isVisible =
@@ -715,12 +721,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
         bottomSheetDialog?.dismiss()
         dialog?.dismiss()
         bottomSheetDialog = null
         dialog = null
+        super.onDestroy()
     }
 
 }

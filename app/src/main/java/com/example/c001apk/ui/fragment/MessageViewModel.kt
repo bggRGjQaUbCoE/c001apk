@@ -38,7 +38,6 @@ class MessageViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
 
 
@@ -134,7 +133,6 @@ class MessageViewModel : ViewModel() {
                             if (isRefreshing)
                                 messageList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = messageList.size
                                 for (element in feed.data)
                                     if (element.entityType == "notification")
                                         if (!BlackListUtil.checkUid(element.fromuid))

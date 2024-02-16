@@ -34,12 +34,10 @@ class HistoryViewModel : ViewModel() {
     inner class ItemClickListener : ItemListener {
         override fun onBlockUser(uid: String, position: Int) {
             super.onBlockUser(uid, position)
-            val currentList = browseLiveData.value!!.toMutableList()
-            currentList.removeAt(position)
-            browseLiveData.postValue(currentList)
+            onDeleteClicked("", "", position)
         }
 
-        override fun onDeleteClicked(entityType:String, id: String, position: Int) {
+        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
             val currentList = browseLiveData.value!!.toMutableList()
             currentList.removeAt(position)
             browseLiveData.postValue(currentList)

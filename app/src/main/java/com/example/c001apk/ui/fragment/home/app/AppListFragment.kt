@@ -105,18 +105,6 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (viewModel.listSize != -1 && isAdded) {
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        viewModel.firstVisibleItemPosition =
-                            mLayoutManager.findFirstCompletelyVisibleItemPosition()
-                    } else {
-                        val positions = sLayoutManager.findFirstCompletelyVisibleItemPositions(null)
-                        for (pos in positions) {
-                            if (pos < viewModel.firstVisibleItemPosition) {
-                                viewModel.firstVisibleItemPosition = pos
-                            }
-                        }
-                    }
-
                     if (dy > 0) {
                         (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
@@ -142,16 +130,18 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
 
     private fun initView() {
         mAdapter = AppListAdapter()
-        mLayoutManager = LinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
         binding.recyclerView.apply {
             itemAnimator = null
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (itemDecorationCount == 0)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     addItemDecoration(LinearItemDecoration(10.dp))
@@ -183,19 +173,14 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
         binding.swipeRefresh.isRefreshing = true
         viewModel.getItems(requireContext())
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
-        binding.recyclerView.stopScroll()
-        if (viewModel.firstVisibleItemPosition == 0) {
-            refreshData()
-        } else {
-            viewModel.firstVisibleItemPosition = 0
-            binding.recyclerView.scrollToPosition(0)
-        }
+        binding.swipeRefresh.isRefreshing = true
+        binding.recyclerView.scrollToPosition(0)
+        refreshData()
     }
 
 }

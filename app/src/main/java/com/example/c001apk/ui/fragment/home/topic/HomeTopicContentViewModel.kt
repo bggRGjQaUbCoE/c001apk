@@ -22,7 +22,6 @@ class HomeTopicContentViewModel : ViewModel() {
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var firstVisibleItemPosition = 0
     private var lastItem: String? = null
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val topicData = MutableLiveData<List<HomeFeedResponse.Data>>()
@@ -45,7 +44,6 @@ class HomeTopicContentViewModel : ViewModel() {
                     } else if (!data?.data.isNullOrEmpty()) {
                         if (isRefreshing) topicDataList.clear()
                         if (isRefreshing || isLoadMore) {
-                            listSize = topicDataList.size
                             for (element in data?.data!!)
                                 if (element.entityType == "topic"
                                     || element.entityType == "product"

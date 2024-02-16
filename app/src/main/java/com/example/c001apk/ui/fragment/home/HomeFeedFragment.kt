@@ -227,8 +227,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
-                            viewModel.firstCompletelyVisibleItemPosition =
-                                mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
@@ -275,14 +273,17 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     private fun initView() {
         mAdapter = AppAdapter(ItemClickListener())
         footerAdapter = FooterAdapter(FooterListener())
-        mLayoutManager = LinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (itemDecorationCount == 0) {
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     addItemDecoration(LinearItemDecoration(10.dp))
@@ -314,7 +315,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
 
     private fun refresh() {
         viewModel.page = 1
-        viewModel.firstCompletelyVisibleItemPosition = 0
         viewModel.lastVisibleItemPosition = 0
         viewModel.isEnd = false
         viewModel.isRefreshing = true
@@ -377,15 +377,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     override fun onReturnTop(isRefresh: Boolean?) {
         binding.recyclerView.stopScroll()
         if (isRefresh == true) {
-            if (viewModel.firstCompletelyVisibleItemPosition == 0) {
-                binding.swipeRefresh.isRefreshing = true
-                refresh()
-            } else {
-                viewModel.firstCompletelyVisibleItemPosition = 0
-                binding.recyclerView.scrollToPosition(0)
-                binding.swipeRefresh.isRefreshing = true
-                refresh()
-            }
+            binding.recyclerView.scrollToPosition(0)
+            binding.swipeRefresh.isRefreshing = true
+            refresh()
         } else if (viewModel.type == "follow") {
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setTitle("关注分组")

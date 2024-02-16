@@ -31,7 +31,6 @@ class UserViewModel : ViewModel() {
     var isRefreshing: Boolean = true
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-    var firstVisibleItemPosition = 0
     var page = 1
     var listSize: Int = -1
     var followType: Boolean = false
@@ -96,7 +95,6 @@ class UserViewModel : ViewModel() {
                         } else if (!feed.data.isNullOrEmpty()) {
                             if (isRefreshing) feedList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = feedList.size
                                 feed.data.forEach {
                                     if (it.entityType == "feed")
                                         if (!BlackListUtil.checkUid(it.userInfo?.uid.toString())

@@ -265,15 +265,17 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                 viewModel.uid.toString(),
             )
         footerAdapter = FooterAdapter(ReloadListener())
-        mLayoutManager = LinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
         binding.recyclerView.apply {
             adapter = ConcatAdapter()
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(ReplyItemDecoration(requireContext(), 1))
             else

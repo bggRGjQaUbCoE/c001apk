@@ -132,7 +132,8 @@ class FeedViewModel : ViewModel() {
                 feedType.toString(), blockStatus, fromFeedAuthor
             )
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
@@ -155,7 +156,6 @@ class FeedViewModel : ViewModel() {
                                 feedReplyList.addAll(feedTopReplyList)
                         }
                         if (isRefreshing || isLoadMore) {
-                            listSize = feedReplyList.size
                             for (element in reply?.data!!) {
                                 if (element.entityType == "feed_reply") {
                                     if (listType == "lastupdate_desc" && topReplyId != null
@@ -207,7 +207,10 @@ class FeedViewModel : ViewModel() {
                         feedType = feed.data.feedType
 
                         if (feedType == "feedArticle") {
-                            articleMsg = feed.data.message
+                            articleMsg =
+                                if (feed.data.message.length > 150)
+                                    feed.data.message.substring(0, 150)
+                                else feed.data.message
                             articleDateLine = feed.data.dateline.toString()
                             articleList = ArrayList<FeedArticleContentBean.Data>().also {
                                 if (feed.data.messageCover?.isNotEmpty() == true) {

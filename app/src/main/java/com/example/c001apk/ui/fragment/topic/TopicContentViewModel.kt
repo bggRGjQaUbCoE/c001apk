@@ -38,7 +38,6 @@ class TopicContentViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
     var url: String? = null
     var title: String? = null
@@ -70,11 +69,7 @@ class TopicContentViewModel : ViewModel() {
                             if (isRefreshing)
                                 topicDataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                lastItem = data.data.last().id
-                                listSize = topicDataList.size
                                 for (element in data.data) {
-                                    if (element.id == lastItem)
-                                        continue
                                     if (element.entityType == "feed"
                                         || element.entityType == "topic"
                                         || element.entityType == "product"
@@ -132,7 +127,7 @@ class TopicContentViewModel : ViewModel() {
             topicData.postValue(currentList)
         }
 
-        override fun onDeleteClicked(entityType:String, id: String, position: Int) {
+        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
             onDeleteFeed("/v6/feed/deleteFeed", id, position)
         }
     }

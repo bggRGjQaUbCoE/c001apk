@@ -22,7 +22,6 @@ class AppListViewModel : ViewModel() {
 
     var isInit: Boolean = true
     var listSize: Int = -1
-    var firstVisibleItemPosition = 0
 
     val setFab: MutableLiveData<Boolean> = MutableLiveData()
     val items: MutableLiveData<List<AppItem>> = MutableLiveData()

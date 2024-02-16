@@ -44,7 +44,6 @@ class SearchContentViewModel : ViewModel() {
     var replyCount: String? = null
     var dateLine: Long? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
 
     val toastText = MutableLiveData<Event<String>>()
@@ -78,7 +77,6 @@ class SearchContentViewModel : ViewModel() {
                             if (isRefreshing)
                                 searchList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = searchList.size
                                 if (type == "feed")
                                     for (element in search.data) {
                                         if (element.entityType == "feed")

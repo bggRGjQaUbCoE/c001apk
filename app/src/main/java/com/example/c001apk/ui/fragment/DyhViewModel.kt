@@ -36,7 +36,6 @@ class DyhViewModel : ViewModel() {
                             if (isRefreshing)
                                 dyhDataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = dyhDataList.size
                                 for (element in data.data)
                                     if (element.entityType == "feed")
                                         if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
@@ -94,7 +93,6 @@ class DyhViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
 
     val toastText = MutableLiveData<Event<String>>()

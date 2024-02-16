@@ -42,6 +42,7 @@ class FeedDataAdapter(
         fun bind() {
             binding.data = articleList!![bindingAdapterPosition]
             binding.listener = listener
+            binding.executePendingBindings()
         }
     }
 
@@ -50,6 +51,7 @@ class FeedDataAdapter(
         fun bind() {
             binding.data = articleList!![bindingAdapterPosition]
             binding.imageView.listener = listener
+            binding.executePendingBindings()
         }
     }
 
@@ -58,6 +60,7 @@ class FeedDataAdapter(
         fun bind() {
             binding.data = articleList!![bindingAdapterPosition]
             binding.listener = listener
+            binding.executePendingBindings()
         }
     }
 

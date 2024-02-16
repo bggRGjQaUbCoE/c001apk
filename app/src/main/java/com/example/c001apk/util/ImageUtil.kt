@@ -103,6 +103,7 @@ object ImageUtil {
                     )
                         transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
                 }
+                .centerCrop()
                 .transition(withCrossFade())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .skipMemoryCache(false)

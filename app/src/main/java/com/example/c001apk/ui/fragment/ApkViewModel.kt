@@ -42,7 +42,6 @@ class ApkViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
 
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()

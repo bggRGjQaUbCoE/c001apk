@@ -221,15 +221,17 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>() {
     private fun initView() {
         mAdapter = AppAdapter(viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
-        mLayoutManager = LinearLayoutManager(this)
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(this@FFFListActivity)
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
@@ -238,8 +240,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>() {
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
-        viewModel.lastVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false

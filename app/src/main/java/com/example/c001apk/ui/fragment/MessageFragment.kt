@@ -187,9 +187,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         mAdapter = MessageAdapter(ItemClickListener())
         messageThirdAdapter.setBadgeList(listOf(atme, atcommentme, feedlike, contacts_follow))
         footerAdapter = FooterAdapter(ReloadListener())
-        mLayoutManager = LinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
         binding.recyclerView.apply {
             adapter = ConcatAdapter(
                 HeaderAdapter(),
@@ -200,9 +197,14 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 footerAdapter
             )
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(10.dp))
             else

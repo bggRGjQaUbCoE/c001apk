@@ -30,7 +30,6 @@ class ApkViewModel : ViewModel() {
     var isRefreshing: Boolean = true
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-    var firstVisibleItemPosition = 0
     var page = 1
     var listSize: Int = -1
     var avatar: String? = null

@@ -36,7 +36,6 @@ class CarouselViewModel : ViewModel() {
     var isRefreshing: Boolean = true
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-    var firstVisibleItemPosition = 0
     var page = 1
     var listSize: Int = -1
     var avatar: String? = null
@@ -46,7 +45,6 @@ class CarouselViewModel : ViewModel() {
     var follow: String? = null
     var fans: String? = null
     var packageName: String? = null
-
 
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val carouselData = MutableLiveData<List<HomeFeedResponse.Data>>()
@@ -116,7 +114,6 @@ class CarouselViewModel : ViewModel() {
                             if (isRefreshing)
                                 carouselList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = carouselList.size
                                 for (element in response?.data!!)
                                     if (element.entityType == "feed" && element.feedType != "vote")
                                         if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())

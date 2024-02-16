@@ -33,7 +33,6 @@ class MessageViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val messageListData = MutableLiveData<List<MessageResponse.Data>>()
@@ -59,7 +58,6 @@ class MessageViewModel : ViewModel() {
                         } else if (!feed.data.isNullOrEmpty()) {
                             if (isRefreshing) messageList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = messageList.size
                                 for (element in feed.data)
                                     if (element.entityType == "feed"
                                         || element.entityType == "feed_reply"

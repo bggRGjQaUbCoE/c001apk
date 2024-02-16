@@ -116,14 +116,17 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     private fun initView() {
         mAdapter = BHistoryAdapter(viewModel.ItemClickListener())
-        mLayoutManager = LinearLayoutManager(this)
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(this@HistoryActivity)
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (itemDecorationCount == 0) {
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     addItemDecoration(LinearItemDecoration(10.dp))

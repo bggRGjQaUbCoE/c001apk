@@ -70,12 +70,12 @@ class FollowViewModel : ViewModel() {
                         } else if (!feed.data.isNullOrEmpty()) {
                             if (isRefreshing) dataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = dataList.size
                                 for (element in feed.data)
                                     if (element.entityType == "feed"
                                         || element.entityType == "contacts"
                                         || element.entityType == "apk"
                                         || element.entityType == "feed_reply"
+                                        || element.entityType == "recentHistory"
                                     )
                                         if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
                                             && !TopicBlackListUtil.checkTopic(
@@ -130,7 +130,6 @@ class FollowViewModel : ViewModel() {
                             if (isRefreshing)
                                 dataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                listSize = dataList.size
                                 for (element in data.data)
                                     if (element.entityType == "feed"
                                         || element.entityType == "topic"
@@ -192,7 +191,6 @@ class FollowViewModel : ViewModel() {
     var dateLine: Long? = null
     var feedType: String? = null
     var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
     var id: String? = null
 
     val toastText = MutableLiveData<Event<String>>()

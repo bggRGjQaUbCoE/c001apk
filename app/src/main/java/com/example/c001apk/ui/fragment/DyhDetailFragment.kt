@@ -106,7 +106,6 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>() {
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition =0
         viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
         viewModel.isEnd = false
@@ -118,15 +117,17 @@ class DyhDetailFragment : BaseFragment<FragmentDyhDetailBinding>() {
     private fun initView() {
         mAdapter = AppAdapter(viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
-        mLayoutManager = LinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(10.dp))
             else

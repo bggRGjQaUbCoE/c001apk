@@ -83,7 +83,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     }
 
     private fun initObserve() {
-        viewModel.toastText.observe(viewLifecycleOwner){event->
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
@@ -130,8 +130,6 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
-                            viewModel.firstVisibleItemPosition =
-                                mLayoutManager.findFirstCompletelyVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
@@ -175,15 +173,17 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     private fun initView() {
         mAdapter = AppAdapter(viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
-        mLayoutManager = LinearLayoutManager(requireContext())
-        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
-                else sLayoutManager
+                } else {
+                    sLayoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    sLayoutManager
+                }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
@@ -200,8 +200,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = -1
-        viewModel.lastVisibleItemPosition = -1
+        viewModel.lastVisibleItemPosition = 0
         viewModel.lastItem = null
         viewModel.page = 1
         viewModel.isEnd = false
@@ -230,14 +229,9 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
-        binding.recyclerView.stopScroll()
-        if (viewModel.firstVisibleItemPosition == 0) {
-            binding.swipeRefresh.isRefreshing = true
-            refreshData()
-        } else {
-            viewModel.firstVisibleItemPosition = 0
-            binding.recyclerView.scrollToPosition(0)
-        }
+        binding.swipeRefresh.isRefreshing = true
+        binding.recyclerView.scrollToPosition(0)
+        refreshData()
     }
 
     inner class ReloadListener : FooterAdapter.FooterListener {

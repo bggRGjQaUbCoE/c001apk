@@ -71,7 +71,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="5dp"
-                android:text="@{data.targetType == `user` ? data.fansNum + `关注` : data.commentNum + `讨论`}"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp"
                 app:layout_constraintStart_toEndOf="@id/follow"

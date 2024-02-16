@@ -336,8 +336,15 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
     inner class RecentHistoryViewHolder(val binding: ItemRecentHistoryBinding) :
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
+            val data = currentList[bindingAdapterPosition]
+            binding.data = data
             binding.listener = listener
+            binding.fans.text =
+                if (data.targetType == "user")
+                    "${data.fansNum}粉丝"
+                else
+                    "${data.commentNum}讨论"
+
         }
     }
 
@@ -530,6 +537,6 @@ class HomeFeedDiffCallback : DiffUtil.ItemCallback<HomeFeedResponse.Data>() {
         oldItem: HomeFeedResponse.Data,
         newItem: HomeFeedResponse.Data
     ): Boolean {
-        return oldItem.entityId == newItem.entityId && oldItem.likenum == newItem.likenum
+        return oldItem.entityId == newItem.entityId && oldItem.lastupdate == newItem.lastupdate
     }
 }
