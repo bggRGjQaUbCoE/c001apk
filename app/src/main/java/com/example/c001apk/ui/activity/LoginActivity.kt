@@ -16,7 +16,7 @@ import com.example.c001apk.util.CookieUtil.isGetCaptcha
 import com.example.c001apk.util.CookieUtil.isGetSmsLoginParam
 import com.example.c001apk.util.CookieUtil.isPreGetLoginParam
 import com.example.c001apk.util.CookieUtil.isTryLogin
-import com.example.c001apk.util.LoginUtils.Companion.createRandomNumber
+import com.example.c001apk.util.LoginUtils.createRandomNumber
 
 
 class LoginActivity : BaseActivity<ActivityLoginBinding>() {

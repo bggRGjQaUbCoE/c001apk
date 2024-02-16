@@ -8,14 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.logic.model.LoginResponse
-import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.network.Repository.getCaptcha
 import com.example.c001apk.logic.network.Repository.getLoginParam
 import com.example.c001apk.logic.network.Repository.getProfile
 import com.example.c001apk.logic.network.Repository.preGetLoginParam
 import com.example.c001apk.logic.network.Repository.tryLogin
 import com.example.c001apk.util.CookieUtil
-import com.example.c001apk.util.LoginUtils.Companion.createRequestHash
+import com.example.c001apk.util.LoginUtils.createRequestHash
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
@@ -23,7 +22,30 @@ import org.jsoup.Jsoup
 
 class LoginViewModel : ViewModel() {
 
+    var uid: String? = null
+    var url: String? = null
+    var listSize: Int = -1
+    var type: String? = null
+    var isInit: Boolean = true
+    var listType: String = "lastupdate_desc"
+    var page = 1
+    var lastItem: String? = null
+    var isRefreshing: Boolean = true
+    var isLoadMore: Boolean = false
+    var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
+    var itemCount = 1
+    var avatar: String? = null
+    var device: String? = null
+    var replyCount: String? = null
+    var dateLine: Long? = null
+    var feedType: String? = null
+    var errorMessage: String? = null
+    var firstVisibleItemPosition = 0
+    var id: String? = null
     var requestHash: String? = null
+    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    var loginData = HashMap<String, String?>()
     val toastText = MutableLiveData<Event<String>>()
     val showCaptcha = MutableLiveData<Event<Bitmap>>()
     val getCaptcha = MutableLiveData<Event<String>>()
@@ -144,7 +166,7 @@ class LoginViewModel : ViewModel() {
     private fun onGetProfile() {
         viewModelScope.launch {
             getProfile(uid.toString())
-                .collect{result->
+                .collect { result ->
                     val data = result.getOrNull()
                     data?.data.let {
                         PrefManager.userAvatar = data?.data?.userAvatar.toString()
@@ -158,31 +180,5 @@ class LoginViewModel : ViewModel() {
 
 
     }
-
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
-    val messageListData = MutableLiveData<List<MessageResponse.Data>>()
-    var loginData = HashMap<String, String?>()
-
-    var uid: String? = null
-    var url: String? = null
-    var listSize: Int = -1
-    var type: String? = null
-    var isInit: Boolean = true
-    var listType: String = "lastupdate_desc"
-    var page = 1
-    var lastItem: String? = null
-    var isRefreshing: Boolean = true
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
-    var id: String? = null
 
 }

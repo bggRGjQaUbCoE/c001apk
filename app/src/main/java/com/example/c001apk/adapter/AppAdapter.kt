@@ -54,6 +54,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
             binding.likeData = likeData
             binding.listener = listener
             binding.multiImage.listener = listener
+            binding.forwardedPic.listener = listener
 
             binding.expand.setOnClickListener {
                 PopupMenu(it.context, it).apply {

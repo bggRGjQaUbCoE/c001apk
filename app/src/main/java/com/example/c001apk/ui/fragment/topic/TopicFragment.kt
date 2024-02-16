@@ -60,11 +60,13 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
         if (viewModel.isResume) {
             viewModel.isResume = false
             getViewData()
-        } else if (!viewModel.isResume && viewModel.tabList.isEmpty()) {
-            binding.errorLayout.parent.visibility = View.VISIBLE
-        } else {
+        } else if (viewModel.tabList.isNotEmpty()) {
             initView(null)
             initBar()
+        } else if (!viewModel.errorMessage.isNullOrEmpty()) {
+            showErrMsg()
+        } else {
+            binding.errorLayout.parent.visibility = View.VISIBLE
         }
 
         initObserve()
@@ -77,6 +79,16 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     }
 
     private fun initObserve() {
+
+        viewModel.showError.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    binding.indicator.parent.isIndeterminate = false
+                    binding.indicator.parent.visibility = View.GONE
+                    showErrMsg()
+                }
+            }
+        }
 
         viewModel.afterFollow.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
@@ -102,10 +114,15 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
     }
 
+    private fun showErrMsg() {
+        binding.errorMsg.parent.text = viewModel.errorMessage
+        binding.errorMsg.parent.visibility = View.VISIBLE
+    }
+
     private fun initSub() {
         subscribe.title =
             if (viewModel.isFollow) "取消关注"
-        else "关注"
+            else "关注"
     }
 
     private fun initBar() {

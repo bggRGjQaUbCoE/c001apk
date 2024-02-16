@@ -23,6 +23,7 @@ import com.example.c001apk.adapter.FeedDataAdapter
 import com.example.c001apk.adapter.FeedFixAdapter
 import com.example.c001apk.adapter.FeedReplyAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.ReplyRefreshListener
 import com.example.c001apk.constant.Constants.SZLM_ID
@@ -60,7 +61,7 @@ import kotlinx.coroutines.withContext
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
 
     private val viewModel by lazy { ViewModelProvider(requireActivity())[FeedViewModel::class.java] }
-    private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
+    private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private lateinit var feedDataAdapter: FeedDataAdapter
     private lateinit var feedReplyAdapter: FeedReplyAdapter
     private lateinit var feedFixAdapter: FeedFixAdapter
@@ -92,8 +93,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             val view1 = LayoutInflater.from(context)
                 .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
             bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view1)
-            bottomSheetDialog.setIOnPublishClickListener(this)
-            bottomSheetDialog.apply {
+            bottomSheetDialog?.setIOnPublishClickListener(this)
+            bottomSheetDialog?.apply {
                 setContentView(view1)
                 setCancelable(false)
                 setCanceledOnTouchOutside(true)
@@ -141,7 +142,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     private fun initReply() {
-        bottomSheetDialog.apply {
+        bottomSheetDialog?.apply {
             rid = viewModel.rid.toString()
             ruid = viewModel.ruid.toString()
             uname = viewModel.uname.toString()
@@ -228,9 +229,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
         viewModel.closeSheet.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it && ::bottomSheetDialog.isInitialized && bottomSheetDialog.isShowing) {
-                    bottomSheetDialog.editText.text = null
-                    bottomSheetDialog.dismiss()
+                if (it && bottomSheetDialog?.isShowing == true) {
+                    bottomSheetDialog?.editText?.text = null
+                    bottomSheetDialog?.dismiss()
                 }
             }
         }
@@ -361,7 +362,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
         binding.recyclerView.apply {
             adapter =
-                ConcatAdapter(feedDataAdapter, feedFixAdapter, feedReplyAdapter, footerAdapter)
+                ConcatAdapter(
+                    HeaderAdapter(),
+                    feedDataAdapter,
+                    feedFixAdapter,
+                    feedReplyAdapter,
+                    footerAdapter
+                )
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     binding.tabLayout.visibility = View.VISIBLE
@@ -707,4 +714,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             return true
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        bottomSheetDialog?.dismiss()
+        dialog?.dismiss()
+        bottomSheetDialog = null
+        dialog = null
+    }
+
 }

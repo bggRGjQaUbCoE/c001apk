@@ -1,25 +1,16 @@
 package com.example.c001apk.adapter
 
-import android.annotation.SuppressLint
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.c001apk.R
 import com.example.c001apk.databinding.ItemMessageContentBinding
 import com.example.c001apk.databinding.ItemMessageUserBinding
-import com.example.c001apk.databinding.ItemSearchUserBinding
+import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.MessageResponse
-import com.example.c001apk.util.DateUtils
-import com.example.c001apk.util.ImageUtil
-import com.example.c001apk.util.ImageUtil.getImageLp
-import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
-import com.example.c001apk.view.LinkTextView
+import com.example.c001apk.ui.activity.FeedActivity
+import com.example.c001apk.util.IntentUtil
 
 
 class MessageContentAdapter(
@@ -42,9 +33,25 @@ class MessageContentAdapter(
     inner class MessageViewHolder(val binding: ItemMessageContentBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind() {
+            val data = currentList[bindingAdapterPosition]
             binding.type = type
-            binding.data = currentList[bindingAdapterPosition]
+            binding.data = data
+            binding.likeData = Like().also {
+                it.likeNum.set(data.likenum)
+                data.userAction?.like?.let { like ->
+                    it.isLike.set(like)
+                }
+            }
             binding.listener = listener
+
+            if (type != "feedLike") {
+                itemView.setOnClickListener {
+                    IntentUtil.startActivity<FeedActivity>(itemView.context) {
+                        putExtra("id", data.id)
+                    }
+                }
+            }
+
             binding.executePendingBindings()
         }
     }

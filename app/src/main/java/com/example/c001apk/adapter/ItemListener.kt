@@ -27,7 +27,7 @@ interface ItemListener {
 
     fun onFollowUser(uid: String, followAuthor: Int, position: Int) {}
 
-    fun onShowCollection(view: View, id: String, title: String?) {}
+    fun onShowCollection(id: String, title: String) {}
 
     fun onViewApk(view: View, id: String?) {
         id?.let {

@@ -294,8 +294,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
         }
     }
 
-
-    @SuppressLint("InflateParams")
     private fun initReply() {
         bottomSheetDialog.apply {
             rid = viewModel.rid.toString()
@@ -320,7 +318,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
 
     inner class ItemClickListener : ItemListener {
         override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
-            viewModel.onPostLikeReply(id, position, likeData)
+            if (PrefManager.isLogin)
+                if (PrefManager.SZLMID.isEmpty())
+                    Toast.makeText(requireContext(), Constants.SZLM_ID, Toast.LENGTH_SHORT).show()
+                else
+                    viewModel.onPostLikeReply(id, position, likeData)
         }
 
         override fun onReply(

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.INavViewContainer
@@ -73,14 +74,6 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
         viewModel.topicData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.apply {
-                    addAdapter(mAdapter)
-                    addAdapter(footerAdapter)
-                }
-            }
         }
     }
 
@@ -105,7 +98,7 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isRefreshing && !viewModel.isLoadMore && !viewModel.isEnd
                     ) {
                         viewModel.page++
@@ -152,7 +145,7 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter()
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager

@@ -3,21 +3,38 @@ package com.example.c001apk.ui.activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
-import com.example.c001apk.constant.Constants
 import com.example.c001apk.constant.Constants.LOADING_FAILED
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.network.Repository.getMessage
 import com.example.c001apk.util.BlackListUtil
-import com.example.c001apk.util.PrefManager
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class MessageViewModel : ViewModel() {
 
+    var url: String? = null
+    var listSize: Int = -1
+    var type: String? = null
+    var isInit: Boolean = true
+    var listType: String = "lastupdate_desc"
+    var page = 1
+    var lastItem: String? = null
+    var isRefreshing: Boolean = true
+    var isLoadMore: Boolean = false
+    var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
+    var itemCount = 1
+    var uid: String? = null
+    var avatar: String? = null
+    var device: String? = null
+    var replyCount: String? = null
+    var dateLine: Long? = null
+    var feedType: String? = null
+    var errorMessage: String? = null
+    var firstVisibleItemPosition = 0
+    var id: String? = null
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val messageListData = MutableLiveData<List<MessageResponse.Data>>()
 
@@ -25,7 +42,8 @@ class MessageViewModel : ViewModel() {
         viewModelScope.launch {
             getMessage(url.toString(), page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val messageList = messageListData.value?.toMutableList() ?: ArrayList()
@@ -75,30 +93,6 @@ class MessageViewModel : ViewModel() {
 
     }
 
-    var url: String? = null
-    var listSize: Int = -1
-    var type: String? = null
-    var isInit: Boolean = true
-    var listType: String = "lastupdate_desc"
-    var page = 1
-    var lastItem: String? = null
-    var isRefreshing: Boolean = true
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
-    var id: String? = null
-
-    inner class ItemClickListener : ItemListener {
-
-    }
+    inner class ItemClickListener : ItemListener
 
 }

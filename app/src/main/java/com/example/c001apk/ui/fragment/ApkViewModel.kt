@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +16,6 @@ import com.example.c001apk.logic.network.Repository.postLikeFeed
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -58,7 +56,8 @@ class ApkViewModel : ViewModel() {
                 commentBaseUrl + appId + appCommentSort, appCommentTitle, null, lastItem, page
             )
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val appCommentList = appCommentData.value?.toMutableList() ?: ArrayList()

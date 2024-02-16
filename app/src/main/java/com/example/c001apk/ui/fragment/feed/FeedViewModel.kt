@@ -46,7 +46,7 @@ class FeedViewModel : ViewModel() {
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
+    var itemCount = 2
     var uid: String? = null
     var funame: String? = null
     var avatar: String? = null
@@ -234,7 +234,7 @@ class FeedViewModel : ViewModel() {
                                     if (item.type == "text" || item.type == "image" || item.type == "shareUrl")
                                         it.add(item)
                                 }
-                                itemCount = it.size
+                                itemCount = it.size + 1
                             }
                         } else {
                             feedDataList = ArrayList<HomeFeedResponse.Data>().also {

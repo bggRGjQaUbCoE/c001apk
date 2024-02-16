@@ -33,15 +33,13 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
     var lastVisibleItemPosition: Int = 0
     var changeFirstItem: Boolean = false
     var listSize: Int = -1
-
     var type: String? = null
     var isInit: Boolean = true
     var isRefreshing: Boolean = true
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-
     var page = 1
-    var firstLaunch = 1
+    private var firstLaunch = 1
     private var firstItem: String? = null
     private var lastItem: String? = null
 
@@ -74,6 +72,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                     } else if (!feed?.data.isNullOrEmpty()) {
                         if (isRefreshing) {
                             if (feed?.data!!.size <= 4 && feed.data.last().entityTemplate == "refreshCard") {
+                                toastText.postValue(Event(feed.data.last().title))
                                 /*val index = if (PrefManager.isIconMiniCard) 4
                                 else 3
                                 if (listSize >= index) {

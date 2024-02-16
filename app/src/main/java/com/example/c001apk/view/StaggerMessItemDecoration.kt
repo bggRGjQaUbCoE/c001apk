@@ -14,12 +14,8 @@ class StaggerMessItemDecoration(private val space: Int) : ItemDecoration() {
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        val position = parent.getChildAdapterPosition(view)
         val params = view.layoutParams as StaggeredGridLayoutManager.LayoutParams
         val spanIndex = params.spanIndex
-        if (position == 0) {
-            outRect.top = space
-        }
         if (spanIndex % 2 == 1) {
             outRect.right = space
         }

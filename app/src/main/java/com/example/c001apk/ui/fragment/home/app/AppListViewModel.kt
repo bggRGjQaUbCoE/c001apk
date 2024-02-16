@@ -26,14 +26,14 @@ class AppListViewModel : ViewModel() {
 
     val setFab: MutableLiveData<Boolean> = MutableLiveData()
     val items: MutableLiveData<List<AppItem>> = MutableLiveData()
-
     val appsUpdate = ArrayList<UpdateCheckResponse.Data>()
 
-    private fun fetchAppsUpdate(pkg:String) {
+    private fun fetchAppsUpdate(pkg: String) {
         viewModelScope.launch {
             getAppsUpdate(pkg)
-                .collect{
-                    it.getOrNull()?.let {
+                .collect { result ->
+                    result.getOrNull()?.let {
+                        appsUpdate.clear()
                         appsUpdate.addAll(it)
                         setFab.postValue(true)
                     }

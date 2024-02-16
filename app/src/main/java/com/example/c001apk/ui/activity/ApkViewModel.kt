@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.activity
 
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +7,6 @@ import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getFollow
 import kotlinx.coroutines.launch
@@ -16,8 +14,8 @@ import kotlinx.coroutines.launch
 class ApkViewModel : ViewModel() {
 
     var collectionUrl: String? = null
-    var commentStatusText: String? = null
-    val tabList = ArrayList<String>()
+    private var commentStatusText: String? = null
+    var tabList: List<String>? = null
     var url: String? = null
     var type: String? = null
     var isFollow: Boolean = false
@@ -42,9 +40,7 @@ class ApkViewModel : ViewModel() {
     var follow: String? = null
     var fans: String? = null
     var packageName: String? = null
-    var versionCode: String? = null
-
-
+    private var versionCode: String? = null
     val showError = MutableLiveData<Event<Boolean>>()
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val doNext = MutableLiveData<Event<Boolean>>()
@@ -70,26 +66,11 @@ class ApkViewModel : ViewModel() {
                         type = appInfo.data.entityType
                         appId = appInfo.data.id
                         title = appInfo.data.title
-                        /*
-
-                      title = appInfo.data.title
-                        version =
-                            "版本: ${appInfo.data.version}(${appInfo.data.apkversioncode})"
-                        size = "大小: ${appInfo.data.apksize}"
-                        lastupdate = if (appInfo.data.lastupdate == null) "更新时间: null"
-                        else "更新时间: ${DateUtils.fromToday(appInfo.data.lastupdate)}"
-                        logo = appInfo.data.logo
-
-                        showAppInfo()*/
                         appData = appInfo.data
                         showAppInfo.postValue(Event(true))
 
                         if (commentStatusText == "允许评论" || type == "appForum") {
-                            tabList.apply {
-                                add("最近回复")
-                                add("最新发布")
-                                add("热度排序")
-                            }
+                            tabList = listOf("最近回复", "最新发布", "热度排序")
                             doNext.postValue(Event(true))
                         } else {
                             errorMessage = appInfo.data.commentStatusText
@@ -127,14 +108,16 @@ class ApkViewModel : ViewModel() {
     fun onGetFollow() {
         viewModelScope.launch {
             getFollow(followUrl.toString(), null, appId)
-                .collect{result->
+                .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
                         response.data?.follow?.let {
                             isFollow = !isFollow
                             toastText.postValue(
-                                Event(if (response.data.follow == 1) "关注成功"
-                                else "取消关注成功")
+                                Event(
+                                    if (response.data.follow == 1) "关注成功"
+                                    else "取消关注成功"
+                                )
                             )
                         }
                     } else {
@@ -145,8 +128,6 @@ class ApkViewModel : ViewModel() {
     }
 
 
-    inner class ItemClickListener : ItemListener {
-
-    }
+    inner class ItemClickListener : ItemListener
 
 }

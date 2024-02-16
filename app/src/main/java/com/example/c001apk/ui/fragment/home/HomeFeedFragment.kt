@@ -19,11 +19,11 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
-import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.ReplyBottomSheetDialog
@@ -158,15 +158,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
 
 
         viewModel.homeFeedData.observe(viewLifecycleOwner) {
-            val newList = ArrayList<HomeFeedResponse.Data>().also { list ->
-                list.addAll(it)
-            }
             viewModel.listSize = it.size
-            mAdapter.submitList(newList)
+            mAdapter.submitList(it)
 
-            if (!(binding.recyclerView.adapter as ConcatAdapter).adapters.contains(footerAdapter)) {
-                (binding.recyclerView.adapter as ConcatAdapter).addAdapter(footerAdapter)
-            }
         }
     }
 
@@ -180,14 +174,10 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT
             )
             lp.setMargins(
-                0,
-                0,
-                25.dp,
+                0, 0, 25.dp,
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    DensityTool.getNavigationBarHeight(requireContext())
-                            + 105.dp
-                else
-                    25.dp
+                    DensityTool.getNavigationBarHeight(requireContext()) + 105.dp
+                else 25.dp
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             binding.fab.layoutParams = lp
@@ -206,8 +196,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
             }
             binding.fab.setOnClickListener {
                 if (PrefManager.SZLMID == "") {
-                    Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                 } else {
                     bottomSheetDialog.show()
                 }
@@ -251,7 +240,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -277,7 +266,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
         footerAdapter.notifyItemChanged(0)
         viewModel.isLoadMore = true
-        viewModel.firstLaunch = 0
         when (viewModel.type) {
             "feed" -> viewModel.fetchHomeFeed()
             else -> viewModel.fetchDataList()
@@ -290,7 +278,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.recyclerView.apply {
-            adapter = ConcatAdapter(mAdapter)
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -444,7 +432,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                         }
                     }
                     viewModel.homeFeedData.postValue(emptyList())
-                    (binding.recyclerView.adapter as ConcatAdapter).removeAdapter(footerAdapter)
                     binding.indicator.parent.visibility = View.VISIBLE
                     binding.indicator.parent.isIndeterminate = true
                     refresh()

@@ -13,7 +13,12 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentCollectionBinding
+import com.example.c001apk.logic.model.Like
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
@@ -77,8 +82,8 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
             }
     }
 
-    private fun initObserve(){
-        viewModel.toastText.observe(viewLifecycleOwner){event->
+    private fun initObserve() {
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
@@ -99,19 +104,11 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
         viewModel.dataListData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.apply {
-                    addAdapter(mAdapter)
-                    addAdapter(footerAdapter)
-                }
-            }
         }
     }
 
     private fun initData() {
-        if (viewModel.listSize==-1) {
+        if (viewModel.listSize == -1) {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             refreshData()
@@ -119,13 +116,13 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         mLayoutManager = LinearLayoutManager(requireContext())
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter()
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -172,7 +169,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                    if (viewModel.listSize!=-1 && !viewModel.isEnd && isAdded) {
+                    if (viewModel.listSize != -1 && !viewModel.isEnd && isAdded) {
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
@@ -187,7 +184,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -206,6 +203,44 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
             loadMore()
+        }
+    }
+
+    inner class ItemClickListener : ItemListener {
+        override fun onShowCollection(id: String, title: String) {
+            requireActivity().supportFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.right_in,
+                    R.anim.left_out_fragment,
+                    R.anim.left_in,
+                    R.anim.right_out
+                )
+                .replace(
+                    R.id.fragment,
+                    newInstance(id, title)
+                )
+                .addToBackStack(null)
+                .commit()
+        }
+
+        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
+            if (PrefManager.isLogin) {
+                if (PrefManager.SZLMID.isEmpty())
+                    Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
+                else viewModel.onPostLikeFeed(id, position, likeData)
+            }
+        }
+
+        override fun onBlockUser(uid: String, position: Int) {
+            super.onBlockUser(uid, position)
+            val currentList = viewModel.dataListData.value!!.toMutableList()
+            currentList.removeAt(position)
+            viewModel.dataListData.postValue(currentList)
+        }
+
+        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
+            viewModel.onDeleteFeed("/v6/feed/deleteFeed", id, position)
         }
     }
 }

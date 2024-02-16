@@ -45,7 +45,6 @@ class ImageCarouselCardAdapter(
         )
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind()
     }

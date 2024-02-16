@@ -49,6 +49,7 @@
                     android:paddingTop="?actionBarSize"
                     android:paddingEnd="20dp"
                     android:paddingBottom="10dp"
+                    android:visibility="invisible"
                     app:layout_collapseMode="parallax">
 
                     <com.google.android.material.imageview.ShapeableImageView
@@ -119,7 +120,7 @@
                         android:minWidth="0dp"
                         android:minHeight="0dp"
                         android:text="下载"
-                        android:visibility="@{appData.entityType == `apk` ? View.VISIBLE : View.GONE}"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
 

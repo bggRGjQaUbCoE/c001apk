@@ -53,7 +53,8 @@ class FollowViewModel : ViewModel() {
         viewModelScope.launch {
             getFollowList(url.toString(), uid.toString(), page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val dataList = dataListData.value?.toMutableList() ?: ArrayList()
@@ -111,7 +112,8 @@ class FollowViewModel : ViewModel() {
         viewModelScope.launch {
             getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val dataList = dataListData.value?.toMutableList() ?: ArrayList()

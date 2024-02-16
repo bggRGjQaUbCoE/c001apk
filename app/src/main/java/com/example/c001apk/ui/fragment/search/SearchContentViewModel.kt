@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.search
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,6 +27,28 @@ class SearchContentViewModel : ViewModel() {
     var pageParam: String? = null
     var pageType: String? = null
     var keyWord: String? = null
+    var isInit: Boolean = true
+    var type: String? = null
+    var listSize: Int = -1
+    var listType: String = "lastupdate_desc"
+    var page = 1
+    var lastItem: String? = null
+    var isRefreshing: Boolean = true
+    var isLoadMore: Boolean = false
+    var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
+    var itemCount = 1
+    var uid: String? = null
+    var avatar: String? = null
+    var device: String? = null
+    var replyCount: String? = null
+    var dateLine: Long? = null
+    var errorMessage: String? = null
+    var firstVisibleItemPosition = 0
+    var id: String? = null
+
+    val toastText = MutableLiveData<Event<String>>()
+    var afterFollow = MutableLiveData<Event<Int>>()
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val searchData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
@@ -39,7 +60,8 @@ class SearchContentViewModel : ViewModel() {
                 -1
             )
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val searchList = searchData.value?.toMutableList() ?: ArrayList()
@@ -97,28 +119,6 @@ class SearchContentViewModel : ViewModel() {
 
     }
 
-    var isInit: Boolean = true
-    var type: String? = null
-    var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
-    var page = 1
-    var lastItem: String? = null
-    var isRefreshing: Boolean = true
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
-    var id: String? = null
-
-    val toastText = MutableLiveData<Event<String>>()
-    var afterFollow = MutableLiveData<Event<Int>>()
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int, position: Int) {
         viewModelScope.launch {
             Repository.postFollowUnFollow(url, uid)

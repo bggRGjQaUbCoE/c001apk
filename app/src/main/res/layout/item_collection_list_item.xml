@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:onClick="@{(view) -> listener.onShowCollection(view, data.id, data.title)}"
+        android:onClick="@{() -> listener.onShowCollection(data.id, data.title)}"
         android:focusable="true"
         app:cardBackgroundColor="@color/home_card_background_color"
         app:cardElevation="0dp"

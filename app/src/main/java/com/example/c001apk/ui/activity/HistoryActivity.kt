@@ -1,14 +1,18 @@
 package com.example.c001apk.ui.activity
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.BHistoryAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.ActivityHistoryBinding
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
@@ -16,6 +20,7 @@ import com.example.c001apk.logic.model.BrowseHistory
 import com.example.c001apk.logic.model.FeedFavorite
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.view.LinearItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +31,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     private val viewModel by lazy { ViewModelProvider(this)[HistoryViewModel::class.java] }
     private lateinit var mAdapter: BHistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val browseHistoryDao by lazy {
         BrowseHistoryDatabase.getDatabase(this).browseHistoryDao()
     }
@@ -109,13 +115,21 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     private fun initView() {
-        mLayoutManager = LinearLayoutManager(this)
         mAdapter = BHistoryAdapter(viewModel.ItemClickListener())
+        mLayoutManager = LinearLayoutManager(this)
+        sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.recyclerView.apply {
-            adapter = mAdapter
-            layoutManager = mLayoutManager
-            if (itemDecorationCount == 0)
-                addItemDecoration(LinearItemDecoration(10.dp))
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
+            layoutManager =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    mLayoutManager
+                else sLayoutManager
+            if (itemDecorationCount == 0) {
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    addItemDecoration(LinearItemDecoration(10.dp))
+                else
+                    addItemDecoration(StaggerItemDecoration(10.dp))
+            }
         }
     }
 

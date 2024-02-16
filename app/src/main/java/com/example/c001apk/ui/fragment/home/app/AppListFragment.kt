@@ -6,12 +6,14 @@ import android.view.Gravity
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppListAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.activity.AppUpdateActivity
 import com.example.c001apk.ui.fragment.BaseFragment
@@ -91,7 +93,7 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             (layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
             setOnClickListener {
                 IntentUtil.startActivity<AppUpdateActivity>(requireContext()) {
-                    putParcelableArrayListExtra("list",viewModel.appsUpdate)
+                    putParcelableArrayListExtra("list", viewModel.appsUpdate)
                 }
             }
         }
@@ -145,7 +147,7 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
 
         binding.recyclerView.apply {
             itemAnimator = null
-            adapter = mAdapter
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager

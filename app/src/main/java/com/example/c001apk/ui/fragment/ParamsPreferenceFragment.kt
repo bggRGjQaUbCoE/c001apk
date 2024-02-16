@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.EditText
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -17,8 +16,9 @@ import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.util.TokenDeviceUtils
-import com.example.c001apk.util.TokenDeviceUtils.Companion.randHexString
+import com.example.c001apk.util.TokenDeviceUtils.randHexString
 import com.example.c001apk.util.Utils
+import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ParamsPreferenceFragment : PreferenceFragmentCompat() {
@@ -50,8 +50,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -78,8 +77,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -106,8 +104,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -134,8 +131,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -168,8 +164,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -201,8 +196,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -235,8 +229,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -269,8 +262,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -302,8 +294,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -335,8 +326,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -361,8 +351,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )
@@ -386,8 +375,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat() {
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
-                    requireContext(),
+                requireContext().getColorFromAttr(
                     rikka.preference.simplemenu.R.attr.colorPrimaryDark
                 ), 128
             )

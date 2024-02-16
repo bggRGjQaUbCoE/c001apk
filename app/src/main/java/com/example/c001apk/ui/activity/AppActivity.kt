@@ -36,12 +36,6 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        if (!viewModel.title.isNullOrEmpty()) {
-            binding.appData = viewModel.appData
-            binding.appLayout.visibility = View.VISIBLE
-        } else if (viewModel.errorMessage != null) {
-            showErrorMessage()
-        }
         initData()
         initObserve()
 
@@ -59,7 +53,6 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (it) {
                     binding.appLayout.visibility = View.GONE
-                    binding.tabLayout.visibility = View.GONE
                     showErrorMessage()
                 }
             }
@@ -69,6 +62,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (it) {
                     binding.appData = viewModel.appData
+                    binding.appLayout.visibility = View.VISIBLE
                 } else {
                     binding.appLayout.visibility = View.GONE
                     binding.errorLayout.parent.visibility = View.VISIBLE
@@ -83,9 +77,9 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                 if (it) {
                     initView()
                 } else {
-                    binding.tabLayout.visibility = View.GONE
                     showErrorMessage()
                 }
+                initDownBtn()
             }
         }
 
@@ -96,7 +90,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             }
         }
 
-        viewModel.toastText.observe(this){event->
+        viewModel.toastText.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 initSub()
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
@@ -104,8 +98,19 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         }
     }
 
+    private fun initDownBtn() {
+        if (viewModel.type == "apk")
+            binding.btnDownload.visibility = View.VISIBLE
+        binding.btnDownload.setOnClickListener {
+            if (viewModel.collectionUrl.isNullOrEmpty()) {
+                viewModel.onGetDownloadLink()
+            } else
+                downloadApp()
+        }
+    }
+
     private fun initView() {
-        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
+        binding.viewPager.offscreenPageLimit = viewModel.tabList!!.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 when (position) {
@@ -115,10 +120,10 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                     else -> throw IllegalArgumentException()
                 }
 
-            override fun getItemCount() = viewModel.tabList.size
+            override fun getItemCount() = viewModel.tabList!!.size
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = viewModel.tabList[position]
+            tab.text = viewModel.tabList!![position]
         }.attach()
 
         binding.tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
@@ -134,6 +139,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun showErrorMessage() {
+        binding.tabLayout.visibility = View.GONE
         binding.errorMessage.parent.visibility = View.VISIBLE
         binding.errorMessage.parent.text = viewModel.errorMessage
         binding.indicator.parent.isIndeterminate = false
@@ -155,12 +161,21 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             binding.indicator.parent.isIndeterminate = true
             binding.indicator.parent.visibility = View.VISIBLE
             refreshData()
-        } else if (viewModel.tabList.isEmpty()) {
-            binding.errorLayout.parent.visibility = View.VISIBLE
-        } else if (viewModel.tabList.isNotEmpty()) {
-            initView()
-        } else if (viewModel.commentStatusText != "允许评论" && viewModel.type != "appForum") {
+        } else if (!viewModel.type.isNullOrEmpty()) {
+            binding.appData = viewModel.appData
+            binding.appLayout.visibility = View.VISIBLE
+            initDownBtn()
+            if (viewModel.tabList?.isNotEmpty() == true) {
+                initView()
+                binding.tabLayout.visibility = View.VISIBLE
+            } else {
+                showErrorMessage()
+            }
+        } else if (!viewModel.errorMessage.isNullOrEmpty()) {
             showErrorMessage()
+        } else {
+            binding.tabLayout.visibility = View.GONE
+            binding.errorLayout.parent.visibility = View.VISIBLE
         }
     }
 

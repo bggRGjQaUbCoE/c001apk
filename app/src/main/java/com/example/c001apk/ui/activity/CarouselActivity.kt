@@ -15,6 +15,7 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.ActivityCarouselBinding
 import com.example.c001apk.ui.fragment.topic.TopicContentFragment
 import com.example.c001apk.util.Utils.getColorFromAttr
@@ -79,32 +80,32 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
     }
 
     private fun initObserve() {
-        viewModel.toastText.observe(this){event->
+        viewModel.toastText.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         }
 
-        viewModel.initBar.observe(this){event->
+        viewModel.initBar.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 initBar(viewModel.barTitle.toString())
             }
         }
 
-        viewModel.showView.observe(this){event->
+        viewModel.showView.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 binding.tabLayout.visibility = View.VISIBLE
                 binding.viewPager.visibility = View.VISIBLE
             }
         }
 
-        viewModel.initView.observe(this){event->
+        viewModel.initView.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 initView()
             }
         }
 
-        viewModel.initRvView.observe(this){event->
+        viewModel.initRvView.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 initRvView()
                 initData()
@@ -115,7 +116,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
             }
         }
 
-        viewModel.error.observe(this){event->
+        viewModel.error.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (::mAdapter.isInitialized) {
                     viewModel.changeState.postValue(
@@ -129,7 +130,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
             }
         }
 
-        viewModel.finish.observe(this){event->
+        viewModel.finish.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 binding.indicator.parent.isIndeterminate = false
                 binding.indicator.parent.visibility = View.GONE
@@ -154,13 +155,6 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
                 mAdapter.submitList(it)
             }
             viewModel.listSize = it.size
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.addAdapter(mAdapter)
-                adapter.addAdapter(footerAdapter)
-            }
-
         }
 
     }
@@ -186,7 +180,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -223,7 +217,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter()
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager

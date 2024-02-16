@@ -56,11 +56,7 @@ class UserViewModel : ViewModel() {
                     val user = result.getOrNull()
                     if (user?.message != null) {
                         errorMessage = user.message
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, errorMessage
-                            )
-                        )
+                        showError.postValue(Event(true))
                         return@collect
                     } else if (user?.data != null) {
                         uid = user.data.uid
@@ -83,7 +79,8 @@ class UserViewModel : ViewModel() {
         viewModelScope.launch {
             getUserFeed(uid.toString(), page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val feedList = feedData.value?.toMutableList() ?: ArrayList()

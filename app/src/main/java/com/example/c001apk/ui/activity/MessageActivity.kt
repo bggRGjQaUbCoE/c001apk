@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.activity
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
@@ -12,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.MessageContentAdapter
 import com.example.c001apk.databinding.ActivityMessageBinding
 import com.example.c001apk.util.Utils.getColorFromAttr
@@ -26,7 +26,6 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,14 +56,6 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
         viewModel.messageListData.observe(this) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.apply {
-                    addAdapter(mAdapter)
-                    addAdapter(footerAdapter)
-                }
-            }
         }
     }
 
@@ -123,7 +114,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -167,7 +158,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter()
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager

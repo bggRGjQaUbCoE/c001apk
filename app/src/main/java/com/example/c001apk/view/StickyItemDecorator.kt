@@ -13,7 +13,7 @@ import com.example.c001apk.util.Utils.getColorFromAttr
 class StickyItemDecorator(
     context: Context,
     private val space: Int,
-    private var itemCount: Int = 1,
+    private var itemCount: Int = 2,
     private val listener: SortShowListener
 ) :
     RecyclerView.ItemDecoration() {
@@ -80,8 +80,6 @@ class StickyItemDecorator(
     ) {
         val position = parent.getChildAdapterPosition(view)
         if (position <= itemCount) {
-            if (position == 0)
-                outRect.top = 12.dp
             if (position < itemCount)
                 outRect.bottom =
                     if (position == itemCount - 1) 12.dp + 1

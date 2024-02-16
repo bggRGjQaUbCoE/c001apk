@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.fragment.minterface.IOnTabClickListener
 import com.example.c001apk.util.Utils.getColorFromAttr
@@ -90,14 +91,6 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
         viewModel.appCommentData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.apply {
-                    addAdapter(mAdapter)
-                    addAdapter(footerAdapter)
-                }
-            }
         }
     }
 
@@ -116,7 +109,7 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter()
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) mLayoutManager
                 else sLayoutManager
@@ -169,7 +162,7 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++

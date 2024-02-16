@@ -54,7 +54,8 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
         viewModelScope.launch {
             getReply2Reply(id.toString(), page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val replyTotalList = totalReplyData.value?.toMutableList() ?: ArrayList()

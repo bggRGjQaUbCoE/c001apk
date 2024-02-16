@@ -45,7 +45,6 @@ class MessageViewModel : ViewModel() {
     private var url = "/v6/notification/list"
     val countList = ArrayList<String>()
     val messCountList = ArrayList<Int>()
-
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val messageData = MutableLiveData<List<MessageResponse.Data>>()
     val doWhat = MutableLiveData<Event<String>>()
@@ -117,7 +116,8 @@ class MessageViewModel : ViewModel() {
         viewModelScope.launch {
             getMessage(url, page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val messageList = messageData.value?.toMutableList() ?: ArrayList()
@@ -187,8 +187,6 @@ class MessageViewModel : ViewModel() {
     }
 
 
-    inner class ItemClickListener : ItemListener {
-
-    }
+    inner class ItemClickListener : ItemListener
 
 }

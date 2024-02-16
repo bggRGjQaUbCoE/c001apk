@@ -18,7 +18,6 @@ class MainViewModel : ViewModel() {
     var isInit: Boolean = true
     val setBadge = MutableLiveData<Event<Boolean>>()
 
-
     fun fetchAppInfo(id: String) {
         viewModelScope.launch {
             getAppInfo(id)

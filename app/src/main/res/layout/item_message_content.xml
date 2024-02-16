@@ -32,7 +32,6 @@
         android:layout_height="wrap_content"
         android:clickable="false"
         android:focusable="false"
-        android:onClick="@{(view) -> listener.onViewFeed(view, data.id, ``, ``, ``, ``, ``, ``, null, null)}"
         app:cardBackgroundColor="@color/home_card_background_color"
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
@@ -118,7 +117,6 @@
                 android:id="@+id/like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?attr/actionBarItemBackground"
                 android:text="@{likeData == null ? `` : likeData.likeNum}"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
@@ -225,7 +223,7 @@
                         app:setImage="@{data.feed.pic}"
                         app:shapeAppearance="@style/searchTopicRadius" />
 
-                    <TextView
+                    <com.example.c001apk.view.LinkTextView
                         android:id="@+id/forwardUname1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -235,12 +233,13 @@
                         app:layout_constraintStart_toEndOf="@id/forward1Pic"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
+                    <com.example.c001apk.view.LinkTextView
                         android:id="@+id/forwardMessage1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="5dp"
+                        android:maxLines="3"
                         android:text="@{type == `feedLike` ? data.message : data.feed.message}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -254,4 +253,5 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
 </layout>

@@ -9,6 +9,10 @@ import kotlinx.coroutines.launch
 
 class UpdateListViewModel : ViewModel() {
 
+    var isInit: Boolean = true
+    var versionCode: String? = null
+    var packageName: String? = null
+    private var appId: String? = null
     val doNext = MutableLiveData<Event<String>>()
 
     fun onGetDownloadLink() {
@@ -25,11 +29,5 @@ class UpdateListViewModel : ViewModel() {
         }
 
     }
-
-
-    var isInit: Boolean = true
-    var versionCode: String? = null
-    var packageName: String? = null
-    var appId: String? = null
 
 }

@@ -29,8 +29,8 @@ class HomeTopicViewModel : ViewModel() {
                     val topic = result.getOrNull()
                     if (!topic?.data.isNullOrEmpty()) {
                         if (tabList.isEmpty()) {
-                            topic?.data?.get(0)?.entities?.let {
-                                it.forEach {
+                            topic?.data?.get(0)?.entities?.let { entities ->
+                                entities.forEach {
                                     tabList.add(it.title)
                                     topicList.add(TopicBean(it.url, it.title))
                                 }
@@ -52,8 +52,8 @@ class HomeTopicViewModel : ViewModel() {
                     val data = result.getOrNull()
                     if (!data?.data.isNullOrEmpty()) {
                         if (tabList.isEmpty()) {
-                            data?.data?.let {
-                                it.forEach {
+                            data?.data?.let { entities ->
+                                entities.forEach {
                                     tabList.add(it.title)
                                     topicList.add(TopicBean(it.url, it.title))
                                 }

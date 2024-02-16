@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment
 
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

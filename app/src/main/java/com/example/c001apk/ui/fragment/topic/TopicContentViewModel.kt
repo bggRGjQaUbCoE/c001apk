@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.fragment.topic
 
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,17 +20,39 @@ import kotlinx.coroutines.launch
 
 class TopicContentViewModel : ViewModel() {
 
+    var isInit: Boolean = true
+    var type: String? = null
+    var listSize: Int = -1
+    var listType: String = "lastupdate_desc"
+    var page = 1
+    var lastItem: String? = null
+    var isRefreshing: Boolean = true
+    var isLoadMore: Boolean = false
+    var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
+    var itemCount = 1
+    var uid: String? = null
+    var avatar: String? = null
+    var device: String? = null
+    var replyCount: String? = null
+    var dateLine: Long? = null
+    var feedType: String? = null
+    var errorMessage: String? = null
+    var firstVisibleItemPosition = 0
+    var id: String? = null
     var url: String? = null
     var title: String? = null
     var isEnable: Boolean? = null
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val topicData = MutableLiveData<List<HomeFeedResponse.Data>>()
+    val toastText = MutableLiveData<Event<String>>()
 
     fun fetchTopicData() {
         viewModelScope.launch {
             getDataList(url.toString(), title.toString(), "", lastItem, page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val topicDataList = topicData.value?.toMutableList() ?: ArrayList()
@@ -95,28 +116,6 @@ class TopicContentViewModel : ViewModel() {
 
     }
 
-    var isInit: Boolean = true
-    var type: String? = null
-    var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
-    var page = 1
-    var lastItem: String? = null
-    var isRefreshing: Boolean = true
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var firstVisibleItemPosition = 0
-    var id: String? = null
-
-    val toastText = MutableLiveData<Event<String>>()
     inner class ItemClickListener : ItemListener {
         override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
             if (PrefManager.isLogin) {

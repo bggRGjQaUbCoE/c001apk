@@ -13,6 +13,16 @@ import kotlinx.coroutines.launch
 
 class HomeTopicContentViewModel : ViewModel() {
 
+    var page = 1
+    var title: String? = null
+    var url: String? = null
+    var isInit = true
+    var listSize = -1
+    var isRefreshing: Boolean = true
+    var isLoadMore: Boolean = false
+    var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
+    var firstVisibleItemPosition = 0
     private var lastItem: String? = null
     val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
     val topicData = MutableLiveData<List<HomeFeedResponse.Data>>()
@@ -21,7 +31,8 @@ class HomeTopicContentViewModel : ViewModel() {
         viewModelScope.launch {
             getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
-                    changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
                 }
                 .collect { result ->
                     val topicDataList = topicData.value?.toMutableList() ?: ArrayList()
@@ -65,20 +76,6 @@ class HomeTopicContentViewModel : ViewModel() {
         }
     }
 
-    var page = 1
-    var title: String? = null
-    var url: String? = null
-    var isInit = true
-    var listSize = -1
-    var isRefreshing: Boolean = true
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
-    var firstVisibleItemPosition = 0
-
-
-    inner class ItemClickListener : ItemListener {
-
-    }
+    inner class ItemClickListener : ItemListener
 
 }

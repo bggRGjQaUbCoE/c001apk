@@ -14,6 +14,7 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.MessageAdapter
 import com.example.c001apk.adapter.MessageFirstAdapter
@@ -130,14 +131,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.messageData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.apply {
-                    addAdapter(mAdapter)
-                    addAdapter(footerAdapter)
-                }
-            }
         }
     }
 
@@ -162,7 +155,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 6
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 7
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                         && !binding.swipeRefresh.isShown
                     ) {
@@ -198,7 +191,14 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter(messageFirstAdapter, messageSecondAdapter, messageThirdAdapter)
+            adapter = ConcatAdapter(
+                HeaderAdapter(),
+                messageFirstAdapter,
+                messageSecondAdapter,
+                messageThirdAdapter,
+                mAdapter,
+                footerAdapter
+            )
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager

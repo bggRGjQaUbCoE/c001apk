@@ -7,14 +7,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.UpdateListAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.fragment.BaseFragment
-import com.example.c001apk.ui.fragment.search.SearchContentFragment
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 
 class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
@@ -66,32 +66,18 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            requireContext().getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
-            )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
-        }
+        binding.swipeRefresh.isEnabled = false
     }
 
     private fun initView() {
         mAdapter = UpdateListAdapter(appsUpdateList, viewModel)
         mLayoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.apply {
-            adapter = mAdapter
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
             layoutManager = mLayoutManager
             if (itemDecorationCount == 0)
                 addItemDecoration(LinearItemDecoration(10.dp))
         }
-    }
-
-    private fun refreshData() {
-        binding.swipeRefresh.isRefreshing = true
-        binding.swipeRefresh.isRefreshing = false
     }
 
 }

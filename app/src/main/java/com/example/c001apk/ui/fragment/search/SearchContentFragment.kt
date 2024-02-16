@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.fragment.BaseFragment
 import com.example.c001apk.ui.fragment.minterface.IOnSearchMenuClickContainer
@@ -105,11 +106,6 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
         viewModel.searchData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(footerAdapter)) {
-                adapter.addAdapter(footerAdapter)
-            }
         }
     }
 
@@ -167,7 +163,7 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
                             }
                         }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -221,7 +217,7 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter(mAdapter)
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -240,7 +236,6 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
             "feedType" -> viewModel.feedType = value
         }
         viewModel.searchData.postValue(emptyList())
-        (binding.recyclerView.adapter as ConcatAdapter).removeAdapter(footerAdapter)
         binding.indicator.parent.visibility = View.VISIBLE
         binding.indicator.parent.isIndeterminate = true
         refreshData()

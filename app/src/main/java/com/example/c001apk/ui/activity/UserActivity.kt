@@ -17,6 +17,7 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.IntentUtil
@@ -41,12 +42,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        if (viewModel.userData != null)
-            binding.infoLayout.visibility = View.VISIBLE
-        else if (viewModel.errorMessage != null) {
-            showErrorMessage()
-        }
 
         initView()
         initData()
@@ -130,14 +125,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         viewModel.feedData.observe(this) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
-            val adapter = binding.recyclerView.adapter as ConcatAdapter
-            if (!adapter.adapters.contains(mAdapter)) {
-                adapter.apply {
-                    addAdapter(mAdapter)
-                    addAdapter(footerAdapter)
-                }
-            }
         }
 
     }
@@ -169,7 +156,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         viewModel.page++
@@ -204,7 +191,12 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
             refreshData()
-        } else if (viewModel.uid == null) {
+        } else if (viewModel.userData != null) {
+            binding.userData = viewModel.userData
+            binding.infoLayout.visibility = View.VISIBLE
+        } else if (viewModel.errorMessage != null) {
+            showErrorMessage()
+        } else {
             binding.errorLayout.parent.visibility = View.VISIBLE
         }
     }
@@ -227,7 +219,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         sLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         binding.recyclerView.apply {
-            adapter = ConcatAdapter()
+            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
                     mLayoutManager
@@ -294,11 +286,14 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             android.R.id.home -> finish()
 
             R.id.search -> {
-                IntentUtil.startActivity<SearchActivity>(this) {
-                    putExtra("pageType", "user")
-                    putExtra("pageParam", viewModel.uid)
-                    putExtra("title", binding.name.text)
-                }
+                if (viewModel.userData == null)
+                    Toast.makeText(this, "加载中...", Toast.LENGTH_SHORT).show()
+                else
+                    IntentUtil.startActivity<SearchActivity>(this) {
+                        putExtra("pageType", "user")
+                        putExtra("pageParam", viewModel.uid)
+                        putExtra("title", binding.name.text)
+                    }
             }
 
             R.id.block -> {

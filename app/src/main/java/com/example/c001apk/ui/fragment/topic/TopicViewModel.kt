@@ -29,16 +29,21 @@ class TopicViewModel : ViewModel() {
     var position: Int = 0
     val topicList: MutableList<TopicBean> = ArrayList()
     var page = 1
+    var errorMessage: String? = null
     var tabSelected: Int? = null
-
     val doNext = MutableLiveData<Event<Boolean>>()
+    val showError = MutableLiveData<Event<Boolean>>()
 
     fun fetchTopicLayout() {
         viewModelScope.launch {
             getTopicLayout(url.toString())
                 .collect { result ->
                     val data = result.getOrNull()
-                    if (data?.data != null) {
+                    if (!data?.message.isNullOrEmpty()) {
+                        errorMessage = data?.message
+                        showError.postValue(Event(true))
+                        return@collect
+                    } else if (data?.data != null) {
                         isFollow = data.data.userAction?.follow == 1
                         if (tabList.isEmpty()) {
                             id = data.data.id
@@ -71,7 +76,11 @@ class TopicViewModel : ViewModel() {
             getProductLayout(id.toString())
                 .collect { result ->
                     val data = result.getOrNull()
-                    if (data?.data != null) {
+                    if (!data?.message.isNullOrEmpty()) {
+                        errorMessage = data?.message
+                        showError.postValue(Event(true))
+                        return@collect
+                    } else if (data?.data != null) {
                         isFollow = data.data.userAction?.follow == 1
                         if (tabList.isEmpty()) {
                             subtitle = data.data.intro
@@ -80,10 +89,10 @@ class TopicViewModel : ViewModel() {
                                 tabList.add(element.title)
                                 topicList.add(TopicBean(element.url, element.title))
                             }
-                            var tabSelected = 0
+                            tabSelected = 0
                             for (element in data.data.tabList) {
                                 if (data.data.selectedTab == element.pageName) break
-                                else tabSelected++
+                                else tabSelected = tabSelected!! + 1
                             }
                         }
                         doNext.postValue(Event(true))

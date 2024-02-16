@@ -50,6 +50,10 @@
         layout="@layout/item_indicator" />
 
     <include
+        android:id="@+id/errorMsg"
+        layout="@layout/item_error_message" />
+
+    <include
         android:id="@+id/errorLayout"
         layout="@layout/item_error_layout" />
 

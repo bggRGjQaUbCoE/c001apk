@@ -23,7 +23,7 @@ class StaggerItemDecoration(
         if (spanIndex % 2 == 1) {
             outRect.right = space
         }
-        outRect.top = 10.dp
+        outRect.bottom = 10.dp
         outRect.left = 10.dp
     }
 
