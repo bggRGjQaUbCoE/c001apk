@@ -12,7 +12,7 @@ abstract class BaseViewTypeAdapter<T : ViewDataBinding> :
         return onCreateViewHolder(parent, getViewType(position))
     }
 
-    abstract fun onCreateViewHolder(parent: ViewGroup, viewType: ViewType): BaseViewHolder<T>
+    abstract fun onCreateViewHolder(parent: ViewGroup, viewType: AppAdapter.ViewType): BaseViewHolder<T>
 
     override fun onBindViewHolder(holder: BaseViewHolder<T>, position: Int) {
         holder.bind()
@@ -21,7 +21,7 @@ abstract class BaseViewTypeAdapter<T : ViewDataBinding> :
 
     override fun getItemViewType(position: Int) = position
 
-    protected abstract fun getViewType(position: Int): ViewType
+    protected abstract fun getViewType(position: Int): AppAdapter.ViewType
 
 }
 

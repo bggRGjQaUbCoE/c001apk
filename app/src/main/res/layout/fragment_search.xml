@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".ui.fragment.search.SearchFragment">
+    tools:context=".ui.search.SearchFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"

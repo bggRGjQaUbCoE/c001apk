@@ -37,6 +37,23 @@ import com.example.c001apk.view.LinearItemDecoration1
 
 class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewDataBinding>() {
 
+    enum class ViewType {
+        IMAGE_CAROUSEL_CARD_1,
+        ICON_LINK_GRID_CARD,
+        IMAGE_TEXT_SCROLL_CARD,
+        ICON_MINI_SCROLL_CARD,
+        REFRESH_CARD,
+        IMAGE_SQUARE_SCROLL_CARD,
+        FEED,
+        FEED_VOTE,
+        USER, // == CONTACTS
+        TOPIC, // == PRODUCT
+        APK,
+        FEED_REPLY,
+        COLLECTION,
+        RECENT_HISTORY
+    }
+
     inner class FeedViewHolder(val binding: ItemHomeFeedBinding) :
         BaseViewHolder<ViewDataBinding>(binding) {
 

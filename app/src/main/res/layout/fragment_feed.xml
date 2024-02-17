@@ -7,7 +7,7 @@
 
         <variable
             name="listener"
-            type="com.example.c001apk.adapter.ReplyRefreshListener" />
+            type="com.example.c001apk.ui.feed.reply.ReplyRefreshListener" />
 
     </data>
 
@@ -17,7 +17,7 @@
         app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
         app:edgeToEdge="true"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_insets"
-        tools:context=".ui.fragment.feed.FeedFragment">
+        tools:context=".ui.feed.FeedFragment">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"

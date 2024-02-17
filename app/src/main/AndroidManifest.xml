@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.C001apk">
         <activity
-            android:name=".ui.activity.AppLinkActivity"
+            android:name=".ui.others.AppLinkActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -382,70 +382,70 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activity.BugHandlerActivity"
+            android:name=".ui.others.BugHandlerActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.CoolPicActivity"
+            android:name=".ui.coolpic.CoolPicActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.CollectionActivity"
+            android:name=".ui.collection.CollectionActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.HistoryActivity"
+            android:name=".ui.history.HistoryActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.BlackListActivity"
+            android:name=".ui.blacklist.BlackListActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.SBCKActivity"
+            android:name=".ui.settings.params.ParamsActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.AppUpdateActivity"
+            android:name=".ui.appupdate.AppUpdateActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.MessageActivity"
+            android:name=".ui.messagedetail.MessageActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.DyhActivity"
+            android:name=".ui.dyh.DyhActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.CarouselActivity"
+            android:name=".ui.carousel.CarouselActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.AboutActivity"
+            android:name=".ui.others.AboutActivity"
             android:exported="false"
             android:theme="@style/AppTheme.About" />
         <activity
-            android:name=".ui.activity.FFFListActivity"
+            android:name=".ui.follow.FFFListActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.AppActivity"
+            android:name=".ui.app.AppActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.UserActivity"
+            android:name=".ui.user.UserActivity"
             android:exported="false"
             android:theme="@style/Theme.User" />
         <activity
-            android:name=".ui.activity.CopyActivity"
+            android:name=".ui.others.CopyActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.WebViewActivity"
+            android:name=".ui.others.WebViewActivity"
             android:exported="false"
             android:process=":webview" />
         <activity
-            android:name=".ui.activity.TopicActivity"
+            android:name=".ui.topic.TopicActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.SearchActivity"
+            android:name=".ui.search.SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.FeedActivity"
+            android:name=".ui.feed.FeedActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.activity.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

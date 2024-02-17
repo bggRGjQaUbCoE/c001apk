@@ -10,14 +10,14 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import com.example.c001apk.MyApplication.Companion.context
-import com.example.c001apk.ui.activity.AppActivity
-import com.example.c001apk.ui.activity.CarouselActivity
-import com.example.c001apk.ui.activity.CoolPicActivity
-import com.example.c001apk.ui.activity.DyhActivity
-import com.example.c001apk.ui.activity.FeedActivity
-import com.example.c001apk.ui.activity.TopicActivity
-import com.example.c001apk.ui.activity.UserActivity
-import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.app.AppActivity
+import com.example.c001apk.ui.carousel.CarouselActivity
+import com.example.c001apk.ui.coolpic.CoolPicActivity
+import com.example.c001apk.ui.dyh.DyhActivity
+import com.example.c001apk.ui.feed.FeedActivity
+import com.example.c001apk.ui.others.WebViewActivity
+import com.example.c001apk.ui.topic.TopicActivity
+import com.example.c001apk.ui.user.UserActivity
 
 
 object NetWorkUtil {

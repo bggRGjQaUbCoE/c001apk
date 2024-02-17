@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.SBCKActivity">
+    tools:context=".ui.settings.params.ParamsActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/sbParams"
-        android:name="com.example.c001apk.ui.fragment.ParamsPreferenceFragment"
+        android:name="com.example.c001apk.ui.settings.params.ParamsPreferenceFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

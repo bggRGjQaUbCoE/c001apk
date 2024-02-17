@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.MenuItem
 import androidx.appcompat.widget.PopupMenu
 import com.example.c001apk.R
-import com.example.c001apk.ui.activity.WebViewActivity
+import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.IntentUtil
 
