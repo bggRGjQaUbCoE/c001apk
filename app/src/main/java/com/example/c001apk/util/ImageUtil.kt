@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
@@ -80,34 +81,26 @@ object ImageUtil {
             url?.http2https,
             LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
         )
-        if (url?.endsWith(".gif") == true)
-            Glide
-                .with(view)
-                .asGif()
-                .load(newUrl).apply {
-                    if (ResourceUtils.isNightMode(view.context.resources.configuration)
-                        && PrefManager.isColorFilter
+        Glide
+            .with(view).apply {
+                if (url?.endsWith(".gif") == true)
+                    asGif()
+            }
+            .load(newUrl).apply {
+                if (ResourceUtils.isNightMode(view.context.resources.configuration)
+                    && PrefManager.isColorFilter
+                )
+                    transform(
+                        CenterCrop(),
+                        ColorFilterTransformation(Color.parseColor("#2D000000"))
                     )
-                        transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
-                }
-                .transition(withCrossFade())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .skipMemoryCache(false)
-                .into(view)
-        else
-            Glide
-                .with(view)
-                .load(newUrl).apply {
-                    if (ResourceUtils.isNightMode(view.context.resources.configuration)
-                        && PrefManager.isColorFilter
-                    )
-                        transform(ColorFilterTransformation(Color.parseColor("#2D000000")))
-                }
-                .centerCrop()
-                .transition(withCrossFade())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .skipMemoryCache(false)
-                .into(view)
+                else
+                    transform(CenterCrop())
+            }
+            .transition(withCrossFade())
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .skipMemoryCache(false)
+            .into(view)
     }
 
     private suspend fun saveImageToGallery(ctx: Context, imageUrl: String): Boolean =

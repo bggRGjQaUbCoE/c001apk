@@ -75,8 +75,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initToolBar()
         initView()
+        initToolBar()
         initData()
         initScroll()
         initReplyBtn()
@@ -409,6 +409,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     mLayoutManager.scrollToPositionWithOffset(0, 0)
                 else
                     sLayoutManager.scrollToPositionWithOffset(0, 0)
+                viewModel.firstVisibleItemPosition = 0
             }
             inflateMenu(R.menu.feed_menu)
             menu.findItem(R.id.showReply).isVisible =
