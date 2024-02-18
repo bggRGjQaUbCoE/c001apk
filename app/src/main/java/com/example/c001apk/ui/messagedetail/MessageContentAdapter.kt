@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.BR
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ItemMessageContentBinding
 import com.example.c001apk.databinding.ItemMessageUserBinding
@@ -19,39 +20,51 @@ class MessageContentAdapter(
     private val listener: ItemListener
 ) : ListAdapter<MessageResponse.Data, RecyclerView.ViewHolder>(MessageDiffCallback()) {
 
-    inner class UserViewHolder(val binding: ItemMessageUserBinding) :
+    class UserViewHolder(
+        val binding: ItemMessageUserBinding,
+        val type: String,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.type = type
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: MessageResponse.Data) {
+            binding.setVariable(BR.type, type)
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
 
     }
 
-
-    inner class MessageViewHolder(val binding: ItemMessageContentBinding) :
+    class MessageViewHolder(
+        val binding: ItemMessageContentBinding,
+        val type: String,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            val data = currentList[bindingAdapterPosition]
-            binding.type = type
-            binding.data = data
-            binding.likeData = Like().also {
+        var id: String = ""
+
+        init {
+            if (type != "feedLike") {
+                itemView.setOnClickListener {
+                    IntentUtil.startActivity<FeedActivity>(itemView.context) {
+                        putExtra("id", id)
+                    }
+                }
+            }
+        }
+
+        fun bind(data: MessageResponse.Data) {
+            id = data.id
+            binding.setVariable(BR.type, type)
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
+            binding.setVariable(BR.likeData, Like().also {
                 it.likeNum.set(data.likenum)
                 data.userAction?.like?.let { like ->
                     it.isLike.set(like)
                 }
-            }
-            binding.listener = listener
+            })
 
-            if (type != "feedLike") {
-                itemView.setOnClickListener {
-                    IntentUtil.startActivity<FeedActivity>(itemView.context) {
-                        putExtra("id", data.id)
-                    }
-                }
-            }
 
             binding.executePendingBindings()
         }
@@ -64,7 +77,7 @@ class MessageContentAdapter(
                     ItemMessageContentBinding.inflate(
                         LayoutInflater.from(parent.context), parent,
                         false
-                    )
+                    ), type, listener
                 )
             }
 
@@ -74,7 +87,7 @@ class MessageContentAdapter(
                     ItemMessageUserBinding.inflate(
                         LayoutInflater.from(parent.context), parent,
                         false
-                    )
+                    ), type, listener
                 )
             }
 
@@ -99,12 +112,12 @@ class MessageContentAdapter(
         when (holder) {
 
             is UserViewHolder -> {
-                holder.bind()
+                holder.bind(currentList[position])
             }
 
 
             is MessageViewHolder -> {
-                holder.bind()
+                holder.bind(currentList[position])
             }
         }
     }

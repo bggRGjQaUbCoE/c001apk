@@ -160,7 +160,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         viewModel.homeFeedData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-
         }
     }
 

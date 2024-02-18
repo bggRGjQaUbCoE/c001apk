@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.PopClickListener
@@ -29,9 +30,59 @@ class Reply2ReplyTotalAdapter(
     Reply2ReplyDiffCallback()
 ) {
 
-    inner class ReplyViewHolder(val binding: ItemReplyToReplyItemBinding) :
+    class ReplyViewHolder(
+        private val binding: ItemReplyToReplyItemBinding,
+        private val listener: ItemListener,
+        private val fuid: String,
+        private val uid: String
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
+        private var rId: String = ""
+        private var rUid: String = ""
+        private var username: String = ""
+        private var likeData: Like = Like()
+
+        init {
+            itemView.setOnClickListener {
+                listener.onReply(
+                    rId,
+                    rUid,
+                    username,
+                    bindingAdapterPosition,
+                    null
+                )
+            }
+
+            binding.expand.setOnClickListener {
+                PopupMenu(it.context, it).apply {
+                    menuInflater.inflate(R.menu.feed_reply_menu, menu).apply {
+                        menu.findItem(R.id.copy)?.isVisible = false
+                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == uid
+                        menu.findItem(R.id.report)?.isVisible = PrefManager.isLogin
+                    }
+                    setOnMenuItemClickListener(
+                        PopClickListener(
+                            listener,
+                            it.context,
+                            "feed_reply",
+                            rId,
+                            rUid,
+                            bindingAdapterPosition
+                        )
+                    )
+                    show()
+                }
+            }
+
+            binding.like.setOnClickListener {
+                listener.onLikeClick(
+                    "feed_reply", rId,
+                    bindingAdapterPosition, likeData
+                )
+            }
+        }
+
+        fun bind(reply: TotalReplyResponse.Data) {
 
             binding.root.also {
                 if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
@@ -56,7 +107,10 @@ class Reply2ReplyTotalAdapter(
                 }
             }
 
-            val reply = currentList[bindingAdapterPosition]
+            rId = reply.id
+            rUid = reply.uid
+            username = reply.username
+
             val replyTag = if (bindingAdapterPosition == 0) ""
             else
                 when (reply.uid) {
@@ -87,10 +141,9 @@ class Reply2ReplyTotalAdapter(
                 null
             )
 
-            binding.data = reply
-            binding.listener = listener
-            binding.multiImage.listener = listener
-            val likeData = Like().also {
+            binding.setVariable(BR.data, reply)
+            binding.setVariable(BR.listener, listener)
+            likeData = Like().also {
                 it.apply {
                     reply.userAction?.like?.let { like ->
                         isLike.set(like)
@@ -98,46 +151,7 @@ class Reply2ReplyTotalAdapter(
                     likeNum.set(reply.likenum)
                 }
             }
-            binding.likeData = likeData
-
-            itemView.setOnClickListener {
-                listener.onReply(
-                    reply.id,
-                    reply.uid,
-                    reply.username,
-                    bindingAdapterPosition,
-                    null
-                )
-            }
-
-            binding.expand.setOnClickListener {
-                PopupMenu(it.context, it).apply {
-                    menuInflater.inflate(R.menu.feed_reply_menu, menu).apply {
-                        menu.findItem(R.id.copy)?.isVisible = false
-                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == reply.uid
-                        menu.findItem(R.id.report)?.isVisible = PrefManager.isLogin
-                    }
-                    setOnMenuItemClickListener(
-                        PopClickListener(
-                            listener,
-                            it.context,
-                            "feed_reply",
-                            reply.id,
-                            reply.uid,
-                            bindingAdapterPosition
-                        )
-                    )
-                    show()
-                }
-            }
-
-            binding.like.setOnClickListener {
-                listener.onLikeClick(
-                    "feed_reply", reply.id,
-                    bindingAdapterPosition, likeData
-                )
-            }
-
+            binding.setVariable(BR.likeData, likeData)
             binding.executePendingBindings()
         }
     }
@@ -148,11 +162,11 @@ class Reply2ReplyTotalAdapter(
             parent,
             false
         )
-        return ReplyViewHolder(binding)
+        return ReplyViewHolder(binding, listener, fuid, uid)
     }
 
     override fun onBindViewHolder(holder: ReplyViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 }

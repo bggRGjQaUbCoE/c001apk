@@ -15,15 +15,15 @@ class IconLinkGridCardAdapter(
     IconLinkGridCardDiffCallback()
 ) {
 
-    inner class ViewHolder(val binding: ItemRecyclerviewBinding) :
+    class ViewHolder(val binding: ItemRecyclerviewBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.recyclerView) {
-        fun bind() {
+        fun bind(data: List<IconLinkGridCardBean>) {
             val layoutManager =
                 GridLayoutManager(itemView.context, 5, GridLayoutManager.VERTICAL, false)
             binding.recyclerView.layoutManager = layoutManager
             binding.recyclerView.isNestedScrollingEnabled = false
             binding.recyclerView.adapter = IconLinkGridCardItemAdapter(listener).also {
-                it.submitList(currentList[bindingAdapterPosition])
+                it.submitList(data)
             }
         }
     }
@@ -34,12 +34,12 @@ class IconLinkGridCardAdapter(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ), listener
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 }

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeImageTextScrollCardItemBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.util.DensityTool
@@ -17,12 +18,14 @@ class ImageTextScrollCardAdapter(
     ListAdapter<HomeFeedResponse.Entities, ImageTextScrollCardAdapter.ViewHolder>(
         ImageTextScrollCardDiffCallback()
     ) {
-
-    inner class ViewHolder(val binding: ItemHomeImageTextScrollCardItemBinding) :
+    class ViewHolder(
+        val binding: ItemHomeImageTextScrollCardItemBinding,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: HomeFeedResponse.Entities) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
     }
@@ -41,12 +44,12 @@ class ImageTextScrollCardAdapter(
             else
                 DensityTool.getScreenWidth(parent.context) / 2 - padding
         binding.root.layoutParams.width = (imageWidth - imageWidth / 3)
-        return ViewHolder(binding)
+        return ViewHolder(binding, listener)
     }
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 }

@@ -3,6 +3,7 @@ package com.example.c001apk.ui.feed
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.BR
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ItemFeedArticleImageBinding
 import com.example.c001apk.databinding.ItemFeedArticleShareUrlBinding
@@ -18,91 +19,88 @@ class FeedDataAdapter(
     private val articleList: List<FeedArticleContentBean.Data>?,
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    inner class FeedViewHolder(val binding: ItemFeedContentBinding) :
+    class FeedViewHolder(val binding: ItemFeedContentBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            val feed = feedDataList!![bindingAdapterPosition]
-            binding.data = feed
+        fun bind(data: HomeFeedResponse.Data) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.likeData = Like().also {
                 it.apply {
-                    feed.userAction?.like?.let { like ->
+                    data.userAction?.like?.let { like ->
                         isLike.set(like)
                     }
-                    likeNum.set(feed.likenum)
+                    likeNum.set(data.likenum)
                 }
             }
-            binding.listener = listener
-            binding.multiImage.listener = listener
             binding.executePendingBindings()
         }
     }
 
-    inner class TextViewHolder(val binding: ItemFeedArticleTextBinding) :
+    class TextViewHolder(val binding: ItemFeedArticleTextBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = articleList!![bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: FeedArticleContentBean.Data) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
     }
 
-    inner class ImageViewHolder(val binding: ItemFeedArticleImageBinding) :
+    class ImageViewHolder(val binding: ItemFeedArticleImageBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = articleList!![bindingAdapterPosition]
-            binding.imageView.listener = listener
+        fun bind(data: FeedArticleContentBean.Data) {
+            binding.setVariable(BR.data, data)
             binding.executePendingBindings()
         }
     }
 
-    inner class ShareUrlViewHolder(val binding: ItemFeedArticleShareUrlBinding) :
+    class ShareUrlViewHolder(
+        val binding: ItemFeedArticleShareUrlBinding,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = articleList!![bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: FeedArticleContentBean.Data) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, position: Int): RecyclerView.ViewHolder {
-        return onCreateViewHolder(parent, getViewType(position))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
 
-    fun onCreateViewHolder(parent: ViewGroup, feedType: FeedType): RecyclerView.ViewHolder {
-        return when (feedType) {
-
-            FeedType.FEED -> FeedViewHolder(
+            0 -> FeedViewHolder(
                 ItemFeedContentBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                )
+                ), listener
             )
 
-            FeedType.TEXT -> TextViewHolder(
+            1 -> TextViewHolder(
                 ItemFeedArticleTextBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                )
+                ), listener
             )
 
-            FeedType.IMAGE -> ImageViewHolder(
+            2 -> ImageViewHolder(
                 ItemFeedArticleImageBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                )
+                ), listener
             )
 
-            FeedType.SHARE_URL -> ShareUrlViewHolder(
+            3 -> ShareUrlViewHolder(
                 ItemFeedArticleShareUrlBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                )
+                ), listener
             )
+
+            else -> throw IllegalArgumentException("invalid viewType: $viewType")
         }
     }
 
@@ -114,30 +112,21 @@ class FeedDataAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is FeedViewHolder -> holder.bind()
-            is TextViewHolder -> holder.bind()
-            is ImageViewHolder -> holder.bind()
-            is ShareUrlViewHolder -> holder.bind()
+            is FeedViewHolder -> holder.bind(feedDataList!![position])
+            is TextViewHolder -> holder.bind(articleList!![position])
+            is ImageViewHolder -> holder.bind(articleList!![position])
+            is ShareUrlViewHolder -> holder.bind(articleList!![position])
         }
     }
 
-    override fun getItemViewType(position: Int) = position
-
-    private fun getViewType(position: Int): FeedType {
-        return if (articleList.isNullOrEmpty()) FeedType.FEED
+    override fun getItemViewType(position: Int): Int {
+        return if (articleList.isNullOrEmpty()) 0
         else when (articleList[position].type) {
-            "text" -> FeedType.TEXT
-            "image" -> FeedType.IMAGE
-            "shareUrl" -> FeedType.SHARE_URL
+            "text" -> 1
+            "image" -> 2
+            "shareUrl" -> 3
             else -> throw IllegalArgumentException("invalid article type: ${articleList[position].type}")
         }
-    }
-
-    enum class FeedType {
-        FEED,
-        TEXT,
-        IMAGE,
-        SHARE_URL
     }
 
 }

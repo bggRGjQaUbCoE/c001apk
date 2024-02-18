@@ -32,7 +32,6 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.RoundImageView
@@ -49,7 +48,6 @@ class NineGridImageView @JvmOverloads constructor(
     var isCompress = false
 
     private var urlList: List<String>? = null
-    var listener: ItemListener? = null
 
     var imgHeight = 1
     var imgWidth = 1
@@ -154,12 +152,7 @@ class NineGridImageView @JvmOverloads constructor(
                 childrenView.scaleType = ImageView.ScaleType.CENTER_CROP
             }
             childrenView.setOnClickListener {
-                listener?.onClick(
-                    this,
-                    childrenView,
-                    urlList!!,
-                    i
-                )
+                ImageUtil.startBigImgView(this, childrenView, urlList!!, i)
             }
             childrenView.layout(left, top, right, bottom)
         }

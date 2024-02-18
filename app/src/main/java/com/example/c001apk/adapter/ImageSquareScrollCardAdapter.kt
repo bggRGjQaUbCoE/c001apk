@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeImageSquareScrollCardItemBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.util.DensityTool
@@ -16,12 +17,14 @@ class ImageSquareScrollCardAdapter(
     ListAdapter<HomeFeedResponse.Entities, ImageSquareScrollCardAdapter.ViewHolder>(
         ImageTextScrollCardDiffCallback()
     ) {
-
-    inner class ViewHolder(val binding: ItemHomeImageSquareScrollCardItemBinding) :
+    class ViewHolder(
+        val binding: ItemHomeImageSquareScrollCardItemBinding,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: HomeFeedResponse.Entities) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
     }
@@ -42,11 +45,11 @@ class ImageSquareScrollCardAdapter(
             else
                 DensityTool.getScreenWidth(parent.context) / 2 - padding
         binding.root.layoutParams.width = (imageWidth / 5)
-        return ViewHolder(binding)
+        return ViewHolder(binding, listener)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 }

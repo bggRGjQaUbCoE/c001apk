@@ -59,9 +59,15 @@ class MessageThirdAdapter
         }
     }
 
-    inner class ThirdViewHolder(val binding: ItemMessageMessBinding) :
+    class ThirdViewHolder(
+        val binding: ItemMessageMessBinding,
+        private val messTitle: List<String>,
+        private val logoList: List<Int>,
+        private val logoColorList: List<String>
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
+
+        init {
             if (PrefManager.isLogin) {
                 itemView.setOnClickListener {
                     binding.badge.visibility = View.GONE
@@ -93,9 +99,11 @@ class MessageThirdAdapter
                             }
                         }
                     }
-
                 }
             }
+        }
+
+        fun bind(badgeList: List<Int>?) {
             binding.title.text = messTitle[bindingAdapterPosition]
             binding.logoCover.setBackgroundColor(Color.parseColor(logoColorList[bindingAdapterPosition]))
             binding.logo.setBackgroundDrawable(itemView.context.getDrawable(logoList[bindingAdapterPosition]))
@@ -114,13 +122,14 @@ class MessageThirdAdapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ThirdViewHolder {
         return ThirdViewHolder(
-            ItemMessageMessBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ItemMessageMessBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+            messTitle, logoList, logoColorList
         )
     }
 
     override fun getItemCount() = 4
 
     override fun onBindViewHolder(holder: ThirdViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(badgeList)
     }
 }

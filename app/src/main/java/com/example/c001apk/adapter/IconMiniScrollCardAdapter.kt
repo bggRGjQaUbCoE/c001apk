@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeIconMiniScrollCardItemBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 
@@ -13,12 +14,14 @@ class IconMiniScrollCardAdapter(
     ListAdapter<HomeFeedResponse.Entities, IconMiniScrollCardAdapter.ViewHolder>(
         ImageTextScrollCardDiffCallback()
     ) {
-
-    inner class ViewHolder(val binding: ItemHomeIconMiniScrollCardItemBinding) :
+    class ViewHolder(
+        val binding: ItemHomeIconMiniScrollCardItemBinding,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: HomeFeedResponse.Entities) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
     }
@@ -29,12 +32,12 @@ class IconMiniScrollCardAdapter(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ), listener
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 }

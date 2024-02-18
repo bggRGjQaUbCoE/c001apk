@@ -32,24 +32,14 @@ class MessageFirstAdapter
         }
     }
 
-    inner class FirstViewHolder(val binding: ItemMessageFffBinding) :
+    class FirstViewHolder(val binding: ItemMessageFffBinding, val fffTitle: List<String>) :
         RecyclerView.ViewHolder(binding.root), View.OnClickListener {
-        fun bind() {
+
+        init {
             if (PrefManager.isLogin) {
                 binding.feedLayout.setOnClickListener(this)
                 binding.followLayout.setOnClickListener(this)
                 binding.fansLayout.setOnClickListener(this)
-            }
-            ffflist?.let {
-                binding.apply {
-                    feedCount.text = it[0]
-                    feedTitle.text = fffTitle[0]
-                    followCount.text = it[1]
-                    followTitle.text = fffTitle[1]
-                    fansCount.text = it[2]
-                    fansTitle.text = fffTitle[2]
-                }
-                binding.executePendingBindings()
             }
         }
 
@@ -77,6 +67,20 @@ class MessageFirstAdapter
                     }
             }
         }
+
+        fun bind(ffflist: List<String>?) {
+            ffflist?.let {
+                binding.apply {
+                    feedCount.text = it[0]
+                    feedTitle.text = fffTitle[0]
+                    followCount.text = it[1]
+                    followTitle.text = fffTitle[1]
+                    fansCount.text = it[2]
+                    fansTitle.text = fffTitle[2]
+                }
+                binding.executePendingBindings()
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FirstViewHolder {
@@ -89,13 +93,13 @@ class MessageFirstAdapter
         if (lp is StaggeredGridLayoutManager.LayoutParams) {
             lp.isFullSpan = true
         }
-        return FirstViewHolder(binding)
+        return FirstViewHolder(binding, fffTitle)
     }
 
     override fun getItemCount() = 1
 
     override fun onBindViewHolder(holder: FirstViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(ffflist)
     }
 
 }

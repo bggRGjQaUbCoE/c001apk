@@ -7,6 +7,7 @@ import androidx.core.view.setPadding
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.PopClickListener
@@ -19,17 +20,18 @@ class MessageAdapter(
     private val listener: ItemListener
 ) : ListAdapter<MessageResponse.Data, MessageAdapter.MessViewHolder>(MessageDiffCallback()) {
 
-    inner class MessViewHolder(val binding: ItemMessageItemBinding) :
+    class MessViewHolder(val binding: ItemMessageItemBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            val data = currentList[bindingAdapterPosition]
-            binding.data = data
-            binding.listener = listener
+        var entityType: String = ""
+        var id: String = ""
+        var uid: String = ""
+        var fromusername: String = ""
 
+        init {
             itemView.setOnLongClickListener {
                 listener.onMessLongClicked(
-                    data.fromusername,
-                    data.id,
+                    fromusername,
+                    id,
                     bindingAdapterPosition
                 )
                 true
@@ -46,15 +48,25 @@ class MessageAdapter(
                         PopClickListener(
                             listener,
                             it.context,
-                            data.entityType,
-                            data.id,
-                            data.uid,
+                            entityType,
+                            id,
+                            uid,
                             bindingAdapterPosition
                         )
                     )
                     show()
                 }
             }
+        }
+
+        fun bind(data: MessageResponse.Data) {
+            entityType = data.entityType
+            id = data.id
+            uid = data.uid
+            fromusername = data.fromusername
+
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
 
             binding.executePendingBindings()
         }
@@ -69,11 +81,11 @@ class MessageAdapter(
         binding.root.setPadding(10.dp)
         binding.root.background = parent.context.getDrawable(R.drawable.round_corners_12)
         binding.root.foreground = parent.context.getDrawable(R.drawable.selector_bg_12_trans)
-        return MessViewHolder(binding)
+        return MessViewHolder(binding, listener)
     }
 
     override fun onBindViewHolder(holder: MessViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 

@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 
 class HomeFeedViewModel(private val installTime: String) : ViewModel() {
 
+    val dataList = ArrayList<HomeFeedResponse.Data>()
     var position: Int? = null
     var lastVisibleItemPosition: Int = 0
     var changeFirstItem: Boolean = false
@@ -94,7 +95,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                                     || element.entityTemplate == "iconMiniScrollCard"
                                     || element.entityTemplate == "iconLinkGridCard"
                                     || element.entityTemplate == "imageCarouselCard_1"
-                                 //   || element.entityTemplate == "imageTextScrollCard"
+                                    || element.entityTemplate == "imageTextScrollCard"
                                 ) {
                                     if (element.entityType == "feed" && changeFirstItem) {
                                         changeFirstItem = false

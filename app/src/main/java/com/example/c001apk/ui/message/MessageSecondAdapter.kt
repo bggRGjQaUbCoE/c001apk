@@ -17,18 +17,24 @@ import com.example.c001apk.util.PrefManager
 class MessageSecondAdapter :
     RecyclerView.Adapter<MessageSecondAdapter.SecondViewHolder>() {
 
-    inner class SecondViewHolder(val binding: ItemMessageMineBinding) :
+    class SecondViewHolder(val binding: ItemMessageMineBinding) :
         RecyclerView.ViewHolder(binding.root), View.OnClickListener {
-        fun bind() {
-            with(binding) {
+
+        init {
+            binding.apply {
                 localFavLayout.setOnClickListener(this@SecondViewHolder)
                 historyLayout.setOnClickListener(this@SecondViewHolder)
-                freqLayout.setOnClickListener(this@SecondViewHolder)
-                favLayout.setOnClickListener(this@SecondViewHolder)
-                likeLayout.setOnClickListener(this@SecondViewHolder)
-                replyLayout.setOnClickListener(this@SecondViewHolder)
-                executePendingBindings()
+                if (PrefManager.isLogin) {
+                    freqLayout.setOnClickListener(this@SecondViewHolder)
+                    favLayout.setOnClickListener(this@SecondViewHolder)
+                    likeLayout.setOnClickListener(this@SecondViewHolder)
+                    replyLayout.setOnClickListener(this@SecondViewHolder)
+                }
             }
+        }
+
+        fun bind() {
+            binding.executePendingBindings()
         }
 
         override fun onClick(view: View?) {

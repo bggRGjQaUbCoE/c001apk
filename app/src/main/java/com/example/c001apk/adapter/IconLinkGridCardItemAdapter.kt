@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeIconLinkGridCardItemBinding
 import com.example.c001apk.logic.model.IconLinkGridCardBean
 
@@ -15,11 +16,11 @@ class IconLinkGridCardItemAdapter(
 ) {
 
 
-    inner class ViewHolder(val binding: ItemHomeIconLinkGridCardItemBinding) :
+    class ViewHolder(val binding: ItemHomeIconLinkGridCardItemBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: IconLinkGridCardBean) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.executePendingBindings()
         }
     }
@@ -27,15 +28,13 @@ class IconLinkGridCardItemAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             ItemHomeIconLinkGridCardItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+                LayoutInflater.from(parent.context), parent, false
+            ), listener
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position])
     }
 
 }

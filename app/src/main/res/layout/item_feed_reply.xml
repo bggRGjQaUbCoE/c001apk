@@ -81,7 +81,7 @@
                 android:textSize="13sp"
                 android:visibility="@{data.deviceTitle.isEmpty || data.deviceTitle == null ? View.INVISIBLE : View.VISIBLE}"
                 app:customText="@{data.deviceTitle}"
-                app:icon="@{@drawable/ic_device1}"
+                app:icon="@{@drawable/ic_device}"
                 app:layout_constraintStart_toEndOf="@id/avatar"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
 

@@ -115,13 +115,6 @@ interface ItemListener {
         }
     }
 
-    fun onClick(
-        nineGridView: NineGridImageView, imageView: ImageView,
-        urlList: List<String>, position: Int
-    ) {
-        ImageUtil.startBigImgView(nineGridView, imageView, urlList, position)
-    }
-
     fun onViewFeed(
         view: View, id: String?, uid: String?, username: String?, userAvatar: String?,
         deviceTitle: String?, message: String?, dateline: String?, rid: Any?, isViewReply: Any?

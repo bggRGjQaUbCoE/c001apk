@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.ViewDataBinding
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ItemCollectionListItemBinding
 import com.example.c001apk.databinding.ItemFeedReplyBinding
@@ -37,47 +37,19 @@ import com.example.c001apk.view.LinearItemDecoration1
 
 class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewDataBinding>() {
 
-    enum class ViewType {
-        IMAGE_CAROUSEL_CARD_1,
-        ICON_LINK_GRID_CARD,
-        IMAGE_TEXT_SCROLL_CARD,
-        ICON_MINI_SCROLL_CARD,
-        REFRESH_CARD,
-        IMAGE_SQUARE_SCROLL_CARD,
-        FEED,
-        FEED_VOTE,
-        USER, // == CONTACTS
-        TOPIC, // == PRODUCT
-        APK,
-        FEED_REPLY,
-        COLLECTION,
-        RECENT_HISTORY
-    }
-
-    inner class FeedViewHolder(val binding: ItemHomeFeedBinding) :
+    class FeedViewHolder(val binding: ItemHomeFeedBinding, val listener: ItemListener) :
         BaseViewHolder<ViewDataBinding>(binding) {
+        var entityType: String = ""
+        var id: String = ""
+        var uid: String = ""
+        var likeData: Like = Like()
 
-        override fun bind() {
-            val feed = currentList[bindingAdapterPosition]
-            binding.data = feed
-            val likeData = Like().also {
-                it.apply {
-                    feed.userAction?.like?.let { like ->
-                        isLike.set(like)
-                    }
-                    likeNum.set(feed.likenum)
-                }
-            }
-            binding.likeData = likeData
-            binding.listener = listener
-            binding.multiImage.listener = listener
-            binding.forwardedPic.listener = listener
-
+        init {
             binding.expand.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     menuInflater.inflate(R.menu.feed_reply_menu, menu).apply {
                         menu.findItem(R.id.copy)?.isVisible = false
-                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == feed.uid
+                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == uid
                         menu.findItem(R.id.show)?.isVisible = false
                         menu.findItem(R.id.report)?.isVisible = PrefManager.isLogin
                     }
@@ -85,9 +57,9 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                         PopClickListener(
                             listener,
                             it.context,
-                            feed.entityType,
-                            feed.id,
-                            feed.uid,
+                            entityType,
+                            id,
+                            uid,
                             bindingAdapterPosition
                         )
                     )
@@ -97,26 +69,45 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
 
             binding.like.setOnClickListener {
                 listener.onLikeClick(
-                    feed.entityType, feed.id,
+                    entityType, id,
                     bindingAdapterPosition, likeData
                 )
             }
-
         }
 
+        override fun bind(data: HomeFeedResponse.Data) {
+            entityType = data.entityType
+            id = data.id
+            uid = data.id
+
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
+            likeData = Like().also {
+                it.apply {
+                    data.userAction?.like?.let { like ->
+                        isLike.set(like)
+                    }
+                    likeNum.set(data.likenum)
+                }
+            }
+            binding.setVariable(BR.likeData, likeData)
+        }
     }
 
-    inner class ImageCarouselCardViewHolder(val binding: ItemHomeImageCarouselCardBinding) :
+    class ImageCarouselCardViewHolder(
+        val binding: ItemHomeImageCarouselCardBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            if (!currentList[bindingAdapterPosition].entities.isNullOrEmpty()) {
+        override fun bind(data: HomeFeedResponse.Data) {
+            if (!data.entities.isNullOrEmpty()) {
                 val imageCarouselCard: MutableList<HomeFeedResponse.Entities> = ArrayList()
-                currentList[bindingAdapterPosition].entities?.forEach {
+                data.entities.forEach {
                     if (!it.url.startsWith("http"))
                         imageCarouselCard.add(it)
                 }
-                val data: MutableList<IconLinkGridCardBean> = ArrayList()
-                data.add(
+                val dataList: MutableList<IconLinkGridCardBean> = ArrayList()
+                dataList.add(
                     IconLinkGridCardBean(
                         imageCarouselCard[imageCarouselCard.size - 1].title,
                         imageCarouselCard[imageCarouselCard.size - 1].pic,
@@ -124,9 +115,9 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                     )
                 )
                 imageCarouselCard.forEach {
-                    data.add(IconLinkGridCardBean(it.title, it.pic, it.url))
+                    dataList.add(IconLinkGridCardBean(it.title, it.pic, it.url))
                 }
-                data.add(
+                dataList.add(
                     IconLinkGridCardBean(
                         imageCarouselCard[0].title,
                         imageCarouselCard[0].pic,
@@ -135,7 +126,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                 )
                 var currentPosition = 0
                 binding.viewPager.adapter = ImageCarouselCardAdapter(listener).also {
-                    it.submitList(data)
+                    it.submitList(dataList)
                 }
                 binding.viewPager.registerOnPageChangeCallback(object :
                     ViewPager2.OnPageChangeCallback() {
@@ -146,8 +137,8 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                     override fun onPageScrollStateChanged(state: Int) {
                         if (state == ViewPager2.SCROLL_STATE_IDLE) {
                             if (currentPosition == 0) {
-                                binding.viewPager.setCurrentItem(data.size - 2, false)
-                            } else if (currentPosition == data.size - 1) {
+                                binding.viewPager.setCurrentItem(dataList.size - 2, false)
+                            } else if (currentPosition == dataList.size - 1) {
                                 binding.viewPager.setCurrentItem(1, false)
                             }
                         }
@@ -159,18 +150,21 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
     }
 
 
-    inner class IconLinkGridCardViewHolder(val binding: ItemHomeIconLinkGridCardBinding) :
+    class IconLinkGridCardViewHolder(
+        val binding: ItemHomeIconLinkGridCardBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            if (!currentList[bindingAdapterPosition].entities.isNullOrEmpty()) {
-                val data = currentList[bindingAdapterPosition].entities?.map {
+        override fun bind(data: HomeFeedResponse.Data) {
+            if (!data.entities.isNullOrEmpty()) {
+                val dataList = data.entities.map {
                     IconLinkGridCardBean(it.title, it.pic, it.url)
                 }
                 val maps: MutableList<List<IconLinkGridCardBean>> = ArrayList()
-                val page = currentList[bindingAdapterPosition].entities!!.size / 5
+                val page = data.entities.size / 5
                 var index = 0
                 repeat(page) {
-                    maps.add(data!!.subList(index * 5, (index + 1) * 5))
+                    maps.add(dataList.subList(index * 5, (index + 1) * 5))
                     index++
                 }
                 binding.viewPager.adapter = IconLinkGridCardAdapter(listener).also {
@@ -182,19 +176,23 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                     binding.indicator.setViewPager(binding.viewPager)
                 }
             }
+
         }
     }
 
-    inner class ImageTextScrollCardViewHolder(val binding: ItemHomeImageTextScrollCardBinding) :
+    class ImageTextScrollCardViewHolder(
+        val binding: ItemHomeImageTextScrollCardBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            if (!currentList[bindingAdapterPosition].entities.isNullOrEmpty()) {
+        override fun bind(data: HomeFeedResponse.Data) {
+            if (!data.entities.isNullOrEmpty()) {
                 val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
-                currentList[bindingAdapterPosition].entities?.forEach {
+                data.entities.forEach {
                     if (it.entityType == "feed" && !BlackListUtil.checkUid(it.userInfo.uid))
                         imageTextScrollCard.add(it)
                 }
-                binding.title.text = currentList[bindingAdapterPosition].title
+                binding.title.text = data.title
                 binding.title.setPadding(10.dp, 10.dp, 10.dp, 0)
                 binding.recyclerView.apply {
                     adapter = ImageTextScrollCardAdapter(listener).also {
@@ -212,12 +210,15 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
 
     }
 
-    inner class IconMiniScrollCardViewHolder(val binding: ItemHomeIconMiniScrollCardBinding) :
+    class IconMiniScrollCardViewHolder(
+        val binding: ItemHomeIconMiniScrollCardBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            if (!currentList[bindingAdapterPosition].entities.isNullOrEmpty()) {
+        override fun bind(data: HomeFeedResponse.Data) {
+            if (!data.entities.isNullOrEmpty()) {
                 val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
-                currentList[bindingAdapterPosition].entities?.forEach {
+                data.entities.forEach {
                     if ((it.entityType == "topic" || it.entityType == "product")
                         && !TopicBlackListUtil.checkTopic(it.title)
                     )
@@ -238,19 +239,22 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         }
     }
 
-    inner class RefreshCardViewHolder(val binding: ItemHomeFeedRefreshCardBinding) :
+    class RefreshCardViewHolder(val binding: ItemHomeFeedRefreshCardBinding, ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            binding.textView.text = currentList[bindingAdapterPosition].title
+        override fun bind(data: HomeFeedResponse.Data) {
+            binding.textView.text = data.title
         }
     }
 
-    inner class ImageSquareScrollCardViewHolder(val binding: ItemHomeImageSquareScrollCardBinding) :
+    class ImageSquareScrollCardViewHolder(
+        val binding: ItemHomeImageSquareScrollCardBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            if (!currentList[bindingAdapterPosition].entities.isNullOrEmpty()) {
+        override fun bind(data: HomeFeedResponse.Data) {
+            if (!data.entities.isNullOrEmpty()) {
                 val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
-                currentList[bindingAdapterPosition].entities?.forEach {
+                data.entities.forEach {
                     if (it.entityType == "picCategory")
                         imageTextScrollCard.add(it)
                 }
@@ -268,36 +272,36 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         }
     }
 
-    inner class UserViewHolder(val binding: ItemSearchUserBinding) :
+    class UserViewHolder(val binding: ItemSearchUserBinding, val listener: ItemListener) :
         BaseViewHolder<ViewDataBinding>(binding) {
         @SuppressLint("SetTextI18n")
-        override fun bind() {
-            val user = currentList[bindingAdapterPosition]
+        override fun bind(data: HomeFeedResponse.Data) {
 
-            binding.listener = listener
-            binding.position = bindingAdapterPosition
-            if (user.userInfo != null && user.fUserInfo != null) {
-                binding.uid = user.userInfo.uid
-                binding.uname.text = user.userInfo.username
-                binding.follow.text = "${user.userInfo.follow}关注"
-                binding.fans.text = "${user.userInfo.fans}粉丝"
-                binding.act.text = DateUtils.fromToday(user.userInfo.logintime) + "活跃"
-                ImageUtil.showIMG(binding.avatar, user.userInfo.userAvatar)
-            } else if (user.userInfo == null && user.fUserInfo != null) {
-                binding.uid = user.fUserInfo.uid
-                binding.uname.text = user.fUserInfo.username
-                binding.follow.text = "${user.fUserInfo.follow}关注"
-                binding.fans.text = "${user.fUserInfo.fans}粉丝"
-                binding.act.text = DateUtils.fromToday(user.fUserInfo.logintime) + "活跃"
-                ImageUtil.showIMG(binding.avatar, user.fUserInfo.userAvatar)
-            } else if (user.userInfo != null) {
-                binding.uid = user.uid
-                binding.uname.text = user.username
-                binding.follow.text = "${user.follow}关注"
-                binding.fans.text = "${user.fans}粉丝"
-                binding.act.text = DateUtils.fromToday(user.logintime) + "活跃"
-                binding.isFollow = user.isFollow
-                if (user.isFollow == 0) {
+            binding.setVariable(BR.position, bindingAdapterPosition)
+            binding.setVariable(BR.listener, listener)
+
+            if (data.userInfo != null && data.fUserInfo != null) {
+                binding.uid = data.userInfo.uid
+                binding.uname.text = data.userInfo.username
+                binding.follow.text = "${data.userInfo.follow}关注"
+                binding.fans.text = "${data.userInfo.fans}粉丝"
+                binding.act.text = DateUtils.fromToday(data.userInfo.logintime) + "活跃"
+                ImageUtil.showIMG(binding.avatar, data.userInfo.userAvatar)
+            } else if (data.userInfo == null && data.fUserInfo != null) {
+                binding.uid = data.fUserInfo.uid
+                binding.uname.text = data.fUserInfo.username
+                binding.follow.text = "${data.fUserInfo.follow}关注"
+                binding.fans.text = "${data.fUserInfo.fans}粉丝"
+                binding.act.text = DateUtils.fromToday(data.fUserInfo.logintime) + "活跃"
+                ImageUtil.showIMG(binding.avatar, data.fUserInfo.userAvatar)
+            } else if (data.userInfo != null) {
+                binding.uid = data.uid
+                binding.uname.text = data.username
+                binding.follow.text = "${data.follow}关注"
+                binding.fans.text = "${data.fans}粉丝"
+                binding.act.text = DateUtils.fromToday(data.logintime) + "活跃"
+                binding.isFollow = data.isFollow
+                if (data.isFollow == 0) {
                     binding.followBtn.text = "关注"
                     binding.followBtn.setTextColor(itemView.context.getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimary))
                 } else {
@@ -306,15 +310,15 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                 }
                 binding.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
                 else View.GONE
-                ImageUtil.showIMG(binding.avatar, user.userAvatar)
+                ImageUtil.showIMG(binding.avatar, data.userAvatar)
             }
+
         }
     }
 
-    inner class TopicProductViewHolder(val binding: ItemSearchTopicBinding) :
+    class TopicProductViewHolder(val binding: ItemSearchTopicBinding, val listener: ItemListener) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            val data = currentList[bindingAdapterPosition]
+        override fun bind(data: HomeFeedResponse.Data) {
             if (data.description == "home") {
                 binding.parent.setCardBackgroundColor(
                     itemView.context.getColorFromAttr(android.R.attr.windowBackground)
@@ -329,62 +333,59 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
             else
                 "${data.feedCommentNumTxt}讨论"
 
-            binding.data = data
-            binding.listener = listener
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
         }
     }
 
-    inner class AppViewHolder(val binding: ItemSearchApkBinding) :
+    class AppViewHolder(val binding: ItemSearchApkBinding, val listener: ItemListener) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        override fun bind(data: HomeFeedResponse.Data) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
         }
     }
 
-    inner class CollectionViewHolder(val binding: ItemCollectionListItemBinding) :
+    class CollectionViewHolder(
+        val binding: ItemCollectionListItemBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        override fun bind(data: HomeFeedResponse.Data) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
         }
     }
 
-    inner class RecentHistoryViewHolder(val binding: ItemRecentHistoryBinding) :
+    class RecentHistoryViewHolder(
+        val binding: ItemRecentHistoryBinding,
+        val listener: ItemListener
+    ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            val data = currentList[bindingAdapterPosition]
-            binding.data = data
-            binding.listener = listener
+        override fun bind(data: HomeFeedResponse.Data) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.fans.text =
                 if (data.targetType == "user")
                     "${data.fansNum}粉丝"
                 else
                     "${data.commentNum}讨论"
-
         }
     }
 
-    inner class FeedReplyViewHolder(val binding: ItemFeedReplyBinding) :
+    class FeedReplyViewHolder(val binding: ItemFeedReplyBinding, val listener: ItemListener) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
-            val feed = currentList[bindingAdapterPosition]
-            val likeData = Like().also {
-                it.apply {
-                    feed.userAction?.like?.let { like ->
-                        isLike.set(like)
-                    }
-                    likeNum.set(feed.likenum)
-                }
-            }
-            binding.likeData = likeData
+        var entityType: String = ""
+        var id: String = ""
+        var uid: String = ""
+        var likeData: Like = Like()
+
+        init {
             binding.expand.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     menuInflater.inflate(R.menu.feed_reply_menu, menu).apply {
                         menu.findItem(R.id.copy)?.isVisible = false
-                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == feed.uid
+                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == uid
                         menu.findItem(R.id.show)?.isVisible = false
                         menu.findItem(R.id.report)?.isVisible = PrefManager.isLogin
                     }
@@ -392,9 +393,9 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                         PopClickListener(
                             listener,
                             it.context,
-                            feed.entityType,
-                            feed.id,
-                            feed.uid,
+                            entityType,
+                            id,
+                            uid,
                             bindingAdapterPosition
                         )
                     )
@@ -403,157 +404,206 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
             }
             binding.like.setOnClickListener {
                 listener.onLikeClick(
-                    feed.entityType,
-                    feed.id,
+                    entityType,
+                    id,
                     bindingAdapterPosition,
                     likeData
                 )
             }
         }
-    }
 
+        override fun bind(data: HomeFeedResponse.Data) {
+            entityType = data.entityType
+            id = data.id
+            uid = data.id
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: ViewType
-    ): BaseViewHolder<ViewDataBinding> {
-        return when (viewType) {
-
-            ViewType.IMAGE_CAROUSEL_CARD_1 -> ImageCarouselCardViewHolder(
-                ItemHomeImageCarouselCardBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent, false
-                )
-            )
-
-            ViewType.ICON_LINK_GRID_CARD -> IconLinkGridCardViewHolder(
-                ItemHomeIconLinkGridCardBinding.inflate(
-                    LayoutInflater.from(parent.context), parent,
-                    false
-                )
-            )
-
-            ViewType.IMAGE_TEXT_SCROLL_CARD -> ImageTextScrollCardViewHolder(
-                ItemHomeImageTextScrollCardBinding.inflate(
-                    LayoutInflater.from(parent.context), parent,
-                    false
-                )
-            )
-
-            ViewType.ICON_MINI_SCROLL_CARD -> IconMiniScrollCardViewHolder(
-                ItemHomeIconMiniScrollCardBinding.inflate(
-                    LayoutInflater.from(parent.context), parent,
-                    false
-                )
-            )
-
-            ViewType.REFRESH_CARD -> RefreshCardViewHolder(
-                ItemHomeFeedRefreshCardBinding.inflate(
-                    LayoutInflater.from(parent.context), parent,
-                    false
-                )
-            )
-
-            ViewType.IMAGE_SQUARE_SCROLL_CARD -> ImageSquareScrollCardViewHolder(
-                ItemHomeImageSquareScrollCardBinding.inflate(
-                    LayoutInflater.from(parent.context), parent,
-                    false
-                )
-            )
-
-            ViewType.FEED -> FeedViewHolder(
-                ItemHomeFeedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-
-            ViewType.USER -> UserViewHolder(
-                ItemSearchUserBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-
-            ViewType.TOPIC -> TopicProductViewHolder(
-                ItemSearchTopicBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-
-            ViewType.APK -> AppViewHolder(
-                ItemSearchApkBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-
-            ViewType.COLLECTION -> CollectionViewHolder(
-                ItemCollectionListItemBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-            )
-
-            ViewType.RECENT_HISTORY -> RecentHistoryViewHolder(
-                ItemRecentHistoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-
-            ViewType.FEED_REPLY -> FeedReplyViewHolder(
-                ItemFeedReplyBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-
-            else -> throw IllegalArgumentException("invalid viewType: $viewType")
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
+            likeData = Like().also {
+                it.apply {
+                    data.userAction?.like?.let { like ->
+                        isLike.set(like)
+                    }
+                    likeNum.set(data.likenum)
+                }
+            }
+            binding.setVariable(BR.likeData, likeData)
         }
     }
 
-    override fun getViewType(position: Int): ViewType {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): BaseViewHolder<ViewDataBinding> {
+        return when (viewType) {
+
+            0 -> {
+                ImageCarouselCardViewHolder(
+                    ItemHomeImageCarouselCardBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent, false
+                    ), listener
+                )
+            }
+
+            1 -> {
+                IconLinkGridCardViewHolder(
+                    ItemHomeIconLinkGridCardBinding.inflate(
+                        LayoutInflater.from(parent.context), parent,
+                        false
+                    ), listener
+                )
+            }
+
+            2 -> {
+                FeedViewHolder(
+                    ItemHomeFeedBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+                    listener
+                )
+            }
+
+            3 -> {
+                ImageTextScrollCardViewHolder(
+                    ItemHomeImageTextScrollCardBinding.inflate(
+                        LayoutInflater.from(parent.context), parent,
+                        false
+                    ), listener
+                )
+            }
+
+            4 -> {
+                IconMiniScrollCardViewHolder(
+                    ItemHomeIconMiniScrollCardBinding.inflate(
+                        LayoutInflater.from(parent.context), parent,
+                        false
+                    ), listener
+                )
+            }
+
+            5 -> {
+                RefreshCardViewHolder(
+                    ItemHomeFeedRefreshCardBinding.inflate(
+                        LayoutInflater.from(parent.context), parent,
+                        false
+                    )
+                )
+            }
+
+            6 -> {
+                UserViewHolder(
+                    ItemSearchUserBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    ),
+                    listener
+                )
+            }
+
+            7 -> {
+                TopicProductViewHolder(
+                    ItemSearchTopicBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    ),
+                    listener
+                )
+            }
+
+            8 -> {
+                AppViewHolder(
+                    ItemSearchApkBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    ),
+                    listener
+                )
+            }
+
+            10 -> {
+                FeedReplyViewHolder(
+                    ItemFeedReplyBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    ),
+                    listener
+                )
+            }
+
+            11 -> {
+                CollectionViewHolder(
+                    ItemCollectionListItemBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false
+                    ), listener
+                )
+            }
+
+            12 -> {
+                RecentHistoryViewHolder(
+                    ItemRecentHistoryBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    ), listener
+                )
+            }
+
+            13 -> {
+                ImageSquareScrollCardViewHolder(
+                    ItemHomeImageSquareScrollCardBinding.inflate(
+                        LayoutInflater.from(parent.context), parent,
+                        false
+                    ), listener
+                )
+            }
+
+            else -> throw IllegalArgumentException("viewType error: $viewType")
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
         return when (currentList[position].entityType) {
             "card" -> {
                 when (currentList[position].entityTemplate) {
-                    "imageCarouselCard_1" -> ViewType.IMAGE_CAROUSEL_CARD_1
+                    "imageCarouselCard_1" -> 0
+                    "iconLinkGridCard" -> 1
+                    "imageTextScrollCard" -> 3
 
-                    "iconLinkGridCard" -> ViewType.ICON_LINK_GRID_CARD
+                    "iconMiniScrollCard" -> 4
+                    "iconMiniGridCard" -> 4
 
-                    "imageTextScrollCard" -> ViewType.IMAGE_TEXT_SCROLL_CARD
+                    "refreshCard" -> 5
 
-                    "iconMiniScrollCard" -> ViewType.ICON_MINI_SCROLL_CARD
-                    "iconMiniGridCard" -> ViewType.ICON_MINI_SCROLL_CARD
-
-                    "refreshCard" -> ViewType.REFRESH_CARD
-
-                    "imageSquareScrollCard" -> ViewType.IMAGE_SQUARE_SCROLL_CARD
+                    "imageSquareScrollCard" -> 13
 
                     else -> throw IllegalArgumentException("entityType error: ${currentList[position].entityTemplate}")
                 }
             }
 
             "feed" -> when (currentList[position].feedType) {
-                "vote" -> ViewType.FEED // ViewType.FEED_VOTE
-
-                else -> ViewType.FEED
+                "vote" -> 2//9
+                else -> 2
             }
 
-            "contacts" -> ViewType.USER
-            "user" -> ViewType.USER
+            "contacts" -> 6
+            "user" -> 6
 
-            "topic" -> ViewType.TOPIC
-            "product" -> ViewType.TOPIC
+            "topic" -> 7
+            "product" -> 7
 
-            "apk" -> ViewType.APK
+            "apk" -> 8
 
-            "feed_reply" -> ViewType.FEED_REPLY
+            "feed_reply" -> 10
 
-            "collection" -> ViewType.COLLECTION
+            "collection" -> 11
 
-            "recentHistory" -> ViewType.RECENT_HISTORY
+            "recentHistory" -> 12
 
             else -> throw IllegalArgumentException("entityType error: ${currentList[position].entityType}")
         }
     }
 
-}
-
-class HomeFeedDiffCallback : DiffUtil.ItemCallback<HomeFeedResponse.Data>() {
-    override fun areItemsTheSame(
-        oldItem: HomeFeedResponse.Data,
-        newItem: HomeFeedResponse.Data
-    ): Boolean {
-        return oldItem.entityId == newItem.entityId
-    }
-
-    override fun areContentsTheSame(
-        oldItem: HomeFeedResponse.Data,
-        newItem: HomeFeedResponse.Data
-    ): Boolean {
-        return oldItem.entityId == newItem.entityId && oldItem.lastupdate == newItem.lastupdate
-    }
 }

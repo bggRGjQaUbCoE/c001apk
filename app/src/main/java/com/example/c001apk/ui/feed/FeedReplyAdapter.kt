@@ -1,20 +1,19 @@
 package com.example.c001apk.ui.feed
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ItemFeedContentReplyItemBinding
@@ -38,13 +37,38 @@ class FeedReplyAdapter(
         this.topReplyId = topReplyId
     }
 
-    inner class ViewHolder(val binding: ItemFeedContentReplyItemBinding) :
+    class ViewHolder(val binding: ItemFeedContentReplyItemBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
+        var id: String = ""
+        var uid: String = ""
+        var username: String = ""
+        var message: String = ""
+        var likeData: Like = Like()
+
+        init {
+            itemView.setOnClickListener {
+                listener.onReply(
+                    id, uid, username,
+                    bindingAdapterPosition, null
+                )
+            }
+
+            binding.like.setOnClickListener {
+                listener.onLikeClick(
+                    "feedReply", id, bindingAdapterPosition, likeData
+                )
+            }
+
+            binding.expand.setOnClickListener {
+                listener.onExpand(
+                    it, id, uid,
+                    message, bindingAdapterPosition, null
+                )
+            }
+        }
 
         @SuppressLint("SetTextI18n")
-        fun bind() {
-
-            val reply = currentList[bindingAdapterPosition]
+        fun bind(reply: TotalReplyResponse.Data, haveTop: Boolean, topReplyId: String?) {
 
             if (bindingAdapterPosition == 0
                 && !reply.username.contains("楼主") && !reply.username.contains("置顶")
@@ -66,35 +90,20 @@ class FeedReplyAdapter(
                 reply.username = "${reply.username}$unameTag$replyTag\u3000"
             }
 
-            binding.data = reply
-            val likeData = Like().also {
+            id = reply.id
+            uid = reply.uid
+            username = reply.username
+            message = reply.message
+
+            binding.setVariable(BR.data, reply)
+            binding.setVariable(BR.listener, listener)
+            likeData = Like().also {
                 it.likeNum.set(reply.likenum)
                 reply.userAction?.like?.let { like ->
                     it.isLike.set(like)
                 }
             }
-            binding.likeData = likeData
-            binding.listener = listener
-            binding.multiImage.listener = listener
-            itemView.setOnClickListener {
-                listener.onReply(
-                    reply.id, reply.uid, reply.username,
-                    bindingAdapterPosition, null
-                )
-            }
-
-            binding.like.setOnClickListener {
-                listener.onLikeClick(
-                    "feedReply", reply.id, bindingAdapterPosition, likeData
-                )
-            }
-
-            binding.expand.setOnClickListener {
-                listener.onExpand(
-                    it, reply.id, reply.uid,
-                    reply.message, bindingAdapterPosition, null
-                )
-            }
+            binding.setVariable(BR.likeData, likeData)
 
             if (!reply.replyRows.isNullOrEmpty()) {
                 val sortedList = ArrayList<TotalReplyResponse.Data>()
@@ -231,32 +240,13 @@ class FeedReplyAdapter(
                 it.setPadding(15.dp, 12.dp, 15.dp, 12.dp)
             }
         }
-        return ViewHolder(binding)
+        return ViewHolder(binding, listener)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position], haveTop, topReplyId)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isEmpty()) {
-            onBindViewHolder(holder, position)
-        } else {
-            holder.binding.like.text = currentList[position].likenum
-            val drawableLike: Drawable =
-                holder.binding.like.context.getDrawable(R.drawable.ic_like)!!
-            val size = holder.binding.like.textSize.toInt()
-            drawableLike.setBounds(0, 0, size, size)
-            val color = if (currentList[position].userAction?.like == 1)
-                holder.binding.like.context.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorPrimary
-                )
-            else holder.binding.like.context.getColor(android.R.color.darker_gray)
-            DrawableCompat.setTint(drawableLike, color)
-            holder.binding.like.setTextColor(color)
-            holder.binding.like.setCompoundDrawables(drawableLike, null, null, null)
-        }
-    }
 }
 
 class FeedReplyDiffCallback : DiffUtil.ItemCallback<TotalReplyResponse.Data>() {

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeImageCarouselCardItemBinding
 import com.example.c001apk.logic.model.IconLinkGridCardBean
 
@@ -15,13 +16,15 @@ class ImageCarouselCardAdapter(
     ListAdapter<IconLinkGridCardBean, ImageCarouselCardAdapter.ViewHolder>(
         ImageCarouselCardDiffCallback()
     ) {
-
-    inner class ViewHolder(val binding: ItemHomeImageCarouselCardItemBinding) :
+    class ViewHolder(
+        val binding: ItemHomeImageCarouselCardItemBinding,
+        val listener: ItemListener
+    ) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind() {
-            binding.data = currentList[bindingAdapterPosition]
-            binding.listener = listener
+        fun bind(data: IconLinkGridCardBean, itemCount: Int) {
+            binding.setVariable(BR.data, data)
+            binding.setVariable(BR.listener, listener)
             binding.count.text =
                 if (itemCount == 1) "1/1"
                 else {
@@ -41,12 +44,12 @@ class ImageCarouselCardAdapter(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ), listener
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(currentList[position], itemCount)
     }
 
 }

@@ -31,12 +31,35 @@ class UpdateListAdapter(
         var updateLog: TextView = itemView.findViewById(R.id.updateLog)
         val bitType: TextView = itemView.findViewById(R.id.bitType)
         val btnUpdate: Button = itemView.findViewById(R.id.btnUpdate)
+        var expand = false
+        var packageName: String = ""
+        var apkversioncode: String = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_app_update, parent, false)
-        return ViewHolder(view)
+        val holder = ViewHolder(view)
+        holder.itemView.setOnClickListener {
+            IntentUtil.startActivity<AppActivity>(holder.itemView.context) {
+                putExtra("id", holder.packageName)
+            }
+        }
+        holder.btnUpdate.apply {
+            setOnClickListener {
+                viewModel.packageName = holder.packageName
+                viewModel.versionCode = holder.apkversioncode
+                viewModel.onGetDownloadLink()
+            }
+        }
+        holder.updateLog.apply {
+            maxLines = if (holder.expand) Int.MAX_VALUE else 5
+            setOnClickListener {
+                holder.expand = !holder.expand
+                maxLines = if (holder.expand) Int.MAX_VALUE else 5
+            }
+        }
+        return holder
     }
 
     override fun getItemCount() = updateList.size
@@ -64,25 +87,8 @@ class UpdateListAdapter(
             2, 3 -> "64位"
             else -> ""
         }
-        holder.itemView.setOnClickListener {
-            IntentUtil.startActivity<AppActivity>(holder.itemView.context) {
-                putExtra("id", app.packageName)
-            }
-        }
-        holder.btnUpdate.apply {
-            setOnClickListener {
-                viewModel.packageName = app.packageName
-                viewModel.versionCode = app.apkversioncode.toString()
-                viewModel.onGetDownloadLink()
-            }
-        }
-        holder.updateLog.apply {
-            maxLines = if (app.expand) Int.MAX_VALUE else 5
-            setOnClickListener {
-                app.expand = !app.expand
-                maxLines = if (app.expand) Int.MAX_VALUE else 5
-            }
-        }
+        holder.packageName = app.packageName
+        holder.apkversioncode = app.apkversioncode.toString()
     }
 
 }
