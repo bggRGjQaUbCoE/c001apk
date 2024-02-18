@@ -12,6 +12,9 @@ interface BlackListDao {
     @Insert
     fun insert(uid: SearchHistory)
 
+    @Insert
+    fun insertAll(list: List<SearchHistory>)
+
     @Query("select * from SearchHistory ORDER BY id DESC")
     fun loadAllList(): List<SearchHistory>
 

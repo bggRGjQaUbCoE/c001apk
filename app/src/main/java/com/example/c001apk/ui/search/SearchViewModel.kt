@@ -32,7 +32,7 @@ class SearchViewModel : ViewModel() {
                     })
                 }
 
-                "blacklist" -> {
+                "userBlacklist" -> {
                     val blackListDao = BlackListDatabase.getDatabase(context).blackListDao()
                     newList.addAll(blackListDao.loadAllList().map {
                         it.keyWord

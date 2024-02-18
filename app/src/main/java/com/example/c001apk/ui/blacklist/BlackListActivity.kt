@@ -54,10 +54,15 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         viewModel.type = intent.getStringExtra("type")
 
         initView()
-        if (viewModel.listSize == -1) {
-            when (viewModel.type) {
-                "user" -> viewModel.getBlackList("blacklist", this)
-                "topic" -> viewModel.getBlackList("topicBlacklist", this)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            binding.indicator.isIndeterminate = true
+            binding.indicator.visibility = View.VISIBLE
+            if (viewModel.listSize == -1) {
+                when (viewModel.type) {
+                    "user" -> viewModel.getBlackList("userBlacklist", this@BlackListActivity)
+                    "topic" -> viewModel.getBlackList("topicBlacklist", this@BlackListActivity)
+                }
             }
         }
 
@@ -68,6 +73,8 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         initClearHistory()
 
         viewModel.blackListLiveData.observe(this) {
+            binding.indicator.isIndeterminate = false
+            binding.indicator.visibility = View.GONE
             viewModel.listSize = it.size
             mAdapter.submitList(it)
             if (it.isEmpty())
@@ -159,9 +166,35 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                     string,
                     Array<String>::class.java
                 )
-                for (element in json) {
-                    if (viewModel.blackListLiveData.value?.indexOf(element) == -1)
-                        updateUid(element)
+                val currentList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
+                val newList = ArrayList<String>()
+                if (currentList.isEmpty())
+                    newList.addAll(json)
+                else
+                    json.forEach {
+                        if (currentList.indexOf(it) == -1)
+                            newList.add(it)
+                    }
+                if (newList.isNotEmpty()) {
+                    if (currentList.isEmpty())
+                        viewModel.blackListLiveData.postValue(newList)
+                    else {
+                        currentList.addAll(0, newList)
+                        viewModel.blackListLiveData.postValue(currentList)
+                    }
+                    CoroutineScope(Dispatchers.IO).launch {
+                        when (viewModel.type) {
+                            "user" ->
+                                blackListDao.insertAll(newList.map {
+                                    SearchHistory(it)
+                                })
+
+                            "topic" ->
+                                topicBlackListDao.insertAll(newList.map {
+                                    SearchHistory(it)
+                                })
+                        }
+                    }
                 }
             }.onFailure {
                 MaterialAlertDialogBuilder(this)
