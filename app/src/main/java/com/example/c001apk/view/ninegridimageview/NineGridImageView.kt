@@ -60,7 +60,7 @@ class NineGridImageView @JvmOverloads constructor(
     private var columns: Int = 0
     private var rows: Int = 0
 
-    private var gap: Int = 5.dp
+    private var gap: Int = 5
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)

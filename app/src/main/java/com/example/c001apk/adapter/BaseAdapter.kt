@@ -1,6 +1,5 @@
 package com.example.c001apk.adapter
 
-import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
