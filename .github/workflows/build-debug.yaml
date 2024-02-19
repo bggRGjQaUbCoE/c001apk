@@ -42,7 +42,7 @@ jobs:
           fi
 
       - name: Cache Gradle Dependencies
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v3.3.3
         with:
           path: |
             ~/.gradle/caches
