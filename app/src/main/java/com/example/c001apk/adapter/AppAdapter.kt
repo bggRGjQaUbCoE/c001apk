@@ -78,7 +78,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         override fun bind(data: HomeFeedResponse.Data) {
             entityType = data.entityType
             id = data.id
-            uid = data.id
+            uid = data.uid
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
@@ -415,7 +415,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         override fun bind(data: HomeFeedResponse.Data) {
             entityType = data.entityType
             id = data.id
-            uid = data.id
+            uid = data.uid
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
