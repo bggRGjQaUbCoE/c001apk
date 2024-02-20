@@ -207,8 +207,8 @@ class FollowViewModel : ViewModel() {
             }
         }
 
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
+        override fun onBlockUser(id: String, uid: String, position: Int) {
+            super.onBlockUser(id, uid, position)
             val currentList = dataListData.value!!.toMutableList()
             currentList.removeAt(position)
             dataListData.postValue(currentList)

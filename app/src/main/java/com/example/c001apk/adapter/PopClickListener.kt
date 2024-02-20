@@ -21,7 +21,7 @@ class PopClickListener(
         when (item?.itemId) {
             R.id.block -> {
                 BlackListUtil.saveUid(uid)
-                listener.onBlockUser(uid, position)
+                listener.onBlockUser(id, uid, position)
             }
 
             R.id.report -> {

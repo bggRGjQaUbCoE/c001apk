@@ -345,8 +345,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             }
         }
 
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
+        override fun onBlockUser(id: String, uid: String, position: Int) {
+            super.onBlockUser(id, uid, position)
             val currentList = viewModel.totalReplyData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.totalReplyData.postValue(currentList)

@@ -446,8 +446,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     }
 
     inner class ItemClickListener : ItemListener {
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
+        override fun onBlockUser(id: String, uid: String, position: Int) {
+            super.onBlockUser(id, uid, position)
             val currentList = viewModel.homeFeedData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.homeFeedData.postValue(currentList)

@@ -164,7 +164,7 @@ interface ItemListener {
 
     fun onReply(id: String, uid: String, username: String?, position: Int, rPosition: Int?) {}
 
-    fun onBlockUser(uid: String, position: Int) {}
+    fun onBlockUser(id:String, uid: String, position: Int) {}
 
     fun onDeleteClicked(entityType: String, id: String, position: Int) {}
 }

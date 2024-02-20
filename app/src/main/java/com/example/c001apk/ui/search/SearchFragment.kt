@@ -62,7 +62,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
 
         if (viewModel.listSize == -1) {
             binding.clearAll.visibility = View.GONE
-            viewModel.getBlackList("history", requireContext())
+            CoroutineScope(Dispatchers.IO).launch {
+                viewModel.getBlackList("history", requireContext())
+            }
         } else
             binding.clearAll.visibility = View.VISIBLE
 
