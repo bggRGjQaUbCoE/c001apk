@@ -44,7 +44,7 @@ class ImageSquareScrollCardAdapter(
                 DensityTool.getScreenWidth(parent.context) - padding
             else
                 DensityTool.getScreenWidth(parent.context) / 2 - padding
-        binding.root.layoutParams.width = (imageWidth / 5)
+        binding.root.layoutParams.width = imageWidth / 5
         return ViewHolder(binding, listener)
     }
 
