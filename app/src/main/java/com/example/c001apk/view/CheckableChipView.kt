@@ -285,7 +285,7 @@ class CheckableChipView @JvmOverloads constructor(
 
         val indicatorSizeHalf = indicatorSize / 2f
 
-        val indicatorRounding = (rounding / (height - outlineWidth)) * (indicatorSizeHalf * 2f)
+        val indicatorRounding = rounding / (height - outlineWidth) * (indicatorSizeHalf * 2f)
         indicatorPaint.color = checkedColor
 
         canvas.drawRoundRect(
