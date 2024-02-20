@@ -220,7 +220,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         viewModel.scroll.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (it) {
-                    mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                    scrollToPosition(viewModel.itemCount)
                 }
             }
         }
@@ -285,7 +285,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             if (viewModel.isViewReply == true) {
                 viewModel.isViewReply = false
                 if (viewModel.firstVisibleItemPosition > viewModel.itemCount)
-                    mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                    scrollToPosition(viewModel.itemCount)
             }
             if (dialog != null) {
                 dialog?.dismiss()
@@ -293,6 +293,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
         }
 
+    }
+
+    private fun scrollToPosition(position: Int) {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            mLayoutManager.scrollToPositionWithOffset(position, 0)
+        else
+            sLayoutManager.scrollToPositionWithOffset(position, 0)
     }
 
     private fun initData() {
@@ -374,8 +381,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 }
             if (viewModel.isViewReply == true) {
                 viewModel.isViewReply = false
-                footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_REPLY, null)
-                mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_REPLY, null)
+                    mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                } else {
+                    footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
+                }
             } else {
                 footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
             }
@@ -405,10 +416,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             setOnClickListener {
                 binding.recyclerView.stopScroll()
                 binding.titleProfile.visibility = View.GONE
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    mLayoutManager.scrollToPositionWithOffset(0, 0)
-                else
-                    sLayoutManager.scrollToPositionWithOffset(0, 0)
+                scrollToPosition(0)
                 viewModel.firstVisibleItemPosition = 0
             }
             inflateMenu(R.menu.feed_menu)
