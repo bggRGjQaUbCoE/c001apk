@@ -197,7 +197,7 @@ class CheckableChipView @JvmOverloads constructor(
 
         // width
         val nonTextWidth =
-            (4 * padding) + (2 * outlinePaint.strokeWidth).toInt() + clearDrawable.intrinsicWidth
+            4 * padding + (2 * outlinePaint.strokeWidth).toInt() + clearDrawable.intrinsicWidth
         val availableTextWidth = when (widthMode) {
             MeasureSpec.EXACTLY -> MeasureSpec.getSize(widthMeasureSpec) - nonTextWidth
             MeasureSpec.AT_MOST -> MeasureSpec.getSize(widthMeasureSpec) - nonTextWidth
@@ -230,7 +230,7 @@ class CheckableChipView @JvmOverloads constructor(
         setMeasuredDimension(width, height)
         outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
-                outline.setRoundRect(0, 0, width, height, outlineCornerRadius ?: (height / 2f))
+                outline.setRoundRect(0, 0, width, height, outlineCornerRadius ?: height / 2f)
             }
         }
         touchFeedbackDrawable.setBounds(0, 0, width, height)
@@ -246,7 +246,7 @@ class CheckableChipView @JvmOverloads constructor(
         }
         val iconRadius = clearDrawable.intrinsicWidth / 2f
         val halfStroke = outlineWidth / 2f
-        val rounding = outlineCornerRadius ?: ((height - outlineWidth) / 2f)
+        val rounding = outlineCornerRadius ?: (height - outlineWidth) / 2f
 
         // Outline
         if (progress < 1f) {
@@ -285,7 +285,7 @@ class CheckableChipView @JvmOverloads constructor(
 
         val indicatorSizeHalf = indicatorSize / 2f
 
-        val indicatorRounding = (rounding / (height - outlineWidth)) * (indicatorSizeHalf * 2f)
+        val indicatorRounding = rounding / (height - outlineWidth) * (indicatorSizeHalf * 2f)
         indicatorPaint.color = checkedColor
 
         canvas.drawRoundRect(
