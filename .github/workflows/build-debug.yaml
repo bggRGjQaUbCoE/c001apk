@@ -1,9 +1,8 @@
-name: CI
+name: Build Debug
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+  pull_request:
+    types: [opened, reopened, synchronize]
     paths-ignore:
       - '**.md'
       - '**.txt'
