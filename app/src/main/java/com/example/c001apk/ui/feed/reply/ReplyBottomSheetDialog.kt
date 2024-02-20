@@ -58,7 +58,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                 SpannableStringBuilderUtil.setEmoji(
                     context,
                     replyTextMap[rid + ruid]!!,
-                    ((editText.textSize) * 1.3).toInt()
+                    (editText.textSize * 1.3).toInt()
                 )
             editText.setSelection(editText.text.toString().length)
         }
@@ -174,7 +174,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                         val builder = SpannableStringBuilderUtil.setEmoji(
                             context,
                             text!!,
-                            ((editText.textSize) * 1.3).toInt(),
+                            (editText.textSize * 1.3).toInt(),
                         )
                         editText.editableText.replace(
                             editText.selectionStart,
@@ -198,7 +198,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                     val builder = SpannableStringBuilderUtil.setEmoji(
                         context,
                         pasteText,
-                        ((editText.textSize) * 1.3).toInt()
+                        (editText.textSize * 1.3).toInt()
                     )
                     editText.editableText.replace(
                         cursorBefore,
@@ -261,7 +261,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                 SpannableStringBuilderUtil.setEmoji(
                     context,
                     name,
-                    ((editText.textSize) * 1.3).toInt()
+                    (editText.textSize * 1.3).toInt()
                 )
             )
         }
