@@ -246,7 +246,7 @@ class CheckableChipView @JvmOverloads constructor(
         }
         val iconRadius = clearDrawable.intrinsicWidth / 2f
         val halfStroke = outlineWidth / 2f
-        val rounding = outlineCornerRadius ?: ((height - outlineWidth) / 2f)
+        val rounding = outlineCornerRadius ?: (height - outlineWidth) / 2f
 
         // Outline
         if (progress < 1f) {
