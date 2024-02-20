@@ -91,7 +91,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                             for (element in feed?.data!!) {
                                 if (!PrefManager.isIconMiniCard && element.entityTemplate == "iconMiniScrollCard")
                                     continue
-                                else if ((element.entityType == "feed" && element.feedType != "vote")
+                                else if (element.entityType == "feed" && element.feedType != "vote"
                                     || element.entityTemplate == "iconMiniScrollCard"
                                     || element.entityTemplate == "iconLinkGridCard"
                                     || element.entityTemplate == "imageCarouselCard_1"
