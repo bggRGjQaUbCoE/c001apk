@@ -234,8 +234,8 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
             }
         }
 
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
+        override fun onBlockUser(id: String, uid: String, position: Int) {
+            super.onBlockUser(id, uid, position)
             val currentList = viewModel.dataListData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.dataListData.postValue(currentList)

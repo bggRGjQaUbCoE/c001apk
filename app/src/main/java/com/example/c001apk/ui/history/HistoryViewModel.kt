@@ -4,16 +4,18 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
+import com.example.c001apk.util.BlackListUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HistoryViewModel : ViewModel() {
 
+    var position: Int? = null
+    var isRemove: Boolean = false
     var listSize: Int = -1
-    var type: String? = null
+    lateinit var type: String
 
     val browseLiveData: MutableLiveData<List<Any>> = MutableLiveData()
 
@@ -22,25 +24,24 @@ class HistoryViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             if (type == "browse") {
                 val browseHistoryDao = BrowseHistoryDatabase.getDatabase(context).browseHistoryDao()
-                newList.addAll(browseHistoryDao.loadAllHistory())
+                val list = browseHistoryDao.loadAllHistory()
+                if (list.isNotEmpty()) {
+                    list.forEach {
+                        if (!BlackListUtil.checkUid(it.uid))
+                            newList.add(it)
+                    }
+                }
             } else {
                 val feedFavoriteDao = FeedFavoriteDatabase.getDatabase(context).feedFavoriteDao()
-                newList.addAll(feedFavoriteDao.loadAllHistory())
+                val list = feedFavoriteDao.loadAllHistory()
+                if (list.isNotEmpty()) {
+                    list.forEach {
+                        if (!BlackListUtil.checkUid(it.uid))
+                            newList.add(it)
+                    }
+                }
             }
             browseLiveData.postValue(newList)
-        }
-    }
-
-    inner class ItemClickListener : ItemListener {
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
-            onDeleteClicked("", "", position)
-        }
-
-        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
-            val currentList = browseLiveData.value!!.toMutableList()
-            currentList.removeAt(position)
-            browseLiveData.postValue(currentList)
         }
     }
 

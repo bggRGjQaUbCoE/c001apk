@@ -59,9 +59,11 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             binding.indicator.isIndeterminate = true
             binding.indicator.visibility = View.VISIBLE
             if (viewModel.listSize == -1) {
-                when (viewModel.type) {
-                    "user" -> viewModel.getBlackList("userBlacklist", this@BlackListActivity)
-                    "topic" -> viewModel.getBlackList("topicBlacklist", this@BlackListActivity)
+                CoroutineScope(Dispatchers.IO).launch {
+                    when (viewModel.type) {
+                        "user" -> viewModel.getBlackList("userBlacklist", this@BlackListActivity)
+                        "topic" -> viewModel.getBlackList("topicBlacklist", this@BlackListActivity)
+                    }
                 }
             }
         }

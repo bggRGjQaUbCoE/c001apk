@@ -294,8 +294,8 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     }
 
     inner class ItemClickListener : ItemListener {
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
+        override fun onBlockUser(id: String, uid: String, position: Int) {
+            super.onBlockUser(id, uid, position)
             val currentList = viewModel.messageData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.messageData.postValue(currentList)

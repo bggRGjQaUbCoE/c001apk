@@ -23,11 +23,9 @@ class HistoryAdapter(
     private var dataList: List<Any> = ArrayList()
     private var type = ""
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setDataListData(type: String, dataList: List<Any>) {
         this.type = type
         this.dataList = dataList
-        notifyDataSetChanged()
     }
 
     class HistoryViewHolder(val binding: ItemHistoryFeedBinding, val listener: ItemListener) :

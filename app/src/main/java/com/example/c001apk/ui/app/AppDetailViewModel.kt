@@ -129,19 +129,19 @@ class AppDetailViewModel : ViewModel() {
             }
         }
 
-        override fun onBlockUser(uid: String, position: Int) {
-            super.onBlockUser(uid, position)
+        override fun onBlockUser(id: String, uid: String, position: Int) {
+            super.onBlockUser(id, uid, position)
             val currentList = appCommentData.value!!.toMutableList()
             currentList.removeAt(position)
             appCommentData.postValue(currentList)
         }
 
-        override fun onDeleteClicked(entityType:String, id: String, position: Int) {
+        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
             onDeleteFeed("/v6/feed/deleteFeed", id, position)
         }
     }
 
-     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
+    fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch {
