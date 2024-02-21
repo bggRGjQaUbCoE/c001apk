@@ -9,22 +9,23 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object Api2ServiceCreator {
 
-    private val client: OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AddCookiesInterceptor())
-        .addInterceptor(HttpLoggingInterceptor().setLevel(if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE))
-        .build()
-
     private const val BASE_URL = "https://api2.coolapk.com"
 
-    private val retrofit = Retrofit.Builder()
+    private val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
+        level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+    }
+
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AddCookiesInterceptor())
+        .addInterceptor(httpLoggingInterceptor)
+        .build()
+
+    private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()
 
     fun <T> create(serviceClass: Class<T>): T = retrofit.create(serviceClass)
-
     inline fun <reified T> create(): T = create(T::class.java)
-
-
 }
