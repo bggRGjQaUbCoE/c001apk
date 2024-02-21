@@ -19,6 +19,8 @@ import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import com.example.c001apk.view.AppBarLayoutStateChangeListener
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -36,6 +38,8 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        binding.appBar.setLiftable(true)
 
         initData()
         initObserve()
@@ -64,6 +68,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                 if (it) {
                     binding.appData = viewModel.appData
                     binding.appLayout.visibility = View.VISIBLE
+                    initAppBar()
                 } else {
                     binding.appLayout.visibility = View.GONE
                     binding.errorLayout.parent.visibility = View.VISIBLE
@@ -97,6 +102,21 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun initAppBar() {
+        binding.appBar.addOnOffsetChangedListener(object : AppBarLayoutStateChangeListener() {
+            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
+                when (state) {
+                    State.COLLAPSED -> binding.appLayout.visibility = View.INVISIBLE
+                    State.EXPANDED, State.INTERMEDIATE ->
+                        binding.appLayout.visibility = View.VISIBLE
+
+                    else -> binding.appLayout.visibility = View.INVISIBLE
+                }
+            }
+
+        })
     }
 
     private fun initDownBtn() {
@@ -165,6 +185,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         } else if (!viewModel.type.isNullOrEmpty()) {
             binding.appData = viewModel.appData
             binding.appLayout.visibility = View.VISIBLE
+            initAppBar()
             initDownBtn()
             if (viewModel.tabList?.isNotEmpty() == true) {
                 initView()

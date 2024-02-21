@@ -13,7 +13,6 @@
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null"
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
@@ -27,10 +26,7 @@
             style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:tabGravity="center"
-            app:tabMode="scrollable"
-            app:tabRippleColor="@android:color/transparent" />
+            android:visibility="gone" />
 
         <View
             android:layout_width="match_parent"
@@ -56,13 +52,16 @@
             android:layout_height="match_parent"
             android:visibility="gone">
 
-            <androidx.recyclerview.widget.RecyclerView
+            <rikka.widget.borderview.BorderRecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:scrollbars="none"
                 android:visibility="gone"
+                app:borderBottomVisibility="never"
+                app:borderTopDrawable="@null"
+                app:borderTopVisibility="whenTop"
                 app:fitsSystemWindowsInsets="bottom" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

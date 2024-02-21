@@ -7,7 +7,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
@@ -74,6 +73,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.appBar.setLiftable(true)
 
         initView()
         initToolBar()
@@ -561,8 +562,15 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 )
                 setCancelable(false)
             }.create()
-            dialog?.window?.setLayout(150.dp, LinearLayout.LayoutParams.WRAP_CONTENT)
             dialog?.show()
+            val decorView: View? = dialog?.window?.decorView
+            val paddingTop: Int = decorView?.paddingTop ?: 0
+            val paddingBottom: Int = decorView?.paddingBottom ?: 0
+            val paddingLeft: Int = decorView?.paddingLeft ?: 0
+            val paddingRight: Int = decorView?.paddingRight ?: 0
+            val width = 68.dp + paddingLeft + paddingRight
+            val height = 68.dp + paddingTop + paddingBottom
+            dialog?.window?.setLayout(width, height)
             viewModel.fetchFeedReply()
         }
     }

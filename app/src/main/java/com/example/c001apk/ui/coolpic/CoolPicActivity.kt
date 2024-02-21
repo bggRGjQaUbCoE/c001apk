@@ -3,20 +3,26 @@ package com.example.c001apk.ui.coolpic
 import android.os.Bundle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
-import com.example.c001apk.databinding.FragmentTopicBinding
+import com.example.c001apk.databinding.ActivityCoolPicBinding
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.collection.CollectionFragment
+import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.home.IOnTabClickListener
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
+class CoolPicActivity : BaseActivity<ActivityCoolPicBinding>(), IOnTabClickContainer {
 
     private var titleText: String? = null
     private val tabList = listOf("精选", "热门", "最新")
+    override var tabController: IOnTabClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         titleText = intent.getStringExtra("title")
+
+        binding.appBar.setLiftable(true)
 
         initBar()
         initView()
@@ -49,6 +55,15 @@ class CoolPicActivity : BaseActivity<FragmentTopicBinding>() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = tabList[position]
         }.attach()
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {}
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabController?.onReturnTop(null)
+            }
+        })
     }
 
 }

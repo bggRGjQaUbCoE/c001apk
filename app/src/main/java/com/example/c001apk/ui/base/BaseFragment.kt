@@ -12,7 +12,7 @@ import java.lang.reflect.ParameterizedType
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
     private var _binding: VB? = null
-    protected val binding get() = _binding!!
+    val binding get() = _binding!!
 
     private var visible = false
 

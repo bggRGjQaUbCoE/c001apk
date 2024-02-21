@@ -19,12 +19,14 @@ import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentCollectionBinding
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.ui.coolpic.CoolPicActivity
+import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 
-class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
+class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[CollectionViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
@@ -53,6 +55,8 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.appBar.setLiftable(true)
 
         initBar()
         initView()
@@ -245,4 +249,62 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>() {
             viewModel.onDeleteFeed("/v6/feed/deleteFeed", id, position)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        initLift()
+        if (activity is CoolPicActivity)
+            (activity as? CoolPicActivity)?.tabController = this
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initLift()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        detachLift()
+
+        if (activity is CoolPicActivity)
+            (activity as? CoolPicActivity)?.tabController = null
+
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
+    }
+
+    private fun initLift() {
+        if (activity is CoolPicActivity) {
+            val parent = activity as CoolPicActivity
+            parent.binding.appBar.setLifted(
+                !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+            )
+            binding.recyclerView.borderViewDelegate
+                .setBorderVisibilityChangedListener { top, _, _, _ ->
+                    parent.binding.appBar.setLifted(!top)
+                }
+        } else {
+            binding.appBar.setLifted(
+                !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+            )
+            binding.recyclerView.borderViewDelegate
+                .setBorderVisibilityChangedListener { top, _, _, _ ->
+                    binding.appBar.setLifted(!top)
+                }
+        }
+    }
+
+    override fun onReturnTop(isRefresh: Boolean?) {
+        binding.swipeRefresh.isRefreshing = true
+        binding.recyclerView.scrollToPosition(0)
+        refreshData()
+    }
+
 }

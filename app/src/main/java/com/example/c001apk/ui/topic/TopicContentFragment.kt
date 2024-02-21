@@ -15,6 +15,7 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.ui.carousel.CarouselActivity
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.IOnSearchMenuClickContainer
@@ -53,23 +54,35 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
             }
     }
 
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
     override fun onPause() {
         super.onPause()
-        if (viewModel.isEnable == true)
-            (requireParentFragment() as IOnTabClickContainer).tabController = null
+
+        detachLift()
+
+        if (parentFragment is TopicFragment)
+            (parentFragment as? IOnTabClickContainer)?.tabController = null
+        else if (activity is CarouselActivity)
+            (activity as? IOnTabClickContainer)?.tabController = null
 
         if (viewModel.title == "讨论")
-            (requireParentFragment() as IOnSearchMenuClickContainer).controller = null
+            (parentFragment as? IOnSearchMenuClickContainer)?.controller = null
     }
 
     override fun onResume() {
         super.onResume()
 
-        if (viewModel.isEnable == true)
-            (requireParentFragment() as IOnTabClickContainer).tabController = this
+        if (parentFragment is TopicFragment)
+            (parentFragment as? IOnTabClickContainer)?.tabController = this
+        else if (activity is CarouselActivity)
+            (activity as? IOnTabClickContainer)?.tabController = this
 
         if (viewModel.title == "讨论")
-            (requireParentFragment() as IOnSearchMenuClickContainer).controller = this
+            (parentFragment as? IOnSearchMenuClickContainer)?.controller = this
 
         if (viewModel.isInit) {
             viewModel.isInit = false
@@ -80,6 +93,13 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
             initObserve()
         }
 
+        initLift()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initLift()
     }
 
     private fun initObserve() {
@@ -118,6 +138,32 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
             initObserve()
         }
 
+    }
+
+    private fun initLift() {
+        if (activity is CarouselActivity) {
+            val parent = activity as CarouselActivity
+            parent.binding.appBar.setLifted(
+                !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+            )
+            binding.recyclerView.borderViewDelegate
+                .setBorderVisibilityChangedListener { top, _, _, _ ->
+                    parent.binding.appBar.setLifted(!top)
+                }
+        } else if (parentFragment is TopicFragment) {
+            val parent = parentFragment as TopicFragment
+            parent.binding.appBar.setLifted(
+                !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+            )
+            binding.recyclerView.borderViewDelegate
+                .setBorderVisibilityChangedListener { top, _, _, _ ->
+                    parent.binding.appBar.setLifted(!top)
+                }
+        }
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
     }
 
     private fun initScroll() {

@@ -15,6 +15,7 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
@@ -195,6 +196,8 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
     override fun onResume() {
         super.onResume()
 
+        (activity as? IOnTabClickContainer)?.tabController = this
+
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
@@ -204,6 +207,39 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
             initObserve()
         }
 
+        initLift()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initLift()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        detachLift()
+        (activity as? IOnTabClickContainer)?.tabController = null
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
+    }
+
+    private fun initLift() {
+        val parent = requireActivity() as AppActivity
+        parent.binding.appBar.setLifted(
+            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+        )
+        binding.recyclerView.borderViewDelegate
+            .setBorderVisibilityChangedListener { top, _, _, _ ->
+                parent.binding.appBar.setLifted(!top)
+            }
     }
 
 }

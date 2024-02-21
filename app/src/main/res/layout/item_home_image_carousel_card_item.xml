@@ -42,7 +42,7 @@
             android:background="@drawable/pic_count_bg"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
-            android:textColor="@color/count_text"
+            android:textColor="?colorOnPrimaryContainer"
             android:textSize="10sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

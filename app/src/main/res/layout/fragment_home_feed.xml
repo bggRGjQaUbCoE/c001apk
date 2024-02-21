@@ -14,12 +14,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
+            <rikka.widget.borderview.BorderRecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:scrollbars="none"
+                app:borderBottomVisibility="never"
+                app:borderTopDrawable="@null"
+                app:borderTopVisibility="whenTop"
                 app:fitsSystemWindowsInsets="bottom" />
 
         </com.example.c001apk.view.NestedScrollableHost1>

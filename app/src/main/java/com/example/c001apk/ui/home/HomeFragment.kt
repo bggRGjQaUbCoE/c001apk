@@ -1,10 +1,7 @@
 package com.example.c001apk.ui.home
 
 import android.os.Bundle
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.View
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -21,7 +18,6 @@ import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.Tab
 import com.google.android.material.tabs.TabLayoutMediator
@@ -50,44 +46,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
         initMenu()
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: Tab?) {
-                viewModel.position = tab!!.position
-                val textView = TextView(requireContext())
-                val selectedSize = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_PX,
-                    17f,
-                    resources.displayMetrics
-                )
-                textView.paint.isFakeBoldText = true
-                textView.gravity = Gravity.CENTER_HORIZONTAL
-                textView.setTextColor(
-                    requireContext().getColorFromAttr(
-                        rikka.preference.simplemenu.R.attr.colorPrimary
-                    )
-                )
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, selectedSize)
-                textView.text = tab.text
-                tab.setCustomView(textView)
+            override fun onTabSelected(tab: Tab) {
+                viewModel.position = tab.position
             }
 
-            override fun onTabUnselected(tab: Tab?) {
-                val textView = TextView(requireContext())
-                val selectedSize = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_PX,
-                    15f,
-                    resources.displayMetrics
-                )
-                textView.paint.isFakeBoldText = false
-                textView.gravity = Gravity.CENTER_HORIZONTAL
-                textView.setTextColor(
-                    requireContext().getColorFromAttr(
-                        rikka.preference.simplemenu.R.attr.colorControlNormal
-                    )
-                )
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, selectedSize)
-                textView.text = tab?.text
-                tab?.setCustomView(textView)
-            }
+            override fun onTabUnselected(tab: Tab?) {}
 
             override fun onTabReselected(tab: Tab?) {
                 if (tab?.text == "关注")
@@ -183,23 +146,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnBottomClickListener
             viewModel.isInit = false
             if (viewModel.tabList.contains("头条"))
                 binding.viewPager.setCurrentItem(viewModel.tabList.indexOf("头条"), false)
-        } else {
-            val textView = TextView(requireContext())
-            val selectedSize = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_PX,
-                17f,
-                resources.displayMetrics
-            )
-            textView.paint.isFakeBoldText = true
-            textView.gravity = Gravity.CENTER_HORIZONTAL
-            textView.setTextColor(
-                requireContext().getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorPrimary
-                )
-            )
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, selectedSize)
-            textView.text = binding.tabLayout.getTabAt(viewModel.position)?.text
-            binding.tabLayout.getTabAt(viewModel.position)?.setCustomView(textView)
         }
     }
 

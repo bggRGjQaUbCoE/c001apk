@@ -11,7 +11,6 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null"
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 

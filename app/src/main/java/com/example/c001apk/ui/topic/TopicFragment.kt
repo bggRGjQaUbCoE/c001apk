@@ -57,6 +57,8 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.appBar.setLiftable(true)
+
         if (viewModel.isResume) {
             viewModel.isResume = false
             getViewData()

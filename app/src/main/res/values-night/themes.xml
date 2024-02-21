@@ -18,4 +18,8 @@
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
+    <style name="user">
+        <item name="contentScrim">?colorPrimaryContainer</item>
+    </style>
+
 </resources>

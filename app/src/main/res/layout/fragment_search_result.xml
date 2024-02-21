@@ -12,7 +12,6 @@
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null"
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
@@ -23,10 +22,9 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
-            style="@style/Widget.Material3.TabLayout.OnSurface.Mod"
+            style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabRippleColor="@android:color/transparent" />
+            android:layout_height="wrap_content" />
 
         <View
             android:layout_width="match_parent"

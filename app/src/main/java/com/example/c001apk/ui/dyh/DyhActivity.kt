@@ -5,19 +5,25 @@ import android.view.MenuItem
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.ActivityDyhDetailBinding
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.home.IOnTabClickListener
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
+class DyhActivity : BaseActivity<ActivityDyhDetailBinding>(), IOnTabClickContainer {
 
     private var id: String? = null
     private var title: String? = null
     private val tabList = listOf("精选", "广场")
+    override var tabController: IOnTabClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         this.id = intent.getStringExtra("id")
         this.title = intent.getStringExtra("title")
+
+        binding.appBar.setLiftable(true)
 
         initBar()
         initView()
@@ -40,6 +46,15 @@ class DyhActivity : BaseActivity<ActivityDyhDetailBinding>() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = tabList[position]
         }.attach()
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {}
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabController?.onReturnTop(null)
+            }
+        })
     }
 
     private fun initBar() {

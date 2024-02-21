@@ -23,7 +23,6 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {

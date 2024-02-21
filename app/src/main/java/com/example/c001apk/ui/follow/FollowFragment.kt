@@ -15,11 +15,13 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 
-class FollowFragment : BaseFragment<FragmentTopicContentBinding>() {
+class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
@@ -47,6 +49,8 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>() {
     override fun onResume() {
         super.onResume()
 
+        (activity as? IOnTabClickContainer)?.tabController = this
+
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
@@ -55,6 +59,40 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>() {
             initScroll()
             initObserve()
         }
+
+        initLift()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initLift()
+    }
+
+    private fun initLift() {
+        val parent = requireActivity() as FFFListActivity
+        parent.binding.appBar.setLifted(
+            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+        )
+        binding.recyclerView.borderViewDelegate
+            .setBorderVisibilityChangedListener { top, _, _, _ ->
+                parent.binding.appBar.setLifted(!top)
+            }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        detachLift()
+        (activity as? IOnTabClickContainer)?.tabController = null
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
     }
 
     private fun initObserve() {
@@ -220,5 +258,10 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>() {
         }
     }
 
+    override fun onReturnTop(isRefresh: Boolean?) {
+        binding.swipeRefresh.isRefreshing = true
+        binding.recyclerView.scrollToPosition(0)
+        refreshData()
+    }
 
 }

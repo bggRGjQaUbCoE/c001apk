@@ -32,21 +32,9 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:tabGravity="fill"
-                app:tabIndicatorFullWidth="false"
                 app:tabMinWidth="0dp"
-                app:tabMaxWidth="0dp"
                 app:tabMode="auto"
-                app:tabRippleColor="@android:color/transparent"
                 app:tabTextAppearance="@style/TabText" />
-
-            <View
-                android:layout_width="20dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="78dp"
-                android:background="@drawable/home_tab"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/search"

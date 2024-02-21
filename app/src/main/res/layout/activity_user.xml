@@ -34,11 +34,11 @@
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:id="@+id/collapsingToolbar"
+                style="@style/user"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
                 app:collapsedTitleTextColor="@color/white"
-                app:contentScrim="?attr/colorPrimary"
                 app:expandedTitleTextColor="@android:color/transparent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
                 app:title="@{userData.username}">
@@ -131,7 +131,7 @@
                             android:paddingStart="5dp"
                             android:paddingEnd="5dp"
                             android:text="@{`Lv.` + userData.level}"
-                            android:textColor="@color/count_text"
+                            android:textColor="?colorOnPrimaryContainer"
                             android:textSize="11sp" />
 
                     </LinearLayout>

@@ -16,22 +16,28 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class FFFListActivity : BaseActivity<ActivityFfflistBinding>() {
+class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    override var tabController: IOnTabClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        binding.appBar.setLiftable(true)
 
         viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
         viewModel.type = intent.getStringExtra("type")
@@ -71,6 +77,42 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>() {
             initObserve()
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (viewModel.isEnable != true)
+            initLift()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (viewModel.isEnable != true)
+            initLift()
+    }
+
+    private fun initLift() {
+        binding.appBar.setLifted(
+            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+        )
+        binding.recyclerView.borderViewDelegate
+            .setBorderVisibilityChangedListener { top, _, _, _ ->
+                binding.appBar.setLifted(!top)
+            }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        detachLift()
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
     }
 
     private fun initObserve() {
@@ -118,6 +160,15 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {}
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabController?.onReturnTop(null)
+            }
+        })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

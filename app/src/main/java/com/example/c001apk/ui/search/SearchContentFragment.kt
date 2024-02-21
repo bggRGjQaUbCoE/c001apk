@@ -55,6 +55,9 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
 
     override fun onPause() {
         super.onPause()
+
+        detachLift()
+
         (requireParentFragment() as? IOnSearchMenuClickContainer)?.controller = null
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
     }
@@ -74,6 +77,33 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
             initObserve()
         }
 
+        initLift()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initLift()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
+    }
+
+    private fun initLift() {
+        val parent = requireParentFragment() as SearchResultFragment
+        parent.binding.appBar.setLifted(
+            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+        )
+        binding.recyclerView.borderViewDelegate
+            .setBorderVisibilityChangedListener { top, _, _, _ ->
+                parent.binding.appBar.setLifted(!top)
+            }
     }
 
     private fun initObserve() {

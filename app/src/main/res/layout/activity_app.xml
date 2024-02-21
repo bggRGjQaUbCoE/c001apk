@@ -34,10 +34,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="false"
-                app:contentScrim="?android:windowBackground"
                 app:expandedTitleTextColor="@android:color/transparent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:title="@{appData.title}">
+                app:title="@{appData.title}"
+                app:titleCollapseMode="scale">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/appLayout"
@@ -130,15 +130,16 @@
                     android:id="@+id/toolBar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
+                    android:elevation="0dp"
                     app:layout_collapseMode="pin" />
+
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
                 style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabRippleColor="@android:color/transparent" />
+                android:layout_height="wrap_content" />
 
             <View
                 android:layout_width="match_parent"

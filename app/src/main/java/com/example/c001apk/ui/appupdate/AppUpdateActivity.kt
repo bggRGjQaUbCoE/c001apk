@@ -12,9 +12,10 @@ class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding.appBar.setLiftable(true)
+
         val appsUpdateList = intent?.getParcelableArrayListExtra<UpdateCheckResponse.Data>("list")
                 as ArrayList<UpdateCheckResponse.Data>
-
 
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
     app:edgeToEdge="true"
     app:fitsSystemWindowsInsets="@integer/internal_fragment_insets">
@@ -17,8 +18,14 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolBar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            app:title="@string/tab_setting" />
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="0dp" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <View
             android:layout_width="match_parent"
@@ -27,11 +34,22 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/settingsContainer"
-        android:name="com.example.c001apk.ui.settings.SettingsPreferenceFragment"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <include
+        android:id="@+id/indicator"
+        layout="@layout/item_indicator" />
+
+    <include
+        android:id="@+id/errorMsg"
+        layout="@layout/item_error_message" />
+
+    <include
+        android:id="@+id/errorLayout"
+        layout="@layout/item_error_layout" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

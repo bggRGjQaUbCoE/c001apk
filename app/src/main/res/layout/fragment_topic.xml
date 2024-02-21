@@ -1,49 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.topic.TopicFragment">
+    android:animateLayoutChanges="true"
+    app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
+    app:edgeToEdge="true"
+    app:fitsSystemWindowsInsets="@integer/internal_fragment_insets">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
-        app:edgeToEdge="true"
-        app:fitsSystemWindowsInsets="@integer/internal_fragment_insets">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="false"
+        app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBar"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="0dp" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            style="@style/Widget.Material3.TabLayout.OnSurface.Trans"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:fitsSystemWindows="false"
-            app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
+            app:tabGravity="center"
+            app:tabMode="scrollable" />
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabLayout"
-                style="@style/Widget.Material3.TabLayout.OnSurface.Mod"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabGravity="center"
-                app:tabMode="scrollable"
-                app:tabRippleColor="@android:color/transparent" />
-
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            android:layout_height="1px"
+            android:background="?attr/colorSurfaceVariant" />
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <include
         android:id="@+id/indicator"
@@ -57,4 +54,4 @@
         android:id="@+id/errorLayout"
         layout="@layout/item_error_layout" />
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

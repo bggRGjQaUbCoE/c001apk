@@ -16,7 +16,7 @@ import java.lang.reflect.ParameterizedType
 
 abstract class BaseActivity<VB : ViewBinding> : MaterialActivity() {
 
-    protected lateinit var binding: VB
+    lateinit var binding: VB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -122,7 +122,7 @@ object NetWorkUtil {
                 }
             }
         } else {
-            Toast.makeText(context, "unsupported url: $url}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "unsupported url: $url", Toast.LENGTH_SHORT).show()
         }
     }
 

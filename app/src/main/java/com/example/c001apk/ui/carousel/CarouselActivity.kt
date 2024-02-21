@@ -18,19 +18,23 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.ActivityCarouselBinding
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.topic.TopicContentFragment
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
+class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[CarouselViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    override var tabController: IOnTabClickListener? = null
 
     override fun onResume() {
         super.onResume()
@@ -38,10 +42,15 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
             viewModel.isResume = false
             initData()
         }
+        if (viewModel.tabList.isEmpty()) {
+            initLift()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        binding.appBar.setLiftable(true)
 
         viewModel.url = intent.getStringExtra("url")
         viewModel.title = intent.getStringExtra("title")
@@ -69,6 +78,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
                 initData()
                 initRefresh()
                 initScroll()
+                initLift()
             }
             if (!viewModel.barTitle.isNullOrEmpty())
                 initBar(viewModel.barTitle.toString())
@@ -78,6 +88,30 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
 
         initObserve()
 
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        detachLift()
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
+    }
+
+    private fun initLift() {
+        binding.appBar.setLifted(
+            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+        )
+        binding.recyclerView.borderViewDelegate
+            .setBorderVisibilityChangedListener { top, _, _, _ ->
+                binding.appBar.setLifted(!top)
+            }
     }
 
     private fun initObserve() {
@@ -248,6 +282,16 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = viewModel.tabList[position]
         }.attach()
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {}
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tabController?.onReturnTop(null)
+            }
+
+        })
     }
 
     private fun initData() {
