@@ -6,14 +6,13 @@ import com.example.c001apk.databinding.ActivitySearchBinding
 import com.example.c001apk.ui.base.BaseActivity
 
 class SearchActivity : BaseActivity<ActivitySearchBinding>() {
-    
+
     private val pageType by lazy { intent.getStringExtra("pageType").orEmpty() }
     private val pageParam by lazy { intent.getStringExtra("pageParam").orEmpty() }
     private val title by lazy { intent.getStringExtra("title").orEmpty() }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().apply {
                 replace(
