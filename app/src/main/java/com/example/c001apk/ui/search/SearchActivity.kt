@@ -7,22 +7,20 @@ import com.example.c001apk.ui.base.BaseActivity
 
 class SearchActivity : BaseActivity<ActivitySearchBinding>() {
 
+    private val pageType by lazy { intent.getStringExtra("pageType").orEmpty() }
+    private val pageParam by lazy { intent.getStringExtra("pageParam").orEmpty() }
+    private val title by lazy { intent.getStringExtra("title").orEmpty() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val pageType = intent.getStringExtra("pageType")
-        val pageParam = intent.getStringExtra("pageParam")
-        val title = intent.getStringExtra("title")
-
-        if (supportFragmentManager.findFragmentById(R.id.searchFragment) == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(
                     R.id.searchFragment,
                     SearchFragment.newInstance(pageType, pageParam, title)
                 )
-                .commit()
+                commit()
+            }
         }
     }
-
 }
