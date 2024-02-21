@@ -70,7 +70,7 @@ class FeedReplyAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(reply: TotalReplyResponse.Data, haveTop: Boolean, topReplyId: String?) {
 
-            fun setTag() {
+            if (!reply.username.contains("[楼主]") && !reply.username.contains("[置顶]")) {
                 val unameTag =
                     when (reply.uid) {
                         reply.feedUid -> " [楼主]"
@@ -86,15 +86,6 @@ class FeedReplyAdapter(
                         else -> ""
                     }
                 reply.username = "${reply.username}$unameTag$replyTag\u3000"
-            }
-
-            when (bindingAdapterPosition) {
-                0 -> if (!reply.username.contains("[楼主]")
-                    && !reply.username.contains("[置顶]")
-                )
-                    setTag()
-
-                else -> setTag()
             }
 
             id = reply.id

@@ -41,6 +41,8 @@ class FeedDataAdapter(
         fun bind(data: FeedArticleContentBean.Data) {
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
+            binding.textView.paint.isFakeBoldText =
+                (bindingAdapterPosition == 0 || bindingAdapterPosition == 1) && data.title == "true"
             binding.executePendingBindings()
         }
     }

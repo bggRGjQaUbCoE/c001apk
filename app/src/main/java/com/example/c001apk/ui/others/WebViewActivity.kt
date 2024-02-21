@@ -190,13 +190,13 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             R.id.refresh -> binding.webView.reload()
 
             R.id.copyLink -> {
-                link?.let {
+                binding.webView.url?.let {
                     copyText(this, it.http2https)
                 }
             }
 
             R.id.openInBrowser -> {
-                val uri = Uri.parse(link)
+                val uri = Uri.parse(binding.webView.url?.http2https)
                 val intent = Intent(Intent.ACTION_VIEW, uri)
                 try {
                     startActivity(intent)
