@@ -16,30 +16,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout 
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Gradle wrapper validation
+      - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v2
 
-      - name: set up JDK 17
+      - name: Set Up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'adopt'
           cache: gradle
 
-      - name: Write key
+      - name: Decode and Write Signing Key
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: |
           if [ ! -z "${{ secrets.SIGN_KEYSTORE_BASE64 }}" ]; then
             echo "${{ secrets.SIGN_KEYSTORE_BASE64 }}" | base64 --decode > key.jks
-            echo KEYSTORE_PATH='${{ github.workspace }}/key.jks' >> local.properties
-            echo KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}' >> local.properties
-            echo KEY_ALIAS='${{ secrets.KEY_ALIAS }}' >> local.properties
-            echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}' >> local.properties
+            echo "KEYSTORE_PATH=${{ github.workspace }}/key.jks" >> $GITHUB_ENV
+            echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
           fi
 
       - name: Cache Gradle Dependencies
@@ -48,43 +48,33 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            !~/.gradle/caches/build-cache-*
-          key: gradle-deps-core-${{ hashFiles('**/build.gradle.kts', '**/build.gradle', '**/libs.versions.toml') }}
-          restore-keys: |
-            gradle-deps
+          key: gradle-${{ runner.os }}-deps-${{ hashFiles('**/*.gradle*', '**/libs.versions.toml') }}
+          restore-keys: gradle-${{ runner.os }}-deps-
 
-      - name: Grant execute permission for gradlew
+      - name: Grant Permission for Gradlew
         run: chmod +x gradlew
 
-      - name: Build release
-        id: buildRelease
+      - name: Build and Upload Artifacts
         run: |
           ./gradlew :app:assembleRelease
-          echo "releaseName=$(ls app/build/outputs/apk/release/*.apk | awk -F '(/|\\.apk)' '{print $6}')" >> $GITHUB_OUTPUT
-
-      - name: Upload release
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.buildRelease.outputs.releaseName }}
-          path: "app/build/outputs/apk/release/*.apk"
-
-      - name: Upload mappings
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mappings
-          path: "app/build/outputs/mapping/release"
-
-      - name: Build debug
-        id: buildDebug
-        run: |
           ./gradlew :app:assembleDebug
-          echo "debugName=$(ls app/build/outputs/apk/debug/*.apk | awk -F '(/|\\.apk)' '{print $6}')" >> $GITHUB_OUTPUT
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-      - name: Upload debug
-        if: success()
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.buildDebug.outputs.debugName }}
-          path: "app/build/outputs/apk/debug/*.apk"
+          name: release-apk
+          path: app/build/outputs/apk/release/*.apk
+
+      - name: Upload Release Mappings
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-mappings
+          path: app/build/outputs/mapping/release
+          
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/*.apk
