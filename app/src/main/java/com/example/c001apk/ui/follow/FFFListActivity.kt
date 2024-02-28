@@ -291,6 +291,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
 
     private fun refreshData() {
         viewModel.lastVisibleItemPosition = 0
+        viewModel.lastItem = null
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false

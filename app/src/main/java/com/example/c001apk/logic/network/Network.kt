@@ -55,10 +55,10 @@ object Network {
         feedType: String,
         sort: String,
         keyWord: String,
-        pageType: String,
-        pageParam: String,
+        pageType: String?,
+        pageParam: String?,
         page: Int,
-        showAnonymous: Int
+        lastItem: String?,
     ) = apiService.getSearch(
         type,
         feedType,
@@ -67,13 +67,11 @@ object Network {
         pageType,
         pageParam,
         page,
-        showAnonymous
+        lastItem,
     ).await()
 
-    suspend fun getReply2Reply(
-        id: String,
-        page: Int
-    ) = apiService.getReply2Reply(id, page).await()
+    suspend fun getReply2Reply(id: String, page: Int, lastItem: String?) =
+        apiService.getReply2Reply(id, page, lastItem).await()
 
     suspend fun getTopicLayout(tag: String) = api2Service.getTopicLayout(tag).await()
 
@@ -83,8 +81,8 @@ object Network {
     suspend fun getUserSpace(uid: String) =
         apiService.getUserSpace(uid).await()
 
-    suspend fun getUserFeed(uid: String, page: Int) =
-        apiService.getUserFeed(uid, page).await()
+    suspend fun getUserFeed(uid: String, page: Int, lastItem: String?) =
+        apiService.getUserFeed(uid, page, lastItem).await()
 
     suspend fun getAppInfo(id: String) =
         apiService.getAppInfo(id).await()
@@ -98,13 +96,13 @@ object Network {
     suspend fun getProfile(uid: String) =
         api2Service.getProfile(uid).await()
 
-    suspend fun getFollowList(url: String, uid: String, page: Int) =
-        apiService.getFollowList(url, uid, page).await()
+    suspend fun getFollowList(url: String, uid: String, page: Int, lastItem: String?) =
+        apiService.getFollowList(url, uid, page, lastItem).await()
 
-    suspend fun postLikeFeed(url:String, id: String) =
+    suspend fun postLikeFeed(url: String, id: String) =
         apiService.postLikeFeed(url, id).await()
 
-    suspend fun postLikeReply(url:String, id: String) =
+    suspend fun postLikeReply(url: String, id: String) =
         apiService.postLikeReply(url, id).await()
 
     suspend fun checkLoginInfo() =
@@ -136,8 +134,8 @@ object Network {
         page: Int
     ) = apiService.getDataList(url, title, subTitle, lastItem, page).await()
 
-    suspend fun getDyhDetail(dyhId: String, type: String, page: Int) =
-        apiService.getDyhDetail(dyhId, type, page).await()
+    suspend fun getDyhDetail(dyhId: String, type: String, page: Int, lastItem: String?) =
+        apiService.getDyhDetail(dyhId, type, page, lastItem).await()
 
     suspend fun getSmsLoginParam(type: String) =
         accountService.getSmsLoginParam(type).response()
@@ -145,8 +143,8 @@ object Network {
     suspend fun getSmsToken(type: String, data: HashMap<String, String?>) =
         accountService.getSmsToken(type, data).response()
 
-    suspend fun getMessage(url: String, page: Int) =
-        apiService.getMessage(url, page).await()
+    suspend fun getMessage(url: String, page: Int, lastItem: String?) =
+        apiService.getMessage(url, page, lastItem).await()
 
     suspend fun postFollowUnFollow(url: String, uid: String) =
         apiService.postFollowUnFollow(url, uid).await()
@@ -174,9 +172,10 @@ object Network {
         uid: String?,
         id: String?,
         showDefault: Int,
-        page: Int
+        page: Int,
+        lastItem: String?
     ) =
-        apiService.getCollectionList(url, uid, id, showDefault, page).await()
+        apiService.getCollectionList(url, uid, id, showDefault, page, lastItem).await()
 
     suspend fun postDelete(url: String, id: String) =
         apiService.postDelete(url, id).await()

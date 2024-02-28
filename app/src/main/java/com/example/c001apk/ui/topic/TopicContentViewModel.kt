@@ -66,6 +66,7 @@ class TopicContentViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
                             if (isRefreshing)
                                 topicDataList.clear()
                             if (isRefreshing || isLoadMore) {

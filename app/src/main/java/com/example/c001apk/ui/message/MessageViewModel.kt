@@ -113,7 +113,7 @@ class MessageViewModel : ViewModel() {
 
     fun fetchMessage() {
         viewModelScope.launch {
-            getMessage(url, page)
+            getMessage(url, page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -130,6 +130,7 @@ class MessageViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!feed.data.isNullOrEmpty()) {
+                            lastItem = feed.data.last().id
                             if (isRefreshing)
                                 messageList.clear()
                             if (isRefreshing || isLoadMore) {

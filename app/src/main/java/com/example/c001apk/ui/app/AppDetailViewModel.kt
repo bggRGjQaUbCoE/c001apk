@@ -62,6 +62,7 @@ class AppDetailViewModel : ViewModel() {
                     val appCommentList = appCommentData.value?.toMutableList() ?: ArrayList()
                     val comment = result.getOrNull()
                     if (!comment?.data.isNullOrEmpty()) {
+                        lastItem = comment?.data?.last()?.id
                         if (isRefreshing)
                             appCommentList.clear()
                         if (isRefreshing || isLoadMore) {

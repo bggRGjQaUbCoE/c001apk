@@ -149,7 +149,7 @@
                         android:paddingEnd="20dp"
                         android:text="@{userData.bio}"
                         android:textSize="14sp"
-                        android:visibility="@{userData.bio.isEmpty || userData.bio == null ? View.GONE : View.VISIBLE}"
+                        android:visibility="@{userData.bio == null || userData.bio.isEmpty ? View.GONE : View.VISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/info" />

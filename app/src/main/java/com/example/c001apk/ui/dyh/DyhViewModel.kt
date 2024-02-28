@@ -15,13 +15,18 @@ import com.example.c001apk.logic.network.Repository.getDyhDetail
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class DyhViewModel : ViewModel() {
     fun fetchDyhDetail() {
         viewModelScope.launch {
-            getDyhDetail(id.toString(), type.toString(), page)
-                .collect{result->
+            getDyhDetail(id.toString(), type.toString(), page, lastItem)
+                .onStart {
+                    if (isLoadMore)
+                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                }
+                .collect { result ->
                     val dyhDataList = dataListData.value?.toMutableList() ?: ArrayList()
                     val data = result.getOrNull()
                     if (data != null) {
@@ -33,6 +38,7 @@ class DyhViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
                             if (isRefreshing)
                                 dyhDataList.clear()
                             if (isRefreshing || isLoadMore) {
@@ -96,6 +102,7 @@ class DyhViewModel : ViewModel() {
     var id: String? = null
 
     val toastText = MutableLiveData<Event<String>>()
+
     inner class ItemClickListener : ItemListener {
         override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
             if (PrefManager.isLogin) {
@@ -112,7 +119,7 @@ class DyhViewModel : ViewModel() {
             dataListData.postValue(currentList)
         }
 
-        override fun onDeleteClicked(entityType:String, id: String, position: Int) {
+        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
             onDeleteFeed("/v6/feed/deleteFeed", id, position)
         }
     }

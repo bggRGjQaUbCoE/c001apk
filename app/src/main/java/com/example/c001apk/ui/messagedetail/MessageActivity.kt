@@ -29,6 +29,8 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding.appBar.setLiftable(true)
+
         viewModel.type = intent.getStringExtra("type")
 
         initBar()
@@ -174,6 +176,7 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
 
     private fun refreshData() {
         viewModel.lastVisibleItemPosition = 0
+        viewModel.lastItem = null
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
@@ -192,6 +195,40 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
         override fun onReLoad() {
             loadMore()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        initLift()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initLift()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        detachLift()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        detachLift()
+    }
+
+    private fun detachLift() {
+        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
+    }
+
+    private fun initLift() {
+        binding.appBar.setLifted(
+            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+        )
+        binding.recyclerView.borderViewDelegate
+            .setBorderVisibilityChangedListener { top, _, _, _ ->
+                binding.appBar.setLifted(!top)
+            }
     }
 
 }

@@ -51,7 +51,7 @@ class FollowViewModel : ViewModel() {
             else -> throw IllegalArgumentException("invalid type: $type")
         }
         viewModelScope.launch {
-            getFollowList(url.toString(), uid.toString(), page)
+            getFollowList(url.toString(), uid.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -68,6 +68,7 @@ class FollowViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!feed.data.isNullOrEmpty()) {
+                            lastItem = feed.data.last().id
                             if (isRefreshing) dataList.clear()
                             if (isRefreshing || isLoadMore) {
                                 for (element in feed.data)
@@ -127,6 +128,7 @@ class FollowViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
                             if (isRefreshing)
                                 dataList.clear()
                             if (isRefreshing || isLoadMore) {

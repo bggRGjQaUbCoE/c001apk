@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -68,13 +67,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
                 android:text="@{data.username}"
                 app:layout_constraintEnd_toStartOf="@id/expand"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="RtlSymmetry" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/expand"
@@ -96,7 +92,7 @@
                 android:lineSpacingMultiplier="1.2"
                 android:text="@{data.message}"
                 android:textSize="15sp"
-                android:visibility="@{data.message == `[图片]` ? View.GONE : View.VISIBLE}"
+                android:visibility="@{data.message == null || data.message.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -173,8 +169,7 @@
                         android:paddingTop="4dp"
                         android:paddingEnd="10dp"
                         android:paddingBottom="4dp"
-                        android:textColor="?attr/colorPrimary"
-                        tools:ignore="RtlSymmetry" />
+                        android:textColor="?attr/colorPrimary" />
 
                 </LinearLayout>
 

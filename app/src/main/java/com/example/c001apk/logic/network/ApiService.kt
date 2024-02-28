@@ -54,22 +54,24 @@ interface ApiService {
         @Query("fromFeedAuthor") fromFeedAuthor: Int
     ): Call<TotalReplyResponse>
 
-    @GET("/v6/search?showAnonymous=-1")
+    @GET("/v6/search")
     fun getSearch(
         @Query("type") type: String,
         @Query("feedType") feedType: String,
         @Query("sort") sort: String,
         @Query("searchValue") keyWord: String,
-        @Query("pageType") pageType: String,
-        @Query("pageParam") pageParam: String,
+        @Query("pageType") pageType: String?,
+        @Query("pageParam") pageParam: String?,
         @Query("page") page: Int,
-        @Query("showAnonymous") showAnonymous: Int
+        @Query("lastItem") lastItem: String?,
+        @Query("showAnonymous") showAnonymous: Int = -1
     ): Call<HomeFeedResponse>
 
     @GET("/v6/feed/replyList?listType=&discussMode=0&feedType=feed_reply&blockStatus=0&fromFeedAuthor=0")
     fun getReply2Reply(
         @Query("id") id: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("lastItem") lastItem: String?
     ): Call<TotalReplyResponse>
 
     @GET("/v6/user/space")
@@ -81,6 +83,7 @@ interface ApiService {
     fun getUserFeed(
         @Query("uid") uid: String,
         @Query("page") page: Int,
+        @Query("lastItem") lastItem: String?
     ): Call<HomeFeedResponse>
 
     @GET("/v6/apk/detail")
@@ -121,7 +124,8 @@ interface ApiService {
     fun getFollowList(
         @Url url: String,
         @Query("uid") uid: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("lastItem") lastItem: String?
     ): Call<HomeFeedResponse>
 
     @POST
@@ -180,7 +184,8 @@ interface ApiService {
     fun getDyhDetail(
         @Query("dyhId") dyhId: String,
         @Query("type") type: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("lastItem") lastItem: String?
     ): Call<HomeFeedResponse>
 
     @GET("/auth/login")
@@ -197,7 +202,9 @@ interface ApiService {
 
     @GET
     fun getMessage(
-        @Url url: String, @Query("page") page: Int
+        @Url url: String,
+        @Query("page") page: Int,
+        @Query("lastItem") lastItem: String?
     ): Call<MessageResponse>
 
     @POST
@@ -236,7 +243,8 @@ interface ApiService {
         @Query("uid") uid: String?,
         @Query("id") id: String?,
         @Query("showDefault") showDefault: Int,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("lastItem") lastItem: String?
     ): Call<HomeFeedResponse>
 
     @POST

@@ -55,8 +55,7 @@ class SearchContentViewModel : ViewModel() {
         viewModelScope.launch {
             getSearch(
                 type.toString(), feedType, sort, keyWord.toString(),
-                pageType.toString(), pageParam.toString(), page,
-                -1
+                pageType, pageParam, page, lastItem
             )
                 .onStart {
                     if (isLoadMore)
@@ -74,6 +73,7 @@ class SearchContentViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!search.data.isNullOrEmpty()) {
+                            lastItem = search.data.last().id
                             if (isRefreshing)
                                 searchList.clear()
                             if (isRefreshing || isLoadMore) {

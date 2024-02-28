@@ -50,18 +50,18 @@ object Repository {
     }
 
     fun getSearch(
-        type: String, feedType: String, sort: String, keyWord: String, pageType: String,
-        pageParam: String, page: Int, showAnonymous: Int
+        type: String, feedType: String, sort: String, keyWord: String, pageType: String?,
+        pageParam: String?, page: Int, lastItem: String?
     ) = fire {
         Result.success(
             Network.getSearch(
-                type, feedType, sort, keyWord, pageType, pageParam, page, showAnonymous
+                type, feedType, sort, keyWord, pageType, pageParam, page, lastItem
             )
         )
     }
 
-    fun getReply2Reply(id: String, page: Int) = fire {
-        Result.success(Network.getReply2Reply(id, page))
+    fun getReply2Reply(id: String, page: Int, lastItem: String?) = fire {
+        Result.success(Network.getReply2Reply(id, page, lastItem))
     }
 
     fun getTopicLayout(tag: String) = fire {
@@ -76,8 +76,8 @@ object Repository {
         Result.success(Network.getUserSpace(uid))
     }
 
-    fun getUserFeed(uid: String, page: Int) = fire {
-        Result.success(Network.getUserFeed(uid, page))
+    fun getUserFeed(uid: String, page: Int, lastItem: String?) = fire {
+        Result.success(Network.getUserFeed(uid, page, lastItem))
     }
 
     fun getAppInfo(id: String) = fire {
@@ -100,8 +100,8 @@ object Repository {
         Result.success(Network.getProfile(uid))
     }
 
-    fun getFollowList(url: String, uid: String, page: Int) = fire {
-        Result.success(Network.getFollowList(url, uid, page))
+    fun getFollowList(url: String, uid: String, page: Int, lastItem: String?) = fire {
+        Result.success(Network.getFollowList(url, uid, page, lastItem))
     }
 
     fun postLikeFeed(url: String, id: String) = fire {
@@ -146,8 +146,8 @@ object Repository {
         Result.success(Network.getDataList(url, title, subTitle, lastItem, page))
     }
 
-    fun getDyhDetail(dyhId: String, type: String, page: Int) = fire {
-        Result.success(Network.getDyhDetail(dyhId, type, page))
+    fun getDyhDetail(dyhId: String, type: String, page: Int, lastItem: String?) = fire {
+        Result.success(Network.getDyhDetail(dyhId, type, page, lastItem))
     }
 
     fun getSmsToken(type: String, data: HashMap<String, String?>) = fire(Dispatchers.IO) {
@@ -158,8 +158,8 @@ object Repository {
         Result.success(Network.getSmsLoginParam(type))
     }
 
-    fun getMessage(url: String, page: Int) = fire {
-        Result.success(Network.getMessage(url, page))
+    fun getMessage(url: String, page: Int, lastItem: String?) = fire {
+        Result.success(Network.getMessage(url, page, lastItem))
     }
 
     fun postFollowUnFollow(url: String, uid: String) = fire {
@@ -184,9 +184,16 @@ object Repository {
         Result.success(Network.getProductList())
     }
 
-    fun getCollectionList(url: String, uid: String?, id: String?, showDefault: Int, page: Int) =
+    fun getCollectionList(
+        url: String,
+        uid: String?,
+        id: String?,
+        showDefault: Int,
+        page: Int,
+        lastItem: String?
+    ) =
         fire {
-            Result.success(Network.getCollectionList(url, uid, id, showDefault, page))
+            Result.success(Network.getCollectionList(url, uid, id, showDefault, page, lastItem))
         }
 
     fun postDelete(url: String, id: String) = fire {

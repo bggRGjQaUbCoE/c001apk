@@ -385,6 +385,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_REPLY, null)
                     mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                    viewModel.firstVisibleItemPosition = viewModel.itemCount
                 } else {
                     footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
                 }

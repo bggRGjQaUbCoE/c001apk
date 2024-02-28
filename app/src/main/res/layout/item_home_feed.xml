@@ -62,15 +62,13 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.c001apk.view.LinkTextView
+            <TextView
                 android:id="@+id/uname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:clickable="true"
                 android:ellipsize="end"
-                android:focusable="true"
                 android:lines="1"
                 android:maxLines="1"
                 android:singleLine="true"
@@ -86,10 +84,9 @@
                 android:layout_marginStart="10dp"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp"
-                android:visibility="@{data.infoHtml.isEmpty || data.infoHtml == null ? View.GONE : View.VISIBLE}"
+                android:visibility="@{data.infoHtml == null || data.infoHtml.isEmpty ? View.GONE : View.VISIBLE}"
                 app:customText="@{data.infoHtml}"
                 app:isHtml="@{true}"
-
                 app:layout_constraintStart_toEndOf="@id/avatar"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
 
@@ -97,12 +94,12 @@
                 android:id="@+id/device"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp"
-                android:visibility="@{data.deviceTitle.isEmpty || data.deviceTitle == null ? View.INVISIBLE : View.VISIBLE}"
+                android:visibility="@{data.deviceTitle == null || data.deviceTitle.isEmpty ? View.INVISIBLE : View.VISIBLE}"
                 app:customText="@{data.deviceTitle}"
                 app:icon="@{@drawable/ic_device}"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -118,7 +115,7 @@
                 android:text="@{data.messageTitle}"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:visibility="@{data.messageTitle.isEmpty || data.messageTitle == null ? View.GONE : View.VISIBLE}"
+                android:visibility="@{data.messageTitle == null || data.messageTitle.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avatar" />
 
@@ -132,6 +129,7 @@
                 android:lineSpacingMultiplier="1.3"
                 android:text="@{data.message}"
                 android:textSize="16sp"
+                android:visibility="@{data.message == null || data.message.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/messageTitle" />
 
@@ -204,9 +202,9 @@
                 android:background="@drawable/round_corners_12_win"
                 android:foreground="@drawable/selector_bg_12_trans"
                 android:onClick="@{(view) -> listener.onViewFeed(view, data.forwardSourceFeed.id, ``, ``, ``, ``, ``, ``, null, null)}"
-                android:orientation="vertical"
                 android:onLongClick="@{(view) -> listener.onCopyText(view, data.forwardSourceFeed.message)}"
-                android:padding="7dp"
+                android:orientation="vertical"
+                android:padding="10dp"
                 android:visibility="@{data.forwardSourceFeed == null ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/hotReply">
@@ -218,8 +216,9 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:lineSpacingMultiplier="1.2"
-                    android:text="@{data.forwardSourceFeed.message}"
-                    android:textSize="15sp" />
+                    android:text='@{"&lt;a class=\"feed-link-uname\" href=\"/u/" + data.forwardSourceFeed.uid + "\">@" + data.forwardSourceFeed.username + "&lt;/a>: " + data.forwardSourceFeed.message}'
+                    android:textSize="15sp"
+                    android:visibility="@{data.forwardSourceFeed.message == null || data.forwardSourceFeed.message.isEmpty ? View.GONE : View.VISIBLE}" />
 
                 <com.example.c001apk.view.ninegridimageview.NineGridImageView
                     android:id="@+id/forwardedPic"

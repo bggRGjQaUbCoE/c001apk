@@ -53,8 +53,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
         viewModelScope.launch {
             getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
                 .onStart {
-                    if (isInit) {
-                        isInit = false
+                    if (firstLaunch == 1) {
                         firstLaunch = 0
                     }
                 }
@@ -70,9 +69,13 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                         changeState.postValue(Pair("error", feed?.message))
                         return@collect
                     } else if (!feed?.data.isNullOrEmpty()) {
+                        lastItem = feed?.data?.last()?.id
                         if (isRefreshing) {
                             if (feed?.data!!.size <= 4 && feed.data.last().entityTemplate == "refreshCard") {
                                 toastText.postValue(Event(feed.data.last().title))
+                                firstItem = null
+                                lastItem = null
+                                firstLaunch = 1
                                 /*val index = if (PrefManager.isIconMiniCard) 4
                                 else 3
                                 if (listSize >= index) {
@@ -180,6 +183,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                         changeState.postValue(Pair("error", feed?.message))
                         return@collect
                     } else if (!feed?.data.isNullOrEmpty()) {
+                        lastItem = feed?.data?.last()?.id
                         if (isRefreshing)
                             currentList.clear()
                         if (isRefreshing || isLoadMore) {

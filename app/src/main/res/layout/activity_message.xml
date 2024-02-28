@@ -13,7 +13,6 @@
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null"
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets">
 
@@ -35,12 +34,15 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
+        <rikka.widget.borderview.BorderRecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:scrollbars="none"
+            app:borderBottomVisibility="never"
+            app:borderTopDrawable="@null"
+            app:borderTopVisibility="whenTop"
             app:fitsSystemWindowsInsets="bottom" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

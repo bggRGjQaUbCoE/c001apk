@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
@@ -91,6 +92,12 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                 }
             }
             binding.setVariable(BR.likeData, likeData)
+            val lp = ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+            lp.setMargins(if (data.infoHtml.isEmpty()) 10.dp else 5.dp, 0, 0, 0)
+            lp.topToBottom = binding.uname.id
+            lp.startToEnd = binding.from.id
+            lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            binding.device.layoutParams = lp
         }
     }
 
@@ -239,7 +246,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         }
     }
 
-    class RefreshCardViewHolder(val binding: ItemHomeFeedRefreshCardBinding, ) :
+    class RefreshCardViewHolder(val binding: ItemHomeFeedRefreshCardBinding) :
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind(data: HomeFeedResponse.Data) {
             binding.textView.text = data.title

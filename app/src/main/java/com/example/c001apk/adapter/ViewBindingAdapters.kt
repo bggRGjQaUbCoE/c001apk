@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.setPadding
 import androidx.databinding.BindingAdapter
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
@@ -26,15 +27,6 @@ import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-
-@BindingAdapter(value = ["uid", "username"], requireAll = true)
-fun setUserName(textView: TextView, uid: String?, username: String?) {
-    val name =
-        """<a class="feed-link-uname" href="/u/$uid">@$username </a>"""
-    textView.movementMethod = LinkMovementMethod.getInstance()
-    textView.text =
-        SpannableStringBuilderUtil.setText(textView.context, name, textView.textSize, null)
-}
 
 @BindingAdapter("setExtraPic")
 fun setExtraPic(imageView: ImageView, extraPic: String?) {

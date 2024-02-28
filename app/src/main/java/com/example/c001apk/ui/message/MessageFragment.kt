@@ -218,7 +218,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         binding.swipeRefresh.setOnRefreshListener {
             getData()
             if (PrefManager.isLogin) {
+                viewModel.lastItem = null
                 viewModel.messCountList.clear()
+                viewModel.countList.clear()
                 viewModel.fetchCheckLoginInfo()
             }
         }

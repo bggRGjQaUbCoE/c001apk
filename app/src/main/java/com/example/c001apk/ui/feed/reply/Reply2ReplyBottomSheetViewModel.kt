@@ -51,7 +51,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
 
     fun fetchReplyTotal() {
         viewModelScope.launch {
-            getReply2Reply(id.toString(), page)
+            getReply2Reply(id.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -68,6 +68,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
                         )
                         return@collect
                     } else if (!reply?.data.isNullOrEmpty()) {
+                        lastItem = reply?.data?.last()?.id
                         if (!isLoadMore) {
                             replyTotalList.clear()
                             replyTotalList.addAll(oriReply)

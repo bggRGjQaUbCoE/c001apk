@@ -301,6 +301,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         super.onResume()
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
         if (viewModel.isInit) {
+            viewModel.isInit = false
             initView()
             initRefresh()
             initScroll()

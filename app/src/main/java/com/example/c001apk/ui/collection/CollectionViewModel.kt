@@ -42,7 +42,7 @@ class CollectionViewModel : ViewModel() {
 
     fun fetchCollectionList() {
         viewModelScope.launch {
-            getCollectionList(url.toString(), null, id, 0, page)
+            getCollectionList(url.toString(), null, id, 0, page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -59,6 +59,7 @@ class CollectionViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
                             if (isRefreshing) dataList.clear()
                             if (isRefreshing || isLoadMore) {
                                 for (element in data.data)

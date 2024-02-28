@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -42,18 +41,15 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp">
 
-            <com.example.c001apk.view.LinkTextView
+            <TextView
                 android:id="@+id/uname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
                 android:text="@{data.fromusername}"
                 app:layout_constraintEnd_toStartOf="@id/expand"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="RtlSymmetry" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/expand"
@@ -75,6 +71,7 @@
                 android:lineSpacingMultiplier="1.2"
                 android:text="@{data.note}"
                 android:textSize="15sp"
+                android:visibility="@{data.note == null || data.note.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
 

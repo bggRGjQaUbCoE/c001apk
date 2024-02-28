@@ -40,6 +40,7 @@ class UserViewModel : ViewModel() {
     var like: String? = null
     var follow: String? = null
     var fans: String? = null
+    var lastItem: String? = null
 
     val showError = MutableLiveData<Event<Boolean>>()
     val showUser = MutableLiveData<Event<Boolean>>()
@@ -76,7 +77,7 @@ class UserViewModel : ViewModel() {
 
     fun fetchUserFeed() {
         viewModelScope.launch {
-            getUserFeed(uid.toString(), page)
+            getUserFeed(uid.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -93,6 +94,7 @@ class UserViewModel : ViewModel() {
                             )
                             return@collect
                         } else if (!feed.data.isNullOrEmpty()) {
+                            lastItem = feed.data.last().id
                             if (isRefreshing) feedList.clear()
                             if (isRefreshing || isLoadMore) {
                                 feed.data.forEach {

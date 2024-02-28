@@ -20,8 +20,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:onClick="@{() -> listener.onShowCollection(data.id, data.title)}"
         android:focusable="true"
+        android:onClick="@{() -> listener.onShowCollection(data.id, data.title)}"
         app:cardBackgroundColor="@color/home_card_background_color"
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
@@ -60,7 +60,7 @@
                 android:layout_marginStart="10dp"
                 android:text="@{data.description}"
                 android:textSize="13sp"
-                android:visibility="@{data.description.isEmpty || data.description == null ? View.GONE : View.VISIBLE}"
+                android:visibility="@{data.description == null || data.description.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toEndOf="@id/cover"
                 app:layout_constraintTop_toBottomOf="@id/title" />
 

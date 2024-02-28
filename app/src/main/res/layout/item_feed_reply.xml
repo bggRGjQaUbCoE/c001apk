@@ -79,7 +79,7 @@
                 android:layout_marginStart="10dp"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp"
-                android:visibility="@{data.deviceTitle.isEmpty || data.deviceTitle == null ? View.INVISIBLE : View.VISIBLE}"
+                android:visibility="@{data.deviceTitle == null || data.deviceTitle.isEmpty ? View.INVISIBLE : View.VISIBLE}"
                 app:customText="@{data.deviceTitle}"
                 app:icon="@{@drawable/ic_device}"
                 app:layout_constraintStart_toEndOf="@id/avatar"
@@ -94,7 +94,7 @@
                 android:text="@{data.messageTitle}"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:visibility="@{data.messageTitle.isEmpty || data.messageTitle == null ? View.GONE : View.VISIBLE}"
+                android:visibility="@{data.messageTitle == null || data.messageTitle.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avatar" />
 
@@ -160,16 +160,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/message">
 
-                <TextView
+                <com.example.c001apk.view.LinkTextView
                     android:id="@+id/feedUname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
+                    android:text='@{"&lt;a class=\"feed-link-uname\" href=\"/u/" + data.feed.uid + "\">@" + data.feed.username + "&lt;/a>"}'
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:uid="@{data.feed.uid}"
-                    app:username="@{data.feed.username}" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <com.example.c001apk.view.LinkTextView
                     android:id="@+id/feedMessage"

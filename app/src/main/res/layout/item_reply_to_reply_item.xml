@@ -32,9 +32,9 @@
             android:id="@+id/avatar"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:onClick="@{(view) -> listener.onViewUser(view, data.uid)}"
             android:background="@color/cover"
             android:foreground="@drawable/selector_bg_avatar"
+            android:onClick="@{(view) -> listener.onViewUser(view, data.uid)}"
             app:setImage="@{data.userAvatar}"
             app:shapeAppearance="@style/circleImageStyle" />
 
@@ -73,6 +73,7 @@
                 android:lineSpacingMultiplier="1.3"
                 android:text="@{data.message}"
                 android:textSize="15sp"
+                android:visibility="@{data.message == null || data.message.isEmpty ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/uname" />
 

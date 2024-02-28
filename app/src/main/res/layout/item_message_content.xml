@@ -83,7 +83,7 @@
                 android:layout_marginStart="10dp"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp"
-                android:visibility="@{data.deviceTitle.isEmpty || data.deviceTitle == null ? View.INVISIBLE : View.VISIBLE}"
+                android:visibility="@{data.deviceTitle == null || data.deviceTitle.isEmpty ? View.INVISIBLE : View.VISIBLE}"
                 app:customText="@{data.deviceTitle}"
                 app:icon="@{@drawable/ic_device}"
                 app:layout_constraintStart_toEndOf="@id/avatar"
@@ -152,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/round_corners_12_win"
                     android:foreground="@drawable/selector_bg_12_trans"
-                    android:padding="5dp">
+                    android:padding="10dp">
 
                     <com.example.c001apk.view.LinkTextView
                         android:id="@+id/forwardTitle"
@@ -161,6 +161,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:text="@{data.forwardSourceFeed.messageTitle}"
+                        android:visibility="@{data.forwardSourceFeed.messageTitle == null || data.forwardSourceFeed.messageTitle.isEmpty ? View.GONE : View.VISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -173,6 +174,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:text="@{data.forwardSourceFeed.message}"
+                        android:visibility="@{data.forwardSourceFeed.message == null || data.forwardSourceFeed.message.isEmpty ? View.GONE : View.VISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/forwardTitle" />
@@ -208,7 +210,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/round_corners_12_win"
                     android:foreground="@drawable/selector_bg_12_trans"
-                    android:padding="5dp">
+                    android:padding="10dp">
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/forward1Pic"
@@ -223,7 +225,7 @@
                         app:setImage="@{data.feed.pic}"
                         app:shapeAppearance="@style/searchTopicRadius" />
 
-                    <com.example.c001apk.view.LinkTextView
+                    <TextView
                         android:id="@+id/forwardUname1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -241,6 +243,7 @@
                         android:layout_marginTop="5dp"
                         android:maxLines="3"
                         android:text="@{type == `feedLike` ? data.message : data.feed.message}"
+                        android:visibility="@{data.feed.message == null || data.feed.message.isEmpty ? View.GONE : View.VISIBLE}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/forward1Pic"
