@@ -9,8 +9,14 @@ import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.util.BlackListUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HistoryViewModel : ViewModel() {
+
+    companion object {
+        const val BROWSE_TYPE = "browse"
+        const val FAVORITE_TYPE = "favorite"
+    }
 
     var position: Int? = null
     var isRemove: Boolean = false
@@ -20,29 +26,19 @@ class HistoryViewModel : ViewModel() {
     val browseLiveData: MutableLiveData<List<Any>> = MutableLiveData()
 
     fun getBrowseList(type: String, context: Context) {
-        val newList = ArrayList<Any>()
-        viewModelScope.launch(Dispatchers.IO) {
-            if (type == "browse") {
-                val browseHistoryDao = BrowseHistoryDatabase.getDatabase(context).browseHistoryDao()
-                val list = browseHistoryDao.loadAllHistory()
-                if (list.isNotEmpty()) {
-                    list.forEach {
-                        if (!BlackListUtil.checkUid(it.uid))
-                            newList.add(it)
-                    }
-                }
-            } else {
-                val feedFavoriteDao = FeedFavoriteDatabase.getDatabase(context).feedFavoriteDao()
-                val list = feedFavoriteDao.loadAllHistory()
-                if (list.isNotEmpty()) {
-                    list.forEach {
-                        if (!BlackListUtil.checkUid(it.uid))
-                            newList.add(it)
-                    }
+        viewModelScope.launch {
+            val newList = withContext(Dispatchers.IO) {
+                return@withContext if (type == BROWSE_TYPE) {
+                    BrowseHistoryDatabase.getDatabase(context).browseHistoryDao()
+                        .loadAllHistory()
+                        .filterNot { BlackListUtil.checkUid(it.uid) }
+                } else {
+                    FeedFavoriteDatabase.getDatabase(context).feedFavoriteDao()
+                        .loadAllHistory()
+                        .filterNot { BlackListUtil.checkUid(it.uid) }
                 }
             }
-            browseLiveData.postValue(newList)
+            browseLiveData.value = newList
         }
     }
-
 }
