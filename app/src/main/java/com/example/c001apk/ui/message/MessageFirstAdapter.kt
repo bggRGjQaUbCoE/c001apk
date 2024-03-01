@@ -72,11 +72,11 @@ class MessageFirstAdapter
             if (!fffList.isNullOrEmpty()) {
                 fffList.let {
                     binding.apply {
-                        feedCount.text = fffList[0]
+                        feedCount.text = it[0]
                         feedTitle.text = fffTitle[0]
-                        followCount.text = fffList[1]
+                        followCount.text = it[1]
                         followTitle.text = fffTitle[1]
-                        fansCount.text = fffList[2]
+                        fansCount.text = it[2]
                         fansTitle.text = fffTitle[2]
                     }
                     binding.executePendingBindings()

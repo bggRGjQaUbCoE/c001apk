@@ -54,7 +54,7 @@ object NetWorkUtil {
             }
         } else if (replace.startsWith("/picture/")) {
             val id = if (replace.contains("shareKey"))
-                replace.substring(6, replace.indexOf("?shareKey"))
+                replace.substring(9, replace.indexOf("?shareKey"))
             else replace.replace("/picture/", "")
             IntentUtil.startActivity<FeedActivity>(context) {
                 putExtra("id", id)

@@ -169,7 +169,7 @@ class FeedReplyAdapter(
                             val mess =
                                 """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag1}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
 
-                            textView.movementMethod = LinkMovementClickMethod.getInstance()
+                            textView.movementMethod = LinkMovementClickMethod.instance
 
                             textView.text = SpannableStringBuilderUtil.setText(
                                 parent.context,

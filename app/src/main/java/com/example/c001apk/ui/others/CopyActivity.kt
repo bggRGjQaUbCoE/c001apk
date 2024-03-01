@@ -3,6 +3,7 @@ package com.example.c001apk.ui.others
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
+import android.text.TextUtils
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.c001apk.databinding.ActivityCopyBinding
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.regex.Pattern
 
 
 class CopyActivity : BaseActivity<ActivityCopyBinding>() {
@@ -29,13 +31,19 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         HomeMenuDatabase.getDatabase(this).homeMenuDao()
     }
 
+    private fun getAllLinkAndText(str: String?): String {
+        return if (TextUtils.isEmpty(str)) "" else
+            Pattern.compile("<a class=\"feed-link-url\"\\s+href=\"([^<>\"]*)\"[^<]*[^>]*>")
+                .matcher(str).replaceAll(" $1 ")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         intent.getStringExtra("text")?.let {
+            val linkText = getAllLinkAndText(it)
             binding.textView.text = Html.fromHtml(
-                it.replace("\n", " <br/>"),
+                linkText.replace("\n", " <br/>"),
                 Html.FROM_HTML_MODE_COMPACT
             ).toString()
             return

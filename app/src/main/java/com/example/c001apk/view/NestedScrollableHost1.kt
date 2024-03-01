@@ -10,6 +10,7 @@ import android.widget.FrameLayout
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
 import com.example.c001apk.R
+import com.example.c001apk.util.ViewUtils
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
