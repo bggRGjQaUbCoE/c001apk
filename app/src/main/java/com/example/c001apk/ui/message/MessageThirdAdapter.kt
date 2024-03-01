@@ -107,15 +107,16 @@ class MessageThirdAdapter
             binding.title.text = messTitle[bindingAdapterPosition]
             binding.logoCover.setBackgroundColor(Color.parseColor(logoColorList[bindingAdapterPosition]))
             binding.logo.setBackgroundDrawable(itemView.context.getDrawable(logoList[bindingAdapterPosition]))
-            badgeList?.let {
-                if (it[bindingAdapterPosition] != 0) {
-                    binding.badge.visibility = View.VISIBLE
-                    binding.badge.text =
-                        if (it[bindingAdapterPosition] > 99) "99+"
-                        else it[bindingAdapterPosition].toString()
-                } else
-                    binding.badge.visibility = View.GONE
-            }
+            if (!badgeList.isNullOrEmpty())
+                badgeList.let {
+                    if (it[bindingAdapterPosition] != 0) {
+                        binding.badge.visibility = View.VISIBLE
+                        binding.badge.text =
+                            if (it[bindingAdapterPosition] > 99) "99+"
+                            else it[bindingAdapterPosition].toString()
+                    } else
+                        binding.badge.visibility = View.GONE
+                }
             binding.executePendingBindings()
         }
     }
