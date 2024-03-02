@@ -9,17 +9,20 @@ import com.example.c001apk.constant.Constants.REQUEST_WITH
 import com.example.c001apk.util.CookieUtil.SESSID
 import com.example.c001apk.util.TokenDeviceUtils.getTokenV2
 import okhttp3.Interceptor
-import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 
 internal class AddCookiesInterceptor : Interceptor {
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
-        val builder: Request.Builder = chain.request().newBuilder()
+        val originalRequest = chain.request()
         val deviceCode = TokenDeviceUtils.getLastingDeviceCode()
         val token = deviceCode.getTokenV2()
-        builder.apply {
+        val userCookie = if (PrefManager.isLogin) {
+            "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
+        } else SESSID
+
+        val request = originalRequest.newBuilder().apply {
             addHeader("User-Agent", PrefManager.USER_AGENT)
             addHeader("X-Requested-With", REQUEST_WITH)
             addHeader("X-Sdk-Int", PrefManager.SDK_INT)
@@ -35,13 +38,9 @@ internal class AddCookiesInterceptor : Interceptor {
             addHeader("X-App-Mode", MODE)
             addHeader("X-App-Supported", PrefManager.VERSION_CODE)
             addHeader("Content-Type", "application/x-www-form-urlencoded")
-            if (PrefManager.isLogin)
-                addHeader(
-                    "Cookie",
-                    "uid=${PrefManager.uid}; username=${PrefManager.username}; token=${PrefManager.token}"
-                )
-            else addHeader("Cookie", SESSID)
-        }
-        return chain.proceed(builder.build())
+            addHeader("Cookie", userCookie)
+        }.build()
+
+        return chain.proceed(request)
     }
 }
