@@ -16,6 +16,7 @@
 
 package net.mikaelzero.mojito.view.sketch.core.util;
 
+import java.nio.file.Files;
 import net.mikaelzero.mojito.view.sketch.core.SLog;
 
 import java.io.BufferedInputStream;
@@ -426,7 +427,7 @@ public final class DiskLruCache implements Closeable {
             journalWriter.close();
         }
 
-        Writer writer = new BufferedWriter(new FileWriter(journalFileTmp), IO_BUFFER_SIZE);
+        Writer writer = Files.newBufferedWriter(journalFileTmp.toPath());
         writer.write(MAGIC);
         writer.write("\n");
         writer.write(VERSION_1);
