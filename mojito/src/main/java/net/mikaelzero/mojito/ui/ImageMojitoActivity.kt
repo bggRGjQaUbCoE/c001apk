@@ -4,8 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Window
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
@@ -39,10 +40,6 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
     override fun onCreate(savedInstanceState: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
         if (Mojito.mojitoConfig().transparentNavigationBar()) {
             ImmersionBar.with(this).transparentBar().init()
         } else {
@@ -50,6 +47,7 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         }
         binding = ActivityImageBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.statusBars())
 
         binding.userCustomLayout.removeAllViews()
         activityCoverLoader?.apply {
@@ -172,6 +170,7 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         fragmentMap.clear()
         Mojito.clean()
         finish()
+        @Suppress("DEPRECATION")
         overridePendingTransition(0, 0)
     }
 

@@ -1,9 +1,6 @@
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
-import org.gradle.api.JavaVersion
-import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 plugins {
@@ -16,7 +13,7 @@ group = "com.github.mikaelzero"
 setupLibraryModule {
     namespace = "net.mikaelzero.mojito"
     defaultConfig {
-        minSdk = 16
+        minSdk = 24
         buildFeatures {
             viewBinding = true
         }
@@ -50,7 +47,7 @@ inline fun <reified T : BaseExtension> Project.setupBaseModule(crossinline block
     extensions.configure<BaseExtension>("android") {
         compileSdkVersion(34)
         defaultConfig {
-            minSdk = 16
+            minSdk = 24
             targetSdk = 34
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
