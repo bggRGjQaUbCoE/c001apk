@@ -410,6 +410,7 @@ object ImageUtil {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         context.startActivity(Intent.createChooser(intent, title))
     }
 
@@ -418,6 +419,7 @@ object ImageUtil {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "video/*"
         intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         context.startActivity(Intent.createChooser(intent, title))
     }
 
@@ -426,6 +428,7 @@ object ImageUtil {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         context.startActivity(Intent.createChooser(intent, title))
     }
 
