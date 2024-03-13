@@ -22,10 +22,9 @@ abstract class TopicBlackListDatabase : RoomDatabase() {
             return Room.databaseBuilder(
                 context.applicationContext,
                 TopicBlackListDatabase::class.java, "topic_blacklist_database"
-            ).allowMainThreadQueries()
-                .build().apply {
-                    instance = this
-                }
+            ).build().apply {
+                instance = this
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ import com.example.c001apk.logic.network.Repository.postLikeFeed
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -50,7 +51,7 @@ class AppDetailViewModel : ViewModel() {
 
     private val commentBaseUrl = "/page?url=/feed/apkCommentList?id="
     fun fetchAppComment() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getDataList(
                 commentBaseUrl + appId + appCommentSort, appCommentTitle, null, lastItem, page
             )
@@ -99,7 +100,7 @@ class AppDetailViewModel : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -145,7 +146,7 @@ class AppDetailViewModel : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()

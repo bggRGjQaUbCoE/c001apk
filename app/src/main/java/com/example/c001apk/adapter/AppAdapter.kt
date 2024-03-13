@@ -35,6 +35,9 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration1
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewDataBinding>() {
 
@@ -194,25 +197,26 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind(data: HomeFeedResponse.Data) {
             if (!data.entities.isNullOrEmpty()) {
-                val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
-                data.entities.forEach {
-                    if (it.entityType == "feed" && !BlackListUtil.checkUid(it.userInfo.uid))
-                        imageTextScrollCard.add(it)
-                }
-                binding.title.text = data.title
-                binding.title.setPadding(10.dp, 10.dp, 10.dp, 0)
-                binding.recyclerView.apply {
-                    adapter = ImageTextScrollCardAdapter(listener).also {
-                        it.submitList(imageTextScrollCard)
+                CoroutineScope(Dispatchers.Main).launch {
+                    val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
+                    data.entities.forEach {
+                        if (it.entityType == "feed" && !BlackListUtil.checkUid(it.userInfo.uid))
+                            imageTextScrollCard.add(it)
                     }
-                    layoutManager = LinearLayoutManager(itemView.context).also {
-                        it.orientation = LinearLayoutManager.HORIZONTAL
+                    binding.title.text = data.title
+                    binding.title.setPadding(10.dp, 10.dp, 10.dp, 0)
+                    binding.recyclerView.apply {
+                        adapter = ImageTextScrollCardAdapter(listener).also {
+                            it.submitList(imageTextScrollCard)
+                        }
+                        layoutManager = LinearLayoutManager(itemView.context).also {
+                            it.orientation = LinearLayoutManager.HORIZONTAL
+                        }
+                        if (itemDecorationCount == 0)
+                            addItemDecoration(LinearItemDecoration1(10.dp))
                     }
-                    if (itemDecorationCount == 0)
-                        addItemDecoration(LinearItemDecoration1(10.dp))
                 }
             }
-
         }
 
     }
@@ -224,25 +228,26 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind(data: HomeFeedResponse.Data) {
             if (!data.entities.isNullOrEmpty()) {
-                val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
-                data.entities.forEach {
-                    if ((it.entityType == "topic" || it.entityType == "product")
-                        && !TopicBlackListUtil.checkTopic(it.title)
-                    )
-                        imageTextScrollCard.add(it)
-                }
-                binding.recyclerView.apply {
-                    adapter = IconMiniScrollCardAdapter(listener).also {
-                        it.submitList(imageTextScrollCard)
+                CoroutineScope(Dispatchers.Main).launch {
+                    val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
+                    data.entities.forEach {
+                        if ((it.entityType == "topic" || it.entityType == "product")
+                            && !TopicBlackListUtil.checkTopic(it.title)
+                        )
+                            imageTextScrollCard.add(it)
                     }
-                    layoutManager = LinearLayoutManager(itemView.context).also {
-                        it.orientation = LinearLayoutManager.HORIZONTAL
+                    binding.recyclerView.apply {
+                        adapter = IconMiniScrollCardAdapter(listener).also {
+                            it.submitList(imageTextScrollCard)
+                        }
+                        layoutManager = LinearLayoutManager(itemView.context).also {
+                            it.orientation = LinearLayoutManager.HORIZONTAL
+                        }
+                        if (itemDecorationCount == 0)
+                            addItemDecoration(LinearItemDecoration1(10.dp))
                     }
-                    if (itemDecorationCount == 0)
-                        addItemDecoration(LinearItemDecoration1(10.dp))
                 }
             }
-
         }
     }
 

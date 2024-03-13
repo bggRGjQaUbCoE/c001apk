@@ -22,6 +22,7 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
     val homeFeedData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchHomeFeed() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
                 .onStart {
                     if (firstLaunch == 1) {
@@ -131,7 +132,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postLikeFeed(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
@@ -165,7 +166,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
     var dataListUrl: String? = null
     var dataListTitle: String? = null
     fun fetchDataList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getDataList(dataListUrl.toString(), dataListTitle.toString(), null, lastItem, page)
                 .onStart {
                     if (isInit)
@@ -224,7 +225,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -249,7 +250,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
 
     lateinit var createFeedData: HashMap<String, String?>
     fun onPostCreateFeed() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postCreateFeed(createFeedData)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -273,7 +274,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
     }
 
     private fun onGetValidateCaptcha() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
                 .collect { result ->
                     val response = result.getOrNull()
@@ -288,7 +289,7 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
 
     lateinit var requestValidateData: HashMap<String, String?>
     fun onPostRequestValidate() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postRequestValidate(requestValidateData)
                 .collect { result ->
                     val response = result.getOrNull()

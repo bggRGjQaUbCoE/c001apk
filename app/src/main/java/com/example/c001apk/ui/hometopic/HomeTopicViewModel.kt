@@ -7,6 +7,7 @@ import com.example.c001apk.adapter.Event
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.network.Repository.getDataList
 import com.example.c001apk.logic.network.Repository.getProductList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeTopicViewModel : ViewModel() {
@@ -23,7 +24,7 @@ class HomeTopicViewModel : ViewModel() {
     val doNext = MutableLiveData<Event<Boolean>>()
 
     fun fetchTopicList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getDataList(url.toString(), title.toString(), null, null, page)
                 .collect { result ->
                     val topic = result.getOrNull()
@@ -46,7 +47,7 @@ class HomeTopicViewModel : ViewModel() {
     }
 
     fun fetchProductList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getProductList()
                 .collect { result ->
                     val data = result.getOrNull()

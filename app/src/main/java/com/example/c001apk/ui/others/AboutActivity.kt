@@ -3,7 +3,12 @@ package com.example.c001apk.ui.others
 import android.annotation.SuppressLint
 import android.widget.ImageView
 import android.widget.TextView
-import com.drakeet.about.*
+import com.drakeet.about.AbsAboutActivity
+import com.drakeet.about.Card
+import com.drakeet.about.Category
+import com.drakeet.about.Contributor
+import com.drakeet.about.License
+import com.drakeet.about.Line
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 

@@ -17,6 +17,7 @@ import com.example.c001apk.logic.network.Repository.getUserSpace
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -50,7 +51,7 @@ class UserViewModel : ViewModel() {
     var afterFollow = MutableLiveData<Event<Boolean>>()
 
     fun fetchUser() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getUserSpace(uid.toString())
                 .collect { result ->
                     val user = result.getOrNull()
@@ -76,7 +77,7 @@ class UserViewModel : ViewModel() {
     }
 
     fun fetchUserFeed() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getUserFeed(uid.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
@@ -133,7 +134,7 @@ class UserViewModel : ViewModel() {
     }
 
     fun onPostFollowUnFollow() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postFollowUnFollow(url.toString(), uid.toString())
                 .collect { result ->
                     val response = result.getOrNull()
@@ -172,7 +173,7 @@ class UserViewModel : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -197,7 +198,7 @@ class UserViewModel : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()

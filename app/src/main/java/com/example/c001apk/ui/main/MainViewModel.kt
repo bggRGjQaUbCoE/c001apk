@@ -9,6 +9,7 @@ import com.example.c001apk.logic.network.Repository.checkLoginInfo
 import com.example.c001apk.logic.network.Repository.getAppInfo
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.PrefManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 
@@ -19,7 +20,7 @@ class MainViewModel : ViewModel() {
     val setBadge = MutableLiveData<Event<Boolean>>()
 
     fun fetchAppInfo(id: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getAppInfo(id)
                 .collect { result ->
                     val appInfo = result.getOrNull()
@@ -41,7 +42,7 @@ class MainViewModel : ViewModel() {
     }
 
     private fun getCheckLoginInfo() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             checkLoginInfo()
                 .collect { result ->
                     val response = result.getOrNull()

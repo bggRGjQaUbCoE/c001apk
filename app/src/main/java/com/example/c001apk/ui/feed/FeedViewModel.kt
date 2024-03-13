@@ -19,6 +19,7 @@ import com.example.c001apk.logic.network.Repository.postReply
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -74,7 +75,7 @@ class FeedViewModel : ViewModel() {
     val feedReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
     var afterFollow = MutableLiveData<Event<Int>>()
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postFollowUnFollow(url, uid)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -94,7 +95,7 @@ class FeedViewModel : ViewModel() {
         val likeType = if (likeData.isLike.get() == 1) "unLikeReply"
         else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postLikeReply(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
@@ -126,7 +127,7 @@ class FeedViewModel : ViewModel() {
     }
 
     fun fetchFeedReply() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getFeedContentReply(
                 id.toString(), listType, page, firstItem, lastItem, discussMode,
                 feedType.toString(), blockStatus, fromFeedAuthor
@@ -188,7 +189,7 @@ class FeedViewModel : ViewModel() {
     }
 
     fun fetchFeedData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getFeedContent(id.toString(), frid)
                 .collect { result ->
                     val feed = result.getOrNull()
@@ -270,7 +271,7 @@ class FeedViewModel : ViewModel() {
     val notify = MutableLiveData<Event<Boolean>>()
     var replyData = HashMap<String, String>()
     fun onPostReply() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postReply(replyData, rid.toString(), type.toString())
                 .collect { result ->
                     val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
@@ -348,7 +349,7 @@ class FeedViewModel : ViewModel() {
 
     val createDialog = MutableLiveData<Event<Bitmap>>()
     private fun onGetValidateCaptcha() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
                 .collect { result ->
                     val response = result.getOrNull()
@@ -363,7 +364,7 @@ class FeedViewModel : ViewModel() {
 
     lateinit var requestValidateData: HashMap<String, String?>
     fun onPostRequestValidate() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postRequestValidate(requestValidateData)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -392,7 +393,7 @@ class FeedViewModel : ViewModel() {
         val likeType = if (likeData.isLike.get() == 1) "unlike"
         else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postLikeFeed(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
@@ -423,7 +424,7 @@ class FeedViewModel : ViewModel() {
     }
 
     fun postDeleteFeedReply(url: String, id: String, position: Int, rPosition: Int?) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()

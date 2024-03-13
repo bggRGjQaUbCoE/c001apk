@@ -15,6 +15,7 @@ import com.example.c001apk.logic.network.Repository.getDataList
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -47,7 +48,7 @@ class TopicContentViewModel : ViewModel() {
     val toastText = MutableLiveData<Event<String>>()
 
     fun fetchTopicData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getDataList(url.toString(), title.toString(), "", lastItem, page)
                 .onStart {
                     if (isLoadMore)
@@ -134,7 +135,7 @@ class TopicContentViewModel : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -159,7 +160,7 @@ class TopicContentViewModel : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()

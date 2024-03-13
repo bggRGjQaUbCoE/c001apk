@@ -17,6 +17,7 @@ import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.LoginUtils.createRequestHash
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
@@ -51,7 +52,7 @@ class LoginViewModel : ViewModel() {
     val afterLogin = MutableLiveData<Event<Boolean>>()
 
     fun onPreGetLoginParam() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             preGetLoginParam()
                 .collect { result ->
                     val response = result.getOrNull()
@@ -79,7 +80,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun onGetLoginParam() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getLoginParam()
                 .collect { result ->
                     val response = result.getOrNull()
@@ -105,7 +106,7 @@ class LoginViewModel : ViewModel() {
 
     fun onGetCaptcha() {
         val timeStamp = System.currentTimeMillis().toString()
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getCaptcha("/auth/showCaptchaImage?$timeStamp")
                 .collect { result ->
                     val response = result.getOrNull()
@@ -119,7 +120,7 @@ class LoginViewModel : ViewModel() {
     }
 
     fun onTryLogin() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             tryLogin(loginData)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -163,7 +164,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun onGetProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getProfile(uid.toString())
                 .collect { result ->
                     val data = result.getOrNull()

@@ -14,6 +14,7 @@ import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getReply2Reply
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
 
     fun fetchReplyTotal() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getReply2Reply(id.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
@@ -105,7 +106,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
     val closeSheet = MutableLiveData<Event<Boolean>>()
     var replyData = HashMap<String, String>()
     fun onPostReply() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postReply(replyData, rid.toString(), "reply")
                 .collect { result ->
                     val replyTotalList = totalReplyData.value?.toMutableList() ?: ArrayList()
@@ -156,7 +157,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
 
     val createDialog = MutableLiveData<Event<Bitmap>>()
     private fun onGetValidateCaptcha() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
                 .collect { result ->
                     val response = result.getOrNull()
@@ -171,7 +172,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
 
     val toastText = MutableLiveData<Event<String>>()
     fun postDeleteFeedReply(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -198,7 +199,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
         val likeType = if (likeData.isLike.get() == 1) "unLikeReply"
         else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeReply(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
@@ -231,7 +232,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
 
     lateinit var requestValidateData: HashMap<String, String?>
     fun onPostRequestValidate() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postRequestValidate(requestValidateData)
                 .collect { result ->
                     val response = result.getOrNull()

@@ -14,6 +14,7 @@ import com.example.c001apk.logic.network.Repository.getProfile
 import com.example.c001apk.logic.network.Repository.postDelete
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
@@ -50,7 +51,7 @@ class MessageViewModel : ViewModel() {
     val toastText = MutableLiveData<Event<String>>()
 
     fun fetchProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getProfile(uid.toString())
                 .collect { result ->
                     val data = result.getOrNull()
@@ -86,7 +87,7 @@ class MessageViewModel : ViewModel() {
 
 
     fun fetchCheckLoginInfo() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             checkLoginInfo()
                 .collect { result ->
                     val response = result.getOrNull()
@@ -112,7 +113,7 @@ class MessageViewModel : ViewModel() {
 
 
     fun fetchMessage() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getMessage(url, page, lastItem)
                 .onStart {
                     if (isLoadMore)
@@ -165,7 +166,7 @@ class MessageViewModel : ViewModel() {
     }
 
     fun onPostDelete(position: Int, id: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postDelete("/v6/notification/delete", id)
                 .collect { result ->
                     val response = result.getOrNull()

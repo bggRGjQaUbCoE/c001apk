@@ -9,6 +9,7 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getFollow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AppViewModel : ViewModel() {
@@ -49,7 +50,7 @@ class AppViewModel : ViewModel() {
     val toastText = MutableLiveData<Event<String>>()
 
     fun fetchAppInfo(id: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getAppInfo(id)
                 .collect { result ->
 
@@ -85,7 +86,7 @@ class AppViewModel : ViewModel() {
 
 
     fun onGetDownloadLink() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getAppDownloadLink(
                 packageName.toString(),
                 appId.toString(),
@@ -105,7 +106,7 @@ class AppViewModel : ViewModel() {
     }
 
     fun onGetFollow() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getFollow(followUrl.toString(), null, appId)
                 .collect { result ->
                     val response = result.getOrNull()

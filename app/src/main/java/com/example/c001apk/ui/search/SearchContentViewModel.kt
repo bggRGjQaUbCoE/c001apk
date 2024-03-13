@@ -15,6 +15,7 @@ import com.example.c001apk.logic.network.Repository.getSearch
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -52,7 +53,7 @@ class SearchContentViewModel : ViewModel() {
     val searchData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchSearchData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getSearch(
                 type.toString(), feedType, sort, keyWord.toString(),
                 pageType, pageParam, page, lastItem
@@ -118,7 +119,7 @@ class SearchContentViewModel : ViewModel() {
     }
 
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postFollowUnFollow(url, uid)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -167,7 +168,7 @@ class SearchContentViewModel : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -192,7 +193,7 @@ class SearchContentViewModel : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()

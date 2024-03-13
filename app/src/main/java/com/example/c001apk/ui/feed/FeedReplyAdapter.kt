@@ -23,6 +23,9 @@ import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinkMovementClickMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FeedReplyAdapter(
     private val listener: ItemListener,
@@ -104,104 +107,106 @@ class FeedReplyAdapter(
             binding.setVariable(BR.likeData, likeData)
 
             if (!reply.replyRows.isNullOrEmpty()) {
-                val sortedList = ArrayList<TotalReplyResponse.Data>()
-                for (element in reply.replyRows) {
-                    if (!BlackListUtil.checkUid(element.uid))
-                        sortedList.add(element)
-                }
-                if (sortedList.isNotEmpty()) {
-                    binding.replyLayout.visibility = View.VISIBLE
-                    if (itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-                        binding.replyLayout.setCardBackgroundColor(
-                            itemView.context.getColorFromAttr(
-                                android.R.attr.windowBackground
-                            )
-                        )
+                CoroutineScope(Dispatchers.Main).launch {
+                    val sortedList = ArrayList<TotalReplyResponse.Data>()
+                    for (element in reply.replyRows) {
+                        if (!BlackListUtil.checkUid(element.uid))
+                            sortedList.add(element)
                     }
-                    binding.linearAdapterLayout.adapter = object : BaseAdapter() {
-                        override fun getCount(): Int = sortedList.size
-                        override fun getItem(p0: Int): Any = 0
-                        override fun getItemId(p0: Int): Long = 0
-                        override fun getView(
-                            position1: Int,
-                            convertView: View?,
-                            parent: ViewGroup
-                        ): View {
-                            val view = LayoutInflater.from(parent.context).inflate(
-                                R.layout.item_feed_content_reply_to_reply_item,
-                                parent,
-                                false
-                            )
-                            val replyData = sortedList[position1]
-                            val textView: TextView = view.findViewById(R.id.reply)
-                            textView.highlightColor = ColorUtils.setAlphaComponent(
-                                parent.context.getColorFromAttr(
-                                    rikka.preference.simplemenu.R.attr.colorPrimaryDark
-                                ), 128
-                            )
-
-                            val replyTag1 =
-                                when (replyData.uid) {
-                                    reply.feedUid -> " [楼主] "
-                                    reply.uid -> " [层主] "
-                                    else -> ""
-                                }
-
-                            val rReplyTag =
-                                when (replyData.ruid) {
-                                    reply.feedUid -> " [楼主] "
-                                    reply.uid -> " [层主] "
-                                    else -> ""
-                                }
-
-                            val rReplyUser =
-                                when (replyData.ruid) {
-                                    reply.uid -> ""
-                                    else -> """<a class="feed-link-uname" href="/u/${replyData.ruid}">${replyData.rusername}${rReplyTag}</a>"""
-                                }
-
-                            val replyPic =
-                                when (replyData.pic) {
-                                    "" -> ""
-                                    else -> """ <a class=\"feed-forward-pic\" href=${replyData.pic}>查看图片(${replyData.picArr?.size})</a>"""
-                                }
-
-                            val mess =
-                                """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag1}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
-
-                            textView.movementMethod = LinkMovementClickMethod.instance
-
-                            textView.text = SpannableStringBuilderUtil.setText(
-                                parent.context,
-                                mess,
-                                textView.textSize,
-                                replyData.picArr
-                            )
-
-                            SpannableStringBuilderUtil.setData(
-                                position1 + 1,
-                                reply.uid
-                            )
-
-                            view.setOnClickListener {
-                                listener.onReply(
-                                    replyData.id, replyData.uid, replyData.username,
-                                    bindingAdapterPosition, position1
+                    if (sortedList.isNotEmpty()) {
+                        binding.replyLayout.visibility = View.VISIBLE
+                        if (itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                            binding.replyLayout.setCardBackgroundColor(
+                                itemView.context.getColorFromAttr(
+                                    android.R.attr.windowBackground
                                 )
-                            }
-
-                            view.setOnLongClickListener {
-                                listener.onExpand(
-                                    it, replyData.id, replyData.uid,
-                                    replyData.message, bindingAdapterPosition, position1
-                                )
-                                true
-                            }
-
-                            return view
+                            )
                         }
-                    }
-                } else binding.replyLayout.visibility = View.GONE
+                        binding.linearAdapterLayout.adapter = object : BaseAdapter() {
+                            override fun getCount(): Int = sortedList.size
+                            override fun getItem(p0: Int): Any = 0
+                            override fun getItemId(p0: Int): Long = 0
+                            override fun getView(
+                                position1: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
+                                val view = LayoutInflater.from(parent.context).inflate(
+                                    R.layout.item_feed_content_reply_to_reply_item,
+                                    parent,
+                                    false
+                                )
+                                val replyData = sortedList[position1]
+                                val textView: TextView = view.findViewById(R.id.reply)
+                                textView.highlightColor = ColorUtils.setAlphaComponent(
+                                    parent.context.getColorFromAttr(
+                                        rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                                    ), 128
+                                )
+
+                                val replyTag1 =
+                                    when (replyData.uid) {
+                                        reply.feedUid -> " [楼主] "
+                                        reply.uid -> " [层主] "
+                                        else -> ""
+                                    }
+
+                                val rReplyTag =
+                                    when (replyData.ruid) {
+                                        reply.feedUid -> " [楼主] "
+                                        reply.uid -> " [层主] "
+                                        else -> ""
+                                    }
+
+                                val rReplyUser =
+                                    when (replyData.ruid) {
+                                        reply.uid -> ""
+                                        else -> """<a class="feed-link-uname" href="/u/${replyData.ruid}">${replyData.rusername}${rReplyTag}</a>"""
+                                    }
+
+                                val replyPic =
+                                    when (replyData.pic) {
+                                        "" -> ""
+                                        else -> """ <a class=\"feed-forward-pic\" href=${replyData.pic}>查看图片(${replyData.picArr?.size})</a>"""
+                                    }
+
+                                val mess =
+                                    """<a class="feed-link-uname" href="/u/${replyData.uid}">${replyData.username}${replyTag1}</a>回复${rReplyUser}: ${replyData.message}${replyPic}"""
+
+                                textView.movementMethod = LinkMovementClickMethod.instance
+
+                                textView.text = SpannableStringBuilderUtil.setText(
+                                    parent.context,
+                                    mess,
+                                    textView.textSize,
+                                    replyData.picArr
+                                )
+
+                                SpannableStringBuilderUtil.setData(
+                                    position1 + 1,
+                                    reply.uid
+                                )
+
+                                view.setOnClickListener {
+                                    listener.onReply(
+                                        replyData.id, replyData.uid, replyData.username,
+                                        bindingAdapterPosition, position1
+                                    )
+                                }
+
+                                view.setOnLongClickListener {
+                                    listener.onExpand(
+                                        it, replyData.id, replyData.uid,
+                                        replyData.message, bindingAdapterPosition, position1
+                                    )
+                                    true
+                                }
+
+                                return view
+                            }
+                        }
+                    } else binding.replyLayout.visibility = View.GONE
+                }
             } else binding.replyLayout.visibility = View.GONE
 
             if (reply.replyRowsMore != 0) {

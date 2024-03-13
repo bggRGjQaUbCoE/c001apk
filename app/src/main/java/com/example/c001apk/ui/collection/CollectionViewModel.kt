@@ -10,6 +10,7 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getCollectionList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -41,7 +42,7 @@ class CollectionViewModel : ViewModel() {
     val dataListData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchCollectionList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getCollectionList(url.toString(), null, id, 0, page, lastItem)
                 .onStart {
                     if (isLoadMore)
@@ -94,7 +95,7 @@ class CollectionViewModel : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -119,7 +120,7 @@ class CollectionViewModel : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()

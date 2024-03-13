@@ -9,6 +9,7 @@ import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.network.Repository.getMessage
 import com.example.c001apk.util.BlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -38,7 +39,7 @@ class MessageViewModel : ViewModel() {
     val messageListData = MutableLiveData<List<MessageResponse.Data>>()
 
     fun fetchMessage() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getMessage(url.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)

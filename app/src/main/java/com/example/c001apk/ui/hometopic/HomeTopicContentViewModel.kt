@@ -8,6 +8,7 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.network.Repository.getDataList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ class HomeTopicContentViewModel : ViewModel() {
     val topicData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchTopicData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
                     if (isLoadMore)

@@ -9,6 +9,7 @@ import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getProductLayout
 import com.example.c001apk.logic.network.Repository.getTopicLayout
 import com.example.c001apk.logic.network.Repository.postFollow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TopicViewModel : ViewModel() {
@@ -35,7 +36,7 @@ class TopicViewModel : ViewModel() {
     val showError = MutableLiveData<Event<Boolean>>()
 
     fun fetchTopicLayout() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getTopicLayout(url.toString())
                 .collect { result ->
                     val data = result.getOrNull()
@@ -72,7 +73,7 @@ class TopicViewModel : ViewModel() {
 
 
     fun fetchProductLayout() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getProductLayout(id.toString())
                 .collect { result ->
                     val data = result.getOrNull()
@@ -106,7 +107,7 @@ class TopicViewModel : ViewModel() {
 
     val afterFollow = MutableLiveData<Event<Pair<Boolean, String>>>()
     fun onGetFollow() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.getFollow(followUrl.toString(), tag, null)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -126,7 +127,7 @@ class TopicViewModel : ViewModel() {
     }
 
     fun onPostFollow() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             postFollowData?.let {
                 postFollow(it)
                     .collect { result ->

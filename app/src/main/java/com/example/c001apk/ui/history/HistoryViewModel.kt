@@ -26,7 +26,7 @@ class HistoryViewModel : ViewModel() {
     val browseLiveData: MutableLiveData<List<Any>> = MutableLiveData()
 
     fun getBrowseList(type: String, context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val newList = withContext(Dispatchers.IO) {
                 return@withContext if (type == BROWSE_TYPE) {
                     BrowseHistoryDatabase.getDatabase(context).browseHistoryDao()
@@ -38,7 +38,7 @@ class HistoryViewModel : ViewModel() {
                         .filterNot { BlackListUtil.checkUid(it.uid) }
                 }
             }
-            browseLiveData.value = newList
+            browseLiveData.postValue(newList)
         }
     }
 }

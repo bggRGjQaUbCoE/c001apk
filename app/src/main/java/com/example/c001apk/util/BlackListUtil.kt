@@ -6,6 +6,7 @@ import com.example.c001apk.logic.model.SearchHistory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object BlackListUtil {
 
@@ -13,7 +14,11 @@ object BlackListUtil {
         BlackListDatabase.getDatabase(context).blackListDao()
     }
 
-    fun checkUid(uid: String) = blackListDao.isExist(uid)
+    suspend fun checkUid(uid: String): Boolean {
+      return  withContext(Dispatchers.IO){
+          blackListDao.isExist(uid)
+      }
+    }
 
     fun saveUid(uid: String) {
         CoroutineScope(Dispatchers.IO).launch {

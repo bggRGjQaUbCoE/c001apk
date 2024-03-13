@@ -28,7 +28,7 @@ class AppListViewModel : ViewModel() {
     val appsUpdate = ArrayList<UpdateCheckResponse.Data>()
 
     private fun fetchAppsUpdate(pkg: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getAppsUpdate(pkg)
                 .collect { result ->
                     result.getOrNull()?.let {

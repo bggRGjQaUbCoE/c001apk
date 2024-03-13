@@ -16,6 +16,7 @@ import com.example.c001apk.logic.network.Repository.getFollowList
 import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TopicBlackListUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ class FollowViewModel : ViewModel() {
 
             else -> throw IllegalArgumentException("invalid type: $type")
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getFollowList(url.toString(), uid.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
@@ -110,7 +111,7 @@ class FollowViewModel : ViewModel() {
     }
 
     fun fetchTopicData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
                     if (isLoadMore)
@@ -228,7 +229,7 @@ class FollowViewModel : ViewModel() {
         val likeType = if (likeData.isLike.get() == 1) "unLikeReply"
         else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeReply(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
@@ -260,7 +261,7 @@ class FollowViewModel : ViewModel() {
     }
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
@@ -285,7 +286,7 @@ class FollowViewModel : ViewModel() {
     fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Repository.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()
