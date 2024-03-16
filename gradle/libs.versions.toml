@@ -1,0 +1,82 @@
+[versions]
+agp = "8.3.0"
+appcenter = "5.0.4"
+appcompat = "1.6.1"
+borderview = "1.1.0"
+constraintlayout = "2.1.4"
+core-ktx = "1.12.0"
+drakeet-about = "2.5.2"
+dagger = "2.51"
+espresso-core = "3.5.1"
+flexbox = "3.0.0"
+glide = "4.16.0"
+glide-transformations = "4.3.0"
+hilt = "2.51"
+jbcrypt = "0.4"
+jsoup = "1.17.2"
+junit = "4.13.2"
+junit-version = "1.1.5"
+kotlin = "1.9.23"
+ksp = "1.9.23-1.0.19"
+leakcanary = "2.13"
+lifecycle-extensions = "2.2.0"
+lifecycle-livedata-ktx = "2.7.0"
+logging-interceptor = "4.12.0"
+material = "1.11.0"
+material-preference = "2.0.0"
+material-version = "2.7.0"
+materialthemebuilder = "1.4.1"
+preference-ktx = "1.2.1"
+retrofit = "2.9.0"
+room = "2.6.1"
+swiperefreshlayout = "1.1.0"
+stringfog-xor = "5.0.0"
+stringfog = "5.1.0"
+utils = "1.1.4"
+webkit = "1.10.0"
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
+androidx-ext-junit = { module = "androidx.test.ext:junit", version.ref = "junit-version" }
+androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycle-extensions" }
+androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle-livedata-ktx" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-livedata-ktx" }
+androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preference-ktx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
+appcenter-crashes = { module = "com.microsoft.appcenter:appcenter-crashes", version.ref = "appcenter" }
+appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", version.ref = "appcenter" }
+drakeet-about = { module = "com.drakeet.about:about", version.ref = "drakeet-about" }
+google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
+google-android-flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
+google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
+google-dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-ksp = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
+glide-okhttp3-integration = { module = "com.github.bumptech.glide:okhttp3-integration", version.ref = "glide" }
+glide-transformations = { module = "jp.wasabeef:glide-transformations", version.ref = "glide-transformations" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }
+junit = { module = "junit:junit", version.ref = "junit" }
+leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
+okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "logging-interceptor" }
+rikkax-borderview = { module = "dev.rikka.rikkax.widget:borderview", version.ref = "borderview" }
+rikkax-material = { module = "dev.rikka.rikkax.material:material", version.ref = "material-version" }
+rikkax-material-preference = { module = "dev.rikka.rikkax.material:material-preference", version.ref = "material-preference" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+stringfog = { module = "com.github.megatronking.stringfog:gradle-plugin", version.ref = "stringfog" }
+stringfog-xor = { module = "com.github.megatronking.stringfog:xor", version.ref = "stringfog-xor" }
+zhaobozhen-libraries-utils = { module = "com.github.zhaobozhen.libraries:utils", version.ref = "utils" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+google-dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+rikka-tools-materialthemebuilder = { id = "dev.rikka.tools.materialthemebuilder", version.ref = "materialthemebuilder" }

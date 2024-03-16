@@ -36,9 +36,8 @@ import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import jp.wasabeef.glide.transformations.ColorFilterTransformation
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.mikaelzero.mojito.Mojito
@@ -165,20 +164,19 @@ object ImageUtil {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun showSaveImgDialog(context: Context, url: String, urlList: List<String>?) {
         MaterialAlertDialogBuilder(context).apply {
             val items = arrayOf("保存图片", "保存全部图片", "图片分享", "复制图片地址")
             setItems(items) { _: DialogInterface?, position: Int ->
                 when (position) {
                     0 -> {
-                        GlobalScope.launch {
+                        CoroutineScope(Dispatchers.IO).launch {
                             saveImage(context, url, true)
                         }
                     }
 
                     1 -> {
-                        GlobalScope.launch {
+                        CoroutineScope(Dispatchers.IO).launch {
                             if (urlList.isNullOrEmpty()) {
                                 saveImage(context, url, true)
                             } else {
@@ -193,7 +191,7 @@ object ImageUtil {
                     }
 
                     2 -> {
-                        GlobalScope.launch {
+                        CoroutineScope(Dispatchers.IO).launch {
                             val index = url.lastIndexOf('/')
                             filename = url.substring(index + 1)
                             imagesDir = File(context.externalCacheDir, "imageShare")
