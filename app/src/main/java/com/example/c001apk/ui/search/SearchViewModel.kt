@@ -1,52 +1,43 @@
 package com.example.c001apk.ui.search
 
-import android.content.Context
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.logic.database.BlackListDatabase
-import com.example.c001apk.logic.database.SearchHistoryDatabase
-import com.example.c001apk.logic.database.TopicBlackListDatabase
+import com.example.c001apk.logic.model.StringEntity
+import com.example.c001apk.logic.repository.SearchHistoryRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchViewModel : ViewModel() {
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+    private val repository: SearchHistoryRepository
+) : ViewModel() {
 
     var type: String? = null
-    var listSize: Int = -1
     var title: String? = null
     var pageParam: String? = null
     var pageType: String? = null
-    var keyWord: String? = null
 
-    val blackListLiveData: MutableLiveData<List<String>> = MutableLiveData()
-    fun getBlackList(type: String, context: Context) {
-        val newList: MutableList<String> = ArrayList()
+    val blackListLiveData: LiveData<List<StringEntity>> = repository.loadAllListLive()
+
+    fun insertData(data: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            when (type) {
-                "history" -> {
-                    val searchHistoryDao =
-                        SearchHistoryDatabase.getDatabase(context).searchHistoryDao()
-                    newList.addAll(searchHistoryDao.loadAllHistory().map {
-                        it.keyWord
-                    })
-                }
+            if (!repository.checkHistory(data))
+                repository.insertHistory(StringEntity(data))
+        }
+    }
 
-                "userBlacklist" -> {
-                    val blackListDao = BlackListDatabase.getDatabase(context).blackListDao()
-                    newList.addAll(blackListDao.loadAllList().map {
-                        it.keyWord
-                    })
-                }
+    fun deleteData(data: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteHistory(data)
+        }
+    }
 
-                "topicBlacklist" -> {
-                    val topicBlacklist = TopicBlackListDatabase.getDatabase(context).blackListDao()
-                    newList.addAll(topicBlacklist.loadAllList().map {
-                        it.keyWord
-                    })
-                }
-            }
-            blackListLiveData.postValue(newList)
+    fun deleteAll() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteAllUser()
         }
     }
 

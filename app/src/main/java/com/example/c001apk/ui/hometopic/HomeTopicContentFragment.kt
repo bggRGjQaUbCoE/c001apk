@@ -18,7 +18,9 @@ import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[HomeTopicContentViewModel::class.java] }
@@ -139,7 +141,7 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)

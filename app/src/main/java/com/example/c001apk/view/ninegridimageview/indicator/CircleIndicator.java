@@ -18,6 +18,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import net.mikaelzero.mojito.R;
 
+import java.util.Objects;
+
 public class CircleIndicator extends LinearLayout {
 
     private final static int DEFAULT_INDICATOR_WIDTH = 5;
@@ -87,7 +89,7 @@ public class CircleIndicator extends LinearLayout {
                 return;
             }
 
-            int newCount = mViewpager.getAdapter().getCount();
+            int newCount = Objects.requireNonNull(mViewpager.getAdapter()).getCount();
             int currentCount = getChildCount();
 
             if (newCount == currentCount) {  // No change
@@ -218,7 +220,7 @@ public class CircleIndicator extends LinearLayout {
 
     private void createIndicators() {
         removeAllViews();
-        int count = mViewpager.getAdapter().getCount();
+        int count = Objects.requireNonNull(mViewpager.getAdapter()).getCount();
         if (count <= 0) {
             return;
         }
@@ -241,7 +243,7 @@ public class CircleIndicator extends LinearLayout {
         }
 
         View indicator = new View(getContext());
-        indicator.setBackgroundDrawable(mIndicatorBackground);
+        indicator.setBackground(mIndicatorBackground);
         addView(indicator, mIndicatorWidth, mIndicatorHeight);
         LayoutParams lp = (LayoutParams) indicator.getLayoutParams();
 
@@ -264,7 +266,7 @@ public class CircleIndicator extends LinearLayout {
         return (int) (dpValue * scale + 0.5f);
     }
 
-    private class ReverseInterpolator implements Interpolator {
+    private static class ReverseInterpolator implements Interpolator {
         @Override
         public float getInterpolation(float value) {
             return Math.abs(1.0f - value);

@@ -4,7 +4,9 @@ import android.os.Bundle
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityTopicBinding
 import com.example.c001apk.ui.base.BaseActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class TopicActivity : BaseActivity<ActivityTopicBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

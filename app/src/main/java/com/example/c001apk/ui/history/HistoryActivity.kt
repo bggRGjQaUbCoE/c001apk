@@ -15,34 +15,26 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ActivityHistoryBinding
-import com.example.c001apk.logic.database.BrowseHistoryDatabase
-import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[HistoryViewModel::class.java] }
+    private lateinit var viewModel: HistoryViewModel
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private val browseHistoryDao by lazy {
-        BrowseHistoryDatabase.getDatabase(this).browseHistoryDao()
-    }
-    private val feedFavoriteDao by lazy {
-        FeedFavoriteDatabase.getDatabase(this).feedFavoriteDao()
-    }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.type = intent.getStringExtra("type").toString()
+        viewModel = ViewModelProvider(this)[HistoryViewModel::class.java]
 
         binding.toolBar.title =
             when (viewModel.type) {
@@ -53,23 +45,9 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
         initBar()
         initView()
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            CoroutineScope(Dispatchers.IO).launch {
-                viewModel.getBrowseList(viewModel.type, this@HistoryActivity)
-            }
-        }
 
         viewModel.browseLiveData.observe(this) { list ->
-            mAdapter.setDataListData(viewModel.type, list)
-            if (viewModel.isRemove) {
-                viewModel.isRemove = false
-                viewModel.position?.let {
-                    mAdapter.notifyItemRemoved(it)
-                }
-            } else
-                mAdapter.notifyDataSetChanged()
+            mAdapter.submitList(list)
             binding.indicator.parent.visibility = View.GONE
             binding.indicator.parent.isIndeterminate = false
         }
@@ -96,11 +74,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                     else setTitle("确定清除全部收藏？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            if (viewModel.type == "browse") browseHistoryDao.deleteAll()
-                            else feedFavoriteDao.deleteAll()
-                        }
-                        viewModel.browseLiveData.postValue(emptyList())
+                        viewModel.deleteAll()
                     }
                     show()
                 }
@@ -110,6 +84,9 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     private fun initView() {
+        binding.indicator.parent.visibility = View.VISIBLE
+        binding.indicator.parent.isIndeterminate = true
+
         mAdapter = HistoryAdapter(ItemClickListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
@@ -132,24 +109,44 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     inner class ItemClickListener : ItemListener {
+        override fun onViewFeed(
+            view: View,
+            id: String?,
+            uid: String?,
+            username: String?,
+            userAvatar: String?,
+            deviceTitle: String?,
+            message: String?,
+            dateline: String?,
+            rid: Any?,
+            isViewReply: Any?
+        ) {
+            super.onViewFeed(
+                view,
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+                rid,
+                isViewReply
+            )
+            if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
+                viewModel.saveHistory(
+                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
+                    deviceTitle.toString(), message.toString(), dateline.toString()
+                )
+        }
+
         override fun onBlockUser(id: String, uid: String, position: Int) {
-            super.onBlockUser(id, uid, position)
+            viewModel.saveUid(uid)
             onDeleteClicked("", id, position)
         }
 
         override fun onDeleteClicked(entityType: String, id: String, position: Int) {
-            CoroutineScope(Dispatchers.IO).launch {
-                when (viewModel.type) {
-                    "browse" -> browseHistoryDao.delete(id)
-                    "favorite" -> feedFavoriteDao.delete(id)
-                    else -> throw IllegalArgumentException("error type: ${viewModel.type}")
-                }
-            }
-            viewModel.isRemove = true
-            viewModel.position = position
-            val currentList = viewModel.browseLiveData.value!!.toMutableList()
-            currentList.removeAt(position)
-            viewModel.browseLiveData.postValue(currentList)
+            viewModel.delete(id)
         }
     }
 

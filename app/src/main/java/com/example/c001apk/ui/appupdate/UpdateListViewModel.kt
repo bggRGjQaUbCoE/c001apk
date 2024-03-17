@@ -3,8 +3,8 @@ package com.example.c001apk.ui.appupdate
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.logic.network.Repository.getAppDownloadLink
+import com.example.c001apk.util.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

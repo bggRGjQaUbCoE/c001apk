@@ -22,15 +22,16 @@ import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.ui.search.SearchActivity
-import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class UserActivity : BaseActivity<ActivityUserBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[UserViewModel::class.java] }
@@ -216,7 +217,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
@@ -306,7 +307,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
                     setTitle("确定将 ${viewModel.uname} 加入黑名单？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        BlackListUtil.saveUid(viewModel.uid.toString())
+                        viewModel.saveUid(viewModel.uid.toString())
                     }
                     show()
                 }

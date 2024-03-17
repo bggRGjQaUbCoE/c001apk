@@ -5,31 +5,28 @@ import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
 import android.view.View
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.c001apk.databinding.ActivityCopyBinding
-import com.example.c001apk.logic.database.HomeMenuDatabase
 import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.HomeMenuAdapter
+import com.example.c001apk.ui.home.HomeViewModel
 import com.example.c001apk.ui.home.ItemTouchHelperCallback
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 
 
+@AndroidEntryPoint
 class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
+    private lateinit var viewModel: HomeViewModel
     private lateinit var mAdapter: HomeMenuAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
-    private var menuList: ArrayList<HomeMenu> = ArrayList()
-    private val homeMenuDao by lazy {
-        HomeMenuDatabase.getDatabase(this).homeMenuDao()
-    }
+    private lateinit var menuList: ArrayList<HomeMenu>
 
     private fun getAllLinkAndText(str: String?): String {
         return if (TextUtils.isEmpty(str)) "" else
@@ -52,34 +49,30 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         val type: String? = intent.getStringExtra("type")
 
         if (type != null && type == "homeMenu") {
-            binding.done.visibility = View.VISIBLE
-            CoroutineScope(Dispatchers.IO).launch {
-                menuList.addAll(homeMenuDao.loadAll())
-                withContext(Dispatchers.Main) {
-                    initView()
-                }
-            }
+            menuList = ArrayList()
+            viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         }
 
         binding.done.setOnClickListener {
-            var i = 0
-            CoroutineScope(Dispatchers.IO).launch {
-                homeMenuDao.deleteAll()
-                for (element in menuList) {
-                    homeMenuDao.insert(
-                        HomeMenu(
-                            i,
-                            element.title,
-                            element.isEnable
-                        )
-                    )
-                    i++
-                }
-                withContext(Dispatchers.Main) {
-                    val intent = packageManager.getLaunchIntentForPackage(packageName)
-                    intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(intent)
-                }
+            viewModel.updateTab(menuList.mapIndexed { index, tab ->
+                HomeMenu(
+                    index,
+                    tab.title,
+                    tab.isEnable
+                )
+            })
+        }
+
+        viewModel.tabListLiveData.observe(this) {
+            menuList.addAll(it)
+            initView()
+        }
+
+        viewModel.restart.observe(this) {
+            if (it) {
+                val intent = packageManager.getLaunchIntentForPackage(packageName)
+                intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
             }
         }
 
@@ -97,6 +90,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         val callback: ItemTouchHelper.Callback = ItemTouchHelperCallback(mAdapter)
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+        binding.done.visibility = View.VISIBLE
     }
 
 }

@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.example.c001apk.logic.model.HomeFeedResponse
 
-abstract class BaseViewTypeAdapter<T : ViewDataBinding> :
+abstract class BaseAdapter<T : ViewDataBinding> :
     ListAdapter<HomeFeedResponse.Data, BaseViewHolder<T>>(HomeFeedDiffCallback()) {
 
     override fun onBindViewHolder(holder: BaseViewHolder<T>, position: Int) {

@@ -11,8 +11,9 @@ import com.example.c001apk.databinding.FragmentHomeTopicBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.view.MyLinearSmoothScroller
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
     BrandLabelAdapter.OnLabelClickListener {
 

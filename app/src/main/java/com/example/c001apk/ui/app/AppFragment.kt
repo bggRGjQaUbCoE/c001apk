@@ -20,7 +20,9 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppDetailViewModel::class.java] }
@@ -105,7 +107,7 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)

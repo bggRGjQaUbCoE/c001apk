@@ -5,10 +5,10 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.FeedArticleContentBean
+import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -16,16 +16,24 @@ import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.postLikeFeed
 import com.example.c001apk.logic.network.Repository.postLikeReply
 import com.example.c001apk.logic.network.Repository.postReply
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
+import javax.inject.Inject
 
-class FeedViewModel : ViewModel() {
+@HiltViewModel
+class FeedViewModel @Inject constructor(
+    val repository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository
+) : ViewModel() {
 
     var position: Int? = null
     var rPosition: Int? = null
@@ -163,7 +171,7 @@ class FeedViewModel : ViewModel() {
                                         && element.id == topReplyId
                                     )
                                         continue
-                                    if (!BlackListUtil.checkUid(element.uid))
+                                    if (!repository.checkUid(element.uid))
                                         feedReplyList.add(element)
                                 }
                             }
@@ -449,6 +457,50 @@ class FeedViewModel : ViewModel() {
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
+        }
+    }
+
+    fun saveUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveUid(uid)
+        }
+    }
+
+    suspend fun isFavorite(fid: String): Boolean {
+        return historyFavoriteRepository.checkFavorite(fid)
+    }
+
+    fun delete(fid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.deleteFavorite(fid)
+        }
+    }
+
+    fun insert(fav: FeedEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.insertFavorite(fav)
+        }
+    }
+
+    fun saveHistory(
+        id: String,
+        uid: String,
+        username: String,
+        userAvatar: String,
+        deviceTitle: String,
+        message: String,
+        dateline: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.saveHistory(
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+            )
         }
     }
 

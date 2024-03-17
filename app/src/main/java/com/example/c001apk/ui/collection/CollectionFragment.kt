@@ -25,7 +25,9 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[CollectionViewModel::class.java] }
@@ -121,7 +123,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
@@ -214,6 +216,37 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
     }
 
     inner class ItemClickListener : ItemListener {
+        override fun onViewFeed(
+            view: View,
+            id: String?,
+            uid: String?,
+            username: String?,
+            userAvatar: String?,
+            deviceTitle: String?,
+            message: String?,
+            dateline: String?,
+            rid: Any?,
+            isViewReply: Any?
+        ) {
+            super.onViewFeed(
+                view,
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+                rid,
+                isViewReply
+            )
+            if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
+                viewModel.saveHistory(
+                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
+                    deviceTitle.toString(), message.toString(), dateline.toString()
+                )
+        }
+
         override fun onShowCollection(id: String, title: String) {
             requireActivity().supportFragmentManager
                 .beginTransaction()
@@ -240,7 +273,7 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         }
 
         override fun onBlockUser(id: String, uid: String, position: Int) {
-            super.onBlockUser(id, uid, position)
+            viewModel.saveUid(uid)
             val currentList = viewModel.dataListData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.dataListData.postValue(currentList)

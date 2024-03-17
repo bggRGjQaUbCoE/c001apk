@@ -1,9 +1,9 @@
 package com.example.c001apk.ui.carousel
 
+import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants
@@ -12,14 +12,21 @@ import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getDataList
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TopicBlackListUtil
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CarouselViewModel : ViewModel() {
+@HiltViewModel
+class CarouselViewModel @Inject constructor(
+    val repository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository
+) : ViewModel() {
 
     var barTitle: String? = null
     var isResume: Boolean = true
@@ -103,8 +110,8 @@ class CarouselViewModel : ViewModel() {
                                 initRvView.postValue(Event(true))
                                 for (element in response.data)
                                     if (element.entityType == "feed" && element.feedType != "vote")
-                                        if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                            && !TopicBlackListUtil.checkTopic(
+                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                            && !repository.checkTopic(
                                                 element.tags + element.ttitle
                                             )
                                         )
@@ -117,8 +124,8 @@ class CarouselViewModel : ViewModel() {
                             if (isRefreshing || isLoadMore) {
                                 for (element in response?.data!!)
                                     if (element.entityType == "feed" && element.feedType != "vote")
-                                        if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                            && !TopicBlackListUtil.checkTopic(
+                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                            && !repository.checkTopic(
                                                 element.tags + element.ttitle
                                             )
                                         )
@@ -146,6 +153,39 @@ class CarouselViewModel : ViewModel() {
     val toastText = MutableLiveData<Event<String>>()
 
     inner class ItemClickListener : ItemListener {
+        override fun onViewFeed(
+            view: View,
+            id: String?,
+            uid: String?,
+            username: String?,
+            userAvatar: String?,
+            deviceTitle: String?,
+            message: String?,
+            dateline: String?,
+            rid: Any?,
+            isViewReply: Any?
+        ) {
+            super.onViewFeed(
+                view,
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+                rid,
+                isViewReply
+            )
+            viewModelScope.launch(Dispatchers.IO) {
+                if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
+                    historyFavoriteRepository.saveHistory(
+                        id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
+                        deviceTitle.toString(), message.toString(), dateline.toString()
+                    )
+            }
+        }
+
         override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
             if (PrefManager.isLogin) {
                 if (PrefManager.SZLMID.isEmpty())
@@ -155,7 +195,9 @@ class CarouselViewModel : ViewModel() {
         }
 
         override fun onBlockUser(id: String, uid: String, position: Int) {
-            super.onBlockUser(id, uid, position)
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.saveUid(uid)
+            }
             val currentList = carouselData.value!!.toMutableList()
             currentList.removeAt(position)
             carouselData.postValue(currentList)

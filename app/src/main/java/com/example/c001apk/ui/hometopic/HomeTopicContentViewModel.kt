@@ -8,11 +8,17 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.network.Repository.getDataList
+import com.example.c001apk.logic.repository.BlackListRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeTopicContentViewModel : ViewModel() {
+@HiltViewModel
+class HomeTopicContentViewModel @Inject constructor(
+    val repository: BlackListRepository
+): ViewModel() {
 
     var page = 1
     var title: String? = null

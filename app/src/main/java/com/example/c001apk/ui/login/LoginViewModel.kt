@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.logic.model.LoginResponse
 import com.example.c001apk.logic.network.Repository.getCaptcha
@@ -14,6 +13,7 @@ import com.example.c001apk.logic.network.Repository.getProfile
 import com.example.c001apk.logic.network.Repository.preGetLoginParam
 import com.example.c001apk.logic.network.Repository.tryLogin
 import com.example.c001apk.util.CookieUtil
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.LoginUtils.createRequestHash
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson

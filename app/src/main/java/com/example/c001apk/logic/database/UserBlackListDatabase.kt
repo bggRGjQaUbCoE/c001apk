@@ -6,6 +6,6 @@ import com.example.c001apk.logic.dao.StringEntityDao
 import com.example.c001apk.logic.model.StringEntity
 
 @Database(version = 1, entities = [StringEntity::class])
-abstract class SearchHistoryDatabase : RoomDatabase() {
-    abstract fun searchHistoryDao(): StringEntityDao
+abstract class UserBlackListDatabase : RoomDatabase() {
+    abstract fun userBlackListDao(): StringEntityDao
 }

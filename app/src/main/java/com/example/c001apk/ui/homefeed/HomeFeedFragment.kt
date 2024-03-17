@@ -10,7 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,8 +31,11 @@ import com.example.c001apk.ui.feed.reply.ReplyBottomSheetDialog
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.main.INavViewContainer
+import com.example.c001apk.ui.main.IOnBottomClickContainer
+import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
@@ -40,14 +43,13 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener,
-    IOnPublishClickListener {
+    IOnBottomClickListener, IOnPublishClickListener {
 
-    private val viewModel by viewModels<HomeFeedViewModel> {
-        FlowersListViewModelFactory(requireContext())
-    }
+    private val viewModel by lazy { ViewModelProvider(this)[HomeFeedViewModel::class.java] }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -270,7 +272,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, ItemClickListener())
         footerAdapter = FooterAdapter(FooterListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
@@ -295,13 +297,16 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     override fun onPause() {
         super.onPause()
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
+        (activity as? IOnBottomClickContainer)?.controller = null
     }
 
     override fun onResume() {
         super.onResume()
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
+        (activity as? IOnBottomClickContainer)?.controller = this
         if (viewModel.isInit) {
             viewModel.isInit = false
+            viewModel.installTime = getLastingInstallTime(requireContext())
             initView()
             initRefresh()
             initScroll()
@@ -447,8 +452,39 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     }
 
     inner class ItemClickListener : ItemListener {
+        override fun onViewFeed(
+            view: View,
+            id: String?,
+            uid: String?,
+            username: String?,
+            userAvatar: String?,
+            deviceTitle: String?,
+            message: String?,
+            dateline: String?,
+            rid: Any?,
+            isViewReply: Any?
+        ) {
+            super.onViewFeed(
+                view,
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+                rid,
+                isViewReply
+            )
+            if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
+                viewModel.saveHistory(
+                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
+                    deviceTitle.toString(), message.toString(), dateline.toString()
+                )
+        }
+
         override fun onBlockUser(id: String, uid: String, position: Int) {
-            super.onBlockUser(id, uid, position)
+            viewModel.saveUid(uid)
             val currentList = viewModel.homeFeedData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.homeFeedData.postValue(currentList)
@@ -465,6 +501,10 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 else viewModel.onPostLikeFeed(id, position, likeData)
             }
         }
+    }
+
+    override fun onReturnTop() {
+        onReturnTop(true)
     }
 
 }

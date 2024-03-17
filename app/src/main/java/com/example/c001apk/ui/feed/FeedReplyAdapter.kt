@@ -19,7 +19,7 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ItemFeedContentReplyItemBinding
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinkMovementClickMethod
@@ -28,7 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class FeedReplyAdapter(
-    private val listener: ItemListener,
+    private val repository: BlackListRepository,
+    private val listener: ItemListener
 ) :
     ListAdapter<TotalReplyResponse.Data, FeedReplyAdapter.ViewHolder>(FeedReplyDiffCallback()) {
 
@@ -71,7 +72,12 @@ class FeedReplyAdapter(
         }
 
         @SuppressLint("SetTextI18n")
-        fun bind(reply: TotalReplyResponse.Data, haveTop: Boolean, topReplyId: String?) {
+        fun bind(
+            reply: TotalReplyResponse.Data,
+            haveTop: Boolean,
+            topReplyId: String?,
+            repository: BlackListRepository
+        ) {
 
             if (!reply.username.contains("[楼主]") && !reply.username.contains("[置顶]")) {
                 val unameTag =
@@ -110,7 +116,7 @@ class FeedReplyAdapter(
                 CoroutineScope(Dispatchers.Main).launch {
                     val sortedList = ArrayList<TotalReplyResponse.Data>()
                     for (element in reply.replyRows) {
-                        if (!BlackListUtil.checkUid(element.uid))
+                        if (!repository.checkUid(element.uid))
                             sortedList.add(element)
                     }
                     if (sortedList.isNotEmpty()) {
@@ -247,7 +253,7 @@ class FeedReplyAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(currentList[position], haveTop, topReplyId)
+        holder.bind(currentList[position], haveTop, topReplyId, repository)
     }
 
 }

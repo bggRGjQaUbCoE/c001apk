@@ -9,12 +9,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
+import com.example.c001apk.logic.model.StringEntity
 import com.example.c001apk.ui.feed.reply.IOnItemClickListener
 
-class HistoryAdapter(
-
-) :
-    ListAdapter<String, HistoryAdapter.ViewHolder>(HistoryDiffCallback()) {
+class HistoryAdapter :
+    ListAdapter<StringEntity, HistoryAdapter.ViewHolder>(HistoryDiffCallback()) {
 
     private lateinit var iOnItemClickListener: IOnItemClickListener
 
@@ -40,7 +39,6 @@ class HistoryAdapter(
         }
         viewHolder.delete.setOnClickListener {
             iOnItemClickListener.onItemDeleteClick(
-                viewHolder.bindingAdapterPosition,
                 viewHolder.keyWord.text.toString()
             )
             viewHolder.delete.visibility = View.GONE
@@ -53,22 +51,22 @@ class HistoryAdapter(
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.keyWord.text = currentList[position]
+        holder.keyWord.text = currentList[position].data
     }
 }
 
-class HistoryDiffCallback : DiffUtil.ItemCallback<String>() {
+class HistoryDiffCallback : DiffUtil.ItemCallback<StringEntity>() {
     override fun areItemsTheSame(
-        oldItem: String,
-        newItem: String
+        oldItem: StringEntity,
+        newItem: StringEntity
     ): Boolean {
-        return oldItem == newItem
+        return oldItem.data == newItem.data
     }
 
     override fun areContentsTheSame(
-        oldItem: String,
-        newItem: String
+        oldItem: StringEntity,
+        newItem: StringEntity
     ): Boolean {
-        return oldItem == newItem
+        return oldItem.data == newItem.data
     }
 }

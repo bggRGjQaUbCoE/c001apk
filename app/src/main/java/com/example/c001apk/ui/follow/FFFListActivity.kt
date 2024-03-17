@@ -24,7 +24,9 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[FollowViewModel::class.java] }
@@ -269,7 +271,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)

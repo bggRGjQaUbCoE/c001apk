@@ -18,7 +18,6 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
@@ -26,9 +25,6 @@ import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @BindingAdapter("setExtraPic")
 fun setExtraPic(imageView: ImageView, extraPic: String?) {
@@ -248,29 +244,23 @@ fun setHotReply(hotReply: TextView, feed: HomeFeedResponse.Data?) {
 
     if (feed != null) {
         if (!feed.replyRows.isNullOrEmpty()) {
-            CoroutineScope(Dispatchers.Main).launch {
-                if (BlackListUtil.checkUid(feed.replyRows[0].uid)) {
-                    hotReply.visibility = View.GONE
-                    return@launch
-                }
-                hotReply.visibility = View.VISIBLE
-                hotReply.highlightColor = Color.TRANSPARENT
-                val mess =
-                    if (feed.replyRows[0].picArr.isNullOrEmpty())
-                        "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message}"
-                    else if (feed.replyRows[0].message == "[图片]")
-                        "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
-                    else
-                        "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} [图片] <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
-                hotReply.movementMethod = LinkMovementMethod.getInstance()
-                hotReply.text = SpannableStringBuilderUtil.setText(
-                    hotReply.context,
-                    mess,
-                    hotReply.textSize,
-                    feed.replyRows[0].picArr
-                )
-                SpannableStringBuilderUtil.isReturn = true
-            }
+            hotReply.visibility = View.VISIBLE
+            hotReply.highlightColor = Color.TRANSPARENT
+            val mess =
+                if (feed.replyRows[0].picArr.isNullOrEmpty())
+                    "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message}"
+                else if (feed.replyRows[0].message == "[图片]")
+                    "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
+                else
+                    "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} [图片] <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
+            hotReply.movementMethod = LinkMovementMethod.getInstance()
+            hotReply.text = SpannableStringBuilderUtil.setText(
+                hotReply.context,
+                mess,
+                hotReply.textSize,
+                feed.replyRows[0].picArr
+            )
+            SpannableStringBuilderUtil.isReturn = true
         } else
             hotReply.visibility = View.GONE
     } else

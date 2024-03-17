@@ -25,6 +25,8 @@ import androidx.core.view.ViewCompat;
 
 import com.example.c001apk.R;
 
+import java.util.Objects;
+
 class BaseCircleIndicator extends LinearLayout {
 
     private final static int DEFAULT_INDICATOR_WIDTH = 5;
@@ -308,7 +310,7 @@ class BaseCircleIndicator extends LinearLayout {
                                          @Nullable ColorStateList tintColor) {
         if (tintColor != null) {
             Drawable indicatorDrawable = DrawableCompat.wrap(
-                    ContextCompat.getDrawable(getContext(), drawableRes).mutate());
+                    Objects.requireNonNull(ContextCompat.getDrawable(getContext(), drawableRes)).mutate());
             DrawableCompat.setTintList(indicatorDrawable, tintColor);
             ViewCompat.setBackground(view, indicatorDrawable);
         } else {

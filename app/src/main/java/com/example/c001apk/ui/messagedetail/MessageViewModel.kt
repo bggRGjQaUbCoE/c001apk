@@ -8,12 +8,17 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.network.Repository.getMessage
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MessageViewModel : ViewModel() {
+@HiltViewModel
+class MessageViewModel @Inject constructor(
+    private val repository: BlackListRepository
+): ViewModel() {
 
     var url: String? = null
     var listSize: Int = -1
@@ -65,7 +70,7 @@ class MessageViewModel : ViewModel() {
                                         || element.entityType == "feed_reply"
                                         || element.entityType == "notification"
                                     )
-                                        if (!BlackListUtil.checkUid(element.uid))
+                                        if (!repository.checkUid(element.uid))
                                             messageList.add(element)
                             }
                             changeState.postValue(

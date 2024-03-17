@@ -3,16 +3,22 @@ package com.example.c001apk.ui.topic
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getProductLayout
 import com.example.c001apk.logic.network.Repository.getTopicLayout
 import com.example.c001apk.logic.network.Repository.postFollow
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.util.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TopicViewModel : ViewModel() {
+@HiltViewModel
+class TopicViewModel @Inject constructor(
+    private val repository: BlackListRepository
+) : ViewModel() {
 
     var postFollowData: HashMap<String, String>? = null
     var tag: String? = null
@@ -147,6 +153,12 @@ class TopicViewModel : ViewModel() {
                     }
             }
 
+        }
+    }
+
+    fun saveTopic(title: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveTopic(title)
         }
     }
 

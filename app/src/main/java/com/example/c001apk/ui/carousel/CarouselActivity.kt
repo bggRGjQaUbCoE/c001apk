@@ -26,7 +26,9 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[CarouselViewModel::class.java] }
@@ -246,7 +248,7 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), IOnTabClickCon
     }
 
     private fun initRvView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)

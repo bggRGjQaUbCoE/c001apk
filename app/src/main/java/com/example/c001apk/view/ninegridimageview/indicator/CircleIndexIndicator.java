@@ -1,7 +1,5 @@
 package com.example.c001apk.view.ninegridimageview.indicator;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.Gravity;
 import android.view.View;
@@ -75,18 +73,9 @@ public class CircleIndexIndicator implements IIndicator {
         }
         final FrameLayout.LayoutParams indexLp = (FrameLayout.LayoutParams) circleIndicator.getLayoutParams();
         ValueAnimator valueAnimator = ValueAnimator.ofInt(begin, end);
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                indexLp.bottomMargin = (int) animation.getAnimatedValue();
-                circleIndicator.setLayoutParams(indexLp);
-            }
-        });
-        valueAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-
-            }
+        valueAnimator.addUpdateListener(animation -> {
+            indexLp.bottomMargin = (int) animation.getAnimatedValue();
+            circleIndicator.setLayoutParams(indexLp);
         });
         valueAnimator.setDuration(300).start();
     }

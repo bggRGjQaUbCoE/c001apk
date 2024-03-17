@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.base.BaseActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FeedActivity : BaseActivity<ActivityFeedBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[FeedViewModel::class.java] }

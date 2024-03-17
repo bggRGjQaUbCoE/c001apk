@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
@@ -27,6 +26,7 @@ import com.example.c001apk.util.CookieUtil.atme
 import com.example.c001apk.util.CookieUtil.contacts_follow
 import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.CookieUtil.message
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
@@ -34,9 +34,10 @@ import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLDecoder
 
-
+@AndroidEntryPoint
 class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }
@@ -296,8 +297,39 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     }
 
     inner class ItemClickListener : ItemListener {
+        override fun onViewFeed(
+            view: View,
+            id: String?,
+            uid: String?,
+            username: String?,
+            userAvatar: String?,
+            deviceTitle: String?,
+            message: String?,
+            dateline: String?,
+            rid: Any?,
+            isViewReply: Any?
+        ) {
+            super.onViewFeed(
+                view,
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+                rid,
+                isViewReply
+            )
+            if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
+                viewModel.saveHistory(
+                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
+                    deviceTitle.toString(), message.toString(), dateline.toString()
+                )
+        }
+
         override fun onBlockUser(id: String, uid: String, position: Int) {
-            super.onBlockUser(id, uid, position)
+            viewModel.saveUid(uid)
             val currentList = viewModel.messageData.value!!.toMutableList()
             currentList.removeAt(position)
             viewModel.messageData.postValue(currentList)

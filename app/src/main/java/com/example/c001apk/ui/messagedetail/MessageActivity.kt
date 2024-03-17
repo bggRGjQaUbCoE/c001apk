@@ -17,7 +17,9 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MessageActivity : BaseActivity<ActivityMessageBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }

@@ -18,14 +18,15 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.view.AppBarLayoutStateChangeListener
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
@@ -257,7 +258,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                     setTitle("确定将 $title 加入黑名单？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        TopicBlackListUtil.saveTopic(viewModel.title.toString())
+                        viewModel.saveTopic(viewModel.title.toString())
                     }
                     show()
                 }

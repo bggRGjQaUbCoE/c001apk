@@ -1,4 +1,4 @@
-package com.example.c001apk.adapter
+package com.example.c001apk.util
 
 open class Event<out T>(private val content: T) {
 

@@ -12,13 +12,10 @@ import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityBlackListBinding
-import com.example.c001apk.logic.database.BlackListDatabase
-import com.example.c001apk.logic.database.TopicBlackListDatabase
-import com.example.c001apk.logic.model.SearchHistory
+import com.example.c001apk.logic.model.StringEntity
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.feed.reply.IOnItemClickListener
 import com.example.c001apk.ui.search.HistoryAdapter
-import com.example.c001apk.ui.search.SearchViewModel
 import com.example.c001apk.ui.topic.TopicActivity
 import com.example.c001apk.ui.user.UserActivity
 import com.example.c001apk.util.IntentUtil
@@ -28,44 +25,28 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-
+@AndroidEntryPoint
 class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[SearchViewModel::class.java] }
+    private lateinit var viewModel: BlackListViewModel
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
-    private val blackListDao by lazy {
-        BlackListDatabase.getDatabase(this@BlackListActivity).blackListDao()
-    }
-    private val topicBlackListDao by lazy {
-        TopicBlackListDatabase.getDatabase(this@BlackListActivity).blackListDao()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.type = intent.getStringExtra("type")
-
-        initView()
+        viewModel = ViewModelProvider(this)[BlackListViewModel::class.java]
 
         binding.indicator.isIndeterminate = true
         binding.indicator.visibility = View.VISIBLE
-        if (viewModel.listSize == -1) {
-            when (viewModel.type) {
-                "user" -> viewModel.getBlackList("userBlacklist", this@BlackListActivity)
-                "topic" -> viewModel.getBlackList("topicBlacklist", this@BlackListActivity)
-            }
-        }
 
+        initView()
         initBar()
-        initButton()
         initEditText()
         initEdit()
         initClearHistory()
@@ -73,12 +54,17 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
         viewModel.blackListLiveData.observe(this) {
             binding.indicator.isIndeterminate = false
             binding.indicator.visibility = View.GONE
-            viewModel.listSize = it.size
             mAdapter.submitList(it)
             if (it.isEmpty())
                 binding.clearAll.visibility = View.GONE
             else
                 binding.clearAll.visibility = View.VISIBLE
+        }
+
+        viewModel.toastText.observe(this) { event ->
+            event?.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
@@ -95,7 +81,14 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.backup -> {
-                        if (saveFile(Gson().toJson(viewModel.blackListLiveData.value)))
+                        if (saveFile(
+                                Gson().toJson(
+                                    viewModel.blackListLiveData.value?.map { item ->
+                                        item.data
+                                    } ?: emptyList<String>()
+                                )
+                            )
+                        )
                             backupSAFLauncher.launch(
                                 if (viewModel.type == "user") "user_blacklist.json"
                                 else "topic_blacklist.json"
@@ -160,40 +153,23 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                 val string = this.contentResolver
                     .openInputStream(uri)?.reader().use { it?.readText() }
                     ?: throw IOException("Backup file was damaged")
-                val json: Array<String> = Gson().fromJson(
+                val dataList: List<String> = Gson().fromJson(
                     string,
                     Array<String>::class.java
-                )
-                val currentList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
-                val newList = ArrayList<String>()
-                if (currentList.isEmpty())
-                    newList.addAll(json)
-                else
-                    json.forEach {
-                        if (currentList.indexOf(it) == -1)
-                            newList.add(it)
-                    }
-                if (newList.isNotEmpty()) {
+                ).toList()
+                val currentList: List<String> =
+                    viewModel.blackListLiveData.value?.map { it.data } ?: emptyList()
+                val newList: List<String> =
                     if (currentList.isEmpty())
-                        viewModel.blackListLiveData.postValue(newList)
-                    else {
-                        currentList.addAll(0, newList)
-                        viewModel.blackListLiveData.postValue(currentList)
-                    }
-                    CoroutineScope(Dispatchers.IO).launch {
-                        when (viewModel.type) {
-                            "user" ->
-                                blackListDao.insertAll(newList.map {
-                                    SearchHistory(it)
-                                })
-
-                            "topic" ->
-                                topicBlackListDao.insertAll(newList.map {
-                                    SearchHistory(it)
-                                })
+                        dataList
+                    else
+                        dataList.filter {
+                            it !in currentList
                         }
-                    }
-                }
+                if (newList.isNotEmpty())
+                    viewModel.insertList(newList.map {
+                        StringEntity(it)
+                    })
             }.onFailure {
                 MaterialAlertDialogBuilder(this)
                     .setTitle("导入失败")
@@ -210,11 +186,6 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             }
         }
 
-    private fun initButton() {
-        /*binding.search.setOnClickListener {
-            checkUid()
-        }*/
-    }
 
     private fun initClearHistory() {
         binding.clearAll.setOnClickListener {
@@ -222,13 +193,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                 setTitle("确定清除全部黑名单？")
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    CoroutineScope(Dispatchers.IO).launch {
-                        when (viewModel.type) {
-                            "user" -> blackListDao.deleteAll()
-                            "topic" -> topicBlackListDao.deleteAll()
-                        }
-                    }
-                    viewModel.blackListLiveData.postValue(emptyList())
+                    viewModel.deleteAll()
                     binding.clearAll.visibility = View.GONE
                 }
                 show()
@@ -281,7 +246,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     private fun initEdit() {
         binding.editText.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, keyEvent ->
             if ((actionId == EditorInfo.IME_ACTION_UNSPECIFIED || actionId == EditorInfo.IME_ACTION_SEARCH) && keyEvent != null) {
-                checkUid()
+                checkData()
                 return@OnEditorActionListener true
             }
             false
@@ -289,54 +254,32 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     }
 
 
-    private fun checkUid() {
+    private fun checkData() {
         if (binding.editText.text.toString() == "") {
             return
         } else {
-            updateUid(binding.editText.text.toString())
+            insertData(binding.editText.text.toString())
             binding.editText.text = null
         }
     }
 
-    private fun updateUid(uid: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            when (viewModel.type) {
-                "user" -> {
-                    if (!blackListDao.isExist(uid))
-                        blackListDao.insert(SearchHistory(uid))
-
-                }
-
-                "topic" -> {
-                    if (!topicBlackListDao.isExist(uid))
-                        topicBlackListDao.insert(SearchHistory(uid))
-                }
-            }
-        }
-        val blackList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
-        if (blackList.indexOf(uid) == -1) {
-            blackList.add(0, uid)
-            viewModel.blackListLiveData.postValue(blackList)
-            if (binding.clearAll.visibility != View.VISIBLE)
-                binding.clearAll.visibility = View.VISIBLE
-        } else {
-            Toast.makeText(this, "已存在", Toast.LENGTH_SHORT).show()
-        }
+    private fun insertData(data: String) {
+        viewModel.insertList(data)
     }
 
-    override fun onItemClick(keyword: String) {
+    override fun onItemClick(data: String) {
         when (viewModel.type) {
             "user" -> {
                 IntentUtil.startActivity<UserActivity>(this) {
-                    putExtra("id", keyword)
+                    putExtra("id", data)
                 }
             }
 
             "topic" -> {
                 IntentUtil.startActivity<TopicActivity>(this) {
                     putExtra("type", "topic")
-                    putExtra("title", keyword)
-                    putExtra("url", keyword)
+                    putExtra("title", data)
+                    putExtra("url", data)
                     putExtra("id", "")
                 }
             }
@@ -344,16 +287,8 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
 
     }
 
-    override fun onItemDeleteClick(position: Int, keyword: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            when (viewModel.type) {
-                "user" -> blackListDao.delete(keyword)
-                "topic" -> topicBlackListDao.delete(keyword)
-            }
-        }
-        val blackList = viewModel.blackListLiveData.value?.toMutableList() ?: ArrayList()
-        blackList.removeAt(position)
-        viewModel.blackListLiveData.postValue(blackList)
+    override fun onItemDeleteClick(data: String) {
+        viewModel.deleteData(data)
     }
 
 }

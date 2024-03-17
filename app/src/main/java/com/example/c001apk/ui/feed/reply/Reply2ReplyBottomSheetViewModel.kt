@@ -5,22 +5,29 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getReply2Reply
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
+import javax.inject.Inject
 
-class Reply2ReplyBottomSheetViewModel : ViewModel() {
+@HiltViewModel
+class Reply2ReplyBottomSheetViewModel @Inject constructor(
+    private val repository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository
+): ViewModel() {
 
     var uname: String? = null
     var ruid: String? = null
@@ -77,7 +84,7 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
                         listSize = replyTotalList.size
                         for (element in reply?.data!!)
                             if (element.entityType == "feed_reply")
-                                if (!BlackListUtil.checkUid(element.uid))
+                                if (!repository.checkUid(element.uid))
                                     replyTotalList.add(element)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
                     } else if (reply?.data?.isEmpty() == true) {
@@ -254,6 +261,34 @@ class Reply2ReplyBottomSheetViewModel : ViewModel() {
                         }
                     }
                 }
+        }
+    }
+
+    fun saveUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveUid(uid)
+        }
+    }
+
+    fun saveHistory(
+        id: String,
+        uid: String,
+        username: String,
+        userAvatar: String,
+        deviceTitle: String,
+        message: String,
+        dateline: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.saveHistory(
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+            )
         }
     }
 

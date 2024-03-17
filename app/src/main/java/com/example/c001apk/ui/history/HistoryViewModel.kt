@@ -1,44 +1,80 @@
 package com.example.c001apk.ui.history
 
-import android.content.Context
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.logic.database.BrowseHistoryDatabase
-import com.example.c001apk.logic.database.FeedFavoriteDatabase
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.model.FeedEntity
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class HistoryViewModel : ViewModel() {
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
+    private val blackListRepository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
-    companion object {
-        const val BROWSE_TYPE = "browse"
-        const val FAVORITE_TYPE = "favorite"
-    }
+    val type: String = savedStateHandle["type"] ?: "browse"
 
-    var position: Int? = null
-    var isRemove: Boolean = false
-    var listSize: Int = -1
-    lateinit var type: String
+    val browseLiveData: LiveData<List<FeedEntity>> =
+        if (type == "browse") {
+            historyFavoriteRepository.loadAllHistoryListLive()
+        } else {
+            historyFavoriteRepository.loadAllFavoriteListLive()
+        }
 
-    val browseLiveData: MutableLiveData<List<Any>> = MutableLiveData()
 
-    fun getBrowseList(type: String, context: Context) {
+    fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val newList = withContext(Dispatchers.IO) {
-                return@withContext if (type == BROWSE_TYPE) {
-                    BrowseHistoryDatabase.getDatabase(context).browseHistoryDao()
-                        .loadAllHistory()
-                        .filterNot { BlackListUtil.checkUid(it.uid) }
-                } else {
-                    FeedFavoriteDatabase.getDatabase(context).feedFavoriteDao()
-                        .loadAllHistory()
-                        .filterNot { BlackListUtil.checkUid(it.uid) }
-                }
-            }
-            browseLiveData.postValue(newList)
+            blackListRepository.saveUid(uid)
         }
     }
+
+    fun deleteAll() {
+        viewModelScope.launch(Dispatchers.IO) {
+            when (type) {
+                "browse" -> historyFavoriteRepository.deleteAllHistory()
+                "favorite" -> historyFavoriteRepository.deleteAllFavorite()
+                else -> {}
+            }
+        }
+    }
+
+    fun delete(fid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            when (type) {
+                "browse" -> historyFavoriteRepository.deleteHistory(fid)
+                "favorite" -> historyFavoriteRepository.deleteFavorite(fid)
+                else -> {}
+            }
+        }
+    }
+
+    fun saveHistory(
+        id: String,
+        uid: String,
+        username: String,
+        userAvatar: String,
+        deviceTitle: String,
+        message: String,
+        dateline: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.saveHistory(
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+            )
+        }
+    }
+
 }

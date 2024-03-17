@@ -1,5 +1,6 @@
 package com.example.c001apk.view.circleindicator;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -20,6 +21,7 @@ public class SnackbarBehavior extends CoordinatorLayout.Behavior<BaseCircleIndic
         super(context, attributeSet);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public boolean layoutDependsOn(@NonNull CoordinatorLayout parent,
                                    @NonNull BaseCircleIndicator child, @NonNull View dependency) {
@@ -34,6 +36,7 @@ public class SnackbarBehavior extends CoordinatorLayout.Behavior<BaseCircleIndic
         return true;
     }
 
+    @SuppressLint("RestrictedApi")
     private float getTranslationYForSnackbar(CoordinatorLayout parent, BaseCircleIndicator ci) {
         float minOffset = 0;
         final List<View> dependencies = parent.getDependencies(ci);

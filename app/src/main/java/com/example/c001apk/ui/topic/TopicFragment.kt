@@ -16,11 +16,12 @@ import com.example.c001apk.ui.search.IOnSearchMenuClickListener
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TopicBlackListUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
     IOnTabClickContainer {
 
@@ -200,7 +201,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                             setTitle("确定将 $title 加入黑名单？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                TopicBlackListUtil.saveTopic(viewModel.title.toString())
+                                viewModel.saveTopic(viewModel.title.toString())
                             }
                             show()
                         }

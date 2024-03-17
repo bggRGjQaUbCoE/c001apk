@@ -1,0 +1,38 @@
+package com.example.c001apk.logic.dao
+
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import com.example.c001apk.logic.model.StringEntity
+import kotlinx.coroutines.flow.Flow
+
+
+@Dao
+interface StringEntityDao {
+
+    @Insert
+    suspend fun insert(data: StringEntity)
+
+    @Insert
+    suspend fun insertList(list: List<StringEntity>)
+
+    @Query("select * from StringEntity ORDER BY id DESC")
+    suspend fun loadAllList(): List<StringEntity>
+
+    @Query("select * from StringEntity ORDER BY id DESC")
+    fun loadAllListLive(): LiveData<List<StringEntity>>
+
+    @Query("select * from StringEntity ORDER BY id DESC")
+    fun loadAllListFlow(): Flow<List<StringEntity>>
+
+    @Query("SELECT 1 FROM StringEntity WHERE data = :data LIMIT 1")
+    suspend fun isExist(data: String): Boolean
+
+    @Query("DELETE FROM StringEntity WHERE data = :data")
+    suspend fun delete(data: String)
+
+    @Query("DELETE FROM StringEntity")
+    suspend fun deleteAll()
+
+}

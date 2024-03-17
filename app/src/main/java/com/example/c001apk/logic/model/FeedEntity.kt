@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class BrowseHistory(
+data class FeedEntity(
     val fid: String,
     val uid: String,
     val uname: String,

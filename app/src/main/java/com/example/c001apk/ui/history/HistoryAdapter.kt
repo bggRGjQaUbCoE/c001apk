@@ -3,29 +3,22 @@ package com.example.c001apk.ui.history
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.PopClickListener
 import com.example.c001apk.databinding.ItemHistoryFeedBinding
-import com.example.c001apk.logic.model.BrowseHistory
-import com.example.c001apk.logic.model.FeedFavorite
+import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.util.PrefManager
 
 
 class HistoryAdapter(
     private val listener: ItemListener
 ) :
-    RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
-
-    private var dataList: List<Any> = ArrayList()
-    private var type = ""
-
-    fun setDataListData(type: String, dataList: List<Any>) {
-        this.type = type
-        this.dataList = dataList
-    }
+    ListAdapter<FeedEntity, HistoryAdapter.HistoryViewHolder>(HistoryDiffCallback()) {
 
     class HistoryViewHolder(val binding: ItemHistoryFeedBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
@@ -55,37 +48,18 @@ class HistoryAdapter(
             }
         }
 
-        fun bind(type: String, item: Any) {
-
-            id =
-                if (type == "browse") (item as BrowseHistory).fid else (item as FeedFavorite).feedId
-            uid =
-                if (type == "browse") (item as BrowseHistory).uid else (item as FeedFavorite).uid
+        fun bind(data: FeedEntity) {
+            id = data.fid
+            uid = data.uid
 
             binding.setVariable(BR.id, id)
             binding.setVariable(BR.uid, uid)
             binding.setVariable(BR.listener, listener)
-            binding.setVariable(
-                BR.username,
-                if (type == "browse") (item as BrowseHistory).uname else (item as FeedFavorite).uname
-            )
-            binding.setVariable(
-                BR.avatarUrl,
-                if (type == "browse") (item as BrowseHistory).avatar else (item as FeedFavorite).avatar
-            )
-            binding.setVariable(
-                BR.deviceTitle,
-                if (type == "browse") (item as BrowseHistory).device else (item as FeedFavorite).device
-            )
-            binding.setVariable(
-                BR.dateline,
-                if (type == "browse") (item as BrowseHistory).pubDate.toLong() else (item as FeedFavorite).pubDate.toLong()
-            )
-            binding.setVariable(
-                BR.messageContent,
-                if (type == "browse") (item as BrowseHistory).message else (item as FeedFavorite).message
-            )
-
+            binding.setVariable(BR.username, data.uname)
+            binding.setVariable(BR.avatarUrl, data.avatar)
+            binding.setVariable(BR.deviceTitle, data.device)
+            binding.setVariable(BR.dateline, data.pubDate.toLong())
+            binding.setVariable(BR.messageContent, data.message)
             binding.executePendingBindings()
         }
     }
@@ -100,11 +74,24 @@ class HistoryAdapter(
         )
     }
 
-    override fun getItemCount() = dataList.size
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        if (dataList.isNotEmpty()) {
-            holder.bind(type, dataList[position])
-        }
+        holder.bind(currentList[position])
+    }
+}
+
+class HistoryDiffCallback : DiffUtil.ItemCallback<FeedEntity>() {
+    override fun areItemsTheSame(
+        oldItem: FeedEntity,
+        newItem: FeedEntity
+    ): Boolean {
+        return oldItem.fid == newItem.fid
+    }
+
+    override fun areContentsTheSame(
+        oldItem: FeedEntity,
+        newItem: FeedEntity
+    ): Boolean {
+        return oldItem.fid == newItem.fid
     }
 }

@@ -3,11 +3,11 @@ package com.example.c001apk.ui.main
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.logic.network.Repository.checkLoginInfo
 import com.example.c001apk.logic.network.Repository.getAppInfo
 import com.example.c001apk.util.CookieUtil
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

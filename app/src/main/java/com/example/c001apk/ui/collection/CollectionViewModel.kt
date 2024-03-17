@@ -3,18 +3,26 @@ package com.example.c001apk.ui.collection
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.network.Repository
 import com.example.c001apk.logic.network.Repository.getCollectionList
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.util.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CollectionViewModel : ViewModel() {
+@HiltViewModel
+class CollectionViewModel @Inject constructor(
+    val repository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository
+): ViewModel() {
 
     var title: String? = null
     var url: String? = null
@@ -143,6 +151,34 @@ class CollectionViewModel : ViewModel() {
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
+        }
+    }
+
+    fun saveUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveUid(uid)
+        }
+    }
+
+    fun saveHistory(
+        id: String,
+        uid: String,
+        username: String,
+        userAvatar: String,
+        deviceTitle: String,
+        message: String,
+        dateline: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.saveHistory(
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+            )
         }
     }
 

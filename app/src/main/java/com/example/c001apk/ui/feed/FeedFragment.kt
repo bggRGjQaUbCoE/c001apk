@@ -13,6 +13,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -24,8 +25,7 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
-import com.example.c001apk.logic.database.FeedFavoriteDatabase
-import com.example.c001apk.logic.model.FeedFavorite
+import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.feed.reply.IOnPublishClickListener
@@ -35,7 +35,6 @@ import com.example.c001apk.ui.feed.reply.ReplyRefreshListener
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.others.WebViewActivity
-import com.example.c001apk.util.BlackListUtil
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
@@ -49,12 +48,12 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.CoroutineScope
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
+@AndroidEntryPoint
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
 
     private val viewModel by lazy { ViewModelProvider(requireActivity())[FeedViewModel::class.java] }
@@ -65,9 +64,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: OffsetLinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private val feedFavoriteDao by lazy {
-        FeedFavoriteDatabase.getDatabase(requireContext()).feedFavoriteDao()
-    }
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
     private var dialog: AlertDialog? = null
 
@@ -350,7 +346,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             viewModel.feedDataList,
             viewModel.articleList
         )
-        feedReplyAdapter = FeedReplyAdapter(ItemClickListener())
+        feedReplyAdapter = FeedReplyAdapter(viewModel.repository, ItemClickListener())
         feedFixAdapter =
             FeedFixAdapter(viewModel.replyCount.toString(), RefreshReplyListener())
 
@@ -426,8 +422,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             val favorite = menu.findItem(R.id.favorite)
-            CoroutineScope(Dispatchers.IO).launch {
-                if (feedFavoriteDao.isFavorite(viewModel.id.toString())) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (viewModel.isFavorite(viewModel.id.toString())) {
                     withContext(Dispatchers.Main) {
                         favorite.title = "取消收藏"
                     }
@@ -456,7 +452,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             setTitle("确定将 ${viewModel.funame} 加入黑名单？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                BlackListUtil.saveUid(viewModel.uid.toString())
+                                viewModel.saveUid(viewModel.uid.toString())
                             }
                             show()
                         }
@@ -487,27 +483,33 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
 
                     R.id.favorite -> {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            if (feedFavoriteDao.isFavorite(viewModel.id.toString())) {
-                                feedFavoriteDao.delete(viewModel.id.toString())
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            if (viewModel.isFavorite(viewModel.id.toString())) {
+                                viewModel.delete(viewModel.id.toString())
                                 withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
                                     ToastUtil.toast(requireContext(), "已取消收藏")
                                 }
                             } else {
                                 try {
-                                    val fav = FeedFavorite(
+                                    val fav = FeedEntity(
                                         viewModel.id.toString(),
                                         viewModel.uid.toString(),
                                         viewModel.funame.toString(),
                                         viewModel.avatar.toString(),
                                         viewModel.device.toString(),
-                                        if (viewModel.feedType == "feedArticle") viewModel.articleMsg.toString()
-                                        else viewModel.feedDataList!![0].message, // 还未加载完会空指针
+                                        if (viewModel.feedType == "feedArticle")
+                                            viewModel.articleMsg.toString()
+                                        else {
+                                            with(viewModel.feedDataList!![0].message) {
+                                                if (this.length > 150) this.substring(0, 150)
+                                                else this
+                                            }
+                                        }, // 还未加载完会空指针
                                         if (viewModel.feedType == "feedArticle") viewModel.articleDateLine.toString()
                                         else viewModel.feedDataList!![0].dateline.toString()
                                     )
-                                    feedFavoriteDao.insert(fav)
+                                    viewModel.insert(fav)
                                     withContext(Dispatchers.Main) {
                                         favorite.title = "取消收藏"
                                         ToastUtil.toast(requireContext(), "已收藏")
@@ -587,6 +589,37 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     inner class ItemClickListener : ItemListener {
+        override fun onViewFeed(
+            view: View,
+            id: String?,
+            uid: String?,
+            username: String?,
+            userAvatar: String?,
+            deviceTitle: String?,
+            message: String?,
+            dateline: String?,
+            rid: Any?,
+            isViewReply: Any?
+        ) {
+            super.onViewFeed(
+                view,
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+                rid,
+                isViewReply
+            )
+            if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
+                viewModel.saveHistory(
+                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
+                    deviceTitle.toString(), message.toString(), dateline.toString()
+                )
+        }
+
         override fun onFollowUser(uid: String, followAuthor: Int, position: Int) {
             if (PrefManager.isLogin)
                 if (followAuthor == 1) {
@@ -694,7 +727,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         override fun onMenuItemClick(item: MenuItem?): Boolean {
             when (item?.itemId) {
                 R.id.block -> {
-                    BlackListUtil.saveUid(uid)
+                    viewModel.saveUid(uid)
                     val replyList = viewModel.feedReplyData.value?.toMutableList() ?: ArrayList()
                     if (rPosition == null || rPosition == -1) {
                         replyList.removeAt(position)

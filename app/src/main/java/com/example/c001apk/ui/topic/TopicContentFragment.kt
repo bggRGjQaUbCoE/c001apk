@@ -23,7 +23,9 @@ import com.example.c001apk.ui.search.IOnSearchMenuClickListener
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     IOnSearchMenuClickListener, IOnTabClickListener {
 
@@ -217,7 +219,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     }
 
     private fun initView() {
-        mAdapter = AppAdapter(viewModel.ItemClickListener())
+        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)

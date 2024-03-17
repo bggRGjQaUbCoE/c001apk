@@ -1,13 +1,10 @@
 package com.example.c001apk.ui.homefeed
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
@@ -18,17 +15,24 @@ import com.example.c001apk.logic.network.Repository.postCreateFeed
 import com.example.c001apk.logic.network.Repository.postDelete
 import com.example.c001apk.logic.network.Repository.postLikeFeed
 import com.example.c001apk.logic.network.Repository.postRequestValidate
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TokenDeviceUtils
-import com.example.c001apk.util.TopicBlackListUtil
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeFeedViewModel(private val installTime: String) : ViewModel() {
+@HiltViewModel
+class HomeFeedViewModel @Inject constructor(
+    val repository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository
+) : ViewModel() {
 
+    var installTime: String = System.currentTimeMillis().toString()
     val dataList = ArrayList<HomeFeedResponse.Data>()
     var position: Int? = null
     var lastVisibleItemPosition: Int = 0
@@ -105,8 +109,8 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                                         changeFirstItem = false
                                         firstItem = element.id
                                     }
-                                    if (!BlackListUtil.checkUid(element.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
+                                    if (!repository.checkUid(element.userInfo?.uid.toString())
+                                        && !repository.checkTopic(
                                             element.tags + element.ttitle
                                         )
                                     )
@@ -198,8 +202,8 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
                                     || it.entityTemplate == "iconLinkGridCard"
                                     || it.entityTemplate == "imageSquareScrollCard"
                                 ) {
-                                    if (!BlackListUtil.checkUid(it.userInfo?.uid.toString())
-                                        && !TopicBlackListUtil.checkTopic(
+                                    if (!repository.checkUid(it.userInfo?.uid.toString())
+                                        && !repository.checkTopic(
                                             it.tags + it.ttitle
                                         )
                                     )
@@ -314,16 +318,31 @@ class HomeFeedViewModel(private val installTime: String) : ViewModel() {
         }
     }
 
-}
-
-class FlowersListViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeFeedViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return HomeFeedViewModel(
-                installTime = TokenDeviceUtils.getLastingInstallTime(context)
-            ) as T
+    fun saveUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveUid(uid)
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+
+    fun saveHistory(
+        id: String,
+        uid: String,
+        username: String,
+        userAvatar: String,
+        deviceTitle: String,
+        message: String,
+        dateline: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.saveHistory(
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+            )
+        }
     }
 }

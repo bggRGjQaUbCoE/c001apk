@@ -13,11 +13,9 @@ import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.ui.topic.TopicActivity
 import com.example.c001apk.ui.user.UserActivity
 import com.example.c001apk.util.ClipboardUtil.copyText
-import com.example.c001apk.util.HistoryUtil
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
-import com.example.c001apk.util.PrefManager
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
@@ -127,11 +125,6 @@ interface ItemListener {
                 putExtra("viewReply", it as Boolean)
             }
         }
-        if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
-            HistoryUtil.saveHistory(
-                id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
-                deviceTitle.toString(), message.toString(), dateline.toString()
-            )
     }
 
     fun onViewUser(view: View, uid: String?) {

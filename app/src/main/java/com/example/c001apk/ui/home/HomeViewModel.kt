@@ -1,11 +1,50 @@
 package com.example.c001apk.ui.home
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.HomeMenu
+import com.example.c001apk.logic.repository.HomeMenuRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val repository: HomeMenuRepository
+) : ViewModel() {
+
     var isInit = true
-    var tabList = ArrayList<String>()
     var position: Int = 0
-    val menuList = ArrayList<HomeMenu>()
+
+    val tabListLiveData: LiveData<List<HomeMenu>> = repository.loadAllListLive()
+    val restart = MutableLiveData<Boolean>()
+
+    val defaultList by lazy {
+        listOf(
+            HomeMenu(0, "关注", true),
+            HomeMenu(1, "应用", true),
+            HomeMenu(2, "头条", true),
+            HomeMenu(3, "热榜", true),
+            HomeMenu(4, "话题", true),
+            HomeMenu(5, "数码", true),
+            HomeMenu(6, "酷图", true)
+        )
+    }
+
+    fun initTab() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.insertList(defaultList)
+        }
+    }
+
+    fun updateTab(menuList: List<HomeMenu>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateList(menuList)
+            restart.postValue(true)
+        }
+    }
+
 }

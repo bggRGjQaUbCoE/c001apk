@@ -9,7 +9,9 @@ import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DyhActivity : BaseActivity<ActivityDyhDetailBinding>(), IOnTabClickContainer {
 
     private var id: String? = null

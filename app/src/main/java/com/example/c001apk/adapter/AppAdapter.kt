@@ -28,18 +28,20 @@ import com.example.c001apk.databinding.ItemSearchUserBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.logic.model.Like
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TopicBlackListUtil
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration1
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewDataBinding>() {
+class AppAdapter(
+    private val repository: BlackListRepository,
+    private val listener: ItemListener
+) : BaseAdapter<ViewDataBinding>() {
 
     class FeedViewHolder(val binding: ItemHomeFeedBinding, val listener: ItemListener) :
         BaseViewHolder<ViewDataBinding>(binding) {
@@ -195,12 +197,12 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         val listener: ItemListener
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind(data: HomeFeedResponse.Data) {
+        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepository) {
             if (!data.entities.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
                     data.entities.forEach {
-                        if (it.entityType == "feed" && !BlackListUtil.checkUid(it.userInfo.uid))
+                        if (it.entityType == "feed" && !repository.checkUid(it.userInfo.uid))
                             imageTextScrollCard.add(it)
                     }
                     binding.title.text = data.title
@@ -217,6 +219,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                     }
                 }
             }
+            binding.executePendingBindings()
         }
 
     }
@@ -226,13 +229,13 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
         val listener: ItemListener
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        override fun bind(data: HomeFeedResponse.Data) {
+        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepository) {
             if (!data.entities.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
                     data.entities.forEach {
                         if ((it.entityType == "topic" || it.entityType == "product")
-                            && !TopicBlackListUtil.checkTopic(it.title)
+                            && !repository.checkTopic(it.title)
                         )
                             imageTextScrollCard.add(it)
                     }
@@ -248,6 +251,7 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
                     }
                 }
             }
+            binding.executePendingBindings()
         }
     }
 
@@ -573,6 +577,14 @@ class AppAdapter(private val listener: ItemListener) : BaseViewTypeAdapter<ViewD
             }
 
             else -> throw IllegalArgumentException("viewType error: $viewType")
+        }
+    }
+
+    override fun onBindViewHolder(holder: BaseViewHolder<ViewDataBinding>, position: Int) {
+        when (holder) {
+            is ImageTextScrollCardViewHolder -> holder.bind(currentList[position], repository)
+            is IconMiniScrollCardViewHolder -> holder.bind(currentList[position], repository)
+            else -> super.onBindViewHolder(holder, position)
         }
     }
 

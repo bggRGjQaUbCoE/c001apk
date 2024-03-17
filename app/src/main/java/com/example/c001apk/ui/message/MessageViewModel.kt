@@ -3,7 +3,6 @@ package com.example.c001apk.ui.message
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.Event
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
@@ -12,14 +11,22 @@ import com.example.c001apk.logic.network.Repository.checkLoginInfo
 import com.example.c001apk.logic.network.Repository.getMessage
 import com.example.c001apk.logic.network.Repository.getProfile
 import com.example.c001apk.logic.network.Repository.postDelete
-import com.example.c001apk.util.BlackListUtil
+import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
+import javax.inject.Inject
 
-class MessageViewModel : ViewModel() {
+@HiltViewModel
+class MessageViewModel @Inject constructor(
+    private val repository: BlackListRepository,
+    private val historyFavoriteRepository: HistoryFavoriteRepository
+) : ViewModel() {
 
     var isInit: Boolean = true
     var type: String? = null
@@ -137,7 +144,7 @@ class MessageViewModel : ViewModel() {
                             if (isRefreshing || isLoadMore) {
                                 for (element in feed.data)
                                     if (element.entityType == "notification")
-                                        if (!BlackListUtil.checkUid(element.fromuid))
+                                        if (!repository.checkUid(element.fromuid))
                                             messageList.add(element)
                             }
                             changeState.postValue(
@@ -183,6 +190,34 @@ class MessageViewModel : ViewModel() {
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
+        }
+    }
+
+    fun saveUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveUid(uid)
+        }
+    }
+
+    fun saveHistory(
+        id: String,
+        uid: String,
+        username: String,
+        userAvatar: String,
+        deviceTitle: String,
+        message: String,
+        dateline: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyFavoriteRepository.saveHistory(
+                id,
+                uid,
+                username,
+                userAvatar,
+                deviceTitle,
+                message,
+                dateline,
+            )
         }
     }
 
