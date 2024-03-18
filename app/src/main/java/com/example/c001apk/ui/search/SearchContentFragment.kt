@@ -20,7 +20,9 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
     IOnSearchMenuClickListener, IOnTabClickListener {
 
