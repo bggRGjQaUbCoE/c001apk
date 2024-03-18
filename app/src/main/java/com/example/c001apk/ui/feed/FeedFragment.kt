@@ -15,6 +15,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
@@ -41,7 +42,6 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.util.Utils.getColorFromAttr
-import com.example.c001apk.view.OffsetLinearLayoutManager
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.view.StickyItemDecorator
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
@@ -62,7 +62,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private lateinit var feedReplyAdapter: FeedReplyAdapter
     private lateinit var feedFixAdapter: FeedFixAdapter
     private lateinit var footerAdapter: FooterAdapter
-    private lateinit var mLayoutManager: OffsetLinearLayoutManager
+    private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
     private var dialog: AlertDialog? = null
@@ -368,7 +368,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     binding.tabLayout.visibility = View.VISIBLE
-                    mLayoutManager = OffsetLinearLayoutManager(requireContext())
+                    mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
                 } else {
                     binding.tabLayout.visibility = View.GONE

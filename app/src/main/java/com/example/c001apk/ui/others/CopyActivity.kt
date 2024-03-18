@@ -7,15 +7,16 @@ import android.text.TextUtils
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityCopyBinding
 import com.example.c001apk.logic.model.HomeMenu
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.HomeMenuAdapter
 import com.example.c001apk.ui.home.HomeViewModel
 import com.example.c001apk.ui.home.ItemTouchHelperCallback
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
+import com.example.c001apk.view.LinearItemDecoration2
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 
@@ -25,7 +26,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
     private lateinit var viewModel: HomeViewModel
     private lateinit var mAdapter: HomeMenuAdapter
-    private lateinit var mLayoutManager: FlexboxLayoutManager
+    private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var menuList: ArrayList<HomeMenu>
 
     private fun getAllLinkAndText(str: String?): String {
@@ -51,15 +52,19 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         if (type != null && type == "homeMenu") {
             menuList = ArrayList()
             viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+            binding.tabPage.visibility = View.VISIBLE
+            binding.toolBar.apply {
+                title = getString(R.string.edit_tab)
+                setNavigationIcon(R.drawable.ic_back)
+                setNavigationOnClickListener {
+                    finish()
+                }
+            }
         }
 
         binding.done.setOnClickListener {
             viewModel.updateTab(menuList.mapIndexed { index, tab ->
-                HomeMenu(
-                    index,
-                    tab.title,
-                    tab.isEnable
-                )
+                tab.copy(position = index)
             })
         }
 
@@ -79,13 +84,12 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
     }
 
     private fun initView() {
-        mLayoutManager = FlexboxLayoutManager(this)
-        mLayoutManager.flexDirection = FlexDirection.ROW
-        mLayoutManager.flexWrap = FlexWrap.WRAP
+        mLayoutManager = LinearLayoutManager(this)
         mAdapter = HomeMenuAdapter(menuList)
         binding.recyclerView.apply {
             adapter = mAdapter
             layoutManager = mLayoutManager
+            addItemDecoration(LinearItemDecoration2(10.dp))
         }
         val callback: ItemTouchHelper.Callback = ItemTouchHelperCallback(mAdapter)
         val itemTouchHelper = ItemTouchHelper(callback)

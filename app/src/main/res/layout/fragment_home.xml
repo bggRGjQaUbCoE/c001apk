@@ -45,6 +45,7 @@
                 android:layout_marginEnd="10dp"
                 android:background="?actionBarItemBackground"
                 android:src="@drawable/ic_search"
+                android:tooltipText="@string/search"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/menu"
                 app:layout_constraintStart_toEndOf="@id/tabLayout"
@@ -59,6 +60,7 @@
                 android:layout_marginEnd="10dp"
                 android:background="?actionBarItemBackground"
                 android:src="@drawable/ic_menu"
+                android:tooltipText="@string/edit_tab"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
