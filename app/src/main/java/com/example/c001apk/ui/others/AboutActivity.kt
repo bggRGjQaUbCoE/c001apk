@@ -173,14 +173,6 @@ class AboutActivity : AbsAboutActivity() {
         )
         items.add(
             License(
-                "StringFog",
-                "MegatronKing",
-                License.APACHE_2,
-                "https://github.com/MegatronKing/StringFog"
-            )
-        )
-        items.add(
-            License(
                 "libraries",
                 "zhaobozhen",
                 License.MIT,

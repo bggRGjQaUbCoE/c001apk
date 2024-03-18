@@ -30,8 +30,6 @@ preference-ktx = "1.2.1"
 retrofit = "2.9.0"
 room = "2.6.1"
 swiperefreshlayout = "1.1.0"
-stringfog-xor = "5.0.0"
-stringfog = "5.1.0"
 utils = "1.1.4"
 webkit = "1.10.0"
 
@@ -71,8 +69,6 @@ rikkax-material = { module = "dev.rikka.rikkax.material:material", version.ref =
 rikkax-material-preference = { module = "dev.rikka.rikkax.material:material-preference", version.ref = "material-preference" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
-stringfog = { module = "com.github.megatronking.stringfog:gradle-plugin", version.ref = "stringfog" }
-stringfog-xor = { module = "com.github.megatronking.stringfog:xor", version.ref = "stringfog-xor" }
 zhaobozhen-libraries-utils = { module = "com.github.zhaobozhen.libraries:utils", version.ref = "utils" }
 
 [plugins]

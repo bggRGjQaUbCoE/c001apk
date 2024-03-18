@@ -6,10 +6,3 @@ plugins {
     alias(libs.plugins.google.dagger.hilt.android) apply false
     alias(libs.plugins.rikka.tools.materialthemebuilder) apply false
 }
-
-buildscript {
-    dependencies {
-       classpath(libs.stringfog)
-       classpath(libs.stringfog.xor)
-    }
-}

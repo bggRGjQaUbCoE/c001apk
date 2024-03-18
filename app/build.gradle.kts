@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.google.dagger.hilt.android)
     id("kotlin-kapt")
     id("kotlin-parcelize")
-    id("stringfog")
 }
 
 apply(plugin = "kotlin-kapt")
@@ -18,20 +17,6 @@ apply(plugin = "kotlin-kapt")
 kapt {
     generateStubs = true
     correctErrorTypes = true
-}
-
-apply(plugin = "stringfog")
-
-configure<com.github.megatronking.stringfog.plugin.StringFogExtension> {
-    // 必要：加解密库的实现类路径，需和上面配置的加解密算法库一致。
-    implementation = "com.github.megatronking.stringfog.xor.StringFogImpl"
-    // 可选：加密开关，默认开启。
-    enable = true
-    // 可选：指定需加密的代码包路径，可配置多个，未指定将默认全部加密。
-    fogPackages = arrayOf("com.example.c001apk")
-    //kg = com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator()
-    // base64或者bytes
-    mode = com.github.megatronking.stringfog.plugin.StringFogMode.bytes
 }
 
 materialThemeBuilder {
@@ -200,7 +185,6 @@ dependencies {
     implementation(libs.drakeet.about)
     implementation(libs.jbcrypt)
     implementation(libs.jsoup)
-    implementation(libs.stringfog.xor)
     implementation(libs.zhaobozhen.libraries.utils)
     testImplementation(libs.junit)
 }
