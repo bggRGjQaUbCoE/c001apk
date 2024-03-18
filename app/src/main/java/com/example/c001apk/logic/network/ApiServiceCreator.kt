@@ -7,30 +7,39 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
 object ApiServiceCreator {
-    
+
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AddCookiesInterceptor())
+        .addInterceptor(HttpLoggingInterceptor().setLevel(if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE))
+        .build()
+
+    private val clientNoRedirect: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AddCookiesInterceptor())
+        .addInterceptor(HttpLoggingInterceptor().setLevel(if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE))
+        .followRedirects(false)
+        .build()
+
     private const val BASE_URL = "https://api.coolapk.com"
 
-    private fun createOkHttpClient(followRedirects: Boolean = true): OkHttpClient =
-        OkHttpClient.Builder().apply {
-            addInterceptor(AddCookiesInterceptor())
-            addInterceptor(HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.DEBUG)
-                    HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
-            })
-            followRedirects(followRedirects)
-        }.build()
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
+        .build()
 
-    private fun createRetrofit(followRedirects: Boolean): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(createOkHttpClient(followRedirects))
-            .build()
+    private val retrofitNoRedirect = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(clientNoRedirect)
+        .build()
 
-    fun <T> create(serviceClass: Class<T>, noRedirect: Boolean = false): T =
-        createRetrofit(noRedirect).create(serviceClass)
+    fun <T> create(noredirect: Boolean, serviceClass: Class<T>): T =
+        if (noredirect) retrofitNoRedirect.create(serviceClass) else retrofit.create(serviceClass)
 
-    inline fun <reified T> create(noRedirect: Boolean = false): T =
-        create(T::class.java, noRedirect)
+    inline fun <reified T> create(noredirect: Boolean = false): T =
+        create(noredirect, T::class.java)
+
+
 }
