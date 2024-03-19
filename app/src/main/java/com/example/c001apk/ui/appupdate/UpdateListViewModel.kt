@@ -10,25 +10,31 @@ import kotlinx.coroutines.launch
 
 class UpdateListViewModel : ViewModel() {
 
+    var appName: String? = null
     var isInit: Boolean = true
+    var versionName: String? = null
     var versionCode: String? = null
     var packageName: String? = null
     private var appId: String? = null
-    val doNext = MutableLiveData<Event<String>>()
+    val doNext = MutableLiveData<Event<Boolean>>()
+    var url: String? = null
 
     fun onGetDownloadLink() {
-        viewModelScope.launch(Dispatchers.IO) {
-            getAppDownloadLink(packageName.toString(), appId.toString(), versionCode.toString())
-                .collect { result ->
-                    val link = result.getOrNull()
-                    if (link != null) {
-                        doNext.postValue(Event(link))
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
+        if (url.isNullOrEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                getAppDownloadLink(packageName.toString(), appId.toString(), versionCode.toString())
+                    .collect { result ->
+                        val link = result.getOrNull()
+                        if (link != null) {
+                            url = link
+                            doNext.postValue(Event(true))
+                        } else {
+                            result.exceptionOrNull()?.printStackTrace()
+                        }
                     }
-                }
-        }
-
+            }
+        } else
+            doNext.postValue(Event(true))
     }
 
 }

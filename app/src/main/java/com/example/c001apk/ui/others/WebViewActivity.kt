@@ -198,7 +198,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             }
 
             R.id.openInBrowser -> {
-                val uri = Uri.parse(binding.webView.url?.http2https)
+                val uri = Uri.parse(binding.webView.url.toString().http2https)
                 val intent = Intent(Intent.ACTION_VIEW, uri)
                 try {
                     startActivity(intent)

@@ -16,8 +16,10 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.SearchActivity
+import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.Utils.downloadApk
 import com.example.c001apk.view.AppBarLayoutStateChangeListener
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -170,10 +172,24 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
     private fun downloadApp() {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.collectionUrl)))
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this@AppActivity, "下载失败", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
+            downloadApk(
+                this,
+                viewModel.collectionUrl.toString(),
+                "${viewModel.appData?.title}-${viewModel.appData?.apkversionname}-${viewModel.appData?.apkversioncode}.apk"
+            )
+        } catch (e: Exception) {
+            try {
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(viewModel.collectionUrl.toString())
+                    )
+                )
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this@AppActivity, "下载失败", Toast.LENGTH_SHORT).show()
+                ClipboardUtil.copyText(this, viewModel.collectionUrl.toString())
+                e.printStackTrace()
+            }
         }
     }
 

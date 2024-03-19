@@ -16,6 +16,8 @@ import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.util.ClipboardUtil
+import com.example.c001apk.util.Utils.downloadApk
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 
@@ -56,13 +58,28 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
 
     private fun initObserve() {
         viewModel.doNext.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let { link ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                try {
-                    requireContext().startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(requireContext(), "打开失败", Toast.LENGTH_SHORT).show()
-                    e.printStackTrace()
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                if (it) {
+                    try {
+                        downloadApk(
+                            requireContext(),
+                            viewModel.url.toString(),
+                            "${viewModel.appName}-${viewModel.versionName}-${viewModel.versionCode}.apk"
+                        )
+                    } catch (e: Exception) {
+                        try {
+                            requireContext().startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(viewModel.url.toString())
+                                )
+                            )
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(requireContext(), "下载失败", Toast.LENGTH_SHORT).show()
+                            ClipboardUtil.copyText(requireContext(), viewModel.url.toString())
+                            e.printStackTrace()
+                        }
+                    }
                 }
             }
         }

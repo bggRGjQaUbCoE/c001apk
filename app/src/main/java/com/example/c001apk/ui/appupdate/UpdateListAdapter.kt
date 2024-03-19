@@ -34,6 +34,7 @@ class UpdateListAdapter(
         var expand = false
         var packageName: String = ""
         var apkversioncode: String = ""
+        var apkversionname: String = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -49,6 +50,8 @@ class UpdateListAdapter(
             setOnClickListener {
                 viewModel.packageName = holder.packageName
                 viewModel.versionCode = holder.apkversioncode
+                viewModel.appName = holder.appName.text.toString()
+                viewModel.versionName = holder.apkversioncode
                 viewModel.onGetDownloadLink()
             }
         }
@@ -89,6 +92,7 @@ class UpdateListAdapter(
         }
         holder.packageName = app.packageName
         holder.apkversioncode = app.apkversioncode.toString()
+        holder.apkversionname = app.apkversionname
     }
 
 }

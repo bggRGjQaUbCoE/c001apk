@@ -1,7 +1,12 @@
 package com.example.c001apk.util
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
+import android.net.Uri
+import android.os.Environment
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import com.example.c001apk.MyApplication
 import java.io.BufferedReader
@@ -17,6 +22,19 @@ import kotlin.random.Random
 
 
 object Utils {
+
+    fun downloadApk(context: Context, url: String, name: String) {
+        val downloadManager =
+            context.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
+        val request = DownloadManager
+            .Request(Uri.parse(url))
+            .setMimeType("application/vnd.android.package-archive")
+            .setTitle(name)
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
+        downloadManager.enqueue(request)
+        ClipboardUtil.copyText(context, url, false)
+    }
 
     /**
      * 检测设备宽度是否大于等于800dp
