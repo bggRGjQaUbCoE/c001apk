@@ -30,7 +30,7 @@ preference-ktx = "1.2.1"
 retrofit = "2.10.0"
 room = "2.6.1"
 swiperefreshlayout = "1.1.0"
-utils = "1.1.4"
+utils = "1.1.5.4"
 webkit = "1.10.0"
 
 [libraries]
