@@ -6,7 +6,6 @@ import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Environment
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import com.example.c001apk.MyApplication
 import java.io.BufferedReader
@@ -25,7 +24,7 @@ object Utils {
 
     fun downloadApk(context: Context, url: String, name: String) {
         val downloadManager =
-            context.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
+            context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val request = DownloadManager
             .Request(Uri.parse(url))
             .setMimeType("application/vnd.android.package-archive")

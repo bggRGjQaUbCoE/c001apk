@@ -1,12 +1,15 @@
 package com.example.c001apk.ui.others
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
@@ -14,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
+import android.webkit.URLUtil
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -28,6 +32,7 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 import kotlin.system.exitProcess
@@ -99,6 +104,41 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             setCookie("m.coolapk.com", "token=${PrefManager.token}")
         }
         binding.webView.apply {
+            setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
+                val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
+                MaterialAlertDialogBuilder(this@WebViewActivity).apply {
+                    setTitle("确定下载文件吗？")
+                    setMessage(fileName)
+                    setNeutralButton("外部打开") { _, _ ->
+                        try {
+                            this@WebViewActivity.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            )
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(this@WebViewActivity, "打开失败", Toast.LENGTH_SHORT)
+                                .show()
+                            e.printStackTrace()
+                        }
+                    }
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        val request = DownloadManager.Request(Uri.parse(url))
+                            .setMimeType(mimetype)
+                            .addRequestHeader("cookie", CookieManager.getInstance().getCookie(url))
+                            .addRequestHeader("User-Agent", userAgent)
+                            .setTitle(fileName)
+                            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            .setDestinationInExternalPublicDir(
+                                Environment.DIRECTORY_DOWNLOADS,
+                                fileName
+                            )
+                        val downloadManager =
+                            getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                        downloadManager.enqueue(request)
+                    }
+                    show()
+                }
+            }
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(
                     webView: WebView?, request: WebResourceRequest?
