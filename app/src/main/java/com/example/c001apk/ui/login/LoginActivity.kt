@@ -19,8 +19,9 @@ import com.example.c001apk.util.CookieUtil.isGetSmsLoginParam
 import com.example.c001apk.util.CookieUtil.isPreGetLoginParam
 import com.example.c001apk.util.CookieUtil.isTryLogin
 import com.example.c001apk.util.LoginUtils.createRandomNumber
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 
     private val viewModel by lazy { ViewModelProvider(this)[LoginViewModel::class.java] }

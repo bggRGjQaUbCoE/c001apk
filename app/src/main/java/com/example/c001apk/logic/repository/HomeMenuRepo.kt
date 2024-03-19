@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HomeMenuRepository @Inject constructor(
+class HomeMenuRepo @Inject constructor(
     private val homeMenuDao: HomeMenuDao,
 ) {
 

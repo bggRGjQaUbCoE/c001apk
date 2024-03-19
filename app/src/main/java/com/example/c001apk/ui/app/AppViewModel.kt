@@ -6,9 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.logic.network.Repository.getFollow
-import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
-    private val repository: BlackListRepository
+    private val repository: BlackListRepo,
+    private val networkRepo: NetworkRepo
 ): ViewModel() {
 
     var collectionUrl: String? = null
@@ -57,7 +57,7 @@ class AppViewModel @Inject constructor(
 
     fun fetchAppInfo(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getAppInfo(id)
+            networkRepo.getAppInfo(id)
                 .collect { result ->
 
                     val appInfo = result.getOrNull()
@@ -93,7 +93,7 @@ class AppViewModel @Inject constructor(
 
     fun onGetDownloadLink() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getAppDownloadLink(
+            networkRepo.getAppDownloadLink(
                 packageName.toString(),
                 appId.toString(),
                 versionCode.toString()
@@ -113,7 +113,7 @@ class AppViewModel @Inject constructor(
 
     fun onGetFollow() {
         viewModelScope.launch(Dispatchers.IO) {
-            getFollow(followUrl.toString(), null, appId)
+            networkRepo.getFollow(followUrl.toString(), null, appId)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {

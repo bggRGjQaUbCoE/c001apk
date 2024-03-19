@@ -8,17 +8,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.logic.model.UpdateCheckResponse
-import com.example.c001apk.logic.network.Repository.getAppsUpdate
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Utils
 import com.example.c001apk.util.Utils.getBase64
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import rikka.core.content.pm.longVersionCodeCompat
+import javax.inject.Inject
 
-class AppListViewModel : ViewModel() {
-
+@HiltViewModel
+class AppListViewModel @Inject constructor(
+    private val networkRepo: NetworkRepo
+): ViewModel() {
 
     var isInit: Boolean = true
     var listSize: Int = -1
@@ -29,7 +33,7 @@ class AppListViewModel : ViewModel() {
 
     private fun fetchAppsUpdate(pkg: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            getAppsUpdate(pkg)
+            networkRepo.getAppsUpdate(pkg)
                 .collect { result ->
                     result.getOrNull()?.let {
                         appsUpdate.clear()

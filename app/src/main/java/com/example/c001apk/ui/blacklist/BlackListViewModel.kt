@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.StringEntity
-import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BlackListViewModel @Inject constructor(
-    private val blackListRepository: BlackListRepository,
+    private val blackListRepo: BlackListRepo,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -23,8 +23,8 @@ class BlackListViewModel @Inject constructor(
     val toastText = MutableLiveData<Event<String>>()
 
     val blackListLiveData: LiveData<List<StringEntity>> = when (type) {
-        "user" -> blackListRepository.loadAllUserListLive()
-        "topic" -> blackListRepository.loadAllTopicListLive()
+        "user" -> blackListRepo.loadAllUserListLive()
+        "topic" -> blackListRepo.loadAllTopicListLive()
         else -> throw IllegalArgumentException("invalid type: $type")
     }
 
@@ -32,17 +32,17 @@ class BlackListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
                 "user" -> {
-                    if (blackListRepository.checkUid(data))
+                    if (blackListRepo.checkUid(data))
                         toast()
                     else
-                        blackListRepository.insertUid(StringEntity(data))
+                        blackListRepo.insertUid(StringEntity(data))
                 }
 
                 "topic" -> {
-                    if (blackListRepository.checkTopic(data))
+                    if (blackListRepo.checkTopic(data))
                         toast()
                     else
-                        blackListRepository.insertTopic(StringEntity(data))
+                        blackListRepo.insertTopic(StringEntity(data))
                 }
 
                 else -> {}
@@ -53,9 +53,9 @@ class BlackListViewModel @Inject constructor(
     fun insertList(dataList: List<StringEntity>) {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "user" -> blackListRepository.insertUidList(dataList)
+                "user" -> blackListRepo.insertUidList(dataList)
 
-                "topic" -> blackListRepository.insertTopicList(dataList)
+                "topic" -> blackListRepo.insertTopicList(dataList)
 
                 else -> {}
             }
@@ -69,8 +69,8 @@ class BlackListViewModel @Inject constructor(
     fun deleteData(data: String) {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "user" -> blackListRepository.deleteUid(data)
-                "topic" -> blackListRepository.deleteTopic(data)
+                "user" -> blackListRepo.deleteUid(data)
+                "topic" -> blackListRepo.deleteTopic(data)
                 else -> {}
             }
         }
@@ -79,8 +79,8 @@ class BlackListViewModel @Inject constructor(
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "user" -> blackListRepository.deleteAllUser()
-                "topic" -> blackListRepository.deleteAllTopic()
+                "user" -> blackListRepo.deleteAllUser()
+                "topic" -> blackListRepo.deleteAllTopic()
                 else -> {}
             }
         }

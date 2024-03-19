@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BlackListRepository @Inject constructor(
+class BlackListRepo @Inject constructor(
     @UserBlackList
     private val userBlackListDao: StringEntityDao,
     @TopicBlackList

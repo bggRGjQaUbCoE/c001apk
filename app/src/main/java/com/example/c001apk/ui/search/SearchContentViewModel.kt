@@ -10,10 +10,9 @@ import com.example.c001apk.constant.Constants
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
-import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.logic.network.Repository.getSearch
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,8 +23,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchContentViewModel @Inject constructor(
-    val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository
+    val repository: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var tabList: MutableList<String>? = null
@@ -61,7 +61,7 @@ class SearchContentViewModel @Inject constructor(
 
     fun fetchSearchData() {
         viewModelScope.launch(Dispatchers.IO) {
-            getSearch(
+            networkRepo.getSearch(
                 type.toString(), feedType, sort, keyWord.toString(),
                 pageType, pageParam, page, lastItem
             )
@@ -127,7 +127,7 @@ class SearchContentViewModel @Inject constructor(
 
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postFollowUnFollow(url, uid)
+            networkRepo.postFollowUnFollow(url, uid)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -171,7 +171,7 @@ class SearchContentViewModel @Inject constructor(
             )
             viewModelScope.launch(Dispatchers.IO) {
                 if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
-                    historyFavoriteRepository.saveHistory(
+                    historyFavoriteRepo.saveHistory(
                         id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
                         deviceTitle.toString(), message.toString(), dateline.toString()
                     )
@@ -211,7 +211,7 @@ class SearchContentViewModel @Inject constructor(
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postDelete(url, id)
+            networkRepo.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -236,7 +236,7 @@ class SearchContentViewModel @Inject constructor(
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postLikeFeed(likeUrl, id)
+            networkRepo.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {

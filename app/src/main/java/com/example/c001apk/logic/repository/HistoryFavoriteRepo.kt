@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HistoryFavoriteRepository @Inject constructor(
+class HistoryFavoriteRepo @Inject constructor(
     @BrowseHistory
     private val browseHistoryDao: HistoryFavoriteDao,
     @FeedFavorite

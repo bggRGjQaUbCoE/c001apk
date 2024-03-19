@@ -7,10 +7,9 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
-import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.logic.network.Repository.getCollectionList
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,8 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
-    val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository
+    val repository: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var title: String? = null
@@ -51,7 +51,7 @@ class CollectionViewModel @Inject constructor(
 
     fun fetchCollectionList() {
         viewModelScope.launch(Dispatchers.IO) {
-            getCollectionList(url.toString(), null, id, 0, page, lastItem)
+            networkRepo.getCollectionList(url.toString(), null, id, 0, page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -105,7 +105,7 @@ class CollectionViewModel @Inject constructor(
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postDelete(url, id)
+            networkRepo.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -130,7 +130,7 @@ class CollectionViewModel @Inject constructor(
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postLikeFeed(likeUrl, id)
+            networkRepo.postLikeFeed(likeUrl, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -171,7 +171,7 @@ class CollectionViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.saveHistory(
+            historyFavoriteRepo.saveHistory(
                 id,
                 uid,
                 username,

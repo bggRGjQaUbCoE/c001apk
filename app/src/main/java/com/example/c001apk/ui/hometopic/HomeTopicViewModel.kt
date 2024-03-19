@@ -4,13 +4,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.TopicBean
-import com.example.c001apk.logic.network.Repository.getDataList
-import com.example.c001apk.logic.network.Repository.getProductList
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeTopicViewModel : ViewModel() {
+@HiltViewModel
+class HomeTopicViewModel @Inject constructor(
+    private val networkRepo: NetworkRepo
+): ViewModel() {
 
     var title: String? = null
     var url: String? = null
@@ -25,7 +29,7 @@ class HomeTopicViewModel : ViewModel() {
 
     fun fetchTopicList() {
         viewModelScope.launch(Dispatchers.IO) {
-            getDataList(url.toString(), title.toString(), null, null, page)
+            networkRepo.getDataList(url.toString(), title.toString(), null, null, page)
                 .collect { result ->
                     val topic = result.getOrNull()
                     if (!topic?.data.isNullOrEmpty()) {
@@ -48,7 +52,7 @@ class HomeTopicViewModel : ViewModel() {
 
     fun fetchProductList() {
         viewModelScope.launch(Dispatchers.IO) {
-            getProductList()
+            networkRepo.getProductList()
                 .collect { result ->
                     val data = result.getOrNull()
                     if (!data?.data.isNullOrEmpty()) {

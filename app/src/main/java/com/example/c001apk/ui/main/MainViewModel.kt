@@ -4,17 +4,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.constant.Constants
-import com.example.c001apk.logic.network.Repository.checkLoginInfo
-import com.example.c001apk.logic.network.Repository.getAppInfo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URLEncoder
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val networkRepo: NetworkRepo
+): ViewModel() {
 
     var badge: Int = 0
     var isInit: Boolean = true
@@ -22,7 +26,7 @@ class MainViewModel : ViewModel() {
 
     fun fetchAppInfo(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            getAppInfo(id)
+            networkRepo.getAppInfo(id)
                 .collect { result ->
                     val appInfo = result.getOrNull()
                     if (appInfo?.data != null) {
@@ -44,7 +48,7 @@ class MainViewModel : ViewModel() {
 
     private fun getCheckLoginInfo() {
         viewModelScope.launch(Dispatchers.IO) {
-            checkLoginInfo()
+            networkRepo.checkLoginInfo()
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {

@@ -19,6 +19,9 @@ import javax.inject.Singleton
 annotation class Api1Service
 
 @Qualifier
+annotation class Api1ServiceNoRedirect
+
+@Qualifier
 annotation class Api2Service
 
 @Qualifier
@@ -26,7 +29,7 @@ annotation class AccountService
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetWorkModule {
+object NetworkModule {
 
     private const val API_BASE_URL = "https://api.coolapk.com"
     private const val API2_BASE_URL = "https://api2.coolapk.com"
@@ -37,6 +40,13 @@ object NetWorkModule {
     @Singleton
     @Provides
     fun provideApi1Service(@Api1Service retrofit: Retrofit): ApiService {
+        return retrofit.create(ApiService::class.java)
+    }
+
+    @Api1ServiceNoRedirect
+    @Singleton
+    @Provides
+    fun provideApi1ServiceNo(@Api1ServiceNoRedirect retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
     }
 
@@ -58,6 +68,17 @@ object NetWorkModule {
     @Singleton
     @Provides
     fun provideApi1ServiceRetrofit(@Api1Service okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+    }
+
+    @Api1ServiceNoRedirect
+    @Singleton
+    @Provides
+    fun provideApi1ServiceNoRetrofit(@Api1ServiceNoRedirect okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(API_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -100,6 +121,22 @@ object NetWorkModule {
                 )
             )
             .followRedirects(true)
+            .build()
+    }
+
+    @Api1ServiceNoRedirect
+    @Singleton
+    @Provides
+    fun provideNoOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(AddCookiesInterceptor)
+            .addInterceptor(
+                HttpLoggingInterceptor().setLevel(
+                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                    else HttpLoggingInterceptor.Level.NONE
+                )
+            )
+            .followRedirects(false)
             .build()
     }
 

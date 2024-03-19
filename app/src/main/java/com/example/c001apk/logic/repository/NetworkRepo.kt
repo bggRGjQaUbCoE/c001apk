@@ -2,6 +2,7 @@ package com.example.c001apk.logic.repository
 
 import com.example.c001apk.di.AccountService
 import com.example.c001apk.di.Api1Service
+import com.example.c001apk.di.Api1ServiceNoRedirect
 import com.example.c001apk.di.Api2Service
 import com.example.c001apk.logic.network.ApiService
 import kotlinx.coroutines.Dispatchers
@@ -18,15 +19,16 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @Singleton
-class NetWorkRepository @Inject constructor(
+class NetworkRepo @Inject constructor(
     @Api1Service
     private val apiService: ApiService,
+    @Api1ServiceNoRedirect
+    private val apiServiceNoRedirect: ApiService,
     @Api2Service
     private val api2Service: ApiService,
     @AccountService
     private val accountService: ApiService,
 ) {
-
 
     suspend fun getHomeFeed(
         page: Int,
@@ -75,14 +77,14 @@ class NetWorkRepository @Inject constructor(
         pageParam: String?, page: Int, lastItem: String?
     ) = fire {
         Result.success(
-            api2Service.getSearch(
+            apiService.getSearch(
                 type, feedType, sort, keyWord, pageType, pageParam, page, lastItem
-            )
+            ).await()
         )
     }
 
     suspend fun getReply2Reply(id: String, page: Int, lastItem: String?) = fire {
-        Result.success(api2Service.getReply2Reply(id, page, lastItem).await())
+        Result.success(apiService.getReply2Reply(id, page, lastItem).await())
     }
 
     suspend fun getTopicLayout(tag: String) = fire {
@@ -90,30 +92,30 @@ class NetWorkRepository @Inject constructor(
     }
 
     suspend fun getProductLayout(id: String) = fire {
-        Result.success(api2Service.getProductLayout(id).await())
+        Result.success(apiService.getProductLayout(id).await())
     }
 
     suspend fun getUserSpace(uid: String) = fire {
-        Result.success(api2Service.getUserSpace(uid).await())
+        Result.success(apiService.getUserSpace(uid).await())
     }
 
     suspend fun getUserFeed(uid: String, page: Int, lastItem: String?) = fire {
-        Result.success(api2Service.getUserFeed(uid, page, lastItem).await())
+        Result.success(apiService.getUserFeed(uid, page, lastItem).await())
     }
 
     suspend fun getAppInfo(id: String) = fire {
-        Result.success(api2Service.getAppInfo(id).await())
+        Result.success(apiService.getAppInfo(id).await())
     }
 
     suspend fun getAppDownloadLink(pn: String, aid: String, vc: String) = fire {
-        val appResponse = api2Service.getAppDownloadLink(pn, aid, vc).response()
+        val appResponse = apiServiceNoRedirect.getAppDownloadLink(pn, aid, vc).response()
         Result.success(appResponse.headers()["Location"])
     }
 
     suspend fun getAppsUpdate(pkgs: String) = fire {
         val multipartBody =
             MultipartBody.Part.createFormData("pkgs", pkgs)
-        val appResponse = api2Service.getAppsUpdate(multipartBody).await()
+        val appResponse = apiService.getAppsUpdate(multipartBody).await()
         Result.success(appResponse.data)
     }
 
@@ -122,74 +124,74 @@ class NetWorkRepository @Inject constructor(
     }
 
     suspend fun getFollowList(url: String, uid: String, page: Int, lastItem: String?) = fire {
-        Result.success(api2Service.getFollowList(url, uid, page, lastItem).await())
+        Result.success(apiService.getFollowList(url, uid, page, lastItem).await())
     }
 
     suspend fun postLikeFeed(url: String, id: String) = fire {
-        Result.success(api2Service.postLikeFeed(url, id).await())
+        Result.success(apiService.postLikeFeed(url, id).await())
     }
 
     suspend fun postLikeReply(url: String, id: String) = fire {
-        Result.success(api2Service.postLikeReply(url, id).await())
+        Result.success(apiService.postLikeReply(url, id).await())
     }
 
     suspend fun checkLoginInfo() = fire {
-        Result.success(api2Service.checkLoginInfo().await())
+        Result.success(apiService.checkLoginInfo().response())
     }
 
     suspend fun preGetLoginParam() = fire {
-        Result.success(api2Service.preGetLoginParam().await())
+        Result.success(accountService.preGetLoginParam().response())
     }
 
     suspend fun getLoginParam() = fire {
-        Result.success(api2Service.getLoginParam().await())
+        Result.success(accountService.getLoginParam().response())
     }
 
     suspend fun tryLogin(data: HashMap<String, String?>) = fire {
-        Result.success(api2Service.tryLogin(data).await())
+        Result.success(accountService.tryLogin(data).response())
     }
 
     suspend fun getCaptcha(url: String) = fire {
-        Result.success(api2Service.getCaptcha(url).await())
+        Result.success(accountService.getCaptcha(url).response())
     }
 
     suspend fun getValidateCaptcha(url: String) = fire {
-        Result.success(api2Service.getValidateCaptcha(url).await())
+        Result.success(apiService.getValidateCaptcha(url).response())
     }
 
     suspend fun postReply(data: HashMap<String, String>, id: String, type: String) = fire {
-        Result.success(api2Service.postReply(data, id, type).await())
+        Result.success(apiService.postReply(data, id, type).await())
     }
 
     suspend fun getDataList(
         url: String, title: String, subTitle: String?, lastItem: String?, page: Int
     ) = fire {
-        Result.success(api2Service.getDataList(url, title, subTitle, lastItem, page).await())
+        Result.success(apiService.getDataList(url, title, subTitle, lastItem, page).await())
     }
 
     suspend fun getDyhDetail(dyhId: String, type: String, page: Int, lastItem: String?) =
         fire {
-            Result.success(api2Service.getDyhDetail(dyhId, type, page, lastItem).await())
+            Result.success(apiService.getDyhDetail(dyhId, type, page, lastItem).await())
         }
 
     suspend fun getMessage(url: String, page: Int, lastItem: String?) = fire {
-        Result.success(api2Service.getMessage(url, page, lastItem).await())
+        Result.success(apiService.getMessage(url, page, lastItem).await())
     }
 
     suspend fun postFollowUnFollow(url: String, uid: String) = fire {
-        Result.success(api2Service.postFollowUnFollow(url, uid).await())
+        Result.success(apiService.postFollowUnFollow(url, uid).await())
     }
 
     suspend fun postCreateFeed(data: HashMap<String, String?>) = fire {
-        Result.success(api2Service.postCreateFeed(data).await())
+        Result.success(apiService.postCreateFeed(data).await())
     }
 
     suspend fun postRequestValidate(data: HashMap<String, String?>) = fire {
-        Result.success(api2Service.postRequestValidate(data).await())
+        Result.success(apiService.postRequestValidate(data).await())
     }
 
     suspend fun getProductList() = fire {
-        Result.success(api2Service.getProductList().await())
+        Result.success(apiService.getProductList().await())
     }
 
     suspend fun getCollectionList(
@@ -201,20 +203,20 @@ class NetWorkRepository @Inject constructor(
         lastItem: String?
     ) = fire {
         Result.success(
-            api2Service.getCollectionList(url, uid, id, showDefault, page, lastItem).await()
+            apiService.getCollectionList(url, uid, id, showDefault, page, lastItem).await()
         )
     }
 
     suspend fun postDelete(url: String, id: String) = fire {
-        Result.success(api2Service.postDelete(url, id).await())
+        Result.success(apiService.postDelete(url, id).await())
     }
 
     suspend fun postFollow(data: HashMap<String, String>) = fire {
-        Result.success(api2Service.postFollow(data).await())
+        Result.success(apiService.postFollow(data).await())
     }
 
     suspend fun getFollow(url: String, tag: String?, id: String?) = fire {
-        Result.success(api2Service.getFollow(url, tag, id).await())
+        Result.success(apiService.getFollow(url, tag, id).await())
     }
 
     private suspend fun <T> Call<T>.await(): T {

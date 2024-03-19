@@ -7,21 +7,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.logic.model.LoginResponse
-import com.example.c001apk.logic.network.Repository.getCaptcha
-import com.example.c001apk.logic.network.Repository.getLoginParam
-import com.example.c001apk.logic.network.Repository.getProfile
-import com.example.c001apk.logic.network.Repository.preGetLoginParam
-import com.example.c001apk.logic.network.Repository.tryLogin
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.LoginUtils.createRequestHash
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val networkRepo: NetworkRepo
+): ViewModel() {
 
     var uid: String? = null
     var url: String? = null
@@ -53,7 +54,7 @@ class LoginViewModel : ViewModel() {
 
     fun onPreGetLoginParam() {
         viewModelScope.launch(Dispatchers.IO) {
-            preGetLoginParam()
+            networkRepo.preGetLoginParam()
                 .collect { result ->
                     val response = result.getOrNull()
                     val body = response?.body()?.string()
@@ -81,7 +82,7 @@ class LoginViewModel : ViewModel() {
 
     private fun onGetLoginParam() {
         viewModelScope.launch(Dispatchers.IO) {
-            getLoginParam()
+            networkRepo.getLoginParam()
                 .collect { result ->
                     val response = result.getOrNull()
                     val body = response?.body()?.string()
@@ -107,7 +108,7 @@ class LoginViewModel : ViewModel() {
     fun onGetCaptcha() {
         val timeStamp = System.currentTimeMillis().toString()
         viewModelScope.launch(Dispatchers.IO) {
-            getCaptcha("/auth/showCaptchaImage?$timeStamp")
+            networkRepo.getCaptcha("/auth/showCaptchaImage?$timeStamp")
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -121,7 +122,7 @@ class LoginViewModel : ViewModel() {
 
     fun onTryLogin() {
         viewModelScope.launch(Dispatchers.IO) {
-            tryLogin(loginData)
+            networkRepo.tryLogin(loginData)
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.body()?.let {
@@ -165,7 +166,7 @@ class LoginViewModel : ViewModel() {
 
     private fun onGetProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            getProfile(uid.toString())
+            networkRepo.getProfile(uid.toString())
                 .collect { result ->
                     val data = result.getOrNull()
                     data?.data.let {

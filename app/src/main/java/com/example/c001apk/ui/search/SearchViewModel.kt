@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.StringEntity
-import com.example.c001apk.logic.repository.SearchHistoryRepository
+import com.example.c001apk.logic.repository.SearchHistoryRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: SearchHistoryRepository
+    private val repository: SearchHistoryRepo
 ) : ViewModel() {
 
     var type: String? = null

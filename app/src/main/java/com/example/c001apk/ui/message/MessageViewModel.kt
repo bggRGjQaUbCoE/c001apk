@@ -7,12 +7,9 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
-import com.example.c001apk.logic.network.Repository.checkLoginInfo
-import com.example.c001apk.logic.network.Repository.getMessage
-import com.example.c001apk.logic.network.Repository.getProfile
-import com.example.c001apk.logic.network.Repository.postDelete
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +22,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MessageViewModel @Inject constructor(
-    private val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository
+    private val repository: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var isInit: Boolean = true
@@ -60,7 +58,7 @@ class MessageViewModel @Inject constructor(
 
     fun fetchProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            getProfile(uid.toString())
+            networkRepo.getProfile(uid.toString())
                 .collect { result ->
                     val data = result.getOrNull()
                     if (data?.data != null) {
@@ -97,7 +95,7 @@ class MessageViewModel @Inject constructor(
 
     fun fetchCheckLoginInfo() {
         viewModelScope.launch(Dispatchers.IO) {
-            checkLoginInfo()
+            networkRepo.checkLoginInfo()
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -123,7 +121,7 @@ class MessageViewModel @Inject constructor(
 
     fun fetchMessage() {
         viewModelScope.launch(Dispatchers.IO) {
-            getMessage(url, page, lastItem)
+            networkRepo.getMessage(url, page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -177,7 +175,7 @@ class MessageViewModel @Inject constructor(
 
     fun onPostDelete(position: Int, id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            postDelete("/v6/notification/delete", id)
+            networkRepo.postDelete("/v6/notification/delete", id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -212,7 +210,7 @@ class MessageViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.saveHistory(
+            historyFavoriteRepo.saveHistory(
                 id,
                 uid,
                 username,

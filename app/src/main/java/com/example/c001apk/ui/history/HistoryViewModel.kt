@@ -5,8 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.FeedEntity
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,8 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    private val blackListRepository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository,
+    private val blackListRepo: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -23,23 +23,23 @@ class HistoryViewModel @Inject constructor(
 
     val browseLiveData: LiveData<List<FeedEntity>> =
         if (type == "browse") {
-            historyFavoriteRepository.loadAllHistoryListLive()
+            historyFavoriteRepo.loadAllHistoryListLive()
         } else {
-            historyFavoriteRepository.loadAllFavoriteListLive()
+            historyFavoriteRepo.loadAllFavoriteListLive()
         }
 
 
     fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            blackListRepository.saveUid(uid)
+            blackListRepo.saveUid(uid)
         }
     }
 
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "browse" -> historyFavoriteRepository.deleteAllHistory()
-                "favorite" -> historyFavoriteRepository.deleteAllFavorite()
+                "browse" -> historyFavoriteRepo.deleteAllHistory()
+                "favorite" -> historyFavoriteRepo.deleteAllFavorite()
                 else -> {}
             }
         }
@@ -48,8 +48,8 @@ class HistoryViewModel @Inject constructor(
     fun delete(fid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "browse" -> historyFavoriteRepository.deleteHistory(fid)
-                "favorite" -> historyFavoriteRepository.deleteFavorite(fid)
+                "browse" -> historyFavoriteRepo.deleteHistory(fid)
+                "favorite" -> historyFavoriteRepo.deleteFavorite(fid)
                 else -> {}
             }
         }
@@ -65,7 +65,7 @@ class HistoryViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.saveHistory(
+            historyFavoriteRepo.saveHistory(
                 id,
                 uid,
                 username,

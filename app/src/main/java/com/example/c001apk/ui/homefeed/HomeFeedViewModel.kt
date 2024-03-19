@@ -8,16 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
-import com.example.c001apk.logic.network.Repository.getDataList
-import com.example.c001apk.logic.network.Repository.getHomeFeed
-import com.example.c001apk.logic.network.Repository.getValidateCaptcha
-import com.example.c001apk.logic.network.Repository.postCreateFeed
-import com.example.c001apk.logic.network.Repository.postDelete
-import com.example.c001apk.logic.network.Repository.postLikeFeed
-import com.example.c001apk.logic.network.Repository.postRequestValidate
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
-import com.example.c001apk.logic.repository.NetWorkRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,9 +22,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeFeedViewModel @Inject constructor(
-    val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository,
-    private val netWorkRepository: NetWorkRepository
+    val repository: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var installTime: String = System.currentTimeMillis().toString()
@@ -58,7 +51,7 @@ class HomeFeedViewModel @Inject constructor(
 
     fun fetchHomeFeed() {
         viewModelScope.launch(Dispatchers.IO) {
-            netWorkRepository.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
+            networkRepo.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
                 .onStart {
                     if (firstLaunch == 1) {
                         firstLaunch = 0
@@ -143,7 +136,7 @@ class HomeFeedViewModel @Inject constructor(
         val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
-            postLikeFeed(likeUrl, id)
+            networkRepo.postLikeFeed(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
                         toastText.postValue(Event(it))
@@ -177,7 +170,7 @@ class HomeFeedViewModel @Inject constructor(
     var dataListTitle: String? = null
     fun fetchDataList() {
         viewModelScope.launch(Dispatchers.IO) {
-            getDataList(dataListUrl.toString(), dataListTitle.toString(), null, lastItem, page)
+            networkRepo.getDataList(dataListUrl.toString(), dataListTitle.toString(), null, lastItem, page)
                 .onStart {
                     if (isInit)
                         isInit = false
@@ -238,7 +231,7 @@ class HomeFeedViewModel @Inject constructor(
 
     fun onDeleteFeed(url: String, id: String, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            postDelete(url, id)
+            networkRepo.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -263,7 +256,7 @@ class HomeFeedViewModel @Inject constructor(
     lateinit var createFeedData: HashMap<String, String?>
     fun onPostCreateFeed() {
         viewModelScope.launch(Dispatchers.IO) {
-            postCreateFeed(createFeedData)
+            networkRepo.postCreateFeed(createFeedData)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -287,7 +280,7 @@ class HomeFeedViewModel @Inject constructor(
 
     private fun onGetValidateCaptcha() {
         viewModelScope.launch(Dispatchers.IO) {
-            getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
+            networkRepo.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -302,7 +295,7 @@ class HomeFeedViewModel @Inject constructor(
     lateinit var requestValidateData: HashMap<String, String?>
     fun onPostRequestValidate() {
         viewModelScope.launch(Dispatchers.IO) {
-            postRequestValidate(requestValidateData)
+            networkRepo.postRequestValidate(requestValidateData)
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -342,7 +335,7 @@ class HomeFeedViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.saveHistory(
+            historyFavoriteRepo.saveHistory(
                 id,
                 uid,
                 username,

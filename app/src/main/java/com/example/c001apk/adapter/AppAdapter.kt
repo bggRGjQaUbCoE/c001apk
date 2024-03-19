@@ -28,7 +28,7 @@ import com.example.c001apk.databinding.ItemSearchUserBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.logic.model.Like
-import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
@@ -39,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AppAdapter(
-    private val repository: BlackListRepository,
+    private val repository: BlackListRepo,
     private val listener: ItemListener
 ) : BaseAdapter<ViewDataBinding>() {
 
@@ -197,7 +197,7 @@ class AppAdapter(
         val listener: ItemListener
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepository) {
+        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepo) {
             if (!data.entities.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
@@ -229,7 +229,7 @@ class AppAdapter(
         val listener: ItemListener
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepository) {
+        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepo) {
             if (!data.entities.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()

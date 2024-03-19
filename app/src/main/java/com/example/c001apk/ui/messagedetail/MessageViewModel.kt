@@ -7,8 +7,8 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
-import com.example.c001apk.logic.network.Repository.getMessage
-import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
@@ -17,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MessageViewModel @Inject constructor(
-    private val repository: BlackListRepository
+    private val repository: BlackListRepo,
+    private val networkRepo: NetworkRepo
 ): ViewModel() {
 
     var url: String? = null
@@ -45,7 +46,7 @@ class MessageViewModel @Inject constructor(
 
     fun fetchMessage() {
         viewModelScope.launch(Dispatchers.IO) {
-            getMessage(url.toString(), page, lastItem)
+            networkRepo.getMessage(url.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))

@@ -26,7 +26,9 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener {
 
     private val viewModel by lazy { ViewModelProvider(this)[AppListViewModel::class.java] }

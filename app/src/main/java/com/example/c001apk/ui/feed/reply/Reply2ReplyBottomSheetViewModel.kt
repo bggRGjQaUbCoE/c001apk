@@ -9,10 +9,9 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
-import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.logic.network.Repository.getReply2Reply
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +24,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class Reply2ReplyBottomSheetViewModel @Inject constructor(
-    private val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository
+    private val repository: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var uname: String? = null
@@ -59,7 +59,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
 
     fun fetchReplyTotal() {
         viewModelScope.launch(Dispatchers.IO) {
-            getReply2Reply(id.toString(), page, lastItem)
+            networkRepo.getReply2Reply(id.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
@@ -117,7 +117,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     var replyData = HashMap<String, String>()
     fun onPostReply() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postReply(replyData, rid.toString(), "reply")
+            networkRepo.postReply(replyData, rid.toString(), "reply")
                 .collect { result ->
                     val replyTotalList = totalReplyData.value?.toMutableList() ?: ArrayList()
                     val response = result.getOrNull()
@@ -167,7 +167,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     val createDialog = MutableLiveData<Event<Bitmap>>()
     private fun onGetValidateCaptcha() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
+            networkRepo.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -182,7 +182,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     val toastText = MutableLiveData<Event<String>>()
     fun postDeleteFeedReply(url: String, id: String, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postDelete(url, id)
+            networkRepo.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -209,7 +209,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
         else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postLikeReply(likeUrl, id)
+            networkRepo.postLikeReply(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
                         toastText.postValue(Event(it))
@@ -242,7 +242,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     lateinit var requestValidateData: HashMap<String, String?>
     fun onPostRequestValidate() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postRequestValidate(requestValidateData)
+            networkRepo.postRequestValidate(requestValidateData)
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -282,7 +282,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.saveHistory(
+            historyFavoriteRepo.saveHistory(
                 id,
                 uid,
                 username,

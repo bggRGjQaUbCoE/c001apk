@@ -12,12 +12,9 @@ import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
-import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.logic.network.Repository.postLikeFeed
-import com.example.c001apk.logic.network.Repository.postLikeReply
-import com.example.c001apk.logic.network.Repository.postReply
-import com.example.c001apk.logic.repository.BlackListRepository
-import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
@@ -31,8 +28,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository
+    val repository: BlackListRepo,
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var position: Int? = null
@@ -84,7 +82,7 @@ class FeedViewModel @Inject constructor(
     var afterFollow = MutableLiveData<Event<Int>>()
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postFollowUnFollow(url, uid)
+            networkRepo.postFollowUnFollow(url, uid)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -104,7 +102,7 @@ class FeedViewModel @Inject constructor(
         else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
-            postLikeReply(likeUrl, id)
+            networkRepo.postLikeReply(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
                         toastText.postValue(Event(it))
@@ -136,7 +134,7 @@ class FeedViewModel @Inject constructor(
 
     fun fetchFeedReply() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getFeedContentReply(
+            networkRepo.getFeedContentReply(
                 id.toString(), listType, page, firstItem, lastItem, discussMode,
                 feedType.toString(), blockStatus, fromFeedAuthor
             )
@@ -200,7 +198,7 @@ class FeedViewModel @Inject constructor(
 
     fun fetchFeedData() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getFeedContent(id.toString(), frid)
+            networkRepo.getFeedContent(id.toString(), frid)
                 .collect { result ->
                     val feed = result.getOrNull()
                     if (feed?.message != null) {
@@ -282,7 +280,7 @@ class FeedViewModel @Inject constructor(
     var replyData = HashMap<String, String>()
     fun onPostReply() {
         viewModelScope.launch(Dispatchers.IO) {
-            postReply(replyData, rid.toString(), type.toString())
+            networkRepo.postReply(replyData, rid.toString(), type.toString())
                 .collect { result ->
                     val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
                     val response = result.getOrNull()
@@ -360,7 +358,7 @@ class FeedViewModel @Inject constructor(
     val createDialog = MutableLiveData<Event<Bitmap>>()
     private fun onGetValidateCaptcha() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
+            networkRepo.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -375,7 +373,7 @@ class FeedViewModel @Inject constructor(
     lateinit var requestValidateData: HashMap<String, String?>
     fun onPostRequestValidate() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postRequestValidate(requestValidateData)
+            networkRepo.postRequestValidate(requestValidateData)
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -404,7 +402,7 @@ class FeedViewModel @Inject constructor(
         else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
-            postLikeFeed(likeUrl, id)
+            networkRepo.postLikeFeed(likeUrl, id)
                 .catch { err ->
                     err.message?.let {
                         toastText.postValue(Event(it))
@@ -434,7 +432,7 @@ class FeedViewModel @Inject constructor(
 
     fun postDeleteFeedReply(url: String, id: String, position: Int, rPosition: Int?) {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.postDelete(url, id)
+            networkRepo.postDelete(url, id)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -468,18 +466,18 @@ class FeedViewModel @Inject constructor(
     }
 
     suspend fun isFavorite(fid: String): Boolean {
-        return historyFavoriteRepository.checkFavorite(fid)
+        return historyFavoriteRepo.checkFavorite(fid)
     }
 
     fun delete(fid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.deleteFavorite(fid)
+            historyFavoriteRepo.deleteFavorite(fid)
         }
     }
 
     fun insert(fav: FeedEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.insertFavorite(fav)
+            historyFavoriteRepo.insertFavorite(fav)
         }
     }
 
@@ -493,7 +491,7 @@ class FeedViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepository.saveHistory(
+            historyFavoriteRepo.saveHistory(
                 id,
                 uid,
                 username,

@@ -208,7 +208,7 @@ object Repository {
         Result.success(Network.getFollow(url, tag, id))
     }
 
-    private suspend fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
+    private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData(context) {
             val result = try {
                 block()
@@ -218,7 +218,7 @@ object Repository {
             emit(result)
         }
 
-    private suspend fun <T> fire(block: suspend () -> Result<T>) =
+    private fun <T> fire(block: suspend () -> Result<T>) =
         flow {
             val result = try {
                 block()

@@ -7,8 +7,8 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.network.Repository.getDataList
-import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
@@ -17,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeTopicContentViewModel @Inject constructor(
-    val repository: BlackListRepository
+    val repository: BlackListRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var page = 1
@@ -35,7 +36,7 @@ class HomeTopicContentViewModel @Inject constructor(
 
     fun fetchTopicData() {
         viewModelScope.launch(Dispatchers.IO) {
-            getDataList(url.toString(), title.toString(), null, lastItem, page)
+            networkRepo.getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
                     if (isLoadMore)
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))

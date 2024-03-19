@@ -4,11 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.TopicBean
-import com.example.c001apk.logic.network.Repository
-import com.example.c001apk.logic.network.Repository.getProductLayout
-import com.example.c001apk.logic.network.Repository.getTopicLayout
-import com.example.c001apk.logic.network.Repository.postFollow
-import com.example.c001apk.logic.repository.BlackListRepository
+import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TopicViewModel @Inject constructor(
-    private val repository: BlackListRepository
+    private val repository: BlackListRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
     var postFollowData: HashMap<String, String>? = null
@@ -43,7 +41,7 @@ class TopicViewModel @Inject constructor(
 
     fun fetchTopicLayout() {
         viewModelScope.launch(Dispatchers.IO) {
-            getTopicLayout(url.toString())
+            networkRepo.getTopicLayout(url.toString())
                 .collect { result ->
                     val data = result.getOrNull()
                     if (!data?.message.isNullOrEmpty()) {
@@ -80,7 +78,7 @@ class TopicViewModel @Inject constructor(
 
     fun fetchProductLayout() {
         viewModelScope.launch(Dispatchers.IO) {
-            getProductLayout(id.toString())
+            networkRepo.getProductLayout(id.toString())
                 .collect { result ->
                     val data = result.getOrNull()
                     if (!data?.message.isNullOrEmpty()) {
@@ -115,7 +113,7 @@ class TopicViewModel @Inject constructor(
     val afterFollow = MutableLiveData<Event<Pair<Boolean, String>>>()
     fun onGetFollow() {
         viewModelScope.launch(Dispatchers.IO) {
-            Repository.getFollow(followUrl.toString(), tag, null)
+            networkRepo.getFollow(followUrl.toString(), tag, null)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -136,7 +134,7 @@ class TopicViewModel @Inject constructor(
     fun onPostFollow() {
         viewModelScope.launch(Dispatchers.IO) {
             postFollowData?.let {
-                postFollow(it)
+                networkRepo.postFollow(it)
                     .collect { result ->
                         val response = result.getOrNull()
                         if (response != null) {
