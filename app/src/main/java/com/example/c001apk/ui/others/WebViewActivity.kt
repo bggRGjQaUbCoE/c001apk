@@ -35,6 +35,7 @@ import com.example.c001apk.util.http2https
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
+import java.net.URLDecoder
 import kotlin.system.exitProcess
 
 
@@ -105,7 +106,10 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         }
         binding.webView.apply {
             setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
-                val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
+                val fileName = URLDecoder.decode(
+                    URLUtil.guessFileName(url, contentDisposition, mimetype),
+                    "UTF-8"
+                )
                 MaterialAlertDialogBuilder(this@WebViewActivity).apply {
                     setTitle("确定下载文件吗？")
                     setMessage(fileName)
