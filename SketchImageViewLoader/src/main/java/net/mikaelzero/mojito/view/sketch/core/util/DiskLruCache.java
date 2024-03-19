@@ -371,7 +371,7 @@ public final class DiskLruCache implements Closeable {
         }
 
         String key = parts[1];
-        if (parts[0].equals(REMOVE) && parts.length == 2) {
+        if (REMOVE.equals(parts[0]) && parts.length == 2) {
             lruEntries.remove(key);
             return;
         }
@@ -382,13 +382,13 @@ public final class DiskLruCache implements Closeable {
             lruEntries.put(key, entry);
         }
 
-        if (parts[0].equals(CLEAN) && parts.length == 2 + valueCount) {
+        if (CLEAN.equals(parts[0]) && parts.length == 2 + valueCount) {
             entry.readable = true;
             entry.currentEditor = null;
             entry.setLengths(copyOfRange(parts, 2, parts.length));
-        } else if (parts[0].equals(DIRTY) && parts.length == 2) {
+        } else if (DIRTY.equals(parts[0]) && parts.length == 2) {
             entry.currentEditor = new Editor(entry);
-        } else if (parts[0].equals(READ) && parts.length == 2) {
+        } else if (READ.equals(parts[0]) && parts.length == 2) {
             // this work was already done by calling lruEntries.get()
         } else {
             throw new IOException("unexpected journal line: " + line);
