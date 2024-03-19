@@ -138,7 +138,7 @@ public class ImageDecodeUtils {
         }
 
         String message = throwable.getMessage();
-        return message != null && (message.equals("Problem decoding into existing bitmap") || message.contains("bitmap"));
+        return message != null && ("Problem decoding into existing bitmap".equals(message) || message.contains("bitmap"));
     }
 
     /**
@@ -170,6 +170,6 @@ public class ImageDecodeUtils {
         }
 
         String message = throwable.getMessage();
-        return message != null && (message.equals("rectangle is outside the image srcRect") || message.contains("srcRect"));
+        return message != null && ("rectangle is outside the image srcRect".equals(message) || message.contains("srcRect"));
     }
 }
