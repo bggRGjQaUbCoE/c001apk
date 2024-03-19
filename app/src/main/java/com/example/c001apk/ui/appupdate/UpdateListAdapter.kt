@@ -51,7 +51,7 @@ class UpdateListAdapter(
                 viewModel.packageName = holder.packageName
                 viewModel.versionCode = holder.apkversioncode
                 viewModel.appName = holder.appName.text.toString()
-                viewModel.versionName = holder.apkversioncode
+                viewModel.versionName = holder.apkversionname
                 viewModel.onGetDownloadLink()
             }
         }

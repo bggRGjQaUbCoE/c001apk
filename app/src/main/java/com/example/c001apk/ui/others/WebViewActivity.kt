@@ -29,6 +29,7 @@ import androidx.webkit.WebViewFeature
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
@@ -121,24 +122,35 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                         } catch (e: ActivityNotFoundException) {
                             Toast.makeText(this@WebViewActivity, "打开失败", Toast.LENGTH_SHORT)
                                 .show()
+                            copyText(this@WebViewActivity, url)
                             e.printStackTrace()
                         }
                     }
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        val request = DownloadManager.Request(Uri.parse(url))
-                            .setMimeType(mimetype)
-                            .addRequestHeader("cookie", CookieManager.getInstance().getCookie(url))
-                            .addRequestHeader("User-Agent", userAgent)
-                            .setTitle(fileName)
-                            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                            .setDestinationInExternalPublicDir(
-                                Environment.DIRECTORY_DOWNLOADS,
-                                fileName
-                            )
-                        val downloadManager =
-                            getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                        downloadManager.enqueue(request)
+                        try {
+                            val request = DownloadManager.Request(Uri.parse(url))
+                                .setMimeType(mimetype)
+                                .addRequestHeader(
+                                    "cookie",
+                                    CookieManager.getInstance().getCookie(url)
+                                )
+                                .addRequestHeader("User-Agent", userAgent)
+                                .setTitle(fileName)
+                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                .setDestinationInExternalPublicDir(
+                                    Environment.DIRECTORY_DOWNLOADS,
+                                    fileName
+                                )
+                            val downloadManager =
+                                getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                            downloadManager.enqueue(request)
+                        } catch (e: Exception) {
+                            Toast.makeText(this@WebViewActivity, "下载失败", Toast.LENGTH_SHORT)
+                                .show()
+                            copyText(this@WebViewActivity, url)
+                            e.printStackTrace()
+                        }
                     }
                     show()
                 }
@@ -242,13 +254,15 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             }
 
             R.id.openInBrowser -> {
-                val uri = Uri.parse(binding.webView.url.toString().http2https)
-                val intent = Intent(Intent.ACTION_VIEW, uri)
-                try {
-                    startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(this, "打开失败", Toast.LENGTH_SHORT).show()
-                    Log.w("error", "Activity was not found for intent, $intent")
+                binding.webView.url?.let {
+                    val uri = Uri.parse(it.http2https)
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    try {
+                        startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(this, "打开失败", Toast.LENGTH_SHORT).show()
+                        Log.w("error", "Activity was not found for intent, $intent")
+                    }
                 }
             }
 
