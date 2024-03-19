@@ -20,6 +20,8 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 
 import net.mikaelzero.mojito.view.sketch.core.util.SketchUtils;
 
@@ -129,7 +131,7 @@ public class HurlStack implements HttpStack {
     @NonNull
     @Override
     public Response getResponse(String uri) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(uri).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) Urls.create(uri, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS).openConnection();
 
         connection.setConnectTimeout(connectTimeout);
         connection.setReadTimeout(readTimeout);
