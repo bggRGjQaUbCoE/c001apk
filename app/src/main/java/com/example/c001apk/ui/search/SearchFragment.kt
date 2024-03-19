@@ -15,10 +15,10 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.feed.reply.IOnItemClickListener
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -154,8 +154,10 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
     private fun initEditText() {
         binding.editText.apply {
             highlightColor = ColorUtils.setAlphaComponent(
-                requireContext().getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorPrimary
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimaryDark,
+                    0
                 ), 128
             )
             isFocusable = true

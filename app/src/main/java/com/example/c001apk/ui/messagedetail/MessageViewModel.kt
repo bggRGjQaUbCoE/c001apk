@@ -65,13 +65,14 @@ class MessageViewModel @Inject constructor(
                             lastItem = feed.data.last().id
                             if (isRefreshing) messageList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in feed.data)
-                                    if (element.entityType == "feed"
-                                        || element.entityType == "feed_reply"
-                                        || element.entityType == "notification"
+                                feed.data.forEach {
+                                    if (it.entityType == "feed"
+                                        || it.entityType == "feed_reply"
+                                        || it.entityType == "notification"
                                     )
-                                        if (!repository.checkUid(element.uid))
-                                            messageList.add(element)
+                                        if (!repository.checkUid(it.uid))
+                                            messageList.add(it)
+                                }
                             }
                             changeState.postValue(
                                 Pair(

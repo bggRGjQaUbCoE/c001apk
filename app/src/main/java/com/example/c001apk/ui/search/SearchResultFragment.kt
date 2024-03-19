@@ -39,7 +39,6 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
         arguments?.let {
             viewModel.keyWord = it.getString("KEYWORD")
             viewModel.pageType = it.getString("pageType")

@@ -95,7 +95,7 @@
     <string name="topic_hot">热度排序</string>
     <string name="show_reply">查看评论</string>
     <string name="download">下载</string>
-    <string name="zmlmId">数字联盟ID</string>
+    <string name="szlmId">数字联盟ID</string>
     <string name="params">机型参数</string>
     <string name="user_black_list">用户黑名单</string>
     <string name="add">添加</string>
@@ -129,4 +129,6 @@
     <string name="loading_failed">加载失败</string>
     <string name="color_filter_in_dark_mode">深色模式压暗图片</string>
     <string name="edit_tab">编辑Tab</string>
+    <string name="random_value">随机值</string>
+    <string name="system_info">使用系统信息</string>
 </resources>

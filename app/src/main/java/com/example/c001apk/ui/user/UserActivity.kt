@@ -24,9 +24,9 @@ import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -152,7 +152,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -178,8 +178,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
 
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            this.getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                this,
+                com.google.android.material.R.attr.colorPrimary,
+                0
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
@@ -244,8 +246,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         val spannableString = SpannableString(itemBlock?.title)
         spannableString.setSpan(
             ForegroundColorSpan(
-                this.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorControlNormal,
+                    0
                 )
             ),
             0,
@@ -259,8 +263,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         val spannableString1 = SpannableString(itemShare?.title)
         spannableString1.setSpan(
             ForegroundColorSpan(
-                this.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorControlNormal,
+                    0
                 )
             ),
             0,
@@ -273,8 +279,10 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         val spannableString2 = SpannableString(itemReport?.title)
         spannableString2.setSpan(
             ForegroundColorSpan(
-                this.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorControlNormal,
+                    0
                 )
             ),
             0,

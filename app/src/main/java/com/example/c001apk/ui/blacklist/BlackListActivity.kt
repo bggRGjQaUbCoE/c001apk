@@ -19,10 +19,10 @@ import com.example.c001apk.ui.search.HistoryAdapter
 import com.example.c001apk.ui.topic.TopicActivity
 import com.example.c001apk.ui.user.UserActivity
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -220,8 +220,10 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             else -> ""
         }
         binding.editText.highlightColor = ColorUtils.setAlphaComponent(
-            this.getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                this,
+                com.google.android.material.R.attr.colorPrimaryDark,
+                0
             ), 128
         )
         binding.editText.hint = when (viewModel.type) {

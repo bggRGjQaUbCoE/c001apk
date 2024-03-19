@@ -11,7 +11,6 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
@@ -23,10 +22,10 @@ import com.example.c001apk.R
 import com.example.c001apk.util.Emoji
 import com.example.c001apk.util.EmojiUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.ExtendEditText
 import com.example.c001apk.view.circleindicator.CircleIndicator
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.color.MaterialColors
 
 class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog(mContext),
     IOnEmojiClickListener {
@@ -57,7 +56,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
             editText.text =
                 SpannableStringBuilderUtil.setEmoji(
                     context,
-                    replyTextMap[rid + ruid]!!,
+                    replyTextMap.getOrDefault(rid + ruid, ""),
                     (editText.textSize * 1.3).toInt()
                 )
             editText.setSelection(editText.text.toString().length)
@@ -68,8 +67,10 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
         super.onCreate(savedInstanceState)
 
         editText.highlightColor = ColorUtils.setAlphaComponent(
-            context.getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                context,
+                com.google.android.material.R.attr.colorPrimaryDark,
+                0
             ), 128
         )
         val title: TextView = view.findViewById(R.id.title)
@@ -98,9 +99,10 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
             } else {
                 publish.isClickable = true
                 publish.setTextColor(
-                    ThemeUtils.getThemeAttrColor(
+                    MaterialColors.getColor(
                         context,
-                        com.drakeet.about.R.attr.colorPrimary
+                        com.google.android.material.R.attr.colorPrimary,
+                        0
                     )
                 )
                 publish.setOnClickListener {
@@ -133,24 +135,27 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
             if (emojiPanel.visibility != View.VISIBLE) {
                 emojiPanel.visibility = View.VISIBLE
                 indicator.visibility = View.VISIBLE
-                val keyboard =
-                    ContextCompat.getDrawable(context, R.drawable.ic_arrow_down)
-                val drawableKeyboard = DrawableCompat.wrap(keyboard!!)
-                DrawableCompat.setTint(
-                    drawableKeyboard,
-                    ContextCompat.getColor(context, android.R.color.darker_gray)
-                )
-                emotion.setImageDrawable(drawableKeyboard)
+                val keyboard = ContextCompat.getDrawable(context, R.drawable.ic_arrow_down)
+                keyboard?.let {
+                    val drawableKeyboard = DrawableCompat.wrap(it)
+                    DrawableCompat.setTint(
+                        drawableKeyboard,
+                        ContextCompat.getColor(context, android.R.color.darker_gray)
+                    )
+                    emotion.setImageDrawable(drawableKeyboard)
+                }
             } else {
                 emojiPanel.visibility = View.GONE
                 indicator.visibility = View.GONE
                 val face = ContextCompat.getDrawable(context, R.drawable.ic_face)
-                val drawableFace = DrawableCompat.wrap(face!!)
-                DrawableCompat.setTint(
-                    drawableFace,
-                    ContextCompat.getColor(context, android.R.color.darker_gray)
-                )
-                emotion.setImageDrawable(drawableFace)
+                face?.let {
+                    val drawableFace = DrawableCompat.wrap(it)
+                    DrawableCompat.setTint(
+                        drawableFace,
+                        ContextCompat.getColor(context, android.R.color.darker_gray)
+                    )
+                    emotion.setImageDrawable(drawableFace)
+                }
             }
         }
 
@@ -173,7 +178,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                     } else {
                         val builder = SpannableStringBuilderUtil.setEmoji(
                             context,
-                            text!!,
+                            text ?: "",
                             (editText.textSize * 1.3).toInt(),
                         )
                         editText.editableText.replace(

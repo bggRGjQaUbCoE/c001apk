@@ -27,7 +27,7 @@ import javax.inject.Inject
 class Reply2ReplyBottomSheetViewModel @Inject constructor(
     private val repository: BlackListRepository,
     private val historyFavoriteRepository: HistoryFavoriteRepository
-): ViewModel() {
+) : ViewModel() {
 
     var uname: String? = null
     var ruid: String? = null
@@ -82,10 +82,13 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             replyTotalList.addAll(oriReply)
                         }
                         listSize = replyTotalList.size
-                        for (element in reply?.data!!)
-                            if (element.entityType == "feed_reply")
-                                if (!repository.checkUid(element.uid))
-                                    replyTotalList.add(element)
+                        reply?.data?.let { data ->
+                            data.forEach {
+                                if (it.entityType == "feed_reply")
+                                    if (!repository.checkUid(it.uid))
+                                        replyTotalList.add(it)
+                            }
+                        }
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
                     } else if (reply?.data?.isEmpty() == true) {
                         if (replyTotalList.isEmpty())
@@ -123,9 +126,8 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             if (response.data.id != null) {
                                 toastText.postValue(Event("回复成功"))
                                 closeSheet.postValue(Event(true))
-                                // generate
                                 replyTotalList.add(
-                                    position!! + 1,
+                                    (position ?: 0) + 1,
                                     TotalReplyResponse.Data(
                                         null,
                                         "feed_reply",
@@ -170,7 +172,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         val responseBody = response.body()
-                        val bitmap = BitmapFactory.decodeStream(responseBody!!.byteStream())
+                        val bitmap = BitmapFactory.decodeStream(responseBody?.byteStream())
                         createDialog.postValue(Event(bitmap))
                     }
                 }
@@ -221,7 +223,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = totalReplyData.value!!.toMutableList()
+                            val currentList = totalReplyData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             totalReplyData.postValue(currentList)

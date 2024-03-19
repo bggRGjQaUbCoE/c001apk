@@ -11,16 +11,21 @@ import androidx.recyclerview.widget.RecyclerView
 class MyLinearSmoothScroller(context: Context) : LinearSmoothScroller(context) {
     override fun onTargetFound(targetView: View, state: RecyclerView.State, action: Action) {
         // 计算距离
-        val distance = distanceToCenter(
-            layoutManager!!,
-            targetView,
-            getOrientationHelper(layoutManager!!)!!
-        )
+        var distance = 0
+        layoutManager?.let { layoutManager ->
+            getOrientationHelper(layoutManager)?.let { orientationHelper ->
+                distance = distanceToCenter(
+                    layoutManager,
+                    targetView,
+                    orientationHelper
+                )
+            }
+        }
         // 计算动画时间
         val time = calculateTimeForDeceleration(distance)
         if (time > 0) {
             // 这里仅实现了水平或者垂直一种方向上的矫正，两者同时的情况暂不考虑
-            if (layoutManager!!.canScrollVertically())
+            if (layoutManager?.canScrollVertically() == true)
                 action.update(0, distance, time * 3, mDecelerateInterpolator)
             else
                 action.update(distance, 0, time * 3, mDecelerateInterpolator)

@@ -59,7 +59,7 @@ class BlackListRepository @Inject constructor(
     }
 
     suspend fun checkTopic(topic: String): Boolean {
-        return topicBlackListDao.isExist(topic)
+        return topicBlackListDao.isContain(topic)
     }
 
     suspend fun saveTopic(topic: String) {

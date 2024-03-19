@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import com.example.c001apk.logic.model.StringEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -28,6 +29,10 @@ interface StringEntityDao {
 
     @Query("SELECT 1 FROM StringEntity WHERE data = :data LIMIT 1")
     suspend fun isExist(data: String): Boolean
+
+    @Transaction
+    @Query("SELECT 1 FROM StringEntity WHERE :data LIKE '%' || data || '%' LIMIT 1")
+    suspend fun isContain(data: String): Boolean
 
     @Query("DELETE FROM StringEntity WHERE data = :data")
     suspend fun delete(data: String)

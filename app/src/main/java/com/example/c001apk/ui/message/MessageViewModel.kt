@@ -19,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 import javax.inject.Inject
 
@@ -69,15 +70,16 @@ class MessageViewModel @Inject constructor(
                             add(data.data.follow)
                             add(data.data.fans)
                         }
-                        PrefManager.username = URLEncoder.encode(data.data.username, "UTF-8")
+                        PrefManager.username =
+                            withContext(Dispatchers.IO) {
+                                URLEncoder.encode(data.data.username, "UTF-8")
+                            }
                         PrefManager.userAvatar = data.data.userAvatar
                         PrefManager.level = data.data.level
                         PrefManager.experience = data.data.experience.toString()
                         PrefManager.nextLevelExperience = data.data.nextLevelExperience.toString()
                         doWhat.postValue(Event("showProfile"))
                         doWhat.postValue(Event("countList"))
-                        //showProfile()
-                        // notify
 
                         fetchMessage()
                     } else {
@@ -101,16 +103,16 @@ class MessageViewModel @Inject constructor(
                     response?.let {
                         response.body()?.let {
                             if (response.body()?.data?.token != null) {
-                                val login = response.body()?.data!!
-                                messCountList.apply {
-                                    add(login.notifyCount.atme)
-                                    add(login.notifyCount.atcommentme)
-                                    add(login.notifyCount.feedlike)
-                                    add(login.notifyCount.contactsFollow)
-                                    add(login.notifyCount.message)
+                                response.body()?.data?.let { login ->
+                                    messCountList.apply {
+                                        add(login.notifyCount.atme)
+                                        add(login.notifyCount.atcommentme)
+                                        add(login.notifyCount.feedlike)
+                                        add(login.notifyCount.contactsFollow)
+                                        add(login.notifyCount.message)
+                                    }
                                 }
                                 doWhat.postValue(Event("messCountList"))
-                                // notify
                             }
                         }
                     }
@@ -142,10 +144,11 @@ class MessageViewModel @Inject constructor(
                             if (isRefreshing)
                                 messageList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in feed.data)
-                                    if (element.entityType == "notification")
-                                        if (!repository.checkUid(element.fromuid))
-                                            messageList.add(element)
+                                feed.data.forEach {
+                                    if (it.entityType == "notification")
+                                        if (!repository.checkUid(it.fromuid))
+                                            messageList.add(it)
+                                }
                             }
                             changeState.postValue(
                                 Pair(
@@ -179,7 +182,7 @@ class MessageViewModel @Inject constructor(
                     val response = result.getOrNull()
                     if (response != null) {
                         if (response.data == "删除成功") {
-                            val messList = messageData.value!!.toMutableList()
+                            val messList = messageData.value?.toMutableList() ?: ArrayList()
                             messList.removeAt(position)
                             messageData.postValue(messList)
                             toastText.postValue(Event(response.data))

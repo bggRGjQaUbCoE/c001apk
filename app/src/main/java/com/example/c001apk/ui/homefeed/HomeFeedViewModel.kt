@@ -76,7 +76,9 @@ class HomeFeedViewModel @Inject constructor(
                     } else if (!feed?.data.isNullOrEmpty()) {
                         lastItem = feed?.data?.last()?.id
                         if (isRefreshing) {
-                            if (feed?.data!!.size <= 4 && feed.data.last().entityTemplate == "refreshCard") {
+                            if ((feed?.data?.size ?: 0) <= 4
+                                && feed?.data?.last()?.entityTemplate == "refreshCard"
+                            ) {
                                 toastText.postValue(Event(feed.data.last().title))
                                 firstItem = null
                                 lastItem = null
@@ -96,25 +98,27 @@ class HomeFeedViewModel @Inject constructor(
                             }
                         }
                         if (isRefreshing || isLoadMore) {
-                            for (element in feed?.data!!) {
-                                if (!PrefManager.isIconMiniCard && element.entityTemplate == "iconMiniScrollCard")
-                                    continue
-                                else if (element.entityType == "feed" && element.feedType != "vote"
-                                    || element.entityTemplate == "iconMiniScrollCard"
-                                    || element.entityTemplate == "iconLinkGridCard"
-                                    || element.entityTemplate == "imageCarouselCard_1"
-                                    || element.entityTemplate == "imageTextScrollCard"
-                                ) {
-                                    if (element.entityType == "feed" && changeFirstItem) {
-                                        changeFirstItem = false
-                                        firstItem = element.id
-                                    }
-                                    if (!repository.checkUid(element.userInfo?.uid.toString())
-                                        && !repository.checkTopic(
-                                            element.tags + element.ttitle
+                            feed?.data?.let { data ->
+                                data.forEach {
+                                    if (!PrefManager.isIconMiniCard && it.entityTemplate == "iconMiniScrollCard")
+                                        return@forEach
+                                    else if (it.entityType == "feed" && it.feedType != "vote"
+                                        || it.entityTemplate == "iconMiniScrollCard"
+                                        || it.entityTemplate == "iconLinkGridCard"
+                                        || it.entityTemplate == "imageCarouselCard_1"
+                                        || it.entityTemplate == "imageTextScrollCard"
+                                    ) {
+                                        if (it.entityType == "feed" && changeFirstItem) {
+                                            changeFirstItem = false
+                                            firstItem = it.id
+                                        }
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
+                                            && !repository.checkTopic(
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                            )
                                         )
-                                    )
-                                        currentList.add(element)
+                                            currentList.add(it)
+                                    }
                                 }
                             }
                         }
@@ -151,7 +155,7 @@ class HomeFeedViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = homeFeedData.value!!.toMutableList()
+                            val currentList = homeFeedData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             homeFeedData.postValue(currentList)
@@ -192,22 +196,24 @@ class HomeFeedViewModel @Inject constructor(
                         if (isRefreshing)
                             currentList.clear()
                         if (isRefreshing || isLoadMore) {
-                            feed?.data!!.forEach {
-                                if (!PrefManager.isIconMiniCard
-                                    && it.entityTemplate == "iconMiniGridCard"
-                                )
-                                    return@forEach
-                                else if (it.entityType == "feed"
-                                    || it.entityTemplate == "iconMiniGridCard"
-                                    || it.entityTemplate == "iconLinkGridCard"
-                                    || it.entityTemplate == "imageSquareScrollCard"
-                                ) {
-                                    if (!repository.checkUid(it.userInfo?.uid.toString())
-                                        && !repository.checkTopic(
-                                            it.tags + it.ttitle
-                                        )
+                            feed?.data?.let { data ->
+                                data.forEach {
+                                    if (!PrefManager.isIconMiniCard
+                                        && it.entityTemplate == "iconMiniGridCard"
                                     )
-                                        currentList.add(it)
+                                        return@forEach
+                                    else if (it.entityType == "feed"
+                                        || it.entityTemplate == "iconMiniGridCard"
+                                        || it.entityTemplate == "iconLinkGridCard"
+                                        || it.entityTemplate == "imageSquareScrollCard"
+                                    ) {
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
+                                            && !repository.checkTopic(
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                            )
+                                        )
+                                            currentList.add(it)
+                                    }
                                 }
                             }
                         }
@@ -236,7 +242,7 @@ class HomeFeedViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = homeFeedData.value!!.toMutableList()
+                            val updateList = homeFeedData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             homeFeedData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -284,7 +290,7 @@ class HomeFeedViewModel @Inject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         val responseBody = response.body()
-                        val bitmap = BitmapFactory.decodeStream(responseBody!!.byteStream())
+                        val bitmap = BitmapFactory.decodeStream(responseBody?.byteStream())
                         createDialog.postValue(Event(bitmap))
                     }
                 }

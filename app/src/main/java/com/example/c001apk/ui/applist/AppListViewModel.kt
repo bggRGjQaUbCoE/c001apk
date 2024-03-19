@@ -48,7 +48,7 @@ class AppListViewModel : ViewModel() {
             val newItems = ArrayList<AppItem>()
             val updateCheckJsonObject = JSONObject()
 
-            for (info in appList) {
+            appList.forEach { info ->
                 if (((info.flags and ApplicationInfo.FLAG_SYSTEM) != ApplicationInfo.FLAG_SYSTEM)) {
                     val packageInfo = context.packageManager.getPackageInfo(info.packageName, 0)
 

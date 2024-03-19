@@ -132,7 +132,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun initView() {
-        binding.viewPager.offscreenPageLimit = viewModel.tabList!!.size
+        binding.viewPager.offscreenPageLimit = viewModel.tabList?.size ?: 0
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 when (position) {
@@ -142,10 +142,10 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
                     else -> throw IllegalArgumentException()
                 }
 
-            override fun getItemCount() = viewModel.tabList!!.size
+            override fun getItemCount() = viewModel.tabList?.size ?: 0
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = viewModel.tabList!![position]
+            tab.text = viewModel.tabList?.getOrElse(position) { "null" }
         }.attach()
 
         binding.tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {

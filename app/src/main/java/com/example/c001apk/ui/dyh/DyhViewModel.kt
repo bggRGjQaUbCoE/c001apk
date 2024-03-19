@@ -26,7 +26,7 @@ import javax.inject.Inject
 class DyhViewModel @Inject constructor(
     val repository: BlackListRepository,
     private val historyFavoriteRepository: HistoryFavoriteRepository
-): ViewModel() {
+) : ViewModel() {
     fun fetchDyhDetail() {
         viewModelScope.launch(Dispatchers.IO) {
             getDyhDetail(id.toString(), type.toString(), page, lastItem)
@@ -50,14 +50,15 @@ class DyhViewModel @Inject constructor(
                             if (isRefreshing)
                                 dyhDataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in data.data)
-                                    if (element.entityType == "feed")
-                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                data.data.forEach {
+                                    if (it.entityType == "feed")
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
                                             && !repository.checkTopic(
-                                                element.tags + element.ttitle
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
-                                            dyhDataList.add(element)
+                                            dyhDataList.add(it)
+                                }
                             }
                             changeState.postValue(
                                 Pair(
@@ -157,7 +158,7 @@ class DyhViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.saveUid(uid)
             }
-            val currentList = dataListData.value!!.toMutableList()
+            val currentList = dataListData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             dataListData.postValue(currentList)
         }
@@ -175,7 +176,7 @@ class DyhViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = dataListData.value!!.toMutableList()
+                            val updateList = dataListData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             dataListData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -203,7 +204,7 @@ class DyhViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = dataListData.value!!.toMutableList()
+                            val currentList = dataListData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             dataListData.postValue(currentList)

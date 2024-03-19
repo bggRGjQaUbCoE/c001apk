@@ -16,10 +16,10 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.HomeFragment
 import com.example.c001apk.ui.message.MessageFragment
 import com.example.c001apk.ui.settings.SettingsFragment
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.navigation.NavigationBarView
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -125,9 +125,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
     private fun setBadge() {
         val badge = navView.getOrCreateBadge(R.id.navigation_message)
         badge.number = viewModel.badge
-        badge.backgroundColor = this.getColorFromAttr(
-            rikka.preference.simplemenu.R.attr.colorPrimary
-        )
+        badge.backgroundColor =
+            MaterialColors.getColor(
+                this,
+                com.google.android.material.R.attr.colorPrimary,
+                0
+            )
         //badge.badgeTextColor = ContextCompat.getColor(this,R.color.design_default_color_error)
         badge.badgeGravity = BadgeDrawable.TOP_END
         badge.verticalOffset = 5
@@ -168,9 +171,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
             // 这里不直接使用 windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
             // 因为它的结果可能受到 insets 传播链上层某环节的影响，出现了错误的 navigationBarsInsets
             val navigationBarsInsets =
-                ViewCompat.getRootWindowInsets(view)!!
-                    .getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navigationBarsInsets.bottom)
+                ViewCompat.getRootWindowInsets(view)
+                    ?.getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.updatePadding(bottom = navigationBarsInsets?.bottom ?: 0)
             windowInsets
         }
     }

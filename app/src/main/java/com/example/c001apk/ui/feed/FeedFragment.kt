@@ -41,11 +41,11 @@ import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ToastUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.view.StickyItemDecorator
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -75,11 +75,27 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         initView()
         initToolBar()
         initData()
+        initRefresh()
         initScroll()
         initReplyBtn()
         initBottomSheet()
         initObserve()
 
+    }
+
+    private fun initRefresh() {
+        binding.swipeRefresh.setColorSchemeColors(
+            MaterialColors.getColor(
+                requireContext(),
+                com.google.android.material.R.attr.colorPrimary,
+                0
+            )
+        )
+        binding.swipeRefresh.setOnRefreshListener {
+            binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.visibility = View.GONE
+            refresh()
+        }
     }
 
     @SuppressLint("InflateParams")
@@ -161,7 +177,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -244,8 +260,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 )
                 binding.captchaImg.setImageBitmap(it)
                 binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
-                    requireContext().getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimaryDark),
-                    128
+                    MaterialColors.getColor(
+                        requireContext(),
+                        com.google.android.material.R.attr.colorPrimaryDark,
+                        0
+                    ), 128
                 )
                 MaterialAlertDialogBuilder(requireContext()).apply {
                     setView(binding.root)
@@ -501,13 +520,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                                         if (viewModel.feedType == "feedArticle")
                                             viewModel.articleMsg.toString()
                                         else {
-                                            with(viewModel.feedDataList!![0].message) {
+                                            with(viewModel.feedDataList?.getOrNull(0)?.message.toString()) {
                                                 if (this.length > 150) this.substring(0, 150)
                                                 else this
                                             }
                                         }, // 还未加载完会空指针
                                         if (viewModel.feedType == "feedArticle") viewModel.articleDateLine.toString()
-                                        else viewModel.feedDataList!![0].dateline.toString()
+                                        else viewModel.feedDataList?.getOrNull(0)?.dateline.toString()
                                     )
                                     viewModel.insert(fav)
                                     withContext(Dispatchers.Main) {
@@ -697,13 +716,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     uid,
                     id
                 )
-            val feedReplyList = viewModel.feedReplyData.value!!
+            val feedReplyList = viewModel.feedReplyData.value ?: emptyList()
             if (rPosition == null || rPosition == -1)
                 mBottomSheetDialogFragment.oriReply.add(feedReplyList[position])
             else
-                mBottomSheetDialogFragment.oriReply.add(
-                    feedReplyList[position].replyRows!![rPosition]
-                )
+                feedReplyList[position].replyRows?.getOrNull(rPosition)?.let {
+                    mBottomSheetDialogFragment.oriReply.add(it)
+                }
 
             mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")
         }
@@ -748,6 +767,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 }
 
                 R.id.delete -> {
+                    viewModel.position = position
                     viewModel.postDeleteFeedReply("/v6/feed/deleteReply", id, position, rPosition)
                 }
 

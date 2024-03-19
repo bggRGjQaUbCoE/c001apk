@@ -30,9 +30,9 @@ import com.example.c001apk.util.Event
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLDecoder
@@ -145,7 +145,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -212,8 +212,10 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            requireContext().getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                requireContext(),
+                com.google.android.material.R.attr.colorPrimary,
+                0
             )
         )
         binding.swipeRefresh.setOnRefreshListener {
@@ -330,7 +332,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
         override fun onBlockUser(id: String, uid: String, position: Int) {
             viewModel.saveUid(uid)
-            val currentList = viewModel.messageData.value!!.toMutableList()
+            val currentList = viewModel.messageData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             viewModel.messageData.postValue(currentList)
         }

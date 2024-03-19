@@ -12,7 +12,6 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.databinding.BindingAdapter
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
@@ -21,20 +20,30 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
+import com.google.android.material.color.MaterialColors
 
 @BindingAdapter("setExtraPic")
 fun setExtraPic(imageView: ImageView, extraPic: String?) {
     if (extraPic.isNullOrEmpty())
         imageView.apply {
             setBackgroundColor(
-                imageView.context.getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimary)
+                MaterialColors.getColor(
+                    imageView.context,
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
             val link = imageView.context.getDrawable(R.drawable.ic_link)
-            link!!.setTint(imageView.context.getColorFromAttr(android.R.attr.windowBackground))
+            link?.setTint(
+                MaterialColors.getColor(
+                    imageView.context,
+                    android.R.attr.windowBackground,
+                    0
+                )
+            )
             setImageDrawable(link)
         }
     else {
@@ -50,7 +59,11 @@ fun setFollowText(textView: TextView, userAction: HomeFeedResponse.UserAction?) 
         textView.visibility = View.VISIBLE
         if (userAction.followAuthor == 0) {
             textView.text = "关注"
-            textView.setTextColor(textView.context.getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimary))
+            MaterialColors.getColor(
+                textView.context,
+                com.google.android.material.R.attr.colorPrimary,
+                0
+            )
         } else if (userAction.followAuthor == 1) {
             textView.text = "取消关注"
             textView.setTextColor(textView.context.getColor(android.R.color.darker_gray))
@@ -63,13 +76,15 @@ fun setArticleImage(
     imageView: NineGridImageView,
     setArticleImage: FeedArticleContentBean.Data,
 ) {
-    val urlList = ArrayList<String>()
-    urlList.add("${setArticleImage.url}.s.jpg")
-    val imageLp = ImageUtil.getImageLp(setArticleImage.url!!)
-    imageView.imgWidth = imageLp.first
-    imageView.imgHeight = imageLp.second
-    imageView.isCompress = true
-    imageView.setUrlList(urlList)
+    setArticleImage.url?.let {
+        val urlList = ArrayList<String>()
+        urlList.add("$it.s.jpg")
+        val imageLp = ImageUtil.getImageLp(it)
+        imageView.imgWidth = imageLp.first
+        imageView.imgHeight = imageLp.second
+        imageView.isCompress = true
+        imageView.setUrlList(urlList)
+    }
 }
 
 @BindingAdapter(value = ["targetRow", "relationRows", "isFeedContent"], requireAll = true)
@@ -195,12 +210,17 @@ fun setGridView(
 fun setLike(textView: TextView, isLike: Int?) {
     isLike?.let {
         val color = if (it == 1)
-            textView.context.getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimary)
+            MaterialColors.getColor(
+                textView.context,
+                com.google.android.material.R.attr.colorPrimary,
+                0
+            )
         else textView.context.getColor(android.R.color.darker_gray)
         val size = textView.textSize.toInt()
-        val drawableLike = textView.context.getDrawable(R.drawable.ic_like)!!
-        drawableLike.setBounds(0, 0, size, size)
-        DrawableCompat.setTint(drawableLike, color)
+        val drawableLike = textView.context.getDrawable(R.drawable.ic_like).also { drawable ->
+            drawable?.setBounds(0, 0, size, size)
+            drawable?.setTint(color)
+        }
         textView.setCompoundDrawables(drawableLike, null, null, null)
         textView.setTextColor(color)
     }

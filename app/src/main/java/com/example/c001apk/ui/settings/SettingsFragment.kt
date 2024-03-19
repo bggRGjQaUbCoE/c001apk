@@ -16,7 +16,7 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.DialogAboutBinding
 import com.example.c001apk.databinding.FragmentSettingsBinding
 import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.util.Utils.getColorFromAttr
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.material.app.LocaleDelegate
 
@@ -60,8 +60,10 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
             binding.designAboutTitle.setText(R.string.app_name)
             binding.designAboutInfo.movementMethod = LinkMovementMethod.getInstance()
             binding.designAboutInfo.highlightColor = ColorUtils.setAlphaComponent(
-                requireContext().getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorPrimary
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimaryDark,
+                    0
                 ), 128
             )
             binding.designAboutInfo.text = HtmlCompat.fromHtml(

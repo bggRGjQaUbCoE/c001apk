@@ -46,7 +46,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
         arguments?.let {
             viewModel.url = it.getString("url")
             viewModel.title = it.getString("title")
@@ -220,10 +219,12 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                             "product" -> {
                                 if (viewModel.postFollowData.isNullOrEmpty())
                                     viewModel.postFollowData = HashMap()
-                                viewModel.postFollowData!!["id"] = viewModel.id.toString()
-                                viewModel.postFollowData!!["status"] =
-                                    if (viewModel.isFollow) "0"
-                                    else "1"
+                                viewModel.postFollowData?.let { map ->
+                                    map["id"] = viewModel.id.toString()
+                                    map["status"] =
+                                        if (viewModel.isFollow) "0"
+                                        else "1"
+                                }
                                 viewModel.onPostFollow()
                             }
 

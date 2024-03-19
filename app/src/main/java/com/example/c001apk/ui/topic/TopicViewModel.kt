@@ -37,7 +37,7 @@ class TopicViewModel @Inject constructor(
     val topicList: MutableList<TopicBean> = ArrayList()
     var page = 1
     var errorMessage: String? = null
-    var tabSelected: Int? = null
+    var tabSelected: Int = 0
     val doNext = MutableLiveData<Event<Boolean>>()
     val showError = MutableLiveData<Event<Boolean>>()
 
@@ -57,16 +57,16 @@ class TopicViewModel @Inject constructor(
                             type = data.data.entityType
                             subtitle = data.data.intro
 
-                            for (element in data.data.tabList) {
-                                tabList.add(element.title)
-                                topicList.add(TopicBean(element.url, element.title))
+                            data.data.tabList.forEach {
+                                tabList.add(it.title)
+                                topicList.add(TopicBean(it.url, it.title))
                             }
-                            tabSelected = 0
-                            for (element in data.data.tabList) {
-                                if (data.data.selectedTab == element.pageName) break
-                                else tabSelected = tabSelected!! + 1
+                            run breaking@{
+                                data.data.tabList.forEach {
+                                    if (data.data.selectedTab == it.pageName) return@breaking
+                                    else tabSelected++
+                                }
                             }
-
                         }
                         doNext.postValue(Event(true))
                     } else {
@@ -92,14 +92,15 @@ class TopicViewModel @Inject constructor(
                         if (tabList.isEmpty()) {
                             subtitle = data.data.intro
 
-                            for (element in data.data.tabList) {
-                                tabList.add(element.title)
-                                topicList.add(TopicBean(element.url, element.title))
+                            data.data.tabList.forEach {
+                                tabList.add(it.title)
+                                topicList.add(TopicBean(it.url, it.title))
                             }
-                            tabSelected = 0
-                            for (element in data.data.tabList) {
-                                if (data.data.selectedTab == element.pageName) break
-                                else tabSelected = tabSelected!! + 1
+                            run breaking@{
+                                data.data.tabList.forEach {
+                                    if (data.data.selectedTab == it.pageName) return@breaking
+                                    else tabSelected++
+                                }
                             }
                         }
                         doNext.postValue(Event(true))

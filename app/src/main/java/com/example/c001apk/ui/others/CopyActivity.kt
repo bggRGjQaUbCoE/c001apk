@@ -29,7 +29,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var menuList: ArrayList<HomeMenu>
 
-    private fun getAllLinkAndText(str: String?): String {
+    private fun getAllLinkAndText(str: String): String {
         return if (TextUtils.isEmpty(str)) "" else
             Pattern.compile("<a class=\"feed-link-url\"\\s+href=\"([^<>\"]*)\"[^<]*[^>]*>")
                 .matcher(str).replaceAll(" $1 ")
@@ -76,7 +76,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         viewModel.restart.observe(this) {
             if (it) {
                 val intent = packageManager.getLaunchIntentForPackage(packageName)
-                intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(intent)
             }
         }

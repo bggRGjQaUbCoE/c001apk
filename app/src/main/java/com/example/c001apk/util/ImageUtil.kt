@@ -395,15 +395,15 @@ object ImageUtil {
 
 
     // 将File 转化为 content://URI
-    private fun getFileProvider(context: Context, file: File?): Uri {
+    private fun getFileProvider(context: Context, file: File): Uri {
         val authority = context.packageName + ".fileprovider"
         return FileProvider.getUriForFile(
             context, authority,
-            file!!
+            file
         )
     }
 
-    private fun shareImage(context: Context, file: File?, title: String?) {
+    private fun shareImage(context: Context, file: File, title: String?) {
         val contentUri = getFileProvider(context, file)
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "image/*"
@@ -412,7 +412,7 @@ object ImageUtil {
         context.startActivity(Intent.createChooser(intent, title))
     }
 
-    private fun shareVideo(context: Context, file: File?, title: String?) {
+    private fun shareVideo(context: Context, file: File, title: String?) {
         val contentUri = getFileProvider(context, file)
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "video/*"
@@ -421,7 +421,7 @@ object ImageUtil {
         context.startActivity(Intent.createChooser(intent, title))
     }
 
-    private fun shareFile(context: Context, file: File?, title: String?) {
+    private fun shareFile(context: Context, file: File, title: String?) {
         val contentUri = getFileProvider(context, file)
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "*/*"

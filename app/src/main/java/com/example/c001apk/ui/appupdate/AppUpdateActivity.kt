@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.appupdate
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import com.example.c001apk.R
@@ -9,6 +10,7 @@ import com.example.c001apk.ui.base.BaseActivity
 
 class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
 
+    @SuppressLint("CommitTransaction")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

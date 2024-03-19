@@ -19,9 +19,9 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -225,7 +225,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -251,8 +251,10 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
 
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            this.getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                this,
+                com.google.android.material.R.attr.colorPrimary,
+                0
             )
         )
         binding.swipeRefresh.setOnRefreshListener {

@@ -36,11 +36,11 @@ import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -96,8 +96,11 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 )
                 binding.captchaImg.setImageBitmap(it)
                 binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
-                    requireContext().getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimaryDark),
-                    128
+                    MaterialColors.getColor(
+                        requireContext(),
+                        com.google.android.material.R.attr.colorPrimaryDark,
+                        0
+                    ), 128
                 )
                 MaterialAlertDialogBuilder(requireContext()).apply {
                     setView(binding.root)
@@ -208,7 +211,11 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
 
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            requireContext().getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimary)
+            MaterialColors.getColor(
+                requireContext(),
+                com.google.android.material.R.attr.colorPrimary,
+                0
+            )
         )
         binding.swipeRefresh.setOnRefreshListener {
             binding.indicator.parent.isIndeterminate = false
@@ -231,7 +238,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -370,7 +377,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
             }
         }
 
-
     }
 
     inner class FooterListener : FooterAdapter.FooterListener {
@@ -397,7 +403,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 }
                 setSingleChoiceItems(
                     items,
-                    viewModel.position!!
+                    viewModel.position ?: 0
                 ) { dialog: DialogInterface, position: Int ->
                     when (position) {
                         0 -> {
@@ -485,7 +491,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
 
         override fun onBlockUser(id: String, uid: String, position: Int) {
             viewModel.saveUid(uid)
-            val currentList = viewModel.homeFeedData.value!!.toMutableList()
+            val currentList = viewModel.homeFeedData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             viewModel.homeFeedData.postValue(currentList)
         }

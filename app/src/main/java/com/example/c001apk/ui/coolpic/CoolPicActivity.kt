@@ -10,7 +10,9 @@ import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CoolPicActivity : BaseActivity<ActivityCoolPicBinding>(), IOnTabClickContainer {
 
     private var titleText: String? = null

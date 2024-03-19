@@ -74,15 +74,17 @@ class AppDetailViewModel @Inject constructor(
                         if (isRefreshing)
                             appCommentList.clear()
                         if (isRefreshing || isLoadMore) {
-                            comment?.data!!.forEach {
-                                if (it.entityType == "feed")
-                                    if (!repository.checkUid(
-                                            it.userInfo?.uid.toString()
-                                        ) && !repository.checkTopic(
-                                            it.tags + it.ttitle
+                            comment?.data?.let { data ->
+                                data.forEach {
+                                    if (it.entityType == "feed")
+                                        if (!repository.checkUid(
+                                                it.userInfo?.uid.toString()
+                                            ) && !repository.checkTopic(
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                            )
                                         )
-                                    )
-                                        appCommentList.add(it)
+                                            appCommentList.add(it)
+                                }
                             }
                         }
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
@@ -114,7 +116,7 @@ class AppDetailViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = appCommentData.value!!.toMutableList()
+                            val updateList = appCommentData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             appCommentData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -175,7 +177,7 @@ class AppDetailViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.saveUid(uid)
             }
-            val currentList = appCommentData.value!!.toMutableList()
+            val currentList = appCommentData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             appCommentData.postValue(currentList)
         }
@@ -198,7 +200,7 @@ class AppDetailViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = appCommentData.value!!.toMutableList()
+                            val currentList = appCommentData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             appCommentData.postValue(currentList)

@@ -112,7 +112,7 @@ class LoginViewModel : ViewModel() {
                     val response = result.getOrNull()
                     response?.let {
                         val responseBody = response.body()
-                        val bitmap = BitmapFactory.decodeStream(responseBody!!.byteStream())
+                        val bitmap = BitmapFactory.decodeStream(responseBody?.byteStream())
                         showCaptcha.postValue(Event(bitmap))
                     }
                 }

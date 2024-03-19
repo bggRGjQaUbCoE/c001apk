@@ -78,18 +78,18 @@ class TopicContentViewModel @Inject constructor(
                             if (isRefreshing)
                                 topicDataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in data.data) {
-                                    if (element.entityType == "feed"
-                                        || element.entityType == "topic"
-                                        || element.entityType == "product"
-                                        || element.entityType == "user"
+                                data.data.forEach {
+                                    if (it.entityType == "feed"
+                                        || it.entityType == "topic"
+                                        || it.entityType == "product"
+                                        || it.entityType == "user"
                                     )
-                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
                                             && !repository.checkTopic(
-                                                element.tags + element.ttitle
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
-                                            topicDataList.add(element)
+                                            topicDataList.add(it)
                                 }
                             }
                             changeState.postValue(
@@ -166,7 +166,7 @@ class TopicContentViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.saveUid(uid)
             }
-            val currentList = topicData.value!!.toMutableList()
+            val currentList = topicData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             topicData.postValue(currentList)
         }
@@ -184,7 +184,7 @@ class TopicContentViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = topicData.value!!.toMutableList()
+                            val updateList = topicData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             topicData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -212,7 +212,7 @@ class TopicContentViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = topicData.value!!.toMutableList()
+                            val currentList = topicData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             topicData.postValue(currentList)

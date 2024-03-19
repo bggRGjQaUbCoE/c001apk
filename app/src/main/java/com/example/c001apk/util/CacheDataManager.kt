@@ -35,15 +35,12 @@ object CacheDataManager {
     fun getFolderSize(file: File?): Long {
         var size: Long = 0
         try {
-            val fileList = file!!.listFiles()
-            if (fileList != null) {
-                for (value in fileList) {
-                    // 如果下面还有文件
-                    size = if (value.isDirectory()) {
-                        size + getFolderSize(value)
-                    } else {
-                        size + value.length()
-                    }
+            file?.listFiles()?.forEach { value ->
+                // 如果下面还有文件
+                size = if (value.isDirectory()) {
+                    size + getFolderSize(value)
+                } else {
+                    size + value.length()
                 }
             }
         } catch (e: Exception) {
@@ -87,17 +84,14 @@ object CacheDataManager {
 
     private fun deleteDir(dir: File?): Boolean {
         if (dir != null && dir.isDirectory()) {
-            val children = dir.list()
-            if (children != null) {
-                for (child in children) {
-                    val success = deleteDir(File(dir, child))
-                    if (!success) {
-                        return false
-                    }
+            dir.list()?.forEach { child ->
+                val success = deleteDir(File(dir, child))
+                if (!success) {
+                    return false
                 }
             }
         }
         assert(dir != null)
-        return dir!!.delete()
+        return dir?.delete() ?: false
     }
 }

@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.feed
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
@@ -59,6 +60,7 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
         binding.errorMessage.parent.text = errorMessage
     }
 
+    @SuppressLint("CommitTransaction")
     private fun doNext() {
         if (viewModel.feedType != "vote") // not done yet
             if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {

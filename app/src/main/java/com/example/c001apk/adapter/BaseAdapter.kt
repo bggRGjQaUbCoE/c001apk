@@ -27,6 +27,10 @@ class HomeFeedDiffCallback : DiffUtil.ItemCallback<HomeFeedResponse.Data>() {
         oldItem: HomeFeedResponse.Data,
         newItem: HomeFeedResponse.Data
     ): Boolean {
-        return oldItem.entityId == newItem.entityId && oldItem.lastupdate == newItem.lastupdate
+        return if ((oldItem.entityTemplate == "iconMiniScrollCard" && newItem.entityTemplate == "iconMiniScrollCard")
+            || oldItem.entityTemplate == "iconMiniGridCard" && newItem.entityTemplate == "iconMiniGridCard"
+        )
+            oldItem == newItem
+        else oldItem.entityId == newItem.entityId && oldItem.lastupdate == newItem.lastupdate
     }
 }

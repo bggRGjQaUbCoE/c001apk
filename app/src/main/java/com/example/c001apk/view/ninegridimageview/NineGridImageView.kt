@@ -33,8 +33,8 @@ import androidx.core.content.ContextCompat
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.util.ImageUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.RoundImageView
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 
@@ -67,8 +67,8 @@ class NineGridImageView @JvmOverloads constructor(
         val sizeWidth = MeasureSpec.getSize(widthMeasureSpec)
         totalWidth = sizeWidth - paddingLeft - paddingRight
         var defaultWidth = (totalWidth - gap * (3 - 1)) / 3
-        if (urlList != null && urlList!!.isNotEmpty()) {
-            val childrenCount = urlList!!.size
+        if (!urlList.isNullOrEmpty()) {
+            val childrenCount = urlList?.size ?: 0
             if (childrenCount == 1) {
                 if (isCompress) {
                     singleWidth = totalWidth
@@ -134,10 +134,10 @@ class NineGridImageView @JvmOverloads constructor(
     }
 
     private fun layoutChildrenView() {
-        if (urlList == null || urlList!!.isEmpty()) {
+        if (urlList.isNullOrEmpty()) {
             return
         }
-        val childrenCount = urlList!!.size
+        val childrenCount = urlList?.size ?: 0
         for (i in 0 until childrenCount) {
             val position = findPosition(i)
             val left = (singleWidth + gap) * position[1] + paddingLeft
@@ -151,8 +151,10 @@ class NineGridImageView @JvmOverloads constructor(
             } else {
                 childrenView.scaleType = ImageView.ScaleType.CENTER_CROP
             }
-            childrenView.setOnClickListener {
-                ImageUtil.startBigImgView(this, childrenView, urlList!!, i)
+            urlList?.let { urlList ->
+                childrenView.setOnClickListener {
+                    ImageUtil.startBigImgView(this, childrenView, urlList, i)
+                }
             }
             childrenView.layout(left, top, right, bottom)
         }
@@ -213,8 +215,10 @@ class NineGridImageView @JvmOverloads constructor(
                     imgWidth = imageLp.first
                     imgHeight = imageLp.second
                     if (replace.endsWith("gif") || imgHeight > imgWidth * 22f / 9f) {
-                        labelBackground = context.getColorFromAttr(
-                            rikka.preference.simplemenu.R.attr.colorPrimary
+                        labelBackground = MaterialColors.getColor(
+                            context,
+                            com.google.android.material.R.attr.colorPrimary,
+                            0
                         )
                         labelText = if (replace.endsWith("gif")) "GIF"
                         else "长图"

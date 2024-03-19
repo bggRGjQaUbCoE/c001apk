@@ -13,8 +13,8 @@ class OffsetLinearLayoutManager(context: Context?) : LinearLayoutManager(context
         listHeight = 0
         for (i in 0 until count) {
             val view = getChildAt(i)
-            heightMap[i] = view!!.height
-            listHeight += view.height
+            heightMap[i] = view?.height ?: 0
+            listHeight += view?.height ?: 0
         }
     }
 
@@ -24,9 +24,9 @@ class OffsetLinearLayoutManager(context: Context?) : LinearLayoutManager(context
         } else try {
             val firstVisiblePosition = findFirstVisibleItemPosition()
             val firstVisibleView = findViewByPosition(firstVisiblePosition)
-            var offsetY = -firstVisibleView!!.y.toInt()
+            var offsetY = -(firstVisibleView?.y?.toInt() ?: 0)
             for (i in 0 until firstVisiblePosition) {
-                offsetY += (if (heightMap[i] == null) 0 else heightMap[i])!!
+                offsetY += (if (heightMap[i] == null) 0 else heightMap[i]) ?: 0
             }
             offsetY
         } catch (e: Exception) {

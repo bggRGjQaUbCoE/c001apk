@@ -6,8 +6,8 @@ import android.text.style.ClickableSpan
 import android.view.View
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.util.http2https
+import com.google.android.material.color.MaterialColors
 
 internal class MyURLSpan(
     private val mContext: Context,
@@ -45,8 +45,10 @@ internal class MyURLSpan(
     override fun updateDrawState(ds: TextPaint) {
         super.updateDrawState(ds)
         if (isColor)
-            ds.color = mContext.getColorFromAttr(
-                com.google.android.material.R.attr.colorControlNormal
+            ds.color =  MaterialColors.getColor(
+                mContext,
+                com.google.android.material.R.attr.colorControlNormal,
+                0
             ) //设置文本颜色
         ds.isUnderlineText = false //取消下划线
     }

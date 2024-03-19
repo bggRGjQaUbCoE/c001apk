@@ -81,7 +81,7 @@ class CarouselViewModel @Inject constructor(
                             isInit = false
 
                             barTitle =
-                                if (response?.data!![response.data.size - 1].extraDataArr == null)
+                                if (response?.data?.getOrNull(response.data.size - 1)?.extraDataArr == null)
                                     title
                                 else
                                     response.data[response.data.size - 1].extraDataArr?.pageTitle.toString()
@@ -89,17 +89,20 @@ class CarouselViewModel @Inject constructor(
 
                             var index = 0
                             var isIconTabLinkGridCard = false
-                            for (element in response.data) {
-                                if (element.entityTemplate == "iconTabLinkGridCard") {
-                                    showView.postValue(Event(true))
-                                    isIconTabLinkGridCard = true
-                                    break
-                                } else index++
+                            run breaking@{
+                                response?.data?.forEach {
+                                    if (it.entityTemplate == "iconTabLinkGridCard") {
+                                        showView.postValue(Event(true))
+                                        isIconTabLinkGridCard = true
+                                        return@breaking
+                                    } else
+                                        index++
+                                }
                             }
 
                             if (isIconTabLinkGridCard) {
-                                if (!response.data[index].entities.isNullOrEmpty()) {
-                                    response.data[index].entities?.forEach {
+                                if (!response?.data?.getOrNull(index)?.entities.isNullOrEmpty()) {
+                                    response?.data?.getOrNull(index)?.entities?.forEach {
                                         tabList.add(it.title)
                                         topicList.add(TopicBean(it.url, it.title))
                                         initView.postValue(Event(true))
@@ -108,28 +111,33 @@ class CarouselViewModel @Inject constructor(
 
                             } else {
                                 initRvView.postValue(Event(true))
-                                for (element in response.data)
-                                    if (element.entityType == "feed" && element.feedType != "vote")
-                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                response?.data?.forEach {
+                                    if (it.entityType == "feed" && it.feedType != "vote")
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
                                             && !repository.checkTopic(
-                                                element.tags + element.ttitle
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
-                                            carouselList.add(element)
+                                            carouselList.add(it)
+                                }
                                 carouselData.postValue(carouselList)
                             }
                         } else {
                             if (isRefreshing)
                                 carouselList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in response?.data!!)
-                                    if (element.entityType == "feed" && element.feedType != "vote")
-                                        if (!repository.checkUid(element.userInfo?.uid.toString())
-                                            && !repository.checkTopic(
-                                                element.tags + element.ttitle
+                                response?.data?.let { data ->
+                                    data.forEach {
+                                        if (it.entityType == "feed" && it.feedType != "vote")
+                                            if (!repository.checkUid(it.userInfo?.uid.toString())
+                                                && !repository.checkTopic(
+                                                    it.tags + it.ttitle
+                                                            + it.relationRows?.getOrNull(0)?.title
+                                                )
                                             )
-                                        )
-                                            carouselList.add(element)
+                                                carouselList.add(it)
+                                    }
+                                }
                             }
                             carouselData.postValue(carouselList)
                         }
@@ -198,7 +206,7 @@ class CarouselViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.saveUid(uid)
             }
-            val currentList = carouselData.value!!.toMutableList()
+            val currentList = carouselData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             carouselData.postValue(currentList)
         }
@@ -216,7 +224,7 @@ class CarouselViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = carouselData.value!!.toMutableList()
+                            val updateList = carouselData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             carouselData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -244,7 +252,7 @@ class CarouselViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = carouselData.value!!.toMutableList()
+                            val currentList = carouselData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             carouselData.postValue(currentList)

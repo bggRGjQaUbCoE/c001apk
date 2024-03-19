@@ -10,7 +10,6 @@ import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.ThemeUtils
 import androidx.core.graphics.ColorUtils
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
@@ -27,7 +26,9 @@ import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.CacheDataManager
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.TokenDeviceUtils
+import com.example.c001apk.util.TokenDeviceUtils.getDeviceCode
+import com.example.c001apk.util.TokenDeviceUtils.randHexString
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import rikka.core.util.ResourceUtils
@@ -80,8 +81,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         override fun putString(key: String?, value: String?) {
             when (key) {
-                "darkTheme" -> PrefManager.darkTheme = value!!.toInt()
-                "themeColor" -> PrefManager.themeColor = value!!
+                "darkTheme" -> PrefManager.darkTheme = value?.toInt() ?: 0
+                "themeColor" -> PrefManager.themeColor = value ?: "MATERIAL_DEFAULT"
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -152,36 +153,39 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("about")?.summary =
             "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
         findPreference<Preference>("about")?.setOnPreferenceClickListener {
-            IntentUtil.startActivity<AboutActivity>(requireContext()) {
-            }
+            IntentUtil.startActivity<AboutActivity>(requireContext()) {}
             true
         }
 
 
-        findPreference<Preference>("sbparams")?.setOnPreferenceClickListener {
-            IntentUtil.startActivity<ParamsActivity>(requireContext()) {
-            }
+        findPreference<Preference>("params")?.setOnPreferenceClickListener {
+            IntentUtil.startActivity<ParamsActivity>(requireContext()) {}
             true
         }
 
-        findPreference<Preference>("zmlmId")?.setOnPreferenceClickListener {
+        findPreference<Preference>("szlmId")?.setOnPreferenceClickListener {
             val view = LayoutInflater.from(requireContext())
                 .inflate(R.layout.item_x_app_token, null, false)
             val editText: EditText = view.findViewById(R.id.editText)
             editText.highlightColor = ColorUtils.setAlphaComponent(
-                ThemeUtils.getThemeAttrColor(
+                MaterialColors.getColor(
                     requireContext(),
-                    rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                    com.google.android.material.R.attr.colorPrimaryDark,
+                    0
                 ), 128
             )
             editText.setText(PrefManager.SZLMID)
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
-                setTitle(requireContext().getString(R.string.zmlmId))
+                setTitle(requireContext().getString(R.string.szlmId))
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.SZLMID = editText.text.toString()
-                    PrefManager.xAppDevice = TokenDeviceUtils.getDeviceCode(false)
+                    PrefManager.xAppDevice = getDeviceCode(false)
+                }
+                setNeutralButton(R.string.random_value) { _, _ ->
+                    PrefManager.SZLMID = randHexString(16)
+                    PrefManager.xAppDevice = getDeviceCode(false)
                 }
             }.create().apply {
                 window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)

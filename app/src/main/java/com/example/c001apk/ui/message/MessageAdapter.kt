@@ -25,7 +25,7 @@ class MessageAdapter(
         var entityType: String = ""
         var id: String = ""
         var uid: String = ""
-        var fromusername: String = ""
+        private var fromusername: String = ""
 
         init {
             itemView.setOnLongClickListener {

@@ -1,9 +1,7 @@
 package com.example.c001apk.util
 
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
-import androidx.annotation.AttrRes
 import androidx.core.text.HtmlCompat
 import com.example.c001apk.MyApplication
 import java.io.BufferedReader
@@ -19,15 +17,6 @@ import kotlin.random.Random
 
 
 object Utils {
-
-    fun Context.getColorFromAttr(@AttrRes attrResId: Int): Int {
-        val typedArray = obtainStyledAttributes(intArrayOf(attrResId))
-        return try {
-            typedArray.getColor(0, 0)
-        } finally {
-            typedArray.recycle()
-        }
-    }
 
     /**
      * 检测设备宽度是否大于等于800dp
@@ -270,7 +259,7 @@ object Utils {
 
             var line: String?
             while (reader.readLine().also { line = it } != null) {
-                lines.add(line!!)
+                lines.add(line ?: "")
             }
 
             val randomIndex = Random.nextInt(lines.size)

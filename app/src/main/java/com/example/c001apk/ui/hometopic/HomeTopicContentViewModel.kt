@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeTopicContentViewModel @Inject constructor(
     val repository: BlackListRepository
-): ViewModel() {
+) : ViewModel() {
 
     var page = 1
     var title: String? = null
@@ -51,14 +51,18 @@ class HomeTopicContentViewModel @Inject constructor(
                     } else if (!data?.data.isNullOrEmpty()) {
                         if (isRefreshing) topicDataList.clear()
                         if (isRefreshing || isLoadMore) {
-                            for (element in data?.data!!)
-                                if (element.entityType == "topic"
-                                    || element.entityType == "product"
-                                )
-                                    topicDataList.add(
-                                        element.also {
-                                            it.description = "home"
-                                        })
+                            data?.data?.let {
+                                it.forEach { item ->
+                                    if (item.entityType == "topic"
+                                        || item.entityType == "product"
+                                    )
+                                        topicDataList.add(
+                                            item.also { des ->
+                                                des.description = "home"
+                                            }
+                                        )
+                                }
+                            }
                             lastItem = topicDataList.last().id
                         }
                         changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))

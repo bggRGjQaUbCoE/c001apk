@@ -20,9 +20,9 @@ import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.search.IOnSearchMenuClickListener
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -181,7 +181,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -207,8 +207,10 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
 
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            requireContext().getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                requireContext(),
+                com.google.android.material.R.attr.colorPrimary,
+                0
             )
         )
         binding.swipeRefresh.setOnRefreshListener {

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
-import com.example.c001apk.util.Utils.getColorFromAttr
+import com.google.android.material.color.MaterialColors
 
 class BrandLabelAdapter(
     private val list: List<String>
@@ -53,27 +53,35 @@ class BrandLabelAdapter(
         holder.title.text = text
         if (selectedPosition == position) {
             holder.title.setTextColor(
-                holder.itemView.context.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorPrimary
+                MaterialColors.getColor(
+                    holder.itemView.context,
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
                 )
             )
             holder.title.setBackgroundColor(
                 holder.itemView.context.getColor(R.color.home_card_background_color)
             )
             holder.indicator.setBackgroundColor(
-                holder.itemView.context.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorPrimary
+                MaterialColors.getColor(
+                    holder.itemView.context,
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
                 )
             )
         } else {
             holder.title.setTextColor(
-                holder.itemView.context.getColorFromAttr(
-                    rikka.preference.simplemenu.R.attr.colorControlNormal
+                MaterialColors.getColor(
+                    holder.itemView.context,
+                    com.google.android.material.R.attr.colorControlNormal,
+                    0
                 )
             )
             holder.title.setBackgroundColor(
-                holder.itemView.context.getColorFromAttr(
-                    android.R.attr.windowBackground
+                MaterialColors.getColor(
+                    holder.itemView.context,
+                    android.R.attr.windowBackground,
+                    0
                 )
             )
             holder.indicator.setBackgroundColor(Color.TRANSPARENT)

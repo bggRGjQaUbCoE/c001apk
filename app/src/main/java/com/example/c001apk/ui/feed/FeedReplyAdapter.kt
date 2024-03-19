@@ -21,8 +21,8 @@ import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.repository.BlackListRepository
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinkMovementClickMethod
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -115,16 +115,18 @@ class FeedReplyAdapter(
             if (!reply.replyRows.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val sortedList = ArrayList<TotalReplyResponse.Data>()
-                    for (element in reply.replyRows) {
-                        if (!repository.checkUid(element.uid))
-                            sortedList.add(element)
+                    reply.replyRows.forEach {
+                        if (!repository.checkUid(it.uid))
+                            sortedList.add(it)
                     }
                     if (sortedList.isNotEmpty()) {
                         binding.replyLayout.visibility = View.VISIBLE
                         if (itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
                             binding.replyLayout.setCardBackgroundColor(
-                                itemView.context.getColorFromAttr(
-                                    android.R.attr.windowBackground
+                                MaterialColors.getColor(
+                                    itemView.context,
+                                    android.R.attr.windowBackground,
+                                    0
                                 )
                             )
                         }
@@ -145,8 +147,10 @@ class FeedReplyAdapter(
                                 val replyData = sortedList[position1]
                                 val textView: TextView = view.findViewById(R.id.reply)
                                 textView.highlightColor = ColorUtils.setAlphaComponent(
-                                    parent.context.getColorFromAttr(
-                                        rikka.preference.simplemenu.R.attr.colorPrimaryDark
+                                    MaterialColors.getColor(
+                                        parent.context,
+                                        com.google.android.material.R.attr.colorPrimaryDark,
+                                        0
                                     ), 128
                                 )
 
@@ -217,7 +221,7 @@ class FeedReplyAdapter(
 
             if (reply.replyRowsMore != 0) {
                 binding.totalReply.visibility = View.VISIBLE
-                val count = reply.replyRowsMore + reply.replyRows?.size!!
+                val count = reply.replyRowsMore + (reply.replyRows?.size ?: 0)
                 binding.totalReply.text = "查看更多回复($count)"
                 binding.totalReply.setOnClickListener {
                     listener.showTotalReply(

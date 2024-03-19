@@ -32,7 +32,7 @@ class MessageFirstAdapter
         }
     }
 
-    class FirstViewHolder(val binding: ItemMessageFffBinding, val fffTitle: List<String>) :
+    class FirstViewHolder(val binding: ItemMessageFffBinding, private val fffTitle: List<String>) :
         RecyclerView.ViewHolder(binding.root), View.OnClickListener {
 
         init {

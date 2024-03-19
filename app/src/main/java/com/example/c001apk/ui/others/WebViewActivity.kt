@@ -101,7 +101,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         binding.webView.apply {
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(
-                    view: WebView?, request: WebResourceRequest?
+                    webView: WebView?, request: WebResourceRequest?
                 ): Boolean {
                     request?.let {
                         try {
@@ -127,35 +127,37 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                             }
                             // 处理自定义scheme协议
                             if (!request.url.toString().startsWith("http")) {
-                                Snackbar.make(
-                                    view!!,
-                                    "当前网页将要打开外部链接，是否打开",
-                                    Snackbar.LENGTH_SHORT
-                                ).setAction("打开") {
-                                    try {
-                                        val intent = Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse(request.url.toString())
-                                        )
-                                        intent.flags =
-                                            (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                        startActivity(intent)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(
-                                            this@WebViewActivity,
-                                            "打开失败",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        e.printStackTrace()
-                                    }
-                                }.show()
+                                webView?.let {
+                                    Snackbar.make(
+                                        it,
+                                        "当前网页将要打开外部链接，是否打开",
+                                        Snackbar.LENGTH_SHORT
+                                    ).setAction("打开") {
+                                        try {
+                                            val intent = Intent(
+                                                Intent.ACTION_VIEW,
+                                                Uri.parse(request.url.toString())
+                                            )
+                                            intent.flags =
+                                                (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                            startActivity(intent)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                this@WebViewActivity,
+                                                "打开失败",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            e.printStackTrace()
+                                        }
+                                    }.show()
+                                }
                                 return true
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
                     }
-                    return super.shouldOverrideUrlLoading(view, request)
+                    return super.shouldOverrideUrlLoading(webView, request)
                 }
             }
             webChromeClient = object : WebChromeClient() {

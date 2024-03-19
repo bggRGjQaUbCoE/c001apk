@@ -19,16 +19,17 @@ object SpannableStringBuilderUtil {
         while (matcher.find()) {
             val group = matcher.group()
             if (EmojiUtil.getEmoji(group) != -1) {
-                val emoji: Drawable =
-                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                emoji.setBounds(0, 0, size, size)
-                val imageSpan = CenteredImageSpan(emoji, size, null)
-                builder.setSpan(
-                    imageSpan,
-                    matcher.start(),
-                    matcher.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+                val emoji: Drawable? = mContext.getDrawable(EmojiUtil.getEmoji(group))
+                emoji?.let {
+                    it.setBounds(0, 0, size, size)
+                    val imageSpan = CenteredImageSpan(it, size, null)
+                    builder.setSpan(
+                        imageSpan,
+                        matcher.start(),
+                        matcher.end(),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
             }
         }
         return builder
@@ -75,19 +76,20 @@ object SpannableStringBuilderUtil {
         while (matcher.find()) {
             val group = matcher.group()
             if (EmojiUtil.getEmoji(group) != -1) {
-                val emoji: Drawable =
-                    mContext.getDrawable(EmojiUtil.getEmoji(group))!!
-                if (group == "[楼主]" || group == "[层主]" || group == "[置顶]")
-                    emoji.setBounds(0, 0, (size * 2).toInt(), size.toInt())
-                else
-                    emoji.setBounds(0, 0, (size * 1.3).toInt(), (size * 1.3).toInt())
-                val imageSpan = CenteredImageSpan(emoji, (size * 1.3).toInt(), group)
-                builder.setSpan(
-                    imageSpan,
-                    matcher.start(),
-                    matcher.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+                val emoji: Drawable? = mContext.getDrawable(EmojiUtil.getEmoji(group))
+                emoji?.let {
+                    if (group == "[楼主]" || group == "[层主]" || group == "[置顶]")
+                        it.setBounds(0, 0, (size * 2).toInt(), size.toInt())
+                    else
+                        it.setBounds(0, 0, (size * 1.3).toInt(), (size * 1.3).toInt())
+                    val imageSpan = CenteredImageSpan(it, (size * 1.3).toInt(), group)
+                    builder.setSpan(
+                        imageSpan,
+                        matcher.start(),
+                        matcher.end(),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
             }
         }
         return builder

@@ -21,10 +21,10 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener {
@@ -116,8 +116,10 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
 
     private fun initRefresh() {
         binding.swipeRefresh.setColorSchemeColors(
-            requireContext().getColorFromAttr(
-                rikka.preference.simplemenu.R.attr.colorPrimary
+            MaterialColors.getColor(
+                requireContext(),
+                com.google.android.material.R.attr.colorPrimary,
+                0
             )
         )
         binding.swipeRefresh.setOnRefreshListener {

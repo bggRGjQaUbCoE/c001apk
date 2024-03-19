@@ -49,13 +49,13 @@ class IconLinkGridCardDiffCallback : DiffUtil.ItemCallback<List<IconLinkGridCard
         oldItem: List<IconLinkGridCardBean>,
         newItem: List<IconLinkGridCardBean>
     ): Boolean {
-        return oldItem[0].url == newItem[0].url
+        return oldItem.first().url == newItem.first().url
     }
 
     override fun areContentsTheSame(
         oldItem: List<IconLinkGridCardBean>,
         newItem: List<IconLinkGridCardBean>
     ): Boolean {
-        return oldItem.size == newItem.size && oldItem.last().url == newItem.last().url
+        return oldItem.size == newItem.size && oldItem.first().url == newItem.first().url
     }
 }

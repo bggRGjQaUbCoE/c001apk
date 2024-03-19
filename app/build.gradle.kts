@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.rikka.tools.materialthemebuilder)
     alias(libs.plugins.google.dagger.hilt.android)
-    id("kotlin-kapt")
-    id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 apply(plugin = "kotlin-kapt")

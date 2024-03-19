@@ -28,12 +28,12 @@ import com.example.c001apk.databinding.ItemCaptchaBinding
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -144,8 +144,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                 )
                 binding.captchaImg.setImageBitmap(it)
                 binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
-                    requireContext().getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimaryDark),
-                    128
+                    MaterialColors.getColor(
+                        requireContext(),
+                        com.google.android.material.R.attr.colorPrimaryDark,
+                        0
+                    ), 128
                 )
                 MaterialAlertDialogBuilder(requireContext()).apply {
                     setView(binding.root)
@@ -223,7 +226,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
-                            for (pos in positions) {
+                            positions.forEach { pos ->
                                 if (pos > viewModel.lastVisibleItemPosition) {
                                     viewModel.lastVisibleItemPosition = pos
                                 }
@@ -380,7 +383,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
 
         override fun onBlockUser(id: String, uid: String, position: Int) {
             viewModel.saveUid(uid)
-            val currentList = viewModel.totalReplyData.value!!.toMutableList()
+            val currentList = viewModel.totalReplyData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             viewModel.totalReplyData.postValue(currentList)
         }
@@ -397,7 +400,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                     uid,
                     id
                 )
-            val feedReplyList = viewModel.totalReplyData.value!!
+            val feedReplyList = viewModel.totalReplyData.value ?: ArrayList()
             mBottomSheetDialogFragment.oriReply.add(feedReplyList[position])
 
             mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")

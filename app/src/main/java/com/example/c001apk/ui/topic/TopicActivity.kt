@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.topic
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityTopicBinding
@@ -8,6 +9,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class TopicActivity : BaseActivity<ActivityTopicBinding>() {
+    @SuppressLint("CommitTransaction")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -53,10 +53,10 @@ class HomeTopicViewModel : ViewModel() {
                     val data = result.getOrNull()
                     if (!data?.data.isNullOrEmpty()) {
                         if (tabList.isEmpty()) {
-                            data?.data?.let { entities ->
-                                entities.forEach {
-                                    tabList.add(it.title)
-                                    topicList.add(TopicBean(it.url, it.title))
+                            data?.data?.let {
+                                it.forEach { item ->
+                                    tabList.add(item.title)
+                                    topicList.add(TopicBean(item.url, item.title))
                                 }
                             }
                             doNext.postValue(Event(true))

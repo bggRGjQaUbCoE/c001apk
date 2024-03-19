@@ -90,7 +90,7 @@ class FeedViewModel @Inject constructor(
                     if (response != null) {
                         val isFollow = if (followAuthor == 1) 0
                         else 1
-                        feedDataList!![0].userAction?.followAuthor = isFollow
+                        feedDataList?.getOrNull(0)?.userAction?.followAuthor = isFollow
                         afterFollow.postValue(Event(isFollow))
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
@@ -118,7 +118,7 @@ class FeedViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = feedReplyData.value!!.toMutableList()
+                            val currentList = feedReplyData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             feedReplyData.postValue(currentList)
@@ -165,14 +165,16 @@ class FeedViewModel @Inject constructor(
                                 feedReplyList.addAll(feedTopReplyList)
                         }
                         if (isRefreshing || isLoadMore) {
-                            for (element in reply?.data!!) {
-                                if (element.entityType == "feed_reply") {
-                                    if (listType == "lastupdate_desc" && topReplyId != null
-                                        && element.id == topReplyId
-                                    )
-                                        continue
-                                    if (!repository.checkUid(element.uid))
-                                        feedReplyList.add(element)
+                            reply?.data?.let { data ->
+                                data.forEach {
+                                    if (it.entityType == "feed_reply") {
+                                        if (listType == "lastupdate_desc" && topReplyId != null
+                                            && it.id == topReplyId
+                                        )
+                                            return@forEach
+                                        if (!repository.checkUid(it.uid))
+                                            feedReplyList.add(it)
+                                    }
                                 }
                             }
                         }
@@ -315,8 +317,8 @@ class FeedViewModel @Inject constructor(
                                     )
                                     scroll.postValue(Event(true))
                                 } else {
-                                    feedReplyList[position!!].replyRows?.add(
-                                        feedReplyList[position!!].replyRows?.size!!,
+                                    feedReplyList.getOrNull(position ?: 0)?.replyRows?.add(
+                                        feedReplyList.getOrNull(position ?: 0)?.replyRows?.size?:0,
                                         TotalReplyResponse.Data(
                                             null,
                                             "feed_reply",
@@ -363,7 +365,7 @@ class FeedViewModel @Inject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         val responseBody = response.body()
-                        val bitmap = BitmapFactory.decodeStream(responseBody!!.byteStream())
+                        val bitmap = BitmapFactory.decodeStream(responseBody?.byteStream())
                         createDialog.postValue(Event(bitmap))
                     }
                 }
@@ -416,9 +418,8 @@ class FeedViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            feedDataList!![0].likenum = count
-                            feedDataList!![0].userAction?.like = isLike
-
+                            feedDataList?.getOrNull(0)?.likenum = count
+                            feedDataList?.getOrNull(0)?.userAction?.like = isLike
                         } else {
                             response.message?.let {
                                 toastText.postValue(Event(it))

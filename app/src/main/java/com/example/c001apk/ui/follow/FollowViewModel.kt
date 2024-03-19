@@ -79,19 +79,20 @@ class FollowViewModel @Inject constructor(
                             lastItem = feed.data.last().id
                             if (isRefreshing) dataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in feed.data)
-                                    if (element.entityType == "feed"
-                                        || element.entityType == "contacts"
-                                        || element.entityType == "apk"
-                                        || element.entityType == "feed_reply"
-                                        || element.entityType == "recentHistory"
+                                feed.data.forEach {
+                                    if (it.entityType == "feed"
+                                        || it.entityType == "contacts"
+                                        || it.entityType == "apk"
+                                        || it.entityType == "feed_reply"
+                                        || it.entityType == "recentHistory"
                                     )
-                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
                                             && !repository.checkTopic(
-                                                element.tags + element.ttitle
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
-                                            dataList.add(element)
+                                            dataList.add(it)
+                                }
                             }
                             changeState.postValue(
                                 Pair(
@@ -140,18 +141,19 @@ class FollowViewModel @Inject constructor(
                             if (isRefreshing)
                                 dataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in data.data)
-                                    if (element.entityType == "feed"
-                                        || element.entityType == "topic"
-                                        || element.entityType == "product"
-                                        || element.entityType == "user"
+                                data.data.forEach {
+                                    if (it.entityType == "feed"
+                                        || it.entityType == "topic"
+                                        || it.entityType == "product"
+                                        || it.entityType == "user"
                                     )
-                                        if (!repository.checkUid(element.userInfo?.uid.toString())
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
                                             && !repository.checkTopic(
-                                                element.tags + element.ttitle
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
-                                            dataList.add(element)
+                                            dataList.add(it)
+                                }
                             }
                             changeState.postValue(
                                 Pair(
@@ -254,7 +256,7 @@ class FollowViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.saveUid(uid)
             }
-            val currentList = dataListData.value!!.toMutableList()
+            val currentList = dataListData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             dataListData.postValue(currentList)
         }
@@ -286,7 +288,7 @@ class FollowViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = dataListData.value!!.toMutableList()
+                            val currentList = dataListData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             dataListData.postValue(currentList)
@@ -310,7 +312,7 @@ class FollowViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = dataListData.value!!.toMutableList()
+                            val updateList = dataListData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             dataListData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -338,7 +340,7 @@ class FollowViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = dataListData.value!!.toMutableList()
+                            val currentList = dataListData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             dataListData.postValue(currentList)

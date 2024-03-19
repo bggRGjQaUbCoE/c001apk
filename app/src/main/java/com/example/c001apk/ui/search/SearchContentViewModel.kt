@@ -86,14 +86,14 @@ class SearchContentViewModel @Inject constructor(
                                 searchList.clear()
                             if (isRefreshing || isLoadMore) {
                                 if (type == "feed")
-                                    for (element in search.data) {
-                                        if (element.entityType == "feed")
-                                            if (!repository.checkUid(element.userInfo?.uid.toString())
+                                    search.data.forEach {
+                                        if (it.entityType == "feed")
+                                            if (!repository.checkUid(it.userInfo?.uid.toString())
                                                 && !repository.checkTopic(
-                                                    element.tags + element.ttitle
+                                                    it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                                 )
                                             )
-                                                searchList.add(element)
+                                                searchList.add(it)
                                     }
                                 else
                                     searchList.addAll(search.data)
@@ -199,7 +199,7 @@ class SearchContentViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.saveUid(uid)
             }
-            val currentList = searchData.value!!.toMutableList()
+            val currentList = searchData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
             searchData.postValue(currentList)
         }
@@ -217,7 +217,7 @@ class SearchContentViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = searchData.value!!.toMutableList()
+                            val updateList = searchData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             searchData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -245,7 +245,7 @@ class SearchContentViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = searchData.value!!.toMutableList()
+                            val currentList = searchData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             searchData.postValue(currentList)

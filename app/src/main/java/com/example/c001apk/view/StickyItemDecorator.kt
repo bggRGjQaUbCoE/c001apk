@@ -8,7 +8,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.absinthe.libraries.utils.extensions.dp
-import com.example.c001apk.util.Utils.getColorFromAttr
+import com.google.android.material.color.MaterialColors
 
 class StickyItemDecorator(
     context: Context,
@@ -23,8 +23,10 @@ class StickyItemDecorator(
     init {
         mPaint.isAntiAlias = true
         mPaint.color =
-            context.getColorFromAttr(
-                com.google.android.material.R.attr.colorSurfaceVariant
+            MaterialColors.getColor(
+                context,
+                com.google.android.material.R.attr.colorSurfaceVariant,
+                0
             )
     }
 
@@ -58,9 +60,10 @@ class StickyItemDecorator(
 
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDrawOver(c, parent, state)
-        if (parent.adapter!!.itemCount <= 0)
+        if ((parent.adapter?.itemCount ?: 0) <= 0)
             return
-        val index = (parent.layoutManager as LinearLayoutManager?)!!.findFirstVisibleItemPosition()
+        val index =
+            (parent.layoutManager as LinearLayoutManager?)?.findFirstVisibleItemPosition() ?: 0
         if (index >= itemCount) {
             listener.showSort(true)
         } else {

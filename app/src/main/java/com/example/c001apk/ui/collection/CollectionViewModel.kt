@@ -22,7 +22,7 @@ import javax.inject.Inject
 class CollectionViewModel @Inject constructor(
     val repository: BlackListRepository,
     private val historyFavoriteRepository: HistoryFavoriteRepository
-): ViewModel() {
+) : ViewModel() {
 
     var title: String? = null
     var url: String? = null
@@ -71,11 +71,12 @@ class CollectionViewModel @Inject constructor(
                             lastItem = data.data.last().id
                             if (isRefreshing) dataList.clear()
                             if (isRefreshing || isLoadMore) {
-                                for (element in data.data)
-                                    if (element.entityType == "collection"
-                                        || element.entityType == "feed"
+                                data.data.forEach {
+                                    if (it.entityType == "collection"
+                                        || it.entityType == "feed"
                                     )
-                                        dataList.add(element)
+                                        dataList.add(it)
+                                }
                             }
                             changeState.postValue(
                                 Pair(
@@ -110,7 +111,7 @@ class CollectionViewModel @Inject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val updateList = dataListData.value!!.toMutableList()
+                            val updateList = dataListData.value?.toMutableList() ?: ArrayList()
                             updateList.removeAt(position)
                             dataListData.postValue(updateList)
                         } else if (!response.message.isNullOrEmpty()) {
@@ -138,7 +139,7 @@ class CollectionViewModel @Inject constructor(
                             val isLike = if (likeData.isLike.get() == 1) 0 else 1
                             likeData.likeNum.set(count)
                             likeData.isLike.set(isLike)
-                            val currentList = dataListData.value!!.toMutableList()
+                            val currentList = dataListData.value?.toMutableList() ?: ArrayList()
                             currentList[position].likenum = count
                             currentList[position].userAction?.like = isLike
                             dataListData.postValue(currentList)

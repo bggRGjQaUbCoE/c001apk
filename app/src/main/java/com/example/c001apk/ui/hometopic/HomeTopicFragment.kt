@@ -142,9 +142,9 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
                 "$position"
             )
         } else {
-            transaction.show(
-                childFragmentManager.findFragmentByTag("$position")!!
-            )
+            childFragmentManager.findFragmentByTag("$position")?.let {
+                transaction.show(it)
+            }
         }
         transaction.commit()
     }

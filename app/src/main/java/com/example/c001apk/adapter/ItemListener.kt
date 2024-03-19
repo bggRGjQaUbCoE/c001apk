@@ -41,7 +41,7 @@ interface ItemListener {
     fun onMessClicked(view: View, note: String) {
         val doc: Document = Jsoup.parse(note)
         val links: Elements = doc.select("a[href]")
-        for (link in links) {
+        links.forEach { link ->
             val href = link.attr("href")
             if (href.contains("/feed/")) {
                 val id: String
@@ -156,7 +156,7 @@ interface ItemListener {
 
     fun onReply(id: String, uid: String, username: String?, position: Int, rPosition: Int?) {}
 
-    fun onBlockUser(id:String, uid: String, position: Int) {}
+    fun onBlockUser(id: String, uid: String, position: Int) {}
 
     fun onDeleteClicked(entityType: String, id: String, position: Int) {}
 }

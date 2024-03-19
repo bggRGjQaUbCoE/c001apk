@@ -11,6 +11,7 @@ import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 
 class MainViewModel : ViewModel() {
@@ -49,20 +50,24 @@ class MainViewModel : ViewModel() {
                     response?.let {
                         response.body()?.let {
                             if (response.body()?.data?.token != null) {
-                                val login = response.body()?.data!!
-                                badge = login.notifyCount.badge
-                                CookieUtil.notification = login.notifyCount.notification
-                                CookieUtil.contacts_follow = login.notifyCount.contactsFollow
-                                CookieUtil.message = login.notifyCount.message
-                                CookieUtil.atme = login.notifyCount.atme
-                                CookieUtil.atcommentme = login.notifyCount.atcommentme
-                                CookieUtil.feedlike = login.notifyCount.feedlike
-                                CookieUtil.badge = login.notifyCount.badge
-                                PrefManager.isLogin = true
-                                PrefManager.uid = login.uid
-                                PrefManager.username = URLEncoder.encode(login.username, "UTF-8")
-                                PrefManager.token = login.token
-                                PrefManager.userAvatar = login.userAvatar
+                                response.body()?.data?.let { login ->
+                                    badge = login.notifyCount.badge
+                                    CookieUtil.notification = login.notifyCount.notification
+                                    CookieUtil.contacts_follow = login.notifyCount.contactsFollow
+                                    CookieUtil.message = login.notifyCount.message
+                                    CookieUtil.atme = login.notifyCount.atme
+                                    CookieUtil.atcommentme = login.notifyCount.atcommentme
+                                    CookieUtil.feedlike = login.notifyCount.feedlike
+                                    CookieUtil.badge = login.notifyCount.badge
+                                    PrefManager.isLogin = true
+                                    PrefManager.uid = login.uid
+                                    PrefManager.username =
+                                        withContext(Dispatchers.IO) {
+                                            URLEncoder.encode(login.username, "UTF-8")
+                                        }
+                                    PrefManager.token = login.token
+                                    PrefManager.userAvatar = login.userAvatar
+                                }
                             } else if (response.body()?.message == "登录信息有误") {
                                 PrefManager.isLogin = false
                                 PrefManager.uid = ""

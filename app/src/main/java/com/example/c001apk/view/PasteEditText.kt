@@ -14,19 +14,15 @@ class PasteEditText : TextInputEditText {
         fun onPaste()
     }
 
-    constructor(context: Context?) : super(context!!)
-    constructor(context: Context?, attrs: AttributeSet?) : super(
-        context!!, attrs
-    )
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     override fun onTextContextMenuItem(id: Int): Boolean {
         when (id) {
             R.id.cut -> {}
             R.id.copy -> {}
             R.id.paste ->
-                if (mOnPasteCallback != null) {
-                    mOnPasteCallback!!.onPaste()
-                }
+                mOnPasteCallback?.onPaste()
         }
         return super.onTextContextMenuItem(id)
     }

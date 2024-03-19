@@ -32,8 +32,8 @@ import com.example.c001apk.logic.repository.BlackListRepository
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.Utils.getColorFromAttr
 import com.example.c001apk.view.LinearItemDecoration1
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -319,7 +319,13 @@ class AppAdapter(
                 binding.isFollow = data.isFollow
                 if (data.isFollow == 0) {
                     binding.followBtn.text = "关注"
-                    binding.followBtn.setTextColor(itemView.context.getColorFromAttr(rikka.preference.simplemenu.R.attr.colorPrimary))
+                    binding.followBtn.setTextColor(
+                        MaterialColors.getColor(
+                            itemView.context,
+                            com.google.android.material.R.attr.colorPrimary,
+                            0
+                        )
+                    )
                 } else {
                     binding.followBtn.text = "已关注"
                     binding.followBtn.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
@@ -337,17 +343,22 @@ class AppAdapter(
         override fun bind(data: HomeFeedResponse.Data) {
             if (data.description == "home") {
                 binding.parent.setCardBackgroundColor(
-                    itemView.context.getColorFromAttr(android.R.attr.windowBackground)
+                    MaterialColors.getColor(
+                        itemView.context,
+                        android.R.attr.windowBackground,
+                        0
+                    )
                 )
             } else {
                 binding.parent.setCardBackgroundColor(
                     itemView.context.getColor(R.color.home_card_background_color)
                 )
             }
-            binding.commentNum.text = if (data.entityType == "topic")
-                "${data.commentnumTxt}讨论"
-            else
-                "${data.feedCommentNumTxt}讨论"
+            binding.commentNum.text =
+                if (data.entityType == "topic")
+                    "${data.commentnumTxt}讨论"
+                else
+                    "${data.feedCommentNumTxt}讨论"
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
