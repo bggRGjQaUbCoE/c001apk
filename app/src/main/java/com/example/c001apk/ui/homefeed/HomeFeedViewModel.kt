@@ -17,6 +17,7 @@ import com.example.c001apk.logic.network.Repository.postLikeFeed
 import com.example.c001apk.logic.network.Repository.postRequestValidate
 import com.example.c001apk.logic.repository.BlackListRepository
 import com.example.c001apk.logic.repository.HistoryFavoriteRepository
+import com.example.c001apk.logic.repository.NetWorkRepository
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeFeedViewModel @Inject constructor(
     val repository: BlackListRepository,
-    private val historyFavoriteRepository: HistoryFavoriteRepository
+    private val historyFavoriteRepository: HistoryFavoriteRepository,
+    private val netWorkRepository: NetWorkRepository
 ) : ViewModel() {
 
     var installTime: String = System.currentTimeMillis().toString()
@@ -56,7 +58,7 @@ class HomeFeedViewModel @Inject constructor(
 
     fun fetchHomeFeed() {
         viewModelScope.launch(Dispatchers.IO) {
-            getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
+            netWorkRepository.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
                 .onStart {
                     if (firstLaunch == 1) {
                         firstLaunch = 0
