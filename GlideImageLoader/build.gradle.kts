@@ -63,10 +63,10 @@ fun BaseExtension.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.23")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    api("com.github.bumptech.glide:okhttp3-integration:4.16.0")
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.okhttp)
+    api(libs.glide.okhttp3.integration)
     implementation(project(":mojito"))
 }

@@ -179,6 +179,14 @@ class AboutActivity : AbsAboutActivity() {
                 "https://github.com/zhaobozhen/libraries"
             )
         )
+        items.add(
+            License(
+                "dagger",
+                "google",
+                License.APACHE_2,
+                "https://github.com/google/dagger"
+            )
+        )
 
     }
 

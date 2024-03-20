@@ -18,13 +18,13 @@ interface StringEntityDao {
     @Insert
     suspend fun insertList(list: List<StringEntity>)
 
-    @Query("select * from StringEntity ORDER BY id DESC")
+    @Query("SELECT * FROM StringEntity ORDER BY id DESC")
     suspend fun loadAllList(): List<StringEntity>
 
-    @Query("select * from StringEntity ORDER BY id DESC")
+    @Query("SELECT * FROM StringEntity ORDER BY id DESC")
     fun loadAllListLive(): LiveData<List<StringEntity>>
 
-    @Query("select * from StringEntity ORDER BY id DESC")
+    @Query("SELECT * FROM StringEntity ORDER BY id DESC")
     fun loadAllListFlow(): Flow<List<StringEntity>>
 
     @Query("SELECT 1 FROM StringEntity WHERE data = :data LIMIT 1")
@@ -39,5 +39,8 @@ interface StringEntityDao {
 
     @Query("DELETE FROM StringEntity")
     suspend fun deleteAll()
+
+    @Query("UPDATE StringEntity SET id = :newId WHERE data = :data")
+    suspend fun updateHistory(data: String, newId: Long)
 
 }

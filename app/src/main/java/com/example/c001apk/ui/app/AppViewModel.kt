@@ -18,7 +18,7 @@ import javax.inject.Inject
 class AppViewModel @Inject constructor(
     private val repository: BlackListRepo,
     private val networkRepo: NetworkRepo
-): ViewModel() {
+) : ViewModel() {
 
     var collectionUrl: String? = null
     private var commentStatusText: String? = null
@@ -72,6 +72,7 @@ class AppViewModel @Inject constructor(
                         type = appInfo.data.entityType
                         appId = appInfo.data.id
                         title = appInfo.data.title
+                        checkTopic(appInfo.data.title)
                         appData = appInfo.data
                         showAppInfo.postValue(Event(true))
 
@@ -139,6 +140,18 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    val updateBlockState = MutableLiveData<Event<Boolean>>()
+    fun checkTopic(title: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateBlockState.postValue(Event(repository.checkTopic(title)))
+        }
+    }
+
+    fun deleteTopic(title: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteTopic(title)
+        }
+    }
 
     inner class ItemClickListener : ItemListener
 

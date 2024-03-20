@@ -14,13 +14,13 @@ interface HistoryFavoriteDao {
     @Insert
     suspend fun insert(data: FeedEntity)
 
-    @Query("select * from FeedEntity ORDER BY id DESC")
+    @Query("SELECT * FROM FeedEntity ORDER BY id DESC")
     suspend fun loadAllList(): List<FeedEntity>
 
-    @Query("select * from FeedEntity ORDER BY id DESC")
+    @Query("SELECT * FROM FeedEntity ORDER BY id DESC")
     fun loadAllListLive(): LiveData<List<FeedEntity>>
 
-    @Query("select * from FeedEntity ORDER BY id DESC")
+    @Query("SELECT * FROM FeedEntity ORDER BY id DESC")
     fun loadAllListFlow(): Flow<List<FeedEntity>>
 
     @Query("SELECT 1 FROM FeedEntity WHERE fid = :fid LIMIT 1")

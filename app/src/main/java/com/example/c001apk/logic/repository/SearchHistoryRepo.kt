@@ -43,4 +43,8 @@ class SearchHistoryRepo @Inject constructor(
         return searchHistoryDao.isExist(history)
     }
 
+    suspend fun updateHistory(data: String, newId: Long) {
+        searchHistoryDao.updateHistory(data, newId)
+    }
+
 }

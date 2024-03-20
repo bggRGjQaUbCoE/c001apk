@@ -66,12 +66,12 @@ fun BaseExtension.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.23")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("me.panpf:sketch-gif:2.7.1")
-    implementation("androidx.exifinterface:exifinterface:1.3.7")
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.okhttp)
+    implementation(libs.sketch.gif)
+    implementation(libs.androidx.exifinterface)
     implementation(project(":mojito"))
 }
 

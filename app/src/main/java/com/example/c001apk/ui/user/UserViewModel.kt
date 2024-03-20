@@ -271,4 +271,18 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    val updateBlockState = MutableLiveData<Event<Boolean>>()
+    fun checkUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (repository.checkUid(uid))
+                updateBlockState.postValue(Event(true))
+        }
+    }
+
+    fun deleteUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteUid(uid)
+        }
+    }
+
 }

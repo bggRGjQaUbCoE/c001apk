@@ -30,6 +30,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     override var tabController: IOnTabClickListener? = null
     private lateinit var subscribe: MenuItem
     private lateinit var order: MenuItem
+    private var itemBlock: MenuItem? = null
 
     companion object {
         @JvmStatic
@@ -81,6 +82,12 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     }
 
     private fun initObserve() {
+        viewModel.updateBlockState.observe(viewLifecycleOwner) { event ->
+            event?.getContentIfNotHandledOrReturnNull()?.let {
+                if (it)
+                    itemBlock?.title = "移除黑名单"
+            }
+        }
 
         viewModel.showError.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
@@ -151,6 +158,11 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                 }
             )?.isChecked = true
 
+            itemBlock = menu.findItem(R.id.block)
+            viewModel.title?.let {
+                viewModel.checkTopic(it)
+            }
+
             subscribe = menu.findItem(R.id.subscribe)
             subscribe.isVisible = PrefManager.isLogin
             subscribe.title = if (viewModel.isFollow) "取消关注"
@@ -192,15 +204,24 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                     }
 
                     R.id.block -> {
+                        val isBlocked = itemBlock?.title.toString() == "移除黑名单"
                         MaterialAlertDialogBuilder(requireContext()).apply {
                             val title =
                                 if (viewModel.type == "topic") viewModel.url.toString()
                                     .replace("/t/", "")
                                 else viewModel.title
-                            setTitle("确定将 $title 加入黑名单？")
+                            setTitle("确定将 $title ${itemBlock?.title}？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                viewModel.saveTopic(viewModel.title.toString())
+                                viewModel.title?.let {
+                                    itemBlock?.title = if (isBlocked) {
+                                        viewModel.deleteTopic(it)
+                                        "加入黑名单"
+                                    } else {
+                                        viewModel.saveTopic(it)
+                                        "移除黑名单"
+                                    }
+                                }
                             }
                             show()
                         }

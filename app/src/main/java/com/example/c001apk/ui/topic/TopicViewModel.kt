@@ -161,4 +161,18 @@ class TopicViewModel @Inject constructor(
         }
     }
 
+    val updateBlockState = MutableLiveData<Event<Boolean>>()
+    fun checkTopic(title: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (repository.checkTopic(title))
+                updateBlockState.postValue(Event(true))
+        }
+    }
+
+    fun deleteTopic(title: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteTopic(title)
+        }
+    }
+
 }

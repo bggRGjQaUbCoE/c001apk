@@ -34,6 +34,7 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     private val viewModel by viewModels<AppViewModel>()
     private var subscribe: MenuItem? = null
     override var tabController: IOnTabClickListener? = null
+    private var itemBlock: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +58,14 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
     }
 
     private fun initObserve() {
+        viewModel.updateBlockState.observe(this) { event ->
+            event?.getContentIfNotHandledOrReturnNull()?.let {
+                if (it)
+                    itemBlock?.title = "移除黑名单"
+                itemBlock?.isVisible = true
+            }
+        }
+
         viewModel.showError.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (it) {
@@ -229,6 +238,12 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
         subscribe = menu?.findItem(R.id.subscribe)
         subscribe?.isVisible = PrefManager.isLogin
         menu?.findItem(R.id.order)?.isVisible = false
+        itemBlock = menu?.findItem(R.id.block)
+        itemBlock?.isVisible =
+            viewModel.title?.let {
+                viewModel.checkTopic(it)
+                true
+            } ?: false
         return true
     }
 
@@ -266,15 +281,24 @@ class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
             }
 
             R.id.block -> {
+                val isBlocked = itemBlock?.title.toString() == "移除黑名单"
                 MaterialAlertDialogBuilder(this).apply {
                     val title =
                         if (viewModel.type == "topic") viewModel.url.toString()
                             .replace("/t/", "")
                         else viewModel.title
-                    setTitle("确定将 $title 加入黑名单？")
+                    setTitle("确定将 $title ${itemBlock?.title}？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        viewModel.saveTopic(viewModel.title.toString())
+                        viewModel.title?.let {
+                            itemBlock?.title = if (isBlocked) {
+                                viewModel.deleteTopic(it)
+                                "加入黑名单"
+                            } else {
+                                viewModel.saveTopic(it)
+                                "移除黑名单"
+                            }
+                        }
                     }
                     show()
                 }

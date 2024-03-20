@@ -61,11 +61,13 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         binding.appBar.setLiftable(true)
 
         initBar()
-        initView()
-        initData()
-        initRefresh()
-        initScroll()
-        initObserve()
+        if (!viewModel.isInit) {
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+            initObserve()
+        }
 
     }
 
@@ -291,6 +293,14 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         initLift()
         if (activity is CoolPicActivity)
             (activity as? CoolPicActivity)?.tabController = this
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initView()
+            initData()
+            initRefresh()
+            initScroll()
+            initObserve()
+        }
     }
 
     override fun onStart() {

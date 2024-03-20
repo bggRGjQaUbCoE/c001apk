@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
@@ -330,8 +331,7 @@ class AppAdapter(
                     binding.followBtn.text = "已关注"
                     binding.followBtn.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
                 }
-                binding.followBtn.visibility = if (PrefManager.isLogin) View.VISIBLE
-                else View.GONE
+                binding.followBtn.isVisible = PrefManager.isLogin
                 ImageUtil.showIMG(binding.avatar, data.userAvatar)
             }
 

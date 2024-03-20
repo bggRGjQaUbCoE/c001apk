@@ -24,8 +24,14 @@ class SearchViewModel @Inject constructor(
 
     fun insertData(data: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (!repository.checkHistory(data))
-                repository.insertHistory(StringEntity(data))
+            with(StringEntity(data)) {
+                if (repository.checkHistory(data)) {
+                    val max = blackListLiveData.value?.maxOfOrNull { it.id } ?: -1
+                    repository.updateHistory(data, max + 1)
+                } else
+                    repository.insertHistory(this)
+            }
+
         }
     }
 

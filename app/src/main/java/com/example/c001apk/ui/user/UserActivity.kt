@@ -39,6 +39,7 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private var itemBlock: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +75,13 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     }
 
     private fun initObserve() {
+        viewModel.updateBlockState.observe(this) { event ->
+            event?.getContentIfNotHandledOrReturnNull()?.let {
+                if (it)
+                    itemBlock?.title = getMenuTitle("移除黑名单")
+            }
+        }
+
         viewModel.toastText.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
@@ -242,57 +250,35 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.user_menu, menu)
 
-        val itemBlock = menu?.findItem(R.id.block)
-        val spannableString = SpannableString(itemBlock?.title)
-        spannableString.setSpan(
-            ForegroundColorSpan(
-                MaterialColors.getColor(
-                    this,
-                    com.google.android.material.R.attr.colorControlNormal,
-                    0
-                )
-            ),
-            0,
-            spannableString.length,
-            0
-        )
-        itemBlock?.title = spannableString
-
+        viewModel.uid?.let {
+            viewModel.checkUid(it)
+        }
+        itemBlock = menu?.findItem(R.id.block)
+        itemBlock?.title = getMenuTitle(itemBlock?.title)
 
         val itemShare = menu?.findItem(R.id.share)
-        val spannableString1 = SpannableString(itemShare?.title)
-        spannableString1.setSpan(
-            ForegroundColorSpan(
-                MaterialColors.getColor(
-                    this,
-                    com.google.android.material.R.attr.colorControlNormal,
-                    0
-                )
-            ),
-            0,
-            spannableString1.length,
-            0
-        )
-        itemShare?.title = spannableString1
+        itemShare?.title = getMenuTitle(itemShare?.title)
 
         val itemReport = menu?.findItem(R.id.report)
-        val spannableString2 = SpannableString(itemReport?.title)
-        spannableString2.setSpan(
-            ForegroundColorSpan(
-                MaterialColors.getColor(
-                    this,
-                    com.google.android.material.R.attr.colorControlNormal,
-                    0
-                )
-            ),
-            0,
-            spannableString2.length,
-            0
-        )
-        itemReport?.title = spannableString2
+        itemReport?.title = getMenuTitle(itemReport?.title)
         itemReport?.isVisible = PrefManager.isLogin
 
         return true
+    }
+
+    private fun getMenuTitle(title: CharSequence?): SpannableString {
+        return SpannableString(title).also {
+            it.setSpan(
+                ForegroundColorSpan(
+                    MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorControlNormal,
+                        0
+                    )
+                ),
+                0, title?.length ?: 0, 0
+            )
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -311,11 +297,20 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             }
 
             R.id.block -> {
+                val isBlocked = itemBlock?.title.toString() == "移除黑名单"
                 MaterialAlertDialogBuilder(this).apply {
-                    setTitle("确定将 ${viewModel.uname} 加入黑名单？")
+                    setTitle("确定将 ${viewModel.uname} ${itemBlock?.title}？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        viewModel.saveUid(viewModel.uid.toString())
+                        viewModel.uid?.let {
+                            itemBlock?.title = if (isBlocked) {
+                                viewModel.deleteUid(it)
+                                getMenuTitle("加入黑名单")
+                            } else {
+                                viewModel.saveUid(it)
+                                getMenuTitle("移除黑名单")
+                            }
+                        }
                     }
                     show()
                 }

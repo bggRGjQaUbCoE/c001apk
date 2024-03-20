@@ -18,13 +18,13 @@ interface HomeMenuDao {
     @Insert
     suspend fun insertList(list: List<HomeMenu>)
 
-    @Query("select * from HomeMenu ORDER BY position ASC")
+    @Query("SELECT * FROM HomeMenu ORDER BY position ASC")
     suspend fun loadAllList(): List<HomeMenu>
 
-    @Query("select * from HomeMenu ORDER BY position ASC")
+    @Query("SELECT * FROM HomeMenu ORDER BY position ASC")
     fun loadAllListLive(): LiveData<List<HomeMenu>>
 
-    @Query("select * from HomeMenu ORDER BY position ASC")
+    @Query("SELECT * FROM HomeMenu ORDER BY position ASC")
     fun loadAllListFlow(): Flow<List<HomeMenu>>
 
     @Query("SELECT 1 FROM HomeMenu WHERE title = :title LIMIT 1")

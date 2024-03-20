@@ -2,6 +2,7 @@ package com.example.c001apk.ui.feed
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BR
 import com.example.c001apk.adapter.ItemListener
@@ -12,6 +13,7 @@ import com.example.c001apk.databinding.ItemFeedContentBinding
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
+import com.example.c001apk.util.PrefManager
 
 class FeedDataAdapter(
     private val listener: ItemListener,
@@ -32,6 +34,7 @@ class FeedDataAdapter(
                     likeNum.set(data?.likenum)
                 }
             }
+            binding.follow.isVisible = PrefManager.isLogin
             binding.executePendingBindings()
         }
     }

@@ -301,6 +301,6 @@ fun setImage(imageView: ImageView, imageUrl: String?) {
 @BindingAdapter("setCover")
 fun setCover(imageView: ImageView, imageUrl: String?) {
     imageUrl?.let {
-        ImageUtil.showUserCover(imageView, it)
+        ImageUtil.showIMG(imageView, it, true)
     }
 }
