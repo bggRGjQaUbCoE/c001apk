@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 @AndroidEntryPoint
 class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
-    private lateinit var viewModel: HomeViewModel
+    private val viewModel by viewModels<HomeViewModel>()
     private lateinit var mAdapter: HomeMenuAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var menuList: ArrayList<HomeMenu>
@@ -51,7 +51,6 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
         if (type != null && type == "homeMenu") {
             menuList = ArrayList()
-            viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
             binding.tabPage.visibility = View.VISIBLE
             binding.toolBar.apply {
                 title = getString(R.string.edit_tab)

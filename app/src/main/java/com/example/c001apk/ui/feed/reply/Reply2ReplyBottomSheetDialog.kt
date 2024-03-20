@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClickListener {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
-    private val viewModel by lazy { ViewModelProvider(this)[Reply2ReplyBottomSheetViewModel::class.java] }
+    private val viewModel by viewModels<Reply2ReplyBottomSheetViewModel>()
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager

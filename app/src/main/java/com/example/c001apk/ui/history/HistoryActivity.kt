@@ -1,12 +1,11 @@
 package com.example.c001apk.ui.history
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -21,20 +20,24 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 
 @AndroidEntryPoint
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
-    private lateinit var viewModel: HistoryViewModel
+    private val viewModel by viewModels<HistoryViewModel>(
+        extrasProducer = {
+            defaultViewModelCreationExtras.withCreationCallback<HistoryViewModel.Factory> { factory ->
+                factory.create(type = intent.getStringExtra("type") ?: "browse")
+            }
+        }
+    )
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this)[HistoryViewModel::class.java]
 
         binding.toolBar.title =
             when (viewModel.type) {

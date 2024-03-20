@@ -1,25 +1,29 @@
 package com.example.c001apk.ui.history
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class HistoryViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = HistoryViewModel.Factory::class)
+class HistoryViewModel @AssistedInject constructor(
+    @Assisted val type: String,
     private val blackListRepo: BlackListRepo,
     private val historyFavoriteRepo: HistoryFavoriteRepo,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val type: String = savedStateHandle["type"] ?: "browse"
+    @AssistedFactory
+    interface Factory {
+        fun create(type: String): HistoryViewModel
+    }
 
     val browseLiveData: LiveData<List<FeedEntity>> =
         if (type == "browse") {

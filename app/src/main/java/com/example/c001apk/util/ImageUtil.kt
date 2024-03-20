@@ -29,8 +29,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants.USER_AGENT
 import com.example.c001apk.util.ClipboardUtil.copyText
-import com.example.c001apk.util.FileUtil.Companion.copyFile
-import com.example.c001apk.util.FileUtil.Companion.createFileByDeleteOldFile
+import com.example.c001apk.util.FileUtil.copyFile
+import com.example.c001apk.util.FileUtil.createFileByDeleteOldFile
 import com.example.c001apk.view.FileTarget
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.example.c001apk.view.ninegridimageview.indicator.CircleIndexIndicator

@@ -4,7 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MessageActivity : BaseActivity<ActivityMessageBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }
+    private val viewModel by viewModels<MessageViewModel>()
     private lateinit var mAdapter: MessageContentAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager

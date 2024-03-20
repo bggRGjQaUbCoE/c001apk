@@ -10,7 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,12 +44,20 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener,
     IOnBottomClickListener, IOnPublishClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[HomeFeedViewModel::class.java] }
+    @Inject
+    lateinit var viewModelAssistedFactory: HomeFeedViewModel.Factory
+    private val viewModel by viewModels<HomeFeedViewModel> {
+        HomeFeedViewModel.provideFactory(
+            viewModelAssistedFactory,
+            getLastingInstallTime(requireContext())
+        )
+    }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -313,7 +321,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         (activity as? IOnBottomClickContainer)?.controller = this
         if (viewModel.isInit) {
             viewModel.isInit = false
-            viewModel.installTime = getLastingInstallTime(requireContext())
             initView()
             initRefresh()
             initScroll()

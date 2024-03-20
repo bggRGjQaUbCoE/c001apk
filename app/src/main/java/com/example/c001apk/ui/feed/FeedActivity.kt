@@ -3,7 +3,7 @@ package com.example.c001apk.ui.feed
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.base.BaseActivity
@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class FeedActivity : BaseActivity<ActivityFeedBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[FeedViewModel::class.java] }
+    private val viewModel by viewModels<FeedViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

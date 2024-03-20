@@ -8,7 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,7 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class UserActivity : BaseActivity<ActivityUserBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[UserViewModel::class.java] }
+    private val viewModel by viewModels<UserViewModel>()
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager

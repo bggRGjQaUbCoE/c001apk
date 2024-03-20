@@ -3,7 +3,7 @@ package com.example.c001apk.ui.hometopic
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[HomeTopicContentViewModel::class.java] }
+    private val viewModel by viewModels<HomeTopicContentViewModel>()
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager

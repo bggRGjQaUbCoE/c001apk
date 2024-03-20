@@ -9,7 +9,7 @@ import com.example.c001apk.util.NetWorkUtil.openLink
 import com.example.c001apk.util.http2https
 import com.google.android.material.color.MaterialColors
 
-internal class MyURLSpan(
+class MyURLSpan(
     private val mContext: Context,
     private val mUrl: String,
     private val imgList: List<String>?
@@ -45,7 +45,7 @@ internal class MyURLSpan(
     override fun updateDrawState(ds: TextPaint) {
         super.updateDrawState(ds)
         if (isColor)
-            ds.color =  MaterialColors.getColor(
+            ds.color = MaterialColors.getColor(
                 mContext,
                 com.google.android.material.R.attr.colorControlNormal,
                 0

@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -20,10 +20,12 @@ import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.Utils.downloadApk
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[UpdateListViewModel::class.java] }
+    private val viewModel by viewModels<UpdateListViewModel>()
     private lateinit var mAdapter: UpdateListAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager

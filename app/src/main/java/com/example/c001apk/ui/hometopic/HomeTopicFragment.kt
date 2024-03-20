@@ -3,7 +3,7 @@ package com.example.c001apk.ui.hometopic
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
@@ -17,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
     BrandLabelAdapter.OnLabelClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[HomeTopicViewModel::class.java] }
+    private val viewModel by viewModels<HomeTopicViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

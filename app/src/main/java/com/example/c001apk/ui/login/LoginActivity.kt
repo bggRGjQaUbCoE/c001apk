@@ -8,7 +8,7 @@ import android.text.Spanned
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityLoginBinding
 import com.example.c001apk.ui.base.BaseActivity
@@ -24,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[LoginViewModel::class.java] }
+    private val viewModel by viewModels<LoginViewModel>()
     private var isLoginPass = true
 
     private val filter =

@@ -3,7 +3,7 @@ package com.example.c001apk.ui.search
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchResultBinding
@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     IOnSearchMenuClickContainer, IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[SearchContentViewModel::class.java] }
+    private val viewModel by viewModels<SearchContentViewModel>()
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var type: MenuItem

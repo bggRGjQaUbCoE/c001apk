@@ -4,7 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[CollectionViewModel::class.java] }
+    private val viewModel by viewModels<CollectionViewModel>()
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager

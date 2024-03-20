@@ -23,18 +23,23 @@ import javax.inject.Singleton
 
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class UserBlackList
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class TopicBlackList
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class SearchHistory
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class BrowseHistory
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class FeedFavorite
 
 @Module

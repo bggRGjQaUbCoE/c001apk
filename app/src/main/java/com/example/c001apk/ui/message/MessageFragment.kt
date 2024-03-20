@@ -5,7 +5,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,7 +40,7 @@ import java.net.URLDecoder
 @AndroidEntryPoint
 class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
-    private val viewModel by lazy { ViewModelProvider(this)[MessageViewModel::class.java] }
+    private val viewModel by viewModels<MessageViewModel>()
     private val messageFirstAdapter by lazy { MessageFirstAdapter() }
     private val messageSecondAdapter by lazy { MessageSecondAdapter() }
     private val messageThirdAdapter by lazy { MessageThirdAdapter() }

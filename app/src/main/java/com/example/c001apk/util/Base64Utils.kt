@@ -257,7 +257,7 @@ object Base64Utils {
     @Throws(UnsupportedEncodingException::class)
     private fun decodePrivate(str: String): ByteArray {
         val sb = StringBuffer()
-        var data: ByteArray?
+        val data: ByteArray?
         data = str.toByteArray(StandardCharsets.US_ASCII)
         val len = data.size
         var i = 0

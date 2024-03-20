@@ -8,7 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityAppBinding
@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class AppActivity : BaseActivity<ActivityAppBinding>(), IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[AppViewModel::class.java] }
+    private val viewModel by viewModels<AppViewModel>()
     private var subscribe: MenuItem? = null
     override var tabController: IOnTabClickListener? = null
 

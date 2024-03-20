@@ -2,12 +2,12 @@ package com.example.c001apk.ui.main
 
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
@@ -27,7 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContainer,
     INavViewContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[MainViewModel::class.java] }
+    private val viewModel by viewModels<MainViewModel>()
     private val navViewBehavior by lazy { HideBottomViewOnScrollBehavior<BottomNavigationView>() }
     override var controller: IOnBottomClickListener? = null
     private lateinit var navView: NavigationBarView

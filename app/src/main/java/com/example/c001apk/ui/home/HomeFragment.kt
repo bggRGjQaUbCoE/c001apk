@@ -3,7 +3,7 @@ package com.example.c001apk.ui.home
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.databinding.FragmentHomeBinding
 import com.example.c001apk.ui.applist.AppListFragment
@@ -23,7 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
+    private val viewModel by viewModels<HomeViewModel>()
     override var tabController: IOnTabClickListener? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

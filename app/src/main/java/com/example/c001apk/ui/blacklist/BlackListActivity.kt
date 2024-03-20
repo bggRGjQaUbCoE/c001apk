@@ -8,8 +8,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
-import androidx.lifecycle.ViewModelProvider
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityBlackListBinding
 import com.example.c001apk.logic.model.StringEntity
@@ -26,6 +26,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -33,14 +34,18 @@ import java.io.IOException
 @AndroidEntryPoint
 class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClickListener {
 
-    private lateinit var viewModel: BlackListViewModel
+    private val viewModel by viewModels<BlackListViewModel>(
+        extrasProducer = {
+            defaultViewModelCreationExtras.withCreationCallback<BlackListViewModel.Factory> { factory ->
+                factory.create(type = intent.getStringExtra("type") ?: "user")
+            }
+        }
+    )
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: FlexboxLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this)[BlackListViewModel::class.java]
 
         binding.indicator.isIndeterminate = true
         binding.indicator.visibility = View.VISIBLE

@@ -16,15 +16,19 @@ import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class Api1Service
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class Api1ServiceNoRedirect
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class Api2Service
 
 @Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class AccountService
 
 @Module
@@ -34,7 +38,6 @@ object NetworkModule {
     private const val API_BASE_URL = "https://api.coolapk.com"
     private const val API2_BASE_URL = "https://api2.coolapk.com"
     private const val ACCOUNT_BASE_URL = "https://account.coolapk.com"
-
 
     @Api1Service
     @Singleton

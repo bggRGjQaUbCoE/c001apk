@@ -10,7 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.graphics.ColorUtils
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchBinding
 import com.example.c001apk.ui.base.BaseFragment
@@ -26,7 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(this)[SearchViewModel::class.java] }
+    private val viewModel by viewModels<SearchViewModel>()
     private var mAdapter: HistoryAdapter? = null
     private var mLayoutManager: FlexboxLayoutManager? = null
 

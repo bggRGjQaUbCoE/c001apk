@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.ToastUtil
 import com.example.c001apk.util.TokenDeviceUtils.getDeviceCode
 import com.example.c001apk.util.TokenDeviceUtils.randHexString
 import com.example.c001apk.util.Utils.randomAndroidVersionRelease

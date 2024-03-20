@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
@@ -13,21 +14,38 @@ import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class HomeFeedViewModel @Inject constructor(
+class HomeFeedViewModel @AssistedInject constructor(
+    @Assisted private val installTime: String,
     val repository: BlackListRepo,
     private val historyFavoriteRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
-    var installTime: String = System.currentTimeMillis().toString()
+    @AssistedFactory
+    interface Factory {
+        fun create(installTime: String): HomeFeedViewModel
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory,
+            installTime: String
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(installTime) as T
+            }
+        }
+    }
+
     val dataList = ArrayList<HomeFeedResponse.Data>()
     var position: Int? = null
     var lastVisibleItemPosition: Int = 0
@@ -170,7 +188,13 @@ class HomeFeedViewModel @Inject constructor(
     var dataListTitle: String? = null
     fun fetchDataList() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getDataList(dataListUrl.toString(), dataListTitle.toString(), null, lastItem, page)
+            networkRepo.getDataList(
+                dataListUrl.toString(),
+                dataListTitle.toString(),
+                null,
+                lastItem,
+                page
+            )
                 .onStart {
                     if (isInit)
                         isInit = false

@@ -6,9 +6,9 @@ borderview = "1.1.0"
 constraintlayout = "2.1.4"
 core-ktx = "1.12.0"
 drakeet-about = "2.5.2"
-dagger = "2.51"
 espresso-core = "3.5.1"
 flexbox = "3.0.0"
+fragment-ktx = "1.6.2"
 glide = "4.16.0"
 glide-transformations = "4.3.0"
 hilt = "2.51"
@@ -39,6 +39,7 @@ androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayo
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-ext-junit = { module = "androidx.test.ext:junit", version.ref = "junit-version" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment-ktx" }
 androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycle-extensions" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle-livedata-ktx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-livedata-ktx" }
@@ -53,8 +54,8 @@ appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", 
 drakeet-about = { module = "com.drakeet.about:about", version.ref = "drakeet-about" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 google-android-flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
-google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
-google-dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
+google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+google-dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-ksp = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
 glide-okhttp3-integration = { module = "com.github.bumptech.glide:okhttp3-integration", version.ref = "glide" }

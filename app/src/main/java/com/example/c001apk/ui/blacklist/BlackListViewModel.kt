@@ -2,24 +2,29 @@ package com.example.c001apk.ui.blacklist
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.model.StringEntity
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.util.Event
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class BlackListViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = BlackListViewModel.Factory::class)
+class BlackListViewModel @AssistedInject constructor(
+    @Assisted val type: String,
     private val blackListRepo: BlackListRepo,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val type: String = savedStateHandle["type"] ?: "user"
+    @AssistedFactory
+    interface Factory {
+        fun create(type: String): BlackListViewModel
+    }
+
     val toastText = MutableLiveData<Event<String>>()
 
     val blackListLiveData: LiveData<List<StringEntity>> = when (type) {

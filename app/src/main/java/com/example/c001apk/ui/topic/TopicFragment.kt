@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentTopicBinding
@@ -25,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
     IOnTabClickContainer {
 
-    private val viewModel by lazy { ViewModelProvider(this)[TopicViewModel::class.java] }
+    private val viewModel by viewModels<TopicViewModel>()
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var subscribe: MenuItem

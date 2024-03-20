@@ -7,7 +7,9 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityAppUpdateBinding
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.ui.base.BaseActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
 
     @SuppressLint("CommitTransaction")

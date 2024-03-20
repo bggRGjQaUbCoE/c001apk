@@ -153,6 +153,7 @@ dependencies {
     debugImplementation(libs.leakcanary.android)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.lifecycle.extensions)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

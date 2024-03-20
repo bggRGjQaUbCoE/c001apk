@@ -12,7 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -56,7 +56,7 @@ import kotlinx.coroutines.withContext
 @AndroidEntryPoint
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
 
-    private val viewModel by lazy { ViewModelProvider(requireActivity())[FeedViewModel::class.java] }
+    private val viewModel by viewModels<FeedViewModel>(ownerProducer = { requireActivity() })
     private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private lateinit var feedDataAdapter: FeedDataAdapter
     private lateinit var feedReplyAdapter: FeedReplyAdapter

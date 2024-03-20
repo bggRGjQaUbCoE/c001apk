@@ -29,7 +29,6 @@ import androidx.webkit.WebViewFeature
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityWebViewBinding
 import com.example.c001apk.ui.base.BaseActivity
-import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.ClipboardUtil.copyText
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.http2https
