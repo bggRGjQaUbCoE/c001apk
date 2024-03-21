@@ -33,8 +33,7 @@ import androidx.core.content.ContextCompat
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.util.ImageUtil
-import com.example.c001apk.view.RoundImageView
-import com.google.android.material.color.MaterialColors
+import com.example.c001apk.view.BadgedImageView
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 
@@ -197,7 +196,7 @@ class NineGridImageView @JvmOverloads constructor(
             removeAllViews()
 
             urlList.forEach {
-                val imageView = RoundImageView(context)
+                val imageView = BadgedImageView(context)
                 val shapePathModel = ShapeAppearanceModel.builder()
                     .setAllCorners(RoundedCornerTreatment())
                     .setAllCornerSizes(12.dp.toFloat())
@@ -215,16 +214,10 @@ class NineGridImageView @JvmOverloads constructor(
                     imgWidth = imageLp.first
                     imgHeight = imageLp.second
                     if (replace.endsWith("gif") || imgHeight > imgWidth * 22f / 9f) {
-                        labelBackground = MaterialColors.getColor(
-                            context,
-                            com.google.android.material.R.attr.colorPrimary,
-                            0
+                        setBadge(
+                            if (replace.endsWith("gif")) "GIF"
+                            else "长图"
                         )
-                        labelText = if (replace.endsWith("gif")) "GIF"
-                        else "长图"
-                        textSize = 12.dp
-                        textColor = context.getColor(R.color.wb)
-                        labelWidth = 20.dp
                     }
                 }
                 addView(imageView, generateDefaultLayoutParams())

@@ -406,7 +406,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                     "all" -> 0
                     "circle" -> 1
                     "topic" -> 2
-                    else -> 3
+                    "product" -> 3
+                    "apk" -> 4
+                    else -> 0
                 }
                 setSingleChoiceItems(
                     items,
