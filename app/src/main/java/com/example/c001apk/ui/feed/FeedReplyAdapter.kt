@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -120,7 +121,7 @@ class FeedReplyAdapter(
                             sortedList.add(it)
                     }
                     if (sortedList.isNotEmpty()) {
-                        binding.replyLayout.visibility = View.VISIBLE
+                        binding.replyLayout.isVisible = true
                         if (itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
                             binding.replyLayout.setCardBackgroundColor(
                                 MaterialColors.getColor(
@@ -215,12 +216,12 @@ class FeedReplyAdapter(
                                 return view
                             }
                         }
-                    } else binding.replyLayout.visibility = View.GONE
+                    } else binding.replyLayout.isVisible = false
                 }
-            } else binding.replyLayout.visibility = View.GONE
+            } else binding.replyLayout.isVisible = false
 
             if (reply.replyRowsMore != 0) {
-                binding.totalReply.visibility = View.VISIBLE
+                binding.totalReply.isVisible = true
                 val count = reply.replyRowsMore + (reply.replyRows?.size ?: 0)
                 binding.totalReply.text = "查看更多回复($count)"
                 binding.totalReply.setOnClickListener {
@@ -231,7 +232,7 @@ class FeedReplyAdapter(
                     )
                 }
             } else
-                binding.totalReply.visibility = View.GONE
+                binding.totalReply.isVisible = false
 
             binding.executePendingBindings()
         }

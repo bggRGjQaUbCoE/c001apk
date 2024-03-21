@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.appupdate
 
 import android.annotation.SuppressLint
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.MenuItem
 import com.example.c001apk.R
@@ -12,22 +13,31 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
 
+    private val appsUpdateList by lazy {
+        val list = if (SDK_INT >= 33)
+            intent.getParcelableArrayListExtra("list", UpdateCheckResponse.Data::class.java)
+                ?: emptyList()
+        else
+            intent.getParcelableArrayListExtra("list") ?: emptyList()
+        list as ArrayList<UpdateCheckResponse.Data>
+    }
+
     @SuppressLint("CommitTransaction")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding.appBar.setLiftable(true)
 
-        val appsUpdateList = intent?.getParcelableArrayListExtra<UpdateCheckResponse.Data>("list")
-                as ArrayList<UpdateCheckResponse.Data>
-
         setSupportActionBar(binding.toolBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "应用更新：" + appsUpdateList.size
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.appUpdateFragment, UpdateListFragment.newInstance(appsUpdateList))
-            .commit()
+        if (supportFragmentManager.findFragmentById(R.id.appUpdateFragment) == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.appUpdateFragment, UpdateListFragment.newInstance(appsUpdateList))
+                .commit()
+        }
 
     }
 

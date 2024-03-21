@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,8 +14,10 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentCollectionBinding
 import com.example.c001apk.logic.model.Like
@@ -26,11 +29,28 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClickListener {
 
-    private val viewModel by viewModels<CollectionViewModel>()
+    private val id by lazy { arguments?.getString("id").orEmpty() }
+    private val title by lazy { arguments?.getString("title").orEmpty() }
+
+    @Inject
+    lateinit var viewModelAssistedFactory: CollectionViewModel.Factory
+    private val viewModel by viewModels<CollectionViewModel> {
+        CollectionViewModel.provideFactory(
+            viewModelAssistedFactory,
+            id,
+            title,
+            if (id.isEmpty()) "/v6/collection/list"
+            else if (id == "recommend") "/v6/picture/list?tag=$title&type=recommend"
+            else if (id == "hot") "/v6/picture/list?tag=$title&type=hot"
+            else if (id == "newest") "/v6/picture/list?tag=$title&type=newest"
+            else "/v6/collection/itemList"
+        )
+    }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -41,18 +61,10 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         fun newInstance(id: String, title: String) =
             CollectionFragment().apply {
                 arguments = Bundle().apply {
-                    putString("ID", id)
-                    putString("TITLE", title)
+                    putString("id", id)
+                    putString("title", title)
                 }
             }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.id = it.getString("ID")
-            viewModel.title = it.getString("TITLE")
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -63,27 +75,30 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         initBar()
         if (!viewModel.isInit) {
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
     }
 
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
+
     private fun initBar() {
-        if (viewModel.id == "recommend"
-            || viewModel.id == "hot"
-            || viewModel.id == "newest"
-        )
-            binding.appBar.visibility = View.GONE
+        if (viewModel.id == "recommend" || viewModel.id == "hot" || viewModel.id == "newest")
+            binding.appBar.isVisible = false
         else
             binding.toolBar.apply {
-                title = if (viewModel.title.isNullOrEmpty()) "我的收藏单"
-                else viewModel.title
+                title = viewModel.title.ifEmpty { "我的收藏单" }
                 setNavigationIcon(R.drawable.ic_back)
                 setNavigationOnClickListener {
-                    if (viewModel.id.isNullOrEmpty())
+                    if (viewModel.id.isEmpty())
                         requireActivity().finish()
                     else
                         requireActivity().supportFragmentManager.popBackStack()
@@ -92,21 +107,42 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
     }
 
     private fun initObserve() {
-        viewModel.toastText.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        isVisible = true
+                        text = it.errMsg
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        parent.isVisible = true
+                        msg.text = it.msg
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
                 binding.swipeRefresh.isRefreshing = false
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
             }
         }
 
@@ -114,13 +150,11 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
             viewModel.listSize = it.size
             mAdapter.submitList(it)
         }
-    }
 
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -152,27 +186,22 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.url =
-            if (viewModel.id.isNullOrEmpty()) "/v6/collection/list"
-            else if (viewModel.id == "recommend") "/v6/picture/list?tag=${viewModel.title}&type=recommend"
-            else if (viewModel.id == "hot") "/v6/picture/list?tag=${viewModel.title}&type=hot"
-            else if (viewModel.id == "newest") "/v6/picture/list?tag=${viewModel.title}&type=newest"
-            else "/v6/collection/itemList"
         viewModel.fetchCollectionList()
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -200,7 +229,6 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -296,10 +324,11 @@ class CollectionFragment : BaseFragment<FragmentCollectionBinding>(), IOnTabClic
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
     }
 

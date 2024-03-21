@@ -4,9 +4,11 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
@@ -28,8 +30,6 @@ class SearchContentViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
-    var tabList: MutableList<String>? = null
-    var title: String? = null
     var feedType: String = "all"
     var sort: String = "default" //hot // reply
     var pageParam: String? = null
@@ -41,22 +41,15 @@ class SearchContentViewModel @Inject constructor(
     var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var errorMessage: String? = null
-    var id: String? = null
 
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val toastText = MutableLiveData<Event<String>>()
-    var afterFollow = MutableLiveData<Event<Int>>()
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    var followState = MutableLiveData<Event<Int>>()
     val searchData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchSearchData() {
@@ -67,18 +60,17 @@ class SearchContentViewModel @Inject constructor(
             )
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val searchList = searchData.value?.toMutableList() ?: ArrayList()
                     val search = result.getOrNull()
                     if (search != null) {
                         if (!search.message.isNullOrEmpty()) {
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_ERROR, search.message
-                                )
-                            )
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(search.message))
+                            else
+                                footerState.postValue(FooterState.LoadingError(search.message))
                             return@collect
                         } else if (!search.data.isNullOrEmpty()) {
                             lastItem = search.data.last().id
@@ -90,7 +82,9 @@ class SearchContentViewModel @Inject constructor(
                                         if (it.entityType == "feed")
                                             if (!repository.checkUid(it.userInfo?.uid.toString())
                                                 && !repository.checkTopic(
-                                                    it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                                    it.tags + it.ttitle + it.relationRows?.getOrNull(
+                                                        0
+                                                    )?.title
                                                 )
                                             )
                                                 searchList.add(it)
@@ -98,28 +92,32 @@ class SearchContentViewModel @Inject constructor(
                                 else
                                     searchList.addAll(search.data)
                             }
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_COMPLETE,
-                                    null
-                                )
-                            )
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            searchData.postValue(searchList)
                         } else {
-                            if (isRefreshing)
-                                searchList.clear()
-                            changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                             isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    searchData.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
                         }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    searchData.postValue(searchList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
 
@@ -131,12 +129,16 @@ class SearchContentViewModel @Inject constructor(
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
-                        val isFollow = if (followAuthor == 1) 0
-                        else 1
-                        val userList = searchData.value?.toMutableList() ?: ArrayList()
-                        userList[position].isFollow = isFollow
-                        searchData.postValue(userList)
-                        afterFollow.postValue(Event(position))
+                        if (response.message != null) {
+                            toastText.postValue(Event(response.message))
+                        } else {
+                            val isFollow = if (followAuthor == 1) 0
+                            else 1
+                            val userList = searchData.value?.toMutableList() ?: ArrayList()
+                            userList[position].isFollow = isFollow
+                            searchData.postValue(userList)
+                            followState.postValue(Event(position))
+                        }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
                     }

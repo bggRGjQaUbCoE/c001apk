@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -38,22 +38,15 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
+    var id: String? = null
+    var uid: String? = null
     var isInit: Boolean = true
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var id: String? = null
 
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    val footerState = MutableLiveData<FooterState>()
     val totalReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
 
@@ -62,52 +55,45 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
             networkRepo.getReply2Reply(id.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val replyTotalList = totalReplyData.value?.toMutableList() ?: ArrayList()
                     val reply = result.getOrNull()
-                    if (reply?.message != null) {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR,
-                                reply.message
-                            )
-                        )
-                        return@collect
-                    } else if (!reply?.data.isNullOrEmpty()) {
-                        lastItem = reply?.data?.last()?.id
-                        if (!isLoadMore) {
-                            replyTotalList.clear()
-                            replyTotalList.addAll(oriReply)
-                        }
-                        listSize = replyTotalList.size
-                        reply?.data?.let { data ->
-                            data.forEach {
+                    if (reply != null) {
+                        if (reply.message != null) {
+                            footerState.postValue(FooterState.LoadingError(reply.message))
+                            return@collect
+                        } else if (!reply.data.isNullOrEmpty()) {
+                            lastItem = reply.data.last().id
+                            if (!isLoadMore) {
+                                replyTotalList.clear()
+                                replyTotalList.addAll(oriReply)
+                            }
+                            listSize = replyTotalList.size
+                            reply.data.forEach {
                                 if (it.entityType == "feed_reply")
                                     if (!repository.checkUid(it.uid))
                                         replyTotalList.add(it)
                             }
+                            page++
+                            totalReplyData.postValue(replyTotalList)
+                            footerState.postValue(FooterState.LoadingDone)
+                        } else if (reply.data?.isEmpty() == true) {
+                            isEnd = true
+                            if (replyTotalList.isEmpty())
+                                totalReplyData.postValue(oriReply)
+                            footerState.postValue(FooterState.LoadingEnd)
                         }
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
-                    } else if (reply?.data?.isEmpty() == true) {
-                        if (replyTotalList.isEmpty())
-                            replyTotalList.addAll(oriReply)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
-                        isEnd = true
-                        result.exceptionOrNull()?.printStackTrace()
                     } else {
-                        if (replyTotalList.isEmpty())
-                            replyTotalList.addAll(oriReply)
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (replyTotalList.isEmpty())
+                            totalReplyData.postValue(oriReply)
+                        footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    totalReplyData.postValue(replyTotalList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
 
@@ -193,9 +179,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             replyList.removeAt(position)
                             totalReplyData.postValue(replyList)
                         } else if (!response.message.isNullOrEmpty()) {
-                            response.message.let {
-                                toastText.postValue(Event(it))
-                            }
+                            toastText.postValue(Event(response.message))
                         }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
@@ -247,9 +231,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         if (response.data != null) {
-                            response.data.let {
-                                toastText.postValue(Event(it))
-                            }
+                            toastText.postValue(Event(response.data))
                             if (response.data == "验证通过") {
                                 onPostReply()
                             }

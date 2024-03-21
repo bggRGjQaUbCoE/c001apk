@@ -4,9 +4,12 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,11 +44,17 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
             }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             appsUpdateList =
-                it.getParcelableArrayList<UpdateCheckResponse.Data>("list") as List<UpdateCheckResponse.Data>
+                if (SDK_INT >= 33)
+                    it.getParcelableArrayList("list", UpdateCheckResponse.Data::class.java)
+                        ?.toList() ?: emptyList()
+                else
+                    it.getParcelableArrayList<UpdateCheckResponse.Data>("list")
+                        ?.toList() ?: emptyList()
         }
     }
 
@@ -59,13 +68,14 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
     }
 
     private fun initObserve() {
-        viewModel.doNext.observe(viewLifecycleOwner) { event ->
+        viewModel.download.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (it) {
+                    val url = viewModel.urlMap[viewModel.packageName.toString()].orEmpty()
                     try {
                         downloadApk(
                             requireContext(),
-                            viewModel.url.toString(),
+                            url,
                             "${viewModel.appName}-${viewModel.versionName}-${viewModel.versionCode}.apk"
                         )
                     } catch (e: Exception) {
@@ -73,12 +83,12 @@ class UpdateListFragment : BaseFragment<FragmentHomeFeedBinding>() {
                             requireContext().startActivity(
                                 Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse(viewModel.url.toString())
+                                    Uri.parse(url)
                                 )
                             )
                         } catch (e: ActivityNotFoundException) {
                             Toast.makeText(requireContext(), "下载失败", Toast.LENGTH_SHORT).show()
-                            ClipboardUtil.copyText(requireContext(), viewModel.url.toString())
+                            ClipboardUtil.copyText(requireContext(), url)
                             e.printStackTrace()
                         }
                     }

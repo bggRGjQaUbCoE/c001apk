@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +22,7 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
@@ -57,10 +59,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             id: String
         ): Reply2ReplyBottomSheetDialog {
             val args = Bundle()
-            args.putString("FUID", fuid)
-            args.putString("UID", uid)
-            args.putString("ID", id)
-            args.putInt("POSITION", position)
+            args.putString("fuid", fuid)
+            args.putString("uid", uid)
+            args.putString("id", id)
+            args.putInt("position", position)
             val fragment = Reply2ReplyBottomSheetDialog()
             fragment.arguments = args
             return fragment
@@ -69,10 +71,10 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
 
     private fun setData() {
         arguments?.let {
-            viewModel.id = it.getString("ID", "")
-            viewModel.fuid = it.getString("FUID", "")
-            viewModel.uid = it.getString("UID", "")
-            viewModel.position = it.getInt("POSITION")
+            viewModel.id = it.getString("id", "")
+            viewModel.fuid = it.getString("fuid", "")
+            viewModel.uid = it.getString("uid", "")
+            viewModel.position = it.getInt("position")
             viewModel.oriReply = oriReply
         }
     }
@@ -183,14 +185,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
             }
         }
 
@@ -206,11 +205,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                 }
             }
         }
-    }
-
-    private fun showReplyErrorMessage() {
-        binding.replyErrorMessage.visibility = View.VISIBLE
-        binding.replyErrorMessage.text = viewModel.errorMessage
     }
 
     private fun initScroll() {
@@ -236,7 +230,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -251,8 +244,8 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
 
     private fun initData() {
         if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
             binding.indicator.parent.isIndeterminate = true
+            binding.indicator.parent.isVisible = true
             viewModel.isEnd = false
             viewModel.isLoadMore = false
             viewModel.fetchReplyTotal()

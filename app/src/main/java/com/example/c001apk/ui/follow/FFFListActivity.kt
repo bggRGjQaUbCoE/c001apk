@@ -3,8 +3,9 @@ package com.example.c001apk.ui.follow
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,7 +14,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.ActivityFfflistBinding
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -41,16 +44,16 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
 
         binding.appBar.setLiftable(true)
 
-        viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
-        viewModel.type = intent.getStringExtra("type")
         viewModel.uid = intent.getStringExtra("uid")
+        viewModel.type = intent.getStringExtra("type")
+        viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
 
         initBar()
-        if (viewModel.isEnable == true) {
-            binding.tabLayout.visibility = View.VISIBLE
-            binding.viewPager.visibility = View.VISIBLE
-            binding.swipeRefresh.visibility = View.GONE
-            binding.recyclerView.visibility = View.GONE
+        if (viewModel.isEnable) {
+            binding.tabLayout.isVisible = true
+            binding.viewPager.isVisible = true
+            binding.swipeRefresh.isVisible = false
+            binding.recyclerView.isVisible = false
             if (viewModel.tabList.isEmpty()) {
                 if (viewModel.type == "follow") {
                     viewModel.tabList.apply {
@@ -68,28 +71,36 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
             }
             initViewPager()
         } else {
-            binding.tabLayout.visibility = View.GONE
-            binding.viewPager.visibility = View.GONE
-            binding.swipeRefresh.visibility = View.VISIBLE
-            binding.recyclerView.visibility = View.VISIBLE
+            binding.tabLayout.isVisible = false
+            binding.viewPager.isVisible = false
+            binding.swipeRefresh.isVisible = true
+            binding.recyclerView.isVisible = true
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
     }
 
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-        if (viewModel.isEnable != true)
+        if (!viewModel.isEnable)
             initLift()
     }
 
     override fun onStart() {
         super.onStart()
-        if (viewModel.isEnable != true)
+        if (!viewModel.isEnable)
             initLift()
     }
 
@@ -118,15 +129,47 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
     }
 
     private fun initObserve() {
-        viewModel.changeState.observe(this) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
-                binding.swipeRefresh.isRefreshing = false
+        viewModel.toastText.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.loadingState.observe(this) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+        viewModel.footerState.observe(this) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
@@ -236,7 +279,6 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -250,25 +292,18 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                this,
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
-        }
-    }
-
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.isIndeterminate = true
-            binding.indicator.parent.visibility = View.VISIBLE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 

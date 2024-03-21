@@ -2,11 +2,13 @@ package com.example.c001apk.ui.hometopic
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.main.INavViewContainer
@@ -41,8 +43,10 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
 
         if (viewModel.isInit) {
             viewModel.isInit = false
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initObserve()
+            initError()
+            initScroll()
         }
 
     }
@@ -51,20 +55,26 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isInit) {
-            initView()
             initObserve()
+            initError()
+            initScroll()
         }
 
+    }
+
+    private fun initError() {
         binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.visibility = View.GONE
             binding.indicator.parent.isIndeterminate = true
-            binding.indicator.parent.visibility = View.VISIBLE
+            binding.errorLayout.parent.isVisible = false
+            binding.indicator.parent.isVisible = true
             if (viewModel.type == "topic")
                 viewModel.fetchTopicList()
             else
                 viewModel.fetchProductList()
         }
+    }
 
+    private fun initScroll() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -75,56 +85,54 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
                 }
             }
         })
-
     }
 
     private fun initObserve() {
-        viewModel.doNext.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it)
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    if (viewModel.type == "topic") {
+                        viewModel.url = "/page?url=V11_VERTICAL_TOPIC"
+                        viewModel.title = "话题"
+                        viewModel.fetchTopicList()
+                    } else
+                        viewModel.fetchProductList()
+                }
+
+                LoadingState.LoadingDone -> {
                     initView()
-                else {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    binding.errorLayout.parent.visibility = View.VISIBLE
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.text = it.errMsg
+                    binding.errorMessage.errMsg.isVisible = true
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.msg.text = it.msg
+                    binding.errorLayout.parent.isVisible = true
                 }
             }
-
-        }
-    }
-
-
-    private fun initData() {
-        if (viewModel.tabList.isEmpty()) {
-            binding.indicator.parent.isIndeterminate = true
-            binding.indicator.parent.visibility = View.VISIBLE
-            if (viewModel.type == "topic") {
-                viewModel.url = "/page?url=V11_VERTICAL_TOPIC"
-                viewModel.title = "话题"
-                viewModel.fetchTopicList()
-            } else
-                viewModel.fetchProductList()
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
+            }
         }
     }
 
     private fun initView() {
-        if (viewModel.tabList.isNotEmpty()) {
-            binding.recyclerView.apply {
-                adapter = BrandLabelAdapter(viewModel.tabList).also {
-                    it.setCurrentPosition(viewModel.position)
-                    it.setOnLabelClickListener(this@HomeTopicFragment)
-                }
-                layoutManager = LinearLayoutManager(requireContext())
-
+        binding.topicLayout.isVisible = true
+        binding.recyclerView.apply {
+            adapter = BrandLabelAdapter(viewModel.tabList).also {
+                it.setCurrentPosition(viewModel.position)
+                it.setOnLabelClickListener(this@HomeTopicFragment)
             }
-            onLabelClicked(viewModel.position)
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            binding.errorLayout.parent.visibility = View.GONE
-            binding.topicLayout.visibility = View.VISIBLE
-        } else {
-            binding.errorLayout.parent.visibility = View.VISIBLE
+            layoutManager = LinearLayoutManager(requireContext())
+
         }
+        onLabelClicked(viewModel.position)
     }
 
     override fun onLabelClicked(position: Int) {

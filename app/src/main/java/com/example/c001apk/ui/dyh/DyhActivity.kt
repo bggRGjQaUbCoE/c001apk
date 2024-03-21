@@ -14,16 +14,13 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DyhActivity : BaseActivity<ActivityDyhDetailBinding>(), IOnTabClickContainer {
 
-    private var id: String? = null
-    private var title: String? = null
+    private val id by lazy { intent.getStringExtra("id").orEmpty() }
+    private val title by lazy { intent.getStringExtra("title").orEmpty() }
     private val tabList = listOf("精选", "广场")
     override var tabController: IOnTabClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        this.id = intent.getStringExtra("id")
-        this.title = intent.getStringExtra("title")
 
         binding.appBar.setLiftable(true)
 
@@ -38,8 +35,8 @@ class DyhActivity : BaseActivity<ActivityDyhDetailBinding>(), IOnTabClickContain
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 when (position) {
-                    0 -> DyhDetailFragment.newInstance(id.toString(), "all")
-                    1 -> DyhDetailFragment.newInstance(id.toString(), "square")
+                    0 -> DyhDetailFragment.newInstance(id, "all")
+                    1 -> DyhDetailFragment.newInstance(id, "square")
                     else -> throw IllegalArgumentException()
                 }
 

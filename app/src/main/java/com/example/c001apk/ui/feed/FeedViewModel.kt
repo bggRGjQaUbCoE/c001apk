@@ -5,7 +5,8 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedEntity
@@ -33,6 +34,7 @@ class FeedViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
+    var isInitFeed = true
     var position: Int? = null
     var rPosition: Int? = null
     var rid: String? = null
@@ -49,7 +51,7 @@ class FeedViewModel @Inject constructor(
     var firstItem: String? = null
     var lastItem: String? = null
     var isInit: Boolean = true
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
@@ -63,7 +65,7 @@ class FeedViewModel @Inject constructor(
     var topReplyId: String? = null
     var isTop: Boolean? = null
     var feedType: String? = null
-    var errorMessage: String? = null
+
     var isViewReply: Boolean? = null
     var frid: String? = null
     var firstVisibleItemPosition = 0
@@ -76,20 +78,25 @@ class FeedViewModel @Inject constructor(
     var articleDateLine: String? = null
     val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
 
-    val doNext = MutableLiveData<Event<Pair<Int, String?>>>()
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val feedReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
-    var afterFollow = MutableLiveData<Event<Int>>()
+    var followState = MutableLiveData<Event<Int>>()
+
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postFollowUnFollow(url, uid)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
-                        val isFollow = if (followAuthor == 1) 0
-                        else 1
-                        feedDataList?.getOrNull(0)?.userAction?.followAuthor = isFollow
-                        afterFollow.postValue(Event(isFollow))
+                        if (response.message != null) {
+                            toastText.postValue(Event(response.message))
+                        } else {
+                            val isFollow = if (followAuthor == 1) 0
+                            else 1
+                            feedDataList?.getOrNull(0)?.userAction?.followAuthor = isFollow
+                            followState.postValue(Event(isFollow))
+                        }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
                     }
@@ -140,31 +147,26 @@ class FeedViewModel @Inject constructor(
             )
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
                     val reply = result.getOrNull()
-                    if (reply?.message != null) {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR,
-                                reply.message
-                            )
-                        )
-                        return@collect
-                    } else if (!reply?.data.isNullOrEmpty()) {
-                        if (firstItem == null)
-                            firstItem = reply?.data?.first()?.id
-                        lastItem = reply?.data?.last()?.id
-                        if (isRefreshing) {
-                            feedReplyList.clear()
-                            if (listType == "lastupdate_desc" && feedTopReplyList.isNotEmpty())
-                                feedReplyList.addAll(feedTopReplyList)
-                        }
-                        if (isRefreshing || isLoadMore) {
-                            reply?.data?.let { data ->
-                                data.forEach {
+                    if (reply != null) {
+                        if (reply.message != null) {
+                            footerState.postValue(FooterState.LoadingError(reply.message))
+                            return@collect
+                        } else if (!reply.data.isNullOrEmpty()) {
+                            if (firstItem == null)
+                                firstItem = reply.data.first().id
+                            lastItem = reply.data.last().id
+                            if (isRefreshing) {
+                                feedReplyList.clear()
+                                if (listType == "lastupdate_desc" && feedTopReplyList.isNotEmpty())
+                                    feedReplyList.addAll(feedTopReplyList)
+                            }
+                            if (isRefreshing || isLoadMore) {
+                                reply.data.forEach {
                                     if (it.entityType == "feed_reply") {
                                         if (listType == "lastupdate_desc" && topReplyId != null
                                             && it.id == topReplyId
@@ -175,23 +177,21 @@ class FeedViewModel @Inject constructor(
                                     }
                                 }
                             }
+                            page++
+                            feedReplyData.postValue(feedReplyList)
+                            footerState.postValue(FooterState.LoadingDone)
+                        } else if (reply.data?.isEmpty() == true) {
+                            isEnd = true
+                            if (isRefreshing)
+                                feedReplyData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd)
                         }
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
-                    } else if (reply?.data?.isEmpty() == true) {
-                        if (isRefreshing)
-                            feedReplyList.clear()
-                        isEnd = true
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR,
-                                LOADING_FAILED
-                            )
-                        )
+                        footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    feedReplyData.postValue(feedReplyList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }
@@ -201,74 +201,77 @@ class FeedViewModel @Inject constructor(
             networkRepo.getFeedContent(id.toString(), frid)
                 .collect { result ->
                     val feed = result.getOrNull()
-                    if (feed?.message != null) {
-                        errorMessage = feed.message
-                        doNext.postValue(Event(Pair(1, feed.message)))
-                        return@collect
-                    } else if (feed?.data != null) {
-                        uid = feed.data.uid
-                        funame = feed.data.userInfo?.username.toString()
-                        avatar = feed.data.userAvatar
-                        device = feed.data.deviceTitle.toString()
-                        replyCount = feed.data.replynum
-                        dateLine = feed.data.dateline
-                        feedTypeName = feed.data.feedTypeName
-                        feedType = feed.data.feedType
+                    if (feed != null) {
+                        if (feed.message != null) {
+                            loadingState.postValue(LoadingState.LoadingError(feed.message))
+                            return@collect
+                        } else if (feed.data != null) {
+                            uid = feed.data.uid
+                            funame = feed.data.userInfo?.username.toString()
+                            avatar = feed.data.userAvatar
+                            device = feed.data.deviceTitle.toString()
+                            replyCount = feed.data.replynum
+                            dateLine = feed.data.dateline
+                            feedTypeName = feed.data.feedTypeName
+                            feedType = feed.data.feedType
 
-                        if (feedType == "feedArticle") {
-                            articleMsg =
-                                if (feed.data.message.length > 150)
-                                    feed.data.message.substring(0, 150)
-                                else feed.data.message
-                            articleDateLine = feed.data.dateline.toString()
-                            articleList = ArrayList<FeedArticleContentBean.Data>().also {
-                                if (feed.data.messageCover?.isNotEmpty() == true) {
-                                    it.add(
-                                        FeedArticleContentBean.Data(
-                                            "image", null, feed.data.messageCover,
-                                            null, null, null, null
+                            if (feedType == "feedArticle") {
+                                articleMsg =
+                                    if (feed.data.message.length > 150)
+                                        feed.data.message.substring(0, 150)
+                                    else feed.data.message
+                                articleDateLine = feed.data.dateline.toString()
+                                articleList = ArrayList<FeedArticleContentBean.Data>().also {
+                                    if (feed.data.messageCover?.isNotEmpty() == true) {
+                                        it.add(
+                                            FeedArticleContentBean.Data(
+                                                "image", null, feed.data.messageCover,
+                                                null, null, null, null
+                                            )
                                         )
-                                    )
-                                }
-                                if (feed.data.messageTitle?.isNotEmpty() == true) {
-                                    it.add(
-                                        FeedArticleContentBean.Data(
-                                            "text", feed.data.messageTitle, null,
-                                            null, "true", null, null
+                                    }
+                                    if (feed.data.messageTitle?.isNotEmpty() == true) {
+                                        it.add(
+                                            FeedArticleContentBean.Data(
+                                                "text", feed.data.messageTitle, null,
+                                                null, "true", null, null
+                                            )
                                         )
+                                    }
+                                    val feedRaw = """{"data":${feed.data.messageRawOutput}}"""
+                                    val feedJson: FeedArticleContentBean = Gson().fromJson(
+                                        feedRaw, FeedArticleContentBean::class.java
                                     )
+                                    feedJson.data.forEach { item ->
+                                        if (item.type == "text" || item.type == "image" || item.type == "shareUrl")
+                                            it.add(item)
+                                    }
+                                    itemCount = it.size + 1
                                 }
-                                val feedRaw = """{"data":${feed.data.messageRawOutput}}"""
-                                val feedJson: FeedArticleContentBean = Gson().fromJson(
-                                    feedRaw, FeedArticleContentBean::class.java
-                                )
-                                feedJson.data.forEach { item ->
-                                    if (item.type == "text" || item.type == "image" || item.type == "shareUrl")
-                                        it.add(item)
+                            } else {
+                                feedDataList = ArrayList<HomeFeedResponse.Data>().also {
+                                    it.add(feed.data)
                                 }
-                                itemCount = it.size + 1
                             }
-                        } else {
-                            feedDataList = ArrayList<HomeFeedResponse.Data>().also {
-                                it.add(feed.data)
+                            if (!feed.data.topReplyRows.isNullOrEmpty()) {
+                                isTop = true
+                                topReplyId = feed.data.topReplyRows[0].id
+                                feedTopReplyList.clear()
+                                feedTopReplyList.addAll(feed.data.topReplyRows)
+                            } else if (!feed.data.replyMeRows.isNullOrEmpty()) {
+                                isTop = false
+                                topReplyId = feed.data.replyMeRows[0].id
+                                feedTopReplyList.clear()
+                                feedTopReplyList.addAll(feed.data.replyMeRows)
                             }
+                            loadingState.postValue(LoadingState.LoadingDone)
                         }
-                        if (!feed.data.topReplyRows.isNullOrEmpty()) {
-                            isTop = true
-                            topReplyId = feed.data.topReplyRows[0].id
-                            feedTopReplyList.clear()
-                            feedTopReplyList.addAll(feed.data.topReplyRows)
-                        } else if (!feed.data.replyMeRows.isNullOrEmpty()) {
-                            isTop = false
-                            topReplyId = feed.data.replyMeRows[0].id
-                            feedTopReplyList.clear()
-                            feedTopReplyList.addAll(feed.data.replyMeRows)
-                        }
-                        doNext.postValue(Event(Pair(2, null)))
                     } else {
-                        doNext.postValue(Event(Pair(3, null)))
+                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }
@@ -316,7 +319,8 @@ class FeedViewModel @Inject constructor(
                                     scroll.postValue(Event(true))
                                 } else {
                                     feedReplyList.getOrNull(position ?: 0)?.replyRows?.add(
-                                        feedReplyList.getOrNull(position ?: 0)?.replyRows?.size?:0,
+                                        feedReplyList.getOrNull(position ?: 0)?.replyRows?.size
+                                            ?: 0,
                                         TotalReplyResponse.Data(
                                             null,
                                             "feed_reply",
@@ -378,16 +382,12 @@ class FeedViewModel @Inject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         if (response.data != null) {
-                            response.data.let {
-                                toastText.postValue(Event(it))
-                            }
+                            toastText.postValue(Event(response.data))
                             if (response.data == "验证通过") {
                                 onPostReply()
                             }
                         } else if (response.message != null) {
-                            response.message.let {
-                                toastText.postValue(Event(it))
-                            }
+                            toastText.postValue(Event(response.message))
                             if (response.message == "请输入正确的图形验证码") {
                                 onGetValidateCaptcha()
                             }

@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.FragmentMessageBinding
@@ -53,8 +55,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.clickToLogin.setOnClickListener {
-            IntentUtil.startActivity<LoginActivity>(requireContext()) {
-            }
+            IntentUtil.startActivity<LoginActivity>(requireContext()) {}
         }
 
         initView()
@@ -64,11 +65,11 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         initObserve()
 
         if (PrefManager.isLogin) {
-            binding.clickToLogin.visibility = View.GONE
-            binding.avatar.visibility = View.VISIBLE
-            binding.name.visibility = View.VISIBLE
-            binding.levelLayout.visibility = View.VISIBLE
-            binding.progress.visibility = View.VISIBLE
+            binding.clickToLogin.isVisible = false
+            binding.avatar.isVisible = true
+            binding.name.isVisible = true
+            binding.levelLayout.isVisible = true
+            binding.progress.isVisible = true
             showProfile()
             if (viewModel.isInit) {
                 viewModel.isInit = false
@@ -87,7 +88,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 add(message)
             }
         } else {
-            binding.clickToLogin.visibility = View.VISIBLE
+            binding.clickToLogin.isVisible = true
             binding.avatar.visibility = View.INVISIBLE
             binding.name.visibility = View.INVISIBLE
             binding.levelLayout.visibility = View.INVISIBLE
@@ -116,13 +117,10 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
                 binding.swipeRefresh.isRefreshing = false
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
             }
         }
 
@@ -157,7 +155,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                         && !binding.swipeRefresh.isShown
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -211,20 +208,22 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            getData()
-            if (PrefManager.isLogin) {
-                viewModel.lastItem = null
-                viewModel.messCountList.clear()
-                viewModel.countList.clear()
-                viewModel.fetchCheckLoginInfo()
+            setOnRefreshListener {
+                getData()
+                if (PrefManager.isLogin) {
+                    viewModel.lastItem = null
+                    viewModel.messCountList.clear()
+                    viewModel.countList.clear()
+                    viewModel.fetchCheckLoginInfo()
+                }
             }
         }
     }
@@ -258,6 +257,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                                 viewModel.messCountList.clear()
                                 viewModel.doWhat.postValue(Event("countList"))
                                 viewModel.doWhat.postValue(Event("messCountList"))
+                                viewModel.footerState.value = FooterState.LoadingDone
                                 viewModel.messageData.postValue(emptyList())
                                 viewModel.isInit = true
                                 viewModel.isEnd = false
@@ -282,12 +282,8 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         binding.name.text = URLDecoder.decode(PrefManager.username, "UTF-8")
         binding.level.text = "Lv.${PrefManager.level}"
         binding.exp.text = "${PrefManager.experience}/${PrefManager.nextLevelExperience}"
-        binding.progress.max =
-            if (PrefManager.nextLevelExperience != "" && PrefManager.nextLevelExperience != "null") PrefManager.nextLevelExperience.toInt()
-            else -1
-        binding.progress.progress =
-            if (PrefManager.experience != "" && PrefManager.experience != "null") PrefManager.experience.toInt()
-            else -1
+        binding.progress.max = PrefManager.nextLevelExperience.toIntOrNull() ?: -1
+        binding.progress.progress = PrefManager.experience.toIntOrNull() ?: -1
         if (PrefManager.userAvatar.isNotEmpty())
             ImageUtil.showIMG(binding.avatar, PrefManager.userAvatar)
     }
@@ -349,6 +345,5 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             return true
         }
     }
-
 
 }

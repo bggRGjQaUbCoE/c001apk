@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
-import android.view.View
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
@@ -51,7 +51,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
         if (type != null && type == "homeMenu") {
             menuList = ArrayList()
-            binding.tabPage.visibility = View.VISIBLE
+            binding.tabPage.isVisible = true
             binding.toolBar.apply {
                 title = getString(R.string.edit_tab)
                 setNavigationIcon(R.drawable.ic_back)
@@ -93,7 +93,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         val callback: ItemTouchHelper.Callback = ItemTouchHelperCallback(mAdapter)
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
-        binding.done.visibility = View.VISIBLE
+        binding.done.isVisible = true
     }
 
 }

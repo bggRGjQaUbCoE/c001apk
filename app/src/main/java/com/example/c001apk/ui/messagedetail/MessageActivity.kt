@@ -3,26 +3,35 @@ package com.example.c001apk.ui.messagedetail
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.ActivityMessageBinding
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 
 @AndroidEntryPoint
 class MessageActivity : BaseActivity<ActivityMessageBinding>() {
 
-    private val viewModel by viewModels<MessageViewModel>()
+    private val viewModel by viewModels<MessageViewModel>(
+        extrasProducer = {
+            defaultViewModelCreationExtras.withCreationCallback<MessageViewModel.Factory> { factory ->
+                factory.create(type = intent.getStringExtra("type").orEmpty())
+            }
+        }
+    )
     private lateinit var mAdapter: MessageContentAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -33,27 +42,60 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
 
         binding.appBar.setLiftable(true)
 
-        viewModel.type = intent.getStringExtra("type")
-
         initBar()
         initView()
-        initData()
+        viewModel.loadingState.value = LoadingState.Loading
         initRefresh()
         initScroll()
         initObserve()
+        initError()
 
     }
 
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
+
     private fun initObserve() {
-        viewModel.changeState.observe(this) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
-                binding.swipeRefresh.isRefreshing = false
+        viewModel.loadingState.observe(this) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+
+        viewModel.footerState.observe(this) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
@@ -121,7 +163,6 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -135,30 +176,23 @@ class MessageActivity : BaseActivity<ActivityMessageBinding>() {
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                this,
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
-        }
-    }
-
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.isIndeterminate = true
-            binding.indicator.parent.visibility = View.VISIBLE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
     private fun initView() {
-        mAdapter = MessageContentAdapter(viewModel.type.toString(), viewModel.ItemClickListener())
+        mAdapter = MessageContentAdapter(viewModel.type, viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)

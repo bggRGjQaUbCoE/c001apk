@@ -3,6 +3,7 @@ package com.example.c001apk.ui.hometopic
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,7 +12,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.main.INavViewContainer
@@ -52,24 +55,58 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
         if (!viewModel.isInit) {
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
     }
 
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
+
     private fun initObserve() {
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
-                binding.swipeRefresh.isRefreshing = false
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
@@ -100,10 +137,10 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
                         }
                     }
 
+
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isRefreshing && !viewModel.isLoadMore && !viewModel.isEnd
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -128,17 +165,18 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -163,14 +201,6 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
         }
     }
 
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
-        }
-    }
-
     private fun refreshData() {
         viewModel.lastVisibleItemPosition = 0
         viewModel.page = 1
@@ -186,10 +216,11 @@ class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
     }
 

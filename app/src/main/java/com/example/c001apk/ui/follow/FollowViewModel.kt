@@ -4,9 +4,11 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
@@ -29,7 +31,12 @@ class FollowViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    var uid: String? = null
+    var type: String? = null
+    var isEnable: Boolean = false
+
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val dataListData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchFeedList() {
@@ -61,18 +68,17 @@ class FollowViewModel @Inject constructor(
             networkRepo.getFollowList(url.toString(), uid.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val dataList = dataListData.value?.toMutableList() ?: ArrayList()
                     val feed = result.getOrNull()
                     if (feed != null) {
                         if (!feed.message.isNullOrEmpty()) {
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_ERROR, feed.message
-                                )
-                            )
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(feed.message))
+                            else
+                                footerState.postValue(FooterState.LoadingError(feed.message))
                             return@collect
                         } else if (!feed.data.isNullOrEmpty()) {
                             lastItem = feed.data.last().id
@@ -93,26 +99,32 @@ class FollowViewModel @Inject constructor(
                                             dataList.add(it)
                                 }
                             }
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_COMPLETE, null
-                                )
-                            )
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            dataListData.postValue(dataList)
                         } else if (feed.data?.isEmpty() == true) {
-                            if (isRefreshing) dataList.clear()
-                            changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                             isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    dataListData.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
                         }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    dataListData.postValue(dataList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }
@@ -122,18 +134,17 @@ class FollowViewModel @Inject constructor(
             networkRepo.getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val dataList = dataListData.value?.toMutableList() ?: ArrayList()
                     val data = result.getOrNull()
                     if (data != null) {
                         if (!data.message.isNullOrEmpty()) {
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_ERROR, data.message
-                                )
-                            )
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(data.message))
+                            else
+                                footerState.postValue(FooterState.LoadingError(data.message))
                             return@collect
                         } else if (!data.data.isNullOrEmpty()) {
                             lastItem = data.data.last().id
@@ -154,55 +165,49 @@ class FollowViewModel @Inject constructor(
                                             dataList.add(it)
                                 }
                             }
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_COMPLETE, null
-                                )
-                            )
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            dataListData.postValue(dataList)
                         } else if (data.data?.isEmpty() == true) {
-                            if (isRefreshing)
-                                dataList.clear()
-                            changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                             isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    dataListData.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
                         }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    dataListData.postValue(dataList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }
 
 
-    var isEnable: Boolean? = null
     val tabList = ArrayList<String>()
     var title: String? = null
     var url: String? = null
     var isInit: Boolean = true
-    var type: String? = null
     var listSize: Int = -1
     var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var id: String? = null
 
     val toastText = MutableLiveData<Event<String>>()
 

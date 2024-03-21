@@ -4,9 +4,12 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
+import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TopicBean
@@ -15,150 +18,161 @@ import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class CarouselViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = CarouselViewModel.Factory::class)
+class CarouselViewModel @AssistedInject constructor(
+    @Assisted("url") val url: String,
+    @Assisted("title") val title: String,
     val repository: BlackListRepo,
     private val historyFavoriteRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
-    var barTitle: String? = null
-    var isResume: Boolean = true
-    val tabList = ArrayList<String>()
-    var url: String? = null
-    var type: String? = null
-    var isFollow: Boolean? = null
-    var fid: String? = null
-    var title: String? = null
-    var isInit: Boolean = true
-    var uid: String? = null
-    var errorMessage: String? = null
-    var uname: String? = null
-    var lastVisibleItemPosition: Int = 0
-    var isRefreshing: Boolean = true
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("url") url: String,
+            @Assisted("title") title: String
+        ): CarouselViewModel
+    }
+
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
+    var lastItem: String? = null
     var page = 1
     var listSize: Int = -1
-    var avatar: String? = null
-    var cover: String? = null
-    var level: String? = null
-    var like: String? = null
-    var follow: String? = null
-    var fans: String? = null
-    var packageName: String? = null
+    var isInit: Boolean = true
 
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val carouselData = MutableLiveData<List<HomeFeedResponse.Data>>()
-    val doNext = MutableLiveData<Event<Boolean>>()
-    val topicList: MutableList<TopicBean> = ArrayList()
-    val initBar = MutableLiveData<Event<Boolean>>()
-    val showView = MutableLiveData<Event<Boolean>>()
-    val initView = MutableLiveData<Event<Boolean>>()
-    val initRvView = MutableLiveData<Event<Boolean>>()
-    val error = MutableLiveData<Event<Boolean>>()
-    val finish = MutableLiveData<Event<Boolean>>()
+    val toastText = MutableLiveData<Event<String>>()
+    var topicList: List<TopicBean>? = null
+    var pageTitle: String? = null
+    var tmpList: ArrayList<HomeFeedResponse.Data>? = null
 
 
-    fun fetchCarouselList() {
+    fun initCarouselList() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getDataList(url.toString(), title.toString(), null, null, page)
-                .onStart {
-                    if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
-                }
+            networkRepo.getDataList(url, title, null, lastItem, page)
                 .collect { result ->
-                    val carouselList = carouselData.value?.toMutableList() ?: ArrayList()
                     val response = result.getOrNull()
-                    if (!response?.data.isNullOrEmpty()) {
-                        if (isInit) {
-                            isInit = false
-
-                            barTitle =
-                                if (response?.data?.getOrNull(response.data.size - 1)?.extraDataArr == null)
-                                    title
-                                else
-                                    response.data[response.data.size - 1].extraDataArr?.pageTitle.toString()
-                            initBar.postValue(Event(true))
-
-                            var index = 0
-                            var isIconTabLinkGridCard = false
-                            run breaking@{
-                                response?.data?.forEach {
-                                    if (it.entityTemplate == "iconTabLinkGridCard") {
-                                        showView.postValue(Event(true))
-                                        isIconTabLinkGridCard = true
-                                        return@breaking
-                                    } else
-                                        index++
+                    if (response != null) {
+                        if (!response.message.isNullOrEmpty()) {
+                            loadingState.postValue(LoadingState.LoadingError(response.message))
+                            return@collect
+                        } else if (!response.data.isNullOrEmpty()) {
+                            val isIconTabLinkGridCard =
+                                response.data.find { it.entityTemplate == "iconTabLinkGridCard" }
+                            if (isIconTabLinkGridCard != null) {
+                                topicList = isIconTabLinkGridCard.entities?.map {
+                                    TopicBean(it.url, it.title)
                                 }
-                            }
-
-                            if (isIconTabLinkGridCard) {
-                                if (!response?.data?.getOrNull(index)?.entities.isNullOrEmpty()) {
-                                    response?.data?.getOrNull(index)?.entities?.forEach {
-                                        tabList.add(it.title)
-                                        topicList.add(TopicBean(it.url, it.title))
-                                        initView.postValue(Event(true))
-                                    }
-                                }
-
                             } else {
-                                initRvView.postValue(Event(true))
-                                response?.data?.forEach {
-                                    if (it.entityType == "feed" && it.feedType != "vote")
+                                page++
+                                tmpList = ArrayList()
+                                lastItem = response.data.last().id
+                                response.data.forEach {
+                                    if (it.entityType == "feed"
+                                        || it.entityType == "topic"
+                                        || it.entityType == "product"
+                                        || it.entityType == "user"
+                                    )
                                         if (!repository.checkUid(it.userInfo?.uid.toString())
                                             && !repository.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
-                                            carouselList.add(it)
-                                }
-                                carouselData.postValue(carouselList)
-                            }
-                        } else {
-                            if (isRefreshing)
-                                carouselList.clear()
-                            if (isRefreshing || isLoadMore) {
-                                response?.data?.let { data ->
-                                    data.forEach {
-                                        if (it.entityType == "feed" && it.feedType != "vote")
-                                            if (!repository.checkUid(it.userInfo?.uid.toString())
-                                                && !repository.checkTopic(
-                                                    it.tags + it.ttitle
-                                                            + it.relationRows?.getOrNull(0)?.title
-                                                )
-                                            )
-                                                carouselList.add(it)
-                                    }
+                                            tmpList?.add(it)
                                 }
                             }
-                            carouselData.postValue(carouselList)
+
+                            pageTitle = response.data.last().extraDataArr?.pageTitle
+                            loadingState.postValue(LoadingState.LoadingDone)
+                        } else if (response.data?.isEmpty() == true) {
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
                         }
-                    } else if (response?.data?.isEmpty() == true) {
-                        if (isRefreshing)
-                            carouselList.clear()
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
-                        isEnd = true
                     } else {
-                        error.postValue(Event(true))
-                        isEnd = true
-                        result.exceptionOrNull()?.printStackTrace()
+                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                     }
-                    finish.postValue(Event(true))
-                    isLoadMore = false
-                    isRefreshing = false
                 }
         }
     }
 
-    val toastText = MutableLiveData<Event<String>>()
+    fun loadCarouselList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getDataList(url, title, "", lastItem, page)
+                .onStart {
+                    if (isLoadMore)
+                        footerState.postValue(FooterState.Loading)
+                }
+                .collect { result ->
+                    val topicDataList = carouselData.value?.toMutableList() ?: ArrayList()
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (!data.message.isNullOrEmpty()) {
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(data.message))
+                            else
+                                footerState.postValue(FooterState.LoadingError(data.message))
+                            return@collect
+                        } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
+                            if (isRefreshing)
+                                topicDataList.clear()
+                            if (isRefreshing || isLoadMore) {
+                                data.data.forEach {
+                                    if (it.entityType == "feed"
+                                        || it.entityType == "topic"
+                                        || it.entityType == "product"
+                                        || it.entityType == "user"
+                                    )
+                                        if (!repository.checkUid(it.userInfo?.uid.toString())
+                                            && !repository.checkTopic(
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                            )
+                                        )
+                                            topicDataList.add(it)
+                                }
+                            }
+                            page++
+                            if (listSize <= 0) {
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            } else
+                                footerState.postValue(FooterState.LoadingDone)
+                            carouselData.postValue(topicDataList)
+                        } else if (data.data?.isEmpty() == true) {
+                            isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    carouselData.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
+                        }
+                    } else {
+                        isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                    isRefreshing = false
+                    isLoadMore = false
+                }
+        }
+    }
 
     inner class ItemClickListener : ItemListener {
         override fun onViewFeed(

@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityLoginBinding
 import com.example.c001apk.ui.base.BaseActivity
@@ -116,7 +117,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
                 when (it) {
                     "图形验证码不能为空" -> {
-                        binding.captcha.visibility = View.VISIBLE
+                        binding.captcha.isVisible = true
                         viewModel.onGetCaptcha()
                     }
 
@@ -175,18 +176,18 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 isLoginPass = true
                 binding.account.inputType = InputType.TYPE_CLASS_TEXT
                 binding.account.filters = arrayOf(LengthFilter(99), filter)
-                binding.passLayout.visibility = View.VISIBLE
-                binding.smsLayout.visibility = View.GONE
-                binding.getSMS.visibility = View.GONE
+                binding.passLayout.isVisible = true
+                binding.smsLayout.isVisible = false
+                binding.getSMS.isVisible = false
             }
 
             R.id.loginPhone -> {
                 isLoginPass = false
                 binding.account.inputType = InputType.TYPE_CLASS_NUMBER
                 binding.account.filters = arrayOf(LengthFilter(11), filter)
-                binding.getSMS.visibility = View.VISIBLE
-                binding.smsLayout.visibility = View.VISIBLE
-                binding.passLayout.visibility = View.GONE
+                binding.getSMS.isVisible = true
+                binding.smsLayout.isVisible = true
+                binding.passLayout.isVisible = false
                 isGetSmsLoginParam = true
                 //viewModel.getSmsLoginParam()
             }

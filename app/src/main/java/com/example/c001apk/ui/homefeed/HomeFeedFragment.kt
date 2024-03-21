@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,8 +20,10 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
@@ -70,7 +73,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         fun newInstance(type: String) =
             HomeFeedFragment().apply {
                 arguments = Bundle().apply {
-                    putString("TYPE", type)
+                    putString("type", type)
                 }
             }
     }
@@ -78,7 +81,46 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("TYPE")
+            viewModel.type = it.getString("type")
+            when (viewModel.type) {
+                "rank" -> {
+                    viewModel.dataListUrl = "/page?url=V9_HOME_TAB_RANKING"
+                    viewModel.dataListTitle = "热榜"
+                }
+
+                "follow" -> {
+                    if (viewModel.dataListUrl.isNullOrEmpty()) {
+                        when (PrefManager.FOLLOWTYPE) {
+                            "all" -> {
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW"
+                                viewModel.dataListTitle = "全部关注"
+                            }
+
+                            "circle" -> {
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
+                                viewModel.dataListTitle = "好友关注"
+                            }
+
+                            "topic" -> {
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
+                                viewModel.dataListTitle = "话题关注"
+                            }
+
+                            else -> {
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
+                                viewModel.dataListTitle = "数码关注"
+                            }
+                        }
+
+
+                    }
+                }
+
+                "coolPic" -> {
+                    viewModel.dataListUrl = "/page?url=V11_FIND_COOLPIC"
+                    viewModel.dataListTitle = "酷图"
+                }
+            }
         }
     }
 
@@ -91,12 +133,19 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
             initScroll()
             initPublish()
             initObserve()
+            initError()
         }
 
     }
 
-    private fun initObserve() {
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
 
+    private fun initObserve() {
         viewModel.createDialog.observe(viewLifecycleOwner) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
                 val binding = ItemCaptchaBinding.inflate(
@@ -143,32 +192,40 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            when (it.first) {
-                "error" -> {
-                    footerAdapter.setLoadState(
-                        FooterAdapter.LoadState.LOADING_ERROR, it.second
-                    )
-                    footerAdapter.notifyItemChanged(0)
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
                 }
 
-                "done" -> {
-                    footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_COMPLETE, null)
-                    footerAdapter.notifyItemChanged(0)
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
                 }
 
-                "end" -> {
-                    footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_END, null)
-                    footerAdapter.notifyItemChanged(0)
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.isVisible = true
+                    binding.errorMessage.errMsg.text = it.errMsg
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.msg.text = it.msg
+                    binding.errorLayout.parent.isVisible = true
                 }
             }
-            binding.swipeRefresh.isRefreshing = false
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            viewModel.isLoadMore = false
-            viewModel.isRefreshing = false
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
+            }
         }
 
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
+            }
+        }
 
         viewModel.homeFeedData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
@@ -194,7 +251,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
             lp.gravity = Gravity.BOTTOM or Gravity.END
             binding.fab.layoutParams = lp
             (binding.fab.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
-            binding.fab.visibility = View.VISIBLE
+            binding.fab.isVisible = true
             bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view)
             bottomSheetDialog.setIOnPublishClickListener(this)
             bottomSheetDialog.apply {
@@ -214,22 +271,22 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 }
             }
         } else
-            binding.fab.visibility = View.GONE
+            binding.fab.isVisible = false
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            binding.swipeRefresh.isRefreshing = true
-            refresh()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -257,7 +314,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -277,8 +333,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     }
 
     private fun loadMore() {
-        footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
-        footerAdapter.notifyItemChanged(0)
         viewModel.isLoadMore = true
         when (viewModel.type) {
             "feed" -> viewModel.fetchHomeFeed()
@@ -317,22 +371,23 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
 
     override fun onResume() {
         super.onResume()
+
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
         (activity as? IOnBottomClickContainer)?.controller = this
+
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initPublish()
             initObserve()
-            binding.indicator.parent.isIndeterminate = true
-            binding.indicator.parent.visibility = View.VISIBLE
-            refresh()
+            initError()
         }
     }
 
-    private fun refresh() {
+    private fun refreshData() {
         viewModel.page = 1
         viewModel.lastVisibleItemPosition = 0
         viewModel.isEnd = false
@@ -342,46 +397,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
 
         when (viewModel.type) {
             "feed" -> viewModel.fetchHomeFeed()
-            "rank" -> {
-                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_RANKING"
-                viewModel.dataListTitle = "热榜"
-                viewModel.fetchDataList()
-            }
-
-            "follow" -> {
-                if (viewModel.dataListUrl.isNullOrEmpty()) {
-                    when (PrefManager.FOLLOWTYPE) {
-                        "all" -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW"
-                            viewModel.dataListTitle = "全部关注"
-                        }
-
-                        "circle" -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
-                            viewModel.dataListTitle = "好友关注"
-                        }
-
-                        "topic" -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
-                            viewModel.dataListTitle = "话题关注"
-                        }
-
-                        else -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
-                            viewModel.dataListTitle = "数码关注"
-                        }
-                    }
-
-
-                }
-                viewModel.fetchDataList()
-            }
-
-            "coolPic" -> {
-                viewModel.dataListUrl = "/page?url=V11_FIND_COOLPIC"
-                viewModel.dataListTitle = "酷图"
-                viewModel.fetchDataList()
-            }
+            "rank", "follow", "coolPic" -> viewModel.fetchDataList()
         }
 
     }
@@ -393,65 +409,70 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
-        binding.recyclerView.stopScroll()
-        if (isRefresh == true) {
-            binding.recyclerView.scrollToPosition(0)
-            binding.swipeRefresh.isRefreshing = true
-            refresh()
-        } else if (viewModel.type == "follow") {
-            MaterialAlertDialogBuilder(requireContext()).apply {
-                setTitle("关注分组")
-                val items = arrayOf("全部关注", "好友关注", "话题关注", "数码关注", "应用关注")
-                viewModel.position = when (PrefManager.FOLLOWTYPE) {
-                    "all" -> 0
-                    "circle" -> 1
-                    "topic" -> 2
-                    "product" -> 3
-                    "apk" -> 4
-                    else -> 0
-                }
-                setSingleChoiceItems(
-                    items,
-                    viewModel.position ?: 0
-                ) { dialog: DialogInterface, position: Int ->
-                    when (position) {
-                        0 -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW"
-                            viewModel.dataListTitle = "全部关注"
-                            PrefManager.FOLLOWTYPE = "all"
-                        }
-
-                        1 -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
-                            viewModel.dataListTitle = "好友关注"
-                            PrefManager.FOLLOWTYPE = "circle"
-                        }
-
-                        2 -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
-                            viewModel.dataListTitle = "话题关注"
-                            PrefManager.FOLLOWTYPE = "topic"
-                        }
-
-                        3 -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
-                            viewModel.dataListTitle = "数码关注"
-                            PrefManager.FOLLOWTYPE = "product"
-                        }
-
-                        4 -> {
-                            viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=apk"
-                            viewModel.dataListTitle = "应用关注"
-                            PrefManager.FOLLOWTYPE = "apk"
-                        }
+        if (binding.swipeRefresh.isEnabled) {
+            binding.recyclerView.stopScroll()
+            if (isRefresh == true) {
+                binding.recyclerView.scrollToPosition(0)
+                binding.swipeRefresh.isRefreshing = true
+                refreshData()
+            } else if (viewModel.type == "follow") {
+                MaterialAlertDialogBuilder(requireContext()).apply {
+                    setTitle("关注分组")
+                    val items =
+                        arrayOf("全部关注", "好友关注", "话题关注", "数码关注", "应用关注")
+                    viewModel.position = when (PrefManager.FOLLOWTYPE) {
+                        "all" -> 0
+                        "circle" -> 1
+                        "topic" -> 2
+                        "product" -> 3
+                        "apk" -> 4
+                        else -> 0
                     }
-                    viewModel.homeFeedData.postValue(emptyList())
-                    binding.indicator.parent.visibility = View.VISIBLE
-                    binding.indicator.parent.isIndeterminate = true
-                    refresh()
-                    dialog.dismiss()
+                    setSingleChoiceItems(
+                        items,
+                        viewModel.position ?: 0
+                    ) { dialog: DialogInterface, position: Int ->
+                        when (position) {
+                            0 -> {
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW"
+                                viewModel.dataListTitle = "全部关注"
+                                PrefManager.FOLLOWTYPE = "all"
+                            }
+
+                            1 -> {
+                                viewModel.dataListUrl =
+                                    "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
+                                viewModel.dataListTitle = "好友关注"
+                                PrefManager.FOLLOWTYPE = "circle"
+                            }
+
+                            2 -> {
+                                viewModel.dataListUrl =
+                                    "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
+                                viewModel.dataListTitle = "话题关注"
+                                PrefManager.FOLLOWTYPE = "topic"
+                            }
+
+                            3 -> {
+                                viewModel.dataListUrl =
+                                    "/page?url=V9_HOME_TAB_FOLLOW&type=product"
+                                viewModel.dataListTitle = "数码关注"
+                                PrefManager.FOLLOWTYPE = "product"
+                            }
+
+                            4 -> {
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=apk"
+                                viewModel.dataListTitle = "应用关注"
+                                PrefManager.FOLLOWTYPE = "apk"
+                            }
+                        }
+                        viewModel.homeFeedData.postValue(emptyList())
+                        viewModel.footerState.value = FooterState.LoadingDone
+                        viewModel.loadingState.value = LoadingState.Loading
+                        dialog.dismiss()
+                    }
+                    show()
                 }
-                show()
             }
         }
     }

@@ -3,10 +3,13 @@ package com.example.c001apk.ui.app
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
@@ -15,60 +18,77 @@ import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AppDetailViewModel @Inject constructor(
+class AppFragmentViewModel @AssistedInject constructor(
+    @Assisted("id") val id: String,
+    @Assisted("appCommentSort") val appCommentSort: String,
+    @Assisted("appCommentTitle") val appCommentTitle: String,
     val repository: BlackListRepo,
     private val historyFavoriteRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("id") id: String,
+            @Assisted("appCommentSort") appCommentSort: String,
+            @Assisted("appCommentTitle") appCommentTitle: String,
+        ): AppFragmentViewModel
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory, id: String, appCommentSort: String, appCommentTitle: String,
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(id, appCommentSort, appCommentTitle) as T
+            }
+        }
+    }
+
     var isInit: Boolean = true
-    var type: String? = null
-    var appCommentTitle = "最近回复"
-    var appCommentSort: String? = null
-    var appId: String? = null
     var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var id: String? = null
 
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val appCommentData = MutableLiveData<List<HomeFeedResponse.Data>>()
     val toastText = MutableLiveData<Event<String>>()
 
-    private val commentBaseUrl = "/page?url=/feed/apkCommentList?id="
-    fun fetchAppComment() {
+    fun fetchAppComment(commentBaseUrl: String = "/page?url=/feed/apkCommentList?id=") {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getDataList(
-                commentBaseUrl + appId + appCommentSort, appCommentTitle, null, lastItem, page
+                commentBaseUrl + id + appCommentSort, appCommentTitle, null, lastItem, page
             )
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val appCommentList = appCommentData.value?.toMutableList() ?: ArrayList()
                     val comment = result.getOrNull()
-                    if (!comment?.data.isNullOrEmpty()) {
+                    if (!comment?.message.isNullOrEmpty()) {
+                        comment?.message?.let {
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(it))
+                            else
+                                footerState.postValue(FooterState.LoadingError(it))
+                        }
+                        return@collect
+                    } else if (!comment?.data.isNullOrEmpty()) {
                         lastItem = comment?.data?.last()?.id
                         if (isRefreshing)
                             appCommentList.clear()
@@ -86,22 +106,31 @@ class AppDetailViewModel @Inject constructor(
                                 }
                             }
                         }
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
+                        page++
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingDone)
+                        else
+                            footerState.postValue(FooterState.LoadingDone)
+                        appCommentData.postValue(appCommentList)
                     } else if (comment?.data?.isEmpty() == true) {
-                        if (isRefreshing) appCommentList.clear()
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingError(LOADING_EMPTY))
+                        else {
+                            if (isRefreshing)
+                                appCommentData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd)
+                        }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR,
-                                LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    appCommentData.postValue(appCommentList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
 

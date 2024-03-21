@@ -12,6 +12,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
@@ -19,6 +20,7 @@ import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
 import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinkTextView
@@ -53,22 +55,31 @@ fun setExtraPic(imageView: ImageView, extraPic: String?) {
 
 @BindingAdapter("setFollowText")
 fun setFollowText(textView: TextView, userAction: HomeFeedResponse.UserAction?) {
-    if (userAction == null)
-        textView.visibility = View.GONE
-    else {
-        textView.visibility = View.VISIBLE
-        if (userAction.followAuthor == 0) {
-            textView.text = "关注"
-            MaterialColors.getColor(
-                textView.context,
-                com.google.android.material.R.attr.colorPrimary,
-                0
-            )
-        } else if (userAction.followAuthor == 1) {
-            textView.text = "取消关注"
-            textView.setTextColor(textView.context.getColor(android.R.color.darker_gray))
+    with(PrefManager.isLogin) {
+        textView.isVisible = this
+        if (this) {
+            userAction?.let {
+                when (it.followAuthor) {
+                    0 -> {
+                        textView.text = "关注"
+                        MaterialColors.getColor(
+                            textView.context,
+                            com.google.android.material.R.attr.colorPrimary,
+                            0
+                        )
+                    }
+
+                    1 -> {
+                        textView.text = "取消关注"
+                        textView.setTextColor(textView.context.getColor(android.R.color.darker_gray))
+                    }
+
+                    else -> {}
+                }
+            }
         }
     }
+
 }
 
 @BindingAdapter("setArticleImage")
@@ -185,7 +196,7 @@ fun setGridView(
     feedType: String?
 ) {
     if (!picArr.isNullOrEmpty()) {
-        imageView.visibility = View.VISIBLE
+        imageView.isVisible = true
         if (picArr.size == 1 || feedType == "feedArticle") {
             val imageLp = ImageUtil.getImageLp(picArr[0])
             imageView.imgWidth = imageLp.first
@@ -202,7 +213,7 @@ fun setGridView(
             setUrlList(urlList)
         }
     } else {
-        imageView.visibility = View.GONE
+        imageView.isVisible = false
     }
 }
 
@@ -264,7 +275,7 @@ fun setHotReply(hotReply: TextView, feed: HomeFeedResponse.Data?) {
 
     if (feed != null) {
         if (!feed.replyRows.isNullOrEmpty()) {
-            hotReply.visibility = View.VISIBLE
+            hotReply.isVisible = true
             hotReply.highlightColor = Color.TRANSPARENT
             val mess =
                 if (feed.replyRows[0].picArr.isNullOrEmpty())
@@ -282,18 +293,18 @@ fun setHotReply(hotReply: TextView, feed: HomeFeedResponse.Data?) {
             )
             SpannableStringBuilderUtil.isReturn = true
         } else
-            hotReply.visibility = View.GONE
+            hotReply.isVisible = false
     } else
-        hotReply.visibility = View.GONE
+        hotReply.isVisible = false
 }
 
 
 @BindingAdapter("setImage")
 fun setImage(imageView: ImageView, imageUrl: String?) {
     if (imageUrl.isNullOrEmpty())
-        imageView.visibility = View.GONE
+        imageView.isVisible = false
     else {
-        imageView.visibility = View.VISIBLE
+        imageView.isVisible = true
         ImageUtil.showIMG(imageView, imageUrl)
     }
 }

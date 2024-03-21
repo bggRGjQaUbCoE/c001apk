@@ -58,18 +58,22 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:scrollbars="none"
-                android:visibility="gone"
                 app:borderBottomVisibility="never"
                 app:borderTopDrawable="@null"
                 app:borderTopVisibility="whenTop"
                 app:fitsSystemWindowsInsets="bottom" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
     </FrameLayout>
 
     <include
         android:id="@+id/indicator"
         layout="@layout/item_indicator" />
+
+    <include
+        android:id="@+id/errorMessage"
+        layout="@layout/item_error_message" />
 
     <include
         android:id="@+id/errorLayout"

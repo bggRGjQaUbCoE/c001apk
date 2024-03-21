@@ -228,7 +228,6 @@
                         android:minWidth="0dp"
                         android:minHeight="0dp"
                         android:text="@{userData.isFollow() == 1 ? `取消关注` : `关注`}"
-                        android:visibility="@{userData.isFollow() == null ? View.GONE : View.VISIBLE}"
                         tools:text="关注" />
 
                 </com.google.android.material.appbar.MaterialToolbar>

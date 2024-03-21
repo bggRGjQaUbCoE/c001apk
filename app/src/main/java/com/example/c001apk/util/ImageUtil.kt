@@ -18,6 +18,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -261,23 +262,23 @@ object ImageUtil {
                 override fun onStartAnim(position: Int) {
                     nineGridView.getImageViewAt(position)?.apply {
                         postDelayed({
-                            this.visibility = View.GONE
+                            this.isVisible = false
                         }, 200)
                     }
                 }
 
                 override fun onMojitoViewFinish(pagePosition: Int) {
                     nineGridView.getImageViews().forEach {
-                        it.visibility = View.VISIBLE
+                        it.isVisible = true
                     }
                 }
 
                 override fun onViewPageSelected(position: Int) {
                     nineGridView.getImageViews().forEachIndexed { index, imageView ->
                         if (position == index) {
-                            imageView.visibility = View.GONE
+                            imageView.isVisible = false
                         } else {
-                            imageView.visibility = View.VISIBLE
+                            imageView.isVisible = true
                         }
                     }
                 }

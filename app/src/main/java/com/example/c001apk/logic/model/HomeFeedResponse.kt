@@ -113,7 +113,7 @@ data class HomeFeedResponse(
         val userAction: UserAction?,
         val userInfo: UserInfo?,
         val fUserInfo: UserInfo?,
-        var isFollow: Int
+        var isFollow: Int?
     )
 
     data class Feed(
@@ -205,7 +205,7 @@ data class HomeFeedResponse(
     data class UserAction(
         var like: Int,
         val favorite: Int,
-        val follow: Int,
+        var follow: Int,
         val collect: Int,
         var followAuthor: Int,
         val authorFollowYou: Int

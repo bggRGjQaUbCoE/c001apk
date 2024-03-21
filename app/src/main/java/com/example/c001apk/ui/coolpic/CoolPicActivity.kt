@@ -15,14 +15,12 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CoolPicActivity : BaseActivity<ActivityCoolPicBinding>(), IOnTabClickContainer {
 
-    private var titleText: String? = null
+    private val titleText by lazy { intent.getStringExtra("title").orEmpty() }
     private val tabList = listOf("精选", "热门", "最新")
     override var tabController: IOnTabClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        titleText = intent.getStringExtra("title")
 
         binding.appBar.setLiftable(true)
 
@@ -46,9 +44,9 @@ class CoolPicActivity : BaseActivity<ActivityCoolPicBinding>(), IOnTabClickConta
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
                 when (position) {
-                    0 -> CollectionFragment.newInstance("recommend", titleText.toString())
-                    1 -> CollectionFragment.newInstance("hot", titleText.toString())
-                    2 -> CollectionFragment.newInstance("newest", titleText.toString())
+                    0 -> CollectionFragment.newInstance("recommend", titleText)
+                    1 -> CollectionFragment.newInstance("hot", titleText)
+                    2 -> CollectionFragment.newInstance("newest", titleText)
                     else -> throw IllegalArgumentException()
                 }
 

@@ -6,6 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.adapter.FooterState
+import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.Like
@@ -53,7 +56,7 @@ class HomeFeedViewModel @AssistedInject constructor(
     var listSize: Int = -1
     var type: String? = null
     var isInit: Boolean = true
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var page = 1
@@ -64,27 +67,29 @@ class HomeFeedViewModel @AssistedInject constructor(
     val closeSheet = MutableLiveData<Event<Boolean>>()
     val createDialog = MutableLiveData<Event<Bitmap>>()
     val toastText = MutableLiveData<Event<String>>()
-    val changeState = MutableLiveData<Pair<String, String?>>()
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val homeFeedData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchHomeFeed() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
                 .onStart {
-                    if (firstLaunch == 1) {
+                    if (firstLaunch == 1)
                         firstLaunch = 0
-                    }
-                }
-                .catch { err ->
-                    err.message?.let {
-                        changeState.postValue(Pair("error", it))
-                    }
+                    if (isLoadMore)
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val feed = result.getOrNull()
                     val currentList = homeFeedData.value?.toMutableList() ?: ArrayList()
                     if (!feed?.message.isNullOrEmpty()) {
-                        changeState.postValue(Pair("error", feed?.message))
+                        feed?.message?.let {
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(it))
+                            else
+                                footerState.postValue(FooterState.LoadingError(it))
+                        }
                         return@collect
                     } else if (!feed?.data.isNullOrEmpty()) {
                         lastItem = feed?.data?.last()?.id
@@ -104,7 +109,11 @@ class HomeFeedViewModel @AssistedInject constructor(
                                         homeFeedData.postValue(currentList)
                                     }
                                 }*/
-                                changeState.postValue(Pair("done", null))
+                                page++
+                                if (listSize <= 0)
+                                    loadingState.postValue(LoadingState.LoadingDone)
+                                else
+                                    footerState.postValue(FooterState.LoadingDone)
                                 return@collect
                             } else {
                                 currentList.clear()
@@ -135,17 +144,31 @@ class HomeFeedViewModel @AssistedInject constructor(
                                 }
                             }
                         }
+                        page++
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingDone)
+                        else
+                            footerState.postValue(FooterState.LoadingDone)
                         homeFeedData.postValue(currentList)
-                        changeState.postValue(Pair("done", null))
                     } else if (feed?.data?.isEmpty() == true) {
-                        if (isRefreshing)
-                            currentList.clear()
                         isEnd = true
-                        changeState.postValue(Pair("end", null))
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                        else {
+                            if (isRefreshing)
+                                homeFeedData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd)
+                        }
                     } else {
-                        changeState.postValue(Pair("error", LOADING_FAILED))
+                        isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }
@@ -196,19 +219,19 @@ class HomeFeedViewModel @AssistedInject constructor(
                 page
             )
                 .onStart {
-                    if (isInit)
-                        isInit = false
-                }
-                .catch { err ->
-                    err.message?.let {
-                        changeState.postValue(Pair("error", it))
-                    }
+                    if (isLoadMore)
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val feed = result.getOrNull()
                     val currentList = homeFeedData.value?.toMutableList() ?: ArrayList()
                     if (!feed?.message.isNullOrEmpty()) {
-                        changeState.postValue(Pair("error", feed?.message))
+                        feed?.message?.let {
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(it))
+                            else
+                                footerState.postValue(FooterState.LoadingError(it))
+                        }
                         return@collect
                     } else if (!feed?.data.isNullOrEmpty()) {
                         lastItem = feed?.data?.last()?.id
@@ -236,20 +259,32 @@ class HomeFeedViewModel @AssistedInject constructor(
                                 }
                             }
                         }
-                        changeState.postValue(Pair("done", null))
+                        page++
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingDone)
+                        else
+                            footerState.postValue(FooterState.LoadingDone)
+                        homeFeedData.postValue(currentList)
                     } else if (feed?.data?.isEmpty() == true) {
-                        if (isRefreshing)
-                            currentList.clear()
                         isEnd = true
-                        changeState.postValue(Pair("end", null))
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                        else {
+                            if (isRefreshing)
+                                homeFeedData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd)
+                        }
                     } else {
                         isEnd = true
-                        changeState.postValue(Pair("error", LOADING_FAILED))
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    homeFeedData.postValue(currentList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
-
         }
     }
 

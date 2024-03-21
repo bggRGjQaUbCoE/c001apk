@@ -2,7 +2,6 @@ package com.example.c001apk.adapter
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -183,9 +182,9 @@ class AppAdapter(
                 binding.viewPager.adapter = IconLinkGridCardAdapter(listener).also {
                     it.submitList(maps)
                 }
-                if (page < 2) binding.indicator.visibility = View.GONE
+                if (page < 2) binding.indicator.isVisible = false
                 else {
-                    binding.indicator.visibility = View.VISIBLE
+                    binding.indicator.isVisible = true
                     binding.indicator.setViewPager(binding.viewPager)
                 }
             }
@@ -317,7 +316,7 @@ class AppAdapter(
                 binding.follow.text = "${data.follow}关注"
                 binding.fans.text = "${data.fans}粉丝"
                 binding.act.text = DateUtils.fromToday(data.logintime) + "活跃"
-                binding.isFollow = data.isFollow
+                binding.isFollow = data.isFollow ?: 0
                 if (data.isFollow == 0) {
                     binding.followBtn.text = "关注"
                     binding.followBtn.setTextColor(

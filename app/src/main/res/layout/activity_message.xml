@@ -51,4 +51,12 @@
         android:id="@+id/indicator"
         layout="@layout/item_indicator" />
 
+    <include
+        android:id="@+id/errorMessage"
+        layout="@layout/item_error_message" />
+
+    <include
+        android:id="@+id/errorLayout"
+        layout="@layout/item_error_layout" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

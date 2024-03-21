@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -36,7 +39,7 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
         fun newInstance(type: String) =
             FollowFragment().apply {
                 arguments = Bundle().apply {
-                    putString("TYPE", type)
+                    putString("type", type)
                 }
             }
     }
@@ -44,7 +47,27 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("TYPE")
+            viewModel.type = it.getString("type")
+            when (viewModel.type) {
+                "follow", "apk", "reply", "replyToMe" -> {
+                    viewModel.fetchFeedList()
+                }
+
+                "topic" -> {
+                    viewModel.url = "#/topic/userFollowTagList"
+                    viewModel.title = "我关注的话题"
+                }
+
+                "product" -> {
+                    viewModel.url = "#/product/followProductList"
+                    viewModel.title = "我关注的数码吧"
+                }
+
+                "favorite" -> {
+                    viewModel.url = "#/collection/followList"
+                    viewModel.title = "我关注的收藏单"
+                }
+            }
         }
     }
 
@@ -56,14 +79,22 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
         initLift()
 
+    }
+
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
     }
 
     override fun onStart() {
@@ -104,15 +135,42 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
-                binding.swipeRefresh.isRefreshing = false
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
@@ -127,10 +185,10 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
 
         if (!viewModel.isInit) {
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
     }
@@ -156,14 +214,6 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
         }
     }
 
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
-        }
-    }
-
     private fun refreshData() {
         viewModel.lastVisibleItemPosition = 0
         viewModel.lastItem = null
@@ -176,39 +226,25 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
                 viewModel.fetchFeedList()
             }
 
-            "topic" -> {
-                viewModel.url = "#/topic/userFollowTagList"
-                viewModel.title = "我关注的话题"
+            "topic", "product", "favorite" -> {
                 viewModel.fetchTopicData()
             }
-
-            "product" -> {
-                viewModel.url = "#/product/followProductList"
-                viewModel.title = "我关注的数码吧"
-                viewModel.fetchTopicData()
-            }
-
-            "favorite" -> {
-                viewModel.url = "#/collection/followList"
-                viewModel.title = "我关注的收藏单"
-                viewModel.fetchTopicData()
-            }
-
         }
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -236,7 +272,6 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }

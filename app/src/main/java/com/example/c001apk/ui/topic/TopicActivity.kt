@@ -9,14 +9,15 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class TopicActivity : BaseActivity<ActivityTopicBinding>() {
+
+    private val type by lazy { intent.getStringExtra("type") }
+    private val title by lazy { intent.getStringExtra("title") }
+    private val url by lazy { intent.getStringExtra("url") }
+    private val id by lazy { intent.getStringExtra("id") }
+
     @SuppressLint("CommitTransaction")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val type = intent.getStringExtra("type")
-        val title = intent.getStringExtra("title")
-        val url = intent.getStringExtra("url")
-        val id = intent.getStringExtra("id")
 
         if (supportFragmentManager.findFragmentById(R.id.topicFragment) == null) {
             supportFragmentManager

@@ -3,6 +3,7 @@ package com.example.c001apk.ui.search
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
@@ -18,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     IOnSearchMenuClickContainer, IOnTabClickContainer {
 
-    private val viewModel by viewModels<SearchContentViewModel>()
+    private val viewModel by viewModels<SearchResultViewModel>()
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var type: MenuItem
@@ -29,7 +30,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
         fun newInstance(keyWord: String, pageType: String?, pageParam: String?, title: String?) =
             SearchResultFragment().apply {
                 arguments = Bundle().apply {
-                    putString("KEYWORD", keyWord)
+                    putString("keyWord", keyWord)
                     putString("pageType", pageType)
                     putString("pageParam", pageParam)
                     putString("title", title)
@@ -40,7 +41,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.keyWord = it.getString("KEYWORD")
+            viewModel.keyWord = it.getString("keyWord")
             viewModel.pageType = it.getString("pageType")
             viewModel.pageParam = it.getString("pageParam")
             viewModel.title = it.getString("title")
@@ -169,7 +170,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
             if (viewModel.pageType.isNullOrEmpty())
                 arrayListOf("动态", "应用", "数码", "用户", "话题")
             else {
-                binding.tabLayout.visibility = View.GONE
+                binding.tabLayout.isVisible = false
                 arrayListOf("null")
             }
         initView()

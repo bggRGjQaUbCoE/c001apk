@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -51,8 +52,8 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
         viewModel.browseLiveData.observe(this) { list ->
             mAdapter.submitList(list)
-            binding.indicator.parent.visibility = View.GONE
             binding.indicator.parent.isIndeterminate = false
+            binding.indicator.parent.isVisible = false
         }
 
     }
@@ -87,8 +88,8 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     private fun initView() {
-        binding.indicator.parent.visibility = View.VISIBLE
         binding.indicator.parent.isIndeterminate = true
+        binding.indicator.parent.isVisible = true
 
         mAdapter = HistoryAdapter(ItemClickListener())
         binding.recyclerView.apply {

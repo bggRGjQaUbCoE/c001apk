@@ -3,7 +3,7 @@ package com.example.c001apk.ui.message
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
@@ -33,25 +33,16 @@ class MessageViewModel @Inject constructor(
     var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
-    var isRefreshing: Boolean = true
+    var uid: String? = null
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var id: String? = null
-
 
     private var url = "/v6/notification/list"
     val countList = ArrayList<String>()
     val messCountList = ArrayList<Int>()
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    val footerState = MutableLiveData<FooterState>()
     val messageData = MutableLiveData<List<MessageResponse.Data>>()
     val doWhat = MutableLiveData<Event<String>>()
     val toastText = MutableLiveData<Event<String>>()
@@ -85,7 +76,6 @@ class MessageViewModel @Inject constructor(
                         isRefreshing = false
                         isLoadMore = false
                         doWhat.postValue(Event("isRefreshing"))
-                        //binding.swipeRefresh.isRefreshing = false
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -124,18 +114,14 @@ class MessageViewModel @Inject constructor(
             networkRepo.getMessage(url, page, lastItem)
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val messageList = messageData.value?.toMutableList() ?: ArrayList()
                     val feed = result.getOrNull()
                     if (feed != null) {
                         if (!feed.message.isNullOrEmpty()) {
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_ERROR, feed.message
-                                )
-                            )
+                            footerState.postValue(FooterState.LoadingError(feed.message))
                             return@collect
                         } else if (!feed.data.isNullOrEmpty()) {
                             lastItem = feed.data.last().id
@@ -148,27 +134,22 @@ class MessageViewModel @Inject constructor(
                                             messageList.add(it)
                                 }
                             }
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_COMPLETE, null
-                                )
-                            )
+                            page++
+                            messageData.postValue(messageList)
+                            footerState.postValue(FooterState.LoadingDone)
                         } else if (feed.data?.isEmpty() == true) {
-                            if (isRefreshing)
-                                messageList.clear()
-                            changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                             isEnd = true
+                            if (isRefreshing)
+                                messageData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd)
                         }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    messageData.postValue(messageList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }

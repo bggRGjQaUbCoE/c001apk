@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentTopicBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -30,7 +32,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
     override var tabController: IOnTabClickListener? = null
     private lateinit var subscribe: MenuItem
     private lateinit var order: MenuItem
-    private var itemBlock: MenuItem? = null
+    private var menuBlock: MenuItem? = null
 
     companion object {
         @JvmStatic
@@ -60,78 +62,80 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
         binding.appBar.setLiftable(true)
 
-        if (viewModel.isResume) {
-            viewModel.isResume = false
-            getViewData()
-        } else if (viewModel.tabList.isNotEmpty()) {
-            initView(null)
-            initBar()
-        } else if (!viewModel.errorMessage.isNullOrEmpty()) {
-            showErrMsg()
-        } else {
-            binding.errorLayout.parent.visibility = View.VISIBLE
-        }
-
+        initData()
         initObserve()
+        initError()
 
+    }
+
+    private fun initError() {
         binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.visibility = View.GONE
-            getViewData()
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
         }
+    }
 
+    private fun initData() {
+        if (viewModel.initData) {
+            viewModel.initData = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
     }
 
     private fun initObserve() {
-        viewModel.updateBlockState.observe(viewLifecycleOwner) { event ->
-            event?.getContentIfNotHandledOrReturnNull()?.let {
-                if (it)
-                    itemBlock?.title = "移除黑名单"
-            }
-        }
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    if (viewModel.type == "topic") {
+                        viewModel.url = viewModel.url.toString().replace("/t/", "")
+                        viewModel.fetchTopicLayout()
+                    } else if (viewModel.type == "product") {
+                        viewModel.fetchProductLayout()
+                    }
+                }
 
-        viewModel.showError.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it) {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    showErrMsg()
+                LoadingState.LoadingDone -> {
+                    initView(
+                        if (viewModel.isInit) viewModel.tabSelected
+                        else null
+                    )
+                    initBar()
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.text = it.errMsg
+                    binding.errorMessage.errMsg.isVisible = true
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.msg.text = it.msg
+                    binding.errorLayout.parent.isVisible = true
                 }
             }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
+            }
         }
 
-        viewModel.afterFollow.observe(viewLifecycleOwner) { event ->
+        viewModel.blockState.observe(viewLifecycleOwner) { event ->
+            event?.getContentIfNotHandledOrReturnNull()?.let {
+                menuBlock?.title = if (it) "移除黑名单"
+                else "加入黑名单"
+            }
+        }
+
+        viewModel.followState.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it.second, Toast.LENGTH_SHORT).show()
                 if (it.first) {
-                    initSub()
+                    updateFollowMenu()
                 }
             }
         }
 
-        viewModel.doNext.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it) {
-                    initView(viewModel.tabSelected)
-                    initBar()
-                } else {
-                    binding.errorLayout.parent.visibility = View.VISIBLE
-                }
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-            }
-        }
-
-    }
-
-    private fun showErrMsg() {
-        binding.errorMsg.parent.text = viewModel.errorMessage
-        binding.errorMsg.parent.visibility = View.VISIBLE
-    }
-
-    private fun initSub() {
-        subscribe.title =
-            if (viewModel.isFollow) "取消关注"
-            else "关注"
     }
 
     private fun initBar() {
@@ -158,15 +162,14 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                 }
             )?.isChecked = true
 
-            itemBlock = menu.findItem(R.id.block)
+            menuBlock = menu.findItem(R.id.block)
             viewModel.title?.let {
                 viewModel.checkTopic(it)
             }
 
             subscribe = menu.findItem(R.id.subscribe)
             subscribe.isVisible = PrefManager.isLogin
-            subscribe.title = if (viewModel.isFollow) "取消关注"
-            else "关注"
+            updateFollowMenu()
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
@@ -204,21 +207,21 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                     }
 
                     R.id.block -> {
-                        val isBlocked = itemBlock?.title.toString() == "移除黑名单"
+                        val isBlocked = menuBlock?.title.toString() == "移除黑名单"
                         MaterialAlertDialogBuilder(requireContext()).apply {
                             val title =
                                 if (viewModel.type == "topic") viewModel.url.toString()
                                     .replace("/t/", "")
                                 else viewModel.title
-                            setTitle("确定将 $title ${itemBlock?.title}？")
+                            setTitle("确定将 $title ${menuBlock?.title}？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                viewModel.title?.let {
-                                    itemBlock?.title = if (isBlocked) {
-                                        viewModel.deleteTopic(it)
+                                viewModel.title?.let { title ->
+                                    menuBlock?.title = if (isBlocked) {
+                                        viewModel.deleteTopic(title)
                                         "加入黑名单"
                                     } else {
-                                        viewModel.saveTopic(it)
+                                        viewModel.saveTopic(title)
                                         "移除黑名单"
                                     }
                                 }
@@ -230,11 +233,11 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                     R.id.subscribe -> {
                         when (viewModel.type) {
                             "topic" -> {
-                                viewModel.followUrl =
+                                val followUrl =
                                     if (viewModel.isFollow) "/v6/feed/unFollowTag"
                                     else "/v6/feed/followTag"
-                                viewModel.tag = viewModel.url.toString().replace("/t/", "")
-                                viewModel.onGetFollow()
+                                val tag = viewModel.url.toString().replace("/t/", "")
+                                viewModel.onGetFollow(followUrl, tag)
                             }
 
                             "product" -> {
@@ -271,6 +274,11 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
         }
     }
 
+    private fun updateFollowMenu() {
+        subscribe.title = if (viewModel.isFollow) "取消关注"
+        else "关注"
+    }
+
     private fun initView(tabSelected: Int?) {
         binding.viewPager.offscreenPageLimit = viewModel.tabList.size
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
@@ -278,7 +286,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                 TopicContentFragment.newInstance(
                     viewModel.topicList[position].url,
                     viewModel.topicList[position].title,
-                    true
                 )
 
             override fun getItemCount() = viewModel.tabList.size
@@ -302,17 +309,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             }
 
         })
-    }
-
-    private fun getViewData() {
-        binding.indicator.parent.visibility = View.VISIBLE
-        binding.indicator.parent.isIndeterminate = true
-        if (viewModel.type == "topic") {
-            viewModel.url = viewModel.url.toString().replace("/t/", "")
-            viewModel.fetchTopicLayout()
-        } else if (viewModel.type == "product") {
-            viewModel.fetchProductLayout()
-        }
     }
 
 }

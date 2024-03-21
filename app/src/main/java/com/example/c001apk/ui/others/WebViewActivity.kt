@@ -14,7 +14,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.URLUtil
@@ -24,6 +23,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.example.c001apk.R
@@ -218,9 +218,9 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                     if (newProgress == 100) {
-                        binding.progressBar.visibility = View.GONE
+                        binding.progressBar.isVisible = false
                     } else {
-                        binding.progressBar.visibility = View.VISIBLE
+                        binding.progressBar.isVisible = true
                         binding.progressBar.progress = newProgress
                     }
                 }

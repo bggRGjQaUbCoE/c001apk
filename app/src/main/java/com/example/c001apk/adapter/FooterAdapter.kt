@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
@@ -14,20 +15,10 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 class FooterAdapter(private val listener: FooterListener) :
     RecyclerView.Adapter<FooterAdapter.FooterViewHolder>() {
 
-    enum class LoadState {
-        LOADING,
-        LOADING_COMPLETE,
-        LOADING_END,
-        LOADING_ERROR,
-        LOADING_REPLY
-    }
+    private var footerState: FooterState = FooterState.LoadingDone
 
-    private var loadState = LoadState.LOADING_COMPLETE
-    private var errorMessage: String? = null
-
-    fun setLoadState(loadState: LoadState, errorMessage: String?) {
-        this.loadState = loadState
-        this.errorMessage = errorMessage
+    fun setLoadState(footerState: FooterState) {
+        this.footerState = footerState
         notifyItemChanged(0)
     }
 
@@ -54,7 +45,7 @@ class FooterAdapter(private val listener: FooterListener) :
             lp.isFullSpan = true
         } else {
             holder.footerLayout.layoutParams =
-                if (loadState == LoadState.LOADING_REPLY) {
+                if (footerState == FooterState.LoadingReply) {
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
@@ -66,37 +57,36 @@ class FooterAdapter(private val listener: FooterListener) :
                     )
         }
 
-        when (loadState) {
-
-            LoadState.LOADING, LoadState.LOADING_REPLY -> {
-                holder.indicator.visibility = View.VISIBLE
+        when (footerState) {
+            FooterState.Loading, FooterState.LoadingReply -> {
+                holder.indicator.isVisible = true
                 holder.indicator.isIndeterminate = true
                 holder.noMore.visibility = View.INVISIBLE
-                holder.retry.visibility = View.GONE
+                holder.retry.isVisible = false
 
             }
 
-            LoadState.LOADING_COMPLETE -> {
+            FooterState.LoadingDone -> {
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
                 holder.noMore.visibility = View.INVISIBLE
-                holder.retry.visibility = View.GONE
+                holder.retry.isVisible = false
             }
 
-            LoadState.LOADING_END -> {
+            FooterState.LoadingEnd -> {
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
-                holder.noMore.visibility = View.VISIBLE
+                holder.noMore.isVisible = true
                 holder.noMore.text = "没有更多了"
-                holder.retry.visibility = View.GONE
+                holder.retry.isVisible = false
             }
 
-            LoadState.LOADING_ERROR -> {
+            is FooterState.LoadingError -> {
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
-                holder.noMore.text = errorMessage
-                holder.noMore.visibility = View.VISIBLE
-                holder.retry.visibility = View.VISIBLE
+                holder.noMore.text = (footerState as FooterState.LoadingError).errMsg
+                holder.noMore.isVisible = true
+                holder.retry.isVisible = true
             }
 
         }

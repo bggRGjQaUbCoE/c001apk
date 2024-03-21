@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.logic.repository.NetworkRepo
@@ -22,11 +23,12 @@ import javax.inject.Inject
 @HiltViewModel
 class AppListViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
-): ViewModel() {
+) : ViewModel() {
 
     var isInit: Boolean = true
     var listSize: Int = -1
 
+    val loadingState = MutableLiveData<LoadingState>()
     val setFab: MutableLiveData<Boolean> = MutableLiveData()
     val items: MutableLiveData<List<AppItem>> = MutableLiveData()
     val appsUpdate = ArrayList<UpdateCheckResponse.Data>()
@@ -74,6 +76,7 @@ class AppListViewModel @Inject constructor(
                 }
             }
 
+            loadingState.postValue(LoadingState.LoadingDone)
             withContext(Dispatchers.Main) {
                 items.value =
                     newItems.sortedByDescending { it.lastUpdateTime }.toCollection(ArrayList())

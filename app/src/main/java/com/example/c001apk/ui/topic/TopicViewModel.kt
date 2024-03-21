@@ -3,6 +3,8 @@ package com.example.c001apk.ui.topic
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.NetworkRepo
@@ -19,56 +21,57 @@ class TopicViewModel @Inject constructor(
 ) : ViewModel() {
 
     var postFollowData: HashMap<String, String>? = null
-    var tag: String? = null
-    var followUrl: String? = null
     var productTitle = "最近回复"
     var subtitle: String? = null
     var isFollow: Boolean = false
-    var isResume: Boolean = true
+    var initData: Boolean = true
     var id: String? = null
     var title: String? = null
     var url: String? = null
     var type: String? = null
     var isInit = true
     var tabList = ArrayList<String>()
-    var position: Int = 0
     val topicList: MutableList<TopicBean> = ArrayList()
     var page = 1
-    var errorMessage: String? = null
+
     var tabSelected: Int = 0
-    val doNext = MutableLiveData<Event<Boolean>>()
-    val showError = MutableLiveData<Event<Boolean>>()
+    val followState = MutableLiveData<Event<Pair<Boolean, String>>>()
+    val blockState = MutableLiveData<Event<Boolean>>()
+    val loadingState = MutableLiveData<LoadingState>()
 
     fun fetchTopicLayout() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getTopicLayout(url.toString())
                 .collect { result ->
                     val data = result.getOrNull()
-                    if (!data?.message.isNullOrEmpty()) {
-                        errorMessage = data?.message
-                        showError.postValue(Event(true))
-                        return@collect
-                    } else if (data?.data != null) {
-                        isFollow = data.data.userAction?.follow == 1
-                        if (tabList.isEmpty()) {
-                            id = data.data.id
-                            type = data.data.entityType
-                            subtitle = data.data.intro
+                    if (data != null) {
+                        if (!data.message.isNullOrEmpty()) {
+                            loadingState.postValue(LoadingState.LoadingError(data.message))
+                            return@collect
+                        } else if (data.data != null) {
+                            isFollow = data.data.userAction?.follow == 1
+                            if (tabList.isEmpty()) {
+                                id = data.data.id
+                                type = data.data.entityType
+                                subtitle = data.data.intro
 
-                            data.data.tabList.forEach {
-                                tabList.add(it.title)
-                                topicList.add(TopicBean(it.url, it.title))
-                            }
-                            run breaking@{
                                 data.data.tabList.forEach {
-                                    if (data.data.selectedTab == it.pageName) return@breaking
-                                    else tabSelected++
+                                    tabList.add(it.title)
+                                    topicList.add(TopicBean(it.url, it.title))
+                                }
+                                run breaking@{
+                                    data.data.tabList.forEachIndexed { index, tab ->
+                                        if (data.data.selectedTab == tab.pageName) {
+                                            tabSelected = index
+                                            return@breaking
+                                        }
+                                    }
                                 }
                             }
+                            loadingState.postValue(LoadingState.LoadingDone)
                         }
-                        doNext.postValue(Event(true))
                     } else {
-                        doNext.postValue(Event(false))
+                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -81,48 +84,50 @@ class TopicViewModel @Inject constructor(
             networkRepo.getProductLayout(id.toString())
                 .collect { result ->
                     val data = result.getOrNull()
-                    if (!data?.message.isNullOrEmpty()) {
-                        errorMessage = data?.message
-                        showError.postValue(Event(true))
-                        return@collect
-                    } else if (data?.data != null) {
-                        isFollow = data.data.userAction?.follow == 1
-                        if (tabList.isEmpty()) {
-                            subtitle = data.data.intro
+                    if (data != null) {
+                        if (!data.message.isNullOrEmpty()) {
+                            loadingState.postValue(LoadingState.LoadingError(data.message))
+                            return@collect
+                        } else if (data.data != null) {
+                            isFollow = data.data.userAction?.follow == 1
+                            if (tabList.isEmpty()) {
+                                subtitle = data.data.intro
 
-                            data.data.tabList.forEach {
-                                tabList.add(it.title)
-                                topicList.add(TopicBean(it.url, it.title))
-                            }
-                            run breaking@{
                                 data.data.tabList.forEach {
-                                    if (data.data.selectedTab == it.pageName) return@breaking
-                                    else tabSelected++
+                                    tabList.add(it.title)
+                                    topicList.add(TopicBean(it.url, it.title))
+                                }
+                                run breaking@{
+                                    data.data.tabList.forEachIndexed { index, tab ->
+                                        if (data.data.selectedTab == tab.pageName) {
+                                            tabSelected = index
+                                            return@breaking
+                                        }
+                                    }
                                 }
                             }
+                            loadingState.postValue(LoadingState.LoadingDone)
                         }
-                        doNext.postValue(Event(true))
                     } else {
-                        doNext.postValue(Event(false))
+                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
         }
     }
 
-    val afterFollow = MutableLiveData<Event<Pair<Boolean, String>>>()
-    fun onGetFollow() {
+    fun onGetFollow(followUrl: String, tag: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getFollow(followUrl.toString(), tag, null)
+            networkRepo.getFollow(followUrl, tag, null)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
                         if (!response.message.isNullOrEmpty()) {
                             if (response.message.contains("关注成功")) {
                                 isFollow = !isFollow
-                                afterFollow.postValue(Event(Pair(true, response.message)))
+                                followState.postValue(Event(Pair(true, response.message)))
                             } else
-                                afterFollow.postValue(Event(Pair(false, response.message)))
+                                followState.postValue(Event(Pair(false, response.message)))
                         }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
@@ -141,14 +146,13 @@ class TopicViewModel @Inject constructor(
                             if (!response.message.isNullOrEmpty()) {
                                 if (response.message.contains("手机吧成功")) {
                                     isFollow = !isFollow
-                                    afterFollow.postValue(Event(Pair(true, response.message)))
+                                    followState.postValue(Event(Pair(true, response.message)))
                                 } else
-                                    afterFollow.postValue(Event(Pair(false, response.message)))
+                                    followState.postValue(Event(Pair(false, response.message)))
                             }
                         } else {
                             result.exceptionOrNull()?.printStackTrace()
                         }
-
                     }
             }
 
@@ -161,11 +165,10 @@ class TopicViewModel @Inject constructor(
         }
     }
 
-    val updateBlockState = MutableLiveData<Event<Boolean>>()
     fun checkTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (repository.checkTopic(title))
-                updateBlockState.postValue(Event(true))
+                blockState.postValue(Event(true))
         }
     }
 

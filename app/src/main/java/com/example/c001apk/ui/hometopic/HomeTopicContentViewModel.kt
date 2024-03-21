@@ -3,8 +3,10 @@ package com.example.c001apk.ui.hometopic
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.repository.BlackListRepo
@@ -26,12 +28,14 @@ class HomeTopicContentViewModel @Inject constructor(
     var url: String? = null
     var isInit = true
     var listSize = -1
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
     private var lastItem: String? = null
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val topicData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
     fun fetchTopicData() {
@@ -39,15 +43,18 @@ class HomeTopicContentViewModel @Inject constructor(
             networkRepo.getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val topicDataList = topicData.value?.toMutableList() ?: ArrayList()
                     val data = result.getOrNull()
                     if (!data?.message.isNullOrEmpty()) {
-                        changeState.postValue(
-                            Pair(FooterAdapter.LoadState.LOADING_ERROR, data?.message)
-                        )
+                        data?.message?.let {
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(it))
+                            else
+                                footerState.postValue(FooterState.LoadingError(it))
+                        }
                         return@collect
                     } else if (!data?.data.isNullOrEmpty()) {
                         if (isRefreshing) topicDataList.clear()
@@ -66,22 +73,31 @@ class HomeTopicContentViewModel @Inject constructor(
                             }
                             lastItem = topicDataList.last().id
                         }
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_COMPLETE, null))
+                        page++
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingDone)
+                        else
+                            footerState.postValue(FooterState.LoadingDone)
+                        topicData.postValue(topicDataList)
                     } else if (data?.data?.isEmpty() == true) {
-                        if (isRefreshing) topicDataList.clear()
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                        else {
+                            if (isRefreshing)
+                                topicData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd)
+                        }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR,
-                                LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    topicData.postValue(topicDataList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
     }

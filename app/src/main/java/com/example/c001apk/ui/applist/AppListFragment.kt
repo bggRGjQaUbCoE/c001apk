@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,12 +14,15 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentHomeFeedBinding
 import com.example.c001apk.ui.appupdate.AppUpdateActivity
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.main.INavViewContainer
+import com.example.c001apk.ui.main.IOnBottomClickContainer
+import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.view.LinearItemDecoration
@@ -29,7 +33,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener {
+class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener,
+    IOnBottomClickListener {
 
     private val viewModel by viewModels<AppListViewModel>()
     private lateinit var mAdapter: AppListAdapter
@@ -43,7 +48,6 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
         if (!viewModel.isInit) {
             initFab()
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
@@ -51,28 +55,37 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
 
     }
 
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.isIndeterminate = true
-            binding.indicator.parent.visibility = View.VISIBLE
-            viewModel.getItems(requireContext())
-        }
-    }
-
     private fun initObserve() {
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    viewModel.getItems(requireContext())
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {}
+                is LoadingState.LoadingFailed -> {}
+            }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
 
         viewModel.items.observe(viewLifecycleOwner) {
             mAdapter.submitList(it)
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
             binding.swipeRefresh.isRefreshing = false
         }
 
         viewModel.setFab.observe(viewLifecycleOwner) {
             if (it)
-                binding.fab.visibility = View.VISIBLE
+                binding.fab.isVisible = true
         }
-
     }
 
     private fun initFab() {
@@ -117,17 +130,18 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -160,19 +174,20 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
             viewModel.isInit = false
             initFab()
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
         }
 
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
-
+        (activity as? IOnBottomClickContainer)?.controller = this
     }
 
     override fun onPause() {
         super.onPause()
         (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
+        (activity as? IOnBottomClickContainer)?.controller = null
     }
 
     private fun refreshData() {
@@ -184,6 +199,10 @@ class AppListFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickList
         binding.swipeRefresh.isRefreshing = true
         binding.recyclerView.scrollToPosition(0)
         refreshData()
+    }
+
+    override fun onReturnTop() {
+        onReturnTop(null)
     }
 
 }

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.SZLM_ID
@@ -57,7 +59,6 @@ import kotlinx.coroutines.withContext
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
 
     private val viewModel by viewModels<FeedViewModel>(ownerProducer = { requireActivity() })
-    private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private lateinit var feedDataAdapter: FeedDataAdapter
     private lateinit var feedReplyAdapter: FeedReplyAdapter
     private lateinit var feedFixAdapter: FeedFixAdapter
@@ -65,6 +66,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
+    private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private var dialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,17 +86,17 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refresh()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -120,7 +122,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private fun initReplyBtn() {
         if (PrefManager.isLogin) {
             binding.reply.apply {
-                visibility = View.VISIBLE
+                isVisible = true
                 val lp = CoordinatorLayout.LayoutParams(
                     CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                     CoordinatorLayout.LayoutParams.WRAP_CONTENT
@@ -149,7 +151,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 }
             }
         } else
-            binding.reply.visibility = View.GONE
+            binding.reply.isVisible = false
     }
 
     private fun initReply() {
@@ -188,7 +190,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + viewModel.itemCount + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -213,8 +214,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     private fun initObserve() {
-
-        viewModel.afterFollow.observe(viewLifecycleOwner) { event ->
+        viewModel.followState.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 feedDataAdapter.notifyItemChanged(0)
             }
@@ -284,14 +284,16 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
                 binding.swipeRefresh.isRefreshing = false
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+            if (dialog != null) {
+                dialog?.dismiss()
+                dialog === null
             }
         }
 
@@ -302,10 +304,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 viewModel.isViewReply = false
                 if (viewModel.firstVisibleItemPosition > viewModel.itemCount)
                     scrollToPosition(viewModel.itemCount)
-            }
-            if (dialog != null) {
-                dialog?.dismiss()
-                dialog === null
             }
         }
 
@@ -322,18 +320,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         if (viewModel.isInit) {
             viewModel.isInit = false
             viewModel.isTop?.let { feedReplyAdapter.setHaveTop(it, viewModel.topReplyId) }
-            binding.titleProfile.visibility = View.GONE
-            refresh()
-        }/* else {
-            if (getScrollYDistance() >= 50.dp) {
-                // showTitleProfile()
-            } else {
-                binding.titleProfile.visibility = View.GONE
-            }
-        }*/
+            binding.titleProfile.isVisible = false
+            refreshData()
+        }
     }
 
-    private fun refresh() {
+    private fun refreshData() {
         viewModel.firstVisibleItemPosition = 0
         viewModel.lastVisibleItemPosition = 0
         viewModel.firstItem = null
@@ -344,19 +336,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         viewModel.isLoadMore = false
         viewModel.fetchFeedReply()
     }
-
-
-    /*private fun getScrollYDistance(): Int {
-        val position = mLayoutManager.findFirstVisibleItemPosition()
-        val firstVisibleChildView = mLayoutManager.findViewByPosition(position)
-        var itemHeight = 0
-        var top = 0
-        firstVisibleChildView?.let {
-            itemHeight = firstVisibleChildView.height
-            top = firstVisibleChildView.top
-        }
-        return position * itemHeight - top
-    }*/
 
     @SuppressLint("SetTextI18n")
     private fun initView() {
@@ -386,11 +365,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 )
             layoutManager =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    binding.tabLayout.visibility = View.VISIBLE
+                    binding.tabLayout.isVisible = true
                     mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
                 } else {
-                    binding.tabLayout.visibility = View.GONE
+                    binding.tabLayout.isVisible = false
                     sLayoutManager =
                         StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                     sLayoutManager
@@ -398,14 +377,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             if (viewModel.isViewReply == true) {
                 viewModel.isViewReply = false
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING_REPLY, null)
+                    footerAdapter.setLoadState(FooterState.LoadingReply)
                     mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
                     viewModel.firstVisibleItemPosition = viewModel.itemCount
                 } else {
-                    footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
+                    footerAdapter.setLoadState(FooterState.Loading)
                 }
             } else {
-                footerAdapter.setLoadState(FooterAdapter.LoadState.LOADING, null)
+                footerAdapter.setLoadState(FooterState.Loading)
             }
             if (itemDecorationCount == 0)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -432,7 +411,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
             setOnClickListener {
                 binding.recyclerView.stopScroll()
-                binding.titleProfile.visibility = View.GONE
+                binding.titleProfile.isVisible = false
                 scrollToPosition(0)
                 viewModel.firstVisibleItemPosition = 0
             }
@@ -460,7 +439,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
                             viewModel.firstVisibleItemPosition = viewModel.itemCount
                         } else {
-                            binding.titleProfile.visibility = View.GONE
+                            binding.titleProfile.isVisible = false
                             mLayoutManager.scrollToPositionWithOffset(0, 0)
                             viewModel.firstVisibleItemPosition = 0
                         }

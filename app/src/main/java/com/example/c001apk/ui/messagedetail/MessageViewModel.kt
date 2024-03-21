@@ -3,45 +3,47 @@ package com.example.c001apk.ui.messagedetail
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class MessageViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = MessageViewModel.Factory::class)
+class MessageViewModel @AssistedInject constructor(
+    @Assisted val type: String,
     private val repository: BlackListRepo,
     private val networkRepo: NetworkRepo
-): ViewModel() {
+) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(type: String): MessageViewModel
+    }
 
     var url: String? = null
     var listSize: Int = -1
-    var type: String? = null
     var isInit: Boolean = true
     var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var uid: String? = null
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var id: String? = null
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+
+    val loadingState = MutableLiveData<LoadingState>()
+    val footerState = MutableLiveData<FooterState>()
     val messageListData = MutableLiveData<List<MessageResponse.Data>>()
 
     fun fetchMessage() {
@@ -49,18 +51,17 @@ class MessageViewModel @Inject constructor(
             networkRepo.getMessage(url.toString(), page, lastItem)
                 .onStart {
                     if (isLoadMore)
-                        changeState.postValue(Pair(FooterAdapter.LoadState.LOADING, null))
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val messageList = messageListData.value?.toMutableList() ?: ArrayList()
                     val feed = result.getOrNull()
                     if (feed != null) {
                         if (!feed.message.isNullOrEmpty()) {
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_ERROR, feed.message
-                                )
-                            )
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(feed.message))
+                            else
+                                footerState.postValue(FooterState.LoadingError(feed.message))
                             return@collect
                         } else if (!feed.data.isNullOrEmpty()) {
                             lastItem = feed.data.last().id
@@ -75,26 +76,32 @@ class MessageViewModel @Inject constructor(
                                             messageList.add(it)
                                 }
                             }
-                            changeState.postValue(
-                                Pair(
-                                    FooterAdapter.LoadState.LOADING_COMPLETE, null
-                                )
-                            )
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            messageListData.postValue(messageList)
                         } else if (feed.data?.isEmpty() == true) {
-                            if (isRefreshing) messageList.clear()
-                            changeState.postValue(Pair(FooterAdapter.LoadState.LOADING_END, null))
                             isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    messageListData.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
                         }
                     } else {
-                        changeState.postValue(
-                            Pair(
-                                FooterAdapter.LoadState.LOADING_ERROR, LOADING_FAILED
-                            )
-                        )
                         isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
-                    messageListData.postValue(messageList)
+                    isRefreshing = false
+                    isLoadMore = false
                 }
         }
 

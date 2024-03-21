@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchBinding
@@ -26,7 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListener {
 
-    private val viewModel by viewModels<SearchViewModel>()
+    private val viewModel by viewModels<SearchFragmentViewModel>()
     private var mAdapter: HistoryAdapter? = null
     private var mLayoutManager: FlexboxLayoutManager? = null
 
@@ -62,10 +63,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
 
         viewModel.blackListLiveData.observe(viewLifecycleOwner) {
             mAdapter?.submitList(it)
-            if (it.isEmpty())
-                binding.clearAll.visibility = View.GONE
-            else
-                binding.clearAll.visibility = View.VISIBLE
+            binding.clearAll.isVisible = it.isNotEmpty()
         }
 
     }
@@ -183,9 +181,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
 
                 override fun afterTextChanged(s: Editable) {
                     if (s.isEmpty())
-                        binding.clear.visibility = View.GONE
+                        binding.clear.isVisible = false
                     else
-                        binding.clear.visibility = View.VISIBLE
+                        binding.clear.isVisible = true
                 }
             })
 

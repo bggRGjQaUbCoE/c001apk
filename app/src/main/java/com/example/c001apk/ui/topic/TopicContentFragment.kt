@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.carousel.CarouselActivity
@@ -24,34 +27,33 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     IOnSearchMenuClickListener, IOnTabClickListener {
 
-    private val viewModel by viewModels<TopicContentViewModel>()
+    @Inject
+    lateinit var viewModelAssistedFactory: TopicContentViewModel.Factory
+    private val viewModel by viewModels<TopicContentViewModel> {
+        TopicContentViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("url").orEmpty(),
+            arguments?.getString("title").orEmpty(),
+        )
+    }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.url = it.getString("url")
-            viewModel.title = it.getString("title")
-            viewModel.isEnable = it.getBoolean("isEnable", false)
-        }
-    }
-
     companion object {
         @JvmStatic
-        fun newInstance(url: String, title: String, isEnable: Boolean) =
+        fun newInstance(url: String, title: String) =
             TopicContentFragment().apply {
                 arguments = Bundle().apply {
                     putString("url", url)
                     putString("title", title)
-                    putBoolean("isEnable", isEnable)
                 }
             }
     }
@@ -89,14 +91,22 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
         initLift()
 
+    }
+
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
     }
 
     override fun onStart() {
@@ -105,27 +115,54 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     }
 
     private fun initObserve() {
-        viewModel.toastText.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
                 binding.swipeRefresh.isRefreshing = false
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
             }
         }
 
         viewModel.topicData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
+        }
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -134,10 +171,10 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
 
         if (!viewModel.isInit) {
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
     }
@@ -192,7 +229,6 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -206,17 +242,18 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -238,14 +275,6 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
                 addItemDecoration(StaggerItemDecoration(10.dp))
-        }
-    }
-
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
         }
     }
 
@@ -273,9 +302,8 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
                 "/page?url=/product/feedList?type=feed&id=$id&ignoreEntityById=1&listType=dateline_desc"
         }
         viewModel.topicData.postValue(emptyList())
-        binding.indicator.parent.visibility = View.VISIBLE
-        binding.indicator.parent.isIndeterminate = true
-        refreshData()
+        viewModel.footerState.value = FooterState.LoadingDone
+        viewModel.loadingState.value = LoadingState.Loading
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {

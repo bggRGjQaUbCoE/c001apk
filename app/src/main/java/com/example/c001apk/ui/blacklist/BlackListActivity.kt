@@ -2,7 +2,6 @@ package com.example.c001apk.ui.blacklist
 
 import android.content.Context
 import android.os.Bundle
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
@@ -10,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityBlackListBinding
 import com.example.c001apk.logic.model.StringEntity
@@ -47,23 +47,21 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding.indicator.isIndeterminate = true
-        binding.indicator.visibility = View.VISIBLE
-
         initView()
         initBar()
         initEditText()
         initEdit()
         initClearHistory()
+        initObserve()
 
+    }
+
+    private fun initObserve() {
         viewModel.blackListLiveData.observe(this) {
             binding.indicator.isIndeterminate = false
-            binding.indicator.visibility = View.GONE
+            binding.indicator.isVisible = false
             mAdapter.submitList(it)
-            if (it.isEmpty())
-                binding.clearAll.visibility = View.GONE
-            else
-                binding.clearAll.visibility = View.VISIBLE
+            binding.clearAll.isVisible = it.isNotEmpty()
         }
 
         viewModel.toastText.observe(this) { event ->
@@ -71,7 +69,6 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         }
-
     }
 
     private fun initBar() {
@@ -199,7 +196,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     viewModel.deleteAll()
-                    binding.clearAll.visibility = View.GONE
+                    binding.clearAll.isVisible = false
                 }
                 show()
             }
@@ -207,6 +204,8 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
     }
 
     private fun initView() {
+        binding.indicator.isIndeterminate = true
+        binding.indicator.isVisible = true
         mLayoutManager = FlexboxLayoutManager(this)
         mLayoutManager.flexDirection = FlexDirection.ROW
         mLayoutManager.flexWrap = FlexWrap.WRAP

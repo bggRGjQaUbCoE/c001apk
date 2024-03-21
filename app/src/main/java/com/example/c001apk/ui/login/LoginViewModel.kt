@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.logic.model.LoginResponse
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.CookieUtil
@@ -32,20 +32,13 @@ class LoginViewModel @Inject constructor(
     var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
-    var isRefreshing: Boolean = true
+    var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
-    var itemCount = 1
-    var avatar: String? = null
-    var device: String? = null
-    var replyCount: String? = null
-    var dateLine: Long? = null
-    var feedType: String? = null
-    var errorMessage: String? = null
-    var id: String? = null
+
     var requestHash: String? = null
-    val changeState = MutableLiveData<Pair<FooterAdapter.LoadState, String?>>()
+    val footerState = MutableLiveData<FooterState>()
     var loginData = HashMap<String, String?>()
     val toastText = MutableLiveData<Event<String>>()
     val showCaptcha = MutableLiveData<Event<Bitmap>>()

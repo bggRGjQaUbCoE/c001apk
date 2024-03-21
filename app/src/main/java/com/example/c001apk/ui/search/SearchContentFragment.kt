@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentSearchFeedBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -37,8 +40,8 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
         fun newInstance(keyWord: String, type: String, pageType: String?, pageParam: String?) =
             SearchContentFragment().apply {
                 arguments = Bundle().apply {
-                    putString("KEYWORD", keyWord)
-                    putString("TYPE", type)
+                    putString("keyWord", keyWord)
+                    putString("type", type)
                     putString("pageType", pageType)
                     putString("pageParam", pageParam)
                 }
@@ -48,8 +51,8 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.keyWord = it.getString("KEYWORD")
-            viewModel.type = it.getString("TYPE")
+            viewModel.keyWord = it.getString("keyWord")
+            viewModel.type = it.getString("type")
             viewModel.pageType = it.getString("pageType")
             viewModel.pageParam = it.getString("pageParam")
         }
@@ -73,14 +76,22 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
         initLift()
 
+    }
+
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
     }
 
     override fun onStart() {
@@ -109,7 +120,7 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
     }
 
     private fun initObserve() {
-        viewModel.afterFollow.observe(viewLifecycleOwner) { event ->
+        viewModel.followState.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 mAdapter.notifyItemChanged(it)
             }
@@ -121,15 +132,42 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
-                binding.swipeRefresh.isRefreshing = false
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
@@ -144,30 +182,11 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
 
         if (!viewModel.isInit) {
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
-
-        /*
-                viewModel.postFollowUnFollowData.observe(viewLifecycleOwner) { result ->
-                    if (viewModel.postFollowUnFollow) {
-                        viewModel.postFollowUnFollow = false
-
-                        val response = result.getOrNull()
-                        if (response != null) {
-                            if (viewModel.followType) {
-                                viewModel.searchList[viewModel.position].isFollow = 0
-                            } else {
-                                viewModel.searchList[viewModel.position].isFollow = 1
-                            }
-                            mAdapter.notifyItemChanged(viewModel.position)
-                        } else {
-                            result.exceptionOrNull()?.printStackTrace()
-                        }
-                    }
-                }*/
 
     }
 
@@ -194,7 +213,6 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -208,25 +226,18 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
-        }
-    }
-
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -268,9 +279,8 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
             "feedType" -> viewModel.feedType = value
         }
         viewModel.searchData.postValue(emptyList())
-        binding.indicator.parent.visibility = View.VISIBLE
-        binding.indicator.parent.isIndeterminate = true
-        refreshData()
+        viewModel.footerState.value = FooterState.LoadingDone
+        viewModel.loadingState.value = LoadingState.Loading
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {

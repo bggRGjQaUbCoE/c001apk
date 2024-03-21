@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.FragmentTopicContentBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -21,11 +24,33 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickListener {
 
-    private val viewModel by viewModels<AppDetailViewModel>()
+    private val type by lazy { arguments?.getString("type") }
+
+    @Inject
+    lateinit var viewModelAssistedFactory: AppFragmentViewModel.Factory
+    private val viewModel by viewModels<AppFragmentViewModel> {
+        AppFragmentViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("id").orEmpty(),
+            when (type) {
+                "reply" -> ""
+                "pub" -> "&sort=dateline_desc"
+                "hot" -> "&sort=popular"
+                else -> ""
+            },
+            when (type) {
+                "reply" -> "最近回复"
+                "pub" -> "最新发布"
+                "hot" -> "热度排序"
+                else -> "最近回复"
+            }
+        )
+    }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -41,68 +66,71 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.type = it.getString("type")
-            viewModel.appId = it.getString("id")
-            viewModel.appCommentSort = when (viewModel.type) {
-                "reply" -> ""
-                "hot" -> "&sort=popular"
-                else -> "&sort=dateline_desc"
-            }
-            viewModel.appCommentTitle = when (viewModel.type) {
-                "reply" -> "最近回复"
-                "hot" -> "热度排序"
-                else -> "最新发布"
-            }
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isInit) {
             initView()
-            initData()
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
     }
 
-    private fun initObserve() {
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
 
+    private fun initObserve() {
         viewModel.toastText.observe(viewLifecycleOwner) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
         }
 
-        viewModel.changeState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
-                binding.swipeRefresh.isRefreshing = false
+        viewModel.loadingState.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
+                }
+
+                LoadingState.LoadingDone -> {
+                    binding.swipeRefresh.isEnabled = true
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.text = it.errMsg
+                    binding.errorMessage.errMsg.isVisible = true
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.msg.text = it.msg
+                    binding.errorLayout.parent.isVisible = true
+                }
+            }
+            if (it !is LoadingState.Loading) {
                 binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+
+        viewModel.footerState.observe(viewLifecycleOwner) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
         viewModel.appCommentData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-        }
-    }
-
-    private fun initData() {
-        if (viewModel.listSize == -1) {
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
         }
     }
 
@@ -139,15 +167,18 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                requireContext(),
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    requireContext(),
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
@@ -175,7 +206,6 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -208,10 +238,11 @@ class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickList
         if (viewModel.isInit) {
             viewModel.isInit = false
             initView()
-            initData()
+            viewModel.loadingState.value = LoadingState.Loading
             initRefresh()
             initScroll()
             initObserve()
+            initError()
         }
 
         initLift()

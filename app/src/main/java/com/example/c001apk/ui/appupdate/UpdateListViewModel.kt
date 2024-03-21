@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UpdateListViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
-): ViewModel() {
+) : ViewModel() {
 
     var appName: String? = null
     var isInit: Boolean = true
@@ -21,25 +21,29 @@ class UpdateListViewModel @Inject constructor(
     var versionCode: String? = null
     var packageName: String? = null
     private var appId: String? = null
-    val doNext = MutableLiveData<Event<Boolean>>()
-    var url: String? = null
+    val download = MutableLiveData<Event<Boolean>>()
+    var urlMap: HashMap<String, String> = HashMap()
 
     fun onGetDownloadLink() {
-        if (url.isNullOrEmpty()) {
+        if (urlMap[packageName].isNullOrEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
-                networkRepo.getAppDownloadLink(packageName.toString(), appId.toString(), versionCode.toString())
+                networkRepo.getAppDownloadLink(
+                    packageName.toString(),
+                    appId.toString(),
+                    versionCode.toString()
+                )
                     .collect { result ->
                         val link = result.getOrNull()
                         if (link != null) {
-                            url = link
-                            doNext.postValue(Event(true))
+                            urlMap[packageName.toString()] = link
+                            download.postValue(Event(true))
                         } else {
                             result.exceptionOrNull()?.printStackTrace()
                         }
                     }
             }
         } else
-            doNext.postValue(Event(true))
+            download.postValue(Event(true))
     }
 
 }

@@ -2,9 +2,10 @@ package com.example.c001apk.ui.feed
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import com.example.c001apk.R
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -13,55 +14,66 @@ import dagger.hilt.android.AndroidEntryPoint
 class FeedActivity : BaseActivity<ActivityFeedBinding>() {
 
     private val viewModel by viewModels<FeedViewModel>()
+    private val id by lazy { intent.getStringExtra("id") }
+    private val frid by lazy { intent.getStringExtra("rid") }
+    private val isViewReply by lazy { intent.getBooleanExtra("viewReply", false) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.id = intent.getStringExtra("id")
-        viewModel.frid = intent.getStringExtra("rid")
-        if (viewModel.isViewReply == null)
-            viewModel.isViewReply = intent.getBooleanExtra("viewReply", false)
+        initData()
+        initObserve()
 
         binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.visibility = View.GONE
-            getFeedData()
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
         }
 
-        if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null && viewModel.feedType == null) {
-            getFeedData()
-        } else {
-            doNext()
-        }
+    }
 
-
-        viewModel.doNext.observe(this) { event ->
-            event?.getContentIfNotHandledOrReturnNull()?.let {
-                when (it.first) {
-                    1 -> showErrorMessage(it.second.toString())
-                    2 -> doNext()
-                    3 -> binding.errorLayout.parent.visibility = View.VISIBLE
+    private fun initObserve() {
+        viewModel.loadingState.observe(this) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    viewModel.fetchFeedData()
                 }
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
 
+                LoadingState.LoadingDone -> {
+                    loadFeedDetail()
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.text = it.errMsg
+                    binding.errorMessage.errMsg.isVisible = true
+
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.msg.text = it.msg
+                    binding.errorLayout.parent.isVisible = true
+                }
+            }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
             }
         }
-
     }
 
-    private fun getFeedData() {
-        binding.indicator.parent.isIndeterminate = true
-        binding.indicator.parent.visibility = View.VISIBLE
-        viewModel.fetchFeedData()
-    }
-
-    private fun showErrorMessage(errorMessage: String) {
-        binding.errorMessage.parent.visibility = View.VISIBLE
-        binding.errorMessage.parent.text = errorMessage
+    private fun initData() {
+        if (viewModel.isInitFeed) {
+            viewModel.isInitFeed = false
+            viewModel.id = id
+            viewModel.frid = frid
+            viewModel.isViewReply = isViewReply
+            viewModel.loadingState.value = LoadingState.Loading
+        }
     }
 
     @SuppressLint("CommitTransaction")
-    private fun doNext() {
+    private fun loadFeedDetail() {
         if (viewModel.feedType != "vote") // not done yet
             if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
                 supportFragmentManager

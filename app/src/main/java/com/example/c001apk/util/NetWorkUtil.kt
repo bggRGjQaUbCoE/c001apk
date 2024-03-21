@@ -59,7 +59,7 @@ object NetWorkUtil {
             IntentUtil.startActivity<FeedActivity>(context) {
                 putExtra("id", id)
             }
-        } else if (replace.startsWith("#/feed/")) {
+        } else if (replace.startsWith("#/feed/")) { // iconLinkGridCard-coolpic
             IntentUtil.startActivity<CarouselActivity>(context) {
                 putExtra("title", title)
                 putExtra("url", url)

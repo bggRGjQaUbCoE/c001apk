@@ -16,6 +16,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.viewpager.widget.ViewPager
 import com.absinthe.libraries.utils.utils.UiUtils
 import com.example.c001apk.R
@@ -82,7 +83,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
         val checkBox: CheckBox = view.findViewById(R.id.checkBox)
         if (type == "publish") {
             title.text = "发动态"
-            forwardLayout.visibility = View.GONE
+            forwardLayout.isVisible = false
         } else if (type == "reply") {
             title.text = "回复"
         }
@@ -133,8 +134,8 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
 
         emotion.setOnClickListener {
             if (emojiPanel.visibility != View.VISIBLE) {
-                emojiPanel.visibility = View.VISIBLE
-                indicator.visibility = View.VISIBLE
+                emojiPanel.isVisible = true
+                indicator.isVisible = true
                 val keyboard = ContextCompat.getDrawable(context, R.drawable.ic_arrow_down)
                 keyboard?.let {
                     val drawableKeyboard = DrawableCompat.wrap(it)
@@ -145,8 +146,8 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
                     emotion.setImageDrawable(drawableKeyboard)
                 }
             } else {
-                emojiPanel.visibility = View.GONE
-                indicator.visibility = View.GONE
+                emojiPanel.isVisible = false
+                indicator.isVisible = false
                 val face = ContextCompat.getDrawable(context, R.drawable.ic_face)
                 face?.let {
                     val drawableFace = DrawableCompat.wrap(it)

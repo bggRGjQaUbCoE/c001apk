@@ -6,9 +6,9 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,7 +17,9 @@ import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.others.WebViewActivity
@@ -29,17 +31,24 @@ import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 
 
 @AndroidEntryPoint
 class UserActivity : BaseActivity<ActivityUserBinding>() {
 
-    private val viewModel by viewModels<UserViewModel>()
+    private val viewModel by viewModels<UserViewModel>(
+        extrasProducer = {
+            defaultViewModelCreationExtras.withCreationCallback<UserViewModel.Factory> { factory ->
+                factory.create(uid = intent.getStringExtra("id").orEmpty())
+            }
+        }
+    )
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private var itemBlock: MenuItem? = null
+    private var menuBlock: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,36 +58,39 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         initView()
+        initFollowBtn()
         initData()
         initRefresh()
         initScroll()
         initObserve()
 
         binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.visibility = View.GONE
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
-        }
-
-        binding.followBtn.setOnClickListener {
-            if (PrefManager.isLogin)
-                if (viewModel.followType) {
-                    viewModel.url = "/v6/user/unfollow"
-                    viewModel.onPostFollowUnFollow()
-                } else {
-                    viewModel.url = "/v6/user/follow"
-                    viewModel.onPostFollowUnFollow()
-                }
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
         }
 
     }
 
+    private fun initFollowBtn() {
+        binding.followBtn.apply {
+            isVisible = PrefManager.isLogin
+            setOnClickListener {
+                if (PrefManager.isLogin)
+                    viewModel.onPostFollowUnFollow(
+                        if (viewModel.userData?.isFollow == 1)
+                            "/v6/user/unfollow"
+                        else
+                            "/v6/user/follow"
+                    )
+            }
+        }
+    }
+
     private fun initObserve() {
-        viewModel.updateBlockState.observe(this) { event ->
+        viewModel.blockState.observe(this) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
                 if (it)
-                    itemBlock?.title = getMenuTitle("移除黑名单")
+                    menuBlock?.title = getMenuTitle("移除黑名单")
             }
         }
 
@@ -88,49 +100,46 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             }
         }
 
-        viewModel.afterFollow.observe(this) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (viewModel.followType) {
-                    binding.followBtn.text = "已关注"
-                } else {
-                    binding.followBtn.text = "关注"
-                }
-            }
+        viewModel.followState.observe(this) {
+            binding.followBtn.text = if (it == 1) "取消关注"
+            else "关注"
         }
 
-        viewModel.showError.observe(this) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it) {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    showErrorMessage()
-                } else {
-                    binding.indicator.parent.isIndeterminate = false
-                    binding.indicator.parent.visibility = View.GONE
-                    binding.errorLayout.parent.visibility = View.VISIBLE
+        viewModel.loadingState.observe(this) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    refreshData()
                 }
-            }
-        }
 
-        viewModel.showUser.observe(this) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it) {
+                LoadingState.LoadingDone -> {
                     binding.userData = viewModel.userData
                     binding.listener = viewModel.ItemClickListener()
-                    binding.infoLayout.visibility = View.VISIBLE
+                    binding.infoLayout.isVisible = true
+                    binding.swipeRefresh.isEnabled = true
                 }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.text = it.errMsg
+                    binding.errorMessage.errMsg.isVisible = true
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.msg.text = it.msg
+                    binding.errorLayout.parent.isVisible = true
+                }
+            }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
             }
         }
 
-        viewModel.changeState.observe(this) {
-            footerAdapter.setLoadState(it.first, it.second)
-            footerAdapter.notifyItemChanged(0)
-            if (it.first != FooterAdapter.LoadState.LOADING) {
+        viewModel.footerState.observe(this) {
+            footerAdapter.setLoadState(it)
+            if (it !is FooterState.Loading) {
                 binding.swipeRefresh.isRefreshing = false
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.visibility = View.GONE
-                viewModel.isLoadMore = false
-                viewModel.isRefreshing = false
             }
         }
 
@@ -139,12 +148,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             mAdapter.submitList(it)
         }
 
-    }
-
-    private fun showErrorMessage() {
-        binding.swipeRefresh.isEnabled = false
-        binding.errorMessage.parent.visibility = View.VISIBLE
-        binding.errorMessage.parent.text = viewModel.errorMessage
     }
 
     private fun initScroll() {
@@ -171,7 +174,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
-                        viewModel.page++
                         loadMore()
                     }
                 }
@@ -185,33 +187,25 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     }
 
     private fun initRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            MaterialColors.getColor(
-                this,
-                com.google.android.material.R.attr.colorPrimary,
-                0
+        binding.swipeRefresh.apply {
+            isEnabled = false
+            setColorSchemeColors(
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorPrimary,
+                    0
+                )
             )
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.indicator.parent.isIndeterminate = false
-            binding.indicator.parent.visibility = View.GONE
-            refreshData()
+            setOnRefreshListener {
+                refreshData()
+            }
         }
     }
 
     private fun initData() {
         if (viewModel.isInit) {
             viewModel.isInit = false
-            binding.indicator.parent.visibility = View.VISIBLE
-            binding.indicator.parent.isIndeterminate = true
-            refreshData()
-        } else if (viewModel.userData != null) {
-            binding.userData = viewModel.userData
-            binding.infoLayout.visibility = View.VISIBLE
-        } else if (viewModel.errorMessage != null) {
-            showErrorMessage()
-        } else {
-            binding.errorLayout.parent.visibility = View.VISIBLE
+            viewModel.loadingState.value = LoadingState.Loading
         }
     }
 
@@ -221,8 +215,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         viewModel.page = 1
         viewModel.isRefreshing = true
         viewModel.isEnd = false
-        if (viewModel.uid.isNullOrEmpty())
-            viewModel.uid = intent.getStringExtra("id")
         viewModel.fetchUser()
     }
 
@@ -250,18 +242,16 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.user_menu, menu)
 
-        viewModel.uid?.let {
-            viewModel.checkUid(it)
-        }
-        itemBlock = menu?.findItem(R.id.block)
-        itemBlock?.title = getMenuTitle(itemBlock?.title)
+        menuBlock = menu?.findItem(R.id.block)
+        menuBlock?.title = getMenuTitle(menuBlock?.title)
+        viewModel.checkUid(viewModel.uid)
 
-        val itemShare = menu?.findItem(R.id.share)
-        itemShare?.title = getMenuTitle(itemShare?.title)
+        val menuShare = menu?.findItem(R.id.share)
+        menuShare?.title = getMenuTitle(menuShare?.title)
 
-        val itemReport = menu?.findItem(R.id.report)
-        itemReport?.title = getMenuTitle(itemReport?.title)
-        itemReport?.isVisible = PrefManager.isLogin
+        val menuReport = menu?.findItem(R.id.report)
+        menuReport?.title = getMenuTitle(menuReport?.title)
+        menuReport?.isVisible = PrefManager.isLogin
 
         return true
     }
@@ -297,13 +287,13 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             }
 
             R.id.block -> {
-                val isBlocked = itemBlock?.title.toString() == "移除黑名单"
+                val isBlocked = menuBlock?.title.toString() == "移除黑名单"
                 MaterialAlertDialogBuilder(this).apply {
-                    setTitle("确定将 ${viewModel.uname} ${itemBlock?.title}？")
+                    setTitle("确定将 ${viewModel.userData?.username} ${menuBlock?.title}？")
                     setNegativeButton(android.R.string.cancel, null)
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        viewModel.uid?.let {
-                            itemBlock?.title = if (isBlocked) {
+                        viewModel.uid.let {
+                            menuBlock?.title = if (isBlocked) {
                                 viewModel.deleteUid(it)
                                 getMenuTitle("加入黑名单")
                             } else {
