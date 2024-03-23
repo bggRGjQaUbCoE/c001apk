@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class HistoryViewModel @AssistedInject constructor(
     @Assisted val type: String,
     private val blackListRepo: BlackListRepo,
-    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val historyRepo: HistoryFavoriteRepo,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -27,9 +27,9 @@ class HistoryViewModel @AssistedInject constructor(
 
     val browseLiveData: LiveData<List<FeedEntity>> =
         if (type == "browse") {
-            historyFavoriteRepo.loadAllHistoryListLive()
+            historyRepo.loadAllHistoryListLive()
         } else {
-            historyFavoriteRepo.loadAllFavoriteListLive()
+            historyRepo.loadAllFavoriteListLive()
         }
 
 
@@ -42,8 +42,8 @@ class HistoryViewModel @AssistedInject constructor(
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "browse" -> historyFavoriteRepo.deleteAllHistory()
-                "favorite" -> historyFavoriteRepo.deleteAllFavorite()
+                "browse" -> historyRepo.deleteAllHistory()
+                "favorite" -> historyRepo.deleteAllFavorite()
                 else -> {}
             }
         }
@@ -52,8 +52,8 @@ class HistoryViewModel @AssistedInject constructor(
     fun delete(fid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             when (type) {
-                "browse" -> historyFavoriteRepo.deleteHistory(fid)
-                "favorite" -> historyFavoriteRepo.deleteFavorite(fid)
+                "browse" -> historyRepo.deleteHistory(fid)
+                "favorite" -> historyRepo.deleteFavorite(fid)
                 else -> {}
             }
         }
@@ -69,7 +69,7 @@ class HistoryViewModel @AssistedInject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepo.saveHistory(
+            historyRepo.saveHistory(
                 id,
                 uid,
                 username,

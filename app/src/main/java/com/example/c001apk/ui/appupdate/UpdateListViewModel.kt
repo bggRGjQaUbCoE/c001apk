@@ -1,9 +1,9 @@
 package com.example.c001apk.ui.appupdate
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.ui.base.BaseViewModel
 import com.example.c001apk.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13,10 +13,9 @@ import javax.inject.Inject
 @HiltViewModel
 class UpdateListViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
-) : ViewModel() {
+) : BaseViewModel() {
 
     var appName: String? = null
-    var isInit: Boolean = true
     var versionName: String? = null
     var versionCode: String? = null
     var packageName: String? = null
@@ -45,5 +44,7 @@ class UpdateListViewModel @Inject constructor(
         } else
             download.postValue(Event(true))
     }
+
+    override fun fetchData() {}
 
 }

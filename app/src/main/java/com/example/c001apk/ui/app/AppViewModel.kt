@@ -1,14 +1,14 @@
 package com.example.c001apk.ui.app
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.ui.base.BaseAppViewModel
 import com.example.c001apk.util.Event
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -17,19 +17,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = AppActivityViewModel.Factory::class)
-class AppActivityViewModel @AssistedInject constructor(
+@HiltViewModel(assistedFactory = AppViewModel.Factory::class)
+class AppViewModel @AssistedInject constructor(
     @Assisted private val id: String,
-    private val repository: BlackListRepo,
-    private val networkRepo: NetworkRepo
-) : ViewModel() {
+    blackListRepo: BlackListRepo,
+    historyRepo: HistoryFavoriteRepo,
+    networkRepo: NetworkRepo
+) : BaseAppViewModel(blackListRepo, historyRepo, networkRepo) {
 
     @AssistedFactory
     interface Factory {
-        fun create(id: String): AppActivityViewModel
+        fun create(id: String): AppViewModel
     }
 
-    var isInit: Boolean = true
     var tabList: List<String>? = null
     var errMsg: String? = null
     var downloadUrl: String? = null
@@ -41,11 +41,12 @@ class AppActivityViewModel @AssistedInject constructor(
     val download = MutableLiveData<Event<Boolean>>()
 
     var appData: HomeFeedResponse.Data? = null
-    val loadingState = MutableLiveData<LoadingState>()
+    val activityState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
-    val followState = MutableLiveData<Event<Int?>>()
+
+    //val followState = MutableLiveData<Event<Int?>>()
     val searchState = MutableLiveData<Event<Unit>>()
-    val toastText = MutableLiveData<Event<Int>>()
+    //val toastText = MutableLiveData<Event<Int?>>()
 
     fun fetchAppInfo() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -54,7 +55,7 @@ class AppActivityViewModel @AssistedInject constructor(
                     val appInfo = result.getOrNull()
                     if (appInfo != null) {
                         if (appInfo.message != null) {
-                            loadingState.postValue(LoadingState.LoadingError(appInfo.message))
+                            activityState.postValue(LoadingState.LoadingError(appInfo.message))
                         } else if (appInfo.data != null) {
                             // get download link params
                             appId = appInfo.data.id
@@ -70,10 +71,10 @@ class AppActivityViewModel @AssistedInject constructor(
                             }
                             checkApp(appInfo.data.title) //menuBlock
                             checkFollow() //menuFollow
-                            loadingState.postValue(LoadingState.LoadingDone)
+                            activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
-                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        activityState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -100,49 +101,32 @@ class AppActivityViewModel @AssistedInject constructor(
 
     }
 
-    fun onGetFollow(followUrl: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getFollow(followUrl, null, appId)
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        response.data?.follow?.let {
-                            appData?.userAction?.follow = it
-                            checkFollow()
-                            toastText.postValue(Event(it))
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
-        }
-    }
-
     fun saveTopic(title: String) {
         viewModelScope.launch {
-            repository.saveTopic(title)
+            blackListRepo.saveTopic(title)
         }
     }
 
     fun checkApp(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            blockState.postValue(Event((repository.checkTopic(title))))
+            blockState.postValue(Event((blackListRepo.checkTopic(title))))
         }
     }
 
     private fun checkFollow() {
         viewModelScope.launch(Dispatchers.IO) {
-            followState.postValue(Event(appData?.userAction?.follow))
-
+            //  followState.postValue(Event(appData?.userAction?.follow))
         }
     }
 
     fun deleteTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteTopic(title)
+            blackListRepo.deleteTopic(title)
         }
     }
 
-    inner class ItemClickListener : ItemListener
+    override fun fetchData() {
+
+    }
 
 }

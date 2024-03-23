@@ -10,27 +10,25 @@ import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
-import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.ui.base.BaseAppViewModel
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class HomeFeedViewModel @AssistedInject constructor(
     @Assisted private val installTime: String,
-    val repository: BlackListRepo,
-    private val historyFavoriteRepo: HistoryFavoriteRepo,
-    private val networkRepo: NetworkRepo
-) : ViewModel() {
+    blackListRepo: BlackListRepo,
+    historyRepo: HistoryFavoriteRepo,
+    networkRepo: NetworkRepo
+) : BaseAppViewModel(blackListRepo, historyRepo, networkRepo) {
 
     @AssistedFactory
     interface Factory {
@@ -49,29 +47,23 @@ class HomeFeedViewModel @AssistedInject constructor(
         }
     }
 
-    val dataList = ArrayList<HomeFeedResponse.Data>()
     var position: Int? = null
-    var lastVisibleItemPosition: Int = 0
     var changeFirstItem: Boolean = false
-    var listSize: Int = -1
     var type: String? = null
-    var isInit: Boolean = true
-    var isRefreshing: Boolean = false
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var page = 1
     private var firstLaunch = 1
     private var firstItem: String? = null
-    private var lastItem: String? = null
 
     val closeSheet = MutableLiveData<Event<Boolean>>()
     val createDialog = MutableLiveData<Event<Bitmap>>()
-    val toastText = MutableLiveData<Event<String>>()
-    val loadingState = MutableLiveData<LoadingState>()
-    val footerState = MutableLiveData<FooterState>()
-    val homeFeedData = MutableLiveData<List<HomeFeedResponse.Data>>()
 
-    fun fetchHomeFeed() {
+    override fun fetchData() {
+        when (type) {
+            "feed" -> fetchHomeFeed()
+            "rank", "follow", "coolPic" -> fetchDataList()
+        }
+    }
+
+    private fun fetchHomeFeed() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getHomeFeed(page, firstLaunch, installTime, firstItem, lastItem)
                 .onStart {
@@ -82,7 +74,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                 }
                 .collect { result ->
                     val feed = result.getOrNull()
-                    val currentList = homeFeedData.value?.toMutableList() ?: ArrayList()
+                    val currentList = dataList.value?.toMutableList() ?: ArrayList()
                     if (!feed?.message.isNullOrEmpty()) {
                         feed?.message?.let {
                             if (listSize <= 0)
@@ -106,7 +98,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                                 if (listSize >= index) {
                                     if (currentList[index - 1].entityTemplate != "refreshCard") {
                                         currentList.add(index - 1, feed.data.last())
-                                        homeFeedData.postValue(currentList)
+                                        dataList.postValue(currentList)
                                     }
                                 }*/
                                 page++
@@ -134,8 +126,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                             changeFirstItem = false
                                             firstItem = it.id
                                         }
-                                        if (!repository.checkUid(it.userInfo?.uid.toString())
-                                            && !repository.checkTopic(
+                                        if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
+                                            && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
@@ -149,14 +141,14 @@ class HomeFeedViewModel @AssistedInject constructor(
                             loadingState.postValue(LoadingState.LoadingDone)
                         else
                             footerState.postValue(FooterState.LoadingDone)
-                        homeFeedData.postValue(currentList)
+                        dataList.postValue(currentList)
                     } else if (feed?.data?.isEmpty() == true) {
                         isEnd = true
                         if (listSize <= 0)
                             loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
                         else {
                             if (isRefreshing)
-                                homeFeedData.postValue(emptyList())
+                                dataList.postValue(emptyList())
                             footerState.postValue(FooterState.LoadingEnd)
                         }
                     } else {
@@ -173,43 +165,10 @@ class HomeFeedViewModel @AssistedInject constructor(
         }
     }
 
-    fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
-        val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
-        val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postLikeFeed(likeUrl, id)
-                .catch { err ->
-                    err.message?.let {
-                        toastText.postValue(Event(it))
-                    }
-                }
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        if (response.data != null) {
-                            val count = response.data.count
-                            val isLike = if (likeData.isLike.get() == 1) 0 else 1
-                            likeData.likeNum.set(count)
-                            likeData.isLike.set(isLike)
-                            val currentList = homeFeedData.value?.toMutableList() ?: ArrayList()
-                            currentList[position].likenum = count
-                            currentList[position].userAction?.like = isLike
-                            homeFeedData.postValue(currentList)
-                        } else {
-                            response.message?.let {
-                                toastText.postValue(Event(it))
-                            }
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
-        }
-    }
 
     var dataListUrl: String? = null
     var dataListTitle: String? = null
-    fun fetchDataList() {
+    private fun fetchDataList() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getDataList(
                 dataListUrl.toString(),
@@ -224,7 +183,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                 }
                 .collect { result ->
                     val feed = result.getOrNull()
-                    val currentList = homeFeedData.value?.toMutableList() ?: ArrayList()
+                    val currentList = dataList.value?.toMutableList() ?: ArrayList()
                     if (!feed?.message.isNullOrEmpty()) {
                         feed?.message?.let {
                             if (listSize <= 0)
@@ -249,8 +208,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                         || it.entityTemplate == "iconLinkGridCard"
                                         || it.entityTemplate == "imageSquareScrollCard"
                                     ) {
-                                        if (!repository.checkUid(it.userInfo?.uid.toString())
-                                            && !repository.checkTopic(
+                                        if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
+                                            && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
                                         )
@@ -264,14 +223,14 @@ class HomeFeedViewModel @AssistedInject constructor(
                             loadingState.postValue(LoadingState.LoadingDone)
                         else
                             footerState.postValue(FooterState.LoadingDone)
-                        homeFeedData.postValue(currentList)
+                        dataList.postValue(currentList)
                     } else if (feed?.data?.isEmpty() == true) {
                         isEnd = true
                         if (listSize <= 0)
                             loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
                         else {
                             if (isRefreshing)
-                                homeFeedData.postValue(emptyList())
+                                dataList.postValue(emptyList())
                             footerState.postValue(FooterState.LoadingEnd)
                         }
                     } else {
@@ -287,30 +246,6 @@ class HomeFeedViewModel @AssistedInject constructor(
                 }
         }
     }
-
-    fun onDeleteFeed(url: String, id: String, position: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postDelete(url, id)
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        if (response.data == "删除成功") {
-                            toastText.postValue(Event("删除成功"))
-                            val updateList = homeFeedData.value?.toMutableList() ?: ArrayList()
-                            updateList.removeAt(position)
-                            homeFeedData.postValue(updateList)
-                        } else if (!response.message.isNullOrEmpty()) {
-                            response.message.let {
-                                toastText.postValue(Event(it))
-                            }
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
-        }
-    }
-
 
     lateinit var createFeedData: HashMap<String, String?>
     fun onPostCreateFeed() {
@@ -380,29 +315,8 @@ class HomeFeedViewModel @AssistedInject constructor(
 
     fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveUid(uid)
+            blackListRepo.saveUid(uid)
         }
     }
 
-    fun saveHistory(
-        id: String,
-        uid: String,
-        username: String,
-        userAvatar: String,
-        deviceTitle: String,
-        message: String,
-        dateline: String,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepo.saveHistory(
-                id,
-                uid,
-                username,
-                userAvatar,
-                deviceTitle,
-                message,
-                dateline,
-            )
-        }
-    }
 }

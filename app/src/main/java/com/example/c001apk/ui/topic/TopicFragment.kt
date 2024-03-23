@@ -4,14 +4,10 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.c001apk.R
-import com.example.c001apk.adapter.LoadingState
-import com.example.c001apk.databinding.FragmentTopicBinding
-import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.base.BasePagerFragment
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.search.IOnSearchMenuClickListener
@@ -20,107 +16,32 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.google.android.material.tabs.TabLayout.GRAVITY_CENTER
+import com.google.android.material.tabs.TabLayout.MODE_SCROLLABLE
 
-@AndroidEntryPoint
-class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
-    IOnTabClickContainer {
+class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
 
-    @Inject
-    lateinit var viewModelAssistedFactory: TopicViewModel.Factory
-    private val viewModel by viewModels<TopicViewModel> {
-        TopicViewModel.provideFactory(
-            viewModelAssistedFactory,
-            arguments?.getString("url").orEmpty(),
-            arguments?.getString("title").orEmpty(),
-            arguments?.getString("id").orEmpty(),
-            arguments?.getString("type").orEmpty()
-        )
-    }
-    override var controller: IOnSearchMenuClickListener? = null
+    private val viewModel by viewModels<TopicViewModel>(ownerProducer = { requireActivity() })
     override var tabController: IOnTabClickListener? = null
     private lateinit var subscribe: MenuItem
     private lateinit var order: MenuItem
     private var menuBlock: MenuItem? = null
-
-    companion object {
-        @JvmStatic
-        fun newInstance(type: String?, title: String?, url: String?, id: String?) =
-            TopicFragment().apply {
-                arguments = Bundle().apply {
-                    putString("url", url)
-                    putString("title", title)
-                    putString("id", id)
-                    putString("type", type)
-                }
-            }
-    }
+    override var controller: IOnSearchMenuClickListener? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.appBar.setLiftable(true)
-
-        initData()
+        initSelected()
         initObserve()
-        initError()
-
     }
 
-    private fun initError() {
-        binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.isVisible = false
-            viewModel.loadingState.value = LoadingState.Loading
-        }
-    }
-
-    private fun initData() {
-        if (viewModel.initData) {
-            viewModel.initData = false
-            viewModel.loadingState.value = LoadingState.Loading
+    private fun initSelected() {
+        viewModel.tabSelected?.let {
+            binding.viewPager.setCurrentItem(it, false)
+            viewModel.tabSelected = null
         }
     }
 
     private fun initObserve() {
-        viewModel.loadingState.observe(viewLifecycleOwner) {
-            when (it) {
-                LoadingState.Loading -> {
-                    binding.indicator.parent.isIndeterminate = true
-                    binding.indicator.parent.isVisible = true
-                    if (viewModel.type == "topic") {
-                        viewModel.url = viewModel.url.replace("/t/", "")
-                        viewModel.fetchTopicLayout()
-                    } else if (viewModel.type == "product") {
-                        viewModel.fetchProductLayout()
-                    }
-                }
-
-                LoadingState.LoadingDone -> {
-                    initView(
-                        if (viewModel.isInit) viewModel.tabSelected
-                        else null
-                    )
-                    initBar()
-                }
-
-                is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.text = it.errMsg
-                    binding.errorMessage.errMsg.isVisible = true
-                }
-
-                is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.msg.text = it.msg
-                    binding.errorLayout.parent.isVisible = true
-                }
-            }
-            if (it !is LoadingState.Loading) {
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.isVisible = false
-            }
-        }
-
         viewModel.blockState.observe(viewLifecycleOwner) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
                 menuBlock?.title = if (it) "移除黑名单"
@@ -128,32 +49,55 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             }
         }
 
-        viewModel.followState.observe(viewLifecycleOwner) { event ->
+        /*viewModel.followState.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it.second, Toast.LENGTH_SHORT).show()
                 if (it.first) {
                     updateFollowMenu()
                 }
             }
-        }
-
+        }*/
     }
 
-    private fun initBar() {
+    private fun updateFollowMenu() {
+        subscribe.title = if (viewModel.isFollow) "取消关注"
+        else "关注"
+    }
+
+    override fun iOnTabSelected(tab: TabLayout.Tab?) {
+        order.isVisible = tab?.position == tabList.indexOf("讨论")
+    }
+
+    override fun getFragment(position: Int): Fragment =
+        TopicContentFragment.newInstance(
+            viewModel.topicList[position].url,
+            viewModel.topicList[position].title,
+        )
+
+    override fun initTabList() {
+        binding.tabLayout.apply {
+            tabGravity = GRAVITY_CENTER
+            tabMode = MODE_SCROLLABLE
+        }
+        tabList = viewModel.topicList.map { it.title }
+    }
+
+    override fun onBackClick() {
+        activity?.finish()
+    }
+
+    override fun initBar() {
+        super.initBar()
+        binding.collapsingToolbar.isTitleEnabled = false
         binding.toolBar.apply {
             title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
             else viewModel.title
             viewModel.subtitle?.let { subtitle = viewModel.subtitle }
-            setNavigationIcon(R.drawable.ic_back)
-            setNavigationOnClickListener {
-                requireActivity().finish()
-            }
 
             inflateMenu(R.menu.topic_product_menu)
-
             order = menu.findItem(R.id.order)
             order.isVisible = viewModel.type == "product"
-                    && binding.viewPager.currentItem == viewModel.tabList.indexOf("讨论")
+                    && binding.viewPager.currentItem == tabList.indexOf("讨论")
             menu.findItem(
                 when (viewModel.productTitle) {
                     "最近回复" -> R.id.topicLatestReply
@@ -272,42 +216,4 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             }
         }
     }
-
-    private fun updateFollowMenu() {
-        subscribe.title = if (viewModel.isFollow) "取消关注"
-        else "关注"
-    }
-
-    private fun initView(tabSelected: Int?) {
-        binding.viewPager.offscreenPageLimit = viewModel.tabList.size
-        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int) =
-                TopicContentFragment.newInstance(
-                    viewModel.topicList[position].url,
-                    viewModel.topicList[position].title,
-                )
-
-            override fun getItemCount() = viewModel.tabList.size
-        }
-        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = viewModel.tabList[position]
-        }.attach()
-        if (viewModel.isInit && tabSelected != null) {
-            binding.viewPager.setCurrentItem(tabSelected, false)
-            viewModel.isInit = false
-        }
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                order.isVisible = tab?.position == viewModel.tabList.indexOf("讨论")
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                tabController?.onReturnTop(null)
-            }
-
-        })
-    }
-
 }

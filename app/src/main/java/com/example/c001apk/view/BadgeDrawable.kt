@@ -37,7 +37,7 @@ class BadgeDrawable(context: Context, private val text: String) : Drawable() {
         val cornerRadius = CORNER_RADIUS
         val textBounds = Rect()
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
-            setTypeface(Typeface.create(TYPEFACE, TYPEFACE_STYLE))
+            setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL))
             textSize = TEXT_SIZE
             getTextBounds(text, 0, text.length, textBounds)
             setColor(
@@ -108,7 +108,5 @@ class BadgeDrawable(context: Context, private val text: String) : Drawable() {
         private val TEXT_SIZE = 12.dp.toFloat()
         private val PADDING = 4.dp.toFloat()
         private val CORNER_RADIUS = 4.dp.toFloat()
-        private const val TYPEFACE = "sans-serif-black"
-        private const val TYPEFACE_STYLE = Typeface.NORMAL
     }
 }

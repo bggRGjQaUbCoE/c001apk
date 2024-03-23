@@ -2,30 +2,105 @@ package com.example.c001apk.ui.topic
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import com.example.c001apk.R
+import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityTopicBinding
 import com.example.c001apk.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 
 @AndroidEntryPoint
 class TopicActivity : BaseActivity<ActivityTopicBinding>() {
 
-    private val type by lazy { intent.getStringExtra("type") }
-    private val title by lazy { intent.getStringExtra("title") }
-    private val url by lazy { intent.getStringExtra("url") }
-    private val id by lazy { intent.getStringExtra("id") }
+    private val viewModel by viewModels<TopicViewModel>(
+        extrasProducer = {
+            defaultViewModelCreationExtras.withCreationCallback<TopicViewModel.Factory> { factory ->
+                factory.create(
+                    intent.getStringExtra("url").orEmpty(),
+                    intent.getStringExtra("title").orEmpty(),
+                    intent.getStringExtra("id").orEmpty(),
+                    intent.getStringExtra("type").orEmpty(),
+                )
+            }
+        }
+    )
 
-    @SuppressLint("CommitTransaction")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (supportFragmentManager.findFragmentById(R.id.topicFragment) == null) {
+        initData()
+        initObserve()
+        initError()
+
+    }
+
+    private fun initError() {
+        binding.errorLayout.retry.setOnClickListener {
+            binding.errorLayout.parent.isVisible = false
+            viewModel.loadingState.value = LoadingState.Loading
+        }
+    }
+
+    private fun initObserve() {
+        viewModel.loadingState.observe(this) {
+            when (it) {
+                LoadingState.Loading -> {
+                    binding.indicator.parent.isIndeterminate = true
+                    binding.indicator.parent.isVisible = true
+                    if (viewModel.type == "topic") {
+                        viewModel.url = viewModel.url.replace("/t/", "")
+                        viewModel.fetchTopicLayout()
+                    } else if (viewModel.type == "product") {
+                        viewModel.fetchProductLayout()
+                    }
+                }
+
+                LoadingState.LoadingDone -> {
+                    beginTransaction()
+                }
+
+                is LoadingState.LoadingError -> {
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
+                }
+
+                is LoadingState.LoadingFailed -> {
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        retry.text = if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
+                        else getString(R.string.retry)
+                        parent.isVisible = true
+                    }
+                }
+            }
+            if (it !is LoadingState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
+    }
+
+    @SuppressLint("CommitTransaction")
+    private fun beginTransaction() {
+        if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
             supportFragmentManager
                 .beginTransaction()
                 .replace(
-                    R.id.topicFragment, TopicFragment.newInstance(type, title, url, id)
+                    R.id.fragmentContainer, TopicFragment()
                 )
                 .commit()
+        }
+    }
+
+    private fun initData() {
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            viewModel.loadingState.value = LoadingState.Loading
         }
     }
 

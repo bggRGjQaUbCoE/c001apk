@@ -1,6 +1,6 @@
 package com.example.c001apk.ui.user
 
-import android.content.res.Configuration
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -9,25 +9,15 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
-import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.adapter.FooterAdapter
-import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityUserBinding
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,10 +34,6 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             }
         }
     )
-    private lateinit var mAdapter: AppAdapter
-    private lateinit var footerAdapter: FooterAdapter
-    private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private var menuBlock: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,18 +43,22 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        initView()
-        initFollowBtn()
         initData()
-        initRefresh()
-        initScroll()
+        initFollowBtn()
         initObserve()
 
         binding.errorLayout.retry.setOnClickListener {
             binding.errorLayout.parent.isVisible = false
-            viewModel.loadingState.value = LoadingState.Loading
+            viewModel.activityState.value = LoadingState.Loading
         }
 
+    }
+
+    private fun initData() {
+        if (viewModel.isAInit) {
+            viewModel.isAInit = false
+            viewModel.activityState.value = LoadingState.Loading
+        }
     }
 
     private fun initFollowBtn() {
@@ -100,34 +90,41 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             }
         }
 
-        viewModel.followState.observe(this) {
+        /*viewModel.followState.observe(this) {
             binding.followBtn.text = if (it == 1) "取消关注"
             else "关注"
-        }
+        }*/
 
-        viewModel.loadingState.observe(this) {
+        viewModel.activityState.observe(this) {
             when (it) {
                 LoadingState.Loading -> {
                     binding.indicator.parent.isIndeterminate = true
                     binding.indicator.parent.isVisible = true
-                    refreshData()
+                    viewModel.fetchUser()
                 }
 
                 LoadingState.LoadingDone -> {
                     binding.userData = viewModel.userData
                     binding.listener = viewModel.ItemClickListener()
                     binding.infoLayout.isVisible = true
-                    binding.swipeRefresh.isEnabled = true
+                    beginTransaction()
                 }
 
                 is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.text = it.errMsg
-                    binding.errorMessage.errMsg.isVisible = true
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
                 }
 
                 is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.msg.text = it.msg
-                    binding.errorLayout.parent.isVisible = true
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        retry.text =
+                            if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
+                            else getString(R.string.retry)
+                        parent.isVisible = true
+                    }
                 }
             }
             if (it !is LoadingState.Loading) {
@@ -136,108 +133,20 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
             }
         }
 
-        viewModel.footerState.observe(this) {
-            footerAdapter.setLoadState(it)
-            if (it !is FooterState.Loading) {
-                binding.swipeRefresh.isRefreshing = false
-            }
-        }
-
-        viewModel.feedData.observe(this) {
-            viewModel.listSize = it.size
-            mAdapter.submitList(it)
-        }
-
     }
 
-    private fun initScroll() {
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    if (viewModel.listSize != -1 && !viewModel.isEnd) {
-                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                            viewModel.lastVisibleItemPosition =
-                                mLayoutManager.findLastVisibleItemPosition()
-                        } else {
-                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                            viewModel.lastVisibleItemPosition = positions[0]
-                            positions.forEach { pos ->
-                                if (pos > viewModel.lastVisibleItemPosition) {
-                                    viewModel.lastVisibleItemPosition = pos
-                                }
-                            }
-                        }
-                    }
-
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
-                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
-                    ) {
-                        loadMore()
-                    }
-                }
-            }
-        })
-    }
-
-    private fun loadMore() {
-        viewModel.isLoadMore = true
-        viewModel.fetchUserFeed()
-    }
-
-    private fun initRefresh() {
-        binding.swipeRefresh.apply {
-            isEnabled = false
-            setColorSchemeColors(
-                MaterialColors.getColor(
-                    this,
-                    com.google.android.material.R.attr.colorPrimary,
-                    0
+    @SuppressLint("CommitTransaction")
+    private fun beginTransaction() {
+        if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.fragmentContainer, UserFragment()
                 )
-            )
-            setOnRefreshListener {
-                refreshData()
-            }
+                .commit()
         }
     }
 
-    private fun initData() {
-        if (viewModel.isInit) {
-            viewModel.isInit = false
-            viewModel.loadingState.value = LoadingState.Loading
-        }
-    }
-
-    private fun refreshData() {
-        viewModel.lastVisibleItemPosition = 0
-        viewModel.lastItem = null
-        viewModel.page = 1
-        viewModel.isRefreshing = true
-        viewModel.isEnd = false
-        viewModel.fetchUser()
-    }
-
-    private fun initView() {
-        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
-        footerAdapter = FooterAdapter(ReloadListener())
-        binding.recyclerView.apply {
-            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
-            layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    mLayoutManager = LinearLayoutManager(this@UserActivity)
-                    mLayoutManager
-                } else {
-                    sLayoutManager =
-                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-                    sLayoutManager
-                }
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(LinearItemDecoration(10.dp))
-            else
-                addItemDecoration(StaggerItemDecoration(10.dp))
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.user_menu, menu)
@@ -323,11 +232,5 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
         return true
     }
 
-
-    inner class ReloadListener : FooterAdapter.FooterListener {
-        override fun onReLoad() {
-            loadMore()
-        }
-    }
 
 }

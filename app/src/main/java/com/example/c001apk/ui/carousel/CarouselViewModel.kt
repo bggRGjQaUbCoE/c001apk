@@ -31,7 +31,7 @@ class CarouselViewModel @AssistedInject constructor(
     @Assisted("url") val url: String,
     @Assisted("title") val title: String,
     val repository: BlackListRepo,
-    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val historyRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
@@ -201,7 +201,7 @@ class CarouselViewModel @AssistedInject constructor(
             )
             viewModelScope.launch(Dispatchers.IO) {
                 if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
-                    historyFavoriteRepo.saveHistory(
+                    historyRepo.saveHistory(
                         id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
                         deviceTitle.toString(), message.toString(), dateline.toString()
                     )

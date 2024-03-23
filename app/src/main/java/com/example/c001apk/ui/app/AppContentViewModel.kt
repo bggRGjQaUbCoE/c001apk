@@ -1,10 +1,9 @@
-package com.example.c001apk.ui.hometopic
+package com.example.c001apk.ui.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
@@ -19,9 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-class HomeTopicContentViewModel @AssistedInject constructor(
-    @Assisted("url") var url: String,
-    @Assisted("title") var title: String,
+class AppContentViewModel @AssistedInject constructor(
+    @Assisted("id") val id: String,
+    @Assisted("appCommentSort") val appCommentSort: String,
+    @Assisted("appCommentTitle") val appCommentTitle: String,
     blackListRepo: BlackListRepo,
     historyRepo: HistoryFavoriteRepo,
     networkRepo: NetworkRepo
@@ -30,63 +30,69 @@ class HomeTopicContentViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            @Assisted("url") url: String, @Assisted("title") title: String
-        ): HomeTopicContentViewModel
+            @Assisted("id") id: String,
+            @Assisted("appCommentSort") appCommentSort: String,
+            @Assisted("appCommentTitle") appCommentTitle: String,
+        ): AppContentViewModel
     }
 
     @Suppress("UNCHECKED_CAST")
     companion object {
         fun provideFactory(
-            assistedFactory: Factory, url: String, title: String,
+            assistedFactory: Factory, id: String, appCommentSort: String, appCommentTitle: String,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create(url, title) as T
+                return assistedFactory.create(id, appCommentSort, appCommentTitle) as T
             }
         }
     }
 
+    private val commentBaseUrl: String = "/page?url=/feed/apkCommentList?id="
     override fun fetchData() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getDataList(url, title, null, lastItem, page)
+            networkRepo.getDataList(
+                commentBaseUrl + id + appCommentSort, appCommentTitle, null, lastItem, page
+            )
                 .onStart {
                     if (isLoadMore)
                         footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
-                    val topicDataList = dataList.value?.toMutableList() ?: ArrayList()
-                    val data = result.getOrNull()
-                    if (!data?.message.isNullOrEmpty()) {
-                        data?.message?.let {
+                    val appCommentList = dataList.value?.toMutableList() ?: ArrayList()
+                    val comment = result.getOrNull()
+                    if (!comment?.message.isNullOrEmpty()) {
+                        comment?.message?.let {
                             if (listSize <= 0)
                                 loadingState.postValue(LoadingState.LoadingError(it))
                             else
                                 footerState.postValue(FooterState.LoadingError(it))
                         }
                         return@collect
-                    } else if (!data?.data.isNullOrEmpty()) {
-                        if (isRefreshing) topicDataList.clear()
+                    } else if (!comment?.data.isNullOrEmpty()) {
+                        lastItem = comment?.data?.last()?.id
+                        if (isRefreshing)
+                            appCommentList.clear()
                         if (isRefreshing || isLoadMore) {
-                            data?.data?.let {
-                                it.forEach { item ->
-                                    if (item.entityType == "topic"
-                                        || item.entityType == "product"
-                                    )
-                                        topicDataList.add(
-                                            item.also { des ->
-                                                des.description = "home"
-                                            }
+                            comment?.data?.let { data ->
+                                data.forEach {
+                                    if (it.entityType == "feed")
+                                        if (!blackListRepo.checkUid(
+                                                it.userInfo?.uid.toString()
+                                            ) && !blackListRepo.checkTopic(
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                            )
                                         )
+                                            appCommentList.add(it)
                                 }
                             }
-                            lastItem = topicDataList.last().id
                         }
                         page++
                         if (listSize <= 0)
                             loadingState.postValue(LoadingState.LoadingDone)
                         else
                             footerState.postValue(FooterState.LoadingDone)
-                        dataList.postValue(topicDataList)
-                    } else if (data?.data?.isEmpty() == true) {
+                        dataList.postValue(appCommentList)
+                    } else if (comment?.data?.isEmpty() == true) {
                         isEnd = true
                         if (listSize <= 0)
                             loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
@@ -108,7 +114,5 @@ class HomeTopicContentViewModel @AssistedInject constructor(
                 }
         }
     }
-
-    inner class ItemClickListener : ItemListener
 
 }

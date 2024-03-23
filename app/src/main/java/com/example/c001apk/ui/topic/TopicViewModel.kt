@@ -1,29 +1,33 @@
 package com.example.c001apk.ui.topic
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.LoadingState
-import com.example.c001apk.constant.Constants.LOADING_FAILED
+import com.example.c001apk.constant.Constants
+import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.repository.BlackListRepo
+import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.ui.base.BaseAppViewModel
 import com.example.c001apk.util.Event
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@HiltViewModel(assistedFactory = TopicViewModel.Factory::class)
 class TopicViewModel @AssistedInject constructor(
     @Assisted("url") var url: String,
     @Assisted("title") val title: String,
     @Assisted("id") var id: String,
     @Assisted("type") var type: String,
-    private val repository: BlackListRepo,
-    private val networkRepo: NetworkRepo
-) : ViewModel() {
+    blackListRepo: BlackListRepo,
+    historyRepo: HistoryFavoriteRepo,
+    networkRepo: NetworkRepo
+) : BaseAppViewModel(blackListRepo, historyRepo, networkRepo) {
 
     @AssistedFactory
     interface Factory {
@@ -35,31 +39,16 @@ class TopicViewModel @AssistedInject constructor(
         ): TopicViewModel
     }
 
-    @Suppress("UNCHECKED_CAST")
-    companion object {
-        fun provideFactory(
-            assistedFactory: Factory, url: String, title: String, id: String, type: String
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create(url, title, id, type) as T
-            }
-        }
-    }
-
-    var postFollowData: HashMap<String, String>? = null
-    var productTitle = "最近回复"
+    // var isInit: Boolean = true
     var subtitle: String? = null
-    var isFollow: Boolean = false
-    var initData: Boolean = true
-    var isInit = true
-    var tabList = ArrayList<String>()
-    val topicList: MutableList<TopicBean> = ArrayList()
-    var page = 1
+    var productTitle = "最近回复"
 
-    var tabSelected: Int = 0
-    val followState = MutableLiveData<Event<Pair<Boolean, String>>>()
+    var tabSelected: Int? = null
+    var topicList: List<TopicBean> = ArrayList()
+
+    //  val loadingState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
-    val loadingState = MutableLiveData<LoadingState>()
+    // val followState = MutableLiveData<Event<Pair<Boolean, String>>>()
 
     fun fetchTopicLayout() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -72,28 +61,14 @@ class TopicViewModel @AssistedInject constructor(
                             return@collect
                         } else if (data.data != null) {
                             isFollow = data.data.userAction?.follow == 1
-                            if (tabList.isEmpty()) {
-                                id = data.data.id
-                                type = data.data.entityType
-                                subtitle = data.data.intro
-
-                                data.data.tabList.forEach {
-                                    tabList.add(it.title)
-                                    topicList.add(TopicBean(it.url, it.title))
-                                }
-                                run breaking@{
-                                    data.data.tabList.forEachIndexed { index, tab ->
-                                        if (data.data.selectedTab == tab.pageName) {
-                                            tabSelected = index
-                                            return@breaking
-                                        }
-                                    }
-                                }
-                            }
+                            id = data.data.id
+                            type = data.data.entityType
+                            subtitle = data.data.intro
+                            getTopicList(data.data.tabList, data.data.selectedTab)
                             loadingState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
-                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        loadingState.postValue(LoadingState.LoadingFailed(Constants.LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -112,92 +87,53 @@ class TopicViewModel @AssistedInject constructor(
                             return@collect
                         } else if (data.data != null) {
                             isFollow = data.data.userAction?.follow == 1
-                            if (tabList.isEmpty()) {
-                                subtitle = data.data.intro
-
-                                data.data.tabList.forEach {
-                                    tabList.add(it.title)
-                                    topicList.add(TopicBean(it.url, it.title))
-                                }
-                                run breaking@{
-                                    data.data.tabList.forEachIndexed { index, tab ->
-                                        if (data.data.selectedTab == tab.pageName) {
-                                            tabSelected = index
-                                            return@breaking
-                                        }
-                                    }
-                                }
-                            }
+                            subtitle = data.data.intro
+                            getTopicList(data.data.tabList, data.data.selectedTab)
                             loadingState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
-                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        loadingState.postValue(LoadingState.LoadingFailed(Constants.LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
         }
     }
 
-    fun onGetFollow(followUrl: String, tag: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getFollow(followUrl, tag, null)
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        if (!response.message.isNullOrEmpty()) {
-                            if (response.message.contains("关注成功")) {
-                                isFollow = !isFollow
-                                followState.postValue(Event(Pair(true, response.message)))
-                            } else
-                                followState.postValue(Event(Pair(false, response.message)))
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
+    private fun getTopicList(tabList: List<HomeFeedResponse.TabList>, selectedTab: String) {
+        topicList = tabList.map {
+            TopicBean(it.url, it.title)
         }
-    }
-
-    fun onPostFollow() {
-        viewModelScope.launch(Dispatchers.IO) {
-            postFollowData?.let {
-                networkRepo.postFollow(it)
-                    .collect { result ->
-                        val response = result.getOrNull()
-                        if (response != null) {
-                            if (!response.message.isNullOrEmpty()) {
-                                if (response.message.contains("手机吧成功")) {
-                                    isFollow = !isFollow
-                                    followState.postValue(Event(Pair(true, response.message)))
-                                } else
-                                    followState.postValue(Event(Pair(false, response.message)))
-                            }
-                        } else {
-                            result.exceptionOrNull()?.printStackTrace()
-                        }
-                    }
+        run breaking@{
+            tabList.forEachIndexed { index, tab ->
+                if (selectedTab == tab.pageName) {
+                    tabSelected = index
+                    return@breaking
+                }
             }
-
         }
     }
 
     fun saveTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveTopic(title)
+            blackListRepo.saveTopic(title)
         }
     }
 
     fun checkTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (repository.checkTopic(title))
+            if (blackListRepo.checkTopic(title))
                 blockState.postValue(Event(true))
         }
     }
 
     fun deleteTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteTopic(title)
+            blackListRepo.deleteTopic(title)
         }
+    }
+
+    override fun fetchData() {
+
     }
 
 }

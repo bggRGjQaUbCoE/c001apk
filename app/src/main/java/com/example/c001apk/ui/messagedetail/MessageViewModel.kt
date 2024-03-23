@@ -2,50 +2,60 @@ package com.example.c001apk.ui.messagedetail
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.ui.base.BaseViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = MessageViewModel.Factory::class)
 class MessageViewModel @AssistedInject constructor(
     @Assisted val type: String,
     private val repository: BlackListRepo,
     private val networkRepo: NetworkRepo
-) : ViewModel() {
+) : BaseViewModel() {
 
     @AssistedFactory
     interface Factory {
         fun create(type: String): MessageViewModel
     }
 
-    var url: String? = null
-    var listSize: Int = -1
-    var isInit: Boolean = true
-    var page = 1
-    var lastItem: String? = null
-    var isRefreshing: Boolean = false
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
+    @Suppress("UNCHECKED_CAST")
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory,
+            type: String
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(type) as T
+            }
+        }
+    }
 
-    val loadingState = MutableLiveData<LoadingState>()
+    var url: String? = null
     val footerState = MutableLiveData<FooterState>()
     val messageListData = MutableLiveData<List<MessageResponse.Data>>()
 
-    fun fetchMessage() {
+    override fun fetchData() {
+        if (url.isNullOrEmpty())
+            when (type) {
+                "atMe" -> url = "/v6/notification/atMeList"
+                "atCommentMe" -> url = "/v6/notification/atCommentMeList"
+                "feedLike" -> url = "/v6/notification/feedLikeList"
+                "contactsFollow" -> url = "/v6/notification/contactsFollowList"
+                "list" -> url = "/v6/message/list"
+
+            }
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getMessage(url.toString(), page, lastItem)
                 .onStart {
@@ -106,6 +116,5 @@ class MessageViewModel @AssistedInject constructor(
 
     }
 
-    inner class ItemClickListener : ItemListener
 
 }

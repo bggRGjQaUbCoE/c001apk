@@ -30,7 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     val repository: BlackListRepo,
-    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val historyRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
@@ -466,18 +466,18 @@ class FeedViewModel @Inject constructor(
     }
 
     suspend fun isFavorite(fid: String): Boolean {
-        return historyFavoriteRepo.checkFavorite(fid)
+        return historyRepo.checkFavorite(fid)
     }
 
     fun delete(fid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepo.deleteFavorite(fid)
+            historyRepo.deleteFavorite(fid)
         }
     }
 
     fun insert(fav: FeedEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepo.insertFavorite(fav)
+            historyRepo.insertFavorite(fav)
         }
     }
 
@@ -491,7 +491,7 @@ class FeedViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepo.saveHistory(
+            historyRepo.saveHistory(
                 id,
                 uid,
                 username,

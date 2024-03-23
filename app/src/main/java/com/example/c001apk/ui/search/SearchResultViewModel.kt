@@ -41,5 +41,5 @@ class SearchResultViewModel @AssistedInject constructor(
 
     var sort: String = "default" //hot // reply
     var feedType: String = "all"
-    var tabList: List<String>? = null
+
 }

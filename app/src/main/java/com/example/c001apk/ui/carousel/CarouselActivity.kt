@@ -12,11 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityCarouselBinding
 import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.base.BaseActivity
@@ -145,6 +147,8 @@ class CarouselActivity : BaseActivity<ActivityCarouselBinding>(), IOnTabClickCon
                 is LoadingState.LoadingFailed -> {
                     binding.errorLayout.apply {
                         msg.text = it.msg
+                        retry.text = if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
+                        else getString(R.string.retry)
                         parent.isVisible = true
                     }
                 }

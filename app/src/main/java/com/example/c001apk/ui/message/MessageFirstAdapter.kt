@@ -48,21 +48,18 @@ class MessageFirstAdapter
                 R.id.feedLayout ->
                     IntentUtil.startActivity<FFFListActivity>(itemView.context) {
                         putExtra("uid", PrefManager.uid)
-                        putExtra("isEnable", false)
                         putExtra("type", "feed")
                     }
 
                 R.id.followLayout ->
                     IntentUtil.startActivity<FFFListActivity>(itemView.context) {
                         putExtra("uid", PrefManager.uid)
-                        putExtra("isEnable", true)
                         putExtra("type", "follow")
                     }
 
                 R.id.fansLayout ->
                     IntentUtil.startActivity<FFFListActivity>(itemView.context) {
                         putExtra("uid", PrefManager.uid)
-                        putExtra("isEnable", false)
                         putExtra("type", "fans")
                     }
             }

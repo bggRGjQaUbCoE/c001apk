@@ -7,28 +7,20 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
-import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.HeaderAdapter
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.SZLM_ID
-import com.example.c001apk.databinding.FragmentHomeFeedBinding
+import com.example.c001apk.databinding.BaseRefreshRecyclerviewBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
-import com.example.c001apk.logic.model.Like
-import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.ui.base.BaseAppFragment
 import com.example.c001apk.ui.feed.reply.IOnPublishClickListener
 import com.example.c001apk.ui.feed.reply.ReplyBottomSheetDialog
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -39,8 +31,6 @@ import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
-import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.color.MaterialColors
@@ -50,22 +40,19 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickListener,
+class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListener,
     IOnBottomClickListener, IOnPublishClickListener {
 
     @Inject
     lateinit var viewModelAssistedFactory: HomeFeedViewModel.Factory
-    private val viewModel by viewModels<HomeFeedViewModel> {
+    override val viewModel by viewModels<HomeFeedViewModel> {
         HomeFeedViewModel.provideFactory(
             viewModelAssistedFactory,
             getLastingInstallTime(requireContext())
         )
     }
-    private lateinit var mAdapter: AppAdapter
-    private lateinit var footerAdapter: FooterAdapter
-    private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
+    private lateinit var fab: FloatingActionButton
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
 
     companion object {
@@ -76,6 +63,18 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                     putString("type", type)
                 }
             }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = BaseRefreshRecyclerviewBinding.inflate(inflater, container, false)
+        fab = FloatingActionButton(requireContext())
+        initPublish()
+        _binding?.root?.addView(fab)
+        return binding.root
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,28 +123,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        if (!viewModel.isInit) {
-            initView()
-            initRefresh()
-            initScroll()
-            initPublish()
-            initObserve()
-            initError()
-        }
-
-    }
-
-    private fun initError() {
-        binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.isVisible = false
-            viewModel.loadingState.value = LoadingState.Loading
-        }
-    }
-
-    private fun initObserve() {
+    override fun initObserve() {
+        super.initObserve()
         viewModel.createDialog.observe(viewLifecycleOwner) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
                 val binding = ItemCaptchaBinding.inflate(
@@ -186,51 +165,6 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
             }
         }
 
-        viewModel.toastText.observe(viewLifecycleOwner) { event ->
-            event?.getContentIfNotHandledOrReturnNull()?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        viewModel.loadingState.observe(viewLifecycleOwner) {
-            when (it) {
-                LoadingState.Loading -> {
-                    binding.indicator.parent.isIndeterminate = true
-                    binding.indicator.parent.isVisible = true
-                    refreshData()
-                }
-
-                LoadingState.LoadingDone -> {
-                    binding.swipeRefresh.isEnabled = true
-                }
-
-                is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.isVisible = true
-                    binding.errorMessage.errMsg.text = it.errMsg
-                }
-
-                is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.msg.text = it.msg
-                    binding.errorLayout.parent.isVisible = true
-                }
-            }
-            if (it !is LoadingState.Loading) {
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.isVisible = false
-            }
-        }
-
-        viewModel.footerState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it)
-            if (it !is FooterState.Loading) {
-                binding.swipeRefresh.isRefreshing = false
-            }
-        }
-
-        viewModel.homeFeedData.observe(viewLifecycleOwner) {
-            viewModel.listSize = it.size
-            mAdapter.submitList(it)
-        }
     }
 
     @SuppressLint("InflateParams")
@@ -249,9 +183,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 else 25.dp
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
-            binding.fab.layoutParams = lp
-            (binding.fab.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
-            binding.fab.isVisible = true
+            fab.layoutParams = lp
+            (fab.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
+            fab.isVisible = true
             bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view)
             bottomSheetDialog.setIOnPublishClickListener(this)
             bottomSheetDialog.apply {
@@ -263,7 +197,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 }
                 type = "publish"
             }
-            binding.fab.setOnClickListener {
+            fab.setOnClickListener {
                 if (PrefManager.SZLMID == "") {
                     Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                 } else {
@@ -271,141 +205,29 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                 }
             }
         } else
-            binding.fab.isVisible = false
+            fab.isVisible = false
     }
 
-    private fun initRefresh() {
-        binding.swipeRefresh.apply {
-            isEnabled = false
-            setColorSchemeColors(
-                MaterialColors.getColor(
-                    requireContext(),
-                    com.google.android.material.R.attr.colorPrimary,
-                    0
-                )
-            )
-            setOnRefreshListener {
-                refreshData()
-            }
-        }
-    }
-
-    private fun initScroll() {
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    if (viewModel.listSize != -1 && isAdded) {
-                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                            viewModel.lastVisibleItemPosition =
-                                mLayoutManager.findLastVisibleItemPosition()
-                        } else {
-                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                            viewModel.lastVisibleItemPosition = positions[0]
-                            positions.forEach { pos ->
-                                if (pos > viewModel.lastVisibleItemPosition) {
-                                    viewModel.lastVisibleItemPosition = pos
-                                }
-                            }
-                        }
-                    }
-
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
-                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
-                    ) {
-                        loadMore()
-                    }
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.listSize != -1) {
-                    if (dy > 0) {
-                        (activity as? INavViewContainer)?.hideNavigationView()
-                    } else if (dy < 0) {
-                        (activity as? INavViewContainer)?.showNavigationView()
-                    }
-                }
-            }
-        })
-    }
-
-    private fun loadMore() {
-        viewModel.isLoadMore = true
-        when (viewModel.type) {
-            "feed" -> viewModel.fetchHomeFeed()
-            else -> viewModel.fetchDataList()
-        }
-    }
-
-    private fun initView() {
-        mAdapter = AppAdapter(viewModel.repository, ItemClickListener())
-        footerAdapter = FooterAdapter(FooterListener())
-        binding.recyclerView.apply {
-            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
-            layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    mLayoutManager = LinearLayoutManager(requireContext())
-                    mLayoutManager
-                } else {
-                    sLayoutManager =
-                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-                    sLayoutManager
-                }
-            if (itemDecorationCount == 0) {
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    addItemDecoration(LinearItemDecoration(10.dp))
-                else
-                    addItemDecoration(StaggerItemDecoration(10.dp))
+    override fun onScrolled(dy: Int) {
+        if (viewModel.listSize != -1) {
+            if (dy > 0) {
+                (activity as? INavViewContainer)?.hideNavigationView()
+            } else if (dy < 0) {
+                (activity as? INavViewContainer)?.showNavigationView()
             }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        (requireParentFragment() as? IOnTabClickContainer)?.tabController = null
+        (parentFragment as? IOnTabClickContainer)?.tabController = null
         (activity as? IOnBottomClickContainer)?.controller = null
     }
 
     override fun onResume() {
         super.onResume()
-
-        (requireParentFragment() as? IOnTabClickContainer)?.tabController = this
+        (parentFragment as? IOnTabClickContainer)?.tabController = this
         (activity as? IOnBottomClickContainer)?.controller = this
-
-        if (viewModel.isInit) {
-            viewModel.isInit = false
-            initView()
-            viewModel.loadingState.value = LoadingState.Loading
-            initRefresh()
-            initScroll()
-            initPublish()
-            initObserve()
-            initError()
-        }
-    }
-
-    private fun refreshData() {
-        viewModel.page = 1
-        viewModel.lastVisibleItemPosition = 0
-        viewModel.isEnd = false
-        viewModel.isRefreshing = true
-        viewModel.isLoadMore = false
-        viewModel.changeFirstItem = true
-
-        when (viewModel.type) {
-            "feed" -> viewModel.fetchHomeFeed()
-            "rank", "follow", "coolPic" -> viewModel.fetchDataList()
-        }
-
-    }
-
-    inner class FooterListener : FooterAdapter.FooterListener {
-        override fun onReLoad() {
-            loadMore()
-        }
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
@@ -466,7 +288,7 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                                 PrefManager.FOLLOWTYPE = "apk"
                             }
                         }
-                        viewModel.homeFeedData.postValue(emptyList())
+                        viewModel.dataList.postValue(emptyList())
                         viewModel.footerState.value = FooterState.LoadingDone
                         binding.swipeRefresh.isEnabled = false
                         binding.errorMessage.errMsg.isVisible = false
@@ -490,60 +312,8 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
         viewModel.onPostCreateFeed()
     }
 
-    inner class ItemClickListener : ItemListener {
-        override fun onViewFeed(
-            view: View,
-            id: String?,
-            uid: String?,
-            username: String?,
-            userAvatar: String?,
-            deviceTitle: String?,
-            message: String?,
-            dateline: String?,
-            rid: Any?,
-            isViewReply: Any?
-        ) {
-            super.onViewFeed(
-                view,
-                id,
-                uid,
-                username,
-                userAvatar,
-                deviceTitle,
-                message,
-                dateline,
-                rid,
-                isViewReply
-            )
-            if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
-                viewModel.saveHistory(
-                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
-                    deviceTitle.toString(), message.toString(), dateline.toString()
-                )
-        }
-
-        override fun onBlockUser(id: String, uid: String, position: Int) {
-            viewModel.saveUid(uid)
-            val currentList = viewModel.homeFeedData.value?.toMutableList() ?: ArrayList()
-            currentList.removeAt(position)
-            viewModel.homeFeedData.postValue(currentList)
-        }
-
-        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
-            viewModel.onDeleteFeed("/v6/feed/deleteFeed", id, position)
-        }
-
-        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
-            if (PrefManager.isLogin) {
-                if (PrefManager.SZLMID.isEmpty())
-                    Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
-                else viewModel.onPostLikeFeed(id, position, likeData)
-            }
-        }
-    }
-
     override fun onReturnTop() {
-        onReturnTop(true)
+        onReturnTop(null)
     }
 
 }

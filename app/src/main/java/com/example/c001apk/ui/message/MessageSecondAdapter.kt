@@ -52,7 +52,6 @@ class MessageSecondAdapter :
                 R.id.freqLayout ->
                     if (PrefManager.isLogin) {
                         IntentUtil.startActivity<FFFListActivity>(itemView.context) {
-                            putExtra("isEnable", false)
                             putExtra("type", "recentHistory")
                             putExtra("uid", PrefManager.uid)
                         }
@@ -66,7 +65,6 @@ class MessageSecondAdapter :
                 R.id.likeLayout ->
                     if (PrefManager.isLogin) {
                         IntentUtil.startActivity<FFFListActivity>(itemView.context) {
-                            putExtra("isEnable", false)
                             putExtra("type", "like")
                             putExtra("uid", PrefManager.uid)
                         }
@@ -75,7 +73,6 @@ class MessageSecondAdapter :
                 R.id.replyLayout ->
                     if (PrefManager.isLogin) {
                         IntentUtil.startActivity<FFFListActivity>(itemView.context) {
-                            putExtra("isEnable", true)
                             putExtra("type", "reply")
                             putExtra("uid", PrefManager.uid)
                         }

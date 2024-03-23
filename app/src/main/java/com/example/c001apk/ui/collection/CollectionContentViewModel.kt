@@ -1,5 +1,6 @@
-package com.example.c001apk.ui.topic
+package com.example.c001apk.ui.collection
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,16 +12,18 @@ import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.ui.base.BaseAppViewModel
+import com.example.c001apk.util.Event
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import rikka.core.util.ContextUtils.requireActivity
 
-class TopicContentViewModel @AssistedInject constructor(
-    @Assisted("url") var url: String,
-    @Assisted("title") var title: String,
+class CollectionContentViewModel @AssistedInject constructor(
+    @Assisted("url") val url: String,
+    @Assisted("id") val id: String?,
     blackListRepo: BlackListRepo,
     historyRepo: HistoryFavoriteRepo,
     networkRepo: NetworkRepo
@@ -30,29 +33,31 @@ class TopicContentViewModel @AssistedInject constructor(
     interface Factory {
         fun create(
             @Assisted("url") url: String,
-            @Assisted("title") title: String,
-        ): TopicContentViewModel
+            @Assisted("id") id: String?,
+        ): CollectionContentViewModel
     }
 
     @Suppress("UNCHECKED_CAST")
     companion object {
-        fun provideFactory(assistedFactory: Factory, url: String, title: String)
+        fun provideFactory(assistedFactory: Factory, url: String, id: String?)
                 : ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create(url, title) as T
+                return assistedFactory.create(url, id) as T
             }
         }
     }
 
+    var type: String? = null
+
     override fun fetchData() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getDataList(url, title, "", lastItem, page)
+            networkRepo.getCollectionList(url, null, id, 0, page, lastItem)
                 .onStart {
                     if (isLoadMore)
                         footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
-                    val dataListList = dataList.value?.toMutableList() ?: ArrayList()
+                    val collectionList = dataList.value?.toMutableList() ?: ArrayList()
                     val data = result.getOrNull()
                     if (data != null) {
                         if (!data.message.isNullOrEmpty()) {
@@ -63,30 +68,22 @@ class TopicContentViewModel @AssistedInject constructor(
                             return@collect
                         } else if (!data.data.isNullOrEmpty()) {
                             lastItem = data.data.last().id
-                            if (isRefreshing)
-                                dataListList.clear()
+                            if (isRefreshing) collectionList.clear()
                             if (isRefreshing || isLoadMore) {
                                 data.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "topic"
-                                        || it.entityType == "product"
-                                        || it.entityType == "user"
+                                    if (it.entityType == "collection"
+                                        || it.entityType == "feed"
                                     )
-                                        if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
-                                            && !blackListRepo.checkTopic(
-                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
-                                            )
-                                        )
-                                            dataListList.add(it)
+                                        collectionList.add(it)
                                 }
                             }
                             page++
-                            if (listSize <= 0) {
+                            if (listSize <= 0)
                                 loadingState.postValue(LoadingState.LoadingDone)
-                            } else
+                            else
                                 footerState.postValue(FooterState.LoadingDone)
-                            dataList.postValue(dataListList)
-                        } else if (data.data?.isEmpty() == true) {
+                            dataList.postValue(collectionList)
+                        } else {
                             isEnd = true
                             if (listSize <= 0)
                                 loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
@@ -110,5 +107,8 @@ class TopicContentViewModel @AssistedInject constructor(
         }
     }
 
-
+    val showCollection = MutableLiveData<Event<Pair<String, String>>>()
+    override fun showCollection(id: String, title: String) {
+        showCollection.postValue(Event(Pair(id, title)))
+    }
 }

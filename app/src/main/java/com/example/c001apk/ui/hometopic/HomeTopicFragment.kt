@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.main.INavViewContainer
@@ -107,13 +108,19 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
                 }
 
                 is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.text = it.errMsg
-                    binding.errorMessage.errMsg.isVisible = true
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
                 }
 
                 is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.msg.text = it.msg
-                    binding.errorLayout.parent.isVisible = true
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        retry.text = if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
+                        else getString(R.string.retry)
+                        parent.isVisible = true
+                    }
                 }
             }
             if (it !is LoadingState.Loading) {

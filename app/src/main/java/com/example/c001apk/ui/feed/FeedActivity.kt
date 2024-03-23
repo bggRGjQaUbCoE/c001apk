@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.ActivityFeedBinding
 import com.example.c001apk.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,14 +46,19 @@ class FeedActivity : BaseActivity<ActivityFeedBinding>() {
                 }
 
                 is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.text = it.errMsg
-                    binding.errorMessage.errMsg.isVisible = true
-
+                    binding.errorMessage.errMsg.apply {
+                        text = it.errMsg
+                        isVisible = true
+                    }
                 }
 
                 is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.msg.text = it.msg
-                    binding.errorLayout.parent.isVisible = true
+                    binding.errorLayout.apply {
+                        msg.text = it.msg
+                        retry.text = if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
+                        else getString(R.string.retry)
+                        parent.isVisible = true
+                    }
                 }
             }
             if (it !is LoadingState.Loading) {

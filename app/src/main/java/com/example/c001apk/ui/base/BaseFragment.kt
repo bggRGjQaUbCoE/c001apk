@@ -14,8 +14,6 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     private var _binding: VB? = null
     val binding get() = _binding!!
 
-    private var visible = false
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

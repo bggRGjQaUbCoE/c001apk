@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class Reply2ReplyBottomSheetViewModel @Inject constructor(
     private val repository: BlackListRepo,
-    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val historyRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
@@ -263,7 +263,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
         dateline: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyFavoriteRepo.saveHistory(
+            historyRepo.saveHistory(
                 id,
                 uid,
                 username,

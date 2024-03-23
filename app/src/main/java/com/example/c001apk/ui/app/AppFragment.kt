@@ -1,283 +1,148 @@
 package com.example.c001apk.ui.app
 
-import android.content.res.Configuration
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
-import com.example.c001apk.adapter.AppAdapter
-import com.example.c001apk.adapter.FooterAdapter
-import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.HeaderAdapter
-import com.example.c001apk.adapter.LoadingState
-import com.example.c001apk.databinding.FragmentTopicContentBinding
-import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.ui.home.IOnTabClickContainer
-import com.example.c001apk.ui.home.IOnTabClickListener
-import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.StaggerItemDecoration
-import com.google.android.material.color.MaterialColors
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.example.c001apk.R
+import com.example.c001apk.databinding.BaseViewAppBinding
+import com.example.c001apk.ui.base.BasePagerFragment
+import com.example.c001apk.ui.search.SearchActivity
+import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.ReplaceViewHelper
+import com.example.c001apk.view.AppBarLayoutStateChangeListener
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayout
 
-@AndroidEntryPoint
-class AppFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickListener {
+class AppFragment : BasePagerFragment() {
 
-    private val type by lazy { arguments?.getString("type") }
-
-    @Inject
-    lateinit var viewModelAssistedFactory: AppFragmentViewModel.Factory
-    private val viewModel by viewModels<AppFragmentViewModel> {
-        AppFragmentViewModel.provideFactory(
-            viewModelAssistedFactory,
-            arguments?.getString("id").orEmpty(),
-            when (type) {
-                "reply" -> ""
-                "pub" -> "&sort=dateline_desc"
-                "hot" -> "&sort=popular"
-                else -> ""
-            },
-            when (type) {
-                "reply" -> "最近回复"
-                "pub" -> "最新发布"
-                "hot" -> "热度排序"
-                else -> "最近回复"
-            }
-        )
-    }
-    private lateinit var mAdapter: AppAdapter
-    private lateinit var footerAdapter: FooterAdapter
-    private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var sLayoutManager: StaggeredGridLayoutManager
-
-    companion object {
-        @JvmStatic
-        fun newInstance(type: String, id: String) = AppFragment().apply {
-            arguments = Bundle().apply {
-                putString("type", type)
-                putString("id", id)
-            }
-        }
-    }
+    private val viewModel by viewModels<AppViewModel>(ownerProducer = { requireActivity() })
+    private val typeList = listOf("reply", "pub", "hot")
+    private lateinit var appBinding: BaseViewAppBinding
+    private var menuSubscribe: MenuItem? = null
+    private var menuBlock: MenuItem? = null
+    private var menuSearch: MenuItem? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!viewModel.isInit) {
-            initView()
-            initRefresh()
-            initScroll()
-            initObserve()
-            initError()
-        }
+        initApp()
+        initAppBar()
 
     }
 
-    private fun initError() {
-        binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.isVisible = false
-            viewModel.loadingState.value = LoadingState.Loading
-        }
-    }
+    override fun initBar() {
+        super.initBar()
+        binding.collapsingToolbar.title = viewModel.appData?.title
 
-    private fun initObserve() {
-        viewModel.toastText.observe(viewLifecycleOwner) { event ->
-            event?.getContentIfNotHandledOrReturnNull()?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        // menu
+        binding.toolBar.apply {
+            inflateMenu(R.menu.topic_product_menu)
+
+            menuSubscribe = menu?.findItem(R.id.subscribe)
+            menuBlock = menu?.findItem(R.id.block)
+            menuSearch = menu?.findItem(R.id.search)
+
+            updateFollow(viewModel.appData?.userAction?.follow)
+            menuBlock?.isVisible = viewModel.appData?.title != null
+            viewModel.appData?.title?.let {
+                viewModel.checkApp(it)
             }
-        }
+            menuSearch?.isVisible = !viewModel.tabList.isNullOrEmpty()
 
-        viewModel.loadingState.observe(viewLifecycleOwner) {
-            when (it) {
-                LoadingState.Loading -> {
-                    binding.indicator.parent.isIndeterminate = true
-                    binding.indicator.parent.isVisible = true
-                    refreshData()
-                }
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    android.R.id.home -> activity?.finish()
 
-                LoadingState.LoadingDone -> {
-                    binding.swipeRefresh.isEnabled = true
-                }
-
-                is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.text = it.errMsg
-                    binding.errorMessage.errMsg.isVisible = true
-                }
-
-                is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.msg.text = it.msg
-                    binding.errorLayout.parent.isVisible = true
-                }
-            }
-            if (it !is LoadingState.Loading) {
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.isVisible = false
-            }
-        }
-
-        viewModel.footerState.observe(viewLifecycleOwner) {
-            footerAdapter.setLoadState(it)
-            if (it !is FooterState.Loading) {
-                binding.swipeRefresh.isRefreshing = false
-            }
-        }
-
-        viewModel.appCommentData.observe(viewLifecycleOwner) {
-            viewModel.listSize = it.size
-            mAdapter.submitList(it)
-        }
-    }
-
-    private fun initView() {
-        mAdapter = AppAdapter(viewModel.repository, viewModel.ItemClickListener())
-        footerAdapter = FooterAdapter(ReloadListener())
-        binding.recyclerView.apply {
-            adapter = ConcatAdapter(HeaderAdapter(), mAdapter, footerAdapter)
-            layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    mLayoutManager = LinearLayoutManager(requireContext())
-                    mLayoutManager
-                } else {
-                    sLayoutManager =
-                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-                    sLayoutManager
-                }
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                addItemDecoration(
-                    LinearItemDecoration(10.dp)
-                )
-            else addItemDecoration(StaggerItemDecoration(10.dp))
-        }
-    }
-
-    private fun refreshData() {
-        viewModel.lastVisibleItemPosition = 0
-        viewModel.lastItem = null
-        viewModel.page = 1
-        viewModel.isEnd = false
-        viewModel.isRefreshing = true
-        viewModel.isLoadMore = false
-        viewModel.fetchAppComment()
-    }
-
-    private fun initRefresh() {
-        binding.swipeRefresh.apply {
-            isEnabled = false
-            setColorSchemeColors(
-                MaterialColors.getColor(
-                    requireContext(),
-                    com.google.android.material.R.attr.colorPrimary,
-                    0
-                )
-            )
-            setOnRefreshListener {
-                refreshData()
-            }
-        }
-    }
-
-    private fun initScroll() {
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    if (viewModel.listSize != -1 && isAdded) {
-                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                            viewModel.lastVisibleItemPosition =
-                                mLayoutManager.findLastVisibleItemPosition()
-                        } else {
-                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                            viewModel.lastVisibleItemPosition = positions[0]
-                            positions.forEach { pos ->
-                                if (pos > viewModel.lastVisibleItemPosition) {
-                                    viewModel.lastVisibleItemPosition = pos
-                                }
-                            }
+                    R.id.search -> {
+                        IntentUtil.startActivity<SearchActivity>(requireContext()) {
+                            putExtra("pageType", "apk")
+                            putExtra("pageParam", viewModel.appId)
+                            putExtra("title", viewModel.appData?.title)
                         }
                     }
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
-                        && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
-                    ) {
-                        loadMore()
+                    R.id.subscribe -> {
+                        /*viewModel.onGetFollow(
+                            if (viewModel.appData?.userAction?.follow == 1) "/v6/apk/unFollow"
+                            else "/v6/apk/follow"
+                        )*/
+                    }
+
+                    R.id.block -> {
+                        viewModel.appData?.title?.let {
+                            val isBlocked = menuBlock?.title.toString() == "移除黑名单"
+                            MaterialAlertDialogBuilder(requireContext()).apply {
+                                setTitle("确定将 $it ${menuBlock?.title}？")
+                                setNegativeButton(android.R.string.cancel, null)
+                                setPositiveButton(android.R.string.ok) { _, _ ->
+                                    menuBlock?.title = if (isBlocked) {
+                                        viewModel.deleteTopic(it)
+                                        "加入黑名单"
+                                    } else {
+                                        viewModel.saveTopic(it)
+                                        "移除黑名单"
+                                    }
+                                }
+                                show()
+                            }
+                        }
                     }
                 }
+                return@setOnMenuItemClickListener true
             }
+        }
+    }
+
+    private fun updateFollow(follow: Int?) {
+        menuSubscribe?.isVisible = PrefManager.isLogin
+                && viewModel.appData?.entityType == "apk"
+        menuSubscribe?.title = if (follow == 1) "取消关注"
+        else "关注"
+    }
+
+    private fun initAppBar() {
+        binding.appBar.addOnOffsetChangedListener(object : AppBarLayoutStateChangeListener() {
+            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
+                when (state) {
+                    State.COLLAPSED -> appBinding.appLayout.visibility = View.INVISIBLE
+                    State.EXPANDED, State.INTERMEDIATE ->
+                        appBinding.appLayout.isVisible = true
+
+                    else -> appBinding.appLayout.visibility = View.INVISIBLE
+                }
+            }
+
         })
     }
 
-    private fun loadMore() {
-        viewModel.isLoadMore = true
-        viewModel.fetchAppComment()
+    private fun initApp() {
+        val replaceViewHelper = ReplaceViewHelper(requireContext())
+        appBinding = BaseViewAppBinding.inflate(layoutInflater, null, false)
+        replaceViewHelper.toReplaceView(binding.view, appBinding.root)
+        appBinding.appData = viewModel.appData
     }
 
-    override fun onReturnTop(isRefresh: Boolean?) {
-        binding.swipeRefresh.isRefreshing = true
-        binding.recyclerView.scrollToPosition(0)
-        refreshData()
-    }
+    override fun iOnTabSelected(tab: TabLayout.Tab?) {}
 
-    inner class ReloadListener : FooterAdapter.FooterListener {
-        override fun onReLoad() {
-            loadMore()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        (activity as? IOnTabClickContainer)?.tabController = this
-
-        if (viewModel.isInit) {
-            viewModel.isInit = false
-            initView()
-            viewModel.loadingState.value = LoadingState.Loading
-            initRefresh()
-            initScroll()
-            initObserve()
-            initError()
-        }
-
-        initLift()
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        initLift()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        detachLift()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        detachLift()
-        (activity as? IOnTabClickContainer)?.tabController = null
-    }
-
-    private fun detachLift() {
-        binding.recyclerView.borderViewDelegate.borderVisibilityChangedListener = null
-    }
-
-    private fun initLift() {
-        val parent = requireActivity() as AppActivity
-        parent.binding.appBar.setLifted(
-            !binding.recyclerView.borderViewDelegate.isShowingTopBorder
+    override fun getFragment(
+        position: Int,
+    ): Fragment =
+        AppContentFragment.newInstance(
+            typeList[position],
+            viewModel.appId ?: "4599"
         )
-        binding.recyclerView.borderViewDelegate
-            .setBorderVisibilityChangedListener { top, _, _, _ ->
-                parent.binding.appBar.setLifted(!top)
-            }
+
+    override fun initTabList() {
+        tabList = viewModel.tabList ?: emptyList()
+    }
+
+    override fun onBackClick() {
+        activity?.finish()
     }
 
 }
