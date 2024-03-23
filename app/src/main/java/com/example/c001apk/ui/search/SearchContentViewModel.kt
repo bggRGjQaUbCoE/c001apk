@@ -3,6 +3,7 @@ package com.example.c001apk.ui.search
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
@@ -17,28 +18,52 @@ import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SearchContentViewModel @Inject constructor(
+class SearchContentViewModel @AssistedInject constructor(
+    @Assisted("keyWord") var keyWord: String,
+    @Assisted("type") var type: String,
+    @Assisted("pageType") val pageType: String,
+    @Assisted("pageParam") var pageParam: String,
     val repository: BlackListRepo,
     private val historyFavoriteRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("keyWord") keyWord: String,
+            @Assisted("type") type: String,
+            @Assisted("pageType") pageType: String,
+            @Assisted("pageParam") pageParam: String,
+        ): SearchContentViewModel
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory,
+            keyWord: String,
+            type: String,
+            pageType: String,
+            pageParam: String
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(keyWord, type, pageType, pageParam) as T
+            }
+        }
+    }
+
     var feedType: String = "all"
     var sort: String = "default" //hot // reply
-    var pageParam: String? = null
-    var pageType: String? = null
-    var keyWord: String? = null
     var isInit: Boolean = true
-    var type: String? = null
     var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
     var isRefreshing: Boolean = false
@@ -55,7 +80,7 @@ class SearchContentViewModel @Inject constructor(
     fun fetchSearchData() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getSearch(
-                type.toString(), feedType, sort, keyWord.toString(),
+                type.toString(), feedType, sort, keyWord,
                 pageType, pageParam, page, lastItem
             )
                 .onStart {

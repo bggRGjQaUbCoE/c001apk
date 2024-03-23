@@ -30,7 +30,6 @@ class MessageViewModel @Inject constructor(
     var isInit: Boolean = true
     var type: String? = null
     var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
     var uid: String? = null

@@ -468,6 +468,9 @@ class HomeFeedFragment : BaseFragment<FragmentHomeFeedBinding>(), IOnTabClickLis
                         }
                         viewModel.homeFeedData.postValue(emptyList())
                         viewModel.footerState.value = FooterState.LoadingDone
+                        binding.swipeRefresh.isEnabled = false
+                        binding.errorMessage.errMsg.isVisible = false
+                        binding.errorLayout.parent.isVisible = false
                         viewModel.loadingState.value = LoadingState.Loading
                         dialog.dismiss()
                     }

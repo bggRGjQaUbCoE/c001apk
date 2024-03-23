@@ -47,12 +47,8 @@ class FollowFragment : BaseFragment<FragmentTopicContentBinding>(), IOnTabClickL
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.type = it.getString("type")
+            viewModel.type = it.getString("type") ?: "feed"
             when (viewModel.type) {
-                "follow", "apk", "reply", "replyToMe" -> {
-                    viewModel.fetchFeedList()
-                }
-
                 "topic" -> {
                     viewModel.url = "#/topic/userFollowTagList"
                     viewModel.title = "我关注的话题"

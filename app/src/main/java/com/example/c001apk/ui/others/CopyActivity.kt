@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
-import androidx.activity.viewModels
 import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 @AndroidEntryPoint
 class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
-    private val viewModel by viewModels<HomeViewModel>()
+    private lateinit var viewModel: HomeViewModel
     private lateinit var mAdapter: HomeMenuAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var menuList: ArrayList<HomeMenu>
@@ -50,6 +50,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         val type: String? = intent.getStringExtra("type")
 
         if (type != null && type == "homeMenu") {
+            viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
             menuList = ArrayList()
             binding.tabPage.isVisible = true
             binding.toolBar.apply {
@@ -59,14 +60,12 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
                     finish()
                 }
             }
+            initObserve()
         }
 
-        binding.done.setOnClickListener {
-            viewModel.updateTab(menuList.mapIndexed { index, tab ->
-                tab.copy(position = index)
-            })
-        }
+    }
 
+    private fun initObserve() {
         viewModel.tabListLiveData.observe(this) {
             menuList.addAll(it)
             initView()
@@ -79,10 +78,15 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
                 startActivity(intent)
             }
         }
-
     }
 
     private fun initView() {
+        binding.done.setOnClickListener {
+            viewModel.updateTab(menuList.mapIndexed { index, tab ->
+                tab.copy(position = index)
+            })
+        }
+
         mLayoutManager = LinearLayoutManager(this)
         mAdapter = HomeMenuAdapter(menuList)
         binding.recyclerView.apply {
@@ -93,7 +97,6 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
         val callback: ItemTouchHelper.Callback = ItemTouchHelperCallback(mAdapter)
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
-        binding.done.isVisible = true
     }
 
 }

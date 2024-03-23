@@ -35,7 +35,6 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     var position: Int? = null
     var fuid: String? = null
     var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
     var id: String? = null

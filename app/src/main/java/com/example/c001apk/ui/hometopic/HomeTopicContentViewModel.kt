@@ -2,6 +2,7 @@ package com.example.c001apk.ui.hometopic
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
@@ -11,21 +12,39 @@ import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.NetworkRepo
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class HomeTopicContentViewModel @Inject constructor(
+class HomeTopicContentViewModel @AssistedInject constructor(
+    @Assisted("url") var url: String,
+    @Assisted("title") var title: String,
     val repository: BlackListRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("url") url: String, @Assisted("title") title: String
+        ): HomeTopicContentViewModel
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory, url: String, title: String,
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(url, title) as T
+            }
+        }
+    }
+
     var page = 1
-    var title: String? = null
-    var url: String? = null
     var isInit = true
     var listSize = -1
     var isRefreshing: Boolean = false
@@ -40,7 +59,7 @@ class HomeTopicContentViewModel @Inject constructor(
 
     fun fetchTopicData() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getDataList(url.toString(), title.toString(), null, lastItem, page)
+            networkRepo.getDataList(url, title, null, lastItem, page)
                 .onStart {
                     if (isLoadMore)
                         footerState.postValue(FooterState.Loading)

@@ -118,6 +118,7 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
         viewModel.loadingState.observe(viewLifecycleOwner) {
             when (it) {
                 LoadingState.Loading -> {
+                    binding.swipeRefresh.isEnabled = false
                     binding.indicator.parent.isIndeterminate = true
                     binding.indicator.parent.isVisible = true
                     refreshData()
@@ -303,6 +304,9 @@ class TopicContentFragment : BaseFragment<FragmentTopicContentBinding>(),
         }
         viewModel.topicData.postValue(emptyList())
         viewModel.footerState.value = FooterState.LoadingDone
+        binding.swipeRefresh.isEnabled = false
+        binding.errorMessage.errMsg.isVisible = false
+        binding.errorLayout.parent.isVisible = false
         viewModel.loadingState.value = LoadingState.Loading
     }
 

@@ -16,10 +16,9 @@ class AppUpdateActivity : BaseActivity<ActivityAppUpdateBinding>() {
     private val appsUpdateList by lazy {
         val list = if (SDK_INT >= 33)
             intent.getParcelableArrayListExtra("list", UpdateCheckResponse.Data::class.java)
-                ?: emptyList()
         else
-            intent.getParcelableArrayListExtra("list") ?: emptyList()
-        list as ArrayList<UpdateCheckResponse.Data>
+            intent.getParcelableArrayListExtra("list")
+        list ?: ArrayList()
     }
 
     @SuppressLint("CommitTransaction")

@@ -34,35 +34,26 @@ class FollowViewModel @Inject constructor(
     var uid: String? = null
     var type: String? = null
     var isEnable: Boolean = false
+    val tabList = ArrayList<String>()
+    var title: String? = null
+    var url: String? = null
+    var isInit: Boolean = true
+    var listSize: Int = -1
+    var page = 1
+    var lastItem: String? = null
+    var isRefreshing: Boolean = false
+    var isLoadMore: Boolean = false
+    var isEnd: Boolean = false
+    var lastVisibleItemPosition: Int = 0
 
     val loadingState = MutableLiveData<LoadingState>()
     val footerState = MutableLiveData<FooterState>()
     val dataListData = MutableLiveData<List<HomeFeedResponse.Data>>()
+    val toastText = MutableLiveData<Event<String>>()
 
     fun fetchFeedList() {
-        url = when (type) {
-            "feed" -> "/v6/user/feedList?showAnonymous=0&isIncludeTop=1"
-            "follow" -> "/v6/user/followList"
-            "fans" -> "/v6/user/fansList"
-            "apk" -> {
-                uid = ""
-                "/v6/user/apkFollowList"
-            }
-
-            "forum" -> {
-                uid = ""
-                "/v6/user/forumFollowList"
-            }
-
-            "like" -> "/v6/user/likeList"
-
-            "reply" -> "/v6/user/replyList"
-
-            "replyToMe" -> "/v6/user/replyToMeList"
-
-            "recentHistory" -> "/v6/user/recentHistoryList"
-
-            else -> throw IllegalArgumentException("invalid type: $type")
+        if (url.isNullOrEmpty()) {
+            initUrl()
         }
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getFollowList(url.toString(), uid.toString(), page, lastItem)
@@ -126,6 +117,33 @@ class FollowViewModel @Inject constructor(
                     isRefreshing = false
                     isLoadMore = false
                 }
+        }
+    }
+
+    private fun initUrl() {
+        url = when (type) {
+            "feed" -> "/v6/user/feedList?showAnonymous=0&isIncludeTop=1"
+            "follow" -> "/v6/user/followList"
+            "fans" -> "/v6/user/fansList"
+            "apk" -> {
+                uid = ""
+                "/v6/user/apkFollowList"
+            }
+
+            "forum" -> {
+                uid = ""
+                "/v6/user/forumFollowList"
+            }
+
+            "like" -> "/v6/user/likeList"
+
+            "reply" -> "/v6/user/replyList"
+
+            "replyToMe" -> "/v6/user/replyToMeList"
+
+            "recentHistory" -> "/v6/user/recentHistoryList"
+
+            else -> type
         }
     }
 
@@ -194,22 +212,6 @@ class FollowViewModel @Inject constructor(
                 }
         }
     }
-
-
-    val tabList = ArrayList<String>()
-    var title: String? = null
-    var url: String? = null
-    var isInit: Boolean = true
-    var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
-    var page = 1
-    var lastItem: String? = null
-    var isRefreshing: Boolean = false
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
-
-    val toastText = MutableLiveData<Event<String>>()
 
     inner class ItemClickListener : ItemListener {
         override fun onViewFeed(

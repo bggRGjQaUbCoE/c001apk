@@ -24,12 +24,23 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
     IOnSearchMenuClickListener, IOnTabClickListener {
 
-    private val viewModel by viewModels<SearchContentViewModel>()
+    @Inject
+    lateinit var viewModelAssistedFactory: SearchContentViewModel.Factory
+    private val viewModel by viewModels<SearchContentViewModel> {
+        SearchContentViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("keyWord").orEmpty(),
+            arguments?.getString("type").orEmpty(),
+            arguments?.getString("pageType").orEmpty(),
+            arguments?.getString("pageParam").orEmpty(),
+        )
+    }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -46,16 +57,6 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
                     putString("pageParam", pageParam)
                 }
             }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.keyWord = it.getString("keyWord")
-            viewModel.type = it.getString("type")
-            viewModel.pageType = it.getString("pageType")
-            viewModel.pageParam = it.getString("pageParam")
-        }
     }
 
     override fun onPause() {
@@ -280,6 +281,9 @@ class SearchContentFragment : BaseFragment<FragmentSearchFeedBinding>(),
         }
         viewModel.searchData.postValue(emptyList())
         viewModel.footerState.value = FooterState.LoadingDone
+        binding.swipeRefresh.isEnabled = false
+        binding.errorMessage.errMsg.isVisible = false
+        binding.errorLayout.parent.isVisible = false
         viewModel.loadingState.value = LoadingState.Loading
     }
 

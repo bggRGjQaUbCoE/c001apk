@@ -45,7 +45,7 @@ class FFFListActivity : BaseActivity<ActivityFfflistBinding>(), IOnTabClickConta
         binding.appBar.setLiftable(true)
 
         viewModel.uid = intent.getStringExtra("uid")
-        viewModel.type = intent.getStringExtra("type")
+        viewModel.type = intent.getStringExtra("type") ?: "feed"
         viewModel.isEnable = intent.getBooleanExtra("isEnable", false)
 
         initBar()

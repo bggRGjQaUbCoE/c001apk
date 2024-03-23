@@ -34,7 +34,6 @@ class MessageViewModel @AssistedInject constructor(
     var url: String? = null
     var listSize: Int = -1
     var isInit: Boolean = true
-    var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
     var isRefreshing: Boolean = false

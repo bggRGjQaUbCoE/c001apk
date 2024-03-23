@@ -22,12 +22,23 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickContainer,
     IOnTabClickContainer {
 
-    private val viewModel by viewModels<TopicViewModel>()
+    @Inject
+    lateinit var viewModelAssistedFactory: TopicViewModel.Factory
+    private val viewModel by viewModels<TopicViewModel> {
+        TopicViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("url").orEmpty(),
+            arguments?.getString("title").orEmpty(),
+            arguments?.getString("id").orEmpty(),
+            arguments?.getString("type").orEmpty()
+        )
+    }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var subscribe: MenuItem
@@ -45,16 +56,6 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                     putString("type", type)
                 }
             }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.url = it.getString("url")
-            viewModel.title = it.getString("title")
-            viewModel.id = it.getString("id")
-            viewModel.type = it.getString("type")
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,7 +90,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                     binding.indicator.parent.isIndeterminate = true
                     binding.indicator.parent.isVisible = true
                     if (viewModel.type == "topic") {
-                        viewModel.url = viewModel.url.toString().replace("/t/", "")
+                        viewModel.url = viewModel.url.replace("/t/", "")
                         viewModel.fetchTopicLayout()
                     } else if (viewModel.type == "product") {
                         viewModel.fetchProductLayout()
@@ -140,7 +141,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
 
     private fun initBar() {
         binding.toolBar.apply {
-            title = if (viewModel.type == "topic") viewModel.url.toString().replace("/t/", "")
+            title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
             else viewModel.title
             viewModel.subtitle?.let { subtitle = viewModel.subtitle }
             setNavigationIcon(R.drawable.ic_back)
@@ -163,9 +164,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
             )?.isChecked = true
 
             menuBlock = menu.findItem(R.id.block)
-            viewModel.title?.let {
-                viewModel.checkTopic(it)
-            }
+            viewModel.checkTopic(viewModel.title)
 
             subscribe = menu.findItem(R.id.subscribe)
             subscribe.isVisible = PrefManager.isLogin
@@ -178,8 +177,8 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                             IntentUtil.startActivity<SearchActivity>(requireContext()) {
                                 putExtra("type", "topic")
                                 putExtra("pageType", "tag")
-                                putExtra("pageParam", viewModel.url.toString().replace("/t/", ""))
-                                putExtra("title", viewModel.url.toString().replace("/t/", ""))
+                                putExtra("pageParam", viewModel.url.replace("/t/", ""))
+                                putExtra("title", viewModel.url.replace("/t/", ""))
                             }
                         } else {
                             IntentUtil.startActivity<SearchActivity>(requireContext()) {
@@ -210,13 +209,13 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                         val isBlocked = menuBlock?.title.toString() == "移除黑名单"
                         MaterialAlertDialogBuilder(requireContext()).apply {
                             val title =
-                                if (viewModel.type == "topic") viewModel.url.toString()
+                                if (viewModel.type == "topic") viewModel.url
                                     .replace("/t/", "")
                                 else viewModel.title
                             setTitle("确定将 $title ${menuBlock?.title}？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                viewModel.title?.let { title ->
+                                viewModel.title.let { title ->
                                     menuBlock?.title = if (isBlocked) {
                                         viewModel.deleteTopic(title)
                                         "加入黑名单"
@@ -236,7 +235,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                                 val followUrl =
                                     if (viewModel.isFollow) "/v6/feed/unFollowTag"
                                     else "/v6/feed/followTag"
-                                val tag = viewModel.url.toString().replace("/t/", "")
+                                val tag = viewModel.url.replace("/t/", "")
                                 viewModel.onGetFollow(followUrl, tag)
                             }
 
@@ -244,7 +243,7 @@ class TopicFragment : BaseFragment<FragmentTopicBinding>(), IOnSearchMenuClickCo
                                 if (viewModel.postFollowData.isNullOrEmpty())
                                     viewModel.postFollowData = HashMap()
                                 viewModel.postFollowData?.let { map ->
-                                    map["id"] = viewModel.id.toString()
+                                    map["id"] = viewModel.id
                                     map["status"] =
                                         if (viewModel.isFollow) "0"
                                         else "1"

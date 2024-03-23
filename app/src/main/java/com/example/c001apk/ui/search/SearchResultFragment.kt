@@ -14,12 +14,23 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
     IOnSearchMenuClickContainer, IOnTabClickContainer {
 
-    private val viewModel by viewModels<SearchResultViewModel>()
+    @Inject
+    lateinit var viewModelAssistedFactory: SearchResultViewModel.Factory
+    private val viewModel by viewModels<SearchResultViewModel> {
+        SearchResultViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("keyWord").orEmpty(),
+            arguments?.getString("pageType").orEmpty(),
+            arguments?.getString("pageParam").orEmpty(),
+            arguments?.getString("title").orEmpty(),
+        )
+    }
     override var controller: IOnSearchMenuClickListener? = null
     override var tabController: IOnTabClickListener? = null
     private lateinit var type: MenuItem
@@ -38,16 +49,6 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
             }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.keyWord = it.getString("keyWord")
-            viewModel.pageType = it.getString("pageType")
-            viewModel.pageParam = it.getString("pageParam")
-            viewModel.title = it.getString("title")
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -62,7 +63,7 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
         binding.toolBar.apply {
             title = viewModel.keyWord
             setTitleTextAppearance(requireContext(), R.style.Toolbar_TitleText)
-            if (!viewModel.pageType.isNullOrEmpty())
+            if (viewModel.pageType.isNotEmpty())
                 subtitle = when (viewModel.pageType) {
                     "tag" -> "话题: ${viewModel.title}"
                     "product_phone" -> "数码: ${viewModel.title}"
@@ -167,51 +168,51 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
 
     private fun initData() {
         viewModel.tabList =
-            if (viewModel.pageType.isNullOrEmpty())
-                arrayListOf("动态", "应用", "数码", "用户", "话题")
+            if (viewModel.pageType.isEmpty())
+                listOf("动态", "应用", "数码", "用户", "话题")
             else {
                 binding.tabLayout.isVisible = false
-                arrayListOf("null")
+                listOf("")
             }
         initView()
     }
 
     private fun initView() {
-        binding.viewPager.offscreenPageLimit = viewModel.tabList?.size ?: 0
+        binding.viewPager.offscreenPageLimit = viewModel.tabList?.size ?: 1
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) =
-                if (viewModel.pageType.isNullOrEmpty()) {
+                if (viewModel.pageType.isEmpty()) {
                     when (position) {
                         0 -> SearchContentFragment.newInstance(
-                            viewModel.keyWord.toString(),
+                            viewModel.keyWord,
                             "feed",
                             null,
                             null
                         )
 
                         1 -> SearchContentFragment.newInstance(
-                            viewModel.keyWord.toString(),
+                            viewModel.keyWord,
                             "apk",
                             null,
                             null
                         )
 
                         2 -> SearchContentFragment.newInstance(
-                            viewModel.keyWord.toString(),
+                            viewModel.keyWord,
                             "product",
                             null,
                             null
                         )
 
                         3 -> SearchContentFragment.newInstance(
-                            viewModel.keyWord.toString(),
+                            viewModel.keyWord,
                             "user",
                             null,
                             null
                         )
 
                         4 -> SearchContentFragment.newInstance(
-                            viewModel.keyWord.toString(),
+                            viewModel.keyWord,
                             "feedTopic",
                             null,
                             null
@@ -221,10 +222,10 @@ class SearchResultFragment : BaseFragment<FragmentSearchResultBinding>(),
                     }
                 } else {
                     SearchContentFragment.newInstance(
-                        viewModel.keyWord.toString(),
+                        viewModel.keyWord,
                         "feed",
-                        viewModel.pageType.toString(),
-                        viewModel.pageParam.toString()
+                        viewModel.pageType,
+                        viewModel.pageParam
                     )
 
                 }

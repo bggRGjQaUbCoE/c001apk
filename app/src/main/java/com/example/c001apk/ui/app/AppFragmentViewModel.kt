@@ -115,7 +115,7 @@ class AppFragmentViewModel @AssistedInject constructor(
                     } else if (comment?.data?.isEmpty() == true) {
                         isEnd = true
                         if (listSize <= 0)
-                            loadingState.postValue(LoadingState.LoadingError(LOADING_EMPTY))
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
                         else {
                             if (isRefreshing)
                                 appCommentData.postValue(emptyList())

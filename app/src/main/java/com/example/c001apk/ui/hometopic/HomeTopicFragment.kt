@@ -14,18 +14,19 @@ import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.view.MyLinearSmoothScroller
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
     BrandLabelAdapter.OnLabelClickListener {
 
-    private val viewModel by viewModels<HomeTopicViewModel>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.type = it.getString("TYPE")
-        }
+    @Inject
+    lateinit var viewModelAssistedFactory: HomeTopicViewModel.Factory
+    private val viewModel by viewModels<HomeTopicViewModel> {
+        HomeTopicViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("type").orEmpty()
+        )
     }
 
     companion object {
@@ -33,7 +34,7 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
         fun newInstance(type: String) =
             HomeTopicFragment().apply {
                 arguments = Bundle().apply {
-                    putString("TYPE", type)
+                    putString("type", type)
                 }
             }
     }

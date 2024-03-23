@@ -2,6 +2,7 @@ package com.example.c001apk.ui.topic
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_FAILED
@@ -9,26 +10,47 @@ import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class TopicViewModel @Inject constructor(
+class TopicViewModel @AssistedInject constructor(
+    @Assisted("url") var url: String,
+    @Assisted("title") val title: String,
+    @Assisted("id") var id: String,
+    @Assisted("type") var type: String,
     private val repository: BlackListRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("url") url: String,
+            @Assisted("title") title: String,
+            @Assisted("id") id: String,
+            @Assisted("type") type: String
+        ): TopicViewModel
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory, url: String, title: String, id: String, type: String
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(url, title, id, type) as T
+            }
+        }
+    }
 
     var postFollowData: HashMap<String, String>? = null
     var productTitle = "最近回复"
     var subtitle: String? = null
     var isFollow: Boolean = false
     var initData: Boolean = true
-    var id: String? = null
-    var title: String? = null
-    var url: String? = null
-    var type: String? = null
     var isInit = true
     var tabList = ArrayList<String>()
     val topicList: MutableList<TopicBean> = ArrayList()
@@ -41,7 +63,7 @@ class TopicViewModel @Inject constructor(
 
     fun fetchTopicLayout() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getTopicLayout(url.toString())
+            networkRepo.getTopicLayout(url)
                 .collect { result ->
                     val data = result.getOrNull()
                     if (data != null) {
@@ -81,7 +103,7 @@ class TopicViewModel @Inject constructor(
 
     fun fetchProductLayout() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getProductLayout(id.toString())
+            networkRepo.getProductLayout(id)
                 .collect { result ->
                     val data = result.getOrNull()
                     if (data != null) {

@@ -22,23 +22,24 @@ import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeTopicContentFragment : BaseFragment<FragmentTopicContentBinding>() {
 
-    private val viewModel by viewModels<HomeTopicContentViewModel>()
+    @Inject
+    lateinit var viewModelAssistedFactory: HomeTopicContentViewModel.Factory
+    private val viewModel by viewModels<HomeTopicContentViewModel> {
+        HomeTopicContentViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("url").orEmpty(),
+            arguments?.getString("title").orEmpty(),
+        )
+    }
     private lateinit var mAdapter: AppAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.url = it.getString("url")
-            viewModel.title = it.getString("title")
-        }
-    }
 
     companion object {
         @JvmStatic

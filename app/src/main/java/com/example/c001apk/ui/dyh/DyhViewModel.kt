@@ -55,7 +55,6 @@ class DyhViewModel @AssistedInject constructor(
     var url: String? = null
     var isInit: Boolean = true
     var listSize: Int = -1
-    var listType: String = "lastupdate_desc"
     var page = 1
     var lastItem: String? = null
     var isRefreshing: Boolean = false
@@ -109,7 +108,7 @@ class DyhViewModel @AssistedInject constructor(
                         } else if (data.data?.isEmpty() == true) {
                             isEnd = true
                             if (listSize <= 0)
-                                loadingState.postValue(LoadingState.LoadingError(LOADING_EMPTY))
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
                             else {
                                 if (isRefreshing)
                                     dataListData.postValue(emptyList())

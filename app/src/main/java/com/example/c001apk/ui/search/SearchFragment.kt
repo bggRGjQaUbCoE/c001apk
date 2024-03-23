@@ -22,23 +22,24 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListener {
 
-    private val viewModel by viewModels<SearchFragmentViewModel>()
+    @Inject
+    lateinit var viewModelAssistedFactory: SearchFragmentViewModel.Factory
+    private val viewModel by viewModels<SearchFragmentViewModel> {
+        SearchFragmentViewModel.provideFactory(
+            viewModelAssistedFactory,
+            arguments?.getString("pageType").orEmpty(),
+            arguments?.getString("pageParam").orEmpty(),
+            arguments?.getString("title").orEmpty(),
+        )
+    }
     private var mAdapter: HistoryAdapter? = null
     private var mLayoutManager: FlexboxLayoutManager? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            viewModel.pageType = it.getString("pageType")
-            viewModel.pageParam = it.getString("pageParam")
-            viewModel.title = it.getString("title")
-        }
-    }
 
     companion object {
         @JvmStatic
@@ -165,7 +166,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                 .showSoftInput(binding.editText, 0)
             imeOptions = EditorInfo.IME_ACTION_SEARCH
             inputType = EditorInfo.TYPE_CLASS_TEXT
-            hint = if (!viewModel.pageType.isNullOrEmpty()) "在 ${viewModel.title} 中搜索"
+            hint = if (viewModel.pageType.isNotEmpty()) "在 ${viewModel.title} 中搜索"
             else "搜索"
 
             addTextChangedListener(object : TextWatcher {
@@ -180,10 +181,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                 override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
                 override fun afterTextChanged(s: Editable) {
-                    if (s.isEmpty())
-                        binding.clear.isVisible = false
-                    else
-                        binding.clear.isVisible = true
+                    binding.clear.isVisible = s.isNotEmpty()
                 }
             })
 
