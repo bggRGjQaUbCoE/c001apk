@@ -2,9 +2,9 @@ package com.example.c001apk.ui.follow
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.R
 import com.example.c001apk.databinding.BaseFragmentContainerBinding
+import com.example.c001apk.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

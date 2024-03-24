@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class Reply2ReplyBottomSheetViewModel @Inject constructor(
-    private val repository: BlackListRepo,
+    private val blackListRepo: BlackListRepo,
     private val historyRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
@@ -72,7 +72,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             listSize = replyTotalList.size
                             reply.data.forEach {
                                 if (it.entityType == "feed_reply")
-                                    if (!repository.checkUid(it.uid))
+                                    if (!blackListRepo.checkUid(it.uid))
                                         replyTotalList.add(it)
                             }
                             page++
@@ -249,7 +249,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
 
     fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveUid(uid)
+            blackListRepo.saveUid(uid)
         }
     }
 

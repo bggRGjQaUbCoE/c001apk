@@ -39,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AppAdapter(
-    private val repository: BlackListRepo,
+    private val blackListRepo: BlackListRepo,
     private val listener: ItemListener
 ) : BaseAdapter<ViewDataBinding>() {
 
@@ -197,12 +197,12 @@ class AppAdapter(
         val listener: ItemListener
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepo) {
+        fun bind(data: HomeFeedResponse.Data, blackListRepo: BlackListRepo) {
             if (!data.entities.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
                     data.entities.forEach {
-                        if (it.entityType == "feed" && !repository.checkUid(it.userInfo.uid))
+                        if (it.entityType == "feed" && !blackListRepo.checkUid(it.userInfo.uid))
                             imageTextScrollCard.add(it)
                     }
                     binding.title.text = data.title
@@ -229,13 +229,13 @@ class AppAdapter(
         val listener: ItemListener
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
-        fun bind(data: HomeFeedResponse.Data, repository: BlackListRepo) {
+        fun bind(data: HomeFeedResponse.Data, blackListRepo: BlackListRepo) {
             if (!data.entities.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     val imageTextScrollCard = ArrayList<HomeFeedResponse.Entities>()
                     data.entities.forEach {
                         if ((it.entityType == "topic" || it.entityType == "product")
-                            && !repository.checkTopic(it.title)
+                            && !blackListRepo.checkTopic(it.title)
                         )
                             imageTextScrollCard.add(it)
                     }
@@ -317,7 +317,10 @@ class AppAdapter(
                 binding.fans.text = "${data.fans}粉丝"
                 binding.act.text = DateUtils.fromToday(data.logintime) + "活跃"
                 binding.isFollow = data.isFollow ?: 0
-                if (data.isFollow == 0) {
+                if (data.isFollow == 1) {
+                    binding.followBtn.text = "已关注"
+                    binding.followBtn.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
+                } else {
                     binding.followBtn.text = "关注"
                     binding.followBtn.setTextColor(
                         MaterialColors.getColor(
@@ -326,9 +329,6 @@ class AppAdapter(
                             0
                         )
                     )
-                } else {
-                    binding.followBtn.text = "已关注"
-                    binding.followBtn.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
                 }
                 binding.followBtn.isVisible = PrefManager.isLogin
                 ImageUtil.showIMG(binding.avatar, data.userAvatar)
@@ -592,8 +592,8 @@ class AppAdapter(
 
     override fun onBindViewHolder(holder: BaseViewHolder<ViewDataBinding>, position: Int) {
         when (holder) {
-            is ImageTextScrollCardViewHolder -> holder.bind(currentList[position], repository)
-            is IconMiniScrollCardViewHolder -> holder.bind(currentList[position], repository)
+            is ImageTextScrollCardViewHolder -> holder.bind(currentList[position], blackListRepo)
+            is IconMiniScrollCardViewHolder -> holder.bind(currentList[position], blackListRepo)
             else -> super.onBindViewHolder(holder, position)
         }
     }

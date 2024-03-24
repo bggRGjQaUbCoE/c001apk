@@ -13,13 +13,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: HomeMenuRepo
+    private val homeMenuRepo: HomeMenuRepo
 ) : ViewModel() {
 
     var isInit = true
     var position: Int = 0
 
-    val tabListLiveData: LiveData<List<HomeMenu>> = repository.loadAllListLive()
+    val tabListLiveData: LiveData<List<HomeMenu>> = homeMenuRepo.loadAllListLive()
     val restart = MutableLiveData<Boolean>()
 
     val defaultList by lazy {
@@ -36,13 +36,13 @@ class HomeViewModel @Inject constructor(
 
     fun initTab() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insertList(defaultList)
+            homeMenuRepo.insertList(defaultList)
         }
     }
 
     fun updateTab(menuList: List<HomeMenu>) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateList(menuList)
+            homeMenuRepo.updateList(menuList)
             restart.postValue(true)
         }
     }

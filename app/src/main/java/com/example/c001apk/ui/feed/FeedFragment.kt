@@ -344,7 +344,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             viewModel.feedDataList,
             viewModel.articleList
         )
-        feedReplyAdapter = FeedReplyAdapter(viewModel.repository, ItemClickListener())
+        feedReplyAdapter = FeedReplyAdapter(viewModel.blackListRepo, ItemClickListener())
         feedFixAdapter =
             FeedFixAdapter(viewModel.replyCount.toString(), RefreshReplyListener())
 
@@ -569,8 +569,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             val paddingBottom: Int = decorView?.paddingBottom ?: 0
             val paddingLeft: Int = decorView?.paddingLeft ?: 0
             val paddingRight: Int = decorView?.paddingRight ?: 0
-            val width = 68.dp + paddingLeft + paddingRight
-            val height = 68.dp + paddingTop + paddingBottom
+            val width = 80.dp + paddingLeft + paddingRight
+            val height = 80.dp + paddingTop + paddingBottom
             dialog?.window?.setLayout(width, height)
             viewModel.fetchFeedReply()
         }

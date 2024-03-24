@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    val repository: BlackListRepo,
+    val blackListRepo: BlackListRepo,
     private val historyRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
@@ -172,7 +172,7 @@ class FeedViewModel @Inject constructor(
                                             && it.id == topReplyId
                                         )
                                             return@forEach
-                                        if (!repository.checkUid(it.uid))
+                                        if (!blackListRepo.checkUid(it.uid))
                                             feedReplyList.add(it)
                                     }
                                 }
@@ -461,7 +461,7 @@ class FeedViewModel @Inject constructor(
 
     fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveUid(uid)
+            blackListRepo.saveUid(uid)
         }
     }
 

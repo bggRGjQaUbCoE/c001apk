@@ -1,21 +1,21 @@
 package com.example.c001apk.ui.app
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.example.c001apk.ui.base.BaseAppFragment
-import com.example.c001apk.ui.home.IOnTabClickListener
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AppContentFragment : BaseAppFragment<AppContentViewModel>(), IOnTabClickListener {
+class AppContentFragment : BaseAppFragment<AppContentViewModel>() {
 
     private val type by lazy { arguments?.getString("type") }
 
     @Inject
     lateinit var viewModelAssistedFactory: AppContentViewModel.Factory
-     override val viewModel by viewModels<AppContentViewModel> {
-         AppContentViewModel.provideFactory(
+    override val viewModel by viewModels<AppContentViewModel> {
+        AppContentViewModel.provideFactory(
             viewModelAssistedFactory,
             arguments?.getString("id").orEmpty(),
             when (type) {
@@ -44,10 +44,14 @@ class AppContentFragment : BaseAppFragment<AppContentViewModel>(), IOnTabClickLi
             }
     }
 
-    override fun onReturnTop(isRefresh: Boolean?) {
-        binding.swipeRefresh.isRefreshing = true
-        binding.recyclerView.scrollToPosition(0)
-        refreshData()
+    override fun initObserve() {
+        super.initObserve()
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 }

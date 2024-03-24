@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:orientation="vertical"
+    app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
+    app:edgeToEdge="true"
+    app:fitsSystemWindowsInsets="@integer/internal_fragment_insets"
     tools:context=".ui.search.SearchFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -76,10 +78,10 @@
         android:id="@id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:layout_marginStart="10dp"
         android:text="@string/search_history"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -109,8 +111,8 @@
         android:scrollbars="none"
         app:fitsSystemWindowsInsets="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title"
         tools:itemCount="1"
         tools:listitem="@layout/item_search_history" />

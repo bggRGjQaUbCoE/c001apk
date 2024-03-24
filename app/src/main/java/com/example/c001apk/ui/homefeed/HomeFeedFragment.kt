@@ -3,6 +3,7 @@ package com.example.c001apk.ui.homefeed
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.res.Configuration
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -71,9 +72,11 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
         savedInstanceState: Bundle?
     ): View {
         _binding = BaseRefreshRecyclerviewBinding.inflate(inflater, container, false)
-        fab = FloatingActionButton(requireContext())
-        initPublish()
-        _binding?.root?.addView(fab)
+        if (viewModel.type == "feed" && PrefManager.isLogin) {
+            fab = FloatingActionButton(requireContext())
+            initPublish()
+            _binding?.root?.addView(fab)
+        }
         return binding.root
     }
 
@@ -125,6 +128,13 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
 
     override fun initObserve() {
         super.initObserve()
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
         viewModel.createDialog.observe(viewLifecycleOwner) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
                 val binding = ItemCaptchaBinding.inflate(
@@ -169,9 +179,21 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
 
     @SuppressLint("InflateParams")
     private fun initPublish() {
-        if (viewModel.type == "feed" && PrefManager.isLogin) {
-            val view = LayoutInflater.from(context)
-                .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
+        val view = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
+        bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view)
+        bottomSheetDialog.apply {
+            setIOnPublishClickListener(this@HomeFeedFragment)
+            setContentView(view)
+            setCancelable(false)
+            setCanceledOnTouchOutside(true)
+            window?.apply {
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+            type = "publish"
+        }
+
+        fab.apply {
             val lp = CoordinatorLayout.LayoutParams(
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT
@@ -183,29 +205,19 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
                 else 25.dp
             )
             lp.gravity = Gravity.BOTTOM or Gravity.END
-            fab.layoutParams = lp
-            (fab.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
-            fab.isVisible = true
-            bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view)
-            bottomSheetDialog.setIOnPublishClickListener(this)
-            bottomSheetDialog.apply {
-                setContentView(view)
-                setCancelable(false)
-                setCanceledOnTouchOutside(true)
-                window?.apply {
-                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                }
-                type = "publish"
-            }
-            fab.setOnClickListener {
+            setImageResource(R.drawable.ic_add1)
+            layoutParams = lp
+            (this.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
+            if (SDK_INT >= 26)
+                tooltipText = getString(R.string.publishFeed)
+            setOnClickListener {
                 if (PrefManager.SZLMID == "") {
                     Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                 } else {
                     bottomSheetDialog.show()
                 }
             }
-        } else
-            fab.isVisible = false
+        }
     }
 
     override fun onScrolled(dy: Int) {
@@ -313,7 +325,7 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
     }
 
     override fun onReturnTop() {
-        onReturnTop(null)
+        onReturnTop(true)
     }
 
 }

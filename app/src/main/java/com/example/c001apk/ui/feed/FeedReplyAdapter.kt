@@ -29,7 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class FeedReplyAdapter(
-    private val repository: BlackListRepo,
+    private val blackListRepo: BlackListRepo,
     private val listener: ItemListener
 ) :
     ListAdapter<TotalReplyResponse.Data, FeedReplyAdapter.ViewHolder>(FeedReplyDiffCallback()) {
@@ -77,7 +77,7 @@ class FeedReplyAdapter(
             reply: TotalReplyResponse.Data,
             haveTop: Boolean,
             topReplyId: String?,
-            repository: BlackListRepo
+            blackListRepo: BlackListRepo
         ) {
 
             if (!reply.username.contains("[楼主]") && !reply.username.contains("[置顶]")) {
@@ -117,7 +117,7 @@ class FeedReplyAdapter(
                 CoroutineScope(Dispatchers.Main).launch {
                     val sortedList = ArrayList<TotalReplyResponse.Data>()
                     reply.replyRows.forEach {
-                        if (!repository.checkUid(it.uid))
+                        if (!blackListRepo.checkUid(it.uid))
                             sortedList.add(it)
                     }
                     if (sortedList.isNotEmpty()) {
@@ -258,7 +258,7 @@ class FeedReplyAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(currentList[position], haveTop, topReplyId, repository)
+        holder.bind(currentList[position], haveTop, topReplyId, blackListRepo)
     }
 
 }

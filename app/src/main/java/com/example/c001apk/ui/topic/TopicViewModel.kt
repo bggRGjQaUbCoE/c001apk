@@ -39,16 +39,16 @@ class TopicViewModel @AssistedInject constructor(
         ): TopicViewModel
     }
 
-    // var isInit: Boolean = true
     var subtitle: String? = null
     var productTitle = "最近回复"
 
+    var postFollowData: HashMap<String, String>? = null
+    var isFollow: Boolean = false
     var tabSelected: Int? = null
     var topicList: List<TopicBean> = ArrayList()
 
-    //  val loadingState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
-    // val followState = MutableLiveData<Event<Pair<Boolean, String>>>()
+    val followState = MutableLiveData<Event<Boolean>>()
 
     fun fetchTopicLayout() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -65,6 +65,7 @@ class TopicViewModel @AssistedInject constructor(
                             type = data.data.entityType
                             subtitle = data.data.intro
                             getTopicList(data.data.tabList, data.data.selectedTab)
+                            checkFollow()
                             loadingState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
@@ -89,6 +90,7 @@ class TopicViewModel @AssistedInject constructor(
                             isFollow = data.data.userAction?.follow == 1
                             subtitle = data.data.intro
                             getTopicList(data.data.tabList, data.data.selectedTab)
+                            checkFollow()
                             loadingState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
@@ -113,27 +115,67 @@ class TopicViewModel @AssistedInject constructor(
         }
     }
 
-    fun saveTopic(title: String) {
+    // follow app/topic
+    fun onGetFollow(followUrl: String, tag: String?, id: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            blackListRepo.saveTopic(title)
+            networkRepo.getFollow(followUrl, tag, id)
+                .collect { result ->
+                    val response = result.getOrNull()
+                    if (response != null) {
+                        if (!response.message.isNullOrEmpty()) {
+                            if (response.message.contains("关注成功")) {
+                                isFollow = !isFollow
+                                checkFollow()
+                            }
+                            toastText.postValue(Event(response.message))
+                        }
+                    } else {
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                }
         }
     }
 
-    fun checkTopic(title: String) {
+    // follow product
+    fun onPostFollow() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (blackListRepo.checkTopic(title))
-                blockState.postValue(Event(true))
+            postFollowData?.let {
+                networkRepo.postFollow(it)
+                    .collect { result ->
+                        val response = result.getOrNull()
+                        if (response != null) {
+                            if (!response.message.isNullOrEmpty()) {
+                                if (response.message.contains("手机吧成功")) {
+                                    isFollow = !isFollow
+                                    checkFollow()
+                                }
+                                toastText.postValue(Event(response.message))
+                            }
+                        } else {
+                            result.exceptionOrNull()?.printStackTrace()
+                        }
+                    }
+            }
         }
     }
 
-    fun deleteTopic(title: String) {
+    private fun checkTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            blackListRepo.deleteTopic(title)
+            blockState.postValue(Event(blackListRepo.checkTopic(title)))
         }
     }
 
-    override fun fetchData() {
+    private fun checkFollow() {
+        viewModelScope.launch(Dispatchers.IO) {
+            followState.postValue(Event(isFollow))
+        }
+    }
 
+    override fun fetchData() {}
+
+    fun checkMenuState() {
+        checkTopic(title)
+        checkFollow()
     }
 
 }

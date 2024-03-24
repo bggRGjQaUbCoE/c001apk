@@ -1,16 +1,15 @@
 package com.example.c001apk.ui.follow
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.example.c001apk.ui.base.BaseAppFragment
-import com.example.c001apk.ui.home.IOnTabClickContainer
-import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class FollowFragment : BaseAppFragment<FollowViewModel>(), IOnTabClickListener {
+class FollowFragment : BaseAppFragment<FollowViewModel>() {
 
     @Inject
     lateinit var viewModelAssistedFactory: FollowViewModel.Factory
@@ -55,20 +54,14 @@ class FollowFragment : BaseAppFragment<FollowViewModel>(), IOnTabClickListener {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        (activity as? IOnTabClickContainer)?.tabController = this
-    }
+    override fun initObserve() {
+        super.initObserve()
 
-    override fun onPause() {
-        super.onPause()
-        (activity as? IOnTabClickContainer)?.tabController = null
-    }
-
-    override fun onReturnTop(isRefresh: Boolean?) {
-        binding.swipeRefresh.isRefreshing = true
-        binding.recyclerView.scrollToPosition(0)
-        refreshData()
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 }

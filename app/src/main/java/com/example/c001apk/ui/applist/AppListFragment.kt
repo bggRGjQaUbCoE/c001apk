@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.applist
 
 import android.content.res.Configuration
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -26,20 +27,12 @@ import com.example.c001apk.util.IntentUtil
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListener,
     IOnBottomClickListener {
 
-    @Inject
-    lateinit var viewModelAssistedFactory: AppListViewModel.Factory
-    override val viewModel by viewModels<AppListViewModel> {
-        AppListViewModel.provideFactory(
-            viewModelAssistedFactory,
-            requireContext().packageManager
-        )
-    }
+    override val viewModel by viewModels<AppListViewModel>()
     private lateinit var appsAdapter: AppListAdapter
     private lateinit var fab: FloatingActionButton
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
@@ -82,6 +75,8 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
     private fun initFab() {
         fab.apply {
             setImageResource(R.drawable.ic_update)
+            if (SDK_INT >= 26)
+                tooltipText = getString(R.string.update)
             val lp = CoordinatorLayout.LayoutParams(
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT
@@ -128,14 +123,14 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
         (activity as? IOnBottomClickContainer)?.controller = null
     }
 
+    override fun onReturnTop() {
+        onReturnTop(true)
+    }
+
     override fun onReturnTop(isRefresh: Boolean?) {
         binding.swipeRefresh.isRefreshing = true
         binding.recyclerView.scrollToPosition(0)
         refreshData()
-    }
-
-    override fun onReturnTop() {
-        onReturnTop(null)
     }
 
 }

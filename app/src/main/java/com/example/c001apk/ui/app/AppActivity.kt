@@ -49,13 +49,10 @@ class AppActivity : BaseActivity<BaseFragmentContainerBinding>() {
                 }
 
                 LoadingState.LoadingDone -> {
-                    if (!viewModel.tabList.isNullOrEmpty()) {
+                    if (!viewModel.tabList.isNullOrEmpty()
+                        || !viewModel.errMsg.isNullOrEmpty()
+                    ) {
                         beginTransaction()
-                    } else {
-                        binding.errorMessage.errMsg.apply {
-                            text = viewModel.errMsg
-                            isVisible = true
-                        }
                     }
                 }
 

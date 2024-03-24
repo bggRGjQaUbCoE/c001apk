@@ -44,9 +44,8 @@ class AppViewModel @AssistedInject constructor(
     val activityState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
 
-    //val followState = MutableLiveData<Event<Int?>>()
     val searchState = MutableLiveData<Event<Unit>>()
-    //val toastText = MutableLiveData<Event<Int?>>()
+    val followState = MutableLiveData<Event<Int>>()
 
     fun fetchAppInfo() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -65,16 +64,39 @@ class AppViewModel @AssistedInject constructor(
                             appData = appInfo.data
                             if (appInfo.data.commentStatusText == "允许评论" || appInfo.data.entityType == "appForum") {
                                 tabList = listOf("最近回复", "最新发布", "热度排序")
-                                searchState.postValue(Event(Unit))
                             } else {
                                 errMsg = appInfo.data.commentStatusText
                             }
-                            checkApp(appInfo.data.title) //menuBlock
+                            checkBlock(appInfo.data.title) //menuBlock
                             checkFollow() //menuFollow
                             activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
                         activityState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                }
+        }
+    }
+
+    fun onGetFollowApk(followUrl: String, tag: String?, id: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getFollow(followUrl, tag, id)
+                .collect { result ->
+                    val response = result.getOrNull()
+                    if (response != null) {
+                        if (!response.message.isNullOrEmpty()) {
+                            toastText.postValue(Event(response.message))
+                        } else if (response.data?.follow != null) {
+                            response.data.follow.let {
+                                appData?.userAction?.follow = it
+                                checkFollow()
+                                val text =  if (it == 1) "关注成功"
+                                else "取消关注成功"
+                                toastText.postValue(Event(text))
+                            }
+                        }
+                    } else {
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -101,13 +123,7 @@ class AppViewModel @AssistedInject constructor(
 
     }
 
-    fun saveTopic(title: String) {
-        viewModelScope.launch {
-            blackListRepo.saveTopic(title)
-        }
-    }
-
-    fun checkApp(title: String) {
+    private fun checkBlock(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
             blockState.postValue(Event((blackListRepo.checkTopic(title))))
         }
@@ -115,18 +131,20 @@ class AppViewModel @AssistedInject constructor(
 
     private fun checkFollow() {
         viewModelScope.launch(Dispatchers.IO) {
-            //  followState.postValue(Event(appData?.userAction?.follow))
+            appData?.userAction?.follow?.let {
+                followState.postValue(Event(it))
+            }
         }
     }
 
-    fun deleteTopic(title: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            blackListRepo.deleteTopic(title)
+    override fun fetchData() {}
+
+    fun checkMenuState() {
+        checkFollow()
+        searchState.postValue(Event(Unit))
+        appData?.title?.let {
+            checkBlock(it)
         }
-    }
-
-    override fun fetchData() {
-
     }
 
 }

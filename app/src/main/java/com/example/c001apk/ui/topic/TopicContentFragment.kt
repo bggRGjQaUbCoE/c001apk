@@ -1,13 +1,12 @@
 package com.example.c001apk.ui.topic
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.ui.base.BaseAppFragment
-import com.example.c001apk.ui.home.IOnTabClickContainer
-import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.search.IOnSearchMenuClickListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,7 +14,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class TopicContentFragment : BaseAppFragment<TopicContentViewModel>(),
-    IOnSearchMenuClickListener, IOnTabClickListener {
+    IOnSearchMenuClickListener {
 
     @Inject
     lateinit var viewModelAssistedFactory: TopicContentViewModel.Factory
@@ -38,10 +37,14 @@ class TopicContentFragment : BaseAppFragment<TopicContentViewModel>(),
             }
     }
 
-    override fun onReturnTop(isRefresh: Boolean?) {
-        binding.swipeRefresh.isRefreshing = true
-        binding.recyclerView.scrollToPosition(0)
-        refreshData()
+    override fun initObserve() {
+        super.initObserve()
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onSearch(type: String, value: String, id: String?) {
@@ -66,14 +69,12 @@ class TopicContentFragment : BaseAppFragment<TopicContentViewModel>(),
 
     override fun onResume() {
         super.onResume()
-        (parentFragment as? IOnTabClickContainer)?.tabController = this
         if (viewModel.title == "讨论")
             (parentFragment as? IOnSearchMenuClickContainer)?.controller = this
     }
 
     override fun onPause() {
         super.onPause()
-        (parentFragment as? IOnTabClickContainer)?.tabController = null
         if (viewModel.title == "讨论")
             (parentFragment as? IOnSearchMenuClickContainer)?.controller = null
     }

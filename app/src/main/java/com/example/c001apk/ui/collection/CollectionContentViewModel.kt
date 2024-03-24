@@ -19,7 +19,6 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import rikka.core.util.ContextUtils.requireActivity
 
 class CollectionContentViewModel @AssistedInject constructor(
     @Assisted("url") val url: String,

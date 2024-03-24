@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.collection
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.ui.base.BaseAppFragment
@@ -33,6 +34,13 @@ class CollectionContentFragment : BaseAppFragment<CollectionContentViewModel>() 
 
     override fun initObserve() {
         super.initObserve()
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
         viewModel.showCollection.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 requireActivity().supportFragmentManager
@@ -52,4 +60,5 @@ class CollectionContentFragment : BaseAppFragment<CollectionContentViewModel>() 
             }
         }
     }
+
 }

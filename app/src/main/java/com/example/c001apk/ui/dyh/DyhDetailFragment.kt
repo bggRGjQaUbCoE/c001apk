@@ -1,15 +1,14 @@
 package com.example.c001apk.ui.dyh
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.example.c001apk.ui.base.BaseAppFragment
-import com.example.c001apk.ui.home.IOnTabClickContainer
-import com.example.c001apk.ui.home.IOnTabClickListener
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class DyhDetailFragment : BaseAppFragment<DyhViewModel>(), IOnTabClickListener {
+class DyhDetailFragment : BaseAppFragment<DyhViewModel>() {
 
     @Inject
     lateinit var viewModelAssistedFactory: DyhViewModel.Factory
@@ -32,21 +31,14 @@ class DyhDetailFragment : BaseAppFragment<DyhViewModel>(), IOnTabClickListener {
             }
     }
 
-    override fun onResume() {
-        super.onResume()
-        (parentFragment as? IOnTabClickContainer)?.tabController = this
-    }
+    override fun initObserve() {
+        super.initObserve()
 
-    override fun onPause() {
-        super.onPause()
-        (parentFragment as? IOnTabClickContainer)?.tabController = null
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
-
-    override fun onReturnTop(isRefresh: Boolean?) {
-        binding.swipeRefresh.isRefreshing = true
-        binding.recyclerView.scrollToPosition(0)
-        refreshData()
-    }
-
 
 }

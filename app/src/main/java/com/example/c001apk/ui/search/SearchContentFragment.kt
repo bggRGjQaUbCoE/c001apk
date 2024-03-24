@@ -1,19 +1,18 @@
 package com.example.c001apk.ui.search
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.ui.base.BaseAppFragment
-import com.example.c001apk.ui.home.IOnTabClickContainer
-import com.example.c001apk.ui.home.IOnTabClickListener
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchContentFragment : BaseAppFragment<SearchContentViewModel>(),
-    IOnSearchMenuClickListener, IOnTabClickListener {
+    IOnSearchMenuClickListener {
 
     @Inject
     lateinit var viewModelAssistedFactory: SearchContentViewModel.Factory
@@ -53,22 +52,24 @@ class SearchContentFragment : BaseAppFragment<SearchContentViewModel>(),
         viewModel.loadingState.value = LoadingState.Loading
     }
 
-    override fun onReturnTop(isRefresh: Boolean?) {
-        binding.swipeRefresh.isRefreshing = true
-        binding.recyclerView.scrollToPosition(0)
-        refreshData()
-    }
-
     override fun onResume() {
         super.onResume()
         (parentFragment as? IOnSearchMenuClickContainer)?.controller = this
-        (parentFragment as? IOnTabClickContainer)?.tabController = this
     }
 
     override fun onPause() {
         super.onPause()
         (parentFragment as? IOnSearchMenuClickContainer)?.controller = null
-        (parentFragment as? IOnTabClickContainer)?.tabController = null
+    }
+
+    override fun initObserve() {
+        super.initObserve()
+
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 }

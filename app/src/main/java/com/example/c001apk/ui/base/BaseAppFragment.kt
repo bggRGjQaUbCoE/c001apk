@@ -1,20 +1,23 @@
 package com.example.c001apk.ui.base
 
-import android.widget.Toast
 import androidx.recyclerview.widget.ConcatAdapter
 import com.example.c001apk.adapter.AppAdapter
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.ui.home.IOnTabClickContainer
+import com.example.c001apk.ui.home.IOnTabClickListener
 
 // SwipeRefreshLayout + RecyclerView
-abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>() {
+abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>(),
+    IOnTabClickListener {
 
     private lateinit var appAdapter: AppAdapter
-    lateinit var footerAdapter: FooterAdapter
+    private lateinit var footerAdapter: FooterAdapter
 
     override fun initObserve() {
         super.initObserve()
+
         viewModel.footerState.observe(viewLifecycleOwner) {
             footerAdapter.setLoadState(it)
             if (it !is FooterState.Loading) {
@@ -27,19 +30,12 @@ abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>() {
             appAdapter.submitList(it)
         }
 
-        viewModel.toastText.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let { text ->
-                context?.let {
-                    Toast.makeText(it, text, Toast.LENGTH_SHORT).show()
-                }
+        viewModel.followUserState.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                appAdapter.notifyItemChanged(it)
             }
         }
 
-        viewModel.followState.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                mAdapter.notifyItemChanged(it)
-            }
-        }
     }
 
     override fun initAdapter() {
@@ -52,6 +48,24 @@ abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>() {
         override fun onReLoad() {
             loadMore()
         }
+    }
+
+    override fun onReturnTop(isRefresh: Boolean?) {
+        if (binding.swipeRefresh.isEnabled) {
+            binding.swipeRefresh.isRefreshing = true
+            binding.recyclerView.scrollToPosition(0)
+            refreshData()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (parentFragment as? IOnTabClickContainer)?.tabController = this
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (parentFragment as? IOnTabClickContainer)?.tabController = null
     }
 
 }

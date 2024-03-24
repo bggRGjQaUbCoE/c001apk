@@ -3,6 +3,7 @@ package com.example.c001apk.ui.hometopic
 import android.os.Bundle
 import androidx.fragment.app.viewModels
 import com.example.c001apk.ui.base.BaseAppFragment
+import com.example.c001apk.ui.main.INavViewContainer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -29,4 +30,13 @@ class HomeTopicContentFragment : BaseAppFragment<HomeTopicContentViewModel>() {
         }
     }
 
+    override fun onScrolled(dy: Int) {
+        if (viewModel.listSize != -1 && isAdded) {
+            if (dy > 0) {
+                (activity as? INavViewContainer)?.hideNavigationView()
+            } else if (dy < 0) {
+                (activity as? INavViewContainer)?.showNavigationView()
+            }
+        }
+    }
 }

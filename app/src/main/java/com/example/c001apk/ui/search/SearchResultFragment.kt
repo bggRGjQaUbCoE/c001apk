@@ -125,6 +125,9 @@ class SearchResultFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
         binding.collapsingToolbar.isTitleEnabled = false
         binding.toolBar.apply {
             title = viewModel.keyWord
+            setOnClickListener {
+                activity?.supportFragmentManager?.popBackStack()
+            }
             setTitleTextAppearance(requireContext(), R.style.Toolbar_TitleText)
             if (viewModel.pageType.isNotEmpty())
                 subtitle = when (viewModel.pageType) {

@@ -6,7 +6,9 @@ import com.example.c001apk.ui.base.BasePagerFragment
 import com.example.c001apk.ui.collection.CollectionContentFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CoolPicFragment : BasePagerFragment(), IOnTabClickContainer {
 
     private val title by lazy { arguments?.getString("title").orEmpty() }

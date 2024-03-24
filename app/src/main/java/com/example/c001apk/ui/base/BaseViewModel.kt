@@ -2,7 +2,6 @@ package com.example.c001apk.ui.base
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 
 abstract class BaseViewModel : ViewModel() {

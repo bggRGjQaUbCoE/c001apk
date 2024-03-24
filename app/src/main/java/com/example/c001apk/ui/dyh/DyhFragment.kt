@@ -5,7 +5,9 @@ import androidx.fragment.app.Fragment
 import com.example.c001apk.ui.base.BasePagerFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DyhFragment : BasePagerFragment(), IOnTabClickContainer {
 
     private val id by lazy { arguments?.getString("id").orEmpty() }

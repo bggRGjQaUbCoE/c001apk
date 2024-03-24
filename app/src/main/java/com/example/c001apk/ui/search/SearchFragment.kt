@@ -129,7 +129,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
                     R.anim.right_out
                 )
                 .replace(
-                    R.id.searchFragment,
+                    R.id.fragmentContainer,
                     SearchResultFragment.newInstance(
                         binding.editText.text.toString(),
                         viewModel.pageType,

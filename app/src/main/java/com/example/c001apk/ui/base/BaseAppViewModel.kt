@@ -22,13 +22,11 @@ abstract class BaseAppViewModel(
     val networkRepo: NetworkRepo
 ) : BaseViewModel() {
 
-    var isFollow: Boolean = false
-
-    var postFollowData: HashMap<String, String>? = null
     val dataList = MutableLiveData<List<HomeFeedResponse.Data>>()
-    var followState = MutableLiveData<Event<Int>>() // position of user/feed detail
+
+    var followUserState = MutableLiveData<Event<Int?>>() // position of user/feed detail
     val footerState = MutableLiveData<FooterState>()
-    val toastText = MutableLiveData<Event<String>>()
+    val toastText = MutableLiveData<Event<String?>>()
 
     open fun showCollection(id: String, title: String) {}
 
@@ -97,7 +95,9 @@ abstract class BaseAppViewModel(
         }
 
         override fun onDeleteClicked(entityType: String, id: String, position: Int) {
-            onDeleteFeed("/v6/feed/deleteFeed", id, position)
+            val url = if (entityType == "feed") "/v6/feed/deleteFeed"
+            else "/v6/feed/deleteReply"
+            onDeleteFeed(url, id, position)
         }
     }
 
@@ -153,6 +153,7 @@ abstract class BaseAppViewModel(
         }
     }
 
+    // follow user
     fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postFollowUnFollow(url, uid)
@@ -167,7 +168,13 @@ abstract class BaseAppViewModel(
                             val userList = dataList.value?.toMutableList() ?: ArrayList()
                             userList[position].isFollow = isFollow
                             dataList.postValue(userList)
-                            followState.postValue(Event(position))
+                            followUserState.postValue(Event(position))
+                            toastText.postValue(
+                                Event(
+                                    if (isFollow == 1) "关注成功"
+                                    else "取消关注成功"
+                                )
+                            )
                         }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
@@ -176,47 +183,15 @@ abstract class BaseAppViewModel(
         }
     }
 
-    fun onGetFollow(followUrl: String, tag: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getFollow(followUrl, tag, null)
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        if (!response.message.isNullOrEmpty()) {
-                            if (response.message.contains("关注成功")) {
-                                isFollow = !isFollow
-                                // followState.postValue(Event(Pair(true, response.message)))
-                            } else {
-                                // followState.postValue(Event(Pair(false, response.message)))
-                            }
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
-                }
+    fun saveTopic(title: String) {
+        viewModelScope.launch {
+            blackListRepo.saveTopic(title)
         }
     }
 
-    fun onPostFollow() {
+    fun deleteTopic(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            postFollowData?.let {
-                networkRepo.postFollow(it)
-                    .collect { result ->
-                        val response = result.getOrNull()
-                        if (response != null) {
-                            if (!response.message.isNullOrEmpty()) {
-                                if (response.message.contains("手机吧成功")) {
-                                    isFollow = !isFollow
-                                    // followState.postValue(Event(Pair(true, response.message)))
-                                } else {
-                                    // followState.postValue(Event(Pair(false, response.message)))
-                                }
-                            }
-                        } else {
-                            result.exceptionOrNull()?.printStackTrace()
-                        }
-                    }
-            }
+            blackListRepo.deleteTopic(title)
         }
     }
 

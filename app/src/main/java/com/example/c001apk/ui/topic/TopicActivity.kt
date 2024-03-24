@@ -7,13 +7,13 @@ import androidx.core.view.isVisible
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
-import com.example.c001apk.databinding.ActivityTopicBinding
+import com.example.c001apk.databinding.BaseFragmentContainerBinding
 import com.example.c001apk.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
 
 @AndroidEntryPoint
-class TopicActivity : BaseActivity<ActivityTopicBinding>() {
+class TopicActivity : BaseActivity<BaseFragmentContainerBinding>() {
 
     private val viewModel by viewModels<TopicViewModel>(
         extrasProducer = {

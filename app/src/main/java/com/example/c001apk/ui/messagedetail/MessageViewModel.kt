@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class MessageViewModel @AssistedInject constructor(
     @Assisted val type: String,
-    private val repository: BlackListRepo,
+    private val blackListRepo: BlackListRepo,
     private val networkRepo: NetworkRepo
 ) : BaseViewModel() {
 
@@ -81,7 +81,7 @@ class MessageViewModel @AssistedInject constructor(
                                         || it.entityType == "feed_reply"
                                         || it.entityType == "notification"
                                     )
-                                        if (!repository.checkUid(it.uid))
+                                        if (!blackListRepo.checkUid(it.uid))
                                             messageList.add(it)
                                 }
                             }

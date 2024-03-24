@@ -18,7 +18,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.GRAVITY_CENTER
 import com.google.android.material.tabs.TabLayout.MODE_SCROLLABLE
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
 
     private val viewModel by viewModels<TopicViewModel>(ownerProducer = { requireActivity() })
@@ -49,19 +51,18 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
             }
         }
 
-        /*viewModel.followState.observe(viewLifecycleOwner) { event ->
+        viewModel.followState.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
-                Toast.makeText(requireContext(), it.second, Toast.LENGTH_SHORT).show()
-                if (it.first) {
-                    updateFollowMenu()
-                }
+                subscribe.title = if (it) "取消关注"
+                else "关注"
             }
-        }*/
-    }
+        }
 
-    private fun updateFollowMenu() {
-        subscribe.title = if (viewModel.isFollow) "取消关注"
-        else "关注"
+        viewModel.toastText.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun iOnTabSelected(tab: TabLayout.Tab?) {
@@ -92,9 +93,10 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
         binding.toolBar.apply {
             title = if (viewModel.type == "topic") viewModel.url.replace("/t/", "")
             else viewModel.title
-            viewModel.subtitle?.let { subtitle = viewModel.subtitle }
+            viewModel.subtitle?.let { subtitle = it }
 
             inflateMenu(R.menu.topic_product_menu)
+
             order = menu.findItem(R.id.order)
             order.isVisible = viewModel.type == "product"
                     && binding.viewPager.currentItem == tabList.indexOf("讨论")
@@ -108,11 +110,10 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
             )?.isChecked = true
 
             menuBlock = menu.findItem(R.id.block)
-            viewModel.checkTopic(viewModel.title)
-
             subscribe = menu.findItem(R.id.subscribe)
             subscribe.isVisible = PrefManager.isLogin
-            updateFollowMenu()
+
+            viewModel.checkMenuState()
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
@@ -180,7 +181,7 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
                                     if (viewModel.isFollow) "/v6/feed/unFollowTag"
                                     else "/v6/feed/followTag"
                                 val tag = viewModel.url.replace("/t/", "")
-                                viewModel.onGetFollow(followUrl, tag)
+                                viewModel.onGetFollow(followUrl, tag, null)
                             }
 
                             "product" -> {

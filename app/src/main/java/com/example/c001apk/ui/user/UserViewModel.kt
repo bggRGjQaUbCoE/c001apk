@@ -1,22 +1,17 @@
 package com.example.c001apk.ui.user
 
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.LoadingState
-import com.example.c001apk.constant.Constants
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_FAILED
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.UserProfileResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.ui.base.BaseAppViewModel
 import com.example.c001apk.util.Event
-import com.example.c001apk.util.PrefManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -42,6 +37,7 @@ class UserViewModel @AssistedInject constructor(
     var isAInit: Boolean = true
     val activityState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
+    val followState = MutableLiveData<Event<Int?>>()
     var userData: UserProfileResponse.Data? = null
 
     fun fetchUser() {
@@ -55,9 +51,6 @@ class UserViewModel @AssistedInject constructor(
                     } else if (user?.data != null) {
                         userData = user.data
                         activityState.postValue(LoadingState.LoadingDone)
-
-                        // isRefreshing = true
-                        // fetchData()
                     } else {
                         activityState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
@@ -137,7 +130,13 @@ class UserViewModel @AssistedInject constructor(
                             toastText.postValue(Event(response.message))
                         } else {
                             userData?.isFollow = if (userData?.isFollow == 1) 0 else 1
-                            //  followState.postValue(userData?.isFollow ?: 0)
+                            checkFollow()
+                            toastText.postValue(
+                                Event(
+                                    if (userData?.isFollow == 1) "关注成功"
+                                    else "取消关注成功"
+                                )
+                            )
                         }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
@@ -146,73 +145,9 @@ class UserViewModel @AssistedInject constructor(
         }
     }
 
-    inner class ItemClickListener : ItemListener {
-        override fun onViewFeed(
-            view: View,
-            id: String?,
-            uid: String?,
-            username: String?,
-            userAvatar: String?,
-            deviceTitle: String?,
-            message: String?,
-            dateline: String?,
-            rid: Any?,
-            isViewReply: Any?
-        ) {
-            super.onViewFeed(
-                view,
-                id,
-                uid,
-                username,
-                userAvatar,
-                deviceTitle,
-                message,
-                dateline,
-                rid,
-                isViewReply
-            )
-            viewModelScope.launch(Dispatchers.IO) {
-                if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
-                    historyRepo.saveHistory(
-                        id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
-                        deviceTitle.toString(), message.toString(), dateline.toString()
-                    )
-            }
-        }
-
-        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
-            if (PrefManager.isLogin) {
-                if (PrefManager.SZLMID.isEmpty())
-                    toastText.postValue(Event(Constants.SZLM_ID))
-                else onPostLikeFeed(id, position, likeData)
-            }
-        }
-
-        override fun onBlockUser(id: String, uid: String, position: Int) {
-            viewModelScope.launch(Dispatchers.IO) {
-                blackListRepo.saveUid(uid)
-            }
-            val currentList = dataList.value?.toMutableList() ?: ArrayList()
-            currentList.removeAt(position)
-            dataList.postValue(currentList)
-        }
-
-        override fun onDeleteClicked(entityType: String, id: String, position: Int) {
-            onDeleteFeed("/v6/feed/deleteFeed", id, position)
-        }
-    }
-
-
     fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             blackListRepo.saveUid(uid)
-        }
-    }
-
-    fun checkUid(uid: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (blackListRepo.checkUid(uid))
-                blockState.postValue(Event(true))
         }
     }
 
@@ -222,5 +157,21 @@ class UserViewModel @AssistedInject constructor(
         }
     }
 
+    fun checkMenuState() {
+        checkUid(uid)
+        checkFollow()
+    }
+
+    private fun checkUid(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            blockState.postValue(Event(blackListRepo.checkUid(uid)))
+        }
+    }
+
+    private fun checkFollow() {
+        viewModelScope.launch(Dispatchers.IO) {
+            followState.postValue(Event(userData?.isFollow ?: 0))
+        }
+    }
 
 }

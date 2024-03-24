@@ -100,7 +100,7 @@
     <string name="user_black_list">用户黑名单</string>
     <string name="add">添加</string>
     <string name="block">加入黑名单</string>
-    <string name="publishFeed">发动态</string>
+    <string name="publishFeed">发布动态</string>
     <string name="share">分享</string>
     <string name="history">浏览历史</string>
     <string name="record_history">记录浏览历史</string>
@@ -131,4 +131,5 @@
     <string name="edit_tab">编辑Tab</string>
     <string name="random_value">随机值</string>
     <string name="system_info">使用系统信息</string>
+    <string name="update">更新</string>
 </resources>

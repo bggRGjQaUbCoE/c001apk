@@ -16,7 +16,7 @@ class SearchFragmentViewModel @AssistedInject constructor(
     @Assisted("pageType") var pageType: String,
     @Assisted("pageParam") val pageParam: String,
     @Assisted("title") var title: String,
-    private val repository: SearchHistoryRepo
+    private val historyRepo: SearchHistoryRepo
 ) : ViewModel() {
 
     @AssistedFactory
@@ -41,16 +41,16 @@ class SearchFragmentViewModel @AssistedInject constructor(
 
     var type: String? = null
 
-    val blackListLiveData: LiveData<List<StringEntity>> = repository.loadAllListLive()
+    val blackListLiveData: LiveData<List<StringEntity>> = historyRepo.loadAllListLive()
 
     fun insertData(data: String) {
         viewModelScope.launch(Dispatchers.IO) {
             with(StringEntity(data)) {
-                if (repository.checkHistory(data)) {
+                if (historyRepo.checkHistory(data)) {
                     val max = blackListLiveData.value?.maxOfOrNull { it.id } ?: -1
-                    repository.updateHistory(data, max + 1)
+                    historyRepo.updateHistory(data, max + 1)
                 } else
-                    repository.insertHistory(this)
+                    historyRepo.insertHistory(this)
             }
 
         }
@@ -58,13 +58,13 @@ class SearchFragmentViewModel @AssistedInject constructor(
 
     fun deleteData(data: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteHistory(data)
+            historyRepo.deleteHistory(data)
         }
     }
 
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteAllUser()
+            historyRepo.deleteAllUser()
         }
     }
 

@@ -92,6 +92,7 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
                 )
             )
             setOnRefreshListener {
+                binding.swipeRefresh.isRefreshing = true
                 refreshData()
             }
         }
@@ -123,7 +124,10 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
                 }
 
                 LoadingState.LoadingDone -> {
-                    binding.swipeRefresh.isEnabled = true
+                    binding.swipeRefresh.apply {
+                        isEnabled = true
+                        isRefreshing = false
+                    }
                 }
 
                 is LoadingState.LoadingError -> {
@@ -147,7 +151,6 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
                 binding.indicator.parent.isVisible = false
             }
         }
-
     }
 
     private fun initError() {
@@ -184,6 +187,7 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
 
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
+                        && !binding.swipeRefresh.isRefreshing
                     ) {
                         loadMore()
                     }

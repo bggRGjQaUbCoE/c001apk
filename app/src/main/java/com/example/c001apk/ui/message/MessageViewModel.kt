@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MessageViewModel @Inject constructor(
-    private val repository: BlackListRepo,
+    private val blackListRepo: BlackListRepo,
     private val historyRepo: HistoryFavoriteRepo,
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
@@ -129,7 +129,7 @@ class MessageViewModel @Inject constructor(
                             if (isRefreshing || isLoadMore) {
                                 feed.data.forEach {
                                     if (it.entityType == "notification")
-                                        if (!repository.checkUid(it.fromuid))
+                                        if (!blackListRepo.checkUid(it.fromuid))
                                             messageList.add(it)
                                 }
                             }
@@ -176,7 +176,7 @@ class MessageViewModel @Inject constructor(
 
     fun saveUid(uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveUid(uid)
+            blackListRepo.saveUid(uid)
         }
     }
 
