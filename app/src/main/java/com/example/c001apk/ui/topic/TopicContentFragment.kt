@@ -59,11 +59,8 @@ class TopicContentFragment : BaseAppFragment<TopicContentViewModel>(),
             "最新发布" -> viewModel.url =
                 "/page?url=/product/feedList?type=feed&id=$id&ignoreEntityById=1&listType=dateline_desc"
         }
-        viewModel.dataList.postValue(emptyList())
+        viewModel.dataList.value = emptyList()
         viewModel.footerState.value = FooterState.LoadingDone
-        binding.swipeRefresh.isEnabled = false
-        binding.errorMessage.errMsg.isVisible = false
-        binding.errorLayout.parent.isVisible = false
         viewModel.loadingState.value = LoadingState.Loading
     }
 

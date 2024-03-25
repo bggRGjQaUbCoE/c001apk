@@ -72,8 +72,12 @@ class FollowViewModel @AssistedInject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getFollowList(url.toString(), uid, page, lastItem)
                 .onStart {
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val list = dataList.value?.toMutableList() ?: ArrayList()
@@ -165,8 +169,12 @@ class FollowViewModel @AssistedInject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getDataList(url.toString(), title.toString(), null, lastItem, page)
                 .onStart {
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val list = dataList.value?.toMutableList() ?: ArrayList()

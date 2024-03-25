@@ -63,8 +63,12 @@ class SearchContentViewModel @AssistedInject constructor(
                 pageType, pageParam, page, lastItem
             )
                 .onStart {
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val searchList = dataList.value?.toMutableList() ?: ArrayList()

@@ -54,8 +54,12 @@ class AppContentViewModel @AssistedInject constructor(
                 commentBaseUrl + id + appCommentSort, appCommentTitle, null, lastItem, page
             )
                 .onStart {
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val appCommentList = dataList.value?.toMutableList() ?: ArrayList()

@@ -63,8 +63,12 @@ class UserViewModel @AssistedInject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getUserFeed(uid, page, lastItem)
                 .onStart {
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val feedList = dataList.value?.toMutableList() ?: ArrayList()

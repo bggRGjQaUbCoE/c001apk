@@ -69,8 +69,12 @@ class HomeFeedViewModel @AssistedInject constructor(
                 .onStart {
                     if (firstLaunch == 1)
                         firstLaunch = 0
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val feed = result.getOrNull()
@@ -178,8 +182,12 @@ class HomeFeedViewModel @AssistedInject constructor(
                 page
             )
                 .onStart {
-                    if (isLoadMore)
-                        footerState.postValue(FooterState.Loading)
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
                 }
                 .collect { result ->
                     val feed = result.getOrNull()

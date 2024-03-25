@@ -116,25 +116,14 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
         viewModel.loadingState.observe(viewLifecycleOwner) {
             when (it) {
                 LoadingState.Loading -> {
-                    binding.indicator.parent.apply {
-                        isIndeterminate = true
-                        isVisible = true
-                    }
-                    refreshData()
+                    if (!viewModel.isLoadMore)
+                        refreshData()
                 }
 
-                LoadingState.LoadingDone -> {
-                    binding.swipeRefresh.apply {
-                        isEnabled = true
-                        isRefreshing = false
-                    }
-                }
+                LoadingState.LoadingDone -> {}
 
                 is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.apply {
-                        text = it.errMsg
-                        isVisible = true
-                    }
+                    binding.errorMessage.errMsg.text = it.errMsg
                 }
 
                 is LoadingState.LoadingFailed -> {
@@ -142,20 +131,20 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
                         msg.text = it.msg
                         retry.text = if (it.msg == LOADING_EMPTY) getString(R.string.refresh)
                         else getString(R.string.retry)
-                        parent.isVisible = true
                     }
                 }
             }
-            if (it !is LoadingState.Loading) {
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.isVisible = false
-            }
+            binding.indicator.parent.isIndeterminate = it is LoadingState.Loading
+            binding.indicator.parent.isVisible = it is LoadingState.Loading
+            binding.swipeRefresh.isEnabled = it is LoadingState.LoadingDone
+            binding.errorMessage.errMsg.isVisible = it is LoadingState.LoadingError
+            binding.errorLayout.parent.isVisible = it is LoadingState.LoadingFailed
+            binding.swipeRefresh.isRefreshing = false
         }
     }
 
     private fun initError() {
         binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.isVisible = false
             viewModel.loadingState.value = LoadingState.Loading
         }
     }
