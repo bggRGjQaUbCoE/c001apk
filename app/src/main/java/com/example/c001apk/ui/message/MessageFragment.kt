@@ -32,6 +32,8 @@ import com.example.c001apk.util.Event
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.doOnMainThreadIdle
+import com.example.c001apk.util.setBottomPaddingSpace
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerMessItemDecoration
 import com.google.android.material.color.MaterialColors
@@ -127,6 +129,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.messageData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
+            doOnMainThreadIdle {
+                binding.recyclerView.setBottomPaddingSpace()
+            }
         }
     }
 
@@ -162,12 +167,10 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.listSize != -1) {
-                    if (dy > 0) {
-                        (activity as? INavViewContainer)?.hideNavigationView()
-                    } else if (dy < 0) {
-                        (activity as? INavViewContainer)?.showNavigationView()
-                    }
+                if (dy > 0) {
+                    (activity as? INavViewContainer)?.hideNavigationView()
+                } else if (dy < 0) {
+                    (activity as? INavViewContainer)?.showNavigationView()
                 }
             }
         })
@@ -204,6 +207,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
                 addItemDecoration(StaggerMessItemDecoration(10.dp))
+        }
+        doOnMainThreadIdle {
+            binding.recyclerView.setBottomPaddingSpace()
         }
     }
 

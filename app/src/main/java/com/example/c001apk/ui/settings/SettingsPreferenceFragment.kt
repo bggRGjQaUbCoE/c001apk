@@ -28,6 +28,8 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getDeviceCode
 import com.example.c001apk.util.TokenDeviceUtils.randHexString
+import com.example.c001apk.util.doOnMainThreadIdle
+import com.example.c001apk.util.setBottomPaddingSpace
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
@@ -60,6 +62,10 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
                 }
             })
+
+            doOnMainThreadIdle {
+                recyclerView.setBottomPaddingSpace()
+            }
 
         }
         return recyclerView

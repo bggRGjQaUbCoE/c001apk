@@ -31,12 +31,10 @@ class HomeTopicContentFragment : BaseAppFragment<HomeTopicContentViewModel>() {
     }
 
     override fun onScrolled(dy: Int) {
-        if (viewModel.listSize != -1 && isAdded) {
-            if (dy > 0) {
-                (activity as? INavViewContainer)?.hideNavigationView()
-            } else if (dy < 0) {
-                (activity as? INavViewContainer)?.showNavigationView()
-            }
+        if (dy > 0) {
+            (activity as? INavViewContainer)?.hideNavigationView()
+        } else if (dy < 0) {
+            (activity as? INavViewContainer)?.showNavigationView()
         }
     }
 }

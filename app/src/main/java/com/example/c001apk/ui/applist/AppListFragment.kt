@@ -24,6 +24,8 @@ import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.doOnMainThreadIdle
+import com.example.c001apk.util.setBottomPaddingSpace
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,6 +66,9 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
         viewModel.items.observe(viewLifecycleOwner) {
             appsAdapter.submitList(it)
             binding.swipeRefresh.isRefreshing = false
+            doOnMainThreadIdle {
+                binding.recyclerView.setBottomPaddingSpace()
+            }
         }
 
         viewModel.setFab.observe(viewLifecycleOwner) {
@@ -101,12 +106,10 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
     }
 
     override fun onScrolled(dy: Int) {
-        if (viewModel.listSize != -1 && isAdded) {
-            if (dy > 0) {
-                (activity as? INavViewContainer)?.hideNavigationView()
-            } else if (dy < 0) {
-                (activity as? INavViewContainer)?.showNavigationView()
-            }
+        if (dy > 0) {
+            (activity as? INavViewContainer)?.hideNavigationView()
+        } else if (dy < 0) {
+            (activity as? INavViewContainer)?.showNavigationView()
         }
     }
 
