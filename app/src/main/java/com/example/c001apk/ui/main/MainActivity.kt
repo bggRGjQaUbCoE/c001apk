@@ -48,6 +48,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
         }
 
         binding.viewPager.apply {
+            offscreenPageLimit = 2
             adapter = object : FragmentStateAdapter(this@MainActivity) {
                 override fun getItemCount() = 3
                 override fun createFragment(position: Int): Fragment {
