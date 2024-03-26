@@ -99,8 +99,7 @@
         android:src="@drawable/ic_clear_all"
         android:tooltipText="@string/clearAll"
         app:layout_constraintBottom_toBottomOf="@id/title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="?attr/colorPrimary" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

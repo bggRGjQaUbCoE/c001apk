@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
-import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.repository.BlackListRepo

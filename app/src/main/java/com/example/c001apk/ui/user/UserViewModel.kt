@@ -35,7 +35,6 @@ class UserViewModel @AssistedInject constructor(
 
     // activity
     var isAInit: Boolean = true
-    val activityState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
     val followState = MutableLiveData<Event<Int?>>()
     var userData: UserProfileResponse.Data? = null

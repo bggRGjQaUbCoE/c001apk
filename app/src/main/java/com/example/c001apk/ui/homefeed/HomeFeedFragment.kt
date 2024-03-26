@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R

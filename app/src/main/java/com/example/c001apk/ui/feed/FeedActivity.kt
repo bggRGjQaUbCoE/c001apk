@@ -1,91 +1,47 @@
 package com.example.c001apk.ui.feed
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.core.view.isVisible
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
-import com.example.c001apk.constant.Constants
-import com.example.c001apk.databinding.ActivityFeedBinding
-import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.ui.base.BaseViewActivity
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 
 @AndroidEntryPoint
-class FeedActivity : BaseActivity<ActivityFeedBinding>() {
+class FeedActivity : BaseViewActivity<FeedViewModel>() {
 
-    private val viewModel by viewModels<FeedViewModel>()
-    private val id by lazy { intent.getStringExtra("id") }
-    private val frid by lazy { intent.getStringExtra("rid") }
-    private val isViewReply by lazy { intent.getBooleanExtra("viewReply", false) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initData()
-        initObserve()
-
-        binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.isVisible = false
-            viewModel.loadingState.value = LoadingState.Loading
+    override val viewModel by viewModels<FeedViewModel>(
+        extrasProducer = {
+            defaultViewModelCreationExtras.withCreationCallback<FeedViewModel.Factory> { factory ->
+                factory.create(
+                    intent.getStringExtra("id").orEmpty(),
+                    intent.getStringExtra("rid"),
+                    intent.getBooleanExtra("viewReply", false),
+                )
+            }
         }
+    )
 
-    }
-
-    private fun initObserve() {
-        viewModel.loadingState.observe(this) {
-            when (it) {
-                LoadingState.Loading -> {
-                    binding.indicator.parent.isIndeterminate = true
-                    binding.indicator.parent.isVisible = true
-                    viewModel.fetchFeedData()
-                }
-
-                LoadingState.LoadingDone -> {
-                    loadFeedDetail()
-                }
-
-                is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.apply {
-                        text = it.errMsg
-                        isVisible = true
-                    }
-                }
-
-                is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.apply {
-                        msg.text = it.msg
-                        retry.text = if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
-                        else getString(R.string.retry)
-                        parent.isVisible = true
-                    }
-                }
-            }
-            if (it !is LoadingState.Loading) {
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.isVisible = false
-            }
+    override fun initData() {
+        if (viewModel.isAInit) {
+            viewModel.isAInit = false
+            viewModel.activityState.value = LoadingState.Loading
         }
     }
 
-    private fun initData() {
-        if (viewModel.isInitFeed) {
-            viewModel.isInitFeed = false
-            viewModel.id = id
-            viewModel.frid = frid
-            viewModel.isViewReply = isViewReply
-            viewModel.loadingState.value = LoadingState.Loading
-        }
+    override fun fetchData() {
+        viewModel.fetchFeedData()
     }
 
     @SuppressLint("CommitTransaction")
-    private fun loadFeedDetail() {
+    override fun beginTransaction() {
         if (viewModel.feedType != "vote") // not done yet
-            if (supportFragmentManager.findFragmentById(R.id.feedFragment) == null) {
+            if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
                 supportFragmentManager
                     .beginTransaction()
                     .replace(
-                        R.id.feedFragment,
+                        R.id.fragmentContainer,
                         /*when (viewModel.feedType) {
                             "vote" -> FeedVoteFragment.newInstance(viewModel.id)
                             else -> FeedFragmentNew()

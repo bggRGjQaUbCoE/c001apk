@@ -3,7 +3,6 @@ package com.example.c001apk.ui.feed
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
@@ -16,60 +15,64 @@ import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.ui.base.BaseAppViewModel
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
-import javax.inject.Inject
 
-@HiltViewModel
-class FeedViewModel @Inject constructor(
-    val blackListRepo: BlackListRepo,
-    private val historyRepo: HistoryFavoriteRepo,
-    private val networkRepo: NetworkRepo
-) : ViewModel() {
+@HiltViewModel(assistedFactory = FeedViewModel.Factory::class)
+class FeedViewModel @AssistedInject constructor(
+    @Assisted("id") val id: String,
+    @Assisted("frid") var frid: String?,
+    @Assisted var isViewReply: Boolean,
+    blackListRepo: BlackListRepo,
+    historyRepo: HistoryFavoriteRepo,
+    networkRepo: NetworkRepo
+) : BaseAppViewModel(blackListRepo, historyRepo, networkRepo) {
 
-    var isInitFeed = true
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("id") id: String,
+            @Assisted("frid") frid: String?,
+            isViewReply: Boolean
+        ): FeedViewModel
+    }
+
+    var isAInit = true
     var position: Int? = null
     var rPosition: Int? = null
-    var rid: String? = null
     var ruid: String? = null
     var uname: String? = null
     var type: String? = null
-    var listSize: Int = -1
     var isRefreshReply: Boolean? = null
     private var blockStatus = 0
     var fromFeedAuthor = 0
     private var discussMode: Int = 1
     var listType: String = "lastupdate_desc"
-    var page = 1
     var firstItem: String? = null
-    var lastItem: String? = null
-    var isInit: Boolean = true
-    var isRefreshing: Boolean = false
-    var isLoadMore: Boolean = false
-    var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
     var itemCount = 2
     var uid: String? = null
     var funame: String? = null
     var avatar: String? = null
     var device: String? = null
     var replyCount: String? = null
-    var dateLine: Long? = null
+    private var dateLine: Long? = null
     var topReplyId: String? = null
     var isTop: Boolean? = null
     var feedType: String? = null
 
-    var isViewReply: Boolean? = null
-    var frid: String? = null
+    var rid: String? = null
     var firstVisibleItemPosition = 0
-    var id: String? = null
     var feedTypeName: String? = null
 
     var feedDataList: MutableList<HomeFeedResponse.Data>? = null
@@ -78,8 +81,6 @@ class FeedViewModel @Inject constructor(
     var articleDateLine: String? = null
     val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
 
-    val loadingState = MutableLiveData<LoadingState>()
-    val footerState = MutableLiveData<FooterState>()
     val feedReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
     var followState = MutableLiveData<Event<Int>>()
 
@@ -142,16 +143,12 @@ class FeedViewModel @Inject constructor(
     fun fetchFeedReply() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getFeedContentReply(
-                id.toString(), listType, page, firstItem, lastItem, discussMode,
+                id, listType, page, firstItem, lastItem, discussMode,
                 feedType.toString(), blockStatus, fromFeedAuthor
             )
                 .onStart {
-                    if (isLoadMore) {
-                        if (listSize <= 0)
-                            loadingState.postValue(LoadingState.Loading)
-                        else
-                            footerState.postValue(FooterState.Loading)
-                    }
+                    if (isLoadMore)
+                        footerState.postValue(FooterState.Loading)
                 }
                 .collect { result ->
                     val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
@@ -202,12 +199,12 @@ class FeedViewModel @Inject constructor(
 
     fun fetchFeedData() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getFeedContent(id.toString(), frid)
+            networkRepo.getFeedContent(id, frid)
                 .collect { result ->
                     val feed = result.getOrNull()
                     if (feed != null) {
                         if (feed.message != null) {
-                            loadingState.postValue(LoadingState.LoadingError(feed.message))
+                            activityState.postValue(LoadingState.LoadingError(feed.message))
                             return@collect
                         } else if (feed.data != null) {
                             uid = feed.data.uid
@@ -268,10 +265,10 @@ class FeedViewModel @Inject constructor(
                                 feedTopReplyList.clear()
                                 feedTopReplyList.addAll(feed.data.replyMeRows)
                             }
-                            loadingState.postValue(LoadingState.LoadingDone)
+                            activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
-                        loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        activityState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                     isRefreshing = false
@@ -280,7 +277,6 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    val toastText = MutableLiveData<Event<String>>()
     val closeSheet = MutableLiveData<Event<Boolean>>()
     val scroll = MutableLiveData<Event<Boolean>>()
     val notify = MutableLiveData<Event<Boolean>>()
@@ -305,7 +301,7 @@ class FeedViewModel @Inject constructor(
                                                 .toString(), // just random local id
                                             ruid.toString(),
                                             PrefManager.uid,
-                                            id.toString(),
+                                            id,
                                             URLDecoder.decode(PrefManager.username, "UTF-8"),
                                             uname.toString(),
                                             replyData["message"].toString(),
@@ -506,6 +502,8 @@ class FeedViewModel @Inject constructor(
             )
         }
     }
+
+    override fun fetchData() {}
 
 
 }

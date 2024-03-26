@@ -48,7 +48,6 @@ class CarouselViewModel @AssistedInject constructor(
     }
 
     var isAInit: Boolean = true
-    val activityState = MutableLiveData<LoadingState>()
     var topicList: List<TopicBean>? = null
     var pageTitle: String? = null
     private var tmpList: ArrayList<HomeFeedResponse.Data>? = null

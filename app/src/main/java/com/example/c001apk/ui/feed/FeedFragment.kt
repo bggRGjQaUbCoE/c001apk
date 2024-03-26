@@ -300,7 +300,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         viewModel.feedReplyData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             feedReplyAdapter.submitList(it)
-            if (viewModel.isViewReply == true) {
+            if (viewModel.isViewReply) {
                 viewModel.isViewReply = false
                 if (viewModel.firstVisibleItemPosition > viewModel.itemCount)
                     scrollToPosition(viewModel.itemCount)
@@ -374,7 +374,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                     sLayoutManager
                 }
-            if (viewModel.isViewReply == true) {
+            if (viewModel.isViewReply) {
                 viewModel.isViewReply = false
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     footerAdapter.setLoadState(FooterState.LoadingReply)
@@ -421,7 +421,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             val favorite = menu.findItem(R.id.favorite)
             lifecycleScope.launch(Dispatchers.IO) {
-                if (viewModel.isFavorite(viewModel.id.toString())) {
+                if (viewModel.isFavorite(viewModel.id)) {
                     withContext(Dispatchers.Main) {
                         favorite.title = "取消收藏"
                     }
@@ -482,8 +482,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
                     R.id.favorite -> {
                         lifecycleScope.launch(Dispatchers.IO) {
-                            if (viewModel.isFavorite(viewModel.id.toString())) {
-                                viewModel.delete(viewModel.id.toString())
+                            if (viewModel.isFavorite(viewModel.id)) {
+                                viewModel.delete(viewModel.id)
                                 withContext(Dispatchers.Main) {
                                     favorite.title = "收藏"
                                     ToastUtil.toast(requireContext(), "已取消收藏")
@@ -491,7 +491,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             } else {
                                 try {
                                     val fav = FeedEntity(
-                                        viewModel.id.toString(),
+                                        viewModel.id,
                                         viewModel.uid.toString(),
                                         viewModel.funame.toString(),
                                         viewModel.avatar.toString(),

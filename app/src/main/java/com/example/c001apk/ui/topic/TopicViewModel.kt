@@ -42,6 +42,7 @@ class TopicViewModel @AssistedInject constructor(
     var subtitle: String? = null
     var productTitle = "最近回复"
 
+    var isAInit: Boolean = true
     var postFollowData: HashMap<String, String>? = null
     var isFollow: Boolean = false
     var tabSelected: Int? = null
@@ -57,7 +58,7 @@ class TopicViewModel @AssistedInject constructor(
                     val data = result.getOrNull()
                     if (data != null) {
                         if (!data.message.isNullOrEmpty()) {
-                            loadingState.postValue(LoadingState.LoadingError(data.message))
+                            activityState.postValue(LoadingState.LoadingError(data.message))
                             return@collect
                         } else if (data.data != null) {
                             isFollow = data.data.userAction?.follow == 1
@@ -66,10 +67,10 @@ class TopicViewModel @AssistedInject constructor(
                             subtitle = data.data.intro
                             getTopicList(data.data.tabList, data.data.selectedTab)
                             checkFollow()
-                            loadingState.postValue(LoadingState.LoadingDone)
+                            activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
-                        loadingState.postValue(LoadingState.LoadingFailed(Constants.LOADING_FAILED))
+                        activityState.postValue(LoadingState.LoadingFailed(Constants.LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -84,17 +85,17 @@ class TopicViewModel @AssistedInject constructor(
                     val data = result.getOrNull()
                     if (data != null) {
                         if (!data.message.isNullOrEmpty()) {
-                            loadingState.postValue(LoadingState.LoadingError(data.message))
+                            activityState.postValue(LoadingState.LoadingError(data.message))
                             return@collect
                         } else if (data.data != null) {
                             isFollow = data.data.userAction?.follow == 1
                             subtitle = data.data.intro
                             getTopicList(data.data.tabList, data.data.selectedTab)
                             checkFollow()
-                            loadingState.postValue(LoadingState.LoadingDone)
+                            activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
-                        loadingState.postValue(LoadingState.LoadingFailed(Constants.LOADING_FAILED))
+                        activityState.postValue(LoadingState.LoadingFailed(Constants.LOADING_FAILED))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }

@@ -41,7 +41,6 @@ class AppViewModel @AssistedInject constructor(
     val download = MutableLiveData<Event<Boolean>>()
 
     var appData: HomeFeedResponse.Data? = null
-    val activityState = MutableLiveData<LoadingState>()
     val blockState = MutableLiveData<Event<Boolean>>()
 
     val searchState = MutableLiveData<Event<Unit>>()

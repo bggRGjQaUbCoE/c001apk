@@ -15,6 +15,7 @@ abstract class BaseViewModel : ViewModel() {
     var lastVisibleItemPosition: Int = 0
     var page: Int = 1
 
+    val activityState = MutableLiveData<LoadingState>()
     val loadingState = MutableLiveData<LoadingState>()
 
     abstract fun fetchData()

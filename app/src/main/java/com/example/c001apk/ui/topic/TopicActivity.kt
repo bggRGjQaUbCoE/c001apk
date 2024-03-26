@@ -1,21 +1,17 @@
 package com.example.c001apk.ui.topic
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.core.view.isVisible
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
-import com.example.c001apk.constant.Constants
-import com.example.c001apk.databinding.BaseFragmentContainerBinding
-import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.ui.base.BaseViewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
 
 @AndroidEntryPoint
-class TopicActivity : BaseActivity<BaseFragmentContainerBinding>() {
+class TopicActivity : BaseViewActivity<TopicViewModel>() {
 
-    private val viewModel by viewModels<TopicViewModel>(
+    override val viewModel by viewModels<TopicViewModel>(
         extrasProducer = {
             defaultViewModelCreationExtras.withCreationCallback<TopicViewModel.Factory> { factory ->
                 factory.create(
@@ -28,65 +24,8 @@ class TopicActivity : BaseActivity<BaseFragmentContainerBinding>() {
         }
     )
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initData()
-        initObserve()
-        initError()
-
-    }
-
-    private fun initError() {
-        binding.errorLayout.retry.setOnClickListener {
-            binding.errorLayout.parent.isVisible = false
-            viewModel.loadingState.value = LoadingState.Loading
-        }
-    }
-
-    private fun initObserve() {
-        viewModel.loadingState.observe(this) {
-            when (it) {
-                LoadingState.Loading -> {
-                    binding.indicator.parent.isIndeterminate = true
-                    binding.indicator.parent.isVisible = true
-                    if (viewModel.type == "topic") {
-                        viewModel.url = viewModel.url.replace("/t/", "")
-                        viewModel.fetchTopicLayout()
-                    } else if (viewModel.type == "product") {
-                        viewModel.fetchProductLayout()
-                    }
-                }
-
-                LoadingState.LoadingDone -> {
-                    beginTransaction()
-                }
-
-                is LoadingState.LoadingError -> {
-                    binding.errorMessage.errMsg.apply {
-                        text = it.errMsg
-                        isVisible = true
-                    }
-                }
-
-                is LoadingState.LoadingFailed -> {
-                    binding.errorLayout.apply {
-                        msg.text = it.msg
-                        retry.text = if (it.msg == Constants.LOADING_EMPTY) getString(R.string.refresh)
-                        else getString(R.string.retry)
-                        parent.isVisible = true
-                    }
-                }
-            }
-            if (it !is LoadingState.Loading) {
-                binding.indicator.parent.isIndeterminate = false
-                binding.indicator.parent.isVisible = false
-            }
-        }
-    }
-
     @SuppressLint("CommitTransaction")
-    private fun beginTransaction() {
+    override fun beginTransaction() {
         if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
             supportFragmentManager
                 .beginTransaction()
@@ -97,10 +36,19 @@ class TopicActivity : BaseActivity<BaseFragmentContainerBinding>() {
         }
     }
 
-    private fun initData() {
-        if (viewModel.isInit) {
-            viewModel.isInit = false
-            viewModel.loadingState.value = LoadingState.Loading
+    override fun fetchData() {
+        if (viewModel.type == "topic") {
+            viewModel.url = viewModel.url.replace("/t/", "")
+            viewModel.fetchTopicLayout()
+        } else if (viewModel.type == "product") {
+            viewModel.fetchProductLayout()
+        }
+    }
+
+    override fun initData() {
+        if (viewModel.isAInit) {
+            viewModel.isAInit = false
+            viewModel.activityState.value = LoadingState.Loading
         }
     }
 

@@ -2,7 +2,6 @@ package com.example.c001apk.ui.search
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState

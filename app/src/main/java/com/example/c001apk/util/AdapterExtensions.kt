@@ -1,6 +1,7 @@
 package com.example.c001apk.util
 
 import androidx.recyclerview.widget.RecyclerView
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 
 // from LibChecker
