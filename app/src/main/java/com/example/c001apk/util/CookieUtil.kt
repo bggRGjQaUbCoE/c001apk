@@ -18,12 +18,9 @@ object CookieUtil {
 
     var isGetSmsToken = false
 
-    var notification = 0
-    var contacts_follow = 0
-    var message = 0
-    var atme = 0
-    var atcommentme = 0
-    var feedlike = 0
-    var badge = 0
+    var atme: Int? = null
+    var atcommentme: Int? = null
+    var feedlike: Int? = null
+    var contacts_follow: Int? = null
 
 }

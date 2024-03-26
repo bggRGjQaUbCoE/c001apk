@@ -18,9 +18,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
-): ViewModel() {
+) : ViewModel() {
 
-    var badge: Int = 0
+    var badge: Int? = null
     var isInit: Boolean = true
     val setBadge = MutableLiveData<Event<Boolean>>()
 
@@ -56,13 +56,10 @@ class MainViewModel @Inject constructor(
                             if (response.body()?.data?.token != null) {
                                 response.body()?.data?.let { login ->
                                     badge = login.notifyCount.badge
-                                    CookieUtil.notification = login.notifyCount.notification
-                                    CookieUtil.contacts_follow = login.notifyCount.contactsFollow
-                                    CookieUtil.message = login.notifyCount.message
                                     CookieUtil.atme = login.notifyCount.atme
                                     CookieUtil.atcommentme = login.notifyCount.atcommentme
                                     CookieUtil.feedlike = login.notifyCount.feedlike
-                                    CookieUtil.badge = login.notifyCount.badge
+                                    CookieUtil.contacts_follow = login.notifyCount.contactsFollow
                                     PrefManager.isLogin = true
                                     PrefManager.uid = login.uid
                                     PrefManager.username =

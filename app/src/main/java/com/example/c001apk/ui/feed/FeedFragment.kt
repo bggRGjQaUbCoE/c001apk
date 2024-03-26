@@ -59,6 +59,7 @@ import kotlinx.coroutines.withContext
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
 
     private val viewModel by viewModels<FeedViewModel>(ownerProducer = { requireActivity() })
+    private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
     private lateinit var feedDataAdapter: FeedDataAdapter
     private lateinit var feedReplyAdapter: FeedReplyAdapter
     private lateinit var feedFixAdapter: FeedFixAdapter
@@ -129,7 +130,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 )
                 lp.setMargins(
                     0, 0, 25.dp,
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    if (isPortrait)
                         DensityTool.getNavigationBarHeight(requireContext()) + 25.dp
                     else 25.dp
                 )
@@ -171,7 +172,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
                     if (viewModel.listSize != -1 && isAdded) {
-                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        if (isPortrait) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                             viewModel.firstVisibleItemPosition =
@@ -310,7 +311,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     private fun scrollToPosition(position: Int) {
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+        if (isPortrait)
             mLayoutManager.scrollToPositionWithOffset(position, 0)
         else
             sLayoutManager.scrollToPositionWithOffset(position, 0)
@@ -364,7 +365,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     footerAdapter
                 )
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (isPortrait) {
                     binding.tabLayout.isVisible = true
                     mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
@@ -376,7 +377,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 }
             if (viewModel.isViewReply) {
                 viewModel.isViewReply = false
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (isPortrait) {
                     footerAdapter.setLoadState(FooterState.LoadingReply)
                     mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
                     viewModel.firstVisibleItemPosition = viewModel.itemCount
@@ -387,7 +388,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 footerAdapter.setLoadState(FooterState.Loading)
             }
             if (itemDecorationCount == 0)
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (isPortrait)
                     addItemDecoration(
                         StickyItemDecorator(requireContext(), 1, viewModel.itemCount,
                             object : StickyItemDecorator.SortShowListener {
@@ -420,16 +421,10 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             val favorite = menu.findItem(R.id.favorite)
-            lifecycleScope.launch(Dispatchers.IO) {
-                if (viewModel.isFavorite(viewModel.id)) {
-                    withContext(Dispatchers.Main) {
-                        favorite.title = "取消收藏"
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        favorite.title = "收藏"
-                    }
-                }
+            lifecycleScope.launch(Dispatchers.Main) {
+                val isFavorite = viewModel.isFavorite(viewModel.id)
+                favorite.title = if (isFavorite) "取消收藏"
+                else "收藏"
             }
             setOnMenuItemClickListener {
                 when (it.itemId) {
@@ -481,13 +476,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
 
                     R.id.favorite -> {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (viewModel.isFavorite(viewModel.id)) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            val isFavorite = favorite.title == "取消收藏"
+                            if (isFavorite) {
                                 viewModel.delete(viewModel.id)
-                                withContext(Dispatchers.Main) {
-                                    favorite.title = "收藏"
-                                    ToastUtil.toast(requireContext(), "已取消收藏")
-                                }
+                                favorite.title = "收藏"
+                                ToastUtil.toast(requireContext(), "已取消收藏")
                             } else {
                                 try {
                                     val fav = FeedEntity(
@@ -508,18 +502,16 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                                         else viewModel.feedDataList?.getOrNull(0)?.dateline.toString()
                                     )
                                     viewModel.insert(fav)
-                                    withContext(Dispatchers.Main) {
-                                        favorite.title = "取消收藏"
-                                        ToastUtil.toast(requireContext(), "已收藏")
-                                    }
+                                    favorite.title = "取消收藏"
+                                    ToastUtil.toast(requireContext(), "已收藏")
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                     ToastUtil.toast(requireContext(), "请稍后再试")
                                 }
                             }
-
                         }
                     }
+
                 }
                 return@setOnMenuItemClickListener true
             }

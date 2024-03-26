@@ -50,6 +50,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
     private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
 
     companion object {
         fun newInstance(
@@ -214,7 +215,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
                     if (viewModel.listSize != -1 && !viewModel.isEnd && isAdded)
-                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        if (isPortrait) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
                         } else {
@@ -263,7 +264,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
         binding.recyclerView.apply {
             adapter = ConcatAdapter()
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (isPortrait) {
                     mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
                 } else {
@@ -271,7 +272,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                         StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                     sLayoutManager
                 }
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            if (isPortrait)
                 addItemDecoration(ReplyItemDecoration(requireContext(), 1))
             else
                 addItemDecoration(StaggerItemDecoration(10.dp))

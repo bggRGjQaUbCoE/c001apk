@@ -36,11 +36,12 @@ class ImageSquareScrollCardAdapter(
                 parent,
                 false
             )
+         val isPortrait by lazy { parent.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
         val padding =
-            if (parent.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 80.dp
+            if (isPortrait) 80.dp
             else 90.dp
         val imageWidth =
-            if (parent.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            if (isPortrait)
                 DensityTool.getScreenWidth(parent.context) - padding
             else
                 DensityTool.getScreenWidth(parent.context) / 2 - padding

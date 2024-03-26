@@ -4,12 +4,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
-import com.example.c001apk.adapter.ItemListener
+import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.util.CookieUtil.atcommentme
+import com.example.c001apk.util.CookieUtil.atme
+import com.example.c001apk.util.CookieUtil.contacts_follow
+import com.example.c001apk.util.CookieUtil.feedlike
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,36 +32,35 @@ class MessageViewModel @Inject constructor(
 ) : ViewModel() {
 
     var isInit: Boolean = true
-    var type: String? = null
     var listSize: Int = -1
     var page = 1
     var lastItem: String? = null
-    var uid: String? = null
+    val uid: String by lazy { PrefManager.uid }
     var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
     var lastVisibleItemPosition: Int = 0
 
-    private var url = "/v6/notification/list"
-    val countList = ArrayList<String>()
-    val messCountList = ArrayList<Int>()
+    var countList = MutableLiveData<List<String>>()
+    var messCountList = MutableLiveData<Event<Unit>>()
     val footerState = MutableLiveData<FooterState>()
     val messageData = MutableLiveData<List<MessageResponse.Data>>()
-    val doWhat = MutableLiveData<Event<String>>()
     val toastText = MutableLiveData<Event<String>>()
+    val loadingState = MutableLiveData<LoadingState>()
 
     fun fetchProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getProfile(uid.toString())
+            networkRepo.getProfile(uid)
                 .collect { result ->
                     val data = result.getOrNull()
                     if (data?.data != null) {
-                        countList.clear()
-                        countList.apply {
-                            add(data.data.feed)
-                            add(data.data.follow)
-                            add(data.data.fans)
-                        }
+                        countList.postValue(
+                            listOf(
+                                data.data.feed,
+                                data.data.follow,
+                                data.data.fans
+                            )
+                        )
                         PrefManager.username =
                             withContext(Dispatchers.IO) {
                                 URLEncoder.encode(data.data.username, "UTF-8")
@@ -66,15 +69,14 @@ class MessageViewModel @Inject constructor(
                         PrefManager.level = data.data.level
                         PrefManager.experience = data.data.experience.toString()
                         PrefManager.nextLevelExperience = data.data.nextLevelExperience.toString()
-                        doWhat.postValue(Event("showProfile"))
-                        doWhat.postValue(Event("countList"))
+                        loadingState.postValue(LoadingState.LoadingDone)
 
                         fetchMessage()
                     } else {
                         isEnd = true
                         isRefreshing = false
                         isLoadMore = false
-                        doWhat.postValue(Event("isRefreshing"))
+                        loadingState.postValue(LoadingState.LoadingFailed(""))
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
@@ -87,28 +89,19 @@ class MessageViewModel @Inject constructor(
             networkRepo.checkLoginInfo()
                 .collect { result ->
                     val response = result.getOrNull()
-                    response?.let {
-                        response.body()?.let {
-                            if (response.body()?.data?.token != null) {
-                                response.body()?.data?.let { login ->
-                                    messCountList.apply {
-                                        add(login.notifyCount.atme)
-                                        add(login.notifyCount.atcommentme)
-                                        add(login.notifyCount.feedlike)
-                                        add(login.notifyCount.contactsFollow)
-                                        add(login.notifyCount.message)
-                                    }
-                                }
-                                doWhat.postValue(Event("messCountList"))
-                            }
-                        }
+                    response?.body()?.data?.let {
+                        atme = it.notifyCount.atme
+                        atcommentme = it.notifyCount.atcommentme
+                        feedlike = it.notifyCount.feedlike
+                        contacts_follow = it.notifyCount.contactsFollow
+                        messCountList.postValue(Event(Unit))
                     }
                 }
         }
     }
 
 
-    fun fetchMessage() {
+    fun fetchMessage(url: String = "/v6/notification/list") {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getMessage(url, page, lastItem)
                 .onStart {
@@ -201,8 +194,5 @@ class MessageViewModel @Inject constructor(
             )
         }
     }
-
-
-    inner class ItemClickListener : ItemListener
 
 }

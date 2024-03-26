@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 
 @HiltViewModel(assistedFactory = FeedViewModel.Factory::class)
@@ -466,17 +467,19 @@ class FeedViewModel @AssistedInject constructor(
     }
 
     suspend fun isFavorite(fid: String): Boolean {
-        return historyRepo.checkFavorite(fid)
+        return withContext(Dispatchers.IO) {
+            historyRepo.checkFavorite(fid)
+        }
     }
 
-    fun delete(fid: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun delete(fid: String) {
+        withContext(Dispatchers.IO) {
             historyRepo.deleteFavorite(fid)
         }
     }
 
-    fun insert(fav: FeedEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun insert(fav: FeedEntity) {
+        withContext(Dispatchers.IO) {
             historyRepo.insertFavorite(fav)
         }
     }

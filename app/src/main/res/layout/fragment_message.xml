@@ -5,6 +5,13 @@
 
     <data>
 
+        <import type="android.view.View" />
+
+        <variable
+            name="isLogin"
+            type="boolean" />
+
+
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -31,7 +38,6 @@
                 app:layout_collapseMode="pin">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/profileLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -44,6 +50,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="@string/click_to_login"
+                        android:visibility="@{isLogin ? View.GONE : View.VISIBLE}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -56,6 +63,7 @@
                         android:layout_marginStart="20dp"
                         android:background="@color/cover"
                         android:foreground="@drawable/selector_bg_avatar"
+                        android:visibility="@{isLogin ? View.VISIBLE : View.INVISIBLE}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="H, 1"
                         app:layout_constraintStart_toStartOf="parent"
@@ -70,6 +78,7 @@
                         android:layout_marginStart="10dp"
                         android:textSize="16sp"
                         android:textStyle="bold"
+                        android:visibility="@{isLogin ? View.VISIBLE : View.INVISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/avatar"
                         app:layout_constraintTop_toTopOf="parent"
@@ -81,6 +90,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="5dp"
+                        android:visibility="@{isLogin ? View.VISIBLE : View.INVISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/avatar"
                         app:layout_constraintTop_toBottomOf="@id/name">
@@ -119,6 +129,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="5dp"
+                        android:visibility="@{isLogin ? View.VISIBLE : View.INVISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/avatar"
                         app:layout_constraintTop_toBottomOf="@id/levelLayout">

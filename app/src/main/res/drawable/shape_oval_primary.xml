@@ -5,8 +5,4 @@
 
     <solid android:color="?attr/colorPrimary" />
 
-    <size
-        android:width="10dp"
-        android:height="10dp" />
-
 </shape>

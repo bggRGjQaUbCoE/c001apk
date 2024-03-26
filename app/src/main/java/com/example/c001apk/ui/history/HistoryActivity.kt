@@ -36,6 +36,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +96,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         binding.recyclerView.apply {
             adapter = ConcatAdapter(HeaderAdapter(), mAdapter)
             layoutManager =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (isPortrait) {
                     mLayoutManager = LinearLayoutManager(this@HistoryActivity)
                     mLayoutManager
                 } else {
@@ -104,7 +105,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                     sLayoutManager
                 }
             if (itemDecorationCount == 0) {
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                if (isPortrait)
                     addItemDecoration(LinearItemDecoration(10.dp))
                 else
                     addItemDecoration(StaggerItemDecoration(10.dp))
