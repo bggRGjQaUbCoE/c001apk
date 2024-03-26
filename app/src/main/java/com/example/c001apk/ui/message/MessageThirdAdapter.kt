@@ -107,7 +107,7 @@ class MessageThirdAdapter
             binding.logo.setBackgroundDrawable(itemView.context.getDrawable(logoList[bindingAdapterPosition]))
             if (!badgeList.isNullOrEmpty())
                 badgeList.let {
-                    if (it[bindingAdapterPosition] != 0) {
+                    if (it[bindingAdapterPosition] > 0) {
                         binding.badge.isVisible = true
                         binding.badge.text =
                             if (it[bindingAdapterPosition] > 99) "99+"

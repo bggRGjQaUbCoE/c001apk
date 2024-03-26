@@ -66,6 +66,7 @@
                 android:singleLine="true"
                 android:textColor="?colorOnPrimary"
                 android:textSize="12sp"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/title"
                 app:layout_constraintDimensionRatio="1"
                 app:layout_constraintEnd_toEndOf="parent"
