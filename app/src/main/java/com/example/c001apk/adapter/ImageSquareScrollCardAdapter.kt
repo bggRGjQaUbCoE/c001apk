@@ -36,7 +36,7 @@ class ImageSquareScrollCardAdapter(
                 parent,
                 false
             )
-         val isPortrait by lazy { parent.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
+        val isPortrait by lazy { parent.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
         val padding =
             if (isPortrait) 80.dp
             else 90.dp

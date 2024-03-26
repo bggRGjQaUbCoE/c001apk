@@ -83,27 +83,23 @@ class Reply2ReplyTotalAdapter(
         }
 
         fun bind(reply: TotalReplyResponse.Data) {
-
-            binding.root.also {
-                if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-                    if (bindingAdapterPosition == 0) {
-                        it.setBackgroundColor(Color.TRANSPARENT)
+            binding.root.apply {
+                if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                    if (absoluteAdapterPosition == 0) {
+                        setBackgroundColor(Color.TRANSPARENT)
                     } else {
-                        it.background =
-                            itemView.context.getDrawable(R.drawable.text_card_bg)
-                        it.foreground =
-                            itemView.context.getDrawable(R.drawable.selector_bg_12_trans)
-                        it.setPadding(10.dp)
+                        background = itemView.context.getDrawable(R.drawable.text_card_bg)
+                        foreground = itemView.context.getDrawable(R.drawable.selector_bg_12_trans)
+                        setPadding(10.dp)
                     }
                 } else {
-                    if (bindingAdapterPosition == 0) {
-                        it.setBackgroundColor(Color.TRANSPARENT)
+                    if (absoluteAdapterPosition == 0) {
+                        setBackgroundColor(Color.TRANSPARENT)
                     } else {
-                        it.setBackgroundColor(itemView.context.getColor(R.color.home_card_background_color))
+                        setBackgroundColor(itemView.context.getColor(R.color.home_card_background_color))
                     }
-                    it.foreground =
-                        itemView.context.getDrawable(R.drawable.selector_bg_trans)
-                    it.setPadding(15.dp, 12.dp, 15.dp, 12.dp)
+                    foreground = itemView.context.getDrawable(R.drawable.selector_bg_trans)
+                    setPadding(15.dp, 12.dp, 15.dp, 12.dp)
                 }
             }
 

@@ -399,7 +399,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             })
                     )
                 else
-                    addItemDecoration(StaggerItemDecoration(10.dp, viewModel.itemCount))
+                    addItemDecoration(StaggerItemDecoration(10.dp))
         }
     }
 

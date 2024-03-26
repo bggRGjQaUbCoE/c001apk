@@ -5,6 +5,8 @@ import com.example.c001apk.di.TopicBlackList
 import com.example.c001apk.di.UserBlackList
 import com.example.c001apk.logic.dao.StringEntityDao
 import com.example.c001apk.logic.model.StringEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,7 +61,9 @@ class BlackListRepo @Inject constructor(
     }
 
     suspend fun checkTopic(topic: String): Boolean {
-        return topicBlackListDao.isContain(topic)
+        return withContext(Dispatchers.IO) {
+            topicBlackListDao.isContain(topic)
+        }
     }
 
     suspend fun saveTopic(topic: String) {

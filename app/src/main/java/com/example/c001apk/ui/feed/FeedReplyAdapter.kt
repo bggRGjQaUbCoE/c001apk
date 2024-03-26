@@ -244,14 +244,14 @@ class FeedReplyAdapter(
             parent,
             false
         )
-        binding.root.also {
-            if (it.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-                it.background = parent.context.getDrawable(R.drawable.text_card_bg)
-                it.foreground = parent.context.getDrawable(R.drawable.selector_bg_12_trans)
-                it.setPadding(10.dp)
+        binding.root.apply {
+            if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                background = parent.context.getDrawable(R.drawable.text_card_bg)
+                foreground = parent.context.getDrawable(R.drawable.selector_bg_12_trans)
+                setPadding(10.dp)
             } else {
-                it.foreground = parent.context.getDrawable(R.drawable.selector_bg_trans)
-                it.setPadding(15.dp, 12.dp, 15.dp, 12.dp)
+                foreground = parent.context.getDrawable(R.drawable.selector_bg_trans)
+                setPadding(15.dp, 12.dp, 15.dp, 12.dp)
             }
         }
         return ViewHolder(binding, listener)

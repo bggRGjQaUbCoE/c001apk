@@ -7,10 +7,7 @@ import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 
-class StaggerItemDecoration(
-    private val space: Int,
-    private var itemCount: Int = 1
-) : ItemDecoration() {
+class StaggerItemDecoration(private val space: Int) : ItemDecoration() {
 
     override fun getItemOffsets(
         outRect: Rect,
@@ -23,8 +20,29 @@ class StaggerItemDecoration(
         if (spanIndex % 2 == 1) {
             outRect.right = space
         }
-        outRect.bottom = 10.dp
-        outRect.left = 10.dp
+        outRect.bottom = space
+        outRect.left = space
+    }
+
+}
+
+class ReplyStaggerItemDecoration(private val space: Int) : ItemDecoration() {
+
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        val position = parent.getChildAdapterPosition(view)
+        val params = view.layoutParams as StaggeredGridLayoutManager.LayoutParams
+        val spanIndex = params.spanIndex
+        if (position == 0 || position == 1)
+            outRect.top = space
+        if (spanIndex % 2 == 1)
+            outRect.right = space
+        outRect.left = space
+        outRect.bottom = space
     }
 
 }

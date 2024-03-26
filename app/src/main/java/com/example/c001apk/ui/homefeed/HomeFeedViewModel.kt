@@ -79,81 +79,117 @@ class HomeFeedViewModel @AssistedInject constructor(
                 .collect { result ->
                     val feed = result.getOrNull()
                     val currentList = dataList.value?.toMutableList() ?: ArrayList()
-                    if (!feed?.message.isNullOrEmpty()) {
-                        feed?.message?.let {
-                            if (listSize <= 0)
-                                loadingState.postValue(LoadingState.LoadingError(it))
-                            else
-                                footerState.postValue(FooterState.LoadingError(it))
-                        }
-                        return@collect
-                    } else if (!feed?.data.isNullOrEmpty()) {
-                        lastItem = feed?.data?.last()?.id
-                        if (isRefreshing) {
-                            if ((feed?.data?.size ?: 0) <= 4
-                                && feed?.data?.last()?.entityTemplate == "refreshCard"
-                            ) {
-                                toastText.postValue(Event(feed.data.last().title))
-                                firstItem = null
-                                lastItem = null
-                                firstLaunch = 1
-                                /*val index = if (PrefManager.isIconMiniCard) 4
-                                else 3
-                                if (listSize >= index) {
-                                    if (currentList[index - 1].entityTemplate != "refreshCard") {
-                                        currentList.add(index - 1, feed.data.last())
-                                        dataList.postValue(currentList)
-                                    }
-                                }*/
-                                page++
+                    if (feed != null) {
+                        if (!feed.message.isNullOrEmpty()) {
+                            feed.message.let {
                                 if (listSize <= 0)
-                                    loadingState.postValue(LoadingState.LoadingDone)
+                                    loadingState.postValue(LoadingState.LoadingError(it))
                                 else
-                                    footerState.postValue(FooterState.LoadingDone)
-                                return@collect
-                            } else {
-                                currentList.clear()
+                                    footerState.postValue(FooterState.LoadingError(it))
                             }
-                        }
-                        if (isRefreshing || isLoadMore) {
-                            feed?.data?.let { data ->
-                                data.forEach {
-                                    if (!PrefManager.isIconMiniCard && it.entityTemplate == "iconMiniScrollCard")
-                                        return@forEach
-                                    else if (it.entityType == "feed" && it.feedType != "vote"
-                                        || it.entityTemplate == "iconMiniScrollCard"
-                                        || it.entityTemplate == "iconLinkGridCard"
-                                        || it.entityTemplate == "imageCarouselCard_1"
-                                        || it.entityTemplate == "imageTextScrollCard"
-                                    ) {
-                                        if (it.entityType == "feed" && changeFirstItem) {
-                                            changeFirstItem = false
-                                            firstItem = it.id
+                            return@collect
+                        } else if (!feed.data.isNullOrEmpty()) {
+                            lastItem = feed.data.last().id
+                            if (isRefreshing) {
+                                if (feed.data.size <= 4
+                                    && feed.data.last().entityTemplate == "refreshCard"
+                                ) {
+                                    toastText.postValue(Event(feed.data.last().title))
+                                    firstItem = null
+                                    lastItem = null
+                                    firstLaunch = 1
+                                    /*val index = if (PrefManager.isIconMiniCard) 4
+                                    else 3
+                                    if (listSize >= index) {
+                                        if (currentList[index - 1].entityTemplate != "refreshCard") {
+                                            currentList.add(index - 1, feed.data.last())
+                                            dataList.postValue(currentList)
                                         }
-                                        if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
-                                            && !blackListRepo.checkTopic(
-                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
-                                            )
-                                        )
-                                            currentList.add(it)
+                                    }*/
+                                    page++
+                                    if (listSize <= 0)
+                                        loadingState.postValue(LoadingState.LoadingDone)
+                                    else
+                                        footerState.postValue(FooterState.LoadingDone)
+                                    return@collect
+                                } else {
+                                    currentList.clear()
+                                }
+                            }
+                            if (isRefreshing || isLoadMore) {
+                                feed.data.forEach {
+                                    when (it.entityType) {
+                                        "card" -> when (it.entityTemplate) {
+                                            "iconLinkGridCard" -> currentList.add(it)
+
+                                            "imageCarouselCard_1" -> {
+                                                it.entities = it.entities?.filterNot { item ->
+                                                    item.url.startsWith("http")
+                                                }
+                                                currentList.add(it)
+                                            }
+
+                                            "iconMiniScrollCard" -> {
+                                                if (!PrefManager.isIconMiniCard)
+                                                    return@forEach
+                                                else {
+                                                    it.entities = it.entities?.filter { item ->
+                                                        (item.entityType == "topic" || item.entityType == "product")
+                                                                && !blackListRepo.checkTopic(item.title)
+                                                    }
+                                                    currentList.add(it)
+                                                }
+                                            }
+
+                                            "imageTextScrollCard" -> {
+                                                it.entities = it.entities?.filter { item ->
+                                                    item.entityType == "feed"
+                                                            && !blackListRepo.checkUid(item.userInfo.uid)
+                                                }
+                                                currentList.add(it)
+                                            }
+
+                                            else -> return@forEach
+                                        }
+
+                                        "feed" -> {
+                                            if (changeFirstItem) {
+                                                changeFirstItem = false
+                                                firstItem = it.id
+                                            }
+
+                                            if (it.feedType == "vote")
+                                                return@forEach
+                                            else {
+                                                if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
+                                                    && !blackListRepo.checkTopic(
+                                                        it.tags + it.ttitle +
+                                                                it.relationRows?.getOrNull(0)?.title
+                                                    )
+                                                )
+                                                    currentList.add(it)
+                                            }
+                                        }
+
+                                        else -> return@forEach
                                     }
                                 }
                             }
-                        }
-                        page++
-                        if (listSize <= 0)
-                            loadingState.postValue(LoadingState.LoadingDone)
-                        else
-                            footerState.postValue(FooterState.LoadingDone)
-                        dataList.postValue(currentList)
-                    } else if (feed?.data?.isEmpty() == true) {
-                        isEnd = true
-                        if (listSize <= 0)
-                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
-                        else {
-                            if (isRefreshing)
-                                dataList.postValue(emptyList())
-                            footerState.postValue(FooterState.LoadingEnd)
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            dataList.postValue(currentList)
+                        } else if (feed.data?.isEmpty() == true) {
+                            isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    dataList.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
                         }
                     } else {
                         isEnd = true
@@ -192,54 +228,85 @@ class HomeFeedViewModel @AssistedInject constructor(
                 .collect { result ->
                     val feed = result.getOrNull()
                     val currentList = dataList.value?.toMutableList() ?: ArrayList()
-                    if (!feed?.message.isNullOrEmpty()) {
-                        feed?.message?.let {
-                            if (listSize <= 0)
-                                loadingState.postValue(LoadingState.LoadingError(it))
-                            else
-                                footerState.postValue(FooterState.LoadingError(it))
-                        }
-                        return@collect
-                    } else if (!feed?.data.isNullOrEmpty()) {
-                        lastItem = feed?.data?.last()?.id
-                        if (isRefreshing)
-                            currentList.clear()
-                        if (isRefreshing || isLoadMore) {
-                            feed?.data?.let { data ->
-                                data.forEach {
-                                    if (!PrefManager.isIconMiniCard
-                                        && it.entityTemplate == "iconMiniGridCard"
-                                    )
-                                        return@forEach
-                                    else if (it.entityType == "feed"
-                                        || it.entityTemplate == "iconMiniGridCard"
-                                        || it.entityTemplate == "iconLinkGridCard"
-                                        || it.entityTemplate == "imageSquareScrollCard"
-                                    ) {
-                                        if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
-                                            && !blackListRepo.checkTopic(
-                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
-                                            )
-                                        )
-                                            currentList.add(it)
+                    if (feed != null) {
+                        if (!feed.message.isNullOrEmpty()) {
+                            feed.message.let {
+                                if (listSize <= 0)
+                                    loadingState.postValue(LoadingState.LoadingError(it))
+                                else
+                                    footerState.postValue(FooterState.LoadingError(it))
+                            }
+                            return@collect
+                        } else if (!feed.data.isNullOrEmpty()) {
+                            lastItem = feed.data.last().id
+                            if (isRefreshing)
+                                currentList.clear()
+                            if (isRefreshing || isLoadMore) {
+                                feed.data.forEach {
+                                    when (it.entityType) {
+                                        "card" -> when (it.entityTemplate) {
+                                            "iconLinkGridCard" -> currentList.add(it)
+
+                                            "imageSquareScrollCard" -> {
+                                                it.entities = it.entities?.filter { item ->
+                                                    item.entityType == "picCategory"
+                                                }
+                                                currentList.add(it)
+                                            }
+
+                                            "iconMiniGridCard" -> {
+                                                if (!PrefManager.isIconMiniCard)
+                                                    return@forEach
+                                                else {
+                                                    it.entities = it.entities?.filter { item ->
+                                                        (item.entityType == "topic" || item.entityType == "product")
+                                                                && !blackListRepo.checkTopic(item.title)
+                                                    }
+                                                    currentList.add(it)
+                                                }
+                                            }
+
+                                            else -> return@forEach
+                                        }
+
+                                        "feed" -> {
+                                            if (changeFirstItem) {
+                                                changeFirstItem = false
+                                                firstItem = it.id
+                                            }
+
+                                            if (it.feedType == "vote")
+                                                return@forEach
+                                            else {
+                                                if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
+                                                    && !blackListRepo.checkTopic(
+                                                        it.tags + it.ttitle +
+                                                                it.relationRows?.getOrNull(0)?.title
+                                                    )
+                                                )
+                                                    currentList.add(it)
+                                            }
+                                        }
+
+                                        else -> return@forEach
                                     }
                                 }
                             }
-                        }
-                        page++
-                        if (listSize <= 0)
-                            loadingState.postValue(LoadingState.LoadingDone)
-                        else
-                            footerState.postValue(FooterState.LoadingDone)
-                        dataList.postValue(currentList)
-                    } else if (feed?.data?.isEmpty() == true) {
-                        isEnd = true
-                        if (listSize <= 0)
-                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
-                        else {
-                            if (isRefreshing)
-                                dataList.postValue(emptyList())
-                            footerState.postValue(FooterState.LoadingEnd)
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            dataList.postValue(currentList)
+                        } else if (feed?.data?.isEmpty() == true) {
+                            isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    dataList.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd)
+                            }
                         }
                     } else {
                         isEnd = true

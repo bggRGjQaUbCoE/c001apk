@@ -324,4 +324,9 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
         onReturnTop(true)
     }
 
+    override fun fetchData() {
+        viewModel.fetchData()
+        viewModel.changeFirstItem = true
+    }
+
 }

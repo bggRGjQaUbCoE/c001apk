@@ -20,7 +20,7 @@ class MainViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
-    var badge: Int? = null
+    var badge: Int = 0
     var isInit: Boolean = true
     val setBadge = MutableLiveData<Event<Boolean>>()
 

@@ -31,7 +31,7 @@ import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.ReplyItemDecoration
-import com.example.c001apk.view.StaggerItemDecoration
+import com.example.c001apk.view.ReplyStaggerItemDecoration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -275,7 +275,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             if (isPortrait)
                 addItemDecoration(ReplyItemDecoration(requireContext(), 1))
             else
-                addItemDecoration(StaggerItemDecoration(10.dp))
+                addItemDecoration(ReplyStaggerItemDecoration(10.dp))
         }
     }
 

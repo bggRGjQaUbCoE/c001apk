@@ -43,7 +43,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
             viewModel.isInit = false
             genData()
             initObserve()
-        } else if (viewModel.badge != null) {
+        } else if (viewModel.badge != 0) {
             setBadge()
         }
 
@@ -89,9 +89,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
 
                     R.id.navigation_message -> {
                         binding.viewPager.setCurrentItem(1, true)
-                        if (viewModel.badge != null) {
+                        if (viewModel.badge != 0) {
                             navView.removeBadge(R.id.navigation_message)
-                            viewModel.badge = null
+                            viewModel.badge = 0
                         }
                     }
 
@@ -124,20 +124,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
     }
 
     private fun setBadge() {
-        viewModel.badge?.let {
-            val badge = navView.getOrCreateBadge(R.id.navigation_message)
-            badge.number = it
-            badge.backgroundColor =
-                MaterialColors.getColor(
-                    this,
-                    com.google.android.material.R.attr.colorPrimary,
-                    0
-                )
-            //badge.badgeTextColor = ContextCompat.getColor(this,R.color.design_default_color_error)
-            badge.badgeGravity = BadgeDrawable.TOP_END
-            badge.verticalOffset = 5
-            badge.horizontalOffset = 5
-        }
+        val badge = navView.getOrCreateBadge(R.id.navigation_message)
+        badge.number = viewModel.badge
+        badge.backgroundColor =
+            MaterialColors.getColor(
+                this,
+                com.google.android.material.R.attr.colorPrimary,
+                0
+            )
+        //badge.badgeTextColor = ContextCompat.getColor(this,R.color.design_default_color_error)
+        badge.badgeGravity = BadgeDrawable.TOP_END
+        badge.verticalOffset = 5
+        badge.horizontalOffset = 5
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(false) {

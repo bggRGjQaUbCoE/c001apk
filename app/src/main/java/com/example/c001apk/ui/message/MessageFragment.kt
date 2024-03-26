@@ -34,7 +34,7 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.doOnMainThreadIdle
 import com.example.c001apk.util.setBottomPaddingSpace
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.StaggerMessItemDecoration
+import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -203,7 +203,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             if (isPortrait)
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
-                addItemDecoration(StaggerMessItemDecoration(10.dp))
+                addItemDecoration(StaggerItemDecoration(10.dp))
         }
         doOnMainThreadIdle {
             binding.recyclerView.setBottomPaddingSpace()

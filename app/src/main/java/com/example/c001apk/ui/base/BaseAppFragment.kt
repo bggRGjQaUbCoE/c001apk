@@ -39,7 +39,7 @@ abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>(),
     }
 
     override fun initAdapter() {
-        appAdapter = AppAdapter(viewModel.blackListRepo, viewModel.ItemClickListener())
+        appAdapter = AppAdapter(viewModel.ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         mAdapter = ConcatAdapter(HeaderAdapter(), appAdapter, footerAdapter)
     }
