@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.activity.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.ui.base.BaseViewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
@@ -26,13 +27,17 @@ class TopicActivity : BaseViewActivity<TopicViewModel>() {
 
     @SuppressLint("CommitTransaction")
     override fun beginTransaction() {
-        if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(
-                    R.id.fragmentContainer, TopicFragment()
-                )
-                .commit()
+        if (viewModel.topicList.isNotEmpty()) {
+            if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(
+                        R.id.fragmentContainer, TopicFragment()
+                    )
+                    .commit()
+            }
+        } else {
+            viewModel.loadingState.value = LoadingState.LoadingError(LOADING_EMPTY)
         }
     }
 
