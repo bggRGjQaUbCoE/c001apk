@@ -9,8 +9,6 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 
 @Suppress("DEPRECATION")
@@ -107,16 +105,14 @@ object AppUtils {
         }.getOrDefault(-1)
     }
 
-    suspend fun getAppName(context: Context, packageName: String): String {
-        return withContext(Dispatchers.IO) {
-            try {
-                context.packageManager.getPackageInfo(
-                    packageName,
-                    0
-                ).applicationInfo.loadLabel(context.packageManager).toString()
-            } catch (e: java.lang.Exception) {
-                "未获取到"
-            }
+    fun getAppName(context: Context, packageName: String): String {
+        return try {
+            context.packageManager.getPackageInfo(
+                packageName,
+                0
+            ).applicationInfo.loadLabel(context.packageManager).toString()
+        } catch (e: java.lang.Exception) {
+            "未获取到"
         }
     }
 

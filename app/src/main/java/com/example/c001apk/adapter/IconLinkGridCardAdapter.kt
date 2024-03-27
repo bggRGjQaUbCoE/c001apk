@@ -18,12 +18,13 @@ class IconLinkGridCardAdapter(
     class ViewHolder(val binding: ItemRecyclerviewBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.recyclerView) {
         fun bind(data: List<IconLinkGridCardBean>) {
-            val layoutManager =
-                GridLayoutManager(itemView.context, 5, GridLayoutManager.VERTICAL, false)
-            binding.recyclerView.layoutManager = layoutManager
-            binding.recyclerView.isNestedScrollingEnabled = false
-            binding.recyclerView.adapter = IconLinkGridCardItemAdapter(listener).also {
-                it.submitList(data)
+            binding.recyclerView.apply {
+                isNestedScrollingEnabled = false
+                layoutManager =
+                    GridLayoutManager(itemView.context, 5, GridLayoutManager.VERTICAL, false)
+                adapter = IconLinkGridCardItemAdapter(listener).also {
+                    it.submitList(data)
+                }
             }
         }
     }

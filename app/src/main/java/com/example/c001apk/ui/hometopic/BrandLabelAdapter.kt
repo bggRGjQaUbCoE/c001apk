@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.hometopic
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -33,17 +32,18 @@ class BrandLabelAdapter(
 
     override fun getItemCount() = list.size
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View =
             LayoutInflater.from(parent.context).inflate(R.layout.item_brand_label, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.itemView.setOnClickListener { _: View ->
             if (viewHolder.bindingAdapterPosition != selectedPosition) {
+                val previousPosition = selectedPosition
                 selectedPosition = viewHolder.bindingAdapterPosition
                 onLabelClickListener?.onLabelClicked(viewHolder.bindingAdapterPosition)
+                notifyItemChanged(previousPosition)
+                notifyItemChanged(selectedPosition)
             }
-            notifyDataSetChanged()
         }
         return viewHolder
     }
@@ -52,23 +52,16 @@ class BrandLabelAdapter(
         val text = list[position]
         holder.title.text = text
         if (selectedPosition == position) {
-            holder.title.setTextColor(
-                MaterialColors.getColor(
-                    holder.itemView.context,
-                    com.google.android.material.R.attr.colorPrimary,
-                    0
-                )
+            val color = MaterialColors.getColor(
+                holder.itemView.context,
+                com.google.android.material.R.attr.colorPrimary,
+                0
             )
+            holder.title.setTextColor(color)
             holder.title.setBackgroundColor(
                 holder.itemView.context.getColor(R.color.home_card_background_color)
             )
-            holder.indicator.setBackgroundColor(
-                MaterialColors.getColor(
-                    holder.itemView.context,
-                    com.google.android.material.R.attr.colorPrimary,
-                    0
-                )
-            )
+            holder.indicator.setBackgroundColor(color)
         } else {
             holder.title.setTextColor(
                 MaterialColors.getColor(

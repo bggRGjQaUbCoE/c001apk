@@ -46,14 +46,12 @@ class UpdateListAdapter(
                 putExtra("id", holder.packageName)
             }
         }
-        holder.btnUpdate.apply {
-            setOnClickListener {
-                viewModel.packageName = holder.packageName
-                viewModel.versionCode = holder.apkversioncode
-                viewModel.appName = holder.appName.text.toString()
-                viewModel.versionName = holder.apkversionname
-                viewModel.onGetDownloadLink()
-            }
+        holder.btnUpdate.setOnClickListener {
+            viewModel.packageName = holder.packageName
+            viewModel.versionCode = holder.apkversioncode
+            viewModel.appName = holder.appName.text.toString()
+            viewModel.versionName = holder.apkversionname
+            viewModel.onGetDownloadLink()
         }
         holder.updateLog.apply {
             maxLines = if (holder.expand) Int.MAX_VALUE else 5

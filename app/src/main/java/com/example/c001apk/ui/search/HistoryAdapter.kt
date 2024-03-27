@@ -32,10 +32,7 @@ class HistoryAdapter :
             LayoutInflater.from(parent.context).inflate(R.layout.item_search_history, parent, false)
         val viewHolder = ViewHolder(view)
         viewHolder.keyWord.setOnLongClickListener {
-            if (viewHolder.delete.visibility == View.GONE)
-                viewHolder.delete.isVisible = true
-            else
-                viewHolder.delete.isVisible = false
+            viewHolder.delete.isVisible = viewHolder.delete.visibility == View.GONE
             true
         }
         viewHolder.delete.setOnClickListener {

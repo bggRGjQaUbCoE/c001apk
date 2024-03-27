@@ -108,12 +108,10 @@ class AppAdapter(
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind(data: HomeFeedResponse.Data) {
             data.entities?.let {
-                val dataList: MutableList<IconLinkGridCardBean> = ArrayList()
-                dataList.addAll(
-                    it.map { item ->
-                        IconLinkGridCardBean(item.title, item.pic, item.url)
-                    }
-                )
+                val dataList = it.map { item ->
+                    IconLinkGridCardBean(item.title, item.pic, item.url)
+                }.toMutableList()
+
                 if (it.size > 1) {
                     dataList.add(
                         0,
@@ -123,7 +121,6 @@ class AppAdapter(
                             it.last().url
                         )
                     )
-
                     dataList.add(
                         dataList.size,
                         IconLinkGridCardBean(
@@ -133,6 +130,7 @@ class AppAdapter(
                         )
                     )
                 }
+
                 var currentPosition = 0
                 binding.viewPager.adapter = ImageCarouselCardAdapter(listener).also { adapter ->
                     adapter.submitList(dataList)

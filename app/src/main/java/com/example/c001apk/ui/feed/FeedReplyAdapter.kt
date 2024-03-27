@@ -115,10 +115,8 @@ class FeedReplyAdapter(
 
             if (!reply.replyRows.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
-                    val sortedList = ArrayList<TotalReplyResponse.Data>()
-                    reply.replyRows.forEach {
-                        if (!blackListRepo.checkUid(it.uid))
-                            sortedList.add(it)
+                    val sortedList = reply.replyRows.filter {
+                        !blackListRepo.checkUid(it.uid)
                     }
                     if (sortedList.isNotEmpty()) {
                         binding.replyLayout.isVisible = true

@@ -45,52 +45,33 @@ class FooterAdapter(private val listener: FooterListener) :
             lp.isFullSpan = true
         } else {
             holder.footerLayout.layoutParams =
-                if (footerState == FooterState.LoadingReply) {
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    if (footerState == FooterState.LoadingReply)
                         FrameLayout.LayoutParams.MATCH_PARENT
-                    )
-                } else
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                    )
+                    else FrameLayout.LayoutParams.WRAP_CONTENT
+                )
+
         }
 
         when (footerState) {
-            FooterState.Loading, FooterState.LoadingReply -> {
-                holder.indicator.isVisible = true
-                holder.indicator.isIndeterminate = true
-                holder.noMore.visibility = View.INVISIBLE
-                holder.retry.isVisible = false
-
-            }
-
-            FooterState.LoadingDone -> {
-                holder.indicator.visibility = View.INVISIBLE
-                holder.indicator.isIndeterminate = false
-                holder.noMore.visibility = View.INVISIBLE
-                holder.retry.isVisible = false
-            }
+            FooterState.Loading, FooterState.LoadingReply, FooterState.LoadingDone -> {}
 
             is FooterState.LoadingEnd -> {
-                holder.indicator.visibility = View.INVISIBLE
-                holder.indicator.isIndeterminate = false
-                holder.noMore.isVisible = true
                 holder.noMore.text = (footerState as FooterState.LoadingEnd).msg
-                holder.retry.isVisible = false
             }
 
             is FooterState.LoadingError -> {
-                holder.indicator.visibility = View.INVISIBLE
-                holder.indicator.isIndeterminate = false
                 holder.noMore.text = (footerState as FooterState.LoadingError).errMsg
-                holder.noMore.isVisible = true
-                holder.retry.isVisible = true
             }
-
         }
-
+        holder.indicator.isIndeterminate = footerState is FooterState.Loading
+                || footerState is FooterState.LoadingReply
+        holder.indicator.isVisible = footerState is FooterState.Loading
+                || footerState is FooterState.LoadingReply
+        holder.noMore.isVisible = footerState is FooterState.LoadingEnd
+                || footerState is FooterState.LoadingError
+        holder.retry.isVisible = footerState is FooterState.LoadingError
     }
 
     override fun getItemCount() = 1
