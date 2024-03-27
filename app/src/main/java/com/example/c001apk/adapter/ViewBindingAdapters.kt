@@ -126,62 +126,52 @@ fun setRows(
                     parent,
                     false
                 )
+
                 if (isFeedContent == true)
-                    view.background = view.context.getDrawable(R.drawable.round_corners_20)
+                    view.background =
+                        parent.context.getDrawable(R.drawable.round_corners_20)
                 val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
                 val title: TextView = view.findViewById(R.id.title)
                 val type: String
                 val id: String
                 val url: String
+                val dataList: MutableList<HomeFeedResponse.RelationRows> = ArrayList()
+                dataList.addAll(it)
                 if (targetRow?.id != null) {
-                    if (position == 0) {
-                        type = targetRow.targetType.toString()
-                        id = targetRow.id
-                        url = targetRow.url
-                        title.text = targetRow.title
-                        ImageUtil.showIMG(logo, targetRow.logo)
-                    } else {
-                        val layoutParams = ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                    dataList.add(
+                        0,
+                        HomeFeedResponse.RelationRows(
+                            targetRow.id,
+                            targetRow.logo,
+                            targetRow.title,
+                            targetRow.url,
+                            targetRow.targetType.toString()
                         )
-                        layoutParams.setMargins(5.dp, 0, 0, 0)
-                        view.layoutParams = layoutParams
-                        type = it[position - 1].entityType
-                        id = it[position - 1].id
-                        url = it[position - 1].url
-                        title.text = it[position - 1].title
-                        ImageUtil.showIMG(
-                            logo,
-                            it[position - 1].logo
-                        )
-                    }
-                } else {
-                    if (position == 0) {
-                        type = it[0].entityType
-                        id = it[0].id
-                        title.text = it[0].title
-                        url = it[0].url
-                        ImageUtil.showIMG(logo, it[0].logo)
-                    } else {
-                        val layoutParams = ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT
-                        )
-                        layoutParams.setMargins(5.dp, 0, 0, 0)
-                        view.layoutParams = layoutParams
-                        type = it[position].entityType
-                        id = it[position].id
-                        url = it[position].url
-                        title.text = it[position].title
-                        ImageUtil.showIMG(
-                            logo,
-                            it[position].logo
-                        )
-                    }
+                    )
                 }
+
+                if (position != 0) {
+                    val layoutParams = ConstraintLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    layoutParams.setMargins(5.dp, 0, 0, 0)
+                    view.layoutParams = layoutParams
+                }
+                type = dataList[position].entityType
+                id = dataList[position].id
+                url = dataList[position].url
+                title.text = dataList[position].title
+                ImageUtil.showIMG(logo, dataList[position].logo)
+
                 view.setOnClickListener {
-                    NetWorkUtil.openLinkDyh(type, view.context, url, id, title.text.toString())
+                    NetWorkUtil.openLinkDyh(
+                        type,
+                        parent.context,
+                        url,
+                        id,
+                        title.text.toString()
+                    )
                 }
                 return view
             }
@@ -207,9 +197,7 @@ fun setGridView(
             if (feedType == "feedArticle" && imgWidth > imgHeight)
                 urlList.add("${picArr[0]}.s.jpg")
             else
-                picArr.forEach {
-                    urlList.add("$it.s.jpg")
-                }
+                urlList.addAll(picArr.map { "$it.s.jpg" })
             setUrlList(urlList)
         }
     } else {
@@ -272,7 +260,6 @@ fun setCustomText(
 
 @BindingAdapter("setHotReply")
 fun setHotReply(hotReply: TextView, feed: HomeFeedResponse.Data?) {
-
     if (feed != null) {
         if (!feed.replyRows.isNullOrEmpty()) {
             hotReply.isVisible = true

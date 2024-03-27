@@ -275,11 +275,7 @@ object ImageUtil {
 
                 override fun onViewPageSelected(position: Int) {
                     nineGridView.getImageViews().forEachIndexed { index, imageView ->
-                        if (position == index) {
-                            imageView.isVisible = false
-                        } else {
-                            imageView.isVisible = true
-                        }
+                        imageView.isVisible = position != index
                     }
                 }
 
