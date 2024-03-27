@@ -24,4 +24,5 @@ object Constants {
     const val SZLM_ID = "数字联盟ID不能为空"
     const val LOADING_FAILED = "加载失败"
     const val LOADING_EMPTY = "什么也没有"
+    const val LOADING_END = "没有更多了"
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedEntity
@@ -186,7 +187,7 @@ class FeedViewModel @AssistedInject constructor(
                             isEnd = true
                             if (isRefreshing)
                                 feedReplyData.postValue(emptyList())
-                            footerState.postValue(FooterState.LoadingEnd)
+                            footerState.postValue(FooterState.LoadingEnd(LOADING_END))
                         }
                     } else {
                         footerState.postValue(FooterState.LoadingError(LOADING_FAILED))

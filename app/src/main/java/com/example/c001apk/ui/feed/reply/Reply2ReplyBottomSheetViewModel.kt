@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
+import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
@@ -82,7 +83,7 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             isEnd = true
                             if (replyTotalList.isEmpty())
                                 totalReplyData.postValue(oriReply)
-                            footerState.postValue(FooterState.LoadingEnd)
+                            footerState.postValue(FooterState.LoadingEnd(LOADING_END))
                         }
                     } else {
                         isEnd = true

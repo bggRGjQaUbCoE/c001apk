@@ -73,11 +73,11 @@ class FooterAdapter(private val listener: FooterListener) :
                 holder.retry.isVisible = false
             }
 
-            FooterState.LoadingEnd -> {
+            is FooterState.LoadingEnd -> {
                 holder.indicator.visibility = View.INVISIBLE
                 holder.indicator.isIndeterminate = false
                 holder.noMore.isVisible = true
-                holder.noMore.text = "没有更多了"
+                holder.noMore.text = (footerState as FooterState.LoadingEnd).msg
                 holder.retry.isVisible = false
             }
 

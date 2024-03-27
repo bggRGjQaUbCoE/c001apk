@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
+import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
@@ -113,7 +114,7 @@ class SearchContentViewModel @AssistedInject constructor(
                             else {
                                 if (isRefreshing)
                                     dataList.postValue(emptyList())
-                                footerState.postValue(FooterState.LoadingEnd)
+                                footerState.postValue(FooterState.LoadingEnd(LOADING_END))
                             }
                         }
                     } else {

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
+import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.repository.BlackListRepo
@@ -102,7 +103,7 @@ class MessageViewModel @AssistedInject constructor(
                             else {
                                 if (isRefreshing)
                                     messageListData.postValue(emptyList())
-                                footerState.postValue(FooterState.LoadingEnd)
+                                footerState.postValue(FooterState.LoadingEnd(LOADING_END))
                             }
                         }
                     } else {

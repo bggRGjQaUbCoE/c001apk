@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
+import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.UserProfileResponse
 import com.example.c001apk.logic.repository.BlackListRepo
@@ -84,10 +85,23 @@ class UserViewModel @AssistedInject constructor(
                             if (isRefreshing) feedList.clear()
                             if (isRefreshing || isLoadMore) {
                                 feed.data.forEach {
-                                    if (it.entityType == "feed")
+                                    // noMoreDataCard
+                                    if (it.entityTemplate == "noMoreDataCard") {
+                                        isEnd = true
+                                        isRefreshing = false
+                                        isLoadMore = false
+                                        if (listSize <= 0)
+                                            loadingState.postValue(LoadingState.LoadingError(it.title))
+                                        else
+                                            footerState.postValue(FooterState.LoadingEnd(it.title))
+                                        dataList.postValue(feedList)
+                                        return@collect
+                                    } else if (it.entityType == "feed")
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
                                             && !blackListRepo.checkTopic(
-                                                it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
+                                                it.tags + it.ttitle + it.relationRows?.getOrNull(
+                                                    0
+                                                )?.title
                                             )
                                         )
                                             feedList.add(it)
@@ -106,7 +120,7 @@ class UserViewModel @AssistedInject constructor(
                             else {
                                 if (isRefreshing)
                                     dataList.postValue(emptyList())
-                                footerState.postValue(FooterState.LoadingEnd)
+                                footerState.postValue(FooterState.LoadingEnd(LOADING_END))
                             }
                         }
                     } else {
