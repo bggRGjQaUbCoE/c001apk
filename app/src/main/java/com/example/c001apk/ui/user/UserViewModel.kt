@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = UserViewModel.Factory::class)
 class UserViewModel @AssistedInject constructor(
-    @Assisted val uid: String,
+    @Assisted var uid: String,
     blackListRepo: BlackListRepo,
     historyRepo: HistoryFavoriteRepo,
     networkRepo: NetworkRepo
@@ -49,6 +49,7 @@ class UserViewModel @AssistedInject constructor(
                         activityState.postValue(LoadingState.LoadingError(user.message))
                         return@collect
                     } else if (user?.data != null) {
+                        uid = user.data.uid
                         userData = user.data
                         activityState.postValue(LoadingState.LoadingDone)
                     } else {
