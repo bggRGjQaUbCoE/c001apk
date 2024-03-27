@@ -134,7 +134,7 @@ class FeedReplyAdapter(
                             override fun getItem(p0: Int): Any = 0
                             override fun getItemId(p0: Int): Long = 0
                             override fun getView(
-                                position1: Int,
+                                position: Int,
                                 convertView: View?,
                                 parent: ViewGroup
                             ): View {
@@ -143,7 +143,7 @@ class FeedReplyAdapter(
                                     parent,
                                     false
                                 )
-                                val replyData = sortedList[position1]
+                                val replyData = sortedList[position]
                                 val textView: TextView = view.findViewById(R.id.reply)
                                 textView.highlightColor = ColorUtils.setAlphaComponent(
                                     MaterialColors.getColor(
@@ -192,21 +192,21 @@ class FeedReplyAdapter(
                                 )
 
                                 SpannableStringBuilderUtil.setData(
-                                    position1 + 1,
+                                    position + 1,
                                     reply.uid
                                 )
 
                                 view.setOnClickListener {
                                     listener.onReply(
                                         replyData.id, replyData.uid, replyData.username,
-                                        bindingAdapterPosition, position1
+                                        bindingAdapterPosition, position
                                     )
                                 }
 
                                 view.setOnLongClickListener {
                                     listener.onExpand(
                                         it, replyData.id, replyData.uid,
-                                        replyData.message, bindingAdapterPosition, position1
+                                        replyData.message, bindingAdapterPosition, position
                                     )
                                     true
                                 }

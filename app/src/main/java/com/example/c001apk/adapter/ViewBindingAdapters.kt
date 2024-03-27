@@ -106,6 +106,20 @@ fun setRows(
     isFeedContent: Boolean?
 ) {
     relationRows?.let {
+        val dataList = it.toMutableList()
+        if (targetRow?.id != null) {
+            dataList.add(
+                0,
+                HomeFeedResponse.RelationRows(
+                    targetRow.id,
+                    targetRow.logo,
+                    targetRow.title,
+                    targetRow.url,
+                    targetRow.targetType.toString()
+                )
+            )
+        }
+
         linearAdapterLayout.adapter = object : BaseAdapter() {
             override fun getCount(): Int =
                 if (targetRow?.id == null) it.size
@@ -126,30 +140,10 @@ fun setRows(
                     parent,
                     false
                 )
-
                 if (isFeedContent == true)
-                    view.background =
-                        parent.context.getDrawable(R.drawable.round_corners_20)
+                    view.background = parent.context.getDrawable(R.drawable.round_corners_20)
                 val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
                 val title: TextView = view.findViewById(R.id.title)
-                val type: String
-                val id: String
-                val url: String
-                val dataList: MutableList<HomeFeedResponse.RelationRows> = ArrayList()
-                dataList.addAll(it)
-                if (targetRow?.id != null) {
-                    dataList.add(
-                        0,
-                        HomeFeedResponse.RelationRows(
-                            targetRow.id,
-                            targetRow.logo,
-                            targetRow.title,
-                            targetRow.url,
-                            targetRow.targetType.toString()
-                        )
-                    )
-                }
-
                 if (position != 0) {
                     val layoutParams = ConstraintLayout.LayoutParams(
                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
@@ -158,18 +152,15 @@ fun setRows(
                     layoutParams.setMargins(5.dp, 0, 0, 0)
                     view.layoutParams = layoutParams
                 }
-                type = dataList[position].entityType
-                id = dataList[position].id
-                url = dataList[position].url
                 title.text = dataList[position].title
                 ImageUtil.showIMG(logo, dataList[position].logo)
 
                 view.setOnClickListener {
                     NetWorkUtil.openLinkDyh(
-                        type,
+                        dataList[position].entityType,
                         parent.context,
-                        url,
-                        id,
+                        dataList[position].url,
+                        dataList[position].id,
                         title.text.toString()
                     )
                 }
