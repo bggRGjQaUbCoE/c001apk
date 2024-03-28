@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.example.c001apk.R
 import com.example.c001apk.databinding.BaseTablayoutViewpagerBinding
 import com.example.c001apk.ui.home.IOnTabClickContainer
@@ -41,7 +42,11 @@ abstract class BasePagerFragment : Fragment(), IOnTabClickContainer {
     }
 
     fun initView() {
-        binding.viewPager.offscreenPageLimit = tabList.size
+        binding.viewPager.offscreenPageLimit =
+            with(tabList.size) {
+                if (this < 1) ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT
+                else this
+            }
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) = getFragment(position)
             override fun getItemCount() = tabList.size
