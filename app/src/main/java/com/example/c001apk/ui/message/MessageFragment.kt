@@ -31,8 +31,6 @@ import com.example.c001apk.util.Event
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.doOnMainThreadIdle
-import com.example.c001apk.util.setBottomPaddingSpace
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.StaggerItemDecoration
 import com.google.android.material.color.MaterialColors
@@ -127,9 +125,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.messageData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-            doOnMainThreadIdle {
-                binding.recyclerView.setBottomPaddingSpace()
-            }
         }
     }
 
@@ -204,9 +199,6 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
                 addItemDecoration(StaggerItemDecoration(10.dp))
-        }
-        doOnMainThreadIdle {
-            binding.recyclerView.setBottomPaddingSpace()
         }
     }
 

@@ -104,10 +104,8 @@ class CarouselViewModel @AssistedInject constructor(
 
     private fun loadCarouselList() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (tmpList != null) {
-                tmpList?.let {
-                    dataList.postValue(it)
-                }
+            tmpList?.let {
+                dataList.postValue(it)
                 page++
                 isRefreshing = false
                 loadingState.postValue(LoadingState.LoadingDone)
