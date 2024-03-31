@@ -12,7 +12,8 @@ import com.google.android.material.color.MaterialColors
 class MyURLSpan(
     private val mContext: Context,
     private val mUrl: String,
-    private val imgList: List<String>?
+    private val imgList: List<String>?,
+    private val showMoreReply: (() -> Unit)? = null
 ) :
     ClickableSpan() {
 
@@ -30,7 +31,7 @@ class MyURLSpan(
         if (mUrl == "") {
             return
         } else if (mUrl.contains("/feed/replyList")) {
-            return
+            showMoreReply?.let { it() }
         } else if (mUrl.contains("image.coolapk.com")) {
             if (imgList == null) {
                 ImageUtil.startBigImgViewSimple(mContext, mUrl.http2https)

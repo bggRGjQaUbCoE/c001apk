@@ -49,7 +49,8 @@ object SpannableStringBuilderUtil {
         mContext: Context,
         text: String,
         size: Float,
-        imgList: List<String>?
+        imgList: List<String>?,
+        showMoreReply: (() -> Unit)? = null
     ): SpannableStringBuilder {
         val mess = Html.fromHtml(
             text.replace("\n", " <br/>") + "\u3000",
@@ -63,7 +64,7 @@ object SpannableStringBuilderUtil {
             URLSpan::class.java
         )
         urls.forEach {
-            val myURLSpan = MyURLSpan(mContext, it.url, imgList)
+            val myURLSpan = MyURLSpan(mContext, it.url, imgList, showMoreReply)
             myURLSpan.setData(position, uid)
             myURLSpan.isColor = isColor
             myURLSpan.isReturn = isReturn

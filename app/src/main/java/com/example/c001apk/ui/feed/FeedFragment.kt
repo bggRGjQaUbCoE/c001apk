@@ -68,6 +68,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
     private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private var dialog: AlertDialog? = null
+    private var isShowReply: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -651,10 +652,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             position: Int,
             rPosition: Int?
         ) {
+            if (isShowReply) {
+                isShowReply = false
+                return
+            }
             if (PrefManager.isLogin) {
                 if (PrefManager.SZLMID == "") {
-                    Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                 } else {
                     viewModel.rid = id
                     viewModel.ruid = uid
@@ -679,6 +683,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         }
 
         override fun showTotalReply(id: String, uid: String, position: Int, rPosition: Int?) {
+            isShowReply = true
             val mBottomSheetDialogFragment =
                 Reply2ReplyBottomSheetDialog.newInstance(
                     position,

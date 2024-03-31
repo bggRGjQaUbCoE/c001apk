@@ -189,7 +189,14 @@ class FeedReplyAdapter(
                                     mess,
                                     textView.textSize,
                                     replyData.picArr
-                                )
+                                ) {
+                                    listener.showTotalReply(
+                                        reply.id,
+                                        reply.uid,
+                                        bindingAdapterPosition,
+                                        null
+                                    )
+                                }
 
                                 SpannableStringBuilderUtil.setData(
                                     position + 1,

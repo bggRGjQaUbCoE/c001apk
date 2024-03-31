@@ -127,7 +127,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                 it.entities = it.entities?.filterNot { item ->
                                                     item.url.startsWith("http")
                                                 }
-                                                currentList.add(it)
+                                                if (!it.entities.isNullOrEmpty())
+                                                    currentList.add(it)
                                             }
 
                                             "iconMiniScrollCard" -> {
@@ -138,7 +139,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                         (item.entityType == "topic" || item.entityType == "product")
                                                                 && !blackListRepo.checkTopic(item.title)
                                                     }
-                                                    currentList.add(it)
+                                                    if (!it.entities.isNullOrEmpty())
+                                                        currentList.add(it)
                                                 }
                                             }
 
@@ -147,7 +149,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                     item.entityType == "feed"
                                                             && !blackListRepo.checkUid(item.userInfo.uid)
                                                 }
-                                                currentList.add(it)
+                                                if (!it.entities.isNullOrEmpty())
+                                                    currentList.add(it)
                                             }
 
                                             else -> return@forEach
@@ -252,7 +255,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                 it.entities = it.entities?.filter { item ->
                                                     item.entityType == "picCategory"
                                                 }
-                                                currentList.add(it)
+                                                if (!it.entities.isNullOrEmpty())
+                                                    currentList.add(it)
                                             }
 
                                             "iconMiniGridCard" -> {
@@ -263,7 +267,8 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                         (item.entityType == "topic" || item.entityType == "product")
                                                                 && !blackListRepo.checkTopic(item.title)
                                                     }
-                                                    currentList.add(it)
+                                                    if (!it.entities.isNullOrEmpty())
+                                                        currentList.add(it)
                                                 }
                                             }
 
