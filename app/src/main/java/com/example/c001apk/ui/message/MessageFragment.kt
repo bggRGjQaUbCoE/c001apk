@@ -32,7 +32,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.LinearItemDecoration
-import com.example.c001apk.view.StaggerItemDecoration
+import com.example.c001apk.view.MessStaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -198,7 +198,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             if (isPortrait)
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
-                addItemDecoration(StaggerItemDecoration(10.dp))
+                addItemDecoration(MessStaggerItemDecoration(10.dp))
         }
     }
 

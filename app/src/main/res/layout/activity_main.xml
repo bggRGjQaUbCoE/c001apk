@@ -17,7 +17,6 @@
         app:labelVisibilityMode="selected"
         app:layout_anchor="@id/viewPager"
         app:layout_anchorGravity="bottom"
-        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
         app:menu="@menu/nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
