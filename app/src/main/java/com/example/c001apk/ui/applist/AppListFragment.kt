@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.applist
 
-import android.content.res.Configuration
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.Gravity
@@ -8,7 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import com.absinthe.libraries.utils.extensions.dp
@@ -22,7 +24,6 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
-import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.doOnMainThreadIdle
 import com.example.c001apk.util.setBottomPaddingSpace
@@ -82,26 +83,30 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
             setImageResource(R.drawable.ic_update)
             if (SDK_INT >= 26)
                 tooltipText = getString(R.string.update)
-            val lp = CoordinatorLayout.LayoutParams(
+            layoutParams = CoordinatorLayout.LayoutParams(
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.setMargins(
-                0, 0, 25.dp,
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    DensityTool.getNavigationBarHeight(requireContext()) + 105.dp
-                else
-                    25.dp
-            )
-            lp.gravity = Gravity.BOTTOM or Gravity.END
-            layoutParams = lp
-            (layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
+            ).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+                behavior = fabViewBehavior
+            }
             setOnClickListener {
                 IntentUtil.startActivity<AppUpdateActivity>(requireContext()) {
                     putParcelableArrayListExtra("list", viewModel.appsUpdate)
                 }
             }
             isVisible = false
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(fab) { _, insets ->
+            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            fab.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                rightMargin = 25.dp
+                bottomMargin =
+                    if (isPortrait)
+                        navigationBars.bottom + 105.dp
+                    else 25.dp
+            }
+            insets
         }
     }
 

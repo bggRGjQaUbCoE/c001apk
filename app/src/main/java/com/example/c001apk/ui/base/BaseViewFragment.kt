@@ -29,7 +29,7 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
     lateinit var mAdapter: ConcatAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
+    val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
 
     override fun onCreateView(
         inflater: LayoutInflater,

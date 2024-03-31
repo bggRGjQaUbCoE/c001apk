@@ -2,7 +2,6 @@ package com.example.c001apk.ui.homefeed
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.content.res.Configuration
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.Gravity
@@ -12,6 +11,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
@@ -28,7 +30,6 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
-import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
@@ -197,12 +198,6 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.setMargins(
-                0, 0, 25.dp,
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    DensityTool.getNavigationBarHeight(requireContext()) + 105.dp
-                else 25.dp
-            )
             lp.gravity = Gravity.BOTTOM or Gravity.END
             setImageResource(R.drawable.ic_add1)
             layoutParams = lp
@@ -216,6 +211,17 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
                     bottomSheetDialog.show()
                 }
             }
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(fab) { _, insets ->
+            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            fab.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                rightMargin = 25.dp
+                bottomMargin =
+                    if (isPortrait)
+                        navigationBars.bottom + 105.dp
+                    else 25.dp
+            }
+            insets
         }
     }
 

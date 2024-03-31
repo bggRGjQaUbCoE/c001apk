@@ -12,7 +12,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -39,7 +42,6 @@ import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.util.ClipboardUtil
-import com.example.c001apk.util.DensityTool
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ToastUtil
@@ -124,20 +126,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         if (PrefManager.isLogin) {
             binding.reply.apply {
                 isVisible = true
-                val lp = CoordinatorLayout.LayoutParams(
+                layoutParams = CoordinatorLayout.LayoutParams(
                     CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                     CoordinatorLayout.LayoutParams.WRAP_CONTENT
-                )
-                lp.setMargins(
-                    0, 0, 25.dp,
-                    if (isPortrait)
-                        DensityTool.getNavigationBarHeight(requireContext()) + 25.dp
-                    else 25.dp
-                )
-                lp.gravity = Gravity.BOTTOM or Gravity.END
-                layoutParams = lp
-                (layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
-
+                ).apply {
+                    gravity = Gravity.BOTTOM or Gravity.END
+                    behavior = fabViewBehavior
+                }
                 setOnClickListener {
                     if (PrefManager.SZLMID == "") {
                         Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT)
@@ -150,6 +145,15 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         initReply()
                     }
                 }
+            }
+            ViewCompat.setOnApplyWindowInsetsListener(binding.reply) { _, insets ->
+                val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                binding.reply.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                    rightMargin = 25.dp
+                    bottomMargin = if (isPortrait) navigationBars.bottom + 25.dp
+                    else 25.dp
+                }
+                insets
             }
         } else
             binding.reply.isVisible = false
