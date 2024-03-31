@@ -1,6 +1,7 @@
 package com.example.c001apk.util
 
 import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.constant.Constants
@@ -153,4 +154,12 @@ object PrefManager {
     var isColorFilter: Boolean
         get() = pref.getBoolean("isColorFilter", true)
         set(value) = pref.edit().putBoolean("isColorFilter", value).apply()
+
+    fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        pref.registerOnSharedPreferenceChangeListener(listener)
+    }
+
+    fun unregisterOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        pref.unregisterOnSharedPreferenceChangeListener(listener)
+    }
 }
