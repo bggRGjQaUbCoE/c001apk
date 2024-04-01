@@ -493,6 +493,7 @@ class ParamsPreferenceFragment : PreferenceFragmentCompat(), SharedPreferences.O
             "SDK_INT" -> findPreference<Preference>(key)?.summary = PrefManager.SDK_INT
             "ANDROID_VERSION" -> findPreference<Preference>(key)?.summary = PrefManager.ANDROID_VERSION
             "USER_AGENT" -> findPreference<Preference>(key)?.summary = PrefManager.USER_AGENT
+            "xAppDevice" -> findPreference<Preference>(key)?.summary = PrefManager.xAppDevice
         }
     }
 }
