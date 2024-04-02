@@ -86,8 +86,8 @@ class HomeTopicViewModel @AssistedInject constructor(
                             if (tabList.isEmpty()) {
                                 data.data.let {
                                     it.forEach { item ->
-                                        tabList.add(item.title)
-                                        topicList.add(TopicBean(item.url, item.title))
+                                        tabList.add(item.title ?: "")
+                                        topicList.add(TopicBean(item.url ?: "", item.title ?: ""))
                                     }
                                 }
                                 loadingState.postValue(LoadingState.LoadingDone)

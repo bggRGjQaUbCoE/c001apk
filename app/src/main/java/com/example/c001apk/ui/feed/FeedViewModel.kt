@@ -11,7 +11,6 @@ import com.example.c001apk.constant.Constants.LOADING_FAILED
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
@@ -25,7 +24,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -84,9 +82,9 @@ class FeedViewModel @AssistedInject constructor(
     val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
 
     val feedReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
-    var followState = MutableLiveData<Event<Int>>()
+    val feedUserState = MutableLiveData<Event<Boolean>>()
 
-    fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int) {
+    fun onFollowUnFollow(url: String, uid: String, followAuthor: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postFollowUnFollow(url, uid)
                 .collect { result ->
@@ -95,10 +93,8 @@ class FeedViewModel @AssistedInject constructor(
                         if (response.message != null) {
                             toastText.postValue(Event(response.message))
                         } else {
-                            val isFollow = if (followAuthor == 1) 0
-                            else 1
-                            feedDataList?.getOrNull(0)?.userAction?.followAuthor = isFollow
-                            followState.postValue(Event(isFollow))
+                            feedDataList?.getOrNull(0)?.userAction?.followAuthor = if (followAuthor == 1) 0 else 1
+                            feedUserState.postValue(Event(true))
                         }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
@@ -107,28 +103,23 @@ class FeedViewModel @AssistedInject constructor(
         }
     }
 
-    fun onPostLikeReply(id: String, position: Int, likeData: Like) {
-        val likeType = if (likeData.isLike.get() == 1) "unLikeReply"
-        else "likeReply"
+    fun onLikeReply(id: String, isLike: Int) {
+        val likeType = if (isLike == 1) "unLikeReply" else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postLikeReply(likeUrl, id)
-                .catch { err ->
-                    err.message?.let {
-                        toastText.postValue(Event(it))
-                    }
-                }
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
                         if (response.data != null) {
-                            val count = response.data
-                            val isLike = if (likeData.isLike.get() == 1) 0 else 1
-                            likeData.likeNum.set(count)
-                            likeData.isLike.set(isLike)
-                            val currentList = feedReplyData.value?.toMutableList() ?: ArrayList()
-                            currentList[position].likenum = count
-                            currentList[position].userAction?.like = isLike
+                            val currentList = feedReplyData.value?.map {
+                                if (it.id == id) {
+                                    it.copy(
+                                        likenum = response.data,
+                                        userAction = it.userAction?.copy(like = if (isLike == 1) 0 else 1)
+                                    )
+                                } else it
+                            } ?: emptyList()
                             feedReplyData.postValue(currentList)
                         } else {
                             response.message?.let {
@@ -220,8 +211,8 @@ class FeedViewModel @AssistedInject constructor(
 
                             if (feedType == "feedArticle") {
                                 articleMsg =
-                                    if (feed.data.message.length > 150)
-                                        feed.data.message.substring(0, 150)
+                                    if ((feed.data.message?.length ?: 0) > 150)
+                                        feed.data.message?.substring(0, 150)
                                     else feed.data.message
                                 articleDateLine = feed.data.dateline.toString()
                                 articleList = ArrayList<FeedArticleContentBean.Data>().also {
@@ -399,27 +390,18 @@ class FeedViewModel @AssistedInject constructor(
         }
     }
 
-    fun onPostLikeFeed(id: String, likeData: Like) {
-        val likeType = if (likeData.isLike.get() == 1) "unlike"
-        else "like"
+    fun onLikeFeed(id: String, isLike: Int) {
+        val likeType = if (isLike == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postLikeFeed(likeUrl, id)
-                .catch { err ->
-                    err.message?.let {
-                        toastText.postValue(Event(it))
-                    }
-                }
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
                         if (response.data != null) {
-                            val count = response.data.count
-                            val isLike = if (likeData.isLike.get() == 1) 0 else 1
-                            likeData.likeNum.set(count)
-                            likeData.isLike.set(isLike)
-                            feedDataList?.getOrNull(0)?.likenum = count
-                            feedDataList?.getOrNull(0)?.userAction?.like = isLike
+                            feedDataList?.getOrNull(0)?.likenum = response.data.count
+                            feedDataList?.getOrNull(0)?.userAction?.like = if (isLike == 1) 0 else 1
+                            feedUserState.postValue(Event(true))
                         } else {
                             response.message?.let {
                                 toastText.postValue(Event(it))

@@ -9,7 +9,6 @@ import com.example.c001apk.BR
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ItemMessageContentBinding
 import com.example.c001apk.databinding.ItemMessageUserBinding
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.feed.FeedActivity
 import com.example.c001apk.util.IntentUtil
@@ -58,13 +57,6 @@ class MessageContentAdapter(
             binding.setVariable(BR.type, type)
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
-            binding.setVariable(BR.likeData, Like().also {
-                it.likeNum.set(data.likenum)
-                data.userAction?.like?.let { like ->
-                    it.isLike.set(like)
-                }
-            })
-
 
             binding.executePendingBindings()
         }

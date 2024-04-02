@@ -92,9 +92,17 @@ class UserViewModel @AssistedInject constructor(
                                         isRefreshing = false
                                         isLoadMore = false
                                         if (listSize <= 0)
-                                            loadingState.postValue(LoadingState.LoadingError(it.title))
+                                            loadingState.postValue(
+                                                LoadingState.LoadingError(
+                                                    it.title ?: ""
+                                                )
+                                            )
                                         else
-                                            footerState.postValue(FooterState.LoadingEnd(it.title))
+                                            footerState.postValue(
+                                                FooterState.LoadingEnd(
+                                                    it.title ?: ""
+                                                )
+                                            )
                                         dataList.postValue(feedList)
                                         return@collect
                                     } else if (it.entityType == "feed")

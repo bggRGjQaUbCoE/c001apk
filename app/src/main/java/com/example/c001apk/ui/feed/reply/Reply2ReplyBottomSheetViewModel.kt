@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
@@ -17,7 +16,6 @@ import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -188,28 +186,24 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
         }
     }
 
-    fun onPostLikeReply(id: String, position: Int, likeData: Like) {
-        val likeType = if (likeData.isLike.get() == 1) "unLikeReply"
+    fun onPostLikeReply(id: String, isLike: Int) {
+        val likeType = if (isLike == 1) "unLikeReply"
         else "likeReply"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postLikeReply(likeUrl, id)
-                .catch { err ->
-                    err.message?.let {
-                        toastText.postValue(Event(it))
-                    }
-                }
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
                         if (response.data != null) {
-                            val count = response.data
-                            val isLike = if (likeData.isLike.get() == 1) 0 else 1
-                            likeData.likeNum.set(count)
-                            likeData.isLike.set(isLike)
-                            val currentList = totalReplyData.value?.toMutableList() ?: ArrayList()
-                            currentList[position].likenum = count
-                            currentList[position].userAction?.like = isLike
+                            val currentList = totalReplyData.value?.map {
+                                if (it.id == id) {
+                                    it.copy(
+                                        likenum = response.data,
+                                        userAction = it.userAction?.copy(like = if (isLike == 1) 0 else 1)
+                                    )
+                                } else it
+                            } ?: emptyList()
                             totalReplyData.postValue(currentList)
                         } else {
                             response.message?.let {

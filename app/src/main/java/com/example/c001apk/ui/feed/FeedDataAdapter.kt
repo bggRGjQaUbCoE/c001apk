@@ -24,14 +24,17 @@ class FeedDataAdapter(
         fun bind(data: HomeFeedResponse.Data?) {
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
-            binding.likeData = Like().also {
-                it.apply {
-                    data?.userAction?.like?.let { like ->
-                        isLike.set(like)
-                    }
-                    likeNum.set(data?.likenum)
-                }
-            }
+            binding.setVariable(
+                BR.likeData,
+                Like(
+                    data?.likenum ?: "0",
+                    data?.userAction?.like ?: 0
+                )
+            )
+            binding.setVariable(
+                BR.followAuthor,
+                data?.userAction?.followAuthor ?: 0
+            )
             binding.executePendingBindings()
         }
     }
@@ -118,6 +121,33 @@ class FeedDataAdapter(
             is TextViewHolder -> holder.bind(articleList?.getOrNull(position))
             is ImageViewHolder -> holder.bind(articleList?.getOrNull(position))
             is ShareUrlViewHolder -> holder.bind(articleList?.getOrNull(position))
+        }
+    }
+
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            if (payloads[0] == true) {
+                with(holder as FeedViewHolder) {
+                    binding.setVariable(
+                        BR.likeData,
+                        Like(
+                            feedDataList?.getOrNull(0)?.likenum ?: "0",
+                            feedDataList?.getOrNull(0)?.userAction?.like ?: 0
+                        )
+                    )
+                    binding.setVariable(
+                        BR.followAuthor,
+                        feedDataList?.getOrNull(0)?.userAction?.followAuthor ?: 0
+                    )
+                    binding.executePendingBindings()
+                }
+            }
         }
     }
 

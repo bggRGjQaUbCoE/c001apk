@@ -7,7 +7,6 @@ import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
@@ -24,7 +23,6 @@ abstract class BaseAppViewModel(
 
     val dataList = MutableLiveData<List<HomeFeedResponse.Data>>()
 
-    var followUserState = MutableLiveData<Event<Int?>>() // position of user/feed detail
     val footerState = MutableLiveData<FooterState>()
     val toastText = MutableLiveData<Event<String?>>()
 
@@ -68,20 +66,21 @@ abstract class BaseAppViewModel(
             }
         }
 
-        override fun onFollowUser(uid: String, followAuthor: Int, position: Int) {
-            if (PrefManager.isLogin)
-                if (followAuthor == 1) {
-                    onPostFollowUnFollow("/v6/user/unfollow", uid, followAuthor, position)
-                } else {
-                    onPostFollowUnFollow("/v6/user/follow", uid, followAuthor, position)
-                }
+        override fun onFollowUser(uid: String, followAuthor: Int) {
+            if (PrefManager.isLogin) {
+                val url = if (followAuthor == 1) "/v6/user/unfollow" else "/v6/user/follow"
+                onPostFollowUnFollow(url, uid, followAuthor)
+            }
         }
 
-        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
+        override fun onLikeClick(type: String, id: String, isLike: Int) {
             if (PrefManager.isLogin) {
                 if (PrefManager.SZLMID.isEmpty())
                     toastText.postValue(Event(Constants.SZLM_ID))
-                else onPostLikeFeed(id, position, likeData)
+                else if (type == "feed")
+                    onPostLikeFeed(id, isLike)
+                else
+                    onPostLikeReply(id, isLike)
             }
         }
 
@@ -124,8 +123,40 @@ abstract class BaseAppViewModel(
         }
     }
 
-    fun onPostLikeFeed(id: String, position: Int, likeData: Like) {
-        val likeType = if (likeData.isLike.get() == 1) "unlike" else "like"
+    // like reply
+    fun onPostLikeReply(id: String, isLike: Int) {
+        val likeType = if (isLike == 1) "unLikeReply" else "likeReply"
+        val likeUrl = "/v6/feed/$likeType"
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.postLikeReply(likeUrl, id)
+                .collect { result ->
+                    val response = result.getOrNull()
+                    if (response != null) {
+                        if (response.data != null) {
+                            val currentList = dataList.value?.map {
+                                if (it.id == id) {
+                                    it.copy(
+                                        likenum = response.data,
+                                        userAction = it.userAction?.copy(like = if (isLike == 1) 0 else 1)
+                                    )
+                                } else it
+                            } ?: emptyList()
+                            dataList.postValue(currentList)
+                        } else {
+                            response.message?.let {
+                                toastText.postValue(Event(it))
+                            }
+                        }
+                    } else {
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                }
+        }
+    }
+
+    // like feed
+    fun onPostLikeFeed(id: String, isLike: Int) {
+        val likeType = if (isLike == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postLikeFeed(likeUrl, id)
@@ -133,13 +164,14 @@ abstract class BaseAppViewModel(
                     val response = result.getOrNull()
                     if (response != null) {
                         if (response.data != null) {
-                            val count = response.data.count
-                            val isLike = if (likeData.isLike.get() == 1) 0 else 1
-                            likeData.likeNum.set(count)
-                            likeData.isLike.set(isLike)
-                            val currentList = dataList.value?.toMutableList() ?: ArrayList()
-                            currentList[position].likenum = count
-                            currentList[position].userAction?.like = isLike
+                            val currentList = dataList.value?.map {
+                                if (it.id == id) {
+                                    it.copy(
+                                        likenum = response.data.count,
+                                        userAction = it.userAction?.copy(like = if (isLike == 1) 0 else 1)
+                                    )
+                                } else it
+                            } ?: emptyList()
                             dataList.postValue(currentList)
                         } else {
                             response.message?.let {
@@ -154,7 +186,7 @@ abstract class BaseAppViewModel(
     }
 
     // follow user
-    fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int, position: Int) {
+    fun onPostFollowUnFollow(url: String, uid: String, followAuthor: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postFollowUnFollow(url, uid)
                 .collect { result ->
@@ -163,12 +195,13 @@ abstract class BaseAppViewModel(
                         if (response.message != null) {
                             toastText.postValue(Event(response.message))
                         } else {
-                            val isFollow = if (followAuthor == 1) 0
-                            else 1
-                            val userList = dataList.value?.toMutableList() ?: ArrayList()
-                            userList[position].isFollow = isFollow
-                            dataList.postValue(userList)
-                            followUserState.postValue(Event(position))
+                            val isFollow = if (followAuthor == 1) 0 else 1
+                            val currentList = dataList.value?.toMutableList()?.map {
+                                if (it.uid == uid)
+                                    it.copy(isFollow = isFollow)
+                                else it
+                            } ?: emptyList()
+                            dataList.postValue(currentList)
                             toastText.postValue(
                                 Event(
                                     if (isFollow == 1) "关注成功"

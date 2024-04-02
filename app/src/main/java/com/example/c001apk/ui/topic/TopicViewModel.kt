@@ -62,10 +62,10 @@ class TopicViewModel @AssistedInject constructor(
                             return@collect
                         } else if (data.data != null) {
                             isFollow = data.data.userAction?.follow == 1
-                            id = data.data.id
+                            id = data.data.id ?: ""
                             type = data.data.entityType
                             subtitle = data.data.intro
-                            getTopicList(data.data.tabList, data.data.selectedTab)
+                            getTopicList(data.data.tabList, data.data.selectedTab.toString())
                             checkFollow()
                             activityState.postValue(LoadingState.LoadingDone)
                         }
@@ -90,7 +90,7 @@ class TopicViewModel @AssistedInject constructor(
                         } else if (data.data != null) {
                             isFollow = data.data.userAction?.follow == 1
                             subtitle = data.data.intro
-                            getTopicList(data.data.tabList, data.data.selectedTab)
+                            getTopicList(data.data.tabList, data.data.selectedTab.toString())
                             checkFollow()
                             activityState.postValue(LoadingState.LoadingDone)
                         }
@@ -102,12 +102,12 @@ class TopicViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getTopicList(tabList: List<HomeFeedResponse.TabList>, selectedTab: String) {
-        topicList = tabList.map {
-            TopicBean(it.url, it.title)
-        }
+    private fun getTopicList(tabList: List<HomeFeedResponse.TabList>?, selectedTab: String) {
+        topicList = tabList?.map {
+            TopicBean(it.url.toString(), it.title.toString())
+        } ?: emptyList()
         run breaking@{
-            tabList.forEachIndexed { index, tab ->
+            tabList?.forEachIndexed { index, tab ->
                 if (selectedTab == tab.pageName) {
                     tabSelected = index
                     return@breaking

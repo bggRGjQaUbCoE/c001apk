@@ -54,28 +54,28 @@ fun setExtraPic(imageView: ImageView, extraPic: String?) {
 }
 
 @BindingAdapter("setFollowText")
-fun setFollowText(textView: TextView, userAction: HomeFeedResponse.UserAction?) {
+fun setFollowText(textView: TextView, followAuthor: Int) {
     with(PrefManager.isLogin) {
         textView.isVisible = this
         if (this) {
-            userAction?.let {
-                when (it.followAuthor) {
-                    0 -> {
-                        textView.text = "关注"
+            when (followAuthor) {
+                0 -> {
+                    textView.text = "关注"
+                    textView.setTextColor(
                         MaterialColors.getColor(
                             textView.context,
                             com.google.android.material.R.attr.colorPrimary,
                             0
                         )
-                    }
-
-                    1 -> {
-                        textView.text = "取消关注"
-                        textView.setTextColor(textView.context.getColor(android.R.color.darker_gray))
-                    }
-
-                    else -> {}
+                    )
                 }
+
+                1 -> {
+                    textView.text = "取消关注"
+                    textView.setTextColor(textView.context.getColor(android.R.color.darker_gray))
+                }
+
+                else -> {}
             }
         }
     }

@@ -48,19 +48,13 @@ class FeedReplyAdapter(
         var uid: String = ""
         var username: String = ""
         var message: String = ""
-        var likeData: Like = Like()
+        var isLike: Int = 0
 
         init {
             itemView.setOnClickListener {
                 listener.onReply(
                     id, uid, username,
                     bindingAdapterPosition, null
-                )
-            }
-
-            binding.like.setOnClickListener {
-                listener.onLikeClick(
-                    "feedReply", id, bindingAdapterPosition, likeData
                 )
             }
 
@@ -102,16 +96,16 @@ class FeedReplyAdapter(
             uid = reply.uid
             username = reply.username
             message = reply.message
+            isLike = reply.userAction?.like ?: 0
 
             binding.setVariable(BR.data, reply)
             binding.setVariable(BR.listener, listener)
-            likeData = Like().also {
-                it.likeNum.set(reply.likenum)
-                reply.userAction?.like?.let { like ->
-                    it.isLike.set(like)
-                }
-            }
-            binding.setVariable(BR.likeData, likeData)
+            binding.setVariable(
+                BR.likeData, Like(
+                    reply.likenum,
+                    reply.userAction?.like ?: 0
+                )
+            )
 
             if (!reply.replyRows.isNullOrEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
@@ -266,6 +260,24 @@ class FeedReplyAdapter(
         holder.bind(currentList[position], haveTop, topReplyId, blackListRepo)
     }
 
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            if (payloads[0] == true) {
+                holder.binding.likeData = Like(
+                    currentList[position].likenum,
+                    currentList[position].userAction?.like ?: 0
+                )
+                holder.binding.executePendingBindings()
+            }
+        }
+    }
+
 }
 
 class FeedReplyDiffCallback : DiffUtil.ItemCallback<TotalReplyResponse.Data>() {
@@ -280,6 +292,13 @@ class FeedReplyDiffCallback : DiffUtil.ItemCallback<TotalReplyResponse.Data>() {
         oldItem: TotalReplyResponse.Data,
         newItem: TotalReplyResponse.Data
     ): Boolean {
-        return oldItem.id == newItem.id && oldItem.username == newItem.username
+        return oldItem.likenum == newItem.likenum
+    }
+
+    override fun getChangePayload(
+        oldItem: TotalReplyResponse.Data,
+        newItem: TotalReplyResponse.Data
+    ): Any? {
+        return if (oldItem.likenum != newItem.likenum) true else null
     }
 }

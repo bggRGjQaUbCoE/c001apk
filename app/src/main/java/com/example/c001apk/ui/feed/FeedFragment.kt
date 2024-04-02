@@ -32,7 +32,6 @@ import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
 import com.example.c001apk.logic.model.FeedEntity
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.feed.reply.IOnPublishClickListener
 import com.example.c001apk.ui.feed.reply.Reply2ReplyBottomSheetDialog
@@ -219,9 +218,10 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     private fun initObserve() {
-        viewModel.followState.observe(viewLifecycleOwner) { event ->
+        viewModel.feedUserState.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
-                feedDataAdapter.notifyItemChanged(0)
+                if (it)
+                    feedDataAdapter.notifyItemChanged(0, true)
             }
         }
 
@@ -614,13 +614,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 )
         }
 
-        override fun onFollowUser(uid: String, followAuthor: Int, position: Int) {
-            if (PrefManager.isLogin)
-                if (followAuthor == 1) {
-                    viewModel.onPostFollowUnFollow("/v6/user/unfollow", uid, followAuthor)
-                } else {
-                    viewModel.onPostFollowUnFollow("/v6/user/follow", uid, followAuthor)
-                }
+        override fun onFollowUser(uid: String, followAuthor: Int) {
+            if (PrefManager.isLogin) {
+                val url = if (followAuthor == 1) "/v6/user/unfollow" else "/v6/user/follow"
+                viewModel.onFollowUnFollow(url, uid, followAuthor)
+            }
         }
 
         override fun onExpand(
@@ -675,15 +673,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
         }
 
-        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
+        override fun onLikeClick(type: String, id: String, isLike: Int) {
             if (PrefManager.isLogin)
                 if (PrefManager.SZLMID.isEmpty())
                     Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
+                else if (type == "feed")
+                    viewModel.onLikeFeed(id, isLike)
                 else
-                    if (type == "feed")
-                        viewModel.onPostLikeFeed(id, likeData)
-                    else
-                        viewModel.onPostLikeReply(id, position, likeData)
+                    viewModel.onLikeReply(id, isLike)
         }
 
         override fun showTotalReply(id: String, uid: String, position: Int, rPosition: Int?) {

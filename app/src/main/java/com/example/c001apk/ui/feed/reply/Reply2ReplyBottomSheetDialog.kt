@@ -27,7 +27,6 @@ import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.ReplyItemDecoration
@@ -346,12 +345,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                 )
         }
 
-        override fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {
+        override fun onLikeClick(type: String, id: String, isLike: Int) {
             if (PrefManager.isLogin)
                 if (PrefManager.SZLMID.isEmpty())
                     Toast.makeText(requireContext(), Constants.SZLM_ID, Toast.LENGTH_SHORT).show()
                 else
-                    viewModel.onPostLikeReply(id, position, likeData)
+                    viewModel.onPostLikeReply(id, isLike)
         }
 
         override fun onReply(

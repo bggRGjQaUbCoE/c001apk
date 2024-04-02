@@ -31,7 +31,7 @@ class Reply2ReplyTotalAdapter(
 ) {
 
     class ReplyViewHolder(
-        private val binding: ItemReplyToReplyItemBinding,
+        val binding: ItemReplyToReplyItemBinding,
         private val listener: ItemListener,
         private val fuid: String,
         private val uid: String
@@ -40,7 +40,7 @@ class Reply2ReplyTotalAdapter(
         private var rId: String = ""
         private var rUid: String = ""
         private var username: String = ""
-        private var likeData: Like = Like()
+        private var isLike: Int = 0
 
         init {
             itemView.setOnClickListener {
@@ -73,13 +73,6 @@ class Reply2ReplyTotalAdapter(
                     show()
                 }
             }
-
-            binding.like.setOnClickListener {
-                listener.onLikeClick(
-                    "feed_reply", rId,
-                    bindingAdapterPosition, likeData
-                )
-            }
         }
 
         fun bind(reply: TotalReplyResponse.Data) {
@@ -106,6 +99,7 @@ class Reply2ReplyTotalAdapter(
             rId = reply.id
             rUid = reply.uid
             username = reply.username
+            isLike = reply.userAction?.like ?: 0
 
             val replyTag = if (bindingAdapterPosition == 0) ""
             else
@@ -136,18 +130,15 @@ class Reply2ReplyTotalAdapter(
                 binding.uname.textSize,
                 null
             )
-
+            binding.setVariable(
+                BR.likeData,
+                Like(
+                    reply.likenum,
+                    reply.userAction?.like ?: 0
+                )
+            )
             binding.setVariable(BR.data, reply)
             binding.setVariable(BR.listener, listener)
-            likeData = Like().also {
-                it.apply {
-                    reply.userAction?.like?.let { like ->
-                        isLike.set(like)
-                    }
-                    likeNum.set(reply.likenum)
-                }
-            }
-            binding.setVariable(BR.likeData, likeData)
             binding.executePendingBindings()
         }
     }
@@ -165,6 +156,24 @@ class Reply2ReplyTotalAdapter(
         holder.bind(currentList[position])
     }
 
+    override fun onBindViewHolder(
+        holder: ReplyViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            if (payloads[0] == true) {
+                holder.binding.likeData = Like(
+                    currentList[position].likenum,
+                    currentList[position].userAction?.like ?: 0
+                )
+                holder.binding.executePendingBindings()
+            }
+        }
+    }
+
 }
 
 
@@ -180,7 +189,14 @@ class Reply2ReplyDiffCallback : DiffUtil.ItemCallback<TotalReplyResponse.Data>()
         oldItem: TotalReplyResponse.Data,
         newItem: TotalReplyResponse.Data
     ): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.likenum == newItem.likenum
+    }
+
+    override fun getChangePayload(
+        oldItem: TotalReplyResponse.Data,
+        newItem: TotalReplyResponse.Data
+    ): Any? {
+        return if (oldItem.likenum != newItem.likenum) true else null
     }
 }
 

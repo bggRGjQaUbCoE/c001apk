@@ -31,6 +31,14 @@ class HomeFeedDiffCallback : DiffUtil.ItemCallback<HomeFeedResponse.Data>() {
             || oldItem.entityTemplate == "iconMiniGridCard" && newItem.entityTemplate == "iconMiniGridCard"
         )
             oldItem == newItem
-        else oldItem.entityId == newItem.entityId && oldItem.lastupdate == newItem.lastupdate
+        else oldItem.lastupdate == newItem.lastupdate && oldItem.likenum == newItem.likenum && oldItem.isFollow == newItem.isFollow
     }
+
+    override fun getChangePayload(
+        oldItem: HomeFeedResponse.Data,
+        newItem: HomeFeedResponse.Data
+    ): Any? {
+        return if (oldItem.likenum != newItem.likenum || oldItem.isFollow != newItem.isFollow) true else null
+    }
+
 }

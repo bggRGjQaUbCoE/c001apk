@@ -30,12 +30,6 @@ abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>(),
             appAdapter.submitList(it)
         }
 
-        viewModel.followUserState.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                appAdapter.notifyItemChanged(it)
-            }
-        }
-
     }
 
     override fun initAdapter() {

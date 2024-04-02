@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.follow
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,17 +8,14 @@ import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants.LOADING_EMPTY
 import com.example.c001apk.constant.Constants.LOADING_END
 import com.example.c001apk.constant.Constants.LOADING_FAILED
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.ui.base.BaseAppViewModel
-import com.example.c001apk.util.Event
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -57,8 +53,6 @@ class FollowViewModel @AssistedInject constructor(
     var url: String? = null
 
     override fun fetchData() {
-        // Log.d("sdfsfsdfsdf", "2uid: ${uid}")
-        Log.d("sdfsfsdfsdf", "2type: $type")
         if (url.isNullOrEmpty()) {
             initUrl()
         }
@@ -232,41 +226,6 @@ class FollowViewModel @AssistedInject constructor(
                     }
                     isRefreshing = false
                     isLoadMore = false
-                }
-        }
-    }
-
-    fun onPostLikeReply(id: String, position: Int, likeData: Like) {
-        val likeType = if (likeData.isLike.get() == 1) "unLikeReply"
-        else "likeReply"
-        val likeUrl = "/v6/feed/$likeType"
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postLikeReply(likeUrl, id)
-                .catch { err ->
-                    err.message?.let {
-                        toastText.postValue(Event(it))
-                    }
-                }
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        if (response.data != null) {
-                            val count = response.data
-                            val isLike = if (likeData.isLike.get() == 1) 0 else 1
-                            likeData.likeNum.set(count)
-                            likeData.isLike.set(isLike)
-                            val currentList = dataList.value?.toMutableList() ?: ArrayList()
-                            currentList[position].likenum = count
-                            currentList[position].userAction?.like = isLike
-                            dataList.postValue(currentList)
-                        } else {
-                            response.message?.let {
-                                toastText.postValue(Event(it))
-                            }
-                        }
-                    } else {
-                        result.exceptionOrNull()?.printStackTrace()
-                    }
                 }
         }
     }

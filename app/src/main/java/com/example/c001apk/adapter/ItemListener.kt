@@ -3,7 +3,6 @@ package com.example.c001apk.adapter
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
-import com.example.c001apk.logic.model.Like
 import com.example.c001apk.ui.app.AppActivity
 import com.example.c001apk.ui.coolpic.CoolPicActivity
 import com.example.c001apk.ui.feed.FeedActivity
@@ -22,7 +21,7 @@ import org.jsoup.select.Elements
 
 interface ItemListener {
 
-    fun onFollowUser(uid: String, followAuthor: Int, position: Int) {}
+    fun onFollowUser(uid: String, followAuthor: Int) {}
 
     fun onShowCollection(id: String, title: String) {}
 
@@ -152,7 +151,7 @@ interface ItemListener {
     ) {
     }
 
-    fun onLikeClick(type: String, id: String, position: Int, likeData: Like) {}
+    fun onLikeClick(type: String, id: String, isLike: Int) {}
 
     fun onReply(id: String, uid: String, username: String?, position: Int, rPosition: Int?) {}
 

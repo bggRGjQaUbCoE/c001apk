@@ -12,10 +12,6 @@
             type="String" />
 
         <variable
-            name="position"
-            type="int" />
-
-        <variable
             name="isFollow"
             type="int" />
 
@@ -106,7 +102,8 @@
                 android:layout_height="wrap_content"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
-                android:onClick="@{() -> listener.onFollowUser(uid, isFollow, position)}"
+                android:onClick="@{() -> listener.onFollowUser(uid, isFollow)}"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

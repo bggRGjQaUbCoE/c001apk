@@ -31,9 +31,9 @@ class MainViewModel @Inject constructor(
                     val appInfo = result.getOrNull()
                     if (appInfo?.data != null) {
                         try {
-                            PrefManager.VERSION_NAME = appInfo.data.apkversionname
+                            PrefManager.VERSION_NAME = appInfo.data.apkversionname ?: ""
                             PrefManager.API_VERSION = "13"
-                            PrefManager.VERSION_CODE = appInfo.data.apkversioncode
+                            PrefManager.VERSION_CODE = appInfo.data.apkversioncode ?: ""
                             PrefManager.USER_AGENT =
                                 "Dalvik/2.1.0 (Linux; U; Android ${PrefManager.ANDROID_VERSION}; ${PrefManager.MODEL} ${PrefManager.BUILDNUMBER}) (#Build; ${PrefManager.BRAND}; ${PrefManager.MODEL}; ${PrefManager.BUILDNUMBER}; ${PrefManager.ANDROID_VERSION}) +CoolMarket/${appInfo.data.apkversionname}-${appInfo.data.apkversioncode}-${Constants.MODE}"
                         } catch (e: Exception) {

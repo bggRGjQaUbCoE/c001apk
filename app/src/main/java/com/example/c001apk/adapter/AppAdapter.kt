@@ -43,7 +43,7 @@ class AppAdapter(
         var entityType: String = ""
         var id: String = ""
         var uid: String = ""
-        var likeData: Like = Like()
+        var isLike: Int = 0
 
         init {
             binding.expand.setOnClickListener {
@@ -67,33 +67,26 @@ class AppAdapter(
                     show()
                 }
             }
-
-            binding.like.setOnClickListener {
-                listener.onLikeClick(
-                    entityType, id,
-                    bindingAdapterPosition, likeData
-                )
-            }
         }
 
         override fun bind(data: HomeFeedResponse.Data) {
             entityType = data.entityType
-            id = data.id
-            uid = data.uid
+            id = data.id ?: ""
+            uid = data.uid ?: ""
+            isLike = data.userAction?.like ?: 0
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
-            likeData = Like().also {
-                it.apply {
-                    data.userAction?.like?.let { like ->
-                        isLike.set(like)
-                    }
-                    likeNum.set(data.likenum)
-                }
-            }
-            binding.setVariable(BR.likeData, likeData)
+            binding.setVariable(
+                BR.likeData,
+                Like(
+                    data.likenum ?: "0",
+                    data.userAction?.like ?: 0
+                )
+            )
+
             val lp = ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-            lp.setMargins(if (data.infoHtml.isEmpty()) 10.dp else 5.dp, 0, 0, 0)
+            lp.setMargins(if (data.infoHtml.isNullOrEmpty()) 10.dp else 5.dp, 0, 0, 0)
             lp.topToBottom = binding.uname.id
             lp.startToEnd = binding.from.id
             lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
@@ -264,7 +257,6 @@ class AppAdapter(
         @SuppressLint("SetTextI18n")
         override fun bind(data: HomeFeedResponse.Data) {
 
-            binding.setVariable(BR.position, bindingAdapterPosition)
             binding.setVariable(BR.listener, listener)
 
             if (data.userInfo != null && data.fUserInfo != null) {
@@ -286,7 +278,7 @@ class AppAdapter(
                 binding.uname.text = data.username
                 binding.follow.text = "${data.follow}关注"
                 binding.fans.text = "${data.fans}粉丝"
-                binding.act.text = DateUtils.fromToday(data.logintime) + "活跃"
+                binding.act.text = DateUtils.fromToday(data.logintime ?: 0L) + "活跃"
                 binding.isFollow = data.isFollow ?: 0
                 if (data.isFollow == 1) {
                     binding.followBtn.text = "已关注"
@@ -375,7 +367,7 @@ class AppAdapter(
         var entityType: String = ""
         var id: String = ""
         var uid: String = ""
-        var likeData: Like = Like()
+        var isLike: Int = 0
 
         init {
             binding.expand.setOnClickListener {
@@ -399,32 +391,23 @@ class AppAdapter(
                     show()
                 }
             }
-            binding.like.setOnClickListener {
-                listener.onLikeClick(
-                    entityType,
-                    id,
-                    bindingAdapterPosition,
-                    likeData
-                )
-            }
         }
 
         override fun bind(data: HomeFeedResponse.Data) {
             entityType = data.entityType
-            id = data.id
-            uid = data.uid
+            id = data.id ?: ""
+            uid = data.uid ?: ""
+            isLike = data.userAction?.like ?: 0
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
-            likeData = Like().also {
-                it.apply {
-                    data.userAction?.like?.let { like ->
-                        isLike.set(like)
-                    }
-                    likeNum.set(data.likenum)
-                }
-            }
-            binding.setVariable(BR.likeData, likeData)
+            binding.setVariable(
+                BR.likeData,
+                Like(
+                    data.likenum ?: "0",
+                    data.userAction?.like ?: 0
+                )
+            )
         }
     }
 
@@ -558,6 +541,63 @@ class AppAdapter(
             }
 
             else -> throw IllegalArgumentException("viewType error: $viewType")
+        }
+    }
+
+    override fun onBindViewHolder(
+        holder: BaseViewHolder<ViewDataBinding>,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            if (payloads[0] == true) {
+                when (holder) {
+                    is FeedViewHolder -> {
+                        holder.binding.setVariable(
+                            BR.likeData,
+                            Like(
+                                currentList[position].likenum ?: "0",
+                                currentList[position].userAction?.like ?: 0
+                            )
+                        )
+                        holder.binding.executePendingBindings()
+                    }
+
+                    is FeedReplyViewHolder -> {
+                        holder.binding.setVariable(
+                            BR.likeData,
+                            Like(
+                                currentList[position].likenum ?: "0",
+                                currentList[position].userAction?.like ?: 0
+                            )
+                        )
+                        holder.binding.executePendingBindings()
+                    }
+
+                    is UserViewHolder -> {
+                        holder.binding.isFollow = currentList[position].isFollow ?: 0
+                        if (currentList[position].isFollow == 1) {
+                            holder.binding.followBtn.text = "已关注"
+                            holder.binding.followBtn.setTextColor(
+                                holder.itemView.context.getColor(
+                                    android.R.color.darker_gray
+                                )
+                            )
+                        } else {
+                            holder.binding.followBtn.text = "关注"
+                            holder.binding.followBtn.setTextColor(
+                                MaterialColors.getColor(
+                                    holder.itemView.context,
+                                    com.google.android.material.R.attr.colorPrimary,
+                                    0
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

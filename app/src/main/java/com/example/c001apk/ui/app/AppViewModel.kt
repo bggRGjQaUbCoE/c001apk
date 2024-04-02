@@ -66,7 +66,7 @@ class AppViewModel @AssistedInject constructor(
                             } else {
                                 errMsg = appInfo.data.commentStatusText
                             }
-                            checkBlock(appInfo.data.title) //menuBlock
+                            checkBlock(appInfo.data.title ?: "") //menuBlock
                             checkFollow() //menuFollow
                             activityState.postValue(LoadingState.LoadingDone)
                         }
@@ -90,7 +90,7 @@ class AppViewModel @AssistedInject constructor(
                             response.data.follow.let {
                                 appData?.userAction?.follow = it
                                 checkFollow()
-                                val text =  if (it == 1) "关注成功"
+                                val text = if (it == 1) "关注成功"
                                 else "取消关注成功"
                                 toastText.postValue(Event(text))
                             }

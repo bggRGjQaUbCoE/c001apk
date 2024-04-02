@@ -21,6 +21,10 @@
             name="listener"
             type="com.example.c001apk.adapter.ItemListener" />
 
+        <variable
+            name="followAuthor"
+            type="int" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -63,10 +67,10 @@
             android:layout_height="wrap_content"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:onClick="@{() -> listener.onFollowUser(data.uid, data.userAction.followAuthor, 0)}"
+            android:onClick="@{() -> listener.onFollowUser(data.uid, followAuthor)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:setFollowText="@{data.userAction}"
+            app:setFollowText="@{followAuthor}"
             tools:text="关注" />
 
         <TextView
@@ -139,7 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/actionBarItemBackground"
-            android:onClick="@{() -> listener.onLikeClick(`feed`, data.id, 0, likeData)}"
+            android:onClick="@{() -> listener.onLikeClick(`feed`, data.id, likeData.isLike)}"
             android:text="@{likeData.likeNum}"
             android:textColor="@android:color/darker_gray"
             app:layout_constraintBaseline_toBaselineOf="@id/ip"
