@@ -17,6 +17,7 @@ import rikka.material.widget.FakeFontWeightMaterialTextView
 
 //https://stackoverflow.com/questions/8558732
 class LinkTextView : FakeFontWeightMaterialTextView {
+
     override fun getHighlightColor(): Int {
         return Color.TRANSPARENT
     }
@@ -60,15 +61,17 @@ class LinkTextView : FakeFontWeightMaterialTextView {
                 return if (link.isNotEmpty()) {
                     if (action == MotionEvent.ACTION_UP) {
                         link[0].onClick(widget)
-                    } else if (action == MotionEvent.ACTION_DOWN) {
+                    }/* else if (action == MotionEvent.ACTION_DOWN) {
                         Selection.setSelection(
                             buffer,
                             buffer.getSpanStart(link[0]),
                             buffer.getSpanEnd(link[0])
                         )
-                    }
+                    }*/
+                    val linkText =
+                        buffer.substring(buffer.getSpanStart(link[0]), buffer.getSpanEnd(link[0]))
                     if (widget is LinkTextView) {
-                        widget.linkHit = true
+                        widget.linkHit = linkText != "查看更多"
                     }
                     true
                 } else {
