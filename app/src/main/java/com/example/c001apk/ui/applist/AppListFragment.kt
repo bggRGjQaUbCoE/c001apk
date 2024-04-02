@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.HeaderAdapter
+import com.example.c001apk.adapter.PlaceHolderAdapter
 import com.example.c001apk.databinding.BaseRefreshRecyclerviewBinding
 import com.example.c001apk.ui.appupdate.AppUpdateActivity
 import com.example.c001apk.ui.base.BaseViewFragment
@@ -25,8 +26,7 @@ import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.IntentUtil
-import com.example.c001apk.util.doOnMainThreadIdle
-import com.example.c001apk.util.setBottomPaddingSpace
+import com.example.c001apk.util.setSpaceFooterView
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +37,7 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
 
     override val viewModel by viewModels<AppListViewModel>()
     private lateinit var appsAdapter: AppListAdapter
+    private val placeHolderAdapter = PlaceHolderAdapter()
     private lateinit var fab: FloatingActionButton
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
 
@@ -61,15 +62,21 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
         viewModel.getItems(requireContext())
     }
 
+    override fun initView() {
+        super.initView()
+        binding.vfContainer.setOnDisplayedChildChangedListener {
+            binding.recyclerView.setSpaceFooterView(placeHolderAdapter)
+        }
+    }
+
     override fun initObserve() {
         super.initObserve()
 
         viewModel.items.observe(viewLifecycleOwner) {
             appsAdapter.submitList(it)
             binding.swipeRefresh.isRefreshing = false
-            doOnMainThreadIdle {
-                binding.recyclerView.setBottomPaddingSpace()
-            }
+            if (binding.vfContainer.displayedChild != it.size)
+                binding.vfContainer.displayedChild = it.size
         }
 
         viewModel.setFab.observe(viewLifecycleOwner) {

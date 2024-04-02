@@ -17,6 +17,7 @@ import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.adapter.PlaceHolderAdapter
 import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.login.LoginActivity
@@ -31,6 +32,7 @@ import com.example.c001apk.util.Event
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.setSpaceFooterView
 import com.example.c001apk.view.LinearItemDecoration
 import com.example.c001apk.view.MessStaggerItemDecoration
 import com.google.android.material.color.MaterialColors
@@ -49,6 +51,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private val placeHolderAdapter = PlaceHolderAdapter()
     private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -125,6 +128,8 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.messageData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
+            if (binding.vfContainer.displayedChild != it.size)
+                binding.vfContainer.displayedChild = it.size
         }
     }
 
@@ -199,6 +204,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 addItemDecoration(LinearItemDecoration(10.dp))
             else
                 addItemDecoration(MessStaggerItemDecoration(10.dp))
+        }
+        binding.vfContainer.setOnDisplayedChildChangedListener {
+            binding.recyclerView.setSpaceFooterView(placeHolderAdapter)
         }
     }
 

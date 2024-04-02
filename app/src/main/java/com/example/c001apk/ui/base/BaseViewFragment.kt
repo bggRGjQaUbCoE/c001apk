@@ -60,7 +60,7 @@ abstract class BaseViewFragment<VM : BaseViewModel> : Fragment() {
         viewModel.loadingState.value = LoadingState.Loading
     }
 
-    private fun initView() {
+    open fun initView() {
         initAdapter()
         binding.recyclerView.apply {
             adapter = mAdapter
