@@ -10,6 +10,7 @@ import com.example.c001apk.logic.model.AppItem
 import com.example.c001apk.logic.model.UpdateCheckResponse
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.ui.base.BaseViewModel
+import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.Utils
 import com.example.c001apk.util.Utils.getBase64
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -75,7 +76,8 @@ class AppListViewModel @Inject constructor(
 
             isEnd = true
             items.postValue(newItems.sortedByDescending { it.lastUpdateTime })
-            fetchAppsUpdate(updateCheckJsonObject.toString().getBase64(false))
+            if (PrefManager.isCheckUpdate)
+                fetchAppsUpdate(updateCheckJsonObject.toString().getBase64(false))
             loadingState.postValue(LoadingState.LoadingDone)
         }
     }

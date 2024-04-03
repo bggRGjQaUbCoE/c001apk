@@ -13,6 +13,7 @@ import com.example.c001apk.databinding.BaseViewUserBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.ui.search.SearchActivity
+import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ReplaceViewHelper
@@ -118,10 +119,33 @@ class UserPagerFragment : BaseFragment<BaseUserPageBinding>() {
             menuReport?.title = getMenuTitle(menuReport?.title)
             menuReport?.isVisible = PrefManager.isLogin
 
+            menu?.findItem(R.id.check)?.title = getMenuTitle(menu?.findItem(R.id.check)?.title)
+
             viewModel.checkMenuState()
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
+                    R.id.check -> {
+                        val data = viewModel.userData
+                        MaterialAlertDialogBuilder(requireContext()).apply {
+                            setTitle(data?.username)
+                            setMessage(
+                                """
+                                uid: ${data?.uid}
+                                
+                                等级: Lv.${data?.level}
+                                
+                                性别: ${if (data?.gender == 0) "女" else if (data?.gender == 1) "男" else "未知"}
+                                
+                                注册时长: ${((System.currentTimeMillis() / 1000 - (data?.regdate ?: 0)) / 24 / 3600)} 天
+                                
+                                注册时间: ${DateUtils.timeStamp2Date(data?.regdate ?: 0)}
+                            """.trimIndent()
+                            )
+                            show()
+                        }
+                    }
+
                     R.id.subscribe -> {
                         viewModel.onPostFollowUnFollow(
                             if (viewModel.userData?.isFollow == 1)

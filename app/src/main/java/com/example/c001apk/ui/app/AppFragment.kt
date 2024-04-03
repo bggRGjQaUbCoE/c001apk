@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import com.example.c001apk.databinding.BaseViewAppBinding
 import com.example.c001apk.ui.base.BasePagerFragment
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.ClipboardUtil
+import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ReplaceViewHelper
@@ -180,6 +182,20 @@ class AppFragment : BasePagerFragment() {
                     else
                         onDownload()
                 }
+            }
+        }
+        viewModel.appData?.changelog?.let { changelog ->
+            appBinding.version.setOnClickListener {
+                MaterialAlertDialogBuilder(requireContext()).apply {
+                    setTitle("更新日志")
+                    setMessage(changelog)
+                    setPositiveButton(android.R.string.ok, null)
+                }.show()
+            }
+        }
+        viewModel.appData?.logo?.let { logo ->
+            appBinding.logo.setOnClickListener {
+                ImageUtil.startBigImgViewSimple(it as ImageView, logo)
             }
         }
     }

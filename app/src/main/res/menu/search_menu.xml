@@ -27,6 +27,22 @@
                     android:id="@+id/typeReply"
                     android:title="@string/type_reply" />
 
+                <item
+                    android:id="@+id/typeRating"
+                    android:title="@string/type_rating" />
+
+                <item
+                    android:id="@+id/typeQuestion"
+                    android:title="@string/type_question" />
+
+                <item
+                    android:id="@+id/typeAnswer"
+                    android:title="@string/type_answer" />
+
+                <item
+                    android:id="@+id/typeVote"
+                    android:title="@string/type_vote" />
+
             </group>
         </menu>
     </item>

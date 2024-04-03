@@ -82,10 +82,14 @@
             android:title="@string/record_history" />
         <rikka.material.preference.MaterialSwitchPreference
             android:defaultValue="true"
-            android:disableDependentsState="false"
             android:icon="@drawable/ic_emoji"
             android:key="showEmoji"
             android:title="@string/show_emoji" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/outline_system_update_24"
+            android:key="isCheckUpdate"
+            android:title="@string/check_apps_update" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/others">

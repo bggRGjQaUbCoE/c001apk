@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:onClick="@{(view) -> listener.onCopyToClip(view, userData.uid)}"
-                android:text="@{`UID: ` + userData.uid}"
+                android:text="@{`uid: ` + userData.uid}"
                 android:textSize="16sp" />
 
             <TextView

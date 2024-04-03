@@ -155,6 +155,10 @@ object PrefManager {
         get() = pref.getBoolean("isColorFilter", true)
         set(value) = pref.edit().putBoolean("isColorFilter", value).apply()
 
+    var isCheckUpdate: Boolean
+        get() = pref.getBoolean("isCheckUpdate", true)
+        set(value) = pref.edit().putBoolean("isCheckUpdate", value).apply()
+
     fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
         pref.registerOnSharedPreferenceChangeListener(listener)
     }

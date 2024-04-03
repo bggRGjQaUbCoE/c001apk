@@ -181,4 +181,10 @@ object DateUtils {
         get() = calendar[Calendar.MINUTE].toString()
     val second: String
         get() = calendar[Calendar.SECOND].toString()
+
+    @SuppressLint("SimpleDateFormat")
+    fun timeStamp2Date(time: Long): String {
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return format.format(time * 1000)
+    }
 }

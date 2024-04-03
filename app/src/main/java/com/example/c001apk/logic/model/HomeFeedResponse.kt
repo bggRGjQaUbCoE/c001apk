@@ -77,6 +77,7 @@ data class HomeFeedResponse(
         val url: String?,
         val uid: String?,
         val ruid: String?,
+        val changelog: String?,
         val username: String?,
         val rusername: String?,
         val tpic: String?,

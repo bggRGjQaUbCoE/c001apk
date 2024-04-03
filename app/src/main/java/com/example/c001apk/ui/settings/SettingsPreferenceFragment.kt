@@ -103,6 +103,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isIconMiniCard" -> PrefManager.isIconMiniCard
                 "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside
                 "isColorFilter" -> PrefManager.isColorFilter
+                "isCheckUpdate" -> PrefManager.isCheckUpdate
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -117,6 +118,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "isIconMiniCard" -> PrefManager.isIconMiniCard = value
                 "isOpenLinkOutside" -> PrefManager.isOpenLinkOutside = value
                 "isColorFilter" -> PrefManager.isColorFilter = value
+                "isCheckUpdate" -> PrefManager.isCheckUpdate = value
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }

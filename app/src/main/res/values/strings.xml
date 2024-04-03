@@ -133,4 +133,10 @@
     <string name="system_info">使用系统信息</string>
     <string name="update">更新</string>
     <string name="show_question">查看提问</string>
+    <string name="type_rating">点评</string>
+    <string name="type_question">提问</string>
+    <string name="type_answer">回答</string>
+    <string name="type_vote">投票</string>
+    <string name="check_apps_update">检查应用更新</string>
+    <string name="check_user_info">查看用户资料</string>
 </resources>

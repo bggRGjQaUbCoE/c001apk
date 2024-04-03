@@ -162,17 +162,13 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                 firstItem = it.id
                                             }
 
-                                            if (it.feedType == "vote")
-                                                return@forEach
-                                            else {
-                                                if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
-                                                    && !blackListRepo.checkTopic(
-                                                        it.tags + it.ttitle +
-                                                                it.relationRows?.getOrNull(0)?.title
-                                                    )
+                                            if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
+                                                && !blackListRepo.checkTopic(
+                                                    it.tags + it.ttitle +
+                                                            it.relationRows?.getOrNull(0)?.title
                                                 )
-                                                    currentList.add(it)
-                                            }
+                                            )
+                                                currentList.add(it)
                                         }
 
                                         else -> return@forEach
@@ -281,17 +277,13 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                 firstItem = it.id
                                             }
 
-                                            if (it.feedType == "vote")
-                                                return@forEach
-                                            else {
-                                                if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
-                                                    && !blackListRepo.checkTopic(
-                                                        it.tags + it.ttitle +
-                                                                it.relationRows?.getOrNull(0)?.title
-                                                    )
+                                            if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
+                                                && !blackListRepo.checkTopic(
+                                                    it.tags + it.ttitle +
+                                                            it.relationRows?.getOrNull(0)?.title
                                                 )
-                                                    currentList.add(it)
-                                            }
+                                            )
+                                                currentList.add(it)
                                         }
 
                                         else -> return@forEach
@@ -304,7 +296,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                             else
                                 footerState.postValue(FooterState.LoadingDone)
                             dataList.postValue(currentList)
-                        } else if (feed?.data?.isEmpty() == true) {
+                        } else if (feed.data?.isEmpty() == true) {
                             isEnd = true
                             if (listSize <= 0)
                                 loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))

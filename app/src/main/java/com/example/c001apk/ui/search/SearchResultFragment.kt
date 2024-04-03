@@ -75,19 +75,26 @@ class SearchResultFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
 
                 2 -> SearchContentFragment.newInstance(
                     viewModel.keyWord,
-                    "product",
+                    "game",
                     null,
                     null
                 )
 
                 3 -> SearchContentFragment.newInstance(
                     viewModel.keyWord,
-                    "user",
+                    "product",
                     null,
                     null
                 )
 
                 4 -> SearchContentFragment.newInstance(
+                    viewModel.keyWord,
+                    "user",
+                    null,
+                    null
+                )
+
+                5 -> SearchContentFragment.newInstance(
                     viewModel.keyWord,
                     "feedTopic",
                     null,
@@ -109,7 +116,7 @@ class SearchResultFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
     override fun initTabList() {
         tabList =
             if (viewModel.pageType.isEmpty())
-                listOf("动态", "应用", "数码", "用户", "话题")
+                listOf("动态", "应用", "游戏", "数码", "用户", "话题")
             else {
                 binding.tabLayout.isVisible = false
                 listOf("")
@@ -201,13 +208,34 @@ class SearchResultFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
                         viewModel.feedType = "comment"
                         controller?.onSearch("feedType", "comment", null)
                     }
+
+                    R.id.typeRating -> {
+                        viewModel.feedType = "rating"
+                        controller?.onSearch("feedType", "rating", null)
+                    }
+
+                    R.id.typeQuestion -> {
+                        viewModel.feedType = "question"
+                        controller?.onSearch("feedType", "question", null)
+                    }
+
+                    R.id.typeAnswer -> {
+                        viewModel.feedType = "answer"
+                        controller?.onSearch("feedType", "answer", null)
+                    }
+
+                    R.id.typeVote -> {
+                        viewModel.feedType = "vote"
+                        controller?.onSearch("feedType", "vote", null)
+                    }
                 }
+
                 menu.findItem(
                     when (viewModel.sort) {
                         "default" -> R.id.feedDefault
                         "hot" -> R.id.feedHot
                         "reply" -> R.id.feedReply
-                        else -> throw IllegalArgumentException("type error")
+                        else -> throw IllegalArgumentException("sort type error: ${viewModel.sort}")
                     }
                 )?.isChecked = true
 
@@ -218,7 +246,11 @@ class SearchResultFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
                         "feedArticle" -> R.id.typeArticle
                         "picture" -> R.id.typePic
                         "comment" -> R.id.typeReply
-                        else -> throw IllegalArgumentException("type error")
+                        "rating" -> R.id.typeRating
+                        "question" -> R.id.typeQuestion
+                        "answer" -> R.id.typeAnswer
+                        "vote" -> R.id.typeVote
+                        else -> throw IllegalArgumentException("feed type error: ${viewModel.feedType}")
                     }
                 )?.isChecked = true
                 return@setOnMenuItemClickListener true
