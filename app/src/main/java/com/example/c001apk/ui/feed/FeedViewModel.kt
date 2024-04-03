@@ -93,7 +93,8 @@ class FeedViewModel @AssistedInject constructor(
                         if (response.message != null) {
                             toastText.postValue(Event(response.message))
                         } else {
-                            feedDataList?.getOrNull(0)?.userAction?.followAuthor = if (followAuthor == 1) 0 else 1
+                            feedDataList?.getOrNull(0)?.userAction?.followAuthor =
+                                if (followAuthor == 1) 0 else 1
                             feedUserState.postValue(Event(true))
                         }
                     } else {
@@ -490,6 +491,124 @@ class FeedViewModel @AssistedInject constructor(
     }
 
     override fun fetchData() {}
+
+    fun preFetchVoteComment() {
+        val fid = feedDataList?.getOrNull(0)?.vote?.id ?: ""
+        when (val type = feedDataList?.getOrNull(0)?.vote?.type) {
+            0 -> { // 2 options
+                fetchVoteCommentType0(
+                    fid,
+                    feedDataList?.getOrNull(0)?.vote?.options?.getOrNull(0)?.id ?: ""
+                )
+            }
+
+            1 -> {
+                fetchVoteCommentType1(fid)
+            }
+
+            else -> {
+                toastText.postValue(Event("unsupported vote type: $type"))
+            }
+        }
+    }
+
+    private fun fetchVoteCommentType0(fid: String, extraKey: String) {
+        val isLeft = extraKey == feedDataList?.getOrNull(0)?.vote?.options?.getOrNull(0)?.id
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getVoteComment(fid, extraKey, page, null, null)
+                .onStart {
+                    if (isLeft)
+                        footerState.postValue(FooterState.Loading)
+                }
+                .collect { result ->
+                    val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            footerState.postValue(FooterState.LoadingError(data.message))
+                            return@collect
+                        } else if (!data.data.isNullOrEmpty()) {
+                            if (isRefreshing) {
+                                if (isLeft)
+                                    feedReplyList.clear()
+                            }
+                            if (isRefreshing || isLoadMore) {
+                                data.data.forEach {
+                                    if (it.entityType == "feed" && !blackListRepo.checkUid(it.uid)) {
+                                        feedReplyList.add(it)
+                                    }
+                                }
+                            }
+                            feedReplyData.postValue(feedReplyList)
+                            if (!isLeft)
+                                footerState.postValue(FooterState.LoadingDone)
+                        } else if (data.data?.isEmpty() == true) {
+                            if (!isLeft)
+                                footerState.postValue(FooterState.LoadingEnd(LOADING_END))
+                        }
+                        if (!isLeft)
+                            page++
+                    } else {
+                        if (!isLeft)
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                    if (isLeft) {
+                        fetchVoteCommentType0(
+                            fid,
+                            feedDataList?.getOrNull(0)?.vote?.options?.getOrNull(1)?.id ?: ""
+                        )
+                    }
+                    if (!isLeft) {
+                        isRefreshing = false
+                        isLoadMore = false
+                    }
+                }
+        }
+    }
+
+    private fun fetchVoteCommentType1(fid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getVoteComment(fid, "", page, null, lastItem)
+                .onStart {
+                    footerState.postValue(FooterState.Loading)
+                }
+                .collect { result ->
+                    val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            footerState.postValue(FooterState.LoadingError(data.message))
+                            return@collect
+                        } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
+                            if (isRefreshing)
+                                feedReplyList.clear()
+                            if (isRefreshing || isLoadMore) {
+                                data.data.forEach {
+                                    if (it.entityType == "feed" && !blackListRepo.checkUid(it.uid)) {
+                                        feedReplyList.add(it)
+                                    }
+                                }
+                            }
+                            page++
+                            feedReplyData.postValue(feedReplyList)
+                            footerState.postValue(FooterState.LoadingDone)
+                        } else if (data.data?.isEmpty() == true) {
+                            isEnd = true
+                            if (isRefreshing)
+                                feedReplyData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd(LOADING_END))
+                        }
+                    } else {
+                        footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                    isRefreshing = false
+                    isLoadMore = false
+                }
+        }
+    }
 
 
 }

@@ -3,6 +3,7 @@ package com.example.c001apk.ui.feed
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.BR
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.ItemFeedArticleImageBinding
@@ -22,6 +23,11 @@ class FeedDataAdapter(
     class FeedViewHolder(val binding: ItemFeedContentBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(data: HomeFeedResponse.Data?) {
+            with(itemView.layoutParams) {
+                if (this is StaggeredGridLayoutManager.LayoutParams)
+                    isFullSpan = true
+            }
+
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
             binding.setVariable(

@@ -36,20 +36,18 @@ class FeedActivity : BaseViewActivity<FeedViewModel>() {
 
     @SuppressLint("CommitTransaction")
     override fun beginTransaction() {
-        if (viewModel.feedType != "vote") // not done yet
-            if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(
-                        R.id.fragmentContainer,
-                        /*when (viewModel.feedType) {
-                            "vote" -> FeedVoteFragment.newInstance(viewModel.id)
-                            else -> FeedFragmentNew()
-                        }*/
-                        FeedFragment()
-                    )
-                    .commit()
-            }
+        if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.fragmentContainer,
+                    when (viewModel.feedType) {
+                        "vote" -> FeedVoteFragment()
+                        else -> FeedFragment()
+                    }
+                )
+                .commit()
+        }
     }
 
 }

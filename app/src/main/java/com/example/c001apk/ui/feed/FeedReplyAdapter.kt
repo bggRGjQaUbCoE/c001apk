@@ -48,7 +48,6 @@ class FeedReplyAdapter(
         var uid: String = ""
         var username: String = ""
         var message: String = ""
-        var isLike: Int = 0
 
         init {
             itemView.setOnClickListener {
@@ -96,7 +95,6 @@ class FeedReplyAdapter(
             uid = reply.uid
             username = reply.username
             message = reply.message
-            isLike = reply.userAction?.like ?: 0
 
             binding.setVariable(BR.data, reply)
             binding.setVariable(BR.listener, listener)

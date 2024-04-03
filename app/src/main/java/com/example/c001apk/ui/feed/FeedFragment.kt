@@ -37,7 +37,6 @@ import com.example.c001apk.ui.feed.reply.IOnPublishClickListener
 import com.example.c001apk.ui.feed.reply.Reply2ReplyBottomSheetDialog
 import com.example.c001apk.ui.feed.reply.ReplyBottomSheetDialog
 import com.example.c001apk.ui.feed.reply.ReplyRefreshListener
-import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.util.ClipboardUtil
@@ -73,8 +72,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.appBar.setLiftable(true)
 
         initView()
         initToolBar()
@@ -195,17 +192,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         loadMore()
-                    }
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (viewModel.listSize != -1) {
-                    if (dy > 0) {
-                        (activity as? INavViewContainer)?.hideNavigationView()
-                    } else if (dy < 0) {
-                        (activity as? INavViewContainer)?.showNavigationView()
                     }
                 }
             }

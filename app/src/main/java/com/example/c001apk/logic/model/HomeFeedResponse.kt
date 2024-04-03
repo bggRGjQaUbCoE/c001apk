@@ -127,6 +127,7 @@ data class HomeFeedResponse(
 
     data class Vote(
         val id: String?,
+        val type: Int?,
         @SerializedName("start_time") val startTime: Long?,
         @SerializedName("end_time") val endTime: Long?,
         @SerializedName("total_vote_num") val totalVoteNum: Int?,

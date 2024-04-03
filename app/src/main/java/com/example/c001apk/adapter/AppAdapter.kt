@@ -43,7 +43,6 @@ class AppAdapter(
         var entityType: String = ""
         var id: String = ""
         var uid: String = ""
-        var isLike: Int = 0
 
         init {
             binding.expand.setOnClickListener {
@@ -73,7 +72,6 @@ class AppAdapter(
             entityType = data.entityType
             id = data.id ?: ""
             uid = data.uid ?: ""
-            isLike = data.userAction?.like ?: 0
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
@@ -367,7 +365,6 @@ class AppAdapter(
         var entityType: String = ""
         var id: String = ""
         var uid: String = ""
-        var isLike: Int = 0
 
         init {
             binding.expand.setOnClickListener {
@@ -397,7 +394,6 @@ class AppAdapter(
             entityType = data.entityType
             id = data.id ?: ""
             uid = data.uid ?: ""
-            isLike = data.userAction?.like ?: 0
 
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
