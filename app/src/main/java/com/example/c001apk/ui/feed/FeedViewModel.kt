@@ -611,4 +611,48 @@ class FeedViewModel @AssistedInject constructor(
     }
 
 
+    fun fetchAnswerList(sort: String = "reply") {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getAnswerList(id, sort, page, null, lastItem)
+                .onStart {
+                    footerState.postValue(FooterState.Loading)
+                }
+                .collect { result ->
+                    val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            footerState.postValue(FooterState.LoadingError(data.message))
+                            return@collect
+                        } else if (!data.data.isNullOrEmpty()) {
+                            lastItem = data.data.last().id
+                            if (isRefreshing)
+                                feedReplyList.clear()
+                            if (isRefreshing || isLoadMore) {
+                                data.data.forEach {
+                                    if (it.entityType == "feed" && !blackListRepo.checkUid(it.uid)) {
+                                        feedReplyList.add(it)
+                                    }
+                                }
+                            }
+                            page++
+                            feedReplyData.postValue(feedReplyList)
+                            footerState.postValue(FooterState.LoadingDone)
+                        } else if (data.data.isNullOrEmpty()) {
+                            isEnd = true
+                            if (isRefreshing)
+                                feedReplyData.postValue(emptyList())
+                            footerState.postValue(FooterState.LoadingEnd(LOADING_END))
+                        }
+                    } else {
+                        footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                    isRefreshing = false
+                    isLoadMore = false
+                }
+        }
+    }
+
+
 }

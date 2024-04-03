@@ -73,6 +73,7 @@ data class HomeFeedResponse(
         val entityTemplate: String?,
         var entities: List<Entities>?,
         val id: String?,
+        val fid: String?,
         val url: String?,
         val uid: String?,
         val ruid: String?,

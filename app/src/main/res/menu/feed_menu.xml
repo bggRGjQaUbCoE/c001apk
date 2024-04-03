@@ -3,6 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
+        android:id="@+id/showQuestion"
+        android:icon="@drawable/outline_help_outline_24"
+        android:showAsAction="always"
+        android:title="@string/show_question"
+        tools:ignore="AlwaysShowAction" />
+
+    <item
         android:id="@+id/showReply"
         android:icon="@drawable/ic_message3"
         android:showAsAction="always"

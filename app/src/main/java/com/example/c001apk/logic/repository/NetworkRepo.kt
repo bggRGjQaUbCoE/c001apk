@@ -200,6 +200,16 @@ class NetworkRepo @Inject constructor(
         Result.success(apiService.getVoteComment(fid, extraKey, page, firstItem, lastItem).await())
     }
 
+    suspend fun getAnswerList(
+        id: String,
+        sort: String,
+        page: Int,
+        firstItem: String?,
+        lastItem: String?,
+    ) = fire {
+        Result.success(apiService.getAnswerList(id, sort, page, firstItem, lastItem).await())
+    }
+
     suspend fun getProductList() = fire {
         Result.success(apiService.getProductList().await())
     }

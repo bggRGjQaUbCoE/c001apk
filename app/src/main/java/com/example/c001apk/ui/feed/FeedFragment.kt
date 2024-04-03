@@ -407,9 +407,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 viewModel.firstVisibleItemPosition = 0
             }
             inflateMenu(R.menu.feed_menu)
+
             menu.findItem(R.id.showReply).isVisible =
                 resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
+            menu.findItem(R.id.showQuestion).isVisible = viewModel.feedType == "answer"
+
             val favorite = menu.findItem(R.id.favorite)
             lifecycleScope.launch(Dispatchers.Main) {
                 val isFavorite = viewModel.isFavorite(viewModel.id)
@@ -418,6 +421,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
             setOnMenuItemClickListener {
                 when (it.itemId) {
+                    R.id.showQuestion -> {
+                        viewModel.feedDataList?.getOrNull(0)?.fid?.let {
+                            IntentUtil.startActivity<FeedActivity>(requireContext()) {
+                                putExtra("id", it)
+                            }
+                        }
+                    }
+
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
                         if (viewModel.firstVisibleItemPosition <= viewModel.itemCount - 1) {

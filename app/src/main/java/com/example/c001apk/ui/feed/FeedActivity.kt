@@ -5,6 +5,8 @@ import androidx.activity.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.ui.base.BaseViewActivity
+import com.example.c001apk.ui.feed.question.FeedQuestionFragment
+import com.example.c001apk.ui.feed.vote.FeedVoteFragment
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
 
@@ -43,6 +45,7 @@ class FeedActivity : BaseViewActivity<FeedViewModel>() {
                     R.id.fragmentContainer,
                     when (viewModel.feedType) {
                         "vote" -> FeedVoteFragment()
+                        "question" -> FeedQuestionFragment()
                         else -> FeedFragment()
                     }
                 )

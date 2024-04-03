@@ -1,11 +1,13 @@
-package com.example.c001apk.ui.feed
+package com.example.c001apk.ui.feed.question
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
@@ -16,17 +18,24 @@ import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.databinding.FragmentFeedVoteBinding
 import com.example.c001apk.ui.base.BaseFragment
+import com.example.c001apk.ui.feed.FeedActivity
+import com.example.c001apk.ui.feed.FeedDataAdapter
+import com.example.c001apk.ui.feed.FeedReplyAdapter
+import com.example.c001apk.ui.feed.FeedViewModel
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.view.QuestionItemDecorator
 import com.example.c001apk.view.VoteStaggerItemDecoration
 import com.google.android.material.color.MaterialColors
 
-class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
+class FeedQuestionFragment : BaseFragment<FragmentFeedVoteBinding>() {
 
     private val viewModel by viewModels<FeedViewModel>(ownerProducer = { requireActivity() })
     private lateinit var feedDataAdapter: FeedDataAdapter
     private lateinit var feedReplyAdapter: FeedReplyAdapter
     private lateinit var footerAdapter: FooterAdapter
+    private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
+    private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -69,11 +78,18 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
                     if (viewModel.listSize != -1 && isAdded) {
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        viewModel.lastVisibleItemPosition = positions[0]
-                        positions.forEach { pos ->
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
+                        if (isPortrait) {
+                            viewModel.lastVisibleItemPosition =
+                                mLayoutManager.findLastVisibleItemPosition()
+                            viewModel.firstVisibleItemPosition =
+                                mLayoutManager.findFirstVisibleItemPosition()
+                        } else {
+                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
+                            viewModel.lastVisibleItemPosition = positions[0]
+                            positions.forEach { pos ->
+                                if (pos > viewModel.lastVisibleItemPosition) {
+                                    viewModel.lastVisibleItemPosition = pos
+                                }
                             }
                         }
                     }
@@ -90,7 +106,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
 
     private fun loadMore() {
         viewModel.isLoadMore = true
-        viewModel.preFetchVoteComment()
+        viewModel.fetchAnswerList()
     }
 
     private fun initRefresh() {
@@ -135,7 +151,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.preFetchVoteComment()
+        viewModel.fetchAnswerList()
     }
 
     private fun initView() {
@@ -143,12 +159,25 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
             FeedDataAdapter(ItemClickListener(), viewModel.feedDataList, viewModel.articleList)
         feedReplyAdapter = FeedReplyAdapter(viewModel.blackListRepo, ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
-        sLayoutManager = StaggeredGridLayoutManager(2, 1)
         binding.recyclerView.apply {
             adapter =
-                ConcatAdapter(HeaderAdapter(), feedDataAdapter, feedReplyAdapter, footerAdapter)
-            layoutManager = sLayoutManager
-            addItemDecoration(VoteStaggerItemDecoration(10.dp))
+                ConcatAdapter(
+                    HeaderAdapter(),
+                    feedDataAdapter,
+                    feedReplyAdapter,
+                    footerAdapter
+                )
+            layoutManager = if (isPortrait) {
+                mLayoutManager = LinearLayoutManager(requireContext())
+                mLayoutManager
+            } else {
+                sLayoutManager = StaggeredGridLayoutManager(2, 1)
+                sLayoutManager
+            }
+            addItemDecoration(
+                if (isPortrait) QuestionItemDecorator(requireContext(), 1)
+                else VoteStaggerItemDecoration(10.dp)
+            )
         }
     }
 

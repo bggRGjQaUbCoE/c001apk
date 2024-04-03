@@ -234,6 +234,15 @@ interface ApiService {
         @Query("lastItem") lastItem: String?,
     ): Call<TotalReplyResponse>
 
+    @GET("/v6/question/answerList")
+    fun getAnswerList(
+        @Query("id") fid: String,
+        @Query("sort") sort: String,
+        @Query("page") page: Int,
+        @Query("firstItem") firstItem: String?,
+        @Query("lastItem") lastItem: String?,
+    ): Call<TotalReplyResponse>
+
     @GET("/v6/product/categoryList")
     fun getProductList(): Call<HomeFeedResponse>
 

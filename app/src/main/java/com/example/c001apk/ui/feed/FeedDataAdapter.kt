@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.feed
 
+import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +25,9 @@ class FeedDataAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(data: HomeFeedResponse.Data?) {
             with(itemView.layoutParams) {
-                if (this is StaggeredGridLayoutManager.LayoutParams)
+                if (itemView.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                    && this is StaggeredGridLayoutManager.LayoutParams
+                )
                     isFullSpan = true
             }
 
