@@ -186,7 +186,7 @@ class UserPagerFragment : BaseFragment<BaseUserPageBinding>() {
                     R.id.share -> {
                         IntentUtil.shareText(
                             requireContext(),
-                            "https://www.coolapk.com/u/${viewModel.uid}"
+                            "https://www.coolapk1s.com/u/${viewModel.uid}"
                         )
                     }
 

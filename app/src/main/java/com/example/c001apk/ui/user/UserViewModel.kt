@@ -91,19 +91,17 @@ class UserViewModel @AssistedInject constructor(
                                         isEnd = true
                                         isRefreshing = false
                                         isLoadMore = false
-                                        if (listSize <= 0)
-                                            loadingState.postValue(
-                                                LoadingState.LoadingError(
-                                                    it.title ?: ""
-                                                )
-                                            )
-                                        else
-                                            footerState.postValue(
-                                                FooterState.LoadingEnd(
-                                                    it.title ?: ""
-                                                )
-                                            )
                                         dataList.postValue(feedList)
+                                        if (listSize <= 0 && feedList.isEmpty())
+                                            loadingState.postValue(
+                                                LoadingState.LoadingError(it.title ?: "")
+                                            )
+                                        else {
+                                            footerState.postValue(
+                                                FooterState.LoadingEnd(it.title ?: "")
+                                            )
+                                            loadingState.postValue(LoadingState.LoadingDone)
+                                        }
                                         return@collect
                                     } else if (it.entityType == "feed")
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
