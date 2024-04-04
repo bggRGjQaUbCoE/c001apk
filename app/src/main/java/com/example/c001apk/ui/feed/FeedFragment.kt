@@ -198,9 +198,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 val shouldShow =
                     if (firstVisibleItemPosition <= 1) scrollYDistance >= 40.dp
                     else true
-                if (shouldShow && !binding.titleProfile.isVisible) {
+                binding.toolBar.title = if (shouldShow) null else viewModel.feedTypeName
+                if (shouldShow && !binding.titleProfile.isVisible)
                     alpha.start()
-                }
                 binding.titleProfile.isVisible = shouldShow
             }
         })
@@ -310,8 +310,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
     private fun scrollToPosition(position: Int) {
         binding.recyclerView.scrollToPosition(position)
-        if (position == 0)
-            binding.titleProfile.isVisible = false
     }
 
     private fun initData() {

@@ -78,13 +78,14 @@
 
                     <TextView
                         android:id="@+id/name"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:text="@{username}"
                         android:textSize="15sp"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/avatar"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="name" />
