@@ -494,7 +494,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                                         viewModel.funame.toString(),
                                         viewModel.avatar.toString(),
                                         viewModel.device.toString(),
-                                        if (viewModel.feedType == "feedArticle")
+                                        if (viewModel.feedType in listOf("feedArticle", "trade"))
                                             viewModel.articleMsg.toString()
                                         else {
                                             with(viewModel.feedDataList?.getOrNull(0)?.message.toString()) {
@@ -502,7 +502,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                                                 else this
                                             }
                                         }, // 还未加载完会空指针
-                                        if (viewModel.feedType == "feedArticle") viewModel.articleDateLine.toString()
+                                        if (viewModel.feedType in listOf("feedArticle", "trade")) viewModel.articleDateLine.toString()
                                         else viewModel.feedDataList?.getOrNull(0)?.dateline.toString()
                                     )
                                     viewModel.insert(fav)

@@ -187,6 +187,7 @@
                         app:feedType="@{data.forwardSourceFeed.feedType}"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/forwardMessage"
+                        app:pic="@{data.pic}"
                         app:picArr="@{data.forwardSourceFeed.picArr}" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

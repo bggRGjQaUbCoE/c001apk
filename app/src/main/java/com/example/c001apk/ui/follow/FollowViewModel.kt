@@ -89,11 +89,9 @@ class FollowViewModel @AssistedInject constructor(
                             if (isRefreshing) list.clear()
                             if (isRefreshing || isLoadMore) {
                                 feed.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "contacts"
-                                        || it.entityType == "apk"
-                                        || it.entityType == "feed_reply"
-                                        || it.entityType == "recentHistory"
+                                    if (it.entityType in listOf(
+                                            "feed", "contacts", "apk", "feed_reply", "recentHistory"
+                                        )
                                     )
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
                                             && !blackListRepo.checkTopic(
@@ -187,11 +185,7 @@ class FollowViewModel @AssistedInject constructor(
                                 list.clear()
                             if (isRefreshing || isLoadMore) {
                                 data.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "topic"
-                                        || it.entityType == "product"
-                                        || it.entityType == "user"
-                                    )
+                                    if (it.entityType in listOf("feed", "topic", "product", "user"))
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
                                             && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title

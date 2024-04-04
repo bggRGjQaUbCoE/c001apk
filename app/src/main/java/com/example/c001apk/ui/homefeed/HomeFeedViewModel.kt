@@ -136,7 +136,9 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                     return@forEach
                                                 else {
                                                     it.entities = it.entities?.filter { item ->
-                                                        (item.entityType == "topic" || item.entityType == "product")
+                                                        (item.entityType in listOf(
+                                                            "topic", "product"
+                                                        ))
                                                                 && !blackListRepo.checkTopic(item.title)
                                                     }
                                                     if (!it.entities.isNullOrEmpty())
@@ -260,7 +262,9 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                     return@forEach
                                                 else {
                                                     it.entities = it.entities?.filter { item ->
-                                                        (item.entityType == "topic" || item.entityType == "product")
+                                                        (item.entityType in listOf(
+                                                            "topic", "product"
+                                                        ))
                                                                 && !blackListRepo.checkTopic(item.title)
                                                     }
                                                     if (!it.entities.isNullOrEmpty())

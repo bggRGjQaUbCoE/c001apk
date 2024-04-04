@@ -137,6 +137,7 @@
                 app:feedType="@{`reply`}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/message"
+                app:pic="@{data.pic}"
                 app:picArr="@{data.picArr}" />
 
             <com.google.android.material.card.MaterialCardView

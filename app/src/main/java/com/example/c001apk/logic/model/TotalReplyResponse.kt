@@ -26,7 +26,7 @@ data class TotalReplyResponse(
         val replynum: String,
         val userAvatar: String,
         val replyRows: ArrayList<Data>?,
-        val replyRowsMore: Int,
+        val replyRowsMore: Int?,
         val userAction: UserAction?
     )
 

@@ -73,14 +73,8 @@ class HomeTopicContentViewModel @AssistedInject constructor(
                         if (isRefreshing || isLoadMore) {
                             data?.data?.let {
                                 it.forEach { item ->
-                                    if (item.entityType == "topic"
-                                        || item.entityType == "product"
-                                    )
-                                        topicDataList.add(
-                                            item.also { des ->
-                                                des.description = "home"
-                                            }
-                                        )
+                                    if (item.entityType in listOf("topic", "product"))
+                                        topicDataList.add(item.copy(description = "home"))
                                 }
                             }
                             lastItem = topicDataList.last().id

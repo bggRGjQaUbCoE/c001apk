@@ -82,9 +82,9 @@ class MessageViewModel @AssistedInject constructor(
                             if (isRefreshing) messageList.clear()
                             if (isRefreshing || isLoadMore) {
                                 feed.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "feed_reply"
-                                        || it.entityType == "notification"
+                                    if (it.entityType in listOf(
+                                            "feed", "feed_reply", "notification"
+                                        )
                                     )
                                         if (!blackListRepo.checkUid(it.uid))
                                             messageList.add(it)

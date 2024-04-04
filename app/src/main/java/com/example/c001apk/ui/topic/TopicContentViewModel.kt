@@ -72,11 +72,7 @@ class TopicContentViewModel @AssistedInject constructor(
                                 dataListList.clear()
                             if (isRefreshing || isLoadMore) {
                                 data.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "topic"
-                                        || it.entityType == "product"
-                                        || it.entityType == "user"
-                                    )
+                                    if (it.entityType in listOf("feed", "topic", "product", "user"))
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
                                             && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title

@@ -17,7 +17,6 @@ import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.ui.base.BaseAppViewModel
 import com.example.c001apk.util.Event
-import com.example.c001apk.util.PrefManager
 import com.google.gson.Gson
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -27,7 +26,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
 
 @HiltViewModel(assistedFactory = FeedViewModel.Factory::class)
 class FeedViewModel @AssistedInject constructor(
@@ -209,7 +207,7 @@ class FeedViewModel @AssistedInject constructor(
                             feedTypeName = feed.data.feedTypeName
                             feedType = feed.data.feedType
 
-                            if (feedType == "feedArticle") {
+                            if (feedType in listOf("feedArticle", "trade")) {
                                 articleMsg =
                                     if ((feed.data.message?.length ?: 0) > 150)
                                         feed.data.message?.substring(0, 150)
@@ -237,7 +235,7 @@ class FeedViewModel @AssistedInject constructor(
                                         feedRaw, FeedArticleContentBean::class.java
                                     )
                                     feedJson.data.forEach { item ->
-                                        if (item.type == "text" || item.type == "image" || item.type == "shareUrl")
+                                        if (item.type in listOf("text", "image", "shareUrl"))
                                             it.add(item)
                                     }
                                     itemCount = it.size + 1
@@ -282,63 +280,19 @@ class FeedViewModel @AssistedInject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         if (response.data != null) {
-                            if (response.data.id != null) {
-                                toastText.postValue(Event("回复成功"))
-                                closeSheet.postValue(Event(true))
-                                if (type == "feed") {
-                                    feedReplyList.add(
-                                        0, TotalReplyResponse.Data(
-                                            null,
-                                            "feed_reply",
-                                            (12345678..87654321).random()
-                                                .toString(), // just random local id
-                                            ruid.toString(),
-                                            PrefManager.uid,
-                                            id,
-                                            URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                            uname.toString(),
-                                            replyData["message"].toString(),
-                                            "",
-                                            null,
-                                            System.currentTimeMillis() / 1000,
-                                            "0",
-                                            "0",
-                                            PrefManager.userAvatar,
-                                            ArrayList(),
-                                            0,
-                                            TotalReplyResponse.UserAction(0)
-                                        )
-                                    )
-                                    scroll.postValue(Event(true))
-                                } else {
-                                    feedReplyList.getOrNull(position ?: 0)?.replyRows?.add(
-                                        feedReplyList.getOrNull(position ?: 0)?.replyRows?.size
-                                            ?: 0,
-                                        TotalReplyResponse.Data(
-                                            null,
-                                            "feed_reply",
-                                            rid.toString(),
-                                            ruid.toString(),
-                                            PrefManager.uid,
-                                            rid.toString(),
-                                            URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                            uname.toString(),
-                                            replyData["message"].toString(),
-                                            "",
-                                            null,
-                                            System.currentTimeMillis() / 1000,
-                                            "0",
-                                            "0",
-                                            PrefManager.userAvatar,
-                                            null,
-                                            0,
-                                            null
-                                        )
-                                    )
-                                    notify.postValue(Event(true))
-                                }
-                                feedReplyData.postValue(feedReplyList)
+                            toastText.postValue(Event("回复成功"))
+                            closeSheet.postValue(Event(true))
+                            if (type == "feed") {
+                                feedReplyList.add(0, response.data)
+                                scroll.postValue(Event(true))
+                            } else {
+                                feedReplyList.getOrNull(position ?: 0)?.replyRows?.add(
+                                    feedReplyList.getOrNull(position ?: 0)?.replyRows?.size
+                                        ?: 0, response.data
+                                )
+                                notify.postValue(Event(true))
                             }
+                            feedReplyData.postValue(feedReplyList)
                         } else {
                             response.message?.let {
                                 toastText.postValue(Event(it))

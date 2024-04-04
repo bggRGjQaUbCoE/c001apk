@@ -57,7 +57,7 @@ class Reply2ReplyTotalAdapter(
                 PopupMenu(it.context, it).apply {
                     menuInflater.inflate(R.menu.feed_reply_menu, menu).apply {
                         menu.findItem(R.id.copy)?.isVisible = false
-                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == uid
+                        menu.findItem(R.id.delete)?.isVisible = PrefManager.uid == rUid
                         menu.findItem(R.id.report)?.isVisible = PrefManager.isLogin
                     }
                     setOnMenuItemClickListener(

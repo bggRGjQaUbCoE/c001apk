@@ -76,11 +76,7 @@ class CarouselViewModel @AssistedInject constructor(
                                 tmpList = ArrayList()
                                 lastItem = response.data.last().id
                                 response.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "topic"
-                                        || it.entityType == "product"
-                                        || it.entityType == "user"
-                                    )
+                                    if (it.entityType in listOf("feed", "topic", "product", "user"))
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
                                             && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
@@ -137,11 +133,7 @@ class CarouselViewModel @AssistedInject constructor(
                                 topicDataList.clear()
                             if (isRefreshing || isLoadMore) {
                                 data.data.forEach {
-                                    if (it.entityType == "feed"
-                                        || it.entityType == "topic"
-                                        || it.entityType == "product"
-                                        || it.entityType == "user"
-                                    )
+                                    if (it.entityType in listOf("feed", "topic", "product", "user"))
                                         if (!blackListRepo.checkUid(it.userInfo?.uid.toString())
                                             && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title

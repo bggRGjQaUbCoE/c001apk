@@ -176,6 +176,7 @@
                 app:feedType="@{data.feedType}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/message"
+                app:pic="@{data.pic}"
                 app:picArr="@{data.picArr}" />
 
             <TextView
@@ -227,6 +228,7 @@
                     android:layout_height="10dp"
                     android:layout_marginTop="10dp"
                     app:feedType="@{data.forwardSourceFeed.feedType}"
+                    app:pic="@{data.pic}"
                     app:picArr="@{data.forwardSourceFeed.picArr}" />
 
             </LinearLayout>

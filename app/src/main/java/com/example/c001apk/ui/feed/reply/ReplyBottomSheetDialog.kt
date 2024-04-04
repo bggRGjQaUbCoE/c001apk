@@ -51,7 +51,7 @@ class ReplyBottomSheetDialog(mContext: Context, mView: View) : BottomSheetDialog
 
     fun setData() {
         editText.hint = "回复: $uname"
-        if (replyTextMap[rid + ruid] == "" || replyTextMap[rid + ruid] == null)
+        if (replyTextMap[rid + ruid].isNullOrEmpty())
             editText.text = null
         else {
             editText.text =

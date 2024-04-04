@@ -15,7 +15,7 @@ class CenteredImageSpan(drawableRes: Drawable, private val size: Int, private va
         end: Int,
         fm: Paint.FontMetricsInt?
     ): Int {
-        return if (group == "[楼主]" || group == "[层主]" || group == "[置顶]")
+        return if (group in listOf("[楼主]", "[层主]", "[置顶]"))
             super.getSize(paint, text, start, end, fm)
         else size
     }

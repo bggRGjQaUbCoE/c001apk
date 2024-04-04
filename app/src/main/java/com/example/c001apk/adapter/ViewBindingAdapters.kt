@@ -170,23 +170,25 @@ fun setRows(
     }
 }
 
-@BindingAdapter(value = ["picArr", "feedType"], requireAll = true)
+@BindingAdapter(value = ["pic", "picArr", "feedType"], requireAll = true)
 fun setGridView(
     imageView: NineGridImageView,
+    pic: String?,
     picArr: List<String>?,
     feedType: String?
 ) {
     if (!picArr.isNullOrEmpty()) {
         imageView.isVisible = true
-        if (picArr.size == 1 || feedType == "feedArticle") {
-            val imageLp = ImageUtil.getImageLp(picArr[0])
+        if (picArr.size == 1 || feedType in listOf("feedArticle", "trade")) {
+            val imageLp = ImageUtil.getImageLp(pic ?: picArr[0])
             imageView.imgWidth = imageLp.first
             imageView.imgHeight = imageLp.second
         }
         imageView.apply {
             val urlList: MutableList<String> = ArrayList()
-            if (feedType == "feedArticle" && imgWidth > imgHeight)
-                urlList.add("${picArr[0]}.s.jpg")
+            if (feedType in listOf("feedArticle", "trade") && imgWidth > imgHeight)
+                if (!pic.isNullOrEmpty()) urlList.add("$pic.s.jpg")
+                else urlList.add("${picArr[0]}.s.jpg")
             else
                 urlList.addAll(picArr.map { "$it.s.jpg" })
             setUrlList(urlList)

@@ -219,7 +219,7 @@ class FeedReplyAdapter(
 
             if (reply.replyRowsMore != 0) {
                 binding.totalReply.isVisible = true
-                val count = reply.replyRowsMore + (reply.replyRows?.size ?: 0)
+                val count = (reply.replyRowsMore ?: 0) + (reply.replyRows?.size ?: 0)
                 binding.totalReply.text = "查看更多回复($count)"
                 binding.totalReply.setOnClickListener {
                     listener.showTotalReply(

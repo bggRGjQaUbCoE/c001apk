@@ -13,12 +13,10 @@ import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.util.Event
-import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import java.net.URLDecoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -107,34 +105,10 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                     val response = result.getOrNull()
                     response?.let {
                         if (response.data != null) {
-                            if (response.data.id != null) {
-                                toastText.postValue(Event("回复成功"))
-                                closeSheet.postValue(Event(true))
-                                replyTotalList.add(
-                                    (position ?: 0) + 1,
-                                    TotalReplyResponse.Data(
-                                        null,
-                                        "feed_reply",
-                                        (12345678..87654321).random().toString(),
-                                        ruid.toString(),
-                                        PrefManager.uid,
-                                        id.toString(),
-                                        URLDecoder.decode(PrefManager.username, "UTF-8"),
-                                        uname.toString(),
-                                        replyData["message"].toString(),
-                                        "",
-                                        null,
-                                        System.currentTimeMillis() / 1000,
-                                        "0",
-                                        "0",
-                                        PrefManager.userAvatar,
-                                        ArrayList(),
-                                        0,
-                                        TotalReplyResponse.UserAction(0)
-                                    )
-                                )
-                                totalReplyData.postValue(replyTotalList)
-                            }
+                            toastText.postValue(Event("回复成功"))
+                            closeSheet.postValue(Event(true))
+                            replyTotalList.add((position ?: 0) + 1, response.data)
+                            totalReplyData.postValue(replyTotalList)
                         } else {
                             response.message?.let {
                                 toastText.postValue(Event(it))

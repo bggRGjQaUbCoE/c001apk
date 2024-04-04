@@ -75,9 +75,7 @@ class CollectionContentViewModel @AssistedInject constructor(
                             if (isRefreshing) collectionList.clear()
                             if (isRefreshing || isLoadMore) {
                                 data.data.forEach {
-                                    if (it.entityType == "collection"
-                                        || it.entityType == "feed"
-                                    )
+                                    if (it.entityType in listOf("collection", "feed"))
                                         collectionList.add(it)
                                 }
                             }
