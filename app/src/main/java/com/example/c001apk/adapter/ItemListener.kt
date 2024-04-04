@@ -51,8 +51,10 @@ interface ItemListener {
                 if (index0 != -1 && index1 != -1 && index2 != -1) {
                     id = href.replace("/feed/", "").substring(0, index0)
                     rid = href.substring(index1 + 4, index2)
-                } else
-                    id = href
+                } else if (index0 != -1 && index1 != -1 && index2 == -1){
+                    id = href.replace("/feed/", "").substring(0, index0)
+                    rid = href.substring(index1 + 4)
+                } else id = href
                 IntentUtil.startActivity<FeedActivity>(view.context) {
                     putExtra("viewReply", true)
                     putExtra("id", id)

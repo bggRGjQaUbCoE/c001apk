@@ -36,7 +36,6 @@ class MessageViewModel @Inject constructor(
     var listSize: Int = -1
     var page = 1
     var lastItem: String? = null
-    val uid: String by lazy { PrefManager.uid }
     var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
@@ -51,7 +50,7 @@ class MessageViewModel @Inject constructor(
 
     fun fetchProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getProfile(uid)
+            networkRepo.getProfile(PrefManager.uid)
                 .collect { result ->
                     val data = result.getOrNull()
                     if (data?.data != null) {
