@@ -131,7 +131,6 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = 0
         viewModel.lastVisibleItemPosition = 0
         viewModel.firstItem = null
         viewModel.lastItem = null

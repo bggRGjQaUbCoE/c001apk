@@ -66,19 +66,18 @@ class FeedViewModel @AssistedInject constructor(
     var avatar: String? = null
     var device: String? = null
     var replyCount: String? = null
-    private var dateLine: Long? = null
+    var dateLine: Long? = null
     var topReplyId: String? = null
     var isTop: Boolean? = null
     var feedType: String? = null
 
     var rid: String? = null
-    var firstVisibleItemPosition = 0
     var feedTypeName: String? = null
 
     var feedDataList: MutableList<HomeFeedResponse.Data>? = null
     var articleList: MutableList<FeedArticleContentBean.Data>? = null
     var articleMsg: String? = null
-    var articleDateLine: String? = null
+    var articleDateLine: Long? = null
     val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
 
     val feedReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
@@ -202,9 +201,9 @@ class FeedViewModel @AssistedInject constructor(
                             return@collect
                         } else if (feed.data != null) {
                             uid = feed.data.uid
-                            funame = feed.data.userInfo?.username.toString()
+                            funame = feed.data.userInfo?.username
                             avatar = feed.data.userAvatar
-                            device = feed.data.deviceTitle.toString()
+                            device = feed.data.deviceTitle
                             replyCount = feed.data.replynum
                             dateLine = feed.data.dateline
                             feedTypeName = feed.data.feedTypeName
@@ -215,7 +214,7 @@ class FeedViewModel @AssistedInject constructor(
                                     if ((feed.data.message?.length ?: 0) > 150)
                                         feed.data.message?.substring(0, 150)
                                     else feed.data.message
-                                articleDateLine = feed.data.dateline.toString()
+                                articleDateLine = feed.data.dateline
                                 articleList = ArrayList<FeedArticleContentBean.Data>().also {
                                     if (feed.data.messageCover?.isNotEmpty() == true) {
                                         it.add(

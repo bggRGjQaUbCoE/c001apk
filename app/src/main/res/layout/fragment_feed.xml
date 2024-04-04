@@ -6,8 +6,32 @@
     <data>
 
         <variable
-            name="listener"
+            name="refreshListener"
             type="com.example.c001apk.ui.feed.reply.ReplyRefreshListener" />
+
+        <variable
+            name="listener"
+            type="com.example.c001apk.adapter.ItemListener" />
+
+        <import type="com.example.c001apk.util.DateUtils" />
+
+        <import type="android.view.View" />
+
+        <variable
+            name="username"
+            type="String" />
+
+        <variable
+            name="avatarUrl"
+            type="String" />
+
+        <variable
+            name="dateline"
+            type="Long" />
+
+        <variable
+            name="deviceTitle"
+            type="String" />
 
     </data>
 
@@ -44,10 +68,12 @@
                         android:layout_height="0dp"
                         android:background="@color/cover"
                         android:foreground="@drawable/selector_bg_avatar"
+                        android:onClick="@{(view) -> listener.onViewUser(view, username)}"
                         app:layout_constraintBottom_toBottomOf="@id/date"
                         app:layout_constraintDimensionRatio="1"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
+                        app:setImage="@{avatarUrl}"
                         app:shapeAppearance="@style/circleImageStyle" />
 
                     <TextView
@@ -57,6 +83,7 @@
                         android:layout_marginStart="5dp"
                         android:ellipsize="end"
                         android:maxLines="1"
+                        android:text="@{username}"
                         android:textSize="15sp"
                         app:layout_constraintStart_toEndOf="@id/avatar"
                         app:layout_constraintTop_toTopOf="parent"
@@ -68,6 +95,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:maxLines="1"
+                        android:text="@{String.valueOf(DateUtils.fromToday(dateline))}"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="13sp"
                         app:layout_constraintStart_toEndOf="@id/avatar"
@@ -83,6 +111,9 @@
                         android:maxLines="1"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="13sp"
+                        android:visibility="@{deviceTitle == null || deviceTitle.isEmpty ? View.INVISIBLE : View.VISIBLE}"
+                        app:customText="@{deviceTitle}"
+                        app:icon="@{@drawable/ic_device}"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/date"
                         app:layout_constraintTop_toBottomOf="@id/name"
@@ -167,7 +198,7 @@
                             android:layout_height="wrap_content"
                             android:minWidth="0dp"
                             android:minHeight="0dp"
-                            android:onClick="@{() -> listener.onRefreshReply(`lastupdate_desc`)}"
+                            android:onClick="@{() -> refreshListener.onRefreshReply(`lastupdate_desc`)}"
                             android:paddingStart="8dp"
                             android:paddingTop="4dp"
                             android:paddingEnd="8dp"
@@ -182,7 +213,7 @@
                             android:layout_height="wrap_content"
                             android:minWidth="0dp"
                             android:minHeight="0dp"
-                            android:onClick="@{() -> listener.onRefreshReply(`dateline_desc`)}"
+                            android:onClick="@{() -> refreshListener.onRefreshReply(`dateline_desc`)}"
                             android:paddingStart="8dp"
                             android:paddingTop="4dp"
                             android:paddingEnd="8dp"
@@ -197,7 +228,7 @@
                             android:layout_height="wrap_content"
                             android:minWidth="0dp"
                             android:minHeight="0dp"
-                            android:onClick="@{() -> listener.onRefreshReply(`popular`)}"
+                            android:onClick="@{() -> refreshListener.onRefreshReply(`popular`)}"
                             android:paddingStart="8dp"
                             android:paddingTop="4dp"
                             android:paddingEnd="8dp"
@@ -212,7 +243,7 @@
                             android:layout_height="wrap_content"
                             android:minWidth="0dp"
                             android:minHeight="0dp"
-                            android:onClick="@{() -> listener.onRefreshReply(``)}"
+                            android:onClick="@{() -> refreshListener.onRefreshReply(``)}"
                             android:paddingStart="8dp"
                             android:paddingTop="4dp"
                             android:paddingEnd="8dp"

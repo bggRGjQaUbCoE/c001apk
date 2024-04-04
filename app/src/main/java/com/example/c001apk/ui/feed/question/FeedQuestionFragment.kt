@@ -81,8 +81,6 @@ class FeedQuestionFragment : BaseFragment<FragmentFeedVoteBinding>() {
                         if (isPortrait) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
-                            viewModel.firstVisibleItemPosition =
-                                mLayoutManager.findFirstVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
@@ -143,7 +141,6 @@ class FeedQuestionFragment : BaseFragment<FragmentFeedVoteBinding>() {
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = 0
         viewModel.lastVisibleItemPosition = 0
         viewModel.firstItem = null
         viewModel.lastItem = null

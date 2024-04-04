@@ -53,6 +53,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @AndroidEntryPoint
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
@@ -69,6 +70,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private var dialog: AlertDialog? = null
     private var isShowReply: Boolean = false
+    private var firstVisibleItemPosition = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -175,8 +177,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         if (isPortrait) {
                             viewModel.lastVisibleItemPosition =
                                 mLayoutManager.findLastVisibleItemPosition()
-                            viewModel.firstVisibleItemPosition =
-                                mLayoutManager.findFirstVisibleItemPosition()
                         } else {
                             val positions = sLayoutManager.findLastVisibleItemPositions(null)
                             viewModel.lastVisibleItemPosition = positions[0]
@@ -194,6 +194,16 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         loadMore()
                     }
                 }
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                firstVisibleItemPosition =
+                    if (isPortrait) mLayoutManager.findFirstVisibleItemPosition()
+                    else sLayoutManager.findFirstVisibleItemPositions(null).minBy { it }
+                binding.titleProfile.isVisible =
+                    if (firstVisibleItemPosition <= 1) scrollYDistance >= 40.dp
+                    else true
             }
         })
     }
@@ -293,7 +303,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             feedReplyAdapter.submitList(it)
             if (viewModel.isViewReply) {
                 viewModel.isViewReply = false
-                if (viewModel.firstVisibleItemPosition > viewModel.itemCount)
+                if (firstVisibleItemPosition > viewModel.itemCount)
                     scrollToPosition(viewModel.itemCount)
             }
         }
@@ -311,13 +321,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         if (viewModel.isInit) {
             viewModel.isInit = false
             viewModel.isTop?.let { feedReplyAdapter.setHaveTop(it, viewModel.topReplyId) }
-            binding.titleProfile.isVisible = false
             refreshData()
         }
     }
 
     private fun refreshData() {
-        viewModel.firstVisibleItemPosition = 0
+        firstVisibleItemPosition = 0
         viewModel.lastVisibleItemPosition = 0
         viewModel.firstItem = null
         viewModel.lastItem = null
@@ -339,7 +348,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         feedFixAdapter =
             FeedFixAdapter(viewModel.replyCount.toString(), RefreshReplyListener())
 
-        binding.listener = RefreshReplyListener()
+        binding.apply {
+            refreshListener = RefreshReplyListener()
+            listener = ItemClickListener()
+            username = viewModel.funame
+            avatarUrl = viewModel.avatar
+            dateline = viewModel.dateLine
+            deviceTitle = viewModel.device
+        }
         footerAdapter = FooterAdapter(ReloadListener())
 
         binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
@@ -370,7 +386,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 if (isPortrait) {
                     footerAdapter.setLoadState(FooterState.LoadingReply)
                     mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
-                    viewModel.firstVisibleItemPosition = viewModel.itemCount
+                    firstVisibleItemPosition = viewModel.itemCount
                 } else {
                     footerAdapter.setLoadState(FooterState.Loading)
                 }
@@ -402,9 +418,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
             setOnClickListener {
                 binding.recyclerView.stopScroll()
-                binding.titleProfile.isVisible = false
                 scrollToPosition(0)
-                viewModel.firstVisibleItemPosition = 0
+                firstVisibleItemPosition = 0
             }
             inflateMenu(R.menu.feed_menu)
 
@@ -431,13 +446,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
-                        if (viewModel.firstVisibleItemPosition <= viewModel.itemCount - 1) {
+                        firstVisibleItemPosition = if (firstVisibleItemPosition <= viewModel.itemCount - 1) {
                             mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
-                            viewModel.firstVisibleItemPosition = viewModel.itemCount
+                            viewModel.itemCount
                         } else {
-                            binding.titleProfile.isVisible = false
                             mLayoutManager.scrollToPositionWithOffset(0, 0)
-                            viewModel.firstVisibleItemPosition = 0
+                            0
                         }
                     }
 
@@ -537,7 +551,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             else
                 feedReplyAdapter.setHaveTop(false, null)
             binding.recyclerView.stopScroll()
-            if (viewModel.firstVisibleItemPosition > 1)
+            if (firstVisibleItemPosition > 1)
                 viewModel.isViewReply = true
             viewModel.fromFeedAuthor = if (listType == "") 1
             else 0
@@ -762,6 +776,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             return true
         }
     }
+
+    private val scrollYDistance: Int
+        get() {
+            val firstVisibleChildView =
+                if (isPortrait) mLayoutManager.findViewByPosition(firstVisibleItemPosition)
+                else sLayoutManager.findViewByPosition(firstVisibleItemPosition)
+            return abs(firstVisibleChildView?.top ?: 0)
+        }
 
     override fun onDestroy() {
         bottomSheetDialog?.dismiss()
