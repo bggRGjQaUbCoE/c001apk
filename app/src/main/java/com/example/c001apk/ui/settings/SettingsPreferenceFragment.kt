@@ -53,13 +53,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-
                     if (dy > 0) {
                         (activity as? INavViewContainer)?.hideNavigationView()
                     } else if (dy < 0) {
                         (activity as? INavViewContainer)?.showNavigationView()
                     }
-
                 }
             })
 

@@ -138,21 +138,10 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    if (viewModel.listSize != -1 && !viewModel.isEnd && isAdded) {
-                        if (isPortrait) {
-                            viewModel.lastVisibleItemPosition =
-                                mLayoutManager.findLastVisibleItemPosition()
-                        } else {
-                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                            viewModel.lastVisibleItemPosition = positions[0]
-                            positions.forEach { pos ->
-                                if (pos > viewModel.lastVisibleItemPosition) {
-                                    viewModel.lastVisibleItemPosition = pos
-                                }
-                            }
-                        }
-                    }
+                    viewModel.lastVisibleItemPosition = if (isPortrait)
+                        mLayoutManager.findLastVisibleItemPosition()
+                    else
+                        sLayoutManager.findLastVisibleItemPositions(null).max()
 
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + 7
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
@@ -319,8 +308,13 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             )
             if (!uid.isNullOrEmpty() && PrefManager.isRecordHistory)
                 viewModel.saveHistory(
-                    id.toString(), uid.toString(), username.toString(), userAvatar.toString(),
-                    deviceTitle.toString(), message.toString(), dateline.toString()
+                    id.toString(),
+                    uid.toString(),
+                    username.toString(),
+                    userAvatar.toString(),
+                    deviceTitle.toString(),
+                    message.toString(),
+                    dateline.toString()
                 )
         }
 

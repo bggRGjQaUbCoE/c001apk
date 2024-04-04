@@ -174,7 +174,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
             // 因为它的结果可能受到 insets 传播链上层某环节的影响，出现了错误的 navigationBarsInsets
             val navigationBarsInsets =
                 ViewCompat.getRootWindowInsets(view)
-                    ?.getInsets(WindowInsetsCompat.Type.navigationBars())
+                    ?.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(bottom = navigationBarsInsets?.bottom ?: 0)
             windowInsets
         }

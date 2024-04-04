@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.feed
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
@@ -71,6 +72,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private var dialog: AlertDialog? = null
     private var isShowReply: Boolean = false
     private var firstVisibleItemPosition = 0
+    private val alpha by lazy {
+        ObjectAnimator.ofFloat(binding.titleProfile, "alpha", 0f, 1f).also {
+            it.setDuration(500)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -172,21 +178,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    if (viewModel.listSize != -1 && isAdded) {
-                        if (isPortrait) {
-                            viewModel.lastVisibleItemPosition =
-                                mLayoutManager.findLastVisibleItemPosition()
-                        } else {
-                            val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                            viewModel.lastVisibleItemPosition = positions[0]
-                            positions.forEach { pos ->
-                                if (pos > viewModel.lastVisibleItemPosition) {
-                                    viewModel.lastVisibleItemPosition = pos
-                                }
-                            }
-                        }
-                    }
+                    viewModel.lastVisibleItemPosition =
+                        if (isPortrait) mLayoutManager.findLastVisibleItemPosition()
+                        else sLayoutManager.findLastVisibleItemPositions(null).max()
 
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + viewModel.itemCount + 1
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
@@ -200,10 +194,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 super.onScrolled(recyclerView, dx, dy)
                 firstVisibleItemPosition =
                     if (isPortrait) mLayoutManager.findFirstVisibleItemPosition()
-                    else sLayoutManager.findFirstVisibleItemPositions(null).minBy { it }
-                binding.titleProfile.isVisible =
+                    else sLayoutManager.findFirstVisibleItemPositions(null).min()
+                val shouldShow =
                     if (firstVisibleItemPosition <= 1) scrollYDistance >= 40.dp
                     else true
+                if (shouldShow && !binding.titleProfile.isVisible) {
+                    alpha.start()
+                }
+                binding.titleProfile.isVisible = shouldShow
             }
         })
     }
@@ -311,10 +309,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     private fun scrollToPosition(position: Int) {
-        if (isPortrait)
-            mLayoutManager.scrollToPositionWithOffset(position, 0)
-        else
-            sLayoutManager.scrollToPositionWithOffset(position, 0)
+        binding.recyclerView.scrollToPosition(position)
+        if (position == 0)
+            binding.titleProfile.isVisible = false
     }
 
     private fun initData() {
@@ -385,8 +382,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 viewModel.isViewReply = false
                 if (isPortrait) {
                     footerAdapter.setLoadState(FooterState.LoadingReply)
-                    mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
-                    firstVisibleItemPosition = viewModel.itemCount
+                    scrollToPosition(viewModel.itemCount)
                 } else {
                     footerAdapter.setLoadState(FooterState.Loading)
                 }
@@ -419,7 +415,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             setOnClickListener {
                 binding.recyclerView.stopScroll()
                 scrollToPosition(0)
-                firstVisibleItemPosition = 0
             }
             inflateMenu(R.menu.feed_menu)
 
@@ -446,13 +441,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
                     R.id.showReply -> {
                         binding.recyclerView.stopScroll()
-                        firstVisibleItemPosition = if (firstVisibleItemPosition <= viewModel.itemCount - 1) {
+                        if (firstVisibleItemPosition <= viewModel.itemCount - 1)
                             mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
-                            viewModel.itemCount
-                        } else {
-                            mLayoutManager.scrollToPositionWithOffset(0, 0)
-                            0
-                        }
+                        else scrollToPosition(0)
                     }
 
                     R.id.block -> {

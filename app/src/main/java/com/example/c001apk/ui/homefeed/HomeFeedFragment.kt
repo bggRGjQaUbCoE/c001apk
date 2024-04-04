@@ -226,12 +226,10 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
     }
 
     override fun onScrolled(dy: Int) {
-        if (viewModel.listSize != -1) {
-            if (dy > 0) {
-                (activity as? INavViewContainer)?.hideNavigationView()
-            } else if (dy < 0) {
-                (activity as? INavViewContainer)?.showNavigationView()
-            }
+        if (dy > 0) {
+            (activity as? INavViewContainer)?.hideNavigationView()
+        } else if (dy < 0) {
+            (activity as? INavViewContainer)?.showNavigationView()
         }
     }
 

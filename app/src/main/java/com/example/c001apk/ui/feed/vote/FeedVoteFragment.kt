@@ -71,16 +71,8 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    if (viewModel.listSize != -1 && isAdded) {
-                        val positions = sLayoutManager.findLastVisibleItemPositions(null)
-                        viewModel.lastVisibleItemPosition = positions[0]
-                        positions.forEach { pos ->
-                            if (pos > viewModel.lastVisibleItemPosition) {
-                                viewModel.lastVisibleItemPosition = pos
-                            }
-                        }
-                    }
+                    viewModel.lastVisibleItemPosition =
+                        sLayoutManager.findLastVisibleItemPositions(null).max()
 
                     if (viewModel.lastVisibleItemPosition == viewModel.listSize + viewModel.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
