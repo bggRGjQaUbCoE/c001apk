@@ -1,7 +1,7 @@
 package com.example.c001apk.logic.model
 
 data class FeedArticleContentBean(
-    var data: List<Data>,
+    var data: List<Data>?,
 ) {
     data class Data(
         val type: String?,

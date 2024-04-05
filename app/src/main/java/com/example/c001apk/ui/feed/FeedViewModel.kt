@@ -207,7 +207,9 @@ class FeedViewModel @AssistedInject constructor(
                             feedTypeName = feed.data.feedTypeName
                             feedType = feed.data.feedType
 
-                            if (feedType in listOf("feedArticle", "trade")) {
+                            if (feedType in listOf("feedArticle", "trade")
+                                && feed.data.messageRawOutput != "null"
+                            ) {
                                 articleMsg =
                                     if ((feed.data.message?.length ?: 0) > 150)
                                         feed.data.message?.substring(0, 150)
@@ -234,7 +236,7 @@ class FeedViewModel @AssistedInject constructor(
                                     val feedJson: FeedArticleContentBean = Gson().fromJson(
                                         feedRaw, FeedArticleContentBean::class.java
                                     )
-                                    feedJson.data.forEach { item ->
+                                    feedJson.data?.forEach { item ->
                                         if (item.type in listOf("text", "image", "shareUrl"))
                                             it.add(item)
                                     }
