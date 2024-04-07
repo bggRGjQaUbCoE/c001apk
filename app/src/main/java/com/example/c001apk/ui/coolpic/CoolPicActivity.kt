@@ -6,11 +6,14 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.BaseFragmentContainerBinding
 import com.example.c001apk.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
+import java.net.URLDecoder
 
 @AndroidEntryPoint
 class CoolPicActivity : BaseActivity<BaseFragmentContainerBinding>() {
 
-    private val title by lazy { intent.getStringExtra("title").orEmpty() }
+    private val title by lazy {
+        URLDecoder.decode(intent.getStringExtra("title").orEmpty(), "UTF-8")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
