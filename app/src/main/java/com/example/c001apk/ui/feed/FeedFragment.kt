@@ -81,14 +81,16 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initView()
-        initToolBar()
-        initData()
-        initRefresh()
-        initScroll()
-        initReplyBtn()
-        initBottomSheet()
-        initObserve()
+        binding.tabLayout.post {
+            initView(binding.swipeRefresh.height - binding.tabLayout.height)
+            initToolBar()
+            initData()
+            initRefresh()
+            initScroll()
+            initReplyBtn()
+            initBottomSheet()
+            initObserve()
+        }
 
     }
 
@@ -333,7 +335,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     }
 
     @SuppressLint("SetTextI18n")
-    private fun initView() {
+    private fun initView(height: Int) {
         feedDataAdapter = FeedDataAdapter(
             ItemClickListener(),
             viewModel.feedDataList,
@@ -351,7 +353,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             dateline = viewModel.dateLine
             deviceTitle = viewModel.device
         }
-        footerAdapter = FooterAdapter(ReloadListener())
+        footerAdapter = FooterAdapter(ReloadListener(), height)
 
         binding.replyCount.text = "共 ${viewModel.replyCount} 回复"
         setListType()
@@ -367,7 +369,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 )
             layoutManager =
                 if (isPortrait) {
-                    binding.tabLayout.isVisible = true
                     mLayoutManager = LinearLayoutManager(requireContext())
                     mLayoutManager
                 } else {
@@ -393,8 +394,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         StickyItemDecorator(requireContext(), 1, viewModel.itemCount,
                             object : StickyItemDecorator.SortShowListener {
                                 override fun showSort(show: Boolean) {
-                                    binding.tabLayout.visibility =
-                                        if (show) View.VISIBLE else View.GONE
+                                    binding.tabLayout.isVisible = show
                                 }
                             })
                     )
@@ -416,8 +416,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
             inflateMenu(R.menu.feed_menu)
 
-            menu.findItem(R.id.showReply).isVisible =
-                resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
+            menu.findItem(R.id.showReply).isVisible = isPortrait
             menu.findItem(R.id.report).isVisible = PrefManager.isLogin
             menu.findItem(R.id.showQuestion).isVisible = viewModel.feedType == "answer"
 

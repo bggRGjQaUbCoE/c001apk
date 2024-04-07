@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.c001apk.R
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
-class FooterAdapter(private val listener: FooterListener) :
+class FooterAdapter(
+    private val listener: FooterListener,
+    private val height: Int? = null,
+) :
     RecyclerView.Adapter<FooterAdapter.FooterViewHolder>() {
 
     private var footerState: FooterState = FooterState.LoadingDone
@@ -48,7 +51,7 @@ class FooterAdapter(private val listener: FooterListener) :
                 FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     if (footerState == FooterState.LoadingReply)
-                        FrameLayout.LayoutParams.MATCH_PARENT
+                        height ?: FrameLayout.LayoutParams.MATCH_PARENT
                     else FrameLayout.LayoutParams.WRAP_CONTENT
                 )
 
