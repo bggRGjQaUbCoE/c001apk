@@ -18,7 +18,7 @@ class TopicActivity : BaseViewActivity<TopicViewModel>() {
             defaultViewModelCreationExtras.withCreationCallback<TopicViewModel.Factory> { factory ->
                 factory.create(
                     URLDecoder.decode(intent.getStringExtra("url").orEmpty(), "UTF-8"),
-                    intent.getStringExtra("title").orEmpty(),
+                    URLDecoder.decode(intent.getStringExtra("title").orEmpty(), "UTF-8"),
                     intent.getStringExtra("id").orEmpty(),
                     intent.getStringExtra("type").orEmpty(),
                 )
