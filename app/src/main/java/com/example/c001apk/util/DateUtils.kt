@@ -58,6 +58,7 @@ object DateUtils {
      * @return
      */
     @JvmStatic
+    @Suppress("DEPRECATION")
     @SuppressLint("SimpleDateFormat")
     fun fromToday(time: Long): String {
         //Calendar calendar = Calendar.getInstance();
@@ -78,7 +79,7 @@ object DateUtils {
             day.toString() + "天前" //+ calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
         } else {
             val date = (time * 1000).toString().toLong()
-            val sdf: SimpleDateFormat = if (ago <= ONE_YEAR) {
+            val sdf: SimpleDateFormat = if (Date(time * 1000).year == Date().year) {
                 SimpleDateFormat("M月d日")
                 /*long month = ago / ONE_MONTH;
                 long day = ago % ONE_MONTH / ONE_DAY;
@@ -86,7 +87,7 @@ object DateUtils {
                         + calendar.get(Calendar.HOUR_OF_DAY) + "点"
                         + calendar.get(Calendar.MINUTE) + "分";*/
             } else {
-                SimpleDateFormat("yyyy-MM-dd")
+                SimpleDateFormat("yyyy年M月d日")
                 /* long year = ago / ONE_YEAR;
                 int month = calendar.get(Calendar.MONTH) + 1;// JANUARY which is 0 so month+1
                 return year + "年前" + month + "月" + calendar.get(Calendar.DATE)
