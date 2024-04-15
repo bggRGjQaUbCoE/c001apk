@@ -40,6 +40,7 @@ abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>(),
 
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
+            viewModel.isEnd = false
             loadMore()
         }
     }

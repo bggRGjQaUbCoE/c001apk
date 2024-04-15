@@ -168,6 +168,7 @@ class FeedQuestionFragment : BaseFragment<FragmentFeedVoteBinding>() {
 
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
+            viewModel.isEnd = false
             loadMore()
         }
     }

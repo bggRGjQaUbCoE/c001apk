@@ -43,6 +43,7 @@ class MessageContentFragment : BaseViewFragment<MessageViewModel>() {
 
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
+            viewModel.isEnd = false
             loadMore()
         }
     }

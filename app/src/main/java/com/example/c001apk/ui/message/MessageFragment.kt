@@ -143,9 +143,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                     else
                         sLayoutManager.findLastVisibleItemPositions(null).max()
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + 7
+                    if (viewModel.lastVisibleItemPosition + 1  == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
-                        && !binding.swipeRefresh.isRefreshing
+                        && !binding.swipeRefresh.isRefreshing && PrefManager.isLogin
                     ) {
                         loadMore()
                     }
@@ -277,6 +277,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
+            viewModel.isEnd = false
             loadMore()
         }
     }

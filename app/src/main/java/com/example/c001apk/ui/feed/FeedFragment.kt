@@ -16,7 +16,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -81,13 +80,21 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        var height = 0
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val navigationBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(navigationBar.left, 0, navigationBar.right, 0)
+            height = navigationBar.bottom
+            insets
+        }
+
         binding.tabLayout.post {
-            initView(binding.swipeRefresh.height - binding.tabLayout.height)
+            initView(binding.swipeRefresh.height - binding.tabLayout.height - height)
             initToolBar()
             initData()
             initRefresh()
             initScroll()
-            initReplyBtn()
+            initReplyBtn(height)
             initBottomSheet()
             initObserve()
         }
@@ -128,7 +135,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         }
     }
 
-    private fun initReplyBtn() {
+    private fun initReplyBtn(height: Int) {
         if (PrefManager.isLogin) {
             binding.reply.apply {
                 isVisible = true
@@ -138,11 +145,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 ).apply {
                     gravity = Gravity.BOTTOM or Gravity.END
                     behavior = fabViewBehavior
+                    setMargins(0, 0, 25.dp, if (isPortrait) 25.dp + height else 25.dp)
                 }
                 setOnClickListener {
                     if (PrefManager.SZLMID == "") {
-                        Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                     } else {
                         viewModel.rid = viewModel.id
                         viewModel.ruid = viewModel.uid
@@ -151,15 +158,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         initReply()
                     }
                 }
-            }
-            ViewCompat.setOnApplyWindowInsetsListener(binding.reply) { _, insets ->
-                val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-                binding.reply.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                    rightMargin = 25.dp
-                    bottomMargin = if (isPortrait) navigationBars.bottom + 25.dp
-                    else 25.dp
-                }
-                insets
             }
         } else
             binding.reply.isVisible = false
@@ -523,6 +521,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
+            viewModel.isEnd = false
             loadMore()
         }
     }

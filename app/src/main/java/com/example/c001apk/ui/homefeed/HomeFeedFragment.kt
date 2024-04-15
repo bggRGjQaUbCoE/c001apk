@@ -194,14 +194,14 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
         }
 
         fab.apply {
-            val lp = CoordinatorLayout.LayoutParams(
+            setImageResource(R.drawable.ic_add1)
+            layoutParams = CoordinatorLayout.LayoutParams(
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT,
                 CoordinatorLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.gravity = Gravity.BOTTOM or Gravity.END
-            setImageResource(R.drawable.ic_add1)
-            layoutParams = lp
-            (this.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabViewBehavior
+            ).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+                behavior = fabViewBehavior
+            }
             if (SDK_INT >= 26)
                 tooltipText = getString(R.string.publishFeed)
             setOnClickListener {
