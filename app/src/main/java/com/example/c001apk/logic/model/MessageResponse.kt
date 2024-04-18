@@ -11,6 +11,7 @@ data class MessageResponse(
 ) {
 
     data class Data(
+        val rid: Long?,
         val infoHtml: String?,
         val entityType: String,
         val id: String,

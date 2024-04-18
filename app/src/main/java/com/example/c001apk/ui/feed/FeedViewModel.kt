@@ -66,6 +66,7 @@ class FeedViewModel @AssistedInject constructor(
     var replyCount: String? = null
     var dateLine: Long? = null
     var topReplyId: String? = null
+    var replyMeId: String? = null
     var isTop: Boolean? = null
     var feedType: String? = null
 
@@ -160,8 +161,8 @@ class FeedViewModel @AssistedInject constructor(
                             if (isRefreshing || isLoadMore) {
                                 reply.data.forEach {
                                     if (it.entityType == "feed_reply") {
-                                        if (listType == "lastupdate_desc" && topReplyId != null
-                                            && it.id == topReplyId
+                                        if (listType == "lastupdate_desc"
+                                            && it.id in listOf(topReplyId, replyMeId)
                                         )
                                             return@forEach
                                         if (!blackListRepo.checkUid(it.uid))
@@ -252,10 +253,9 @@ class FeedViewModel @AssistedInject constructor(
                                 topReplyId = feed.data.topReplyRows[0].id
                                 feedTopReplyList.clear()
                                 feedTopReplyList.addAll(feed.data.topReplyRows)
-                            } else if (!feed.data.replyMeRows.isNullOrEmpty()) {
-                                isTop = false
-                                topReplyId = feed.data.replyMeRows[0].id
-                                feedTopReplyList.clear()
+                            }
+                            if (!feed.data.replyMeRows.isNullOrEmpty()) {
+                                replyMeId = feed.data.replyMeRows[0].id
                                 feedTopReplyList.addAll(feed.data.replyMeRows)
                             }
                             activityState.postValue(LoadingState.LoadingDone)

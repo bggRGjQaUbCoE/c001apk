@@ -155,7 +155,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="@drawable/selector_bg_12_trans"
-                android:onClick="@{(view) -> listener.onViewFeed(view, data.feed.id, data.feed.uid, data.feed.username, data.userAvatar, data.deviceTitle, data.feed.message, String.valueOf(data.dateline), null, null)}"
+                android:onClick="@{(view) -> listener.onViewFeed(view, data.feed.id, data.feed.uid, data.feed.username, data.userAvatar, data.deviceTitle, data.feed.message, String.valueOf(data.dateline), data.rid == 0 ? data.id : String.valueOf(data.rid), true)}"
                 android:padding="10dp"
                 android:visibility="@{data.feed == null ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"

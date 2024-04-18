@@ -101,6 +101,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.toastText.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                (activity as? MainActivity)?.showNavigationView()
             }
         }
 
@@ -128,8 +129,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.messageData.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             mAdapter.submitList(it)
-            if (binding.vfContainer.displayedChild != it.size)
-                binding.vfContainer.displayedChild = it.size
+            binding.vfContainer.displayedChild = it.size
         }
     }
 
@@ -143,7 +143,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                     else
                         sLayoutManager.findLastVisibleItemPositions(null).max()
 
-                    if (viewModel.lastVisibleItemPosition + 1  == binding.recyclerView.adapter?.itemCount
+                    if (viewModel.lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                         && !binding.swipeRefresh.isRefreshing && PrefManager.isLogin
                     ) {
