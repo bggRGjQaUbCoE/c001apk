@@ -271,7 +271,6 @@ fun setHotReply(hotReply: TextView, feed: HomeFeedResponse.Data?) {
                 hotReply.textSize,
                 feed.replyRows[0].picArr
             )
-            SpannableStringBuilderUtil.isReturn = true
         } else
             hotReply.isVisible = false
     } else

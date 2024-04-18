@@ -376,7 +376,13 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             viewModel.postDeleteFeedReply("/v6/feed/deleteReply", id, position)
         }
 
-        override fun showTotalReply(id: String, uid: String, position: Int, rPosition: Int?) {
+        override fun showTotalReply(
+            id: String,
+            uid: String,
+            position: Int,
+            rPosition: Int?,
+            intercept: Boolean
+        ) {
             val mBottomSheetDialogFragment =
                 newInstance(
                     position,

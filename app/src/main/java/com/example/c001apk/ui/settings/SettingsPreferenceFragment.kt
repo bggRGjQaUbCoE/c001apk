@@ -189,9 +189,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                     PrefManager.SZLMID = editText.text.toString()
                     PrefManager.xAppDevice = getDeviceCode(false)
                 }
-                setNeutralButton(R.string.random_value) { _, _ ->
-                    PrefManager.SZLMID = randHexString(16)
-                    PrefManager.xAppDevice = getDeviceCode(false)
+                if (BuildConfig.DEBUG) {
+                    setNeutralButton(R.string.random_value) { _, _ ->
+                        PrefManager.SZLMID = randHexString(16)
+                        PrefManager.xAppDevice = getDeviceCode(false)
+                    }
                 }
             }.create().apply {
                 window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)

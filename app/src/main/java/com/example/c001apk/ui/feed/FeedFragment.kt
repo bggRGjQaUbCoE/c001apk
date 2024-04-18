@@ -69,7 +69,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
     private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private var dialog: AlertDialog? = null
-    private var isShowReply: Boolean = false
+    private var isShowReply = false
     private var firstVisibleItemPosition = 0
     private val alpha by lazy {
         ObjectAnimator.ofFloat(binding.titleProfile, "alpha", 0f, 1f).also {
@@ -681,8 +681,14 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     viewModel.onLikeReply(id, isLike)
         }
 
-        override fun showTotalReply(id: String, uid: String, position: Int, rPosition: Int?) {
-            isShowReply = true
+        override fun showTotalReply(
+            id: String,
+            uid: String,
+            position: Int,
+            rPosition: Int?,
+            intercept: Boolean
+        ) {
+            isShowReply = intercept
             val mBottomSheetDialogFragment =
                 Reply2ReplyBottomSheetDialog.newInstance(
                     position,

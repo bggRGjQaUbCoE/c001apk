@@ -35,16 +35,6 @@ object SpannableStringBuilderUtil {
         return builder
     }
 
-    private var position = 0
-    private var uid = ""
-    fun setData(position: Int, uid: String) {
-        this.position = position
-        this.uid = uid
-    }
-
-    var isReturn = false
-    var isColor = false
-
     fun setText(
         mContext: Context,
         text: String,
@@ -65,9 +55,6 @@ object SpannableStringBuilderUtil {
         )
         urls.forEach {
             val myURLSpan = MyURLSpan(mContext, it.url, imgList, showMoreReply)
-            myURLSpan.setData(position, uid)
-            myURLSpan.isColor = isColor
-            myURLSpan.isReturn = isReturn
             val start = builder.getSpanStart(it)
             val end = builder.getSpanEnd(it)
             val flags = builder.getSpanFlags(it)

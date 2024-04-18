@@ -186,14 +186,10 @@ class FeedReplyAdapter(
                                         reply.id,
                                         reply.uid,
                                         bindingAdapterPosition,
-                                        null
+                                        null,
+                                        true
                                     )
                                 }
-
-                                SpannableStringBuilderUtil.setData(
-                                    position + 1,
-                                    reply.uid
-                                )
 
                                 view.setOnClickListener {
                                     listener.onReply(

@@ -51,7 +51,7 @@ interface ItemListener {
                 if (index0 != -1 && index1 != -1 && index2 != -1) {
                     id = href.replace("/feed/", "").substring(0, index0)
                     rid = href.substring(index1 + 4, index2)
-                } else if (index0 != -1 && index1 != -1 && index2 == -1){
+                } else if (index0 != -1 && index1 != -1 && index2 == -1) {
                     id = href.replace("/feed/", "").substring(0, index0)
                     rid = href.substring(index1 + 4)
                 } else id = href
@@ -74,7 +74,14 @@ interface ItemListener {
         }
     }
 
-    fun showTotalReply(id: String, uid: String, position: Int, rPosition: Int?) {}
+    fun showTotalReply(
+        id: String,
+        uid: String,
+        position: Int,
+        rPosition: Int?,
+        intercept: Boolean = false
+    ) {
+    }
 
     fun viewFFFList(view: View, uid: String?, isEnable: Boolean, type: String) {
         uid?.let {
