@@ -199,7 +199,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:onClick="@{(view) -> listener.onViewFeed(view, type == `feedLike` ? data.fid : data.feed.id, ``, ``, ``, ``, ``, ``, data.rid == 0 ? data.id : String.valueOf(data.rid), true)}"
+                android:onClick="@{(view) -> listener.onViewFeed(view, type == `feedLike` ? data.fid : data.feed.id, ``, ``, ``, ``, ``, ``, data.id, true)}"
                 android:visibility="@{data.feed == null ? View.GONE : View.VISIBLE}"
                 app:cardElevation="0dp"
                 app:layout_constraintStart_toStartOf="parent"

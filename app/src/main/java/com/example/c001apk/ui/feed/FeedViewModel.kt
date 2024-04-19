@@ -50,6 +50,7 @@ class FeedViewModel @AssistedInject constructor(
     var position: Int? = null
     var rPosition: Int? = null
     var ruid: String? = null
+    var cuid: String? = null
     var uname: String? = null
     var type: String? = null
     var isRefreshReply: Boolean? = null
@@ -59,15 +60,15 @@ class FeedViewModel @AssistedInject constructor(
     var listType: String = "lastupdate_desc"
     var firstItem: String? = null
     var itemCount = 2
-    var uid: String? = null
+    var feedUid: String? = null
     var funame: String? = null
     var avatar: String? = null
     var device: String? = null
     var replyCount: String? = null
     var dateLine: Long? = null
-    var topReplyId: String? = null
-    var replyMeId: String? = null
-    var isTop: Boolean? = null
+    private var topReplyId: String? = null
+    private var replyMeId: String? = null
+    private var isTop: Boolean? = null
     var feedType: String? = null
 
     var rid: String? = null
@@ -77,7 +78,7 @@ class FeedViewModel @AssistedInject constructor(
     var articleList: MutableList<FeedArticleContentBean.Data>? = null
     var articleMsg: String? = null
     var articleDateLine: Long? = null
-    val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
+    private val feedTopReplyList = ArrayList<TotalReplyResponse.Data>()
 
     val feedReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()
     val feedUserState = MutableLiveData<Event<Boolean>>()
@@ -144,36 +145,58 @@ class FeedViewModel @AssistedInject constructor(
                 }
                 .collect { result ->
                     val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
-                    val reply = result.getOrNull()
-                    if (reply != null) {
-                        if (reply.message != null) {
-                            footerState.postValue(FooterState.LoadingError(reply.message))
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            footerState.postValue(FooterState.LoadingError(data.message))
                             return@collect
-                        } else if (!reply.data.isNullOrEmpty()) {
+                        } else if (!data.data.isNullOrEmpty()) {
                             if (firstItem == null)
-                                firstItem = reply.data.first().id
-                            lastItem = reply.data.last().id
+                                firstItem = data.data.first().id
+                            lastItem = data.data.last().id
                             if (isRefreshing) {
                                 feedReplyList.clear()
                                 if (listType == "lastupdate_desc" && feedTopReplyList.isNotEmpty())
                                     feedReplyList.addAll(feedTopReplyList)
                             }
                             if (isRefreshing || isLoadMore) {
-                                reply.data.forEach {
-                                    if (it.entityType == "feed_reply") {
+                                data.data.forEach { reply ->
+                                    if (reply.entityType == "feed_reply") {
                                         if (listType == "lastupdate_desc"
-                                            && it.id in listOf(topReplyId, replyMeId)
+                                            && reply.id in listOf(topReplyId, replyMeId)
                                         )
                                             return@forEach
-                                        if (!blackListRepo.checkUid(it.uid))
-                                            feedReplyList.add(it)
+                                        if (!blackListRepo.checkUid(reply.uid)) {
+                                            // reply tag
+                                            val unameTag =
+                                                when (reply.uid) {
+                                                    feedUid -> " [楼主]"
+                                                    else -> ""
+                                                }
+                                            reply.username = "${reply.username}$unameTag\u3000"
+
+                                            if (!reply.replyRows.isNullOrEmpty()) {
+                                                reply.replyRows = reply.replyRows?.filter {
+                                                    !blackListRepo.checkUid(it.uid)
+                                                }?.map {
+                                                    it.copy(
+                                                        message = generateMess(
+                                                            it,
+                                                            feedUid,
+                                                            reply.uid
+                                                        )
+                                                    )
+                                                }?.toMutableList()
+                                            }
+                                            feedReplyList.add(reply)
+                                        }
                                     }
                                 }
                             }
                             page++
                             feedReplyData.postValue(feedReplyList)
                             footerState.postValue(FooterState.LoadingDone)
-                        } else if (reply.data?.isEmpty() == true) {
+                        } else if (data.data?.isEmpty() == true) {
                             isEnd = true
                             if (isRefreshing)
                                 feedReplyData.postValue(emptyList())
@@ -199,7 +222,7 @@ class FeedViewModel @AssistedInject constructor(
                             activityState.postValue(LoadingState.LoadingError(feed.message))
                             return@collect
                         } else if (feed.data != null) {
-                            uid = feed.data.uid
+                            feedUid = feed.data.uid
                             funame = feed.data.userInfo?.username
                             avatar = feed.data.userAvatar
                             device = feed.data.deviceTitle
@@ -250,13 +273,49 @@ class FeedViewModel @AssistedInject constructor(
                             }
                             if (!feed.data.topReplyRows.isNullOrEmpty()) {
                                 isTop = true
-                                topReplyId = feed.data.topReplyRows[0].id
                                 feedTopReplyList.clear()
+                                feed.data.topReplyRows.getOrNull(0)?.let {
+                                    topReplyId = it.id
+                                    val unameTag =
+                                        when (it.uid) {
+                                            feedUid -> " [楼主]"
+                                            else -> ""
+                                        }
+                                    val replyTag = " [置顶]"
+                                    it.username = "${it.username}$unameTag$replyTag\u3000"
+                                    if (!it.replyRows.isNullOrEmpty()) {
+                                        it.replyRows = it.replyRows?.map { reply ->
+                                            reply.copy(
+                                                message = generateMess(reply, feedUid, it.uid)
+                                            )
+                                        }?.toMutableList()
+                                    }
+                                }
                                 feedTopReplyList.addAll(feed.data.topReplyRows)
                             }
                             if (!feed.data.replyMeRows.isNullOrEmpty()) {
-                                replyMeId = feed.data.replyMeRows[0].id
-                                feedTopReplyList.addAll(feed.data.replyMeRows)
+                                run {
+                                    feed.data.replyMeRows.getOrNull(0)?.let {
+                                        if (it.id == topReplyId)
+                                            return@run
+                                        else
+                                            replyMeId = it.id
+                                        val unameTag =
+                                            when (it.uid) {
+                                                feedUid -> " [楼主]"
+                                                else -> ""
+                                            }
+                                        it.username = "${it.username}$unameTag\u3000"
+                                        if (!it.replyRows.isNullOrEmpty()) {
+                                            it.replyRows = it.replyRows?.map { reply ->
+                                                reply.copy(
+                                                    message = generateMess(reply, feedUid, it.uid)
+                                                )
+                                            }?.toMutableList()
+                                        }
+                                    }
+                                    feedTopReplyList.addAll(feed.data.replyMeRows)
+                                }
                             }
                             activityState.postValue(LoadingState.LoadingDone)
                         }
@@ -272,28 +331,41 @@ class FeedViewModel @AssistedInject constructor(
 
     val closeSheet = MutableLiveData<Event<Boolean>>()
     val scroll = MutableLiveData<Event<Boolean>>()
-    val notify = MutableLiveData<Event<Boolean>>()
     var replyData = HashMap<String, String>()
     fun onPostReply() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postReply(replyData, rid.toString(), type.toString())
                 .collect { result ->
-                    val feedReplyList = feedReplyData.value?.toMutableList() ?: ArrayList()
                     val response = result.getOrNull()
                     response?.let {
                         if (response.data != null) {
                             toastText.postValue(Event("回复成功"))
                             closeSheet.postValue(Event(true))
-                            if (type == "feed") {
-                                feedReplyList.add(0, response.data)
-                                scroll.postValue(Event(true))
-                            } else {
-                                feedReplyList.getOrNull(position ?: 0)?.replyRows?.add(
-                                    feedReplyList.getOrNull(position ?: 0)?.replyRows?.size
-                                        ?: 0, response.data
-                                )
-                                notify.postValue(Event(true))
-                            }
+                            val feedReplyList: List<TotalReplyResponse.Data> =
+                                if (type == "feed") { // feed
+                                    val newList =
+                                        feedReplyData.value?.toMutableList() ?: ArrayList()
+                                    newList.add(0, response.data)
+                                    scroll.postValue(Event(true))
+                                    newList
+                                } else { //feed reply
+                                    feedReplyData.value?.mapIndexed { index, reply ->
+                                        if (index == position) {
+                                            reply.copy(
+                                                lastupdate = System.currentTimeMillis(),
+                                                replyRows = (reply.replyRows ?: ArrayList()).also {
+                                                    it.add(
+                                                        reply.replyRows?.size ?: 0,
+                                                        response.data.also { reply ->
+                                                            reply.message =
+                                                                generateMess(reply, feedUid, cuid)
+                                                        }
+                                                    )
+                                                }
+                                            )
+                                        } else reply
+                                    } ?: emptyList()
+                                }
                             feedReplyData.postValue(feedReplyList)
                         } else {
                             response.message?.let {
@@ -346,6 +418,42 @@ class FeedViewModel @AssistedInject constructor(
         }
     }
 
+    private fun generateMess(
+        reply: TotalReplyResponse.Data,
+        feedUid: String?,
+        uid: String?
+    ): String =
+        run {
+            val replyTag =
+                when (reply.uid) {
+                    feedUid -> " [楼主] "
+                    uid -> " [层主] "
+                    else -> ""
+                }
+
+            val rReplyTag =
+                when (reply.ruid) {
+                    feedUid -> " [楼主] "
+                    uid -> " [层主] "
+                    else -> ""
+                }
+
+            val rReplyUser =
+                when (reply.ruid) {
+                    uid -> ""
+                    else -> """<a class="feed-link-uname" href="/u/${reply.ruid}">${reply.rusername}${rReplyTag}</a>"""
+                }
+
+            val replyPic =
+                when (reply.pic) {
+                    "" -> ""
+                    else -> """ <a class=\"feed-forward-pic\" href=${reply.pic}>查看图片(${reply.picArr?.size})</a>"""
+                }
+
+            """<a class="feed-link-uname" href="/u/${reply.uid}">${reply.username}${replyTag}</a>回复${rReplyUser}: ${reply.message}${replyPic}"""
+
+        }
+
     fun onLikeFeed(id: String, isLike: Int) {
         val likeType = if (isLike == 1) "unlike" else "like"
         val likeUrl = "/v6/feed/$likeType"
@@ -378,15 +486,24 @@ class FeedViewModel @AssistedInject constructor(
                     if (response != null) {
                         if (response.data == "删除成功") {
                             toastText.postValue(Event("删除成功"))
-                            val replyList =
-                                feedReplyData.value?.toMutableList() ?: ArrayList()
-                            if (rPosition == null || rPosition == -1) {
-                                replyList.removeAt(position)
-                            } else {
-                                replyList[position].replyRows?.removeAt(rPosition)
-                            }
-                            feedReplyData.postValue(replyList)
-                            notify.postValue(Event(true))
+                            val newList: List<TotalReplyResponse.Data> =
+                                if (rPosition == null || rPosition == -1) {
+                                    feedReplyData.value?.filterIndexed { index, _ ->
+                                        index != position
+                                    } ?: emptyList()
+                                } else {
+                                    feedReplyData.value?.mapIndexed { index, reply ->
+                                        if (index == position) {
+                                            reply.copy(
+                                                lastupdate = System.currentTimeMillis(),
+                                                replyRows = reply.replyRows.also {
+                                                    it?.removeAt(rPosition)
+                                                }
+                                            )
+                                        } else reply
+                                    } ?: emptyList()
+                                }
+                            feedReplyData.postValue(newList)
                         } else if (!response.message.isNullOrEmpty()) {
                             response.message.let {
                                 toastText.postValue(Event(it))

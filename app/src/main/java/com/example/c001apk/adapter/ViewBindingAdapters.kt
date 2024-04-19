@@ -121,9 +121,7 @@ fun setRows(
         }
 
         linearAdapterLayout.adapter = object : BaseAdapter() {
-            override fun getCount(): Int =
-                if (targetRow?.id == null) it.size
-                else 1 + it.size
+            override fun getCount(): Int = dataList.size
 
             override fun getItem(p0: Int): Any = 0
 
@@ -252,27 +250,17 @@ fun setCustomText(
 }
 
 @BindingAdapter("setHotReply")
-fun setHotReply(hotReply: TextView, feed: HomeFeedResponse.Data?) {
-    if (feed != null) {
-        if (!feed.replyRows.isNullOrEmpty()) {
-            hotReply.isVisible = true
-            hotReply.highlightColor = Color.TRANSPARENT
-            val mess =
-                if (feed.replyRows[0].picArr.isNullOrEmpty())
-                    "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message}"
-                else if (feed.replyRows[0].message == "[图片]")
-                    "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
-                else
-                    "<a class=\"feed-link-uname\" href=\"/u/${feed.replyRows[0].uid}\">${feed.replyRows[0].userInfo?.username}</a>: ${feed.replyRows[0].message} [图片] <a class=\"feed-forward-pic\" href=${feed.replyRows[0].pic}>查看图片(${feed.replyRows[0].picArr?.size})</a>"
-            hotReply.movementMethod = LinkMovementMethod.getInstance()
-            hotReply.text = SpannableStringBuilderUtil.setText(
-                hotReply.context,
-                mess,
-                hotReply.textSize,
-                feed.replyRows[0].picArr
-            )
-        } else
-            hotReply.isVisible = false
+fun setHotReply(hotReply: TextView, replyRow: HomeFeedResponse.ReplyRows?) {
+    if (replyRow != null) {
+        hotReply.isVisible = true
+        hotReply.highlightColor = Color.TRANSPARENT
+        hotReply.movementMethod = LinkMovementMethod.getInstance()
+        hotReply.text = SpannableStringBuilderUtil.setText(
+            hotReply.context,
+            replyRow.message.toString(),
+            hotReply.textSize,
+            replyRow.picArr
+        )
     } else
         hotReply.isVisible = false
 }

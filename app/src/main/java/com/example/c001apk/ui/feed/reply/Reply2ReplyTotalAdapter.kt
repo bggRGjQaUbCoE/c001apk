@@ -23,29 +23,25 @@ import com.example.c001apk.util.SpannableStringBuilderUtil
 
 
 class Reply2ReplyTotalAdapter(
-    private val listener: ItemListener,
-    private val fuid: String,
-    private val uid: String,
+    private val listener: ItemListener
 ) : ListAdapter<TotalReplyResponse.Data, Reply2ReplyTotalAdapter.ReplyViewHolder>(
     Reply2ReplyDiffCallback()
 ) {
 
     class ReplyViewHolder(
         val binding: ItemReplyToReplyItemBinding,
-        private val listener: ItemListener,
-        private val fuid: String,
-        private val uid: String
+        private val listener: ItemListener
     ) :
         RecyclerView.ViewHolder(binding.root) {
         private var rId: String = ""
         private var rUid: String = ""
         private var username: String = ""
-        private var isLike: Int = 0
 
         init {
             itemView.setOnClickListener {
                 listener.onReply(
                     rId,
+                    rUid,
                     rUid,
                     username,
                     bindingAdapterPosition,
@@ -98,35 +94,12 @@ class Reply2ReplyTotalAdapter(
 
             rId = reply.id
             rUid = reply.uid
-            username = reply.username
-            isLike = reply.userAction?.like ?: 0
-
-            val replyTag = if (bindingAdapterPosition == 0) ""
-            else
-                when (reply.uid) {
-                    fuid -> " [楼主] "
-                    uid -> " [层主] "
-                    else -> ""
-                }
-
-            val rReplyTag = if (bindingAdapterPosition == 0) ""
-            else
-                when (reply.ruid) {
-                    fuid -> " [楼主] "
-                    uid -> " [层主] "
-                    else -> ""
-                }
-
-            val text =
-                if (reply.ruid == "0")
-                    """<a class="feed-link-uname" href="/u/${reply.uid}">${reply.username}$replyTag</a>""" + "\u3000"
-                else
-                    """<a class="feed-link-uname" href="/u/${reply.uid}">${reply.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${reply.rusername}">${reply.rusername}$rReplyTag</a>""" + "\u3000"
+            username = reply.userInfo.username
 
             binding.uname.movementMethod = LinkMovementMethod.getInstance()
             binding.uname.text = SpannableStringBuilderUtil.setText(
                 itemView.context,
-                text,
+                reply.username,
                 binding.uname.textSize,
                 null
             )
@@ -149,7 +122,7 @@ class Reply2ReplyTotalAdapter(
             parent,
             false
         )
-        return ReplyViewHolder(binding, listener, fuid, uid)
+        return ReplyViewHolder(binding, listener)
     }
 
     override fun onBindViewHolder(holder: ReplyViewHolder, position: Int) {

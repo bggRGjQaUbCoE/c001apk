@@ -142,7 +142,7 @@ class FeedQuestionFragment : BaseFragment<FragmentFeedVoteBinding>() {
     private fun initView() {
         feedDataAdapter =
             FeedDataAdapter(ItemClickListener(), viewModel.feedDataList, viewModel.articleList)
-        feedReplyAdapter = FeedReplyAdapter(viewModel.blackListRepo, ItemClickListener())
+        feedReplyAdapter = FeedReplyAdapter(ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter =
@@ -176,6 +176,7 @@ class FeedQuestionFragment : BaseFragment<FragmentFeedVoteBinding>() {
     inner class ItemClickListener : ItemListener {
         override fun onReply(
             id: String,
+            cuid: String,
             uid: String,
             username: String?,
             position: Int,

@@ -243,12 +243,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
     }
 
     private fun initView() {
-        mAdapter =
-            Reply2ReplyTotalAdapter(
-                ItemClickListener(),
-                viewModel.fuid.toString(),
-                viewModel.uid.toString(),
-            )
+        mAdapter = Reply2ReplyTotalAdapter(ItemClickListener())
         footerAdapter = FooterAdapter(ReloadListener())
         binding.recyclerView.apply {
             adapter = ConcatAdapter()
@@ -346,6 +341,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
 
         override fun onReply(
             id: String,
+            cuid: String,
             uid: String,
             username: String?,
             position: Int,
@@ -369,7 +365,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             viewModel.saveUid(uid)
             val currentList = viewModel.totalReplyData.value?.toMutableList() ?: ArrayList()
             currentList.removeAt(position)
-            viewModel.totalReplyData.postValue(currentList)
+            viewModel.totalReplyData.value = currentList
         }
 
         override fun onDeleteClicked(entityType: String, id: String, position: Int) {

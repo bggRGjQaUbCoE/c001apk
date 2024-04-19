@@ -162,7 +162,15 @@ interface ItemListener {
 
     fun onLikeClick(type: String, id: String, isLike: Int) {}
 
-    fun onReply(id: String, uid: String, username: String?, position: Int, rPosition: Int?) {}
+    fun onReply(
+        id: String,
+        cuid: String,
+        uid: String,
+        username: String?,
+        position: Int,
+        rPosition: Int?
+    ) {
+    }
 
     fun onBlockUser(id: String, uid: String, position: Int) {}
 

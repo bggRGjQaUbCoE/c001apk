@@ -69,8 +69,10 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                             listSize = replyTotalList.size
                             reply.data.forEach {
                                 if (it.entityType == "feed_reply")
-                                    if (!blackListRepo.checkUid(it.uid))
+                                    if (!blackListRepo.checkUid(it.uid)) {
+                                        it.username = generateName(it)
                                         replyTotalList.add(it)
+                                    }
                             }
                             page++
                             totalReplyData.postValue(replyTotalList)
@@ -107,7 +109,12 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                         if (response.data != null) {
                             toastText.postValue(Event("回复成功"))
                             closeSheet.postValue(Event(true))
-                            replyTotalList.add((position ?: 0) + 1, response.data)
+                            replyTotalList.add(
+                                (position ?: 0) + 1,
+                                response.data.copy(
+                                    username = generateName(response.data)
+                                )
+                            )
                             totalReplyData.postValue(replyTotalList)
                         } else {
                             response.message?.let {
@@ -120,6 +127,27 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    private fun generateName(data: TotalReplyResponse.Data): String = run {
+        val replyTag =
+            when (data.uid) {
+                fuid -> " [楼主] "
+                uid -> " [层主] "
+                else -> ""
+            }
+
+        val rReplyTag =
+            when (data.ruid) {
+                fuid -> " [楼主] "
+                uid -> " [层主] "
+                else -> ""
+            }
+
+        if (data.ruid == "0")
+            """<a class="feed-link-uname" href="/u/${data.uid}">${data.username}$replyTag</a>""" + "\u3000"
+        else
+            """<a class="feed-link-uname" href="/u/${data.uid}">${data.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${data.rusername}">${data.rusername}$rReplyTag</a>""" + "\u3000"
     }
 
     val createDialog = MutableLiveData<Event<Bitmap>>()

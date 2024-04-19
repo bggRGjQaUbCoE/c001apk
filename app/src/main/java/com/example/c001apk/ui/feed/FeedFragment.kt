@@ -32,6 +32,7 @@ import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
 import com.example.c001apk.logic.model.FeedEntity
+import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.feed.reply.IOnPublishClickListener
 import com.example.c001apk.ui.feed.reply.Reply2ReplyBottomSheetDialog
@@ -150,7 +151,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                     } else {
                         viewModel.rid = viewModel.id
-                        viewModel.ruid = viewModel.uid
+                        viewModel.ruid = viewModel.feedUid
                         viewModel.uname = viewModel.funame
                         viewModel.type = "feed"
                         initReply()
@@ -214,16 +215,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             event.getContentIfNotHandledOrReturnNull()?.let {
                 if (it)
                     feedDataAdapter.notifyItemChanged(0, true)
-            }
-        }
-
-        viewModel.notify.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it) {
-                    viewModel.position?.let { position ->
-                        feedReplyAdapter.notifyItemChanged(position)
-                    }
-                }
             }
         }
 
@@ -313,7 +304,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private fun initData() {
         if (viewModel.isInit) {
             viewModel.isInit = false
-            viewModel.isTop?.let { feedReplyAdapter.setHaveTop(it, viewModel.topReplyId) }
             refreshData()
         }
     }
@@ -337,7 +327,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             viewModel.feedDataList,
             viewModel.articleList
         )
-        feedReplyAdapter = FeedReplyAdapter(viewModel.blackListRepo, ItemClickListener())
+        feedReplyAdapter = FeedReplyAdapter(ItemClickListener())
         feedFixAdapter =
             FeedFixAdapter(viewModel.replyCount.toString(), RefreshReplyListener())
 
@@ -444,7 +434,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             setTitle("确定将 ${viewModel.funame} 加入黑名单？")
                             setNegativeButton(android.R.string.cancel, null)
                             setPositiveButton(android.R.string.ok) { _, _ ->
-                                viewModel.saveUid(viewModel.uid.toString())
+                                viewModel.saveUid(viewModel.feedUid.toString())
                             }
                             show()
                         }
@@ -485,7 +475,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                                 try {
                                     val fav = FeedEntity(
                                         viewModel.id,
-                                        viewModel.uid.toString(),
+                                        viewModel.feedUid.toString(),
                                         viewModel.funame.toString(),
                                         viewModel.avatar.toString(),
                                         viewModel.device.toString(),
@@ -531,10 +521,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             setListType()
             viewModel.firstItem = null
             viewModel.lastItem = null
-            if (listType == "lastupdate_desc" && viewModel.feedTopReplyList.isNotEmpty())
-                viewModel.isTop?.let { feedReplyAdapter.setHaveTop(it, viewModel.topReplyId) }
-            else
-                feedReplyAdapter.setHaveTop(false, null)
             binding.recyclerView.stopScroll()
             if (firstVisibleItemPosition > 1)
                 viewModel.isViewReply = true
@@ -645,6 +631,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
         override fun onReply(
             id: String,
+            cuid:String,
             uid: String,
             username: String?,
             position: Int,
@@ -659,6 +646,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     Toast.makeText(requireContext(), SZLM_ID, Toast.LENGTH_SHORT).show()
                 } else {
                     viewModel.rid = id
+                    viewModel.cuid = cuid
                     viewModel.ruid = uid
                     viewModel.uname = username
                     viewModel.type = "reply"
@@ -690,7 +678,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             val mBottomSheetDialogFragment =
                 Reply2ReplyBottomSheetDialog.newInstance(
                     position,
-                    viewModel.uid.toString(),
+                    viewModel.feedUid.toString(),
                     uid,
                     id
                 )
@@ -725,14 +713,24 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             when (item?.itemId) {
                 R.id.block -> {
                     viewModel.saveUid(uid)
-                    val replyList = viewModel.feedReplyData.value?.toMutableList() ?: ArrayList()
-                    if (rPosition == null || rPosition == -1) {
-                        replyList.removeAt(position)
-                    } else {
-                        replyList[position].replyRows?.removeAt(rPosition)
-                    }
-                    viewModel.feedReplyData.postValue(replyList)
-                    feedReplyAdapter.notifyItemChanged(position)
+                    val newList: List<TotalReplyResponse.Data> =
+                        if (rPosition == null || rPosition == -1) {
+                            viewModel.feedReplyData.value?.toMutableList().also {
+                                it?.removeAt(position)
+                            } ?: emptyList()
+                        } else {
+                            viewModel.feedReplyData.value?.mapIndexed { index, reply ->
+                                if (index == position) {
+                                    reply.copy(
+                                        lastupdate = System.currentTimeMillis(),
+                                        replyRows = reply.replyRows.also {
+                                            it?.removeAt(rPosition)
+                                        }
+                                    )
+                                } else reply
+                            } ?: emptyList()
+                        }
+                    viewModel.feedReplyData.value = newList
                 }
 
                 R.id.report -> {
