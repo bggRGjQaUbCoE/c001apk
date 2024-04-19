@@ -56,7 +56,9 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="none" />
+            android:clipToPadding="false"
+            android:scrollbars="none"
+            app:fitsSystemWindowsInsets="bottom" />
 
     </LinearLayout>
 
