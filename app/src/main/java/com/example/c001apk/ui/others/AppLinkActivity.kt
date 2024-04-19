@@ -14,17 +14,7 @@ class AppLinkActivity : MaterialActivity() {
 
         val data = intent.data
 
-        if (data.toString().startsWith("coolmarket://feed/")) {
-            IntentUtil.startActivity<FeedActivity>(this) {
-                putExtra("id", data.toString().replace("coolmarket://feed/", ""))
-            }
-        } else if (data.toString().startsWith("coolmarket://u/")) {
-            IntentUtil.startActivity<UserActivity>(this) {
-                putExtra("id", data.toString().replace("coolmarket://u/", ""))
-            }
-        } else {
-            openLink(this, data.toString(), null)
-        }
+        openLink(this, data.toString(), null)
 
         finish()
 

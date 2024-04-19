@@ -81,10 +81,8 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         super.onViewCreated(view, savedInstanceState)
 
         var height = 0
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val navigationBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(navigationBar.left, 0, navigationBar.right, 0)
-            height = navigationBar.bottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.reply) { _, insets ->
+            height = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
             insets
         }
 

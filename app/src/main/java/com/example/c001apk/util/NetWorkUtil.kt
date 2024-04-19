@@ -39,7 +39,9 @@ object NetWorkUtil {
     }
 
     fun openLink(context: Context, url: String, title: String?) {
-        val replace = url.replace("https://", "")
+        val replace = url
+            .replace("coolmarket://", "/")
+            .replace("https://", "")
             .replace("http://", "")
             .replace("www.", "")
             .replace("coolapk1s", "coolapk")
@@ -125,6 +127,7 @@ object NetWorkUtil {
             }
         } else {
             Toast.makeText(context, "unsupported url: $url", Toast.LENGTH_SHORT).show()
+            ClipboardUtil.copyText(context, url, false)
         }
     }
 
