@@ -8,9 +8,4 @@
         android:valueFrom="0.2"
         android:valueTo="1.0"/>
 
-    <objectAnimator
-        android:propertyName="rotation"
-        android:valueType="floatType"
-        android:valueFrom="0"
-        android:valueTo="180"/>
 </set>

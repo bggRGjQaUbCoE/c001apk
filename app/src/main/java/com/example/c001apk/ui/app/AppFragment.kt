@@ -22,7 +22,6 @@ import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ReplaceViewHelper
 import com.example.c001apk.util.Utils.downloadApk
 import com.example.c001apk.view.AppBarLayoutStateChangeListener
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -155,16 +154,9 @@ class AppFragment : BasePagerFragment() {
 
     private fun initAppBar() {
         binding.appBar.addOnOffsetChangedListener(object : AppBarLayoutStateChangeListener() {
-            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
-                when (state) {
-                    State.COLLAPSED -> appBinding.appLayout.visibility = View.INVISIBLE
-                    State.EXPANDED, State.INTERMEDIATE ->
-                        appBinding.appLayout.isVisible = true
-
-                    else -> appBinding.appLayout.visibility = View.INVISIBLE
-                }
+            override fun onScroll(percent: Float) {
+                appBinding.appLayout.alpha = percent
             }
-
         })
     }
 
