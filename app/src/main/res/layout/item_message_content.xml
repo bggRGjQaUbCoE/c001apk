@@ -211,15 +211,17 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/round_corners_12_win"
                     android:foreground="@drawable/selector_bg_12_trans"
-                    android:padding="10dp">
+                    android:paddingVertical="10dp"
+                    android:paddingEnd="10dp"
+                    tools:ignore="RtlSymmetry">
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/forward1Pic"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:layout_marginStart="10dp"
                         android:background="@color/cover"
                         android:scaleType="centerCrop"
-                        android:visibility="@{type == `feedLike` ? View.GONE : View.VISIBLE}"
                         app:layout_constraintDimensionRatio="H, 1"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"

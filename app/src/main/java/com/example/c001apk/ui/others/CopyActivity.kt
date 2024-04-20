@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -17,6 +18,7 @@ import com.example.c001apk.ui.home.HomeMenuAdapter
 import com.example.c001apk.ui.home.HomeViewModel
 import com.example.c001apk.ui.home.ItemTouchHelperCallback
 import com.example.c001apk.view.LinearItemDecoration2
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 
@@ -40,10 +42,19 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
 
         intent.getStringExtra("text")?.let {
             val linkText = getAllLinkAndText(it)
-            binding.textView.text = Html.fromHtml(
-                linkText.replace("\n", " <br/>"),
-                Html.FROM_HTML_MODE_COMPACT
-            ).toString()
+            binding.textView.apply {
+                text = Html.fromHtml(
+                    linkText.replace("\n", " <br/>"),
+                    Html.FROM_HTML_MODE_COMPACT
+                ).toString()
+                highlightColor = ColorUtils.setAlphaComponent(
+                    MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorPrimaryDark,
+                        0
+                    ), 128
+                )
+            }
             return
         }
 
