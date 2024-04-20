@@ -3,6 +3,7 @@ package com.example.c001apk.view
 import android.text.Selection
 import android.text.Spannable
 import android.text.method.LinkMovementMethod
+import android.text.method.Touch
 import android.text.style.ClickableSpan
 import android.view.MotionEvent
 import android.widget.TextView
@@ -11,9 +12,7 @@ class LinkMovementClickMethod : LinkMovementMethod() {
     private var lastClickTime: Long = 0
     override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
         val action = event.action
-        if (action == MotionEvent.ACTION_UP ||
-            action == MotionEvent.ACTION_DOWN
-        ) {
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
             var x = event.x.toInt()
             var y = event.y.toInt()
             x -= widget.totalPaddingLeft
@@ -21,6 +20,16 @@ class LinkMovementClickMethod : LinkMovementMethod() {
             x += widget.scrollX
             y += widget.scrollY
             val layout = widget.layout
+            val isOutOfLineBounds: Boolean = if (y < 0 || y > layout.height) {
+                true
+            } else {
+                val line = layout.getLineForVertical(y)
+                (x < layout.getLineLeft(line) || x > layout.getLineRight(line))
+            }
+            if (isOutOfLineBounds) {
+                Selection.removeSelection(buffer)
+                return Touch.onTouchEvent(widget, buffer, event)
+            }
             val line = layout.getLineForVertical(y)
             val off = layout.getOffsetForHorizontal(line, x.toFloat())
             val link = buffer.getSpans(off, off, ClickableSpan::class.java)
@@ -40,6 +49,7 @@ class LinkMovementClickMethod : LinkMovementMethod() {
                 return true
             } else {
                 Selection.removeSelection(buffer)
+                return Touch.onTouchEvent(widget, buffer, event)
             }
         }
         return super.onTouchEvent(widget, buffer, event)

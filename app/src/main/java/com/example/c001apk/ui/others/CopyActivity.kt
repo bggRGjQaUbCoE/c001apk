@@ -44,7 +44,7 @@ class CopyActivity : BaseActivity<ActivityCopyBinding>() {
             val linkText = getAllLinkAndText(it)
             binding.textView.apply {
                 text = Html.fromHtml(
-                    linkText.replace("\n", " <br/>"),
+                    linkText.replace("\n", "<br/>"),
                     Html.FROM_HTML_MODE_COMPACT
                 ).toString()
                 highlightColor = ColorUtils.setAlphaComponent(

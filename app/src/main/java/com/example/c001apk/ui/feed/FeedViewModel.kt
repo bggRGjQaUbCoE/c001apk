@@ -173,7 +173,7 @@ class FeedViewModel @AssistedInject constructor(
                                                     feedUid -> " [楼主]"
                                                     else -> ""
                                                 }
-                                            reply.username = "${reply.username}$unameTag\u3000"
+                                            reply.username = "${reply.username}$unameTag"
 
                                             if (!reply.replyRows.isNullOrEmpty()) {
                                                 reply.replyRows = reply.replyRows?.filter {
@@ -282,7 +282,7 @@ class FeedViewModel @AssistedInject constructor(
                                             else -> ""
                                         }
                                     val replyTag = " [置顶]"
-                                    it.username = "${it.username}$unameTag$replyTag\u3000"
+                                    it.username = "${it.username}$unameTag$replyTag"
                                     if (!it.replyRows.isNullOrEmpty()) {
                                         it.replyRows = it.replyRows?.map { reply ->
                                             reply.copy(
@@ -305,7 +305,7 @@ class FeedViewModel @AssistedInject constructor(
                                                 feedUid -> " [楼主]"
                                                 else -> ""
                                             }
-                                        it.username = "${it.username}$unameTag\u3000"
+                                        it.username = "${it.username}$unameTag"
                                         if (!it.replyRows.isNullOrEmpty()) {
                                             it.replyRows = it.replyRows?.map { reply ->
                                                 reply.copy(

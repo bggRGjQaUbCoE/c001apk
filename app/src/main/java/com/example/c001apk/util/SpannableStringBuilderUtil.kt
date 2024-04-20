@@ -43,7 +43,7 @@ object SpannableStringBuilderUtil {
         showMoreReply: (() -> Unit)? = null
     ): SpannableStringBuilder {
         val mess = Html.fromHtml(
-            text.replace("\n", " <br/>") + "\u3000",
+            text.replace("\n", "<br/>"),
             Html.FROM_HTML_MODE_COMPACT
         )
         val builder = SpannableStringBuilder(mess)

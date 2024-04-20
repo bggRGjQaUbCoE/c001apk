@@ -5,11 +5,11 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.HtmlCompat
+import androidx.core.text.method.LinkMovementMethodCompat
 import androidx.fragment.app.DialogFragment
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
@@ -58,7 +58,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
             val binding: DialogAboutBinding =
                 DialogAboutBinding.inflate(layoutInflater, null, false)
             binding.designAboutTitle.setText(R.string.app_name)
-            binding.designAboutInfo.movementMethod = LinkMovementMethod.getInstance()
+            binding.designAboutInfo.movementMethod = LinkMovementMethodCompat.getInstance()
             binding.designAboutInfo.highlightColor = ColorUtils.setAlphaComponent(
                 MaterialColors.getColor(
                     requireContext(),

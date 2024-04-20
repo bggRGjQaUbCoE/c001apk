@@ -145,9 +145,9 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
             }
 
         if (data.ruid == "0")
-            """<a class="feed-link-uname" href="/u/${data.uid}">${data.username}$replyTag</a>""" + "\u3000"
+            """<a class="feed-link-uname" href="/u/${data.uid}">${data.username}$replyTag</a>"""
         else
-            """<a class="feed-link-uname" href="/u/${data.uid}">${data.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${data.rusername}">${data.rusername}$rReplyTag</a>""" + "\u3000"
+            """<a class="feed-link-uname" href="/u/${data.uid}">${data.username}$replyTag</a>回复<a class="feed-link-uname" href="/u/${data.rusername}">${data.rusername}$rReplyTag</a>"""
     }
 
     val createDialog = MutableLiveData<Event<Bitmap>>()

@@ -1,10 +1,10 @@
 package com.example.c001apk.ui.feed.reply
 
 import android.graphics.Color
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.text.method.LinkMovementMethodCompat
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -96,13 +96,6 @@ class Reply2ReplyTotalAdapter(
             rUid = reply.uid
             username = reply.userInfo.username
 
-            binding.uname.movementMethod = LinkMovementMethod.getInstance()
-            binding.uname.text = SpannableStringBuilderUtil.setText(
-                itemView.context,
-                reply.username,
-                binding.uname.textSize,
-                null
-            )
             binding.setVariable(
                 BR.likeData,
                 Like(

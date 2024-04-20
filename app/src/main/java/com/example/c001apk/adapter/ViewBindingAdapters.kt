@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.text.method.LinkMovementMethodCompat
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.absinthe.libraries.utils.extensions.dp
@@ -254,7 +254,7 @@ fun setHotReply(hotReply: TextView, replyRow: HomeFeedResponse.ReplyRows?) {
     if (replyRow != null) {
         hotReply.isVisible = true
         hotReply.highlightColor = Color.TRANSPARENT
-        hotReply.movementMethod = LinkMovementMethod.getInstance()
+        hotReply.movementMethod = LinkMovementMethodCompat.getInstance()
         hotReply.text = SpannableStringBuilderUtil.setText(
             hotReply.context,
             replyRow.message.toString(),

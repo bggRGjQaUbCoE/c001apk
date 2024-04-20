@@ -53,12 +53,22 @@ class LinkTextView : FakeFontWeightMaterialTextView {
                 x += widget.scrollX
                 y += widget.scrollY
                 val layout = widget.layout
+                val isOutOfLineBounds: Boolean = if (y < 0 || y > layout.height) {
+                    true
+                } else {
+                    val line = layout.getLineForVertical(y)
+                    (x < layout.getLineLeft(line) || x > layout.getLineRight(line))
+                }
+                if (isOutOfLineBounds) {
+                    Selection.removeSelection(buffer)
+                    return Touch.onTouchEvent(widget, buffer, event)
+                }
                 val line = layout.getLineForVertical(y)
                 val off = layout.getOffsetForHorizontal(line, x.toFloat())
                 val link = buffer.getSpans(
                     off, off, ClickableSpan::class.java
                 )
-                return if (link.isNotEmpty()) {
+                if (link.isNotEmpty()) {
                     if (action == MotionEvent.ACTION_UP) {
                         link[0].onClick(widget)
                     }/* else if (action == MotionEvent.ACTION_DOWN) {
@@ -73,14 +83,13 @@ class LinkTextView : FakeFontWeightMaterialTextView {
                     if (widget is LinkTextView) {
                         widget.linkHit = linkText != "查看更多"
                     }
-                    true
+                    return true
                 } else {
                     Selection.removeSelection(buffer)
-                    Touch.onTouchEvent(widget, buffer, event)
-                    false
+                    return Touch.onTouchEvent(widget, buffer, event)
                 }
             }
-            return Touch.onTouchEvent(widget, buffer, event)
+            return super.onTouchEvent(widget, buffer, event)
         }
 
         companion object {
