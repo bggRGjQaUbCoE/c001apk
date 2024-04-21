@@ -26,10 +26,12 @@ class PopClickListener(
                 IntentUtil.startActivity<WebViewActivity>(context) {
                     putExtra(
                         "url",
-                        if (entityType == "feed")
-                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$id"
-                        else
-                            "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$id"
+                        when (entityType) {
+                            "feed" -> "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed&id=$id"
+                            "feed_reply" -> "https://m.coolapk.com/mp/do?c=feed&m=report&type=feed_reply&id=$id"
+                            "user" -> "https://m.coolapk.com/mp/do?c=user&m=report&id=$uid"
+                            else -> "error: entityType: $entityType, id: $id, uid: $uid"
+                        }
                     )
                 }
             }

@@ -60,9 +60,9 @@ class MessageAdapter(
         }
 
         fun bind(data: MessageResponse.Data) {
-            entityType = data.entityType
+            entityType = "user"
             id = data.id
-            uid = data.uid
+            uid = data.fromuid
             fromusername = data.fromusername
 
             binding.setVariable(BR.data, data)

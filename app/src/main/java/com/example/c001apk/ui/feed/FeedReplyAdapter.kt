@@ -126,6 +126,7 @@ class FeedReplyAdapter(
             else if (reply.replyRows?.isEmpty() == true && reply.replyRowsMore == 0) false
             else true
 
+        holder.binding.linearAdapterLayout.adapter = null
         reply.replyRows?.let { replyRows ->
             if (holder.itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
                 holder.binding.replyLayout.setCardBackgroundColor(

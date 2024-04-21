@@ -55,6 +55,14 @@ object NetWorkUtil {
                         if (this@with != -1) replace.substring(6, this@with)
                         else replace.substring(6)
                     )
+                    if (this@with != -1) {
+                        replace.indexOfFirst { it == '&' }.let {
+                            if (it != -1) {
+                                putExtra("rid", replace.substring(5 + this@with, it))
+                                putExtra("viewReply", true)
+                            }
+                        }
+                    }
                 }
             }
         } else if (replace.startsWith("/picture/")) {

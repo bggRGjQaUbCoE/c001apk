@@ -105,6 +105,7 @@ fun setRows(
     relationRows: ArrayList<HomeFeedResponse.RelationRows>?,
     isFeedContent: Boolean?
 ) {
+    linearAdapterLayout.adapter = null
     relationRows?.let {
         val dataList = it.toMutableList()
         if (targetRow?.id != null) {
