@@ -12,6 +12,7 @@ class FollowPagerFragment : BasePagerFragment() {
 
     private val uid by lazy { arguments?.getString("uid").orEmpty() }
     private val type by lazy { arguments?.getString("type").orEmpty() }
+    private val isMe by lazy { uid == PrefManager.uid }
 
     companion object {
         @JvmStatic
@@ -26,13 +27,16 @@ class FollowPagerFragment : BasePagerFragment() {
 
     override fun getFragment(position: Int): Fragment =
         when (type) {
-            "follow" -> when (position) {
-                0 -> FollowFragment.newInstance(type = "follow")
-                1 -> FollowFragment.newInstance(type = "topic")
-                2 -> FollowFragment.newInstance(type = "product")
-                3 -> FollowFragment.newInstance(type = "apk")
-                else -> throw IllegalArgumentException()
-            }
+            "follow" ->
+                if (isMe)
+                    when (position) {
+                        0 -> FollowFragment.newInstance(type = "follow")
+                        1 -> FollowFragment.newInstance(type = "topic")
+                        2 -> FollowFragment.newInstance(type = "product")
+                        3 -> FollowFragment.newInstance(type = "apk")
+                        else -> throw IllegalArgumentException()
+                    }
+                else FollowFragment.newInstance(uid, "follow")
 
             "reply" -> when (position) {
                 0 -> FollowFragment.newInstance(type = "reply")
@@ -46,7 +50,14 @@ class FollowPagerFragment : BasePagerFragment() {
     override fun initTabList() {
         tabList =
             when (type) {
-                "follow" -> listOf("用户", "话题", "数码", "应用")
+                "follow" ->
+                    if (isMe)
+                        listOf("用户", "话题", "数码", "应用")
+                    else {
+                        binding.tabLayout.isVisible = false
+                        listOf("")
+                    }
+
                 "reply" -> listOf("我的回复", "我收到的回复")
                 else -> {
                     binding.tabLayout.isVisible = false
@@ -66,14 +77,14 @@ class FollowPagerFragment : BasePagerFragment() {
             "feed" -> "我的动态"
 
             "follow" -> {
-                if (uid == PrefManager.uid)
+                if (isMe)
                     "我的关注"
                 else
                     "TA关注的人"
             }
 
             "fans" -> {
-                if (uid == PrefManager.uid)
+                if (isMe)
                     "关注我的人"
                 else
                     "TA的粉丝"
