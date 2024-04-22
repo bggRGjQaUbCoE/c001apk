@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Window
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -37,9 +38,18 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
     private lateinit var imageViewPagerAdapter: FragmentPagerAdapter
     val fragmentMap = hashMapOf<Int, ImageMojitoFragment?>()
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            (imageViewPagerAdapter.getItem(binding.viewPager.currentItem) as ImageMojitoFragment).backToMin()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
+
+        onBackPressedDispatcher.addCallback(onBackPressedCallback)
+
         if (Mojito.mojitoConfig().transparentNavigationBar()) {
             ImmersionBar.with(this).transparentBar().init()
         } else {
@@ -47,7 +57,10 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         }
         binding = ActivityImageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.statusBars())
+        WindowInsetsControllerCompat(
+            window,
+            binding.root
+        ).hide(WindowInsetsCompat.Type.statusBars())
 
         binding.userCustomLayout.removeAllViews()
         activityCoverLoader?.apply {
@@ -178,12 +191,12 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         (imageViewPagerAdapter.getItem(binding.viewPager.currentItem) as ImageMojitoFragment).backToMin()
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    /*override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         return if (keyCode == KeyEvent.KEYCODE_BACK) {
             (imageViewPagerAdapter.getItem(binding.viewPager.currentItem) as ImageMojitoFragment).backToMin()
             true
         } else super.onKeyDown(keyCode, event)
-    }
+    }*/
 
     companion object {
         var hasShowedAnimMap = hashMapOf<Int, Boolean>()
