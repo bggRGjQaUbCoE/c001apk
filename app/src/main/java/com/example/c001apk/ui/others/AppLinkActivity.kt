@@ -1,9 +1,6 @@
 package com.example.c001apk.ui.others
 
 import android.os.Bundle
-import com.example.c001apk.ui.feed.FeedActivity
-import com.example.c001apk.ui.user.UserActivity
-import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.NetWorkUtil.openLink
 import rikka.material.app.MaterialActivity
 

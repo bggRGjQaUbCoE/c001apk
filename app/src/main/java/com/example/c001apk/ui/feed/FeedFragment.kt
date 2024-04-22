@@ -463,7 +463,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         }
                     }
 
-
                     R.id.favorite -> {
                         lifecycleScope.launch(Dispatchers.Main) {
                             val isFavorite = favorite.title == "取消收藏"
@@ -631,7 +630,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
         override fun onReply(
             id: String,
-            cuid:String,
+            cuid: String,
             uid: String,
             username: String?,
             position: Int,
@@ -687,7 +686,16 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                 mBottomSheetDialogFragment.oriReply.add(feedReplyList[position])
             else
                 feedReplyList[position].replyRows?.getOrNull(rPosition)?.let {
-                    mBottomSheetDialogFragment.oriReply.add(it)
+                    mBottomSheetDialogFragment.oriReply.add(it.copy(
+                        message = with(it.message) {
+                            val start = indexOfFirst { char -> char == ':' }
+                            val end = indexOf("<a class=\\\"feed-forward-pic\\\"")
+                            if (end != -1)
+                                substring(start + 2, end - 1)
+                            else
+                                substring(start + 2)
+                        }
+                    ))
                 }
 
             mBottomSheetDialogFragment.show(childFragmentManager, "Dialog")

@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.text.method.LinkMovementMethodCompat
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -19,7 +18,6 @@ import com.example.c001apk.databinding.ItemReplyToReplyItemBinding
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.SpannableStringBuilderUtil
 
 
 class Reply2ReplyTotalAdapter(
