@@ -149,7 +149,7 @@ object ImageUtil {
         )
         if (imageCheckDir.exists()) {
             if (isEnd)
-                ToastUtil.toast(context, "文件已存在")
+                context.makeToast("文件已存在")
         } else {
             downloadPicture(context, url.http2https, filename, isEnd)
         }
@@ -206,7 +206,7 @@ object ImageUtil {
                                     )
                                 }
                             } else {
-                                ToastUtil.toast(context, "分享失败")
+                                context.makeToast("分享失败")
                             }
                         }
                     }

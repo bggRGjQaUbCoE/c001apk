@@ -1,14 +1,20 @@
 package com.example.c001apk.ui.feed.reply
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -39,17 +45,17 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClickListener {
+class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var binding: DialogReplyToReplyBottomSheetBinding
     private val viewModel by viewModels<Reply2ReplyBottomSheetViewModel>()
     private lateinit var mAdapter: Reply2ReplyTotalAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var bottomSheetDialog: ReplyBottomSheetDialog
     var oriReply: ArrayList<TotalReplyResponse.Data> = ArrayList()
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
+    private lateinit var intentActivityResultLauncher: ActivityResultLauncher<Intent>
 
     companion object {
         fun newInstance(
@@ -76,6 +82,28 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
             viewModel.uid = it.getString("uid", "")
             viewModel.position = it.getInt("position")
             viewModel.oriReply = oriReply
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (PrefManager.isLogin) {
+            intentActivityResultLauncher =
+                registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+                { result: ActivityResult ->
+                    if (result.resultCode == Activity.RESULT_OK) {
+                        val data = if (Build.VERSION.SDK_INT >= 33)
+                            result.data?.getParcelableExtra(
+                                "response_data", TotalReplyResponse.Data::class.java
+                            )
+                        else
+                            result.data?.getParcelableExtra("response_data")
+                        data?.let {
+                            viewModel.updateReply(it)
+                            Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
         }
     }
 
@@ -120,65 +148,9 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
         initScroll()
         initObserve()
 
-        if (PrefManager.isLogin) {
-            val view1 = LayoutInflater.from(context)
-                .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
-            bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view1)
-            bottomSheetDialog.setIOnPublishClickListener(this)
-            bottomSheetDialog.apply {
-                setContentView(view1)
-                setCancelable(false)
-                setCanceledOnTouchOutside(true)
-                window?.apply {
-                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                }
-                type = "reply"
-            }
-        }
-
     }
 
     private fun initObserve() {
-        viewModel.createDialog.observe(viewLifecycleOwner) { event ->
-            event?.getContentIfNotHandledOrReturnNull()?.let {
-                val binding = ItemCaptchaBinding.inflate(
-                    LayoutInflater.from(requireContext()), null, false
-                )
-                binding.captchaImg.setImageBitmap(it)
-                binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
-                    MaterialColors.getColor(
-                        requireContext(),
-                        com.google.android.material.R.attr.colorPrimaryDark,
-                        0
-                    ), 128
-                )
-                MaterialAlertDialogBuilder(requireContext()).apply {
-                    setView(binding.root)
-                    setTitle("captcha")
-                    setNegativeButton(android.R.string.cancel, null)
-                    setPositiveButton("验证并继续") { _, _ ->
-                        viewModel.requestValidateData = HashMap()
-                        viewModel.requestValidateData["type"] = "err_request_captcha"
-                        viewModel.requestValidateData["code"] = binding.captchaText.text.toString()
-                        viewModel.requestValidateData["mobile"] = ""
-                        viewModel.requestValidateData["idcard"] = ""
-                        viewModel.requestValidateData["name"] = ""
-                        viewModel.onPostRequestValidate()
-                    }
-                    show()
-                }
-            }
-        }
-
-        viewModel.closeSheet.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it && ::bottomSheetDialog.isInitialized && bottomSheetDialog.isShowing) {
-                    bottomSheetDialog.editText.text = null
-                    bottomSheetDialog.dismiss()
-                }
-            }
-        }
-
         viewModel.toastText.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
@@ -276,21 +248,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
         }
     }
 
-    private fun initReply() {
-        bottomSheetDialog.apply {
-            rid = viewModel.rid.toString()
-            ruid = viewModel.ruid.toString()
-            uname = viewModel.uname.toString()
-            setData()
-            show()
-        }
-    }
-
-    override fun onPublish(message: String, replyAndForward: String) {
-        viewModel.replyData["message"] = message
-        viewModel.replyData["replyAndForward"] = replyAndForward
-        viewModel.onPostReply()
-    }
+    /*  override fun onPublish(message: String, replyAndForward: String) {
+          viewModel.replyData["message"] = message
+          viewModel.replyData["replyAndForward"] = replyAndForward
+          viewModel.onPostReply()
+      }*/
 
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
@@ -356,7 +318,11 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment(), IOnPublishClic
                     viewModel.ruid = uid
                     viewModel.uname = username
                     viewModel.position = position
-                    initReply()
+                    val intent = Intent(requireContext(), ReplyActivity::class.java)
+                    intent.putExtra("type", "reply")
+                    intent.putExtra("rid", viewModel.rid)
+                    intent.putExtra("username", viewModel.uname)
+                    intentActivityResultLauncher.launch(intent)
                 }
             }
         }

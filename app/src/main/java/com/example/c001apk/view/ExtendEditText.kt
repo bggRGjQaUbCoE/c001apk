@@ -4,10 +4,13 @@ package com.example.c001apk.view
 import android.R
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 class ExtendEditText : TextInputEditText {
 
@@ -23,35 +26,31 @@ class ExtendEditText : TextInputEditText {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
+            super(context, attrs, defStyleAttr)
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection {
         return MyInputConnection(super.onCreateInputConnection(outAttrs), false)
     }
 
-    internal inner class MyInputConnection
-        (target: InputConnection?, mutable: Boolean) : InputConnectionWrapper(target, mutable),
-        InputConnection {
+    inner class MyInputConnection(target: InputConnection?, mutable: Boolean) :
+        InputConnectionWrapper(target, mutable), InputConnection {
+
         override fun commitText(text: CharSequence, newCursorPosition: Int): Boolean {
-            if (mOnPasteCallback != null) {
-                mOnPasteCallback!!.onPaste(text.toString(), false)
-            }
+            Log.i("sdfsdfsdfsdfsdfsfsds", "commitText: text:$text")
+            mOnPasteCallback?.onPaste(text.toString(), false)
             //return super<InputConnectionWrapper>.commitText(text, newCursorPosition)
             return false
         }
     }
 
+
+
     override fun onTextContextMenuItem(id: Int): Boolean {
         if (id == R.id.copy) {
             //Log.i("shawn", "onTextContextMenuItem 复制")
         } else if (id == R.id.paste) {
-            if (mOnPasteCallback != null) {
-                mOnPasteCallback!!.onPaste(null, true)
-            }
+            mOnPasteCallback?.onPaste(null, true)
             //Log.i("shawn", "onTextContextMenuItem 粘贴")
         } else if (id == R.id.selectAll) {
             //Log.i("shawn", "onTextContextMenuItem 全选")

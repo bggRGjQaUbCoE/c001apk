@@ -14,8 +14,7 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 
 
-class MessageSecondAdapter :
-    RecyclerView.Adapter<MessageSecondAdapter.SecondViewHolder>() {
+class MessageSecondAdapter : RecyclerView.Adapter<MessageSecondAdapter.SecondViewHolder>() {
 
     class SecondViewHolder(val binding: ItemMessageMineBinding) :
         RecyclerView.ViewHolder(binding.root), View.OnClickListener {

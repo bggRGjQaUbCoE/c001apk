@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
@@ -14,11 +13,11 @@ import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityBlackListBinding
 import com.example.c001apk.logic.model.StringEntity
 import com.example.c001apk.ui.base.BaseActivity
-import com.example.c001apk.ui.feed.reply.IOnItemClickListener
 import com.example.c001apk.ui.search.HistoryAdapter
 import com.example.c001apk.ui.topic.TopicActivity
 import com.example.c001apk.ui.user.UserActivity
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.makeToast
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -27,9 +26,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClickListener {
@@ -66,7 +66,7 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
 
         viewModel.toastText.observe(this) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+                makeToast(it)
             }
         }
     }
@@ -81,71 +81,55 @@ class BlackListActivity : BaseActivity<ActivityBlackListBinding>(), IOnItemClick
             }
             inflateMenu(R.menu.blacklist_menu)
             setOnMenuItemClickListener {
-                when (it.itemId) {
+                return@setOnMenuItemClickListener when (it.itemId) {
                     R.id.backup -> {
-                        if (saveFile(
-                                Gson().toJson(
-                                    viewModel.blackListLiveData.value?.map { item ->
-                                        item.data
-                                    } ?: emptyList<String>()
-                                )
-                            )
-                        )
-                            backupSAFLauncher.launch(
-                                if (viewModel.type == "user") "user_blacklist.json"
-                                else "topic_blacklist.json"
-                            )
-                        else
-                            Toast.makeText(this@BlackListActivity, "导出失败", Toast.LENGTH_SHORT)
-                                .show()
+                        if (viewModel.blackListLiveData.value.isNullOrEmpty()) {
+                            makeToast("黑名单为空")
+                        } else {
+                            try {
+                                val date =
+                                    SimpleDateFormat(
+                                        "yyyy-MM-dd_HH.mm.ss", Locale.getDefault()
+                                    ).format(Date())
+                                backupSAFLauncher.launch("${viewModel.type}_blacklist_$date.json")
+                            } catch (e: Exception) {
+                                makeToast("导出失败")
+                                e.printStackTrace()
+                            }
+                        }
+                        true
                     }
 
                     R.id.restore -> {
-                        restoreSAFLauncher.launch("application/json")
+                        try {
+                            restoreSAFLauncher.launch("application/json")
+                        } catch (e: Exception) {
+                            makeToast("导出失败")
+                            e.printStackTrace()
+                        }
+                        true
                     }
-                }
-                true
-            }
-        }
-    }
 
-    private fun saveFile(content: String): Boolean {
-        return try {
-            val dir = File(this.cacheDir.toString())
-            if (!dir.exists())
-                dir.mkdir()
-            val file = File("${this.cacheDir}/blacklist.json")
-            if (!file.exists())
-                file.createNewFile()
-            else {
-                file.delete()
-                file.createNewFile()
+                    else -> false
+                }
             }
-            val fileOutputStream = FileOutputStream(file)
-            fileOutputStream.write(content.toByteArray())
-            fileOutputStream.flush()
-            fileOutputStream.close()
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
         }
     }
 
     private val backupSAFLauncher =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) backup@{ uri ->
             if (uri == null) return@backup
-            try {
-                File("${this.cacheDir}/blacklist.json").inputStream().use { input ->
-                    this.contentResolver.openOutputStream(uri).use { output ->
-                        if (output == null) Toast.makeText(this, "导出失败", Toast.LENGTH_SHORT)
-                            .show()
-                        else input.copyTo(output)
-                    }
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
+            contentResolver.openOutputStream(uri).use { output ->
+                if (output == null)
+                    makeToast("导出失败")
+                else
+                    output.write(Gson().toJson(
+                        viewModel.blackListLiveData.value?.map { item ->
+                            item.data
+                        } ?: emptyList<String>()
+                    ).toByteArray())
             }
+            makeToast("导出成功")
         }
 
     private val restoreSAFLauncher =

@@ -15,7 +15,7 @@ import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.databinding.FragmentSearchBinding
 import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.ui.feed.reply.IOnItemClickListener
+import com.example.c001apk.ui.blacklist.IOnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager

@@ -329,94 +329,6 @@ class FeedViewModel @AssistedInject constructor(
         }
     }
 
-    val closeSheet = MutableLiveData<Event<Boolean>>()
-    val scroll = MutableLiveData<Event<Boolean>>()
-    var replyData = HashMap<String, String>()
-    fun onPostReply() {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postReply(replyData, rid.toString(), type.toString())
-                .collect { result ->
-                    val response = result.getOrNull()
-                    response?.let {
-                        if (response.data != null) {
-                            toastText.postValue(Event("回复成功"))
-                            closeSheet.postValue(Event(true))
-                            val feedReplyList: List<TotalReplyResponse.Data> =
-                                if (type == "feed") { // feed
-                                    val newList =
-                                        feedReplyData.value?.toMutableList() ?: ArrayList()
-                                    newList.add(0, response.data)
-                                    scroll.postValue(Event(true))
-                                    newList
-                                } else { //feed reply
-                                    feedReplyData.value?.mapIndexed { index, reply ->
-                                        if (index == position) {
-                                            reply.copy(
-                                                lastupdate = System.currentTimeMillis(),
-                                                replyRows = (reply.replyRows ?: ArrayList()).also {
-                                                    it.add(
-                                                        reply.replyRows?.size ?: 0,
-                                                        response.data.also { reply ->
-                                                            reply.message =
-                                                                generateMess(reply, feedUid, cuid)
-                                                        }
-                                                    )
-                                                }
-                                            )
-                                        } else reply
-                                    } ?: emptyList()
-                                }
-                            feedReplyData.postValue(feedReplyList)
-                        } else {
-                            response.message?.let {
-                                toastText.postValue(Event(it))
-                            }
-                            if (response.messageStatus == "err_request_captcha") {
-                                onGetValidateCaptcha()
-                            }
-                        }
-                    }
-                }
-        }
-    }
-
-    val createDialog = MutableLiveData<Event<Bitmap>>()
-    private fun onGetValidateCaptcha() {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getValidateCaptcha("/v6/account/captchaImage?${System.currentTimeMillis() / 1000}&w=270=&h=113")
-                .collect { result ->
-                    val response = result.getOrNull()
-                    response?.let {
-                        val responseBody = response.body()
-                        val bitmap = BitmapFactory.decodeStream(responseBody?.byteStream())
-                        createDialog.postValue(Event(bitmap))
-                    }
-                }
-        }
-    }
-
-    lateinit var requestValidateData: HashMap<String, String?>
-    fun onPostRequestValidate() {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postRequestValidate(requestValidateData)
-                .collect { result ->
-                    val response = result.getOrNull()
-                    response?.let {
-                        if (response.data != null) {
-                            toastText.postValue(Event(response.data))
-                            if (response.data == "验证通过") {
-                                onPostReply()
-                            }
-                        } else if (response.message != null) {
-                            toastText.postValue(Event(response.message))
-                            if (response.message == "请输入正确的图形验证码") {
-                                onGetValidateCaptcha()
-                            }
-                        }
-                    }
-                }
-        }
-    }
 
     private fun generateMess(
         reply: TotalReplyResponse.Data,
@@ -724,6 +636,34 @@ class FeedViewModel @AssistedInject constructor(
                     isLoadMore = false
                 }
         }
+    }
+
+    fun updateReply(data: TotalReplyResponse.Data) {
+        val feedReplyList: List<TotalReplyResponse.Data> =
+            if (type == "feed") { // feed
+                val newList =
+                    feedReplyData.value?.toMutableList() ?: ArrayList()
+                newList.add(0, data)
+                newList
+            } else { //feed reply
+                feedReplyData.value?.mapIndexed { index, reply ->
+                    if (index == position) {
+                        reply.copy(
+                            lastupdate = System.currentTimeMillis(),
+                            replyRows = (reply.replyRows ?: ArrayList()).also {
+                                it.add(
+                                    reply.replyRows?.size ?: 0,
+                                    data.also { reply ->
+                                        reply.message =
+                                            generateMess(reply, feedUid, cuid)
+                                    }
+                                )
+                            }
+                        )
+                    } else reply
+                } ?: emptyList()
+            }
+        feedReplyData.postValue(feedReplyList)
     }
 
 

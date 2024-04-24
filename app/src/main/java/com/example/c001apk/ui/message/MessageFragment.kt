@@ -51,7 +51,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
-    private val placeHolderAdapter = PlaceHolderAdapter()
+    private val placeHolderAdapter by lazy { PlaceHolderAdapter() }
     private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

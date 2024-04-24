@@ -37,7 +37,7 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
 
     override val viewModel by viewModels<AppListViewModel>()
     private lateinit var appsAdapter: AppListAdapter
-    private val placeHolderAdapter = PlaceHolderAdapter()
+    private val placeHolderAdapter by lazy { PlaceHolderAdapter() }
     private lateinit var fab: FloatingActionButton
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
 
@@ -106,7 +106,7 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
         }
         ViewCompat.setOnApplyWindowInsetsListener(fab) { _, insets ->
             val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            fab.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 rightMargin = 25.dp
                 bottomMargin =
                     if (isPortrait)

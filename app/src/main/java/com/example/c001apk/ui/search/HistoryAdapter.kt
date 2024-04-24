@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.StringEntity
-import com.example.c001apk.ui.feed.reply.IOnItemClickListener
+import com.example.c001apk.ui.blacklist.IOnItemClickListener
 
 class HistoryAdapter :
     ListAdapter<StringEntity, HistoryAdapter.ViewHolder>(HistoryDiffCallback()) {

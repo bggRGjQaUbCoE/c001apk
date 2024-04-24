@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.feed.reply
+package com.example.c001apk.ui.blacklist
 
 interface IOnItemClickListener {
     fun onItemClick(data: String)

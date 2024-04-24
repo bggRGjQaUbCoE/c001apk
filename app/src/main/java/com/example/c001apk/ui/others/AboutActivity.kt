@@ -187,6 +187,14 @@ class AboutActivity : AbsAboutActivity() {
                 "https://github.com/google/dagger"
             )
         )
+        items.add(
+            License(
+                "SmoothInputLayout",
+                "AlexMofer",
+                License.APACHE_2,
+                "https://github.com/AlexMofer/SmoothInputLayout"
+            )
+        )
 
     }
 

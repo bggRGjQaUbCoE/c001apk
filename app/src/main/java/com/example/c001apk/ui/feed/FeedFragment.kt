@@ -2,17 +2,22 @@ package com.example.c001apk.ui.feed
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -30,24 +35,21 @@ import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.FragmentFeedBinding
-import com.example.c001apk.databinding.ItemCaptchaBinding
 import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.ui.feed.reply.IOnPublishClickListener
 import com.example.c001apk.ui.feed.reply.Reply2ReplyBottomSheetDialog
-import com.example.c001apk.ui.feed.reply.ReplyBottomSheetDialog
+import com.example.c001apk.ui.feed.reply.ReplyActivity
 import com.example.c001apk.ui.feed.reply.ReplyRefreshListener
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
-import com.example.c001apk.util.ToastUtil
+import com.example.c001apk.util.makeToast
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.view.StickyItemDecorator
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -56,8 +58,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
+
 @AndroidEntryPoint
-class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListener {
+class FeedFragment : BaseFragment<FragmentFeedBinding>() {
 
     private val viewModel by viewModels<FeedViewModel>(ownerProducer = { requireActivity() })
     private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
@@ -68,13 +71,37 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
-    private var bottomSheetDialog: ReplyBottomSheetDialog? = null
     private var dialog: AlertDialog? = null
     private var isShowReply = false
     private var firstVisibleItemPosition = 0
     private val alpha by lazy {
         ObjectAnimator.ofFloat(binding.titleProfile, "alpha", 0f, 1f).also {
             it.setDuration(500)
+        }
+    }
+    private lateinit var intentActivityResultLauncher: ActivityResultLauncher<Intent>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (PrefManager.isLogin) {
+            intentActivityResultLauncher =
+                registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+                { result: ActivityResult ->
+                    if (result.resultCode == RESULT_OK) {
+                        val data = if (SDK_INT >= 33)
+                            result.data?.getParcelableExtra(
+                                "response_data", TotalReplyResponse.Data::class.java
+                            )
+                        else
+                            result.data?.getParcelableExtra("response_data")
+                        data?.let {
+                            viewModel.updateReply(it)
+                            Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT).show()
+                            if (viewModel.type == "feed")
+                                scrollToPosition(viewModel.itemCount)
+                        }
+                    }
+                }
         }
     }
 
@@ -94,7 +121,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             initRefresh()
             initScroll()
             initReplyBtn(height)
-            initBottomSheet()
             initObserve()
         }
 
@@ -111,25 +137,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             )
             setOnRefreshListener {
                 refreshData()
-            }
-        }
-    }
-
-    @SuppressLint("InflateParams")
-    private fun initBottomSheet() {
-        if (PrefManager.isLogin) {
-            val view1 = LayoutInflater.from(context)
-                .inflate(R.layout.dialog_reply_bottom_sheet, null, false)
-            bottomSheetDialog = ReplyBottomSheetDialog(requireContext(), view1)
-            bottomSheetDialog?.setIOnPublishClickListener(this)
-            bottomSheetDialog?.apply {
-                setContentView(view1)
-                setCancelable(false)
-                setCanceledOnTouchOutside(true)
-                window?.apply {
-                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                }
-                type = "reply"
             }
         }
     }
@@ -154,22 +161,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                         viewModel.ruid = viewModel.feedUid
                         viewModel.uname = viewModel.funame
                         viewModel.type = "feed"
-                        initReply()
+                        launchReply()
                     }
                 }
             }
         } else
             binding.reply.isVisible = false
-    }
-
-    private fun initReply() {
-        bottomSheetDialog?.apply {
-            rid = viewModel.rid.toString()
-            ruid = viewModel.ruid.toString()
-            uname = viewModel.uname.toString()
-            setData()
-            show()
-        }
     }
 
     private fun initScroll() {
@@ -218,57 +215,9 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
             }
         }
 
-        viewModel.scroll.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it) {
-                    scrollToPosition(viewModel.itemCount)
-                }
-            }
-        }
-
-        viewModel.closeSheet.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                if (it && bottomSheetDialog?.isShowing == true) {
-                    bottomSheetDialog?.editText?.text = null
-                    bottomSheetDialog?.dismiss()
-                }
-            }
-        }
-
         viewModel.toastText.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        viewModel.createDialog.observe(viewLifecycleOwner) { event ->
-            event?.getContentIfNotHandledOrReturnNull()?.let {
-                val binding = ItemCaptchaBinding.inflate(
-                    LayoutInflater.from(requireContext()), null, false
-                )
-                binding.captchaImg.setImageBitmap(it)
-                binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
-                    MaterialColors.getColor(
-                        requireContext(),
-                        com.google.android.material.R.attr.colorPrimaryDark,
-                        0
-                    ), 128
-                )
-                MaterialAlertDialogBuilder(requireContext()).apply {
-                    setView(binding.root)
-                    setTitle("captcha")
-                    setNegativeButton(android.R.string.cancel, null)
-                    setPositiveButton("验证并继续") { _, _ ->
-                        viewModel.requestValidateData = HashMap()
-                        viewModel.requestValidateData["type"] = "err_request_captcha"
-                        viewModel.requestValidateData["code"] = binding.captchaText.text.toString()
-                        viewModel.requestValidateData["mobile"] = ""
-                        viewModel.requestValidateData["idcard"] = ""
-                        viewModel.requestValidateData["name"] = ""
-                        viewModel.onPostRequestValidate()
-                    }
-                    show()
-                }
             }
         }
 
@@ -469,7 +418,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                             if (isFavorite) {
                                 viewModel.delete(viewModel.id)
                                 favorite.title = "收藏"
-                                ToastUtil.toast(requireContext(), "已取消收藏")
+                                requireContext().makeToast("已取消收藏")
                             } else {
                                 try {
                                     val fav = FeedEntity(
@@ -491,10 +440,10 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                                     )
                                     viewModel.insert(fav)
                                     favorite.title = "取消收藏"
-                                    ToastUtil.toast(requireContext(), "已收藏")
+                                    requireContext().makeToast("已收藏")
                                 } catch (e: Exception) {
                                     e.printStackTrace()
-                                    ToastUtil.toast(requireContext(), "请稍后再试")
+                                    requireContext().makeToast("请稍后再试")
                                 }
                             }
                         }
@@ -651,7 +600,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
                     viewModel.type = "reply"
                     viewModel.position = position
                     viewModel.rPosition = rPosition
-                    initReply()
+                    launchReply()
                 }
             }
         }
@@ -703,10 +652,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
 
     }
 
-    override fun onPublish(message: String, replyAndForward: String) {
-        viewModel.replyData["message"] = message
-        viewModel.replyData["replyAndForward"] = replyAndForward
-        viewModel.onPostReply()
+    private fun launchReply() {
+        val intent = Intent(requireContext(), ReplyActivity::class.java)
+        intent.putExtra("type", viewModel.type)
+        intent.putExtra("rid", viewModel.rid)
+        intent.putExtra("username", viewModel.uname)
+        intentActivityResultLauncher.launch(intent)
     }
 
     inner class PopClickListener(
@@ -783,9 +734,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), IOnPublishClickListene
         }
 
     override fun onDestroy() {
-        bottomSheetDialog?.dismiss()
         dialog?.dismiss()
-        bottomSheetDialog = null
         dialog = null
         super.onDestroy()
     }

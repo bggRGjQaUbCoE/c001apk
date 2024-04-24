@@ -22,6 +22,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.C001apk"
         android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".ui.feed.reply.ReplyActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeTranslucent"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".ui.others.AppLinkActivity"
             android:exported="true">

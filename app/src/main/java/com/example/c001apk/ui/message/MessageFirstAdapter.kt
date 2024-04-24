@@ -12,25 +12,15 @@ import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 
 
-class MessageFirstAdapter
-    : RecyclerView.Adapter<MessageFirstAdapter.FirstViewHolder>() {
+class MessageFirstAdapter : RecyclerView.Adapter<MessageFirstAdapter.FirstViewHolder>() {
 
+    private val fffTitle = listOf("动态", "关注", "粉丝")
     private var ffflist: List<String>? = null
 
     fun setFFFList(ffflist: List<String>) {
         if (ffflist.isNotEmpty()) {
             this.ffflist = ffflist
             notifyItemChanged(0)
-        }
-    }
-
-    private val fffTitle = ArrayList<String>()
-
-    init {
-        fffTitle.apply {
-            add("动态")
-            add("关注")
-            add("粉丝")
         }
     }
 
