@@ -4,7 +4,7 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.GridView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.c001apk.util.dp
+import com.absinthe.libraries.utils.extensions.dp
 
 class EmojiPagerAdapter(
     private val emojiList: List<List<Pair<String, Int>>>,

@@ -95,7 +95,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
     private fun initButton() {
         binding.toolBar.apply {
             setNavigationOnClickListener {
-                requireActivity().finish()
+                activity?.finish()
             }
         }
         binding.search.setOnClickListener {

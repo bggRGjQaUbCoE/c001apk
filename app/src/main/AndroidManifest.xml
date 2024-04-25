@@ -25,7 +25,6 @@
 
         <activity
             android:name=".ui.feed.reply.ReplyActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
             android:launchMode="singleTop"
             android:theme="@style/AppThemeTranslucent"
             android:windowSoftInputMode="adjustResize" />

@@ -1,7 +1,5 @@
 package com.example.c001apk.ui.feed
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState

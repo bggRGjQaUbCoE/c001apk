@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
-import com.example.c001apk.util.dp
+import com.absinthe.libraries.utils.extensions.dp
 
 
 class EmojiGridAdapter(

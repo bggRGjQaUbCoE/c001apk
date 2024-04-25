@@ -15,7 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.graphics.ColorUtils
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
@@ -26,13 +26,11 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.absinthe.libraries.utils.extensions.dp
 import com.absinthe.libraries.utils.utils.UiUtils
-import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
-import com.example.c001apk.databinding.ItemCaptchaBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.view.ReplyItemDecoration
@@ -40,9 +38,8 @@ import com.example.c001apk.view.ReplyStaggerItemDecoration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.color.MaterialColors
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
@@ -248,12 +245,6 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    /*  override fun onPublish(message: String, replyAndForward: String) {
-          viewModel.replyData["message"] = message
-          viewModel.replyData["replyAndForward"] = replyAndForward
-          viewModel.onPostReply()
-      }*/
-
     inner class ReloadListener : FooterAdapter.FooterListener {
         override fun onReLoad() {
             viewModel.isEnd = false
@@ -322,7 +313,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
                     intent.putExtra("type", "reply")
                     intent.putExtra("rid", viewModel.rid)
                     intent.putExtra("username", viewModel.uname)
-                    intentActivityResultLauncher.launch(intent)
+                    val options = ActivityOptionsCompat.makeCustomAnimation(
+                        requireContext(),
+                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+                    )
+                    intentActivityResultLauncher.launch(intent, options)
                 }
             }
         }

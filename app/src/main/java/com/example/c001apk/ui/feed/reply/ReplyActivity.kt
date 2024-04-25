@@ -1,6 +1,7 @@
 package com.example.c001apk.ui.feed.reply
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -13,6 +14,7 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.view.View.VISIBLE
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
@@ -57,6 +59,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private val type: String? by lazy { intent.getStringExtra("type") }
     private val rid: String? by lazy { intent.getStringExtra("rid") }
     private val username: String? by lazy { intent.getStringExtra("username") }
+    private val imm by lazy {
+        getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,21 +70,18 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         viewModel.type = type
         viewModel.rid = rid
 
-        setActivityDialogSize()
-
-        binding.emojiBtn.setOnClickListener(this)
+        binding.emojiBtn?.setOnClickListener(this)
         binding.editText.setOnTouchListener(this)
         binding.out.setOnTouchListener(this)
-        binding.main.setOnVisibilityChangeListener(this)
-        binding.inputLayout.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(this))
-        binding.emojiLayout.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(this))
-
-        showInput()
+        if (binding.main is SmoothInputLayout)
+            (binding.main as SmoothInputLayout).setOnVisibilityChangeListener(this)
 
         initPage()
         initEditText()
         initEmojiPanel()
         initObserve()
+        showInput()
+
     }
 
     private fun initObserve() {
@@ -136,9 +138,11 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun initPage() {
+        binding.checkBox.text = if (type == "createFeed") "仅自己可见"
+        else "回复并转发"
         binding.title.text = if (type == "createFeed") "发布动态"
         else "回复"
-        if (type == "reply" && !username.isNullOrEmpty())
+        if (type != "createFeed" && !username.isNullOrEmpty())
             binding.editText.hint = "回复: $username"
 
         binding.publish.setOnClickListener {
@@ -148,7 +152,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                 viewModel.createFeedData["message"] = binding.editText.text.toString()
                 viewModel.createFeedData["type"] = "feed"
                 viewModel.createFeedData["pic"] = ""
-                viewModel.createFeedData["status"] = "-1"
+                viewModel.createFeedData["status"] = if (binding.checkBox.isChecked) "-1" else "1"
                 viewModel.onPostCreateFeed()
             } else {
                 viewModel.replyData["message"] = binding.editText.text.toString()
@@ -157,6 +161,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                 viewModel.onPostReply()
             }
         }
+        binding.publish.isClickable = false
     }
 
     private fun initEmojiPanel() {
@@ -167,7 +172,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         }
         list.add(data.subList(141, 155))
         binding.emojiPanel.adapter = EmojiPagerAdapter(list) {
-            binding.editText.append(it)
+            with(binding.editText) {
+                editableText.replace(selectionStart, selectionEnd, it)
+            }
         }
         binding.indicator.setViewPager(binding.emojiPanel)
     }
@@ -261,7 +268,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         }
     }
 
-    private fun setActivityDialogSize() {
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        window.navigationBarColor = SurfaceColors.SURFACE_0.getColor(this)
         window.decorView.setPadding(0, 0, 0, 0)
         val lp = window.attributes
         lp.width = WindowManager.LayoutParams.MATCH_PARENT
@@ -270,22 +279,29 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun showInput() {
-        binding.main.showKeyboard()
+        binding.emojiBtn?.setImageResource(R.drawable.ic_emoji)
+        binding.editText.let {
+            it.requestFocus()
+            it.requestFocusFromTouch()
+            imm.showSoftInput(it, InputMethodManager.SHOW_IMPLICIT)
+        }
     }
 
     private fun showEmoji() {
+        binding.emojiBtn?.setImageResource(R.drawable.ic_keyboard)
         binding.emojiLayout.isVisible = true
-        binding.main.showInputPane(true)
+        if (binding.main is SmoothInputLayout)
+            (binding.main as SmoothInputLayout).showInputPane(true)
     }
 
     override fun onClick(view: View) {
         when (view.id) {
             R.id.emojiBtn -> {
-                if (binding.emojiBtn.isSelected) {
-                    binding.emojiBtn.isSelected = false
+                if (binding.emojiBtn?.isSelected == true) {
+                    binding.emojiBtn?.isSelected = false
                     showInput()
                 } else {
-                    binding.emojiBtn.isSelected = true
+                    binding.emojiBtn?.isSelected = true
                     showEmoji()
                 }
             }
@@ -297,25 +313,26 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         when (view.id) {
             R.id.out -> {
-                if (binding.main.isKeyBoardOpen) {
-                    binding.main.closeKeyboard(false)
-                } else if (binding.emojiBtn.isSelected) {
-                    binding.main.closeInputPane()
+                if (binding.main is SmoothInputLayout && (binding.main as SmoothInputLayout).isKeyBoardOpen) {
+                    (binding.main as SmoothInputLayout).closeKeyboard(false)
+                } else if (binding.emojiBtn?.isSelected == true) {
+                    if (binding.main is SmoothInputLayout)
+                        (binding.main as SmoothInputLayout).closeInputPane()
                 } else {
                     finish()
                 }
             }
 
             R.id.editText -> {
-                binding.emojiBtn.isSelected = false
+                binding.emojiBtn?.isSelected = false
             }
         }
         return false
     }
 
     override fun onVisibilityChange(visibility: Int) {
-        binding.emojiBtn.isSelected = visibility == VISIBLE
-        binding.emojiBtn.setImageResource(
+        binding.emojiBtn?.isSelected = visibility == VISIBLE
+        binding.emojiBtn?.setImageResource(
             if (visibility == VISIBLE) R.drawable.ic_keyboard
             else R.drawable.ic_emoji
         )
@@ -323,7 +340,11 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.bottom_in, R.anim.top_out)
+        overridePendingTransition(
+            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+        )
     }
+
 }
 

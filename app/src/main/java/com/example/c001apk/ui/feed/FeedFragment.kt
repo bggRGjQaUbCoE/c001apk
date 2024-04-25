@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -343,7 +344,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
             title = viewModel.feedTypeName
             setNavigationIcon(R.drawable.ic_back)
             setNavigationOnClickListener {
-                requireActivity().finish()
+                activity?.finish()
             }
             setOnClickListener {
                 binding.recyclerView.stopScroll()
@@ -657,7 +658,12 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
         intent.putExtra("type", viewModel.type)
         intent.putExtra("rid", viewModel.rid)
         intent.putExtra("username", viewModel.uname)
-        intentActivityResultLauncher.launch(intent)
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            requireContext(),
+            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+        )
+        intentActivityResultLauncher.launch(intent, options)
     }
 
     inner class PopClickListener(

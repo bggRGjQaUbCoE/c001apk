@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -28,7 +29,6 @@ import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
-import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
@@ -152,7 +152,12 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
                 } else {
                     val intent = Intent(requireContext(), ReplyActivity::class.java)
                     intent.putExtra("type", "createFeed")
-                    requireContext().startActivity(intent)
+                    val options = ActivityOptionsCompat.makeCustomAnimation(
+                        requireContext(),
+                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+                    )
+                    requireContext().startActivity(intent, options.toBundle())
                 }
             }
         }
