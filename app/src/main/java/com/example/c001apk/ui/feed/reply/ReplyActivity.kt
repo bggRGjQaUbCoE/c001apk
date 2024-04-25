@@ -3,11 +3,13 @@ package com.example.c001apk.ui.feed.reply
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -18,7 +20,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.isVisible
+import androidx.core.view.HapticFeedbackConstantsCompat
+import androidx.core.view.ViewCompat
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityReplyBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
@@ -62,6 +66,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private val imm by lazy {
         getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
+    private val color by lazy { SurfaceColors.SURFACE_1.getColor(this) }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,10 +76,27 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         viewModel.rid = rid
 
         binding.emojiBtn?.setOnClickListener(this)
+        binding.checkBox.setOnClickListener(this)
         binding.editText.setOnTouchListener(this)
         binding.out.setOnTouchListener(this)
         if (binding.main is SmoothInputLayout)
             (binding.main as SmoothInputLayout).setOnVisibilityChangeListener(this)
+        val radius = listOf(16.dp.toFloat(), 16.dp.toFloat(), 0f, 0f)
+        val radiusBg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(this@ReplyActivity.color)
+            cornerRadii = floatArrayOf(
+                radius[0], radius[0],
+                radius[1], radius[1],
+                radius[2], radius[2],
+                radius[3], radius[3]
+            )
+        }
+        if (binding.main is SmoothInputLayout) {
+            binding.inputLayout.background = radiusBg
+            binding.emojiLayout.setBackgroundColor(color)
+        } else
+            binding.bottomLayout?.background = radiusBg
 
         initPage()
         initEditText()
@@ -168,12 +190,16 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         val data = EmojiUtils.emojiMap.toList()
         val list = ArrayList<List<Pair<String, Int>>>()
         for (i in 0..4) {
-            list.add(data.subList(i * 28 + 4, (i + 1) * 28 + 4))
+            list.add(data.subList(i * 27 + 4, (i + 1) * 27 + 4))
         }
-        list.add(data.subList(141, 155))
+        list.add(data.subList(139, 155))
         binding.emojiPanel.adapter = EmojiPagerAdapter(list) {
             with(binding.editText) {
-                editableText.replace(selectionStart, selectionEnd, it)
+                if (it == "[c001apk]") {
+                    dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
+                    ViewCompat.performHapticFeedback(this, HapticFeedbackConstantsCompat.CONFIRM)
+                } else
+                    editableText.replace(selectionStart, selectionEnd, it)
             }
         }
         binding.indicator.setViewPager(binding.emojiPanel)
@@ -270,7 +296,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        window.navigationBarColor = SurfaceColors.SURFACE_0.getColor(this)
+        window.navigationBarColor = SurfaceColors.SURFACE_1.getColor(this)
         window.decorView.setPadding(0, 0, 0, 0)
         val lp = window.attributes
         lp.width = WindowManager.LayoutParams.MATCH_PARENT
@@ -289,7 +315,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     private fun showEmoji() {
         binding.emojiBtn?.setImageResource(R.drawable.ic_keyboard)
-        binding.emojiLayout.isVisible = true
         if (binding.main is SmoothInputLayout)
             (binding.main as SmoothInputLayout).showInputPane(true)
     }
@@ -297,6 +322,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun onClick(view: View) {
         when (view.id) {
             R.id.emojiBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
                 if (binding.emojiBtn?.isSelected == true) {
                     binding.emojiBtn?.isSelected = false
                     showInput()
@@ -306,6 +332,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                 }
             }
 
+            R.id.checkBox ->
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
         }
     }
 

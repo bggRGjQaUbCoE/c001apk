@@ -1,11 +1,15 @@
 package com.example.c001apk.ui.feed.reply
 
 import android.annotation.SuppressLint
+import android.os.CountDownTimer
+import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.R
 
 
 class EmojiGridAdapter(
@@ -13,7 +17,7 @@ class EmojiGridAdapter(
     private val onClickEmoji: (String) -> Unit
 ) : BaseAdapter() {
 
-    override fun getCount() = emojiList.size
+    override fun getCount() = 28
 
     override fun getItem(position: Int): Any {
         return 0
@@ -23,17 +27,47 @@ class EmojiGridAdapter(
         return 0
     }
 
-    @SuppressLint("ViewHolder")
+    @SuppressLint("ViewHolder", "ClickableViewAccessibility")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val emoji = emojiList[position]
-        val imageView = ImageView(parent.context).apply {
-            layoutParams = ViewGroup.LayoutParams(28.dp,28.dp)
+        val emoji = emojiList.getOrNull(position)
+        return if (emoji != null || position == 27) {
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.item_emoji, parent, false)
+            val imageView: ImageView = view.findViewById(R.id.imageView)
+
+            imageView.setImageResource(emoji?.second ?: R.drawable.ic_backspace)
+            emoji?.first?.let {
+                view.background = parent.context.getDrawable(R.drawable.selector_emoji)
+            }
+            view.setOnClickListener {
+                onClickEmoji(emoji?.first ?: "[c001apk]")
+            }
+            if (emoji?.first.isNullOrEmpty()) {
+                view.setOnLongClickListener {
+                    countDownTimer.start()
+                    false
+                }
+                view.setOnTouchListener { _, event ->
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        countDownTimer.cancel()
+                    }
+                    false
+                }
+            }
+            view
+        } else View(parent.context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+        }.apply {
+            isEnabled = false
         }
-        imageView.setImageResource(emoji.second)
-        imageView.setOnClickListener {
-            onClickEmoji(emoji.first)
+    }
+
+    private val countDownTimer: CountDownTimer = object : CountDownTimer(100000, 50) {
+        override fun onTick(millisUntilFinished: Long) {
+            onClickEmoji("[c001apk]")
         }
-        return imageView
+
+        override fun onFinish() {}
     }
 
 }

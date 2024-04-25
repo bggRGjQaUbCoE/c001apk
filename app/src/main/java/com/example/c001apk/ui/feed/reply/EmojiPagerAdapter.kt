@@ -22,7 +22,7 @@ class EmojiPagerAdapter(
                 gravity = Gravity.CENTER
             }
             numColumns = 7
-            verticalSpacing = 20.dp
+            verticalSpacing = 4.dp
         }
         return ViewHolder(view)
     }

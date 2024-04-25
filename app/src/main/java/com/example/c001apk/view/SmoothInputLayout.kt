@@ -21,6 +21,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 
 /**
@@ -33,6 +34,8 @@ class SmoothInputLayout : LinearLayout {
     private var mDefaultKeyboardHeight = 0
     private var mMinKeyboardHeight = 0
     private var mKeyboardHeight = 0
+        get() = if (field < 233.dp) 233.dp
+        else field
     private var mInputViewId = 0
     private var mInputView: View? = null
     private val imm by lazy {
