@@ -71,8 +71,8 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
 
     override fun getFragment(position: Int): Fragment =
         TopicContentFragment.newInstance(
-            viewModel.topicList[position].url,
-            viewModel.topicList[position].title,
+            viewModel.topicList?.getOrNull(position)?.url.orEmpty(),
+            viewModel.topicList?.getOrNull(position)?.title.orEmpty(),
         )
 
     override fun initTabList() {
@@ -80,7 +80,7 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
             tabGravity = GRAVITY_CENTER
             tabMode = MODE_SCROLLABLE
         }
-        tabList = viewModel.topicList.map { it.title }
+        tabList = viewModel.topicList?.map { it.title } ?: emptyList()
     }
 
     override fun onBackClick() {

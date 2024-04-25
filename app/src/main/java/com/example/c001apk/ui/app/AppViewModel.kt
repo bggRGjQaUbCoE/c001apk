@@ -55,19 +55,10 @@ class AppViewModel @AssistedInject constructor(
                         if (appInfo.message != null) {
                             activityState.postValue(LoadingState.LoadingError(appInfo.message))
                         } else if (appInfo.data != null) {
-                            // get download link params
-                            appId = appInfo.data.id
-                            packageName = appInfo.data.apkname
-                            versionCode = appInfo.data.apkversioncode
                             // appData for App Info
                             appData = appInfo.data
-                            if (appInfo.data.commentStatusText == "允许评论" || appInfo.data.entityType == "appForum") {
-                                tabList = listOf("最近回复", "最新发布", "热度排序")
-                            } else {
-                                errMsg = appInfo.data.commentStatusText
-                            }
-                            checkBlock(appInfo.data.title ?: "") //menuBlock
-                            checkFollow() //menuFollow
+
+                            handleAppData()
                             activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
@@ -75,6 +66,23 @@ class AppViewModel @AssistedInject constructor(
                         result.exceptionOrNull()?.printStackTrace()
                     }
                 }
+        }
+    }
+
+    fun handleAppData() {
+        appData?.let { data ->
+            // get download link params
+            appId = data.id
+            packageName = data.apkname
+            versionCode = data.apkversioncode
+
+            if (data.commentStatusText == "允许评论" || data.entityType == "appForum") {
+                tabList = listOf("最近回复", "最新发布", "热度排序")
+            } else {
+                errMsg = data.commentStatusText
+            }
+            checkBlock(data.title ?: "") //menuBlock
+            checkFollow() //menuFollow
         }
     }
 

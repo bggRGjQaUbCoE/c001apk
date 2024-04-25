@@ -23,7 +23,6 @@ import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.login.LoginActivity
 import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.MainActivity
-import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.CookieUtil.atcommentme
 import com.example.c001apk.util.CookieUtil.atme
 import com.example.c001apk.util.CookieUtil.contacts_follow
@@ -253,7 +252,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                                 PrefManager.username = ""
                                 PrefManager.token = ""
                                 PrefManager.userAvatar = ""
-                                ActivityCollector.recreateActivity(MainActivity::class.java.name)
+                                (requireActivity() as? MainActivity)?.recreate()
                             }
                             show()
                         }

@@ -1,9 +1,12 @@
 package com.example.c001apk.ui.carousel
 
 import android.annotation.SuppressLint
+import android.os.Build
+import android.os.Bundle
 import androidx.activity.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.logic.model.TopicBean
 import com.example.c001apk.ui.base.BaseViewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -22,6 +25,16 @@ class CarouselActivity : BaseViewActivity<CarouselViewModel>() {
             )
         })
 
+    override fun getSavedData(savedInstanceState: Bundle?) {
+        if (viewModel.topicList == null) {
+            viewModel.topicList = if (Build.VERSION.SDK_INT >= 33)
+                savedInstanceState?.getParcelableArrayList("topicList", TopicBean::class.java)
+            else
+                savedInstanceState?.getParcelableArrayList("topicList")
+
+        }
+    }
+
     @SuppressLint("CommitTransaction")
     override fun beginTransaction() {
         if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
@@ -39,8 +52,17 @@ class CarouselActivity : BaseViewActivity<CarouselViewModel>() {
     override fun initData() {
         if (viewModel.isAInit) {
             viewModel.isAInit = false
-            viewModel.activityState.value = LoadingState.Loading
+            if (viewModel.topicList == null) {
+                viewModel.activityState.value = LoadingState.Loading
+            }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        viewModel.topicList?.let {
+            outState.putParcelableArrayList("topicList", it)
+        }
+        super.onSaveInstanceState(outState)
     }
 
 }

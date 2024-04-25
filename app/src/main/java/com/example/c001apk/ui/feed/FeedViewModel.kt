@@ -210,6 +210,8 @@ class FeedViewModel @AssistedInject constructor(
         }
     }
 
+
+    var feedData: HomeFeedResponse.Data? = null
     fun fetchFeedData() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getFeedContent(id, frid)
@@ -220,101 +222,8 @@ class FeedViewModel @AssistedInject constructor(
                             activityState.postValue(LoadingState.LoadingError(feed.message))
                             return@collect
                         } else if (feed.data != null) {
-                            feedUid = feed.data.uid
-                            funame = feed.data.userInfo?.username
-                            avatar = feed.data.userAvatar
-                            device = feed.data.deviceTitle
-                            replyCount = feed.data.replynum
-                            dateLine = feed.data.dateline
-                            feedTypeName = feed.data.feedTypeName
-                            feedType = feed.data.feedType
-
-                            if (feedType in listOf("feedArticle", "trade")
-                                && feed.data.messageRawOutput != "null"
-                            ) {
-                                articleMsg =
-                                    if ((feed.data.message?.length ?: 0) > 150)
-                                        feed.data.message?.substring(0, 150)
-                                    else feed.data.message
-                                articleDateLine = feed.data.dateline
-                                articleList = ArrayList<FeedArticleContentBean.Data>().also {
-                                    if (feed.data.messageCover?.isNotEmpty() == true) {
-                                        it.add(
-                                            FeedArticleContentBean.Data(
-                                                "image", null, feed.data.messageCover,
-                                                null, null, null, null
-                                            )
-                                        )
-                                    }
-                                    if (feed.data.messageTitle?.isNotEmpty() == true) {
-                                        it.add(
-                                            FeedArticleContentBean.Data(
-                                                "text", feed.data.messageTitle, null,
-                                                null, "true", null, null
-                                            )
-                                        )
-                                    }
-                                    val feedRaw = """{"data":${feed.data.messageRawOutput}}"""
-                                    val feedJson: FeedArticleContentBean = Gson().fromJson(
-                                        feedRaw, FeedArticleContentBean::class.java
-                                    )
-                                    feedJson.data?.forEach { item ->
-                                        if (item.type in listOf("text", "image", "shareUrl"))
-                                            it.add(item)
-                                    }
-                                    itemCount = it.size + 1
-                                }
-                            } else {
-                                feedDataList = ArrayList<HomeFeedResponse.Data>().also {
-                                    it.add(feed.data)
-                                }
-                            }
-                            if (!feed.data.topReplyRows.isNullOrEmpty()) {
-                                isTop = true
-                                feedTopReplyList.clear()
-                                feed.data.topReplyRows.getOrNull(0)?.let {
-                                    topReplyId = it.id
-                                    val unameTag =
-                                        when (it.uid) {
-                                            feedUid -> " [楼主]"
-                                            else -> ""
-                                        }
-                                    val replyTag = " [置顶]"
-                                    it.username = "${it.username}$unameTag$replyTag"
-                                    if (!it.replyRows.isNullOrEmpty()) {
-                                        it.replyRows = it.replyRows?.map { reply ->
-                                            reply.copy(
-                                                message = generateMess(reply, feedUid, it.uid)
-                                            )
-                                        }?.toMutableList()
-                                    }
-                                }
-                                feedTopReplyList.addAll(feed.data.topReplyRows)
-                            }
-                            if (!feed.data.replyMeRows.isNullOrEmpty()) {
-                                run {
-                                    feed.data.replyMeRows.getOrNull(0)?.let {
-                                        if (it.id == topReplyId)
-                                            return@run
-                                        else
-                                            replyMeId = it.id
-                                        val unameTag =
-                                            when (it.uid) {
-                                                feedUid -> " [楼主]"
-                                                else -> ""
-                                            }
-                                        it.username = "${it.username}$unameTag"
-                                        if (!it.replyRows.isNullOrEmpty()) {
-                                            it.replyRows = it.replyRows?.map { reply ->
-                                                reply.copy(
-                                                    message = generateMess(reply, feedUid, it.uid)
-                                                )
-                                            }?.toMutableList()
-                                        }
-                                    }
-                                    feedTopReplyList.addAll(feed.data.replyMeRows)
-                                }
-                            }
+                            feedData = feed.data
+                            handleFeedData()
                             activityState.postValue(LoadingState.LoadingDone)
                         }
                     } else {
@@ -662,6 +571,106 @@ class FeedViewModel @AssistedInject constructor(
                 } ?: emptyList()
             }
         feedReplyData.postValue(feedReplyList)
+    }
+
+    fun handleFeedData() {
+        feedData?.let {data->
+            feedUid = data.uid
+            funame = data.userInfo?.username
+            avatar = data.userAvatar
+            device = data.deviceTitle
+            replyCount = data.replynum
+            dateLine = data.dateline
+            feedTypeName = data.feedTypeName
+            feedType = data.feedType
+
+            if (feedType in listOf("feedArticle", "trade")
+                && data.messageRawOutput != "null"
+            ) {
+                articleMsg =
+                    if ((data.message?.length ?: 0) > 150)
+                        data.message?.substring(0, 150)
+                    else data.message
+                articleDateLine = data.dateline
+                articleList = ArrayList<FeedArticleContentBean.Data>().also {
+                    if (data.messageCover?.isNotEmpty() == true) {
+                        it.add(
+                            FeedArticleContentBean.Data(
+                                "image", null, data.messageCover,
+                                null, null, null, null
+                            )
+                        )
+                    }
+                    if (data.messageTitle?.isNotEmpty() == true) {
+                        it.add(
+                            FeedArticleContentBean.Data(
+                                "text", data.messageTitle, null,
+                                null, "true", null, null
+                            )
+                        )
+                    }
+                    val feedRaw = """{"data":${data.messageRawOutput}}"""
+                    val feedJson: FeedArticleContentBean = Gson().fromJson(
+                        feedRaw, FeedArticleContentBean::class.java
+                    )
+                    feedJson.data?.forEach { item ->
+                        if (item.type in listOf("text", "image", "shareUrl"))
+                            it.add(item)
+                    }
+                    itemCount = it.size + 1
+                }
+            } else {
+                feedDataList = ArrayList<HomeFeedResponse.Data>().also {
+                    it.add(data)
+                }
+            }
+            if (!data.topReplyRows.isNullOrEmpty()) {
+                isTop = true
+                feedTopReplyList.clear()
+                data.topReplyRows.getOrNull(0)?.let {
+                    topReplyId = it.id
+                    val unameTag =
+                        when (it.uid) {
+                            feedUid -> " [楼主]"
+                            else -> ""
+                        }
+                    val replyTag = " [置顶]"
+                    it.username = "${it.username}$unameTag$replyTag"
+                    if (!it.replyRows.isNullOrEmpty()) {
+                        it.replyRows = it.replyRows?.map { reply ->
+                            reply.copy(
+                                message = generateMess(reply, feedUid, it.uid)
+                            )
+                        }?.toMutableList()
+                    }
+                }
+                feedTopReplyList.addAll(data.topReplyRows)
+            }
+            if (!data.replyMeRows.isNullOrEmpty()) {
+                run {
+                    data.replyMeRows.getOrNull(0)?.let {
+                        if (it.id == topReplyId)
+                            return@run
+                        else
+                            replyMeId = it.id
+                        val unameTag =
+                            when (it.uid) {
+                                feedUid -> " [楼主]"
+                                else -> ""
+                            }
+                        it.username = "${it.username}$unameTag"
+                        if (!it.replyRows.isNullOrEmpty()) {
+                            it.replyRows = it.replyRows?.map { reply ->
+                                reply.copy(
+                                    message = generateMess(reply, feedUid, it.uid)
+                                )
+                            }?.toMutableList()
+                        }
+                    }
+                    feedTopReplyList.addAll(data.replyMeRows)
+                }
+            }
+        }
     }
 
 

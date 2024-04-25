@@ -48,7 +48,7 @@ class CarouselViewModel @AssistedInject constructor(
     }
 
     var isAInit: Boolean = true
-    var topicList: List<TopicBean>? = null
+    var topicList: ArrayList<TopicBean>? = null
     var pageTitle: String? = null
     private var tmpList: ArrayList<HomeFeedResponse.Data>? = null
 
@@ -69,8 +69,11 @@ class CarouselViewModel @AssistedInject constructor(
                             val isIconTabLinkGridCard =
                                 response.data.find { it.entityTemplate == "iconTabLinkGridCard" }
                             if (isIconTabLinkGridCard != null) {
-                                topicList = isIconTabLinkGridCard.entities?.map {
+                                isIconTabLinkGridCard.entities?.map {
                                     TopicBean(it.url, it.title)
+                                }?.let {
+                                    topicList = ArrayList()
+                                    topicList?.addAll(it)
                                 }
                             } else {
                                 tmpList = ArrayList()

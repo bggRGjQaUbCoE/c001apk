@@ -16,6 +16,7 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.HomeFragment
 import com.example.c001apk.ui.message.MessageFragment
 import com.example.c001apk.ui.settings.SettingsFragment
+import com.example.c001apk.util.ActivityCollector
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -34,6 +35,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ActivityCollector.addActivity(this)
 
         navView = binding.bottomNav as NavigationBarView
 
@@ -185,6 +187,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), IOnBottomClickContaine
             /* Do nothing */
             windowInsets
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ActivityCollector.removeActivity(this)
     }
 
 }

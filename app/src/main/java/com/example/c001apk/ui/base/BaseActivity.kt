@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.viewbinding.ViewBinding
 import com.example.c001apk.R
-import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ThemeUtils
 import com.google.android.material.color.DynamicColors
@@ -20,7 +19,6 @@ abstract class BaseActivity<VB : ViewBinding> : MaterialActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ActivityCollector.addActivity(this)
         val type = javaClass.genericSuperclass as ParameterizedType
         val aClass = type.actualTypeArguments[0] as Class<*>
         val method = aClass.getDeclaredMethod("inflate", LayoutInflater::class.java)
@@ -33,11 +31,6 @@ abstract class BaseActivity<VB : ViewBinding> : MaterialActivity() {
         val configuration = newBase.resources.configuration
         configuration.fontScale = PrefManager.FONTSCALE.toFloat()
         super.attachBaseContext(newBase.createConfigurationContext(configuration))
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        ActivityCollector.removeActivity(this)
     }
 
     override fun computeUserThemeKey() =

@@ -46,7 +46,7 @@ class TopicViewModel @AssistedInject constructor(
     var postFollowData: HashMap<String, String>? = null
     var isFollow: Boolean = false
     var tabSelected: Int? = null
-    var topicList: List<TopicBean> = ArrayList()
+    var topicList: ArrayList<TopicBean>? = null
 
     val blockState = MutableLiveData<Event<Boolean>>()
     val followState = MutableLiveData<Event<Boolean>>()
@@ -103,9 +103,12 @@ class TopicViewModel @AssistedInject constructor(
     }
 
     private fun getTopicList(tabList: List<HomeFeedResponse.TabList>?, selectedTab: String) {
-        topicList = tabList?.map {
+        tabList?.map {
             TopicBean(it.url.toString(), it.title.toString())
-        } ?: emptyList()
+        }?.let {
+            topicList = ArrayList()
+            topicList?.addAll(it)
+        }
         run breaking@{
             tabList?.forEachIndexed { index, tab ->
                 if (selectedTab == tab.pageName) {

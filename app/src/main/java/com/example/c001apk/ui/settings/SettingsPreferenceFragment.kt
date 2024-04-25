@@ -22,7 +22,6 @@ import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.ui.others.AboutActivity
 import com.example.c001apk.ui.settings.params.ParamsActivity
-import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.CacheDataManager
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
@@ -241,11 +240,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 setNegativeButton(android.R.string.cancel, null)
                 setNeutralButton("重置") { _, _ ->
                     PrefManager.FONTSCALE = "1.00"
-                    ActivityCollector.recreateActivity(MainActivity::class.java.name)
+                    (requireActivity() as? MainActivity)?.recreate()
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     PrefManager.FONTSCALE = String.format("%.2f", slider.value)
-                    ActivityCollector.recreateActivity(MainActivity::class.java.name)
+                    (requireActivity() as? MainActivity)?.recreate()
                 }
                 show()
             }

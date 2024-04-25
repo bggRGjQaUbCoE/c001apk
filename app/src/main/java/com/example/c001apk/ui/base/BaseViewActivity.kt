@@ -9,7 +9,6 @@ import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.BaseFragmentContainerBinding
-import com.example.c001apk.util.ActivityCollector
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ThemeUtils
 import rikka.material.app.MaterialActivity
@@ -21,14 +20,17 @@ abstract class BaseViewActivity<VM : BaseAppViewModel> : MaterialActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ActivityCollector.addActivity(this)
         binding = BaseFragmentContainerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        getSavedData(savedInstanceState)
 
         initData()
         initObserve()
         initError()
     }
+
+    open fun getSavedData(savedInstanceState: Bundle?) {}
 
     private fun initError() {
         binding.errorLayout.retry.setOnClickListener {
@@ -86,11 +88,6 @@ abstract class BaseViewActivity<VM : BaseAppViewModel> : MaterialActivity() {
         val configuration = newBase.resources.configuration
         configuration.fontScale = PrefManager.FONTSCALE.toFloat()
         super.attachBaseContext(newBase.createConfigurationContext(configuration))
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        ActivityCollector.removeActivity(this)
     }
 
     override fun computeUserThemeKey() =

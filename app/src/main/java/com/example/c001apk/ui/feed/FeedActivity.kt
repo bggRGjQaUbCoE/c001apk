@@ -1,9 +1,12 @@
 package com.example.c001apk.ui.feed
 
 import android.annotation.SuppressLint
+import android.os.Build.VERSION.SDK_INT
+import android.os.Bundle
 import androidx.activity.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.ui.base.BaseViewActivity
 import com.example.c001apk.ui.feed.question.FeedQuestionFragment
 import com.example.c001apk.ui.feed.vote.FeedVoteFragment
@@ -25,10 +28,22 @@ class FeedActivity : BaseViewActivity<FeedViewModel>() {
         }
     )
 
+    override fun getSavedData(savedInstanceState: Bundle?) {
+        if (viewModel.feedData == null) {
+            viewModel.feedData = if (SDK_INT >= 33)
+                savedInstanceState?.getParcelable("feedData", HomeFeedResponse.Data::class.java)
+            else savedInstanceState?.getParcelable("feedData")
+        }
+    }
+
     override fun initData() {
         if (viewModel.isAInit) {
             viewModel.isAInit = false
-            viewModel.activityState.value = LoadingState.Loading
+            if (viewModel.feedData == null) {
+                viewModel.activityState.value = LoadingState.Loading
+            } else {
+                viewModel.handleFeedData()
+            }
         }
     }
 
@@ -51,6 +66,13 @@ class FeedActivity : BaseViewActivity<FeedViewModel>() {
                 )
                 .commit()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        viewModel.feedData?.let {
+            outState.putParcelable("feedData", it)
+        }
+        super.onSaveInstanceState(outState)
     }
 
 }
