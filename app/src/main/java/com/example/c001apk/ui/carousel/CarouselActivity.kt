@@ -14,6 +14,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CarouselActivity : BaseViewActivity<CarouselViewModel>() {
 
+    private var isSinglePage: Int? = null
+
     @Inject
     lateinit var viewModelAssistedFactory: CarouselViewModel.Factory
     override val viewModel by viewModels<CarouselViewModel>(
@@ -31,7 +33,7 @@ class CarouselActivity : BaseViewActivity<CarouselViewModel>() {
                 savedInstanceState?.getParcelableArrayList("topicList", TopicBean::class.java)
             else
                 savedInstanceState?.getParcelableArrayList("topicList")
-
+            isSinglePage = savedInstanceState?.getInt("isSinglePage")
         }
     }
 
@@ -52,15 +54,17 @@ class CarouselActivity : BaseViewActivity<CarouselViewModel>() {
     override fun initData() {
         if (viewModel.isAInit) {
             viewModel.isAInit = false
-            if (viewModel.topicList == null) {
+            if (viewModel.topicList == null && isSinglePage == null) {
                 viewModel.activityState.value = LoadingState.Loading
             }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        viewModel.topicList?.let {
-            outState.putParcelableArrayList("topicList", it)
+        if (!viewModel.topicList.isNullOrEmpty()) {
+            outState.putParcelableArrayList("topicList", viewModel.topicList)
+        } else if (!viewModel.dataList.value.isNullOrEmpty()) {
+            outState.putInt("isSinglePage", 1)
         }
         super.onSaveInstanceState(outState)
     }

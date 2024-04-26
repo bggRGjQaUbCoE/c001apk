@@ -8,7 +8,9 @@ import com.absinthe.libraries.utils.extensions.dp
 
 class EmojiPagerAdapter(
     private val emojiList: List<List<Pair<String, Int>>>,
-    private val onClickEmoji: (String) -> Unit
+    private val onClickEmoji: (String) -> Unit,
+    private val onCountStart: () -> Unit,
+    private val onCountStop: () -> Unit
 ) : RecyclerView.Adapter<EmojiPagerAdapter.ViewHolder>() {
 
     class ViewHolder(val view: GridView) : RecyclerView.ViewHolder(view)
@@ -30,7 +32,12 @@ class EmojiPagerAdapter(
     override fun getItemCount() = emojiList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.view.adapter = EmojiGridAdapter(emojiList[position].toList(), onClickEmoji)
+        holder.view.adapter = EmojiGridAdapter(
+            emojiList[position].toList(),
+            onClickEmoji,
+            onCountStart,
+            onCountStop
+        )
     }
 
 

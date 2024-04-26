@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.Spannable
 import android.text.TextWatcher
@@ -192,16 +193,37 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             list.add(data.subList(i * 27 + 4, (i + 1) * 27 + 4))
         }
         list.add(data.subList(139, 155))
-        binding.emojiPanel.adapter = EmojiPagerAdapter(list) {
-            with(binding.editText) {
-                if (it == "[c001apk]") {
-                    dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
-                    ViewCompat.performHapticFeedback(this, HapticFeedbackConstantsCompat.CONFIRM)
-                } else
-                    editableText.replace(selectionStart, selectionEnd, it)
+        binding.emojiPanel.adapter = EmojiPagerAdapter(
+            list,
+            onClickEmoji = {
+                with(binding.editText) {
+                    if (it == "[c001apk]") {
+                        onBackSpace()
+                    } else
+                        editableText.replace(selectionStart, selectionEnd, it)
+                }
+            },
+            onCountStart = {
+                countDownTimer.start()
+            },
+            onCountStop = {
+                countDownTimer.cancel()
             }
-        }
+        )
         binding.indicator.setViewPager(binding.emojiPanel)
+    }
+
+    private val countDownTimer: CountDownTimer = object : CountDownTimer(100000, 50) {
+        override fun onTick(millisUntilFinished: Long) {
+            onBackSpace()
+        }
+
+        override fun onFinish() {}
+    }
+
+    private fun onBackSpace() {
+        dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
+        ViewCompat.performHapticFeedback(binding.editText, HapticFeedbackConstantsCompat.CONFIRM)
     }
 
     private fun initEditText() {
@@ -210,6 +232,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     override fun onDestroy() {
         super.onDestroy()
+        countDownTimer.cancel()
         binding.editText.removeTextChangedListener(textWatcher)
     }
 
