@@ -2,9 +2,7 @@ package com.example.c001apk.ui.feed
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -121,99 +119,86 @@ class FeedReplyAdapter(
         holder: ViewHolder
     ) {
         val reply = currentList[holder.bindingAdapterPosition]
-        holder.binding.replyLayout.isVisible =
-            if (reply.replyRows == null) false
-            else if (reply.replyRows?.isEmpty() == true && reply.replyRowsMore == 0) false
-            else true
+        holder.binding.apply {
+            replyLayout.isVisible =
+                if (reply.replyRows == null) false
+                else if (reply.replyRows?.isEmpty() == true && reply.replyRowsMore == 0) false
+                else true
 
-        holder.binding.linearAdapterLayout.adapter = null
-        reply.replyRows?.let { replyRows ->
-            if (holder.itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-                holder.binding.replyLayout.setCardBackgroundColor(
-                    MaterialColors.getColor(
-                        holder.itemView.context,
-                        android.R.attr.windowBackground,
-                        0
-                    )
-                )
-            }
-            holder.binding.linearAdapterLayout.adapter = object : BaseAdapter() {
-                override fun getCount(): Int = replyRows.size
-                override fun getItem(p0: Int): Any = 0
-                override fun getItemId(p0: Int): Long = 0
-
-                @SuppressLint("ViewHolder")
-                override fun getView(
-                    position: Int,
-                    convertView: View?,
-                    parent: ViewGroup
-                ): View {
-                    val view = LayoutInflater.from(parent.context).inflate(
-                        R.layout.item_feed_content_reply_to_reply_item,
-                        parent,
-                        false
-                    )
-                    val replyData = replyRows[position]
-                    val textView: TextView = view.findViewById(R.id.reply)
-                    textView.highlightColor = ColorUtils.setAlphaComponent(
+            linearLayout.removeAllViews()
+            reply.replyRows?.let { replyRows ->
+                if (holder.itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                    replyLayout.setCardBackgroundColor(
                         MaterialColors.getColor(
-                            parent.context,
-                            com.google.android.material.R.attr.colorPrimaryDark,
+                            holder.itemView.context,
+                            android.R.attr.windowBackground,
                             0
-                        ), 128
+                        )
                     )
-
-                    textView.movementMethod = LinkMovementClickMethod.instance
-
-                    textView.text = SpannableStringBuilderUtil.setText(
-                        parent.context,
-                        replyData.message,
-                        textView.textSize,
-                        replyData.picArr
-                    ) {
-                        listener.showTotalReply(
-                            reply.id,
-                            reply.uid,
-                            holder.bindingAdapterPosition,
-                            null,
-                            true
+                }
+                val context = holder.itemView.context
+                replyRows.forEachIndexed { index, replyData ->
+                    val view = LayoutInflater.from(context).inflate(
+                        R.layout.item_feed_content_reply_to_reply_item, linearLayout, false
+                    )
+                    view.findViewById<TextView>(R.id.reply).apply {
+                        movementMethod = LinkMovementClickMethod.instance
+                        highlightColor = ColorUtils.setAlphaComponent(
+                            MaterialColors.getColor(
+                                context,
+                                com.google.android.material.R.attr.colorPrimaryDark,
+                                0
+                            ), 128
                         )
+                        text = SpannableStringBuilderUtil.setText(
+                            context,
+                            replyData.message,
+                            textSize,
+                            replyData.picArr
+                        ) {
+                            this@FeedReplyAdapter.listener.showTotalReply(
+                                reply.id,
+                                reply.uid,
+                                holder.bindingAdapterPosition,
+                                null,
+                                true
+                            )
+                        }
                     }
-
                     view.setOnClickListener {
-                        listener.onReply(
+                        this@FeedReplyAdapter.listener.onReply(
                             replyData.id, reply.uid, replyData.uid, replyData.username,
-                            holder.bindingAdapterPosition, position
+                            holder.bindingAdapterPosition, index
                         )
                     }
-
                     view.setOnLongClickListener {
-                        listener.onExpand(
+                        this@FeedReplyAdapter.listener.onExpand(
                             it, replyData.id, replyData.uid,
-                            replyData.message, holder.bindingAdapterPosition, position
+                            replyData.message, holder.bindingAdapterPosition, index
                         )
                         true
                     }
-
-                    return view
+                    linearLayout.addView(view)
                 }
             }
+
+            if (reply.replyRowsMore != 0) {
+                totalReply.apply {
+                    isVisible = true
+                    text = "查看更多回复(${reply.replynum})"
+                    setOnClickListener {
+                        this@FeedReplyAdapter.listener.showTotalReply(
+                            reply.id, reply.uid,
+                            holder.bindingAdapterPosition,
+                            null
+                        )
+                    }
+                }
+            } else
+                totalReply.isVisible = false
+
+            executePendingBindings()
         }
-
-        if (reply.replyRowsMore != 0) {
-            holder.binding.totalReply.isVisible = true
-            holder.binding.totalReply.text = "查看更多回复(${reply.replynum})"
-            holder.binding.totalReply.setOnClickListener {
-                listener.showTotalReply(
-                    reply.id, reply.uid,
-                    holder.bindingAdapterPosition,
-                    null
-                )
-            }
-        } else
-            holder.binding.totalReply.isVisible = false
-
-        holder.binding.executePendingBindings()
     }
 
 }

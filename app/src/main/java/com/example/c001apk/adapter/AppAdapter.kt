@@ -26,7 +26,6 @@ import com.example.c001apk.databinding.ItemSearchApkBinding
 import com.example.c001apk.databinding.ItemSearchTopicBinding
 import com.example.c001apk.databinding.ItemSearchUserBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
-import com.example.c001apk.logic.model.IconLinkGridCardBean
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
@@ -99,32 +98,9 @@ class AppAdapter(
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind(data: HomeFeedResponse.Data) {
             data.entities?.let {
-                val dataList = it.map { item ->
-                    IconLinkGridCardBean(item.title, item.pic, item.url)
-                }.toMutableList()
-
-                if (it.size > 1) {
-                    dataList.add(
-                        0,
-                        IconLinkGridCardBean(
-                            it.last().title,
-                            it.last().pic,
-                            it.last().url
-                        )
-                    )
-                    dataList.add(
-                        dataList.size,
-                        IconLinkGridCardBean(
-                            it.first().title,
-                            it.first().pic,
-                            it.first().url
-                        )
-                    )
-                }
-
                 var currentPosition = 0
                 binding.viewPager.adapter = ImageCarouselCardAdapter(listener).also { adapter ->
-                    adapter.submitList(dataList)
+                    adapter.submitList(it)
                 }
                 binding.viewPager.registerOnPageChangeCallback(object :
                     ViewPager2.OnPageChangeCallback() {
@@ -135,8 +111,8 @@ class AppAdapter(
                     override fun onPageScrollStateChanged(state: Int) {
                         if (state == ViewPager2.SCROLL_STATE_IDLE) {
                             if (currentPosition == 0) {
-                                binding.viewPager.setCurrentItem(dataList.size - 2, false)
-                            } else if (currentPosition == dataList.size - 1) {
+                                binding.viewPager.setCurrentItem(it.size - 2, false)
+                            } else if (currentPosition == it.size - 1) {
                                 binding.viewPager.setCurrentItem(1, false)
                             }
                         }
@@ -154,20 +130,13 @@ class AppAdapter(
     ) :
         BaseViewHolder<ViewDataBinding>(binding) {
         override fun bind(data: HomeFeedResponse.Data) {
-            data.entities?.let { entities ->
-                val dataList = entities.map {
-                    IconLinkGridCardBean(it.title, it.pic, it.url)
+            data.entities?.let {
+                val dataList: MutableList<List<HomeFeedResponse.Entities>> = ArrayList()
+                val page = it.size / 5
+                for (index in 0..<page) {
+                    dataList.add(it.subList(index * 5, (index + 1) * 5))
                 }
-                val maps: MutableList<List<IconLinkGridCardBean>> = ArrayList()
-                val page = entities.size / 5
-                var index = 0
-                repeat(page) {
-                    maps.add(dataList.subList(index * 5, (index + 1) * 5))
-                    index++
-                }
-                binding.viewPager.adapter = IconLinkGridCardAdapter(listener).also {
-                    it.submitList(maps)
-                }
+                binding.viewPager.adapter = IconLinkGridCardAdapter(dataList, listener)
                 if (page < 2) binding.indicator.isVisible = false
                 else {
                     binding.indicator.isVisible = true

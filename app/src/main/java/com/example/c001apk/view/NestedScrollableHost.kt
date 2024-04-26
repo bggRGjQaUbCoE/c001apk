@@ -15,6 +15,7 @@ package com.example.c001apk.view
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -23,6 +24,7 @@ import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
+import com.example.c001apk.R
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -36,8 +38,20 @@ import kotlin.math.sign
  */
 class NestedScrollableHost : FrameLayout {
     constructor(context: Context) : super(context)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
+    @SuppressLint("CustomViewStyleable")
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        val a = context.obtainStyledAttributes(attrs, R.styleable.NestedScrollableHost)
+        isChildHasSameDirection =
+            a.getBoolean(R.styleable.NestedScrollableHost_sameDirectionWithParent, false)
+        isChildVerticalScroll =
+            a.getBoolean(R.styleable.NestedScrollableHost_childVerticalScroll, false)
+        a.recycle()
+    }
+
+    // ViewPager2与RecyclerView的滑动方向是否一致
+    private var isChildHasSameDirection = false
+    private var isChildVerticalScroll = false
     private var touchSlop = 0
     private var initialX = 0f
     private var initialY = 0f
@@ -73,8 +87,13 @@ class NestedScrollableHost : FrameLayout {
     private fun handleInterceptTouchEvent(e: MotionEvent) {
         val orientation = parentViewPager?.orientation ?: return
 
-        // Early return if child can't scroll in same direction as parent
+        /*// Early return if child can't scroll in same direction as parent
         if (!canChildScroll(orientation, -1f) && !canChildScroll(orientation, 1f)) {
+            return
+        }*/
+        // Early return if child can't scroll in its direction
+        val childOrientation = if (isChildHasSameDirection) orientation else orientation xor 1
+        if (!canChildScroll(childOrientation, -1f) && !canChildScroll(childOrientation, 1f)) {
             return
         }
 
@@ -94,7 +113,8 @@ class NestedScrollableHost : FrameLayout {
             if (scaledDx > touchSlop || scaledDy > touchSlop) {
                 if (isVpHorizontal == (scaledDy > scaledDx)) {
                     // Gesture is perpendicular, allow all parents to intercept
-                    parent.requestDisallowInterceptTouchEvent(false)
+                    // vertical scroll // true -> child scroll
+                    parent.requestDisallowInterceptTouchEvent(isChildVerticalScroll)
                 } else {
                     // Gesture is parallel, query child if movement in that direction is possible
                     if (canChildScroll(orientation, if (isVpHorizontal) dx else dy)) {

@@ -8,12 +8,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeImageCarouselCardItemBinding
-import com.example.c001apk.logic.model.IconLinkGridCardBean
+import com.example.c001apk.logic.model.HomeFeedResponse
 
 class ImageCarouselCardAdapter(
     private val listener: ItemListener
 ) :
-    ListAdapter<IconLinkGridCardBean, ImageCarouselCardAdapter.ViewHolder>(
+    ListAdapter<HomeFeedResponse.Entities, ImageCarouselCardAdapter.ViewHolder>(
         ImageCarouselCardDiffCallback()
     ) {
     class ViewHolder(
@@ -22,7 +22,7 @@ class ImageCarouselCardAdapter(
     ) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(data: IconLinkGridCardBean, itemCount: Int) {
+        fun bind(data: HomeFeedResponse.Entities, itemCount: Int) {
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
             binding.count.text =
@@ -54,17 +54,17 @@ class ImageCarouselCardAdapter(
 
 }
 
-class ImageCarouselCardDiffCallback : DiffUtil.ItemCallback<IconLinkGridCardBean>() {
+class ImageCarouselCardDiffCallback : DiffUtil.ItemCallback<HomeFeedResponse.Entities>() {
     override fun areItemsTheSame(
-        oldItem: IconLinkGridCardBean,
-        newItem: IconLinkGridCardBean
+        oldItem: HomeFeedResponse.Entities,
+        newItem: HomeFeedResponse.Entities
     ): Boolean {
         return oldItem.url == newItem.url
     }
 
     override fun areContentsTheSame(
-        oldItem: IconLinkGridCardBean,
-        newItem: IconLinkGridCardBean
+        oldItem: HomeFeedResponse.Entities,
+        newItem: HomeFeedResponse.Entities
     ): Boolean {
         return oldItem.url == newItem.url
     }

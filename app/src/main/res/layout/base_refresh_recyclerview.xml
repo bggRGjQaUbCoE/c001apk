@@ -14,9 +14,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.example.c001apk.view.NestedScrollableHost1
+            <com.example.c001apk.view.NestedScrollableHost
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                app:childVerticalScroll="true">
 
                 <rikka.widget.borderview.BorderRecyclerView
                     android:id="@+id/recyclerView"
@@ -29,7 +30,7 @@
                     app:borderTopVisibility="whenTop"
                     app:fitsSystemWindowsInsets="bottom" />
 
-            </com.example.c001apk.view.NestedScrollableHost1>
+            </com.example.c001apk.view.NestedScrollableHost>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

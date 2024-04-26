@@ -3,6 +3,7 @@
 
     <declare-styleable name="NestedScrollableHost">
         <attr name="sameDirectionWithParent" format="boolean" />
+        <attr name="childVerticalScroll" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="VerticalTabLayout">

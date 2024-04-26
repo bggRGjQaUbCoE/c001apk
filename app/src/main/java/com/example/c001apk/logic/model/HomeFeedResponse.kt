@@ -75,7 +75,7 @@ data class HomeFeedResponse(
         val entityType: String,
         val feedType: String?,
         val entityTemplate: String?,
-        var entities: List<Entities>?,
+        var entities: MutableList<Entities>?,
         val id: String?,
         val fid: String?,
         val url: String?,
@@ -120,7 +120,7 @@ data class HomeFeedResponse(
         val userInfo: UserInfo?,
         val fUserInfo: UserInfo?,
         var isFollow: Int?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class Feed(
@@ -130,7 +130,7 @@ data class HomeFeedResponse(
         val message: String?,
         val pic: String?,
         val url: String?,
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class Vote(
@@ -145,7 +145,7 @@ data class HomeFeedResponse(
         @SerializedName("min_select_num") val minSelectNum: Int?,
         @SerializedName("message_title") val messageTitle: String?,
         val options: List<Option>?,
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class Option(
@@ -156,7 +156,7 @@ data class HomeFeedResponse(
         val status: Int?,
         val order: Int?,
         val color: String?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class RelationRows(
@@ -165,7 +165,7 @@ data class HomeFeedResponse(
         val title: String?,
         val url: String,
         val entityType: String,
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class TargetRow(
@@ -175,13 +175,13 @@ data class HomeFeedResponse(
         val url: String,
         val entityType: String?,
         val targetType: String?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class ExtraDataArr(
         val pageTitle: String?,
         val cardPageName: String?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class UserInfo(
@@ -197,7 +197,7 @@ data class HomeFeedResponse(
         val fans: String?,
         val follow: String?,
         val bio: String?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class TabList(
@@ -206,7 +206,7 @@ data class HomeFeedResponse(
         @SerializedName("page_name") val pageName: String?,
         val entityType: String?,
         val entityId: Int?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class HomeTabCardRows(
@@ -216,7 +216,7 @@ data class HomeFeedResponse(
         val url: String?,
         val entities: List<Entities>?,
         val entityId: String?,
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class UserAction(
@@ -226,7 +226,7 @@ data class HomeFeedResponse(
         val collect: Int?,
         var followAuthor: Int?,
         val authorFollowYou: Int?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class ReplyRows(
@@ -240,7 +240,7 @@ data class HomeFeedResponse(
         val picArr: List<String>?,
         val pic: String?,
         val userInfo: UserInfo?
-    ): Parcelable
+    ) : Parcelable
 
     @Parcelize
     data class Entities(
@@ -256,7 +256,7 @@ data class HomeFeedResponse(
         val entityType: String?,
         @SerializedName("alias_title") val aliasTitle: String?,
         val userInfo: UserInfo
-    ): Parcelable
+    ) : Parcelable
 
 }
 

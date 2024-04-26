@@ -1,14 +1,11 @@
 package com.example.c001apk.adapter
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.text.method.LinkMovementMethodCompat
@@ -22,10 +19,10 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
-import com.example.c001apk.view.LinearAdapterLayout
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.imageview.ShapeableImageView
 
 @BindingAdapter("setExtraPic")
 fun setExtraPic(imageView: ImageView, extraPic: String?) {
@@ -100,15 +97,15 @@ fun setArticleImage(
 
 @BindingAdapter(value = ["targetRow", "relationRows", "isFeedContent"], requireAll = true)
 fun setRows(
-    linearAdapterLayout: LinearAdapterLayout,
+    linearLayout: LinearLayout,
     targetRow: HomeFeedResponse.TargetRow?,
     relationRows: ArrayList<HomeFeedResponse.RelationRows>?,
     isFeedContent: Boolean?
 ) {
-    linearAdapterLayout.adapter = null
+    linearLayout.removeAllViews()
     relationRows?.let {
         val dataList = it.toMutableList()
-        if (targetRow?.id != null) {
+        targetRow?.id?.let {
             dataList.add(
                 0,
                 HomeFeedResponse.RelationRows(
@@ -120,52 +117,38 @@ fun setRows(
                 )
             )
         }
-
-        linearAdapterLayout.adapter = object : BaseAdapter() {
-            override fun getCount(): Int = dataList.size
-
-            override fun getItem(p0: Int): Any = 0
-
-            override fun getItemId(p0: Int): Long = 0
-
-            @SuppressLint("ViewHolder")
-            override fun getView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                val view = LayoutInflater.from(parent.context).inflate(
-                    R.layout.item_home_icon_mini_scroll_card_item,
-                    parent,
-                    false
-                )
-                if (isFeedContent == true)
-                    view.background = parent.context.getDrawable(R.drawable.round_corners_20)
-                val logo: ImageView = view.findViewById(R.id.iconMiniScrollCard)
-                val title: TextView = view.findViewById(R.id.title)
-                if (position != 0) {
-                    val layoutParams = ConstraintLayout.LayoutParams(
-                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                        ConstraintLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    layoutParams.setMargins(5.dp, 0, 0, 0)
-                    view.layoutParams = layoutParams
+        val context = linearLayout.context
+        dataList.forEachIndexed { index, relationRows ->
+            val view = LayoutInflater.from(context).inflate(
+                R.layout.item_home_icon_mini_scroll_card_item, linearLayout, false
+            )
+            if (isFeedContent == true)
+                view.background = context.getDrawable(R.drawable.round_corners_20)
+            if (index != 0) {
+                view.layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(5.dp, 0, 0, 0)
                 }
-                title.text = dataList[position].title
-                ImageUtil.showIMG(logo, dataList[position].logo)
-
-                view.setOnClickListener {
-                    NetWorkUtil.openLinkDyh(
-                        dataList[position].entityType,
-                        parent.context,
-                        dataList[position].url,
-                        dataList[position].id,
-                        title.text.toString()
-                    )
-                }
-                return view
             }
+            view.findViewById<TextView>(R.id.title).text = relationRows.title
+            ImageUtil.showIMG(
+                view.findViewById<ShapeableImageView>(R.id.iconMiniScrollCard), relationRows.logo
+            )
+
+            view.setOnClickListener {
+                NetWorkUtil.openLinkDyh(
+                    relationRows.entityType,
+                    context,
+                    relationRows.url,
+                    relationRows.id,
+                    relationRows.title
+                )
+            }
+            linearLayout.addView(view)
         }
+
     }
 }
 

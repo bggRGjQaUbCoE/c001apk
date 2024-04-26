@@ -15,7 +15,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.View.VISIBLE
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -297,11 +296,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         window.navigationBarColor = SurfaceColors.SURFACE_1.getColor(this)
-        window.decorView.setPadding(0, 0, 0, 0)
-        val lp = window.attributes
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT
-        lp.height = WindowManager.LayoutParams.MATCH_PARENT
-        window.setAttributes(lp)
     }
 
     private fun showInput() {
@@ -341,14 +335,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         when (view.id) {
             R.id.out -> {
-                if (binding.main is SmoothInputLayout && (binding.main as SmoothInputLayout).isKeyBoardOpen) {
-                    (binding.main as SmoothInputLayout).closeKeyboard(false)
-                } else if (binding.emojiBtn?.isSelected == true) {
-                    if (binding.main is SmoothInputLayout)
-                        (binding.main as SmoothInputLayout).closeInputPane()
-                } else {
-                    finish()
-                }
+                finish()
             }
 
             R.id.editText -> {

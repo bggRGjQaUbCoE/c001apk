@@ -120,9 +120,20 @@ class HomeFeedViewModel @AssistedInject constructor(
                                             "imageCarouselCard_1" -> {
                                                 it.entities = it.entities?.filterNot { item ->
                                                     item.url.startsWith("http")
-                                                }
-                                                if (!it.entities.isNullOrEmpty())
+                                                }?.toMutableList()
+                                                if (!it.entities.isNullOrEmpty()) {
+                                                    if ((it.entities?.size ?: 0) > 1) {
+                                                        it.entities?.last()?.let { item ->
+                                                            it.entities?.add(0, item)
+                                                        }
+                                                        it.entities?.getOrNull(1)?.let { item ->
+                                                            it.entities?.add(
+                                                                it.entities?.size ?: 0, item
+                                                            )
+                                                        }
+                                                    }
                                                     currentList.add(it)
+                                                }
                                             }
 
                                             "iconMiniScrollCard" -> {
@@ -134,7 +145,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                             "topic", "product"
                                                         ))
                                                                 && !blackListRepo.checkTopic(item.title)
-                                                    }
+                                                    }?.toMutableList()
                                                     if (!it.entities.isNullOrEmpty())
                                                         currentList.add(it)
                                                 }
@@ -144,7 +155,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                 it.entities = it.entities?.filter { item ->
                                                     item.entityType == "feed"
                                                             && !blackListRepo.checkUid(item.userInfo.uid)
-                                                }
+                                                }?.toMutableList()
                                                 if (!it.entities.isNullOrEmpty())
                                                     currentList.add(it)
                                             }
@@ -263,7 +274,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                                             "imageSquareScrollCard" -> {
                                                 it.entities = it.entities?.filter { item ->
                                                     item.entityType == "picCategory"
-                                                }
+                                                }?.toMutableList()
                                                 if (!it.entities.isNullOrEmpty())
                                                     currentList.add(it)
                                             }
@@ -277,7 +288,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                                                             "topic", "product"
                                                         ))
                                                                 && !blackListRepo.checkTopic(item.title)
-                                                    }
+                                                    }?.toMutableList()
                                                     if (!it.entities.isNullOrEmpty())
                                                         currentList.add(it)
                                                 }

@@ -7,7 +7,7 @@
 
         <variable
             name="data"
-            type="com.example.c001apk.logic.model.IconLinkGridCardBean" />
+            type="com.example.c001apk.logic.model.HomeFeedResponse.Entities" />
 
         <variable
             name="listener"

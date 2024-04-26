@@ -1,56 +1,34 @@
 package com.example.c001apk.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import android.widget.BaseAdapter
 import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeIconLinkGridCardItemBinding
-import com.example.c001apk.logic.model.IconLinkGridCardBean
+import com.example.c001apk.logic.model.HomeFeedResponse
 
 class IconLinkGridCardItemAdapter(
+    private val dataList: List<HomeFeedResponse.Entities>,
     private val listener: ItemListener
-) : ListAdapter<IconLinkGridCardBean, IconLinkGridCardItemAdapter.ViewHolder>(
-    IconLinkGridCardItemDiffCallback()
-) {
+) : BaseAdapter() {
 
+    override fun getCount() = dataList.size
 
-    class ViewHolder(val binding: ItemHomeIconLinkGridCardItemBinding, val listener: ItemListener) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(data: IconLinkGridCardBean) {
-            binding.setVariable(BR.data, data)
-            binding.setVariable(BR.listener, listener)
-            binding.executePendingBindings()
-        }
-    }
+    override fun getItem(position: Int): Any = 0
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            ItemHomeIconLinkGridCardItemBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            ), listener
+    override fun getItemId(position: Int): Long = 0
+
+    @SuppressLint("ViewHolder")
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val binding = ItemHomeIconLinkGridCardItemBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
         )
+        binding.setVariable(BR.data, dataList[position])
+        binding.setVariable(BR.listener, listener)
+        binding.executePendingBindings()
+        return binding.root
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(currentList[position])
-    }
-
-}
-
-class IconLinkGridCardItemDiffCallback : DiffUtil.ItemCallback<IconLinkGridCardBean>() {
-    override fun areItemsTheSame(
-        oldItem: IconLinkGridCardBean,
-        newItem: IconLinkGridCardBean
-    ): Boolean {
-        return oldItem.url == newItem.url
-    }
-
-    override fun areContentsTheSame(
-        oldItem: IconLinkGridCardBean,
-        newItem: IconLinkGridCardBean
-    ): Boolean {
-        return oldItem.url == newItem.url
-    }
 }

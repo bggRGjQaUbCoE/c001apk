@@ -1,62 +1,35 @@
 package com.example.c001apk.adapter
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ListAdapter
+import android.widget.GridView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.c001apk.databinding.ItemRecyclerviewBinding
-import com.example.c001apk.logic.model.IconLinkGridCardBean
+import com.example.c001apk.logic.model.HomeFeedResponse
+import com.example.c001apk.view.NoScrollGridView
 
 class IconLinkGridCardAdapter(
+    private val dataList: List<List<HomeFeedResponse.Entities>>,
     private val listener: ItemListener,
-) : ListAdapter<List<IconLinkGridCardBean>, IconLinkGridCardAdapter.ViewHolder>(
-    IconLinkGridCardDiffCallback()
-) {
+) : RecyclerView.Adapter<IconLinkGridCardAdapter.ViewHolder>() {
 
-    class ViewHolder(val binding: ItemRecyclerviewBinding, val listener: ItemListener) :
-        RecyclerView.ViewHolder(binding.recyclerView) {
-        fun bind(data: List<IconLinkGridCardBean>) {
-            binding.recyclerView.apply {
-                isNestedScrollingEnabled = false
-                layoutManager =
-                    GridLayoutManager(itemView.context, 5, GridLayoutManager.VERTICAL, false)
-                adapter = IconLinkGridCardItemAdapter(listener).also {
-                    it.submitList(data)
-                }
-            }
-        }
-    }
+    class ViewHolder(val view: GridView) : RecyclerView.ViewHolder(view)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            ItemRecyclerviewBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            ), listener
-        )
+        val view = NoScrollGridView(parent.context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            numColumns = 5
+        }
+        return ViewHolder(view)
     }
+
+    override fun getItemCount() = dataList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(currentList[position])
+        val data = dataList[position]
+        holder.view.adapter =
+            IconLinkGridCardItemAdapter(data, listener)
     }
 
-}
-
-class IconLinkGridCardDiffCallback : DiffUtil.ItemCallback<List<IconLinkGridCardBean>>() {
-    override fun areItemsTheSame(
-        oldItem: List<IconLinkGridCardBean>,
-        newItem: List<IconLinkGridCardBean>
-    ): Boolean {
-        return oldItem.first().url == newItem.first().url
-    }
-
-    override fun areContentsTheSame(
-        oldItem: List<IconLinkGridCardBean>,
-        newItem: List<IconLinkGridCardBean>
-    ): Boolean {
-        return oldItem.size == newItem.size
-    }
 }

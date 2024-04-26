@@ -1,6 +1,5 @@
 package com.example.c001apk.ui.feed
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -75,11 +74,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
     private var dialog: AlertDialog? = null
     private var isShowReply = false
     private var firstVisibleItemPosition = 0
-    private val alpha by lazy {
-        ObjectAnimator.ofFloat(binding.titleProfile, "alpha", 0f, 1f).also {
-            it.setDuration(500)
-        }
-    }
     private lateinit var intentActivityResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -196,8 +190,10 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
                     if (firstVisibleItemPosition <= 1) scrollYDistance >= 40.dp
                     else true
                 binding.toolBar.title = if (shouldShow) null else viewModel.feedTypeName
-                if (shouldShow && !binding.titleProfile.isVisible)
-                    alpha.start()
+                if (shouldShow && !binding.titleProfile.isVisible) {
+                    binding.titleProfile.alpha = 0f
+                    binding.titleProfile.animate().alpha(1f).setDuration(500)
+                }
                 binding.titleProfile.isVisible = shouldShow
             }
         })
