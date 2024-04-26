@@ -106,6 +106,7 @@ class HomeFeedViewModel @AssistedInject constructor(
                                         loadingState.postValue(LoadingState.LoadingDone)
                                     else
                                         footerState.postValue(FooterState.LoadingDone)
+                                    isRefreshing = false
                                     return@collect
                                 } else {
                                     currentList.clear()
