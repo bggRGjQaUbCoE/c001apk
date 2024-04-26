@@ -99,7 +99,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
                             viewModel.updateReply(it)
                             Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT).show()
                             if (viewModel.type == "feed")
-                                scrollToPosition(viewModel.itemCount)
+                                mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
                         }
                     }
                 }
@@ -231,7 +231,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
             }
             if (dialog != null) {
                 dialog?.dismiss()
-                dialog === null
+                dialog = null
             }
         }
 
@@ -241,7 +241,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
             if (viewModel.isViewReply) {
                 viewModel.isViewReply = false
                 if (firstVisibleItemPosition > viewModel.itemCount)
-                    scrollToPosition(viewModel.itemCount)
+                    mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
             }
         }
 
