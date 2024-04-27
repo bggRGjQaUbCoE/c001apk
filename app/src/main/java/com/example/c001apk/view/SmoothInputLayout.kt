@@ -34,7 +34,7 @@ class SmoothInputLayout : LinearLayout {
     private var mDefaultKeyboardHeight = 0
     private var mMinKeyboardHeight = 0
     private var mKeyboardHeight = 0
-        get() = if (field < 233.dp) 233.dp
+        get() = if (field < 276.dp) 276.dp
         else field
     private var mInputViewId = 0
     private var mInputView: View? = null

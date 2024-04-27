@@ -10,6 +10,7 @@ import android.text.Editable
 import android.text.Spannable
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -17,12 +18,16 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.core.view.ViewCompat
 import com.absinthe.libraries.utils.extensions.dp
+import androidx.viewpager2.widget.ViewPager2
+import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityReplyBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
@@ -67,6 +72,19 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
     private val color by lazy { SurfaceColors.SURFACE_1.getColor(this) }
+    private val dataList by lazy { EmojiUtils.emojiMap.toList() }
+    private val recentList = ArrayList<List<Pair<String, Int>>>()
+    private val emojiList = ArrayList<List<Pair<String, Int>>>()
+    private val coolBList = ArrayList<List<Pair<String, Int>>>()
+    private val list = listOf(recentList, emojiList, coolBList)
+
+    init {
+        for (i in 0..3) {
+            emojiList.add(dataList.subList(i * 27 + 4, (i + 1) * 27 + 4))
+        }
+        coolBList.add(dataList.subList(112, 139))
+        coolBList.add(dataList.subList(139, 155))
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +125,24 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun initObserve() {
+        viewModel.recentEmojiLiveData.observe(this) {
+            if (binding.emojiPanel.currentItem == 0 && recentList.isNotEmpty())
+                return@observe
+            recentList.clear()
+            if (it.isNullOrEmpty()) {
+                if (viewModel.isInit) {
+                    viewModel.isInit = false
+                    binding.emojiPanel.setCurrentItem(1, false)
+                }
+                recentList.add(0, emptyList())
+            } else {
+                recentList.add(0, it.map { item ->
+                    Pair(item.data, EmojiUtils.emojiMap[item.data] ?: R.drawable.ic_logo)
+                })
+            }
+            binding.emojiPanel.adapter?.notifyItemChanged(0)
+        }
+
         viewModel.over.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
                 val intent = Intent()
@@ -187,20 +223,84 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun initEmojiPanel() {
-        val data = EmojiUtils.emojiMap.toList()
-        val list = ArrayList<List<Pair<String, Int>>>()
-        for (i in 0..4) {
-            list.add(data.subList(i * 27 + 4, (i + 1) * 27 + 4))
+        for (i in 0..2) {
+            binding.indicator.addView(
+                TextView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT
+                    ).apply {
+                        weight = 1f
+                    }
+                    gravity = Gravity.CENTER
+                    text = listOf("最近", "默认", "酷币")[i]
+                    background = getDrawable(R.drawable.selector_bg_trans)
+                    setOnClickListener {
+                        binding.emojiPanel.setCurrentItem(i, false)
+                    }
+                    if (i == 0 && BuildConfig.DEBUG) {
+                        setOnLongClickListener {
+                            viewModel.deleteAll()
+                            true
+                        }
+                    }
+                }
+            )
+            if (i != 2) {
+                binding.indicator.addView(
+                    View(this).apply {
+                        layoutParams = LinearLayout.LayoutParams(
+                            1.dp,
+                            LinearLayout.LayoutParams.MATCH_PARENT
+                        )
+                        setBackgroundColor(
+                            MaterialColors.getColor(
+                                this@ReplyActivity,
+                                com.google.android.material.R.attr.colorSurfaceVariant, 0
+                            )
+                        )
+                    }
+                )
+            }
         }
-        list.add(data.subList(139, 155))
+        binding.emojiPanel.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                for (i in 0..<binding.indicator.childCount) {
+                    with(binding.indicator.getChildAt(i)) {
+                        if (this is TextView) {
+                            background = getDrawable(
+                                if (i / 2 == binding.emojiPanel.currentItem) R.drawable.selector_emoji_indicator_selected
+                                else R.drawable.selector_emoji_indicator
+                            )
+                            setTextColor(
+                                if (i / 2 == binding.emojiPanel.currentItem)
+                                    MaterialColors.getColor(
+                                        this@ReplyActivity,
+                                        com.google.android.material.R.attr.colorOnPrimary, 0
+                                    )
+                                else
+                                    MaterialColors.getColor(
+                                        this@ReplyActivity,
+                                        com.google.android.material.R.attr.colorControlNormal, 0
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+        })
+
         binding.emojiPanel.adapter = EmojiPagerAdapter(
             list,
             onClickEmoji = {
                 with(binding.editText) {
                     if (it == "[c001apk]") {
                         onBackSpace()
-                    } else
+                    } else {
                         editableText.replace(selectionStart, selectionEnd, it)
+                        viewModel.updateRecentEmoji(it)
+                    }
                 }
             },
             onCountStart = {
@@ -210,7 +310,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                 countDownTimer.cancel()
             }
         )
-        binding.indicator.setViewPager(binding.emojiPanel)
     }
 
     private val countDownTimer: CountDownTimer = object : CountDownTimer(100000, 50) {

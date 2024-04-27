@@ -10,6 +10,7 @@ import com.example.c001apk.logic.dao.StringEntityDao
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.database.HomeMenuDatabase
+import com.example.c001apk.logic.database.RecentEmojiDatabase
 import com.example.c001apk.logic.database.SearchHistoryDatabase
 import com.example.c001apk.logic.database.TopicBlackListDatabase
 import com.example.c001apk.logic.database.UserBlackListDatabase
@@ -36,6 +37,10 @@ annotation class SearchHistory
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class RecentEmoji
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class BrowseHistory
 
 @Qualifier
@@ -45,6 +50,22 @@ annotation class FeedFavorite
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
+
+    @RecentEmoji
+    @Singleton
+    @Provides
+    fun provideRecentEmojiDao(stringEntityDatabase: RecentEmojiDatabase): StringEntityDao {
+        return stringEntityDatabase.recentEmojiDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideRecentEmojiDatabase(@ApplicationContext context: Context): RecentEmojiDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            RecentEmojiDatabase::class.java, "recent_emoji.db"
+        ).build()
+    }
 
     @UserBlackList
     @Singleton

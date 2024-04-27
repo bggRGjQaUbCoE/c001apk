@@ -2,6 +2,7 @@ package com.example.c001apk.logic.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -37,10 +38,16 @@ interface StringEntityDao {
     @Query("DELETE FROM StringEntity WHERE data = :data")
     suspend fun delete(data: String)
 
+    @Delete
+    suspend fun delete(data: StringEntity)
+
     @Query("DELETE FROM StringEntity")
     suspend fun deleteAll()
 
     @Query("UPDATE StringEntity SET id = :newId WHERE data = :data")
     suspend fun updateHistory(data: String, newId: Long)
+
+    @Query("UPDATE StringEntity SET id = :newId , data = :newData WHERE data = :oldData")
+    suspend fun updateEmoji(oldData: String, newData: String, newId: Long)
 
 }

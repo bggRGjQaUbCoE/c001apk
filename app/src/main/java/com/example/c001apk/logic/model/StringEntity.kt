@@ -8,5 +8,5 @@ data class StringEntity(
     var data: String
 ) {
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
+    var id: Long = System.currentTimeMillis()
 }

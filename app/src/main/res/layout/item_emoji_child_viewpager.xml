@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <com.example.c001apk.view.NestedScrollableHost
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        app:sameDirectionWithParent="true">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none" />
+
+    </com.example.c001apk.view.NestedScrollableHost>
+
+    <com.example.c001apk.view.circleindicator.CircleIndicator3
+        android:id="@+id/indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        app:ci_animator="@anim/indicator_animator"
+        app:ci_animator_reverse="@anim/indicator_animator_reverse"
+        app:ci_drawable="@drawable/shape_oval_primary"
+        app:ci_height="5dp"
+        app:ci_width="5dp" />
+
+</LinearLayout>

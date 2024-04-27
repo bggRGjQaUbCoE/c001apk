@@ -2,11 +2,14 @@ package com.example.c001apk.ui.feed.reply
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.logic.model.StringEntity
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.repository.NetworkRepo
+import com.example.c001apk.logic.repository.RecentEmojiRepo
 import com.example.c001apk.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,9 +18,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReplyViewModel @Inject constructor(
-    val networkRepo: NetworkRepo
+    private val recentEmojiRepo: RecentEmojiRepo,
+    private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
+    val recentEmojiLiveData: LiveData<List<StringEntity>> = recentEmojiRepo.loadAllListLive()
+
+    var isInit = true
     var type: String? = null
     var rid: String? = null
 
@@ -111,6 +118,34 @@ class ReplyViewModel @Inject constructor(
                         toastText.postValue(Event("response is null"))
                     }
                 }
+        }
+    }
+
+    fun updateRecentEmoji(it: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            with(StringEntity(it)) {
+                if (recentEmojiRepo.checkEmoji(data)) {
+                    recentEmojiRepo.updateEmoji(data, System.currentTimeMillis())
+                } else {
+                    if (recentEmojiLiveData.value?.size == 27)
+                        recentEmojiLiveData.value?.last()?.data?.let {
+                            recentEmojiRepo.updateEmoji(
+                                it,
+                                data,
+                                System.currentTimeMillis()
+                            )
+                        }
+                    else
+                        recentEmojiRepo.insertEmoji(this)
+                }
+            }
+
+        }
+    }
+
+    fun deleteAll() {
+        viewModelScope.launch(Dispatchers.IO) {
+            recentEmojiRepo.deleteAll()
         }
     }
 

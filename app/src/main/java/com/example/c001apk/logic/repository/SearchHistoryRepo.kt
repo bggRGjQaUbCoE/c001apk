@@ -35,7 +35,7 @@ class SearchHistoryRepo @Inject constructor(
         searchHistoryDao.delete(history)
     }
 
-    suspend fun deleteAllUser() {
+    suspend fun deleteAllHistory() {
         searchHistoryDao.deleteAll()
     }
 

@@ -47,8 +47,7 @@ class SearchFragmentViewModel @AssistedInject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             with(StringEntity(data)) {
                 if (historyRepo.checkHistory(data)) {
-                    val max = blackListLiveData.value?.maxOfOrNull { it.id } ?: -1
-                    historyRepo.updateHistory(data, max + 1)
+                    historyRepo.updateHistory(data, System.currentTimeMillis())
                 } else
                     historyRepo.insertHistory(this)
             }
@@ -64,7 +63,7 @@ class SearchFragmentViewModel @AssistedInject constructor(
 
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
-            historyRepo.deleteAllUser()
+            historyRepo.deleteAllHistory()
         }
     }
 
