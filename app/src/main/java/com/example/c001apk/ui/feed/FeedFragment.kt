@@ -92,8 +92,15 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
                         data?.let {
                             viewModel.updateReply(it)
                             Toast.makeText(requireContext(), "回复成功", Toast.LENGTH_SHORT).show()
-                            if (viewModel.type == "feed")
-                                mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
+                            if (viewModel.type == "feed") {
+                                if (isPortrait)
+                                    mLayoutManager.scrollToPositionWithOffset(
+                                        viewModel.itemCount,
+                                        0
+                                    )
+                                else
+                                    sLayoutManager.scrollToPositionWithOffset(0, 0)
+                            }
                         }
                     }
                 }
@@ -236,7 +243,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
             feedReplyAdapter.submitList(it)
             if (viewModel.isViewReply) {
                 viewModel.isViewReply = false
-                if (firstVisibleItemPosition > viewModel.itemCount)
+                if (firstVisibleItemPosition > viewModel.itemCount && ::mLayoutManager.isInitialized)
                     mLayoutManager.scrollToPositionWithOffset(viewModel.itemCount, 0)
             }
         }

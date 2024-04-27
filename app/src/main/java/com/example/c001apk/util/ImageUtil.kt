@@ -136,7 +136,7 @@ object ImageUtil {
             success
         }
 
-    private fun saveImage(context: Context, url: String, isEnd: Boolean) {
+    private suspend fun saveImage(context: Context, url: String, isEnd: Boolean) {
         val index = url.lastIndexOf('/')
         filename = url.substring(index + 1)
         imagesDir = File(
@@ -149,7 +149,9 @@ object ImageUtil {
         )
         if (imageCheckDir.exists()) {
             if (isEnd)
-                context.makeToast("文件已存在")
+                withContext(Dispatchers.Main) {
+                    context.makeToast("文件已存在")
+                }
         } else {
             downloadPicture(context, url.http2https, filename, isEnd)
         }
@@ -206,7 +208,9 @@ object ImageUtil {
                                     )
                                 }
                             } else {
-                                context.makeToast("分享失败")
+                                withContext(Dispatchers.Main) {
+                                    context.makeToast("分享失败")
+                                }
                             }
                         }
                     }
