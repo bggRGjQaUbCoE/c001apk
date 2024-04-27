@@ -7,6 +7,7 @@ import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.LikeFeedResponse
 import com.example.c001apk.logic.model.LikeReplyResponse
 import com.example.c001apk.logic.model.MessageResponse
+import com.example.c001apk.logic.model.OSSUploadPrepareResponse
 import com.example.c001apk.logic.model.PostReplyResponse
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.model.UpdateCheckResponse
@@ -217,7 +218,7 @@ interface ApiService {
     @POST("/v6/feed/createFeed")
     @FormUrlEncoded
     fun postCreateFeed(
-        @FieldMap data: HashMap<String, String?>
+        @FieldMap data: HashMap<String, String>
     ): Call<CreateFeedResponse>
 
     @POST("/v6/account/requestValidate")
@@ -275,5 +276,11 @@ interface ApiService {
         @Query("tag") tag: String?,
         @Query("id") id: String?,
     ): Call<LikeFeedResponse>
+
+    @POST("/v6/upload/ossUploadPrepare")
+    @FormUrlEncoded
+    fun postOSSUploadPrepare(
+        @FieldMap data: HashMap<String, String>
+    ): Call<OSSUploadPrepareResponse>
 
 }

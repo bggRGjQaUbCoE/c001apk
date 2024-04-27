@@ -3,13 +3,18 @@ package com.example.c001apk.ui.feed.reply
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Editable
 import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -18,19 +23,40 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.core.view.ViewCompat
 import com.absinthe.libraries.utils.extensions.dp
+import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
+import com.alibaba.sdk.android.oss.ClientConfiguration
+import com.alibaba.sdk.android.oss.ClientException
+import com.alibaba.sdk.android.oss.OSSClient
+import com.alibaba.sdk.android.oss.ServiceException
+import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback
+import com.alibaba.sdk.android.oss.common.OSSLog
+import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider
+import com.alibaba.sdk.android.oss.model.OSSRequest
+import com.alibaba.sdk.android.oss.model.ObjectMetadata
+import com.alibaba.sdk.android.oss.model.PutObjectRequest
+import com.alibaba.sdk.android.oss.model.PutObjectResult
+import com.blankj.utilcode.util.FileUtils.getFileMD5ToString
+import com.blankj.utilcode.util.UriUtils
+import com.bumptech.glide.Glide
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityReplyBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
+import com.example.c001apk.logic.model.OSSUploadPrepareModel
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.util.EmojiUtils
 import com.example.c001apk.view.CenteredImageSpan
@@ -62,7 +88,8 @@ import java.util.regex.Pattern
 
 @AndroidEntryPoint
 class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
-    View.OnClickListener, OnTouchListener, SmoothInputLayout.OnVisibilityChangeListener {
+    View.OnClickListener, OnTouchListener, SmoothInputLayout.OnVisibilityChangeListener,
+    SmoothInputLayout.OnKeyboardChangeListener {
 
     private val viewModel by viewModels<ReplyViewModel>()
     private val type: String? by lazy { intent.getStringExtra("type") }
@@ -77,6 +104,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private val emojiList = ArrayList<List<Pair<String, Int>>>()
     private val coolBList = ArrayList<List<Pair<String, Int>>>()
     private val list = listOf(recentList, emojiList, coolBList)
+    private lateinit var pickMultipleMedia: ActivityResultLauncher<PickVisualMediaRequest>
+    private var uriList: MutableList<Uri> = ArrayList()
 
     init {
         for (i in 0..3) {
@@ -86,19 +115,84 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         coolBList.add(dataList.subList(139, 155))
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewModel.type = type
         viewModel.rid = rid
 
+        initView()
+        initPage()
+        initEditText()
+        initEmojiPanel()
+        initObserve()
+        initPhotoPick()
+        showInput()
+
+    }
+
+    private fun initPhotoPick() {
+        if (!ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this))
+            return
+        pickMultipleMedia =
+            registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(9)) { uris ->
+                if (uris.isNotEmpty()) {
+                    uris.forEach { uri ->
+                        if (uriList.size == 9) {
+                            Toast.makeText(this, "最多选择9张图片", Toast.LENGTH_SHORT).show()
+                            return@registerForActivityResult
+                        }
+                        uriList.add(uri)
+
+                        val file = UriUtils.uri2File(uri)
+                        val md5 = getFileMD5ToString(file).lowercase()
+                        val options = BitmapFactory.Options()
+                        options.inJustDecodeBounds = true
+                        BitmapFactory.decodeFile(file.path, options)
+                        val width = options.outWidth
+                        val height = options.outHeight
+                        viewModel.imageList.add(
+                            OSSUploadPrepareModel(
+                                name = file.name,
+                                resolution = "${width}x${height}",
+                                md5 = md5,
+                            )
+                        )
+
+                        val imageView = ImageView(this).apply {
+                            layoutParams = LinearLayout.LayoutParams(
+                                (55.dp * width.toFloat() / height.toFloat()).toInt(), 55.dp
+                            ).apply {
+                                setMargins(5.dp, 0, 0, 0)
+                            }
+                            setOnClickListener {
+                                with(binding.imageLayout.indexOfChild(this)){
+                                    binding.imageLayout.removeViewAt(this)
+                                    uriList.removeAt(this)
+                                    viewModel.imageList.removeAt(this)
+                                    binding.imageLayout.isVisible = uriList.isNotEmpty()
+                                }
+                            }
+                        }
+                        Glide.with(this).load(uri).into(imageView)
+                        binding.imageLayout.addView(imageView)
+                    }
+                }
+                binding.imageLayout.isVisible = uriList.isNotEmpty()
+            }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initView() {
         binding.emojiBtn?.setOnClickListener(this)
+        binding.imageBtn.setOnClickListener(this)
+        binding.keyboardBtn?.setOnClickListener(this)
         binding.checkBox.setOnClickListener(this)
+        binding.publish.setOnClickListener(this)
         binding.editText.setOnTouchListener(this)
         binding.out.setOnTouchListener(this)
-        if (binding.main is SmoothInputLayout)
-            (binding.main as SmoothInputLayout).setOnVisibilityChangeListener(this)
+        (binding.main as? SmoothInputLayout)?.setOnVisibilityChangeListener(this)
+        (binding.main as? SmoothInputLayout)?.setOnKeyboardChangeListener(this)
         val radius = listOf(16.dp.toFloat(), 16.dp.toFloat(), 0f, 0f)
         val radiusBg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -115,16 +209,123 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             binding.emojiLayout.setBackgroundColor(color)
         } else
             binding.bottomLayout?.background = radiusBg
-
-        initPage()
-        initEditText()
-        initEmojiPanel()
-        initObserve()
-        showInput()
-
     }
 
     private fun initObserve() {
+        viewModel.uploadImage.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let { responseData ->
+
+                viewModel.replyAndFeedData["pic"] =
+                    responseData.fileInfo.joinToString(separator = ",") {
+                        responseData.uploadPrepareInfo.uploadImagePrefix + "/" + it.uploadFileName
+                    }
+
+                val accessKeyId = responseData.uploadPrepareInfo.accessKeyId
+                val accessKeySecret = responseData.uploadPrepareInfo.accessKeySecret
+                val securityToken = responseData.uploadPrepareInfo.securityToken
+
+                val endPoint = responseData.uploadPrepareInfo.endPoint
+                val bucket = responseData.uploadPrepareInfo.bucket
+                val callbackUrl = responseData.uploadPrepareInfo.callbackUrl
+
+                val conf = ClientConfiguration()
+                conf.connectionTimeout = 5 * 60 * 1000
+                conf.socketTimeout = 5 * 60 * 1000
+                conf.maxConcurrentRequest = 5
+                conf.maxErrorRetry = 2
+                OSSLog.enableLog()
+                val credentialProvider = OSSStsTokenCredentialProvider(
+                    accessKeyId,
+                    accessKeySecret,
+                    securityToken
+                )
+                val oss = OSSClient(
+                    this,
+                    endPoint,
+                    credentialProvider,
+                    conf
+                )
+
+                uriList.forEachIndexed { index, uri ->
+                    val put = PutObjectRequest(
+                        bucket,
+                        responseData.fileInfo[index].uploadFileName, // objectKey -> oss上所存储文件的名称
+                        uri // uri
+                    )
+                    val metadata = ObjectMetadata()
+                    metadata.contentType = "application/octet-stream"
+                    put.metadata = metadata
+                    put.crC64 = OSSRequest.CRC64Config.YES
+                    if (!TextUtils.isEmpty(callbackUrl)) {
+                        put.callbackParam = object : HashMap<String?, String?>() {
+                            init {
+                                put("callbackUrl", callbackUrl)
+                                put("callbackBody", "filename=${responseData.fileInfo[index].name}")
+                            }
+                        }
+                    }
+                    val task = oss.asyncPutObject(
+                        put,
+                        object : OSSCompletedCallback<PutObjectRequest?, PutObjectResult?> {
+                            override fun onSuccess(
+                                request: PutObjectRequest?,
+                                result: PutObjectResult?
+                            ) {
+                                Log.i("OSSUpload", "index: $index, uploadSuccess")
+                                if (index == uriList.lastIndex) {
+                                    if (type == "createFeed")
+                                        viewModel.onPostCreateFeed()
+                                    else
+                                        viewModel.onPostReply()
+                                }
+                            }
+
+                            override fun onFailure(
+                                request: PutObjectRequest?,
+                                clientException: ClientException?,
+                                serviceException: ServiceException?
+                            ) {
+
+                                // Request exception
+                                if (clientException != null) {
+                                    // Local exception, such as a network exception
+                                    Log.i(
+                                        "OSSUpload",
+                                        "index: $index, uploadFailed: clientException: ${clientException.message}"
+                                    )
+                                    clientException.printStackTrace()
+                                }
+                                if (serviceException != null) {
+                                    // Service exception
+                                    Log.i(
+                                        "OSSUpload",
+                                        "index: $index, OSSUpload: serviceException: ${serviceException.message}"
+                                    )
+                                    Log.i(
+                                        "OSSUpload",
+                                        "index: $index, ErrorCode=" + serviceException.errorCode
+                                    )
+                                    Log.i(
+                                        "OSSUpload",
+                                        "index: $index, RequestId=" + serviceException.requestId
+                                    )
+                                    Log.i(
+                                        "OSSUpload",
+                                        "index: $index, HostId=" + serviceException.hostId
+                                    )
+                                    Log.i(
+                                        "OSSUpload",
+                                        "index: $index, RawMessage=" + serviceException.rawMessage
+                                    )
+                                }
+                            }
+                        })
+                    task.waitUntilFinished()
+                }
+
+            }
+        }
+
         viewModel.recentEmojiLiveData.observe(this) {
             if (binding.emojiPanel.currentItem == 0 && recentList.isNotEmpty())
                 return@observe
@@ -202,23 +403,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         else "回复"
         if (type != "createFeed" && !username.isNullOrEmpty())
             binding.editText.hint = "回复: $username"
-
-        binding.publish.setOnClickListener {
-            if (type == "createFeed") {
-                viewModel.createFeedData = HashMap()
-                viewModel.createFeedData["id"] = ""
-                viewModel.createFeedData["message"] = binding.editText.text.toString()
-                viewModel.createFeedData["type"] = "feed"
-                viewModel.createFeedData["pic"] = ""
-                viewModel.createFeedData["status"] = if (binding.checkBox.isChecked) "-1" else "1"
-                viewModel.onPostCreateFeed()
-            } else {
-                viewModel.replyData["message"] = binding.editText.text.toString()
-                viewModel.replyData["replyAndForward"] =
-                    if (binding.checkBox.isChecked) "1" else "0"
-                viewModel.onPostReply()
-            }
-        }
         binding.publish.isClickable = false
     }
 
@@ -266,15 +450,15 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         binding.emojiPanel.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                for (i in 0..<binding.indicator.childCount) {
+                for (i in 0 until binding.indicator.childCount) {
                     with(binding.indicator.getChildAt(i)) {
                         if (this is TextView) {
                             background = getDrawable(
-                                if (i / 2 == binding.emojiPanel.currentItem) R.drawable.selector_emoji_indicator_selected
+                                if (i / 2 == position) R.drawable.selector_emoji_indicator_selected
                                 else R.drawable.selector_emoji_indicator
                             )
                             setTextColor(
-                                if (i / 2 == binding.emojiPanel.currentItem)
+                                if (i / 2 == position)
                                     MaterialColors.getColor(
                                         this@ReplyActivity,
                                         com.google.android.material.R.attr.colorOnPrimary, 0
@@ -327,6 +511,10 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     private fun initEditText() {
         binding.editText.addTextChangedListener(textWatcher)
+        binding.editText.addTextChangedListener(OnTextInputListener("@") {
+            //
+        })
+        binding.editText.setOnKeyListener(FastDeleteAtUserKeyListener())
     }
 
     override fun onDestroy() {
@@ -357,9 +545,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             }
         }
 
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
         override fun onTextChanged(
-            charSequence: CharSequence?,
+            charSequence: CharSequence,
             start: Int,
             before: Int,
             count: Int
@@ -421,35 +609,77 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun showInput() {
-        binding.emojiBtn?.setImageResource(R.drawable.ic_emoji)
-        binding.editText.let {
-            it.requestFocus()
-            it.requestFocusFromTouch()
-            imm.showSoftInput(it, InputMethodManager.SHOW_IMPLICIT)
-        }
+        if (binding.main is SmoothInputLayout)
+            (binding.main as? SmoothInputLayout)?.showKeyboard()
+        else
+            binding.editText.let {
+                it.requestFocus()
+                it.requestFocusFromTouch()
+                imm.showSoftInput(it, InputMethodManager.SHOW_IMPLICIT)
+            }
     }
 
     private fun showEmoji() {
-        binding.emojiBtn?.setImageResource(R.drawable.ic_keyboard)
-        if (binding.main is SmoothInputLayout)
-            (binding.main as SmoothInputLayout).showInputPane(true)
+        (binding.main as? SmoothInputLayout)?.showEmojiPanel(true)
     }
 
     override fun onClick(view: View) {
         when (view.id) {
+            R.id.imageBtn -> {
+                if (!ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this))
+                    return
+                pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+
+            R.id.keyboardBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
+                with(binding.main as? SmoothInputLayout) {
+                    if (binding.emojiLayout.isVisible) {
+                        this?.closeEmojiPanel()
+                    } else if (this?.isKeyBoardOpen == true) {
+                        closeKeyboard(false)
+                    } else {
+                        showInput()
+                    }
+                }
+            }
+
             R.id.emojiBtn -> {
                 ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
                 if (binding.emojiBtn?.isSelected == true) {
-                    binding.emojiBtn?.isSelected = false
                     showInput()
                 } else {
-                    binding.emojiBtn?.isSelected = true
                     showEmoji()
                 }
             }
 
             R.id.checkBox ->
                 ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
+
+            R.id.publish -> {
+                if (type == "createFeed") {
+                    viewModel.replyAndFeedData = HashMap()
+                    viewModel.replyAndFeedData["id"] = ""
+                    viewModel.replyAndFeedData["message"] = binding.editText.text.toString()
+                    viewModel.replyAndFeedData["type"] = "feed"
+                    viewModel.replyAndFeedData["status"] =
+                        if (binding.checkBox.isChecked) "-1" else "1"
+                    if (uriList.isNotEmpty()) {
+                        viewModel.onPostOSSUploadPrepare()
+                    } else {
+                        viewModel.onPostCreateFeed()
+                    }
+                } else {
+                    viewModel.replyAndFeedData["message"] = binding.editText.text.toString()
+                    viewModel.replyAndFeedData["replyAndForward"] =
+                        if (binding.checkBox.isChecked) "1" else "0"
+                    if (uriList.isNotEmpty()) {
+                        viewModel.onPostOSSUploadPrepare()
+                    } else {
+                        viewModel.onPostReply()
+                    }
+                }
+            }
         }
     }
 
@@ -459,19 +689,26 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             R.id.out -> {
                 finish()
             }
-
-            R.id.editText -> {
-                binding.emojiBtn?.isSelected = false
-            }
         }
         return false
     }
 
-    override fun onVisibilityChange(visibility: Int) {
+    override fun onVisibilityChange(visibility: Int) { // 0->visible, 8->gone
         binding.emojiBtn?.isSelected = visibility == VISIBLE
         binding.emojiBtn?.setImageResource(
             if (visibility == VISIBLE) R.drawable.ic_keyboard
             else R.drawable.ic_emoji
+        )
+        if (binding.emojiBtn?.isSelected == true)
+            binding.keyboardBtn?.setImageResource(R.drawable.outline_keyboard_hide_24)
+        if (binding.emojiBtn?.isSelected == false && (binding.main as? SmoothInputLayout)?.isKeyBoardOpen == false)
+            binding.keyboardBtn?.setImageResource(R.drawable.outline_keyboard_show_24)
+    }
+
+    override fun onKeyboardChanged(open: Boolean) {
+        binding.keyboardBtn?.setImageResource(
+            if (open || binding.emojiBtn?.isSelected == true) R.drawable.outline_keyboard_hide_24
+            else R.drawable.outline_keyboard_show_24
         )
     }
 
@@ -485,3 +722,112 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
 }
 
+class FastDeleteAtUserKeyListener : View.OnKeyListener {
+    override fun onKey(view: View, keyCode: Int, keyEvent: KeyEvent): Boolean {
+        val editText = view as EditText
+        if (keyCode == KeyEvent.KEYCODE_DEL && keyEvent.action == KeyEvent.ACTION_DOWN) {
+            if (removeFastDelete(editText)) {
+                return true
+            }
+
+            val text = editText.text
+            val selectionStart = editText.selectionStart
+            if (selectionStart <= 0) {
+                return false
+            }
+            val charAt = text[selectionStart - 1]
+            if (charAt != ' ' && charAt != ':' || selectionStart != editText.selectionEnd) {
+                return false
+            }
+            val lastIndexOfAt = lastIndexOfAt(text, selectionStart)
+            val lastIndexOfTopicStart = lastIndexOfTopicStart(text, selectionStart)
+            if (lastIndexOfAt >= 0 && lastIndexOfAt > lastIndexOfTopicStart) {
+                val cArr = CharArray(selectionStart - lastIndexOfAt)
+                text.getChars(lastIndexOfAt, selectionStart, cArr, 0)
+                if (!AT_PATTERN.matcher(String(cArr)).matches()) {
+                    return false
+                }
+                text.delete(lastIndexOfAt, selectionStart)
+                return true
+            }
+            if (lastIndexOfTopicStart >= 0 && lastIndexOfTopicStart > lastIndexOfAt) {
+                val cArr2 = CharArray(selectionStart - lastIndexOfTopicStart)
+                text.getChars(lastIndexOfTopicStart, selectionStart, cArr2, 0)
+                if (TAG_PATTERN.matcher(String(cArr2)).matches()) {
+                    text.delete(lastIndexOfTopicStart, selectionStart)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun lastIndexOfAt(editable: Editable, i: Int): Int {
+        for (i2 in i - 1 downTo 0) {
+            if (editable[i2] == '@') {
+                return i2
+            }
+        }
+        return -1
+    }
+
+    private fun lastIndexOfTopicStart(editable: Editable, i: Int): Int {
+        var i2 = 0
+        for (i3 in i - 1 downTo 0) {
+            if (editable[i3] == '#') {
+                i2++
+            }
+            if (i2 == 2) {
+                return i3
+            }
+        }
+        return -1
+    }
+
+    private fun removeFastDelete(editText: EditText): Boolean {
+        val spannableStringBuilder = editText.text as SpannableStringBuilder
+        var selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
+        if (selectionEnd == selectionStart && selectionStart > 0) {
+            selectionStart--
+        }
+        var z = false
+        for (fastDeleteSpan in
+        spannableStringBuilder.getSpans(
+            selectionStart, selectionEnd, FastDeleteSpan::class.java
+        ) as Array<FastDeleteSpan?>) {
+            val spanStart = spannableStringBuilder.getSpanStart(fastDeleteSpan)
+            val spanEnd = spannableStringBuilder.getSpanEnd(fastDeleteSpan)
+            spannableStringBuilder.delete(spanStart, spanEnd)
+            spannableStringBuilder.removeSpan(fastDeleteSpan)
+            if (spanEnd == selectionEnd) {
+                z = true
+            }
+        }
+        return z
+    }
+
+    companion object {
+        private val AT_PATTERN = Pattern.compile("@[\\w\\-._]+[\\s:]")
+        private val TAG_PATTERN = Pattern.compile("#[^# @]+#\\s")
+    }
+
+    class FastDeleteSpan
+
+}
+
+class OnTextInputListener(
+    private val text: String,
+    private val onTextChange: () -> Unit
+) :
+    TextWatcher {
+    override fun afterTextChanged(editable: Editable) {}
+    override fun beforeTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+        if (before == 0 && count == text.length
+            && s.subSequence(start, start + count).toString() == text
+        ) {
+            onTextChange()
+        }
+    }
+}

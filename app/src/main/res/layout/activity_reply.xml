@@ -8,7 +8,7 @@
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
-    app:silInputPane="@+id/emojiLayout"
+    app:silEmojiPanel="@+id/emojiLayout"
     app:silInputView="@+id/editText">
 
     <View
@@ -77,7 +77,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:paddingStart="0dp"
+            android:background="@null"
+            android:button="@null"
+            android:drawableStart="?android:attr/listChoiceIndicatorMultiple"
             android:text="@string/replyAndForward"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textInputLayout" />
@@ -91,6 +93,26 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/checkBox" />
 
+        <HorizontalScrollView
+            android:id="@+id/imageScrollLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line">
+
+            <LinearLayout
+                android:id="@+id/imageLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="55dp"
+                android:orientation="horizontal"
+                android:paddingStart="11dp"
+                android:paddingEnd="16dp"
+                android:visibility="gone" />
+
+        </HorizontalScrollView>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,15 +120,37 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/line">
+            app:layout_constraintTop_toBottomOf="@id/imageScrollLayout">
 
             <ImageView
                 android:id="@+id/emojiBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
                 android:src="@drawable/ic_face"
+                android:tint="@android:color/darker_gray" />
+
+
+            <ImageView
+                android:id="@+id/imageBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="8dp"
+                android:src="@drawable/ic_image"
+                android:tint="@android:color/darker_gray" />
+
+            <ImageView
+                android:id="@+id/keyboardBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="8dp"
+                android:src="@drawable/outline_keyboard_hide_24"
                 android:tint="@android:color/darker_gray" />
 
         </LinearLayout>

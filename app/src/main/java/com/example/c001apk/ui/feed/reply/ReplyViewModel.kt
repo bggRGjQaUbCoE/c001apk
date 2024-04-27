@@ -6,11 +6,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.logic.model.OSSUploadPrepareModel
+import com.example.c001apk.logic.model.OSSUploadPrepareResponse
 import com.example.c001apk.logic.model.StringEntity
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.logic.repository.RecentEmojiRepo
 import com.example.c001apk.util.Event
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,10 +35,10 @@ class ReplyViewModel @Inject constructor(
     var responseData: TotalReplyResponse.Data? = null
     val over = MutableLiveData<Event<Boolean>>()
 
-    var replyData = HashMap<String, String>()
+    var replyAndFeedData = HashMap<String, String>()
     fun onPostReply() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postReply(replyData, rid.toString(), type.toString())
+            networkRepo.postReply(replyAndFeedData, rid.toString(), type.toString())
                 .collect { result ->
                     val response = result.getOrNull()
                     response?.let {
@@ -97,10 +100,9 @@ class ReplyViewModel @Inject constructor(
         }
     }
 
-    lateinit var createFeedData: HashMap<String, String?>
     fun onPostCreateFeed() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.postCreateFeed(createFeedData)
+            networkRepo.postCreateFeed(replyAndFeedData)
                 .collect { result ->
                     val response = result.getOrNull()
                     if (response != null) {
@@ -146,6 +148,32 @@ class ReplyViewModel @Inject constructor(
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
             recentEmojiRepo.deleteAll()
+        }
+    }
+
+    val uploadImage = MutableLiveData<Event<OSSUploadPrepareResponse.Data>>()
+    private val ossUploadPrepareData: HashMap<String, String> = HashMap()
+    var imageList = ArrayList<OSSUploadPrepareModel>()
+    fun onPostOSSUploadPrepare() {
+        ossUploadPrepareData["uploadBucket"] = "image"
+        ossUploadPrepareData["uploadDir"] = "feed"
+        ossUploadPrepareData["is_anonymous"] = "0"
+        ossUploadPrepareData["uploadFileList"] = Gson().toJson(imageList)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.postOSSUploadPrepare(ossUploadPrepareData)
+                .collect { result ->
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            toastText.postValue(Event("uploadPrepare error: ${data.message}"))
+                        } else if (data.data != null) {
+                            uploadImage.postValue(Event(data.data))
+                        }
+                    } else {
+                        toastText.postValue(Event("response is null"))
+                    }
+                }
         }
     }
 

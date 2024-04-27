@@ -182,7 +182,7 @@ class NetworkRepo @Inject constructor(
         Result.success(apiService.postFollowUnFollow(url, uid).await())
     }
 
-    suspend fun postCreateFeed(data: HashMap<String, String?>) = fire {
+    suspend fun postCreateFeed(data: HashMap<String, String>) = fire {
         Result.success(apiService.postCreateFeed(data).await())
     }
 
@@ -237,6 +237,10 @@ class NetworkRepo @Inject constructor(
 
     suspend fun getFollow(url: String, tag: String?, id: String?) = fire {
         Result.success(apiService.getFollow(url, tag, id).await())
+    }
+
+    suspend fun postOSSUploadPrepare(data: HashMap<String, String>) = fire {
+        Result.success(apiService.postOSSUploadPrepare(data).await())
     }
 
     private suspend fun <T> Call<T>.await(): T {

@@ -136,7 +136,7 @@ object Network {
     suspend fun postFollowUnFollow(url: String, uid: String) =
         apiService.postFollowUnFollow(url, uid).await()
 
-    suspend fun postCreateFeed(data: HashMap<String, String?>) =
+    suspend fun postCreateFeed(data: HashMap<String, String>) =
         apiService.postCreateFeed(data).await()
 
     suspend fun postRequestValidate(data: HashMap<String, String?>) =

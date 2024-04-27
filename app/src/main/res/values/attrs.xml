@@ -158,7 +158,7 @@
         <attr name="silDefaultKeyboardHeight" format="dimension" />
         <attr name="silMinKeyboardHeight" format="dimension" />
         <attr name="silInputView" format="reference" />
-        <attr name="silInputPane" format="reference" />
+        <attr name="silEmojiPanel" format="reference" />
         <attr name="silAutoSaveKeyboardHeight" format="boolean" />
     </declare-styleable>
 

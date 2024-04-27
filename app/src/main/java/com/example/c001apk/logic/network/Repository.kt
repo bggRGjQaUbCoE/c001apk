@@ -166,7 +166,7 @@ object Repository {
         Result.success(Network.postFollowUnFollow(url, uid))
     }
 
-    suspend fun postCreateFeed(data: HashMap<String, String?>) = fire {
+    suspend fun postCreateFeed(data: HashMap<String, String>) = fire {
         Result.success(Network.postCreateFeed(data))
     }
 

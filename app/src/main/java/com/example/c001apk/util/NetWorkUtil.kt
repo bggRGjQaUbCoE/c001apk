@@ -56,9 +56,9 @@ object NetWorkUtil {
                         else replace.substring(6)
                     )
                     if (this@with != -1) {
-                        replace.indexOfFirst { it == '&' }.let {
+                        replace.indexOf("rid=").let {
                             if (it != -1) {
-                                putExtra("rid", replace.substring(5 + this@with, it))
+                                putExtra("rid", replace.substring(it + 4))
                                 putExtra("viewReply", true)
                             }
                         }

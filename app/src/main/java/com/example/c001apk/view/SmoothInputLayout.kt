@@ -49,13 +49,13 @@ class SmoothInputLayout : LinearLayout {
      * @return 是否输入法已打开
      */
     var isKeyBoardOpen = false
-    private var mInputPaneId = 0
-    private var mInputPane: View? = null
+    private var mEmojiPanelId = 0
+    private var mEmojiPanel: View? = null
     private var mListener: OnVisibilityChangeListener? = null
     private var keyboardChangeListener: OnKeyboardChangeListener? = null
     private var mAutoSaveKeyboardHeight = false
     private var mKeyboardProcessor: KeyboardProcessor? = null
-    private var tShowInputPane = false
+    private var isShowEmojiPanel = false
 
     constructor(context: Context) : super(context) {
         initView(null)
@@ -85,7 +85,7 @@ class SmoothInputLayout : LinearLayout {
             (DEFAULT_KEYBOARD_HEIGHT * resources.displayMetrics.density).toInt()
         var minInputHeight = (MIN_KEYBOARD_HEIGHT * resources.displayMetrics.density).toInt()
         mInputViewId = NO_ID
-        mInputPaneId = NO_ID
+        mEmojiPanelId = NO_ID
         val autoSave: Boolean
         val custom = context.obtainStyledAttributes(attrs, R.styleable.SmoothInputLayout)
         defaultInputHeight = custom.getDimensionPixelOffset(
@@ -97,8 +97,8 @@ class SmoothInputLayout : LinearLayout {
         )
         mInputViewId =
             custom.getResourceId(R.styleable.SmoothInputLayout_silInputView, mInputViewId)
-        mInputPaneId =
-            custom.getResourceId(R.styleable.SmoothInputLayout_silInputPane, mInputPaneId)
+        mEmojiPanelId =
+            custom.getResourceId(R.styleable.SmoothInputLayout_silEmojiPanel, mEmojiPanelId)
         autoSave =
             custom.getBoolean(R.styleable.SmoothInputLayout_silAutoSaveKeyboardHeight, true)
         custom.recycle()
@@ -112,8 +112,8 @@ class SmoothInputLayout : LinearLayout {
         if (mInputViewId != NO_ID) {
             setInputView(findViewById(mInputViewId))
         }
-        if (mInputPaneId != NO_ID) {
-            setInputPane(findViewById(mInputPaneId))
+        if (mEmojiPanelId != NO_ID) {
+            setEmojiPanel(findViewById(mEmojiPanelId))
         }
     }
 
@@ -130,17 +130,17 @@ class SmoothInputLayout : LinearLayout {
             }
             isKeyBoardOpen = true
             // 输入法弹出，隐藏功能面板
-            if (mInputPane != null && mInputPane?.visibility == VISIBLE) {
-                mInputPane?.visibility = GONE
+            if (mEmojiPanel != null && mEmojiPanel?.visibility == VISIBLE) {
+                mEmojiPanel?.visibility = GONE
                 mListener?.onVisibilityChange(GONE)
             }
         } else {
             isKeyBoardOpen = false
-            if (tShowInputPane) {
-                tShowInputPane = false
-                if (mInputPane != null && mInputPane?.visibility == GONE) {
+            if (isShowEmojiPanel) {
+                isShowEmojiPanel = false
+                if (mEmojiPanel != null && mEmojiPanel?.visibility == GONE) {
                     updateLayout()
-                    mInputPane?.visibility = VISIBLE
+                    mEmojiPanel?.visibility = VISIBLE
                     mListener?.onVisibilityChange(VISIBLE)
                     forceLayout()
                 }
@@ -176,12 +176,12 @@ class SmoothInputLayout : LinearLayout {
      * 更新子项高度
      */
     private fun updateLayout() {
-        if (mInputPane == null) return
+        if (mEmojiPanel == null) return
         if (mKeyboardHeight == 0) mKeyboardHeight = getKeyboardHeight(mDefaultKeyboardHeight)
-        val layoutParams = mInputPane?.layoutParams
+        val layoutParams = mEmojiPanel?.layoutParams
         if (layoutParams != null) {
             layoutParams.height = mKeyboardHeight
-            mInputPane?.setLayoutParams(layoutParams)
+            mEmojiPanel?.setLayoutParams(layoutParams)
         }
     }
 
@@ -228,9 +228,9 @@ class SmoothInputLayout : LinearLayout {
      *
      * @param pane 面板
      */
-    private fun setInputPane(pane: View) {
-        if (mInputPane !== pane)
-            mInputPane = pane
+    private fun setEmojiPanel(pane: View) {
+        if (mEmojiPanel !== pane)
+            mEmojiPanel = pane
     }
 
     /**
@@ -270,20 +270,20 @@ class SmoothInputLayout : LinearLayout {
         mKeyboardProcessor = processor
     }
 
-    private val isInputPaneOpen: Boolean
+    private val isEmojiPanelOpen: Boolean
         /**
          * 是否特殊输入面板已打开
          *
          * @return 特殊输入面板已打开
          */
-        get() = mInputPane != null && mInputPane?.visibility == VISIBLE
+        get() = mEmojiPanel != null && mEmojiPanel?.visibility == VISIBLE
 
     /**
      * 关闭特殊输入面板
      */
-    fun closeInputPane() {
-        if (isInputPaneOpen) {
-            mInputPane?.visibility = GONE
+    fun closeEmojiPanel() {
+        if (isEmojiPanelOpen) {
+            mEmojiPanel?.visibility = GONE
             mListener?.onVisibilityChange(GONE)
         }
     }
@@ -293,14 +293,14 @@ class SmoothInputLayout : LinearLayout {
      *
      * @param focus 是否让输入框拥有焦点
      */
-    fun showInputPane(focus: Boolean) {
+    fun showEmojiPanel(focus: Boolean) {
         if (isKeyBoardOpen) {
-            tShowInputPane = true
+            isShowEmojiPanel = true
             imm.hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
         } else {
-            if (mInputPane != null && mInputPane?.visibility == GONE) {
+            if (mEmojiPanel != null && mEmojiPanel?.visibility == GONE) {
                 updateLayout()
-                mInputPane?.visibility = VISIBLE
+                mEmojiPanel?.visibility = VISIBLE
                 mListener?.onVisibilityChange(VISIBLE)
             }
         }
