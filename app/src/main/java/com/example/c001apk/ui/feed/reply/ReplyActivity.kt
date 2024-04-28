@@ -1,11 +1,14 @@
 package com.example.c001apk.ui.feed.reply
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Editable
@@ -32,12 +35,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.core.view.ViewCompat
-import com.absinthe.libraries.utils.extensions.dp
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
+import com.absinthe.libraries.utils.extensions.dp
 import com.alibaba.sdk.android.oss.ClientConfiguration
 import com.alibaba.sdk.android.oss.ClientException
 import com.alibaba.sdk.android.oss.OSSClient
@@ -132,8 +137,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun initPhotoPick() {
-        if (!ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this))
-            return
         pickMultipleMedia =
             registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(9)) { uris ->
                 if (uris.isNotEmpty()) {
@@ -166,7 +169,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                                 setMargins(5.dp, 0, 0, 0)
                             }
                             setOnClickListener {
-                                with(binding.imageLayout.indexOfChild(this)){
+                                with(binding.imageLayout.indexOfChild(this)) {
                                     binding.imageLayout.removeViewAt(this)
                                     uriList.removeAt(this)
                                     viewModel.imageList.removeAt(this)
@@ -626,9 +629,33 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun onClick(view: View) {
         when (view.id) {
             R.id.imageBtn -> {
-                if (!ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this))
-                    return
-                pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                if (SDK_INT in listOf(24, 25)) {
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                                this,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            )
+                        ) {
+                            Toast.makeText(this, "未授予存储权限", Toast.LENGTH_SHORT).show()
+                        } else {
+                            ActivityCompat
+                                .requestPermissions(
+                                    this,
+                                    arrayOf(
+                                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                    ), 1
+                                )
+
+                        }
+                    } else
+                        pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                } else
+                    pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
 
             R.id.keyboardBtn -> {
