@@ -50,7 +50,7 @@ import com.alibaba.sdk.android.oss.ServiceException
 import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback
 import com.alibaba.sdk.android.oss.common.OSSLog
 import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider
-import com.alibaba.sdk.android.oss.model.OSSRequest
+import com.alibaba.sdk.android.oss.common.utils.BinaryUtil.calculateBase64Md5
 import com.alibaba.sdk.android.oss.model.ObjectMetadata
 import com.alibaba.sdk.android.oss.model.PutObjectRequest
 import com.alibaba.sdk.android.oss.model.PutObjectResult
@@ -111,6 +111,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private val list = listOf(recentList, emojiList, coolBList)
     private lateinit var pickMultipleMedia: ActivityResultLauncher<PickVisualMediaRequest>
     private var uriList: MutableList<Uri> = ArrayList()
+    private var typeList = ArrayList<String>()
+    private var pathList = ArrayList<String>()
 
     init {
         for (i in 0..3) {
@@ -148,12 +150,16 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                         uriList.add(uri)
 
                         val file = UriUtils.uri2File(uri)
+                        val path = file.path
                         val md5 = getFileMD5ToString(file).lowercase()
                         val options = BitmapFactory.Options()
                         options.inJustDecodeBounds = true
                         BitmapFactory.decodeFile(file.path, options)
                         val width = options.outWidth
                         val height = options.outHeight
+                        val type = options.outMimeType
+                        typeList.add(type)
+                        pathList.add(path)
                         viewModel.imageList.add(
                             OSSUploadPrepareModel(
                                 name = file.name,
@@ -172,6 +178,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                                 with(binding.imageLayout.indexOfChild(this)) {
                                     binding.imageLayout.removeViewAt(this)
                                     uriList.removeAt(this)
+                                    typeList.removeAt(this)
+                                    pathList.removeAt(this)
                                     viewModel.imageList.removeAt(this)
                                     binding.imageLayout.isVisible = uriList.isNotEmpty()
                                 }
@@ -227,7 +235,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                 val accessKeySecret = responseData.uploadPrepareInfo.accessKeySecret
                 val securityToken = responseData.uploadPrepareInfo.securityToken
 
-                val endPoint = responseData.uploadPrepareInfo.endPoint
+                val endPoint = responseData.uploadPrepareInfo.endPoint.replace("https://", "")
                 val bucket = responseData.uploadPrepareInfo.bucket
                 val callbackUrl = responseData.uploadPrepareInfo.callbackUrl
 
@@ -256,13 +264,23 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                         uri // uri
                     )
                     val metadata = ObjectMetadata()
-                    metadata.contentType = "application/octet-stream"
+                    metadata.contentType = typeList[index]
+                    metadata.contentMD5 = calculateBase64Md5(pathList[index])
+                    metadata.setHeader(
+                        "x-oss-callback",
+                        "eyJjYWxsYmFja0JvZHlUeXBlIjoiYXBwbGljYXRpb25cL2pzb24iLCJjYWxsYmFja0hvc3QiOiJhcGkuY29vbGFway5jb20iLCJjYWxsYmFja1VybCI6Imh0dHBzOlwvXC9hcGkuY29vbGFway5jb21cL3Y2XC9jYWxsYmFja1wvbW9iaWxlT3NzVXBsb2FkU3VjY2Vzc0NhbGxiYWNrP2NoZWNrQXJ0aWNsZUNvdmVyUmVzb2x1dGlvbj0wJnZlcnNpb25Db2RlPTIxMDIwMzEiLCJjYWxsYmFja0JvZHkiOiJ7XCJidWNrZXRcIjoke2J1Y2tldH0sXCJvYmplY3RcIjoke29iamVjdH0sXCJoYXNQcm9jZXNzXCI6JHt4OnZhcjF9fSJ9"
+                    )
+                    metadata.setHeader("x-oss-callback-var", "eyJ4OnZhcjEiOiJmYWxzZSJ9")
                     put.metadata = metadata
-                    put.crC64 = OSSRequest.CRC64Config.YES
                     if (!TextUtils.isEmpty(callbackUrl)) {
                         put.callbackParam = object : HashMap<String?, String?>() {
                             init {
                                 put("callbackUrl", callbackUrl)
+                                put(
+                                    "callbackHost",
+                                    Uri.parse(callbackUrl).host ?: "developer.coolapk.com"
+                                )
+                                put("callbackBodyType", "application/json")
                                 put("callbackBody", "filename=${responseData.fileInfo[index].name}")
                             }
                         }

@@ -159,6 +159,7 @@ class ReplyViewModel @Inject constructor(
         ossUploadPrepareData["uploadDir"] = "feed"
         ossUploadPrepareData["is_anonymous"] = "0"
         ossUploadPrepareData["uploadFileList"] = Gson().toJson(imageList)
+        ossUploadPrepareData["toUid"] = ""
 
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.postOSSUploadPrepare(ossUploadPrepareData)
