@@ -275,11 +275,7 @@ class ImageMojitoFragment : Fragment(), IMojitoFragment, OnMojitoViewCallback {
                 }
 
                 override fun onFail(error: Exception?) {
-                    if (url.endsWith(".s.jpg")) {
-                        loadImageWithoutCache(url.replace(".s.jpg", ""), needHandleTarget)
-                    } else {
-                        loadImageFail(false)
-                    }
+                    loadImageFail(false)
                 }
 
                 override fun onSuccess(image: File) {
