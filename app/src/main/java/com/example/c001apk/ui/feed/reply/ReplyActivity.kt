@@ -14,7 +14,6 @@ import android.os.CountDownTimer
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.util.Log
@@ -35,7 +34,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.HapticFeedbackConstantsCompat
@@ -113,6 +114,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private var uriList: MutableList<Uri> = ArrayList()
     private var typeList = ArrayList<String>()
     private var pathList = ArrayList<String>()
+    private var dialog: AlertDialog? = null
 
     init {
         for (i in 0..3) {
@@ -260,8 +262,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                 uriList.forEachIndexed { index, uri ->
                     val put = PutObjectRequest(
                         bucket,
-                        responseData.fileInfo[index].uploadFileName, // objectKey -> oss上所存储文件的名称
-                        uri // uri
+                        responseData.fileInfo[index].uploadFileName,
+                        uri
                     )
                     val metadata = ObjectMetadata()
                     metadata.contentType = typeList[index]
@@ -272,76 +274,35 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                     )
                     metadata.setHeader("x-oss-callback-var", "eyJ4OnZhcjEiOiJmYWxzZSJ9")
                     put.metadata = metadata
-                    if (!TextUtils.isEmpty(callbackUrl)) {
-                        put.callbackParam = object : HashMap<String?, String?>() {
-                            init {
-                                put("callbackUrl", callbackUrl)
-                                put(
-                                    "callbackHost",
-                                    Uri.parse(callbackUrl).host ?: "developer.coolapk.com"
-                                )
-                                put("callbackBodyType", "application/json")
-                                put("callbackBody", "filename=${responseData.fileInfo[index].name}")
-                            }
+                    put.callbackParam = object : HashMap<String?, String?>() {
+                        init {
+                            put("callbackUrl", callbackUrl)
+                            put(
+                                "callbackHost",
+                                Uri.parse(callbackUrl).host ?: "developer.coolapk.com"
+                            )
+                            put("callbackBodyType", "application/json")
+                            put("callbackBody", "filename=${responseData.fileInfo[index].name}")
                         }
                     }
-                    val task = oss.asyncPutObject(
-                        put,
-                        object : OSSCompletedCallback<PutObjectRequest?, PutObjectResult?> {
-                            override fun onSuccess(
-                                request: PutObjectRequest?,
-                                result: PutObjectResult?
-                            ) {
-                                Log.i("OSSUpload", "index: $index, uploadSuccess")
-                                if (index == uriList.lastIndex) {
-                                    if (type == "createFeed")
-                                        viewModel.onPostCreateFeed()
-                                    else
-                                        viewModel.onPostReply()
-                                }
+                    oss.asyncPutObject(put, OSSCallBack(
+                        iOnSuccess = {
+                            Log.i("OSSUpload", "uploadSuccess")
+                            if (index == uriList.lastIndex) {
+                                if (type == "createFeed")
+                                    viewModel.onPostCreateFeed()
+                                else
+                                    viewModel.onPostReply()
                             }
-
-                            override fun onFailure(
-                                request: PutObjectRequest?,
-                                clientException: ClientException?,
-                                serviceException: ServiceException?
-                            ) {
-
-                                // Request exception
-                                if (clientException != null) {
-                                    // Local exception, such as a network exception
-                                    Log.i(
-                                        "OSSUpload",
-                                        "index: $index, uploadFailed: clientException: ${clientException.message}"
-                                    )
-                                    clientException.printStackTrace()
-                                }
-                                if (serviceException != null) {
-                                    // Service exception
-                                    Log.i(
-                                        "OSSUpload",
-                                        "index: $index, OSSUpload: serviceException: ${serviceException.message}"
-                                    )
-                                    Log.i(
-                                        "OSSUpload",
-                                        "index: $index, ErrorCode=" + serviceException.errorCode
-                                    )
-                                    Log.i(
-                                        "OSSUpload",
-                                        "index: $index, RequestId=" + serviceException.requestId
-                                    )
-                                    Log.i(
-                                        "OSSUpload",
-                                        "index: $index, HostId=" + serviceException.hostId
-                                    )
-                                    Log.i(
-                                        "OSSUpload",
-                                        "index: $index, RawMessage=" + serviceException.rawMessage
-                                    )
-                                }
+                        },
+                        iOnFailure = {
+                            Log.i("OSSUpload", "uploadFailed")
+                            runOnUiThread {
+                                closeDialog()
+                                Toast.makeText(this, "图片上传失败", Toast.LENGTH_SHORT).show()
                             }
-                        })
-                    task.waitUntilFinished()
+                        }
+                    ))
                 }
 
             }
@@ -367,6 +328,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
         viewModel.over.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
+                closeDialog()
                 val intent = Intent()
                 if (type == "createFeed") {
                     Toast.makeText(this, "发布成功", Toast.LENGTH_SHORT).show()
@@ -380,12 +342,15 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
         viewModel.toastText.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let {
+                closeDialog()
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         }
 
         viewModel.createDialog.observe(this) { event ->
             event?.getContentIfNotHandledOrReturnNull()?.let {
+                closeDialog()
+
                 val binding = ItemCaptchaBinding.inflate(
                     LayoutInflater.from(this), null, false
                 )
@@ -415,6 +380,11 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             }
         }
 
+    }
+
+    private fun closeDialog() {
+        dialog?.dismiss()
+        dialog = null
     }
 
     private fun initPage() {
@@ -540,6 +510,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     override fun onDestroy() {
         super.onDestroy()
+        closeDialog()
         countDownTimer.cancel()
         binding.editText.removeTextChangedListener(textWatcher)
     }
@@ -647,6 +618,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun onClick(view: View) {
         when (view.id) {
             R.id.imageBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
                 if (SDK_INT in listOf(24, 25)) {
                     if (ContextCompat.checkSelfPermission(
                             this,
@@ -670,10 +642,12 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                                 )
 
                         }
-                    } else
-                        pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                } else
-                    pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    } else {
+                        launchPick()
+                    }
+                } else {
+                    launchPick()
+                }
             }
 
             R.id.keyboardBtn -> {
@@ -703,7 +677,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
             R.id.publish -> {
                 if (type == "createFeed") {
-                    viewModel.replyAndFeedData = HashMap()
                     viewModel.replyAndFeedData["id"] = ""
                     viewModel.replyAndFeedData["message"] = binding.editText.text.toString()
                     viewModel.replyAndFeedData["type"] = "feed"
@@ -724,8 +697,39 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                         viewModel.onPostReply()
                     }
                 }
+                dialog = MaterialAlertDialogBuilder(
+                    this,
+                    R.style.ThemeOverlay_MaterialAlertDialog_Rounded
+                ).apply {
+                    setView(
+                        LayoutInflater.from(this@ReplyActivity)
+                            .inflate(R.layout.dialog_refresh, null, false)
+                    )
+                    setCancelable(false)
+                }.create()
+                dialog?.show()
+                val decorView: View? = dialog?.window?.decorView
+                val paddingTop: Int = decorView?.paddingTop ?: 0
+                val paddingBottom: Int = decorView?.paddingBottom ?: 0
+                val paddingLeft: Int = decorView?.paddingLeft ?: 0
+                val paddingRight: Int = decorView?.paddingRight ?: 0
+                val width = 80.dp + paddingLeft + paddingRight
+                val height = 80.dp + paddingTop + paddingBottom
+                dialog?.window?.setLayout(width, height)
             }
+
         }
+    }
+
+    private fun launchPick() {
+        (binding.main as? SmoothInputLayout)?.closeKeyboard(false)
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            this, R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
+        )
+        pickMultipleMedia.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+            options
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -873,6 +877,60 @@ class OnTextInputListener(
             && s.subSequence(start, start + count).toString() == text
         ) {
             onTextChange()
+        }
+    }
+}
+
+class OSSCallBack(
+    private val iOnSuccess: () -> Unit,
+    private val iOnFailure: () -> Unit,
+) : OSSCompletedCallback<PutObjectRequest?, PutObjectResult?> {
+    override fun onSuccess(
+        request: PutObjectRequest?,
+        result: PutObjectResult?
+    ) {
+        iOnSuccess()
+    }
+
+    override fun onFailure(
+        request: PutObjectRequest?,
+        clientException: ClientException?,
+        serviceException: ServiceException?
+    ) {
+
+        iOnFailure()
+
+        // Request exception
+        if (clientException != null) {
+            // Local exception, such as a network exception
+            Log.i(
+                "OSSUpload",
+                "uploadFailed: clientException: ${clientException.message}"
+            )
+            clientException.printStackTrace()
+        }
+        if (serviceException != null) {
+            // Service exception
+            Log.i(
+                "OSSUpload",
+                "OSSUpload: serviceException: ${serviceException.message}"
+            )
+            Log.i(
+                "OSSUpload",
+                "ErrorCode=" + serviceException.errorCode
+            )
+            Log.i(
+                "OSSUpload",
+                "RequestId=" + serviceException.requestId
+            )
+            Log.i(
+                "OSSUpload",
+                "HostId=" + serviceException.hostId
+            )
+            Log.i(
+                "OSSUpload",
+                "RawMessage=" + serviceException.rawMessage
+            )
         }
     }
 }

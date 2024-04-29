@@ -84,15 +84,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textInputLayout" />
 
-        <View
-            android:id="@+id/line"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/colorSurfaceVariant"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/checkBox" />
-
         <HorizontalScrollView
             android:id="@+id/imageScrollLayout"
             android:layout_width="match_parent"
@@ -100,7 +91,7 @@
             android:scrollbars="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/line">
+            app:layout_constraintTop_toBottomOf="@id/checkBox">
 
             <LinearLayout
                 android:id="@+id/imageLayout"
@@ -113,6 +104,15 @@
 
         </HorizontalScrollView>
 
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorSurfaceVariant"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imageScrollLayout" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -120,7 +120,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageScrollLayout">
+            app:layout_constraintTop_toBottomOf="@id/line">
 
             <ImageView
                 android:id="@+id/emojiBtn"
@@ -129,8 +129,7 @@
                 android:layout_weight="1"
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
-                android:src="@drawable/ic_face"
-                android:tint="@android:color/darker_gray" />
+                android:src="@drawable/ic_face" />
 
 
             <ImageView
@@ -140,8 +139,7 @@
                 android:layout_weight="1"
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
-                android:src="@drawable/ic_image"
-                android:tint="@android:color/darker_gray" />
+                android:src="@drawable/ic_image" />
 
             <ImageView
                 android:id="@+id/keyboardBtn"
@@ -150,8 +148,7 @@
                 android:layout_weight="1"
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
-                android:src="@drawable/outline_keyboard_hide_24"
-                android:tint="@android:color/darker_gray" />
+                android:src="@drawable/outline_keyboard_hide_24" />
 
         </LinearLayout>
 

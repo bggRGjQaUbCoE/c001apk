@@ -94,7 +94,6 @@
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
                 android:src="@drawable/ic_image"
-                android:tint="@android:color/darker_gray"
                 app:layout_constraintBottom_toBottomOf="@id/checkBox"
                 app:layout_constraintStart_toEndOf="@id/checkBox"
                 app:layout_constraintTop_toTopOf="@id/checkBox" />
