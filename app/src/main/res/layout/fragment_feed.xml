@@ -7,7 +7,7 @@
 
         <variable
             name="refreshListener"
-            type="com.example.c001apk.ui.feed.reply.ReplyRefreshListener" />
+            type="com.example.c001apk.ui.feed.reply.reply2reply.ReplyRefreshListener" />
 
         <variable
             name="listener"

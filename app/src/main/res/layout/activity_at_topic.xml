@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:consumeSystemWindowsInsets="@integer/internal_fragment_insets"
-    app:edgeToEdge="true"
-    app:fitsSystemWindowsInsets="@integer/internal_fragment_insets"
-    tools:context=".ui.search.SearchFragment">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="false"
-        app:fitsSystemWindowsInsets="@integer/internal_fragment_top_insets"
+        android:background="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -24,8 +19,9 @@
             style="@style/Widget.Material3.SearchView.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
+            android:background="@null"
             android:clipChildren="false"
-            app:navigationIcon="@drawable/ic_back">
+            tools:navigationIcon="@drawable/ic_back">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -54,13 +50,13 @@
                     app:srcCompat="@drawable/ic_clear_black_24" />
 
                 <ImageView
-                    android:id="@+id/search"
+                    android:id="@+id/clearRecent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
                     android:background="?attr/actionBarItemBackground"
                     android:padding="10dp"
-                    android:visibility="visible"
-                    app:srcCompat="@drawable/ic_search" />
+                    app:srcCompat="@drawable/ic_clear_all" />
 
             </LinearLayout>
 
@@ -73,46 +69,35 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <TextView
-        android:id="@id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:text="@string/search_history"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appBar" />
-
-    <ImageView
-        android:id="@+id/clearAll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:background="?attr/actionBarItemBackground"
-        android:src="@drawable/ic_clear_all"
-        android:tooltipText="@string/clearAll"
-        app:layout_constraintBottom_toBottomOf="@id/title"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="5dp"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
         android:scrollbars="none"
         app:fitsSystemWindowsInsets="bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        tools:itemCount="1"
-        tools:listitem="@layout/item_search_history" />
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:windowBackground"
+        android:visibility="gone"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center|end"
+        android:layout_margin="25dp"
+        android:src="@drawable/ic_check"
+        android:visibility="gone"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+
+    <include
+        android:id="@+id/indicator"
+        layout="@layout/item_indicator" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

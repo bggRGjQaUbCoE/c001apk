@@ -1,4 +1,4 @@
-package com.example.c001apk.ui.feed.reply
+package com.example.c001apk.ui.feed.reply.emoji
 
 import android.view.LayoutInflater
 import android.view.View

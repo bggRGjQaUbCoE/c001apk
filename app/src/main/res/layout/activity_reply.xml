@@ -131,7 +131,6 @@
                 android:padding="8dp"
                 android:src="@drawable/ic_face" />
 
-
             <ImageView
                 android:id="@+id/imageBtn"
                 android:layout_width="0dp"
@@ -140,6 +139,34 @@
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
                 android:src="@drawable/ic_image" />
+
+            <ImageView
+                android:id="@+id/atBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="8dp"
+                android:src="@drawable/ic_at"
+                android:tint="?attr/colorControlNormal" />
+
+            <ImageView
+                android:id="@+id/tagBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="8dp"
+                android:src="@drawable/outline_tag_24" />
+
+            <ImageView
+                android:id="@+id/appBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="8dp"
+                android:src="@drawable/outline_widgets_24" />
 
             <ImageView
                 android:id="@+id/keyboardBtn"

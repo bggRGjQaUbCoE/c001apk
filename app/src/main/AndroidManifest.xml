@@ -24,7 +24,12 @@
         android:usesCleartextTraffic="true">
 
         <activity
+            android:name=".ui.feed.reply.attopic.AtTopicActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.feed.reply.ReplyActivity"
+            android:exported="false"
             android:launchMode="singleTop"
             android:theme="@style/AppThemeTranslucent"
             android:windowSoftInputMode="adjustResize" />

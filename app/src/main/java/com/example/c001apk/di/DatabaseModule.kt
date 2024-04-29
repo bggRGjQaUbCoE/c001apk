@@ -6,10 +6,12 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.c001apk.logic.dao.HistoryFavoriteDao
 import com.example.c001apk.logic.dao.HomeMenuDao
+import com.example.c001apk.logic.dao.RecentAtUserDao
 import com.example.c001apk.logic.dao.StringEntityDao
 import com.example.c001apk.logic.database.BrowseHistoryDatabase
 import com.example.c001apk.logic.database.FeedFavoriteDatabase
 import com.example.c001apk.logic.database.HomeMenuDatabase
+import com.example.c001apk.logic.database.RecentAtUserDatabase
 import com.example.c001apk.logic.database.RecentEmojiDatabase
 import com.example.c001apk.logic.database.SearchHistoryDatabase
 import com.example.c001apk.logic.database.TopicBlackListDatabase
@@ -168,6 +170,20 @@ object DatabaseModule {
             .build()
     }
 
+    @Singleton
+    @Provides
+    fun provideRecentAtUserDao(recentAtUserDatabase: RecentAtUserDatabase): RecentAtUserDao {
+        return recentAtUserDatabase.recentAtUserDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideRecentAtUserDatabase(@ApplicationContext context: Context): RecentAtUserDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            RecentAtUserDatabase::class.java, "recent_at_user.db"
+        ).build()
+    }
 
 }
 

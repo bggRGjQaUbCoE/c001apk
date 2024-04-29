@@ -57,7 +57,7 @@
                 android:layout_marginRight="16dp"
                 app:counterEnabled="true"
                 app:counterMaxLength="500"
-                app:layout_constraintBottom_toTopOf="@id/checkBox"
+                app:layout_constraintBottom_toTopOf="@id/input_bottom"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/title">
@@ -74,29 +74,66 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkBox"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/input_bottom"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:background="@null"
-                android:button="@null"
-                android:drawableStart="?android:attr/listChoiceIndicatorMultiple"
-                android:text="@string/replyAndForward"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toTopOf="@id/imageScrollLayout"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent">
 
-            <ImageView
-                android:id="@+id/imageBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:background="?attr/actionBarItemBackground"
-                android:padding="8dp"
-                android:src="@drawable/ic_image"
-                app:layout_constraintBottom_toBottomOf="@id/checkBox"
-                app:layout_constraintStart_toEndOf="@id/checkBox"
-                app:layout_constraintTop_toTopOf="@id/checkBox" />
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/checkBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawableStart="?android:attr/listChoiceIndicatorMultiple"
+                    android:text="@string/replyAndForward" />
+
+                <ImageView
+                    android:id="@+id/imageBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?attr/actionBarItemBackground"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_image"
+                    app:layout_constraintBottom_toBottomOf="@id/checkBox"
+                    app:layout_constraintStart_toEndOf="@id/checkBox"
+                    app:layout_constraintTop_toTopOf="@id/checkBox" />
+
+                <ImageView
+                    android:id="@+id/atBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?attr/actionBarItemBackground"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_at"
+                    android:tint="?attr/colorControlNormal" />
+
+                <ImageView
+                    android:id="@+id/tagBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?attr/actionBarItemBackground"
+                    android:padding="8dp"
+                    android:src="@drawable/outline_tag_24" />
+
+                <ImageView
+                    android:id="@+id/appBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?attr/actionBarItemBackground"
+                    android:padding="8dp"
+                    android:src="@drawable/outline_widgets_24" />
+
+            </LinearLayout>
 
             <HorizontalScrollView
                 android:id="@+id/imageScrollLayout"

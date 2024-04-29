@@ -30,6 +30,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +43,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.absinthe.libraries.utils.extensions.dp
 import com.alibaba.sdk.android.oss.ClientConfiguration
@@ -64,6 +66,8 @@ import com.example.c001apk.databinding.ActivityReplyBinding
 import com.example.c001apk.databinding.ItemCaptchaBinding
 import com.example.c001apk.logic.model.OSSUploadPrepareModel
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.ui.feed.reply.attopic.AtTopicActivity
+import com.example.c001apk.ui.feed.reply.emoji.EmojiPagerAdapter
 import com.example.c001apk.util.EmojiUtils
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.SmoothInputLayout
@@ -71,6 +75,9 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.elevation.SurfaceColors
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 
@@ -115,6 +122,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private var typeList = ArrayList<String>()
     private var pathList = ArrayList<String>()
     private var dialog: AlertDialog? = null
+    private lateinit var atTopicResultLauncher: ActivityResultLauncher<Intent>
+    private var isFromAt = false
 
     init {
         for (i in 0..3) {
@@ -136,8 +145,34 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         initEmojiPanel()
         initObserve()
         initPhotoPick()
-        showInput()
+        initAtUser()
 
+    }
+
+    private fun initAtUser() {
+        atTopicResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { result: ActivityResult ->
+                if (result.resultCode == RESULT_OK) {
+                    val list = result.data?.getStringExtra("data")
+                    if (isFromAt) {
+                        isFromAt = false
+                        with(binding.editText.selectionStart) {
+                            binding.editText.editableText.replace(this - 1, this, list)
+                        }
+                    } else {
+                        binding.editText.editableText.append(list)
+                    }
+                }
+            }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch(Dispatchers.Main) {
+            delay(150)
+            showInput()
+        }
     }
 
     private fun initPhotoPick() {
@@ -199,6 +234,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private fun initView() {
         binding.emojiBtn?.setOnClickListener(this)
         binding.imageBtn.setOnClickListener(this)
+        binding.atBtn.setOnClickListener(this)
+        binding.tagBtn.setOnClickListener(this)
+        binding.appBtn.setOnClickListener(this)
         binding.keyboardBtn?.setOnClickListener(this)
         binding.checkBox.setOnClickListener(this)
         binding.publish.setOnClickListener(this)
@@ -501,11 +539,22 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun initEditText() {
-        binding.editText.addTextChangedListener(textWatcher)
-        binding.editText.addTextChangedListener(OnTextInputListener("@") {
-            //
-        })
-        binding.editText.setOnKeyListener(FastDeleteAtUserKeyListener())
+        binding.editText.apply {
+            highlightColor = ColorUtils.setAlphaComponent(
+                MaterialColors.getColor(
+                    this@ReplyActivity,
+                    com.google.android.material.R.attr.colorPrimaryDark,
+                    0
+                ), 128
+            )
+            addTextChangedListener(textWatcher)
+            addTextChangedListener(OnTextInputListener("@") {
+                isFromAt = true
+                launchAtTopic("user")
+            })
+            setOnKeyListener(FastDeleteAtUserKeyListener())
+        }
+
     }
 
     override fun onDestroy() {
@@ -617,6 +666,21 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
     override fun onClick(view: View) {
         when (view.id) {
+            R.id.atBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
+                launchAtTopic("user")
+            }
+
+            R.id.tagBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
+                launchAtTopic("topic")
+            }
+
+            R.id.appBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
+
+            }
+
             R.id.imageBtn -> {
                 ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
                 if (SDK_INT in listOf(24, 25)) {
@@ -719,6 +783,15 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             }
 
         }
+    }
+
+    private fun launchAtTopic(type: String) {
+        val intent = Intent(this, AtTopicActivity::class.java)
+        intent.putExtra("type", type)
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            this, R.anim.right_in, R.anim.left_out
+        )
+        atTopicResultLauncher.launch(intent, options)
     }
 
     private fun launchPick() {

@@ -38,9 +38,9 @@ import com.example.c001apk.databinding.FragmentFeedBinding
 import com.example.c001apk.logic.model.FeedEntity
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.ui.feed.reply.Reply2ReplyBottomSheetDialog
 import com.example.c001apk.ui.feed.reply.ReplyActivity
-import com.example.c001apk.ui.feed.reply.ReplyRefreshListener
+import com.example.c001apk.ui.feed.reply.reply2reply.Reply2ReplyBottomSheetDialog
+import com.example.c001apk.ui.feed.reply.reply2reply.ReplyRefreshListener
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.util.ClipboardUtil

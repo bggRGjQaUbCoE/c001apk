@@ -58,7 +58,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
 
         initView()
         initEditText()
-        initEdit()
         initButton()
         initClearHistory()
 
@@ -104,16 +103,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
         binding.clear.setOnClickListener {
             binding.editText.text = null
         }
-    }
-
-    private fun initEdit() {
-        binding.editText.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, keyEvent ->
-            if ((actionId == EditorInfo.IME_ACTION_UNSPECIFIED || actionId == EditorInfo.IME_ACTION_SEARCH) && keyEvent != null) {
-                search()
-                return@OnEditorActionListener false
-            }
-            false
-        })
     }
 
     private fun search() {
@@ -168,21 +157,20 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(), IOnItemClickListen
             inputType = EditorInfo.TYPE_CLASS_TEXT
             hint = if (viewModel.pageType.isNotEmpty()) "在 ${viewModel.title} 中搜索"
             else "搜索"
+            setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, keyEvent ->
+                if ((actionId == EditorInfo.IME_ACTION_UNSPECIFIED || actionId == EditorInfo.IME_ACTION_SEARCH) && keyEvent != null) {
+                    search()
+                    return@OnEditorActionListener false
+                }
+                false
+            })
 
             addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
+                override fun beforeTextChanged(s: CharSequence, i: Int, i2: Int, i3: Int) {}
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                    binding.clear.isVisible = s.isNotBlank()
                 }
-
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-
-                override fun afterTextChanged(s: Editable) {
-                    binding.clear.isVisible = s.isNotEmpty()
-                }
+                override fun afterTextChanged(s: Editable) {}
             })
 
         }

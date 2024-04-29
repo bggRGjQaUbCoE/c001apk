@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ItemTopBinding
-import com.example.c001apk.ui.feed.reply.ReplyRefreshListener
+import com.example.c001apk.ui.feed.reply.reply2reply.ReplyRefreshListener
 
 class FeedFixAdapter(
     private val replyNum: String,
