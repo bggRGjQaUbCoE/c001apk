@@ -1,5 +1,6 @@
 package com.example.c001apk.ui.app
 
+import android.app.ActivityOptions
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -14,6 +15,7 @@ import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.databinding.BaseViewAppBinding
 import com.example.c001apk.ui.base.BasePagerFragment
+import com.example.c001apk.ui.feed.reply.ReplyActivity
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.ImageUtil
@@ -41,6 +43,8 @@ class AppFragment : BasePagerFragment() {
         initApp()
         initAppBar()
         if (!viewModel.tabList.isNullOrEmpty()) {
+            if (PrefManager.isLogin)
+                initFab()
             initTabList()
             initView()
         } else if (!viewModel.errMsg.isNullOrEmpty()) {
@@ -51,6 +55,28 @@ class AppFragment : BasePagerFragment() {
             }
         }
         initObserve()
+    }
+
+    override fun initFab() {
+        super.initFab()
+
+        fab.setOnClickListener {
+            val intent = Intent(requireContext(), ReplyActivity::class.java)
+            intent.putExtra("type", "createFeed")
+            intent.putExtra("targetType", "apk")
+            intent.putExtra("targetId", "${1000000000 + (viewModel.appId?.toInt() ?: 4599)}")
+            val animationBundle = ActivityOptions.makeCustomAnimation(
+                context,
+                com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+                com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+            ).toBundle()
+            requireContext().startActivity(intent, animationBundle)
+        }
+    }
+
+    override fun onTabReselectedExtra() {
+        if (fabBehavior.isScrolledDown)
+            fabBehavior.slideUp(fab, true)
     }
 
     private fun initObserve() {

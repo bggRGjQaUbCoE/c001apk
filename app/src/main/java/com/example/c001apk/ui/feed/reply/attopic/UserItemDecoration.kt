@@ -7,7 +7,7 @@ import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.c001apk.util.dp
+import com.absinthe.libraries.utils.extensions.dp
 import com.google.android.material.color.MaterialColors
 
 class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {

@@ -165,10 +165,7 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
             val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
             fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 rightMargin = 25.dp
-                bottomMargin =
-                    if (isPortrait)
-                        navigationBars.bottom + 105.dp
-                    else 25.dp
+                bottomMargin = navigationBars.bottom + if (isPortrait) 105.dp else 25.dp
             }
             insets
         }
@@ -198,6 +195,8 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
         if (binding.swipeRefresh.isEnabled) {
             binding.recyclerView.stopScroll()
             if (isRefresh == true) {
+                if (viewModel.type == "feed" && fabViewBehavior.isScrolledDown)
+                    fabViewBehavior.slideUp(fab, true)
                 binding.recyclerView.scrollToPosition(0)
                 binding.swipeRefresh.isRefreshing = true
                 refreshData()

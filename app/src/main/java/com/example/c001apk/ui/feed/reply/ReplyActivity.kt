@@ -108,6 +108,11 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private val type: String? by lazy { intent.getStringExtra("type") }
     private val rid: String? by lazy { intent.getStringExtra("rid") }
     private val username: String? by lazy { intent.getStringExtra("username") }
+
+    private val targetType: String? by lazy { intent.getStringExtra("targetType") }
+    private val targetId: String? by lazy { intent.getStringExtra("targetId") }
+    private val title: String? by lazy { intent.getStringExtra("title") }
+
     private val imm by lazy {
         getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
@@ -140,8 +145,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         viewModel.rid = rid
 
         initView()
-        initPage()
         initEditText()
+        initPage()
         initEmojiPanel()
         initObserve()
         initPhotoPick()
@@ -432,6 +437,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         else "回复"
         if (type != "createFeed" && !username.isNullOrEmpty())
             binding.editText.hint = "回复: $username"
+        title?.let {
+            binding.editText.editableText.append("#${title}# ")
+        }
         binding.publish.isClickable = false
     }
 
@@ -554,7 +562,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
             })
             setOnKeyListener(FastDeleteAtUserKeyListener())
         }
-
     }
 
     override fun onDestroy() {
@@ -746,6 +753,16 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                     viewModel.replyAndFeedData["type"] = "feed"
                     viewModel.replyAndFeedData["status"] =
                         if (binding.checkBox.isChecked) "-1" else "1"
+
+                    targetType?.let {
+                        if (it == "apk")
+                            viewModel.replyAndFeedData["type"] = "comment"
+                        viewModel.replyAndFeedData["targetType"] = it
+                    }
+                    targetId?.let {
+                        viewModel.replyAndFeedData["targetId"] = it
+                    }
+
                     if (uriList.isNotEmpty()) {
                         viewModel.onPostOSSUploadPrepare()
                     } else {
@@ -797,7 +814,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private fun launchPick() {
         (binding.main as? SmoothInputLayout)?.closeKeyboard(false)
         val options = ActivityOptionsCompat.makeCustomAnimation(
-            this, R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
+            this,
+            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
         )
         pickMultipleMedia.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),

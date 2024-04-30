@@ -1,5 +1,7 @@
 package com.example.c001apk.ui.topic
 
+import android.app.ActivityOptions
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -8,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.ui.base.BasePagerFragment
+import com.example.c001apk.ui.feed.reply.ReplyActivity
 import com.example.c001apk.ui.home.IOnTabClickListener
 import com.example.c001apk.ui.search.IOnSearchMenuClickContainer
 import com.example.c001apk.ui.search.IOnSearchMenuClickListener
@@ -33,7 +36,35 @@ class TopicFragment : BasePagerFragment(), IOnSearchMenuClickContainer {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initSelected()
+        if (PrefManager.isLogin)
+            initFab()
         initObserve()
+    }
+
+    override fun initFab() {
+        super.initFab()
+        fab.setOnClickListener {
+            val intent = Intent(requireContext(), ReplyActivity::class.java)
+            intent.putExtra("type", "createFeed")
+            intent.putExtra(
+                "targetType",
+                if (viewModel.type == "topic") "tag" else "product_phone"
+            )
+            intent.putExtra("targetId", viewModel.id)
+            if (viewModel.type == "topic")
+                intent.putExtra("title", viewModel.title)
+            val animationBundle = ActivityOptions.makeCustomAnimation(
+                context,
+                com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
+                com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+            ).toBundle()
+            requireContext().startActivity(intent, animationBundle)
+        }
+    }
+
+    override fun onTabReselectedExtra() {
+        if (fabBehavior.isScrolledDown)
+            fabBehavior.slideUp(fab, true)
     }
 
     private fun initSelected() {

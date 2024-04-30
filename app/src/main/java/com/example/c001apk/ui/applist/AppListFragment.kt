@@ -108,10 +108,7 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
             val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
             fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 rightMargin = 25.dp
-                bottomMargin =
-                    if (isPortrait)
-                        navigationBars.bottom + 105.dp
-                    else 25.dp
+                bottomMargin = navigationBars.bottom + if (isPortrait) 105.dp else 25.dp
             }
             insets
         }
@@ -143,6 +140,8 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
     }
 
     override fun onReturnTop(isRefresh: Boolean?) {
+        if (fabViewBehavior.isScrolledDown)
+            fabViewBehavior.slideUp(fab, true)
         binding.swipeRefresh.isRefreshing = true
         binding.recyclerView.scrollToPosition(0)
         refreshData()

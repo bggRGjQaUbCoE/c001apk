@@ -153,7 +153,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
                 ).apply {
                     gravity = Gravity.BOTTOM or Gravity.END
                     behavior = fabViewBehavior
-                    setMargins(0, 0, 25.dp, if (isPortrait) 25.dp + height else 25.dp)
+                    setMargins(0, 0, 25.dp, 25.dp + height)
                 }
                 setOnClickListener {
                     if (PrefManager.SZLMID == "") {
