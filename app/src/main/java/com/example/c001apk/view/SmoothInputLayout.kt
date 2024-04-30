@@ -21,8 +21,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
+import com.example.c001apk.util.dp
 
 /**
  * 顺滑的输入面板

@@ -174,6 +174,19 @@
         <item name="android:textSize">15sp</item>
     </style>
 
+    <style name="CustomShapeAppearanceBottomSheetDialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/anim_bottom_sheet_slide_up</item>
+        <item name="android:windowExitAnimation">@anim/anim_bottom_sheet_slide_down</item>
+    </style>
+
     <style name="AppThemeTranslucent" parent="Theme.Material3.DynamicColors.DayNight.Rikka">
         <!--设置dialog的背景-->
         <item name="android:windowBackground">@android:color/transparent</item>

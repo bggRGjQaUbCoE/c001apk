@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.c001apk.logic.model.LoadUrlResponse
 import com.example.c001apk.logic.model.OSSUploadPrepareModel
 import com.example.c001apk.logic.model.OSSUploadPrepareResponse
 import com.example.c001apk.logic.model.StringEntity
@@ -170,6 +171,25 @@ class ReplyViewModel @Inject constructor(
                             toastText.postValue(Event("uploadPrepare error: ${data.message}"))
                         } else if (data.data != null) {
                             uploadImage.postValue(Event(data.data))
+                        }
+                    } else {
+                        toastText.postValue(Event("response is null"))
+                    }
+                }
+        }
+    }
+
+    val loadShareUrl = MutableLiveData<Event<LoadUrlResponse.Data>>()
+    fun loadShareUrl(url: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.loadShareUrl(url)
+                .collect { result ->
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            toastText.postValue(Event(data.message))
+                        } else if (data.data != null) {
+                            loadShareUrl.postValue(Event(data.data))
                         }
                     } else {
                         toastText.postValue(Event("response is null"))

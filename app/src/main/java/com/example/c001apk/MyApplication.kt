@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatDelegate
-import com.absinthe.libraries.utils.utils.Utility
 import com.example.c001apk.ui.others.BugHandlerActivity
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.HiltAndroidApp
@@ -21,8 +20,6 @@ class MyApplication : Application() {
         super.onCreate()
 
         context = applicationContext
-
-        Utility.init(this)
 
         AppCompatDelegate.setDefaultNightMode(PrefManager.darkTheme)
 

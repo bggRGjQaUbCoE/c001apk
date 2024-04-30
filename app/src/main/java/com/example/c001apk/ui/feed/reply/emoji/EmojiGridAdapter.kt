@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
+import com.example.c001apk.util.dp
 
 
 class EmojiGridAdapter(

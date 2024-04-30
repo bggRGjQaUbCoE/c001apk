@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
@@ -24,6 +25,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.View.VISIBLE
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -45,7 +47,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import com.absinthe.libraries.utils.extensions.dp
 import com.alibaba.sdk.android.oss.ClientConfiguration
 import com.alibaba.sdk.android.oss.ClientException
 import com.alibaba.sdk.android.oss.OSSClient
@@ -69,11 +70,14 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.feed.reply.attopic.AtTopicActivity
 import com.example.c001apk.ui.feed.reply.emoji.EmojiPagerAdapter
 import com.example.c001apk.util.EmojiUtils
+import com.example.c001apk.util.ImageUtil.showIMG
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.SmoothInputLayout
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -242,6 +246,11 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         binding.atBtn.setOnClickListener(this)
         binding.tagBtn.setOnClickListener(this)
         binding.appBtn.setOnClickListener(this)
+        binding.urlBtn.isVisible = false //type == "createFeed"
+        if (type == "createFeed") {
+            binding.urlBtn.setOnClickListener(this)
+            binding.extraUrlLayout.setOnClickListener(this)
+        }
         binding.keyboardBtn?.setOnClickListener(this)
         binding.checkBox.setOnClickListener(this)
         binding.publish.setOnClickListener(this)
@@ -268,6 +277,44 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     }
 
     private fun initObserve() {
+        viewModel.loadShareUrl.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                closeDialog()
+
+                viewModel.replyAndFeedData["extra_title"] = it.title
+                viewModel.replyAndFeedData["extra_url"] = it.url
+
+                binding.extraUrlLayout.isVisible = true
+                binding.extraTitle.text = it.title
+                binding.extraUrl.text = it.url
+                if (it.logo.isNullOrEmpty()) {
+                    binding.extraPic.apply {
+                        setBackgroundColor(
+                            MaterialColors.getColor(
+                                this,
+                                com.google.android.material.R.attr.colorPrimary,
+                                0
+                            )
+                        )
+                        val link = getDrawable(R.drawable.ic_link)
+                        link?.setTint(
+                            MaterialColors.getColor(
+                                this,
+                                com.google.android.material.R.attr.colorOnPrimary,
+                                0
+                            )
+                        )
+                        Glide.with(this).load(link).into(this)
+                    }
+                } else {
+                    binding.extraPic.apply {
+                        setBackgroundColor(Color.TRANSPARENT)
+                        showIMG(this, it.logo)
+                    }
+                }
+            }
+        }
+
         viewModel.uploadImage.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let { responseData ->
 
@@ -418,8 +465,10 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                         viewModel.requestValidateData["name"] = ""
                         viewModel.onPostRequestValidate()
                     }
-                    show()
-                }
+                }.create().apply {
+                    window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                    binding.captchaText.requestFocus()
+                }.show()
             }
         }
 
@@ -671,8 +720,41 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         (binding.main as? SmoothInputLayout)?.showEmojiPanel(true)
     }
 
+    @SuppressLint("InflateParams")
     override fun onClick(view: View) {
         when (view.id) {
+            R.id.extraUrlLayout -> {
+                binding.extraUrlLayout.isVisible = false
+                viewModel.replyAndFeedData["extra_title"] = ""
+                viewModel.replyAndFeedData["extra_url"] = ""
+            }
+
+            R.id.urlBtn -> {
+                ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
+                val urlView = LayoutInflater.from(this@ReplyActivity)
+                    .inflate(R.layout.item_edittext, null, false)
+                val editText: TextInputEditText = urlView.findViewById(R.id.editText)
+                editText.highlightColor = ColorUtils.setAlphaComponent(
+                    MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorPrimaryDark,
+                        0
+                    ), 128
+                )
+                MaterialAlertDialogBuilder(this).apply {
+                    setTitle("添加网络链接")
+                    setView(urlView)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        viewModel.loadShareUrl(editText.text.toString())
+                        showDialog()
+                    }
+                    setNegativeButton(android.R.string.cancel, null)
+                }.create().apply {
+                    window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                    editText.requestFocus()
+                }.show()
+            }
+
             R.id.atBtn -> {
                 ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
                 launchAtTopic("user")
@@ -778,28 +860,33 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                         viewModel.onPostReply()
                     }
                 }
-                dialog = MaterialAlertDialogBuilder(
-                    this,
-                    R.style.ThemeOverlay_MaterialAlertDialog_Rounded
-                ).apply {
-                    setView(
-                        LayoutInflater.from(this@ReplyActivity)
-                            .inflate(R.layout.dialog_refresh, null, false)
-                    )
-                    setCancelable(false)
-                }.create()
-                dialog?.show()
-                val decorView: View? = dialog?.window?.decorView
-                val paddingTop: Int = decorView?.paddingTop ?: 0
-                val paddingBottom: Int = decorView?.paddingBottom ?: 0
-                val paddingLeft: Int = decorView?.paddingLeft ?: 0
-                val paddingRight: Int = decorView?.paddingRight ?: 0
-                val width = 80.dp + paddingLeft + paddingRight
-                val height = 80.dp + paddingTop + paddingBottom
-                dialog?.window?.setLayout(width, height)
+                showDialog()
             }
 
         }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showDialog() {
+        dialog = MaterialAlertDialogBuilder(
+            this,
+            R.style.ThemeOverlay_MaterialAlertDialog_Rounded
+        ).apply {
+            setView(
+                LayoutInflater.from(this@ReplyActivity)
+                    .inflate(R.layout.dialog_refresh, null, false)
+            )
+            setCancelable(false)
+        }.create()
+        dialog?.show()
+        val decorView: View? = dialog?.window?.decorView
+        val paddingTop: Int = decorView?.paddingTop ?: 0
+        val paddingBottom: Int = decorView?.paddingBottom ?: 0
+        val paddingLeft: Int = decorView?.paddingLeft ?: 0
+        val paddingRight: Int = decorView?.paddingRight ?: 0
+        val width = 80.dp + paddingLeft + paddingRight
+        val height = 80.dp + paddingTop + paddingBottom
+        dialog?.window?.setLayout(width, height)
     }
 
     private fun launchAtTopic(type: String) {
@@ -814,9 +901,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private fun launchPick() {
         (binding.main as? SmoothInputLayout)?.closeKeyboard(false)
         val options = ActivityOptionsCompat.makeCustomAnimation(
-            this,
-            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
-            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+            this, R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
         )
         pickMultipleMedia.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
@@ -856,8 +941,8 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     override fun finish() {
         super.finish()
         overridePendingTransition(
-            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
-            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+            R.anim.anim_bottom_sheet_slide_up,
+            R.anim.anim_bottom_sheet_slide_down
         )
     }
 

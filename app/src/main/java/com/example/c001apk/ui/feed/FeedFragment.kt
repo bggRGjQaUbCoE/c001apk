@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
@@ -46,6 +45,7 @@ import com.example.c001apk.ui.others.WebViewActivity
 import com.example.c001apk.util.ClipboardUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.dp
 import com.example.c001apk.util.makeToast
 import com.example.c001apk.view.StaggerItemDecoration
 import com.example.c001apk.view.StickyItemDecorator
@@ -662,9 +662,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
         intent.putExtra("rid", viewModel.rid)
         intent.putExtra("username", viewModel.uname)
         val options = ActivityOptionsCompat.makeCustomAnimation(
-            requireContext(),
-            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
-            com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+            requireContext(), R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
         )
         intentActivityResultLauncher.launch(intent, options)
     }

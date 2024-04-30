@@ -46,6 +46,7 @@ class UpdateListFragment : BaseViewFragment<UpdateListViewModel>() {
     }
 
 
+
     override fun initObserve() {
         super.initRefresh()
 

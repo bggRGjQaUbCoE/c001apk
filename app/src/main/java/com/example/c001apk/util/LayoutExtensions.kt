@@ -1,5 +1,6 @@
 package com.example.c001apk.util
 
+import android.content.res.Resources
 import android.text.StaticLayout
 
 /**
@@ -19,3 +20,5 @@ internal fun StaticLayout.textWidth(): Int {
 internal fun lerp(a: Float, b: Float, t: Float): Float {
     return a + (b - a) * t
 }
+
+val Number.dp get() = (toFloat() * Resources.getSystem().displayMetrics.density).toInt()

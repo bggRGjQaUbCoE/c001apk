@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.BR
 import com.example.c001apk.databinding.ItemHomeImageSquareScrollCardItemBinding
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.util.DensityTool
+import com.example.c001apk.util.dp
 
 class ImageSquareScrollCardAdapter(
     private val listener: ItemListener

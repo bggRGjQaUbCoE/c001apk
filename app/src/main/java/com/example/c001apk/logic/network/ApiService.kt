@@ -6,6 +6,7 @@ import com.example.c001apk.logic.model.FeedContentResponse
 import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.LikeFeedResponse
 import com.example.c001apk.logic.model.LikeReplyResponse
+import com.example.c001apk.logic.model.LoadUrlResponse
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.model.OSSUploadPrepareResponse
 import com.example.c001apk.logic.model.PostReplyResponse
@@ -291,5 +292,11 @@ interface ApiService {
         @Query("firstItem") firstItem: String?,
         @Query("lastItem") lastItem: String?,
     ): Call<HomeFeedResponse>
+
+    @GET("/v6/feed/loadShareUrl")
+    fun loadShareUrl(
+        @Query("url") url: String,
+        @Query("packageName") packageName: String = "",
+    ): Call<LoadUrlResponse>
 
 }

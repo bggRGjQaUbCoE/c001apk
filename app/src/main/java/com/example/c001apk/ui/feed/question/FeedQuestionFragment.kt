@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
@@ -23,6 +22,7 @@ import com.example.c001apk.ui.feed.FeedDataAdapter
 import com.example.c001apk.ui.feed.FeedReplyAdapter
 import com.example.c001apk.ui.feed.FeedViewModel
 import com.example.c001apk.util.IntentUtil
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.QuestionItemDecorator
 import com.example.c001apk.view.VoteStaggerItemDecoration
 import com.google.android.material.color.MaterialColors

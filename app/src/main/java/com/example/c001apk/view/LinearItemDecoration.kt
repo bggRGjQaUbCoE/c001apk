@@ -6,7 +6,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.absinthe.libraries.utils.extensions.getColorByAttr
+import com.google.android.material.color.MaterialColors
 
 class LinearItemDecoration(private val space: Int) :
     RecyclerView.ItemDecoration() {
@@ -54,8 +54,10 @@ class ReplyItemDecoration(
     init {
         mPaint.isAntiAlias = true
         mPaint.color =
-            context.getColorByAttr(
-                com.google.android.material.R.attr.colorSurfaceVariant
+            MaterialColors.getColor(
+                context,
+                com.google.android.material.R.attr.colorSurfaceVariant,
+                0
             )
     }
 

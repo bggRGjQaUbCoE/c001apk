@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.adapter.ItemListener
@@ -19,6 +18,7 @@ import com.example.c001apk.databinding.ItemFeedContentReplyItemBinding
 import com.example.c001apk.logic.model.Like
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.LinkMovementClickMethod
 import com.google.android.material.color.MaterialColors
 

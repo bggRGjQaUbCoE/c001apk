@@ -11,7 +11,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.text.method.LinkMovementMethodCompat
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.logic.model.FeedArticleContentBean
 import com.example.c001apk.logic.model.HomeFeedResponse
@@ -19,6 +18,7 @@ import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.NetWorkUtil
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.SpannableStringBuilderUtil
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.LinkTextView
 import com.example.c001apk.view.ninegridimageview.NineGridImageView
 import com.google.android.material.color.MaterialColors
@@ -39,7 +39,7 @@ fun setExtraPic(imageView: ImageView, extraPic: String?) {
             link?.setTint(
                 MaterialColors.getColor(
                     imageView.context,
-                    android.R.attr.windowBackground,
+                    com.google.android.material.R.attr.colorOnPrimary,
                     0
                 )
             )

@@ -67,8 +67,8 @@ class AppFragment : BasePagerFragment() {
             intent.putExtra("targetId", "${1000000000 + (viewModel.appId?.toInt() ?: 4599)}")
             val animationBundle = ActivityOptions.makeCustomAnimation(
                 context,
-                com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
-                com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+                R.anim.anim_bottom_sheet_slide_up,
+                R.anim.anim_bottom_sheet_slide_down
             ).toBundle()
             requireContext().startActivity(intent, animationBundle)
         }

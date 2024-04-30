@@ -24,8 +24,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
-import com.absinthe.libraries.utils.utils.UiUtils
+import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.ItemListener
@@ -34,12 +33,15 @@ import com.example.c001apk.databinding.DialogReplyToReplyBottomSheetBinding
 import com.example.c001apk.logic.model.TotalReplyResponse
 import com.example.c001apk.ui.feed.reply.ReplyActivity
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.UiUtils.setSystemBarStyle
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.ReplyItemDecoration
 import com.example.c001apk.view.ReplyStaggerItemDecoration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import rikka.core.util.ResourceUtils
 
 
 @AndroidEntryPoint
@@ -112,12 +114,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
                 super.onAttachedToWindow()
 
                 window?.let {
-                    it.attributes?.windowAnimations =
-                        com.absinthe.libraries.utils.R.style.DialogAnimation
+                    it.attributes?.windowAnimations = R.style.DialogAnimation
                     WindowCompat.setDecorFitsSystemWindows(it, false)
-                    UiUtils.setSystemBarStyle(it)
+                    setSystemBarStyle(it)
                     WindowInsetsControllerCompat(it, it.decorView)
-                        .isAppearanceLightNavigationBars = !UiUtils.isDarkMode()
+                        .isAppearanceLightNavigationBars =
+                        !ResourceUtils.isNightMode(resources.configuration)
                 }
 
                 findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
@@ -315,9 +317,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
                     intent.putExtra("rid", viewModel.rid)
                     intent.putExtra("username", viewModel.uname)
                     val options = ActivityOptionsCompat.makeCustomAnimation(
-                        requireContext(),
-                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
-                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+                        requireContext(), R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
                     )
                     intentActivityResultLauncher.launch(intent, options)
                 }

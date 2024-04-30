@@ -9,7 +9,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ActivityCopyBinding
 import com.example.c001apk.logic.model.HomeMenu
@@ -17,6 +16,7 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.home.HomeMenuAdapter
 import com.example.c001apk.ui.home.HomeViewModel
 import com.example.c001apk.ui.home.ItemTouchHelperCallback
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.LinearItemDecoration2
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint

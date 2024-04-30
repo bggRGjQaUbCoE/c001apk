@@ -9,7 +9,6 @@ import androidx.viewbinding.ViewBinding
 import com.example.c001apk.R
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.ThemeUtils
-import com.google.android.material.color.DynamicColors
 import rikka.material.app.MaterialActivity
 import java.lang.reflect.ParameterizedType
 
@@ -43,9 +42,7 @@ abstract class BaseActivity<VB : ViewBinding> : MaterialActivity() {
     }
 
     override fun onApplyUserThemeResource(theme: Resources.Theme, isDecorView: Boolean) {
-        if (ThemeUtils.isSystemAccent)
-            DynamicColors.applyToActivityIfAvailable(this)
-        else
+        if (!ThemeUtils.isSystemAccent)
             theme.applyStyle(ThemeUtils.colorThemeStyleRes, true)
         theme.applyStyle(ThemeUtils.getNightThemeStyleRes(this), true) //blackDarkMode
     }

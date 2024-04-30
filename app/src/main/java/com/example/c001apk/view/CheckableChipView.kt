@@ -47,8 +47,8 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.withScale
 import androidx.core.graphics.withTranslation
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
+import com.example.c001apk.util.dp
 import com.example.c001apk.util.lerp
 import com.example.c001apk.util.textWidth
 import java.text.Bidi

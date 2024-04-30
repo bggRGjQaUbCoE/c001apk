@@ -6,7 +6,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.adapter.ItemListener
@@ -14,6 +13,7 @@ import com.example.c001apk.adapter.PopClickListener
 import com.example.c001apk.databinding.ItemMessageItemBinding
 import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.ui.messagedetail.MessageDiffCallback
+import com.example.c001apk.util.dp
 
 
 class MessageAdapter(

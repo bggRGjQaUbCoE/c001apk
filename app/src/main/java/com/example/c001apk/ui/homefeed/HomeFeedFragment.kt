@@ -16,7 +16,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
@@ -31,6 +30,7 @@ import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
+import com.example.c001apk.util.dp
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -154,8 +154,8 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
                     intent.putExtra("type", "createFeed")
                     val options = ActivityOptionsCompat.makeCustomAnimation(
                         requireContext(),
-                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_up,
-                        com.absinthe.libraries.utils.R.anim.anim_bottom_sheet_slide_down
+                        R.anim.anim_bottom_sheet_slide_up,
+                        R.anim.anim_bottom_sheet_slide_down
                     )
                     requireContext().startActivity(intent, options.toBundle())
                 }
@@ -203,8 +203,7 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
             } else if (viewModel.type == "follow") {
                 MaterialAlertDialogBuilder(requireContext()).apply {
                     setTitle("关注分组")
-                    val items =
-                        arrayOf("全部关注", "好友关注", "话题关注", "数码关注", "应用关注")
+                    val items = arrayOf("全部关注", "好友关注", "话题关注", "数码关注", "应用关注")
                     viewModel.position = when (PrefManager.FOLLOWTYPE) {
                         "all" -> 0
                         "circle" -> 1
@@ -225,22 +224,19 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
                             }
 
                             1 -> {
-                                viewModel.dataListUrl =
-                                    "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=circle"
                                 viewModel.dataListTitle = "好友关注"
                                 PrefManager.FOLLOWTYPE = "circle"
                             }
 
                             2 -> {
-                                viewModel.dataListUrl =
-                                    "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=topic"
                                 viewModel.dataListTitle = "话题关注"
                                 PrefManager.FOLLOWTYPE = "topic"
                             }
 
                             3 -> {
-                                viewModel.dataListUrl =
-                                    "/page?url=V9_HOME_TAB_FOLLOW&type=product"
+                                viewModel.dataListUrl = "/page?url=V9_HOME_TAB_FOLLOW&type=product"
                                 viewModel.dataListTitle = "数码关注"
                                 PrefManager.FOLLOWTYPE = "product"
                             }

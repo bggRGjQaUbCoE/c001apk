@@ -253,6 +253,10 @@ class NetworkRepo @Inject constructor(
         Result.success(apiService.getSearchTag(query, page, recentIds, firstItem, lastItem).await())
     }
 
+    suspend fun loadShareUrl(url: String) = fire {
+        Result.success(apiService.loadShareUrl(url).await())
+    }
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

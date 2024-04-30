@@ -186,7 +186,6 @@ dependencies {
     implementation(libs.drakeet.about)
     implementation(libs.jbcrypt)
     implementation(libs.jsoup)
-    implementation(libs.zhaobozhen.libraries.utils)
     testImplementation(libs.junit)
     implementation(libs.oss.android.sdk)
     implementation(libs.utilcode)

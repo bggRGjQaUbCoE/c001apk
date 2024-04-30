@@ -15,7 +15,7 @@ import android.view.animation.Interpolator
 import android.widget.LinearLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.util.dp
 import net.mikaelzero.mojito.R
 import kotlin.math.abs
 

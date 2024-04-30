@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.view.Gravity
-import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.util.dp
 import com.google.android.material.imageview.ShapeableImageView
 
 

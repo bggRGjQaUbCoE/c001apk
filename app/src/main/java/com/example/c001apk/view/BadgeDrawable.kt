@@ -9,7 +9,7 @@ import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.text.TextPaint
-import com.absinthe.libraries.utils.extensions.dp
+import com.example.c001apk.util.dp
 import com.google.android.material.color.MaterialColors
 
 /*

@@ -9,7 +9,6 @@ import androidx.core.view.isVisible
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
-import com.absinthe.libraries.utils.extensions.dp
 import com.example.c001apk.BR
 import com.example.c001apk.R
 import com.example.c001apk.databinding.ItemCollectionListItemBinding
@@ -30,6 +29,7 @@ import com.example.c001apk.logic.model.Like
 import com.example.c001apk.util.DateUtils
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.PrefManager
+import com.example.c001apk.util.dp
 import com.example.c001apk.view.LinearItemDecoration1
 import com.google.android.material.color.MaterialColors
 
