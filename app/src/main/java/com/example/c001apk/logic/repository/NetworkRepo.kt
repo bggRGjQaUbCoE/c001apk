@@ -12,6 +12,7 @@ import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.http.Query
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -241,6 +242,16 @@ class NetworkRepo @Inject constructor(
 
     suspend fun postOSSUploadPrepare(data: HashMap<String, String>) = fire {
         Result.success(apiService.postOSSUploadPrepare(data).await())
+    }
+
+    suspend fun getSearchTag(
+        query: String,
+        page: Int,
+        recentIds: String?,
+        firstItem: String?,
+        lastItem: String?,
+    ) = fire {
+        Result.success(apiService.getSearchTag(query, page, recentIds, firstItem, lastItem).await())
     }
 
     private suspend fun <T> Call<T>.await(): T {

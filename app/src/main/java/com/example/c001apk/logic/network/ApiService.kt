@@ -283,4 +283,13 @@ interface ApiService {
         @FieldMap data: HashMap<String, String>
     ): Call<OSSUploadPrepareResponse>
 
+    @GET("/v6/feed/searchTag")
+    fun getSearchTag(
+        @Query("q") query: String,
+        @Query("page") page: Int,
+        @Query("recentIds") recentIds: String?,
+        @Query("firstItem") firstItem: String?,
+        @Query("lastItem") lastItem: String?,
+    ): Call<HomeFeedResponse>
+
 }

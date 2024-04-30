@@ -141,9 +141,7 @@ class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
                     if (view.top - headHeight >= parent.paddingTop) {
                         //如果是分组的头部
                         if (adapter.isGroupHead(childPosition)) {
-                            val groupName =
-                                if (adapter.getGroupName(childPosition) == "recent") "最近联系人"
-                                else "好友"
+                            val groupName = adapter.getGroupName(childPosition)
 
                             //绘制头部的背景
                             val rect = Rect(left, view.top - headHeight, right, view.top)
@@ -203,8 +201,7 @@ class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
                         c.drawRect(rect, topPaint)
 
                         //绘制吸顶的头部文字
-                        val groupName = if (adapter.getGroupName(position) == "recent") "最近联系人"
-                        else "好友" //adapter.getGroupName(position)
+                        val groupName = adapter.getGroupName(position)
                         topTextPaint.getTextBounds(groupName, 0, groupName.length, topTextRect)
 
                         //将超出的挡住裁掉
@@ -225,8 +222,7 @@ class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
                         c.drawRect(rect, topPaint)
 
                         //绘制吸顶的头部文字
-                        val groupName = if (adapter.getGroupName(position) == "recent") "最近联系人"
-                        else "好友" //adapter.getGroupName(position)
+                        val groupName = adapter.getGroupName(position)
                         topTextPaint.getTextBounds(groupName, 0, groupName.length, topTextRect)
 
                         c.drawText(

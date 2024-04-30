@@ -2,6 +2,7 @@ package com.example.c001apk.ui.feed.reply.attopic
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +11,9 @@ import com.example.c001apk.logic.model.RecentAtUser
 import com.example.c001apk.util.ImageUtil.showIMG
 
 class AtUserAdapter(
-    private val onClickUser: (RecentAtUser, Boolean) -> Unit
+    private val type: String,
+    private val onClickUser: (RecentAtUser, Boolean) -> Unit,
+    private val onClickTopic: (String, String) -> Unit
 ) : ListAdapter<RecentAtUser, AtUserAdapter.ViewHolder>(AtTopicDiffCallback()) {
 
     class ViewHolder(val binding: ItemAtUserBinding) : RecyclerView.ViewHolder(binding.root)
@@ -24,15 +27,27 @@ class AtUserAdapter(
             )
         )
 
+        viewHolder.binding.checkBox.isVisible = type == "user"
+
         fun onClick() {
-            onClickUser(currentList[viewHolder.bindingAdapterPosition], viewHolder.binding.checkBox.isChecked)
+            onClickUser(
+                currentList[viewHolder.bindingAdapterPosition],
+                viewHolder.binding.checkBox.isChecked
+            )
         }
         viewHolder.binding.checkBox.setOnClickListener {
             onClick()
         }
         viewHolder.itemView.setOnClickListener {
-            viewHolder.binding.checkBox.isChecked = !viewHolder.binding.checkBox.isChecked
-            onClick()
+            if (type == "user") {
+                viewHolder.binding.checkBox.isChecked = !viewHolder.binding.checkBox.isChecked
+                onClick()
+            } else {
+                onClickTopic(
+                    currentList[viewHolder.bindingAdapterPosition].username,
+                    currentList[viewHolder.bindingAdapterPosition].id.toString()
+                )
+            }
         }
         return viewHolder
     }
@@ -56,7 +71,13 @@ class AtUserAdapter(
     }
 
     fun getGroupName(childPosition: Int): String {
-        return currentList[childPosition].group
+        return when (val group = currentList[childPosition].group) {
+            "recent" -> "最近联系人"
+            "follow" -> "好友"
+            "recentTopic" -> "最近参与"
+            "hotTopic" -> "热门话题"
+            else -> group
+        }
     }
 
 }

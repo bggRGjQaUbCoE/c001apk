@@ -19,6 +19,7 @@ import com.example.c001apk.adapter.FooterAdapter
 import com.example.c001apk.databinding.ActivityAtTopicBinding
 import com.example.c001apk.logic.model.RecentAtUser
 import com.example.c001apk.ui.base.BaseActivity
+import com.example.c001apk.util.PrefManager
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -54,7 +55,9 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                         mLayoutManager.findLastVisibleItemPosition()
 
                     if (lastVisibleItemPosition ==
-                        viewModel.listSize + (viewModel.recentAtUsersData.value?.size ?: 0) - 1
+                        (if (type == "user")
+                            viewModel.listSize + (viewModel.recentAtUsersData.value?.size ?: 0) - 1
+                        else viewModel.listSize - 1)
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         loadMore()
@@ -75,9 +78,9 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     private fun initObserve() {
-        viewModel.footerState.observe(this) {
+        /*viewModel.footerState.observe(this) {
             footerAdapter.setLoadState(it)
-        }
+        }*/
 
         if (type == "user") {
             viewModel.recentAtUsersData.observe(this) {
@@ -101,11 +104,16 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                     isVisible = false
                 }
             }
-            viewModel.dataList.observe(this) {
-
-            }
         } else {
             viewModel.getHotTopics()
+            viewModel.followListData.observe(this) {
+                viewModel.listSize = it.size
+                atUserAdapter.submitList(it)
+                binding.indicator.parent.apply {
+                    isIndeterminate = false
+                    isVisible = false
+                }
+            }
         }
     }
 
@@ -139,16 +147,18 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     binding.clear.isVisible = s.isNullOrEmpty().not()
                     binding.fragmentContainer.isVisible = s.isNullOrEmpty().not()
-                    if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
-                        supportFragmentManager
-                            .beginTransaction()
-                            .replace(
-                                R.id.fragmentContainer,
-                                SearchFragment.newInstance(type, s.toString())
-                            )
-                            .commit()
-                    } else {
-                        container?.onSearch(type, s.toString())
+                    if (s.isNullOrEmpty().not()) {
+                        if (supportFragmentManager.findFragmentById(R.id.fragmentContainer) == null) {
+                            supportFragmentManager
+                                .beginTransaction()
+                                .replace(
+                                    R.id.fragmentContainer,
+                                    SearchFragment.newInstance(type, s.toString())
+                                )
+                                .commit()
+                        } else {
+                            container?.onSearch(type, s.toString())
+                        }
                     }
                 }
 
@@ -163,7 +173,15 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
             isVisible = true
         }
         binding.clearRecent.setOnClickListener {
-            viewModel.clearAll()
+            if (type == "user")
+                viewModel.clearAll()
+            else {
+                PrefManager.recentIds = ""
+                viewModel.followListData.value =
+                    viewModel.followListData.value?.filterNot {
+                        it.group == "recentTopic"
+                    }
+            }
         }
         binding.toolBar.apply {
             setNavigationIcon(R.drawable.ic_back)
@@ -186,13 +204,18 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                 finish()
             }
         }
-        atUserAdapter = AtUserAdapter { position, isChecked ->
-            if (isChecked)
-                atList.add(position)
-            else
-                atList.remove(position)
-            binding.fab.isVisible = atList.isNotEmpty()
-        }
+        atUserAdapter = AtUserAdapter(type,
+            onClickUser = { recentAtUser, isChecked ->
+                if (isChecked)
+                    atList.add(recentAtUser)
+                else
+                    atList.remove(recentAtUser)
+                binding.fab.isVisible = atList.isNotEmpty()
+
+            },
+            onClickTopic = { title, id ->
+                onClickTopic(title, id)
+            })
         footerAdapter = FooterAdapter(object : FooterAdapter.FooterListener {
             override fun onReLoad() {
                 viewModel.isEnd = false
@@ -213,7 +236,11 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
 
     private fun loadMore() {
         viewModel.isLoadMore = true
-        viewModel.getFollowList()
+        if (type == "user") {
+            viewModel.getFollowList()
+        } else {
+            viewModel.getHotTopics()
+        }
     }
 
     fun onClickUser(avatar: String, username: String) {
@@ -239,16 +266,20 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
         finish()
     }
 
-    fun onClickTopic(title: String) {
-        val userList = atList.distinctBy { it.username }
-        viewModel.updateList(userList)
-
-        val list = atList.map {
-            "@${it.username} "
-        }.distinct().joinToString(separator = "")
+    fun onClickTopic(title: String, id: String) {
+        with(PrefManager.recentIds) {
+            if (this.isEmpty())
+                PrefManager.recentIds = id
+            else {
+                val idList = this.split(",".toRegex())
+                if (!idList.contains(id)) {
+                    PrefManager.recentIds = (idList + listOf(id)).joinToString(separator = ",")
+                }
+            }
+        }
 
         val intent = Intent()
-        intent.putExtra("data", list)
+        intent.putExtra("data", "#$title# ")
         setResult(RESULT_OK, intent)
         finish()
     }

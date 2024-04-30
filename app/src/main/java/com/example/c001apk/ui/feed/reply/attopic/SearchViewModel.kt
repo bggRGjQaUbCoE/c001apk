@@ -29,6 +29,73 @@ class SearchViewModel @Inject constructor(
     var type: String = "user"
 
     override fun fetchData() {
+        if (type == "user")
+            onSearchUser()
+        else if (type == "topic")
+            onSearchTopic()
+    }
+
+    private fun onSearchTopic() {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getSearchTag(
+                keyword, page, "", null, lastItem
+            )
+                .onStart {
+                    if (isLoadMore) {
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.Loading)
+                        else
+                            footerState.postValue(FooterState.Loading)
+                    }
+                }
+                .collect { result ->
+                    val searchList = dataList.value?.toMutableList() ?: ArrayList()
+                    val search = result.getOrNull()
+                    if (search != null) {
+                        if (!search.message.isNullOrEmpty()) {
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingError(search.message))
+                            else
+                                footerState.postValue(FooterState.LoadingError(search.message))
+                            return@collect
+                        } else if (!search.data.isNullOrEmpty()) {
+                            lastItem = search.data.last().id
+                            if (isRefreshing)
+                                searchList.clear()
+                            if (isRefreshing || isLoadMore) {
+                                searchList.addAll(search.data)
+                            }
+                            page++
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingDone)
+                            else
+                                footerState.postValue(FooterState.LoadingDone)
+                            dataList.postValue(searchList)
+                        } else {
+                            isEnd = true
+                            if (listSize <= 0)
+                                loadingState.postValue(LoadingState.LoadingFailed(LOADING_EMPTY))
+                            else {
+                                if (isRefreshing)
+                                    dataList.postValue(emptyList())
+                                footerState.postValue(FooterState.LoadingEnd(LOADING_END))
+                            }
+                        }
+                    } else {
+                        isEnd = true
+                        if (listSize <= 0)
+                            loadingState.postValue(LoadingState.LoadingFailed(LOADING_FAILED))
+                        else
+                            footerState.postValue(FooterState.LoadingError(LOADING_FAILED))
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                    isRefreshing = false
+                    isLoadMore = false
+                }
+        }
+    }
+
+    private fun onSearchUser() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getSearch(
                 type, "all", "default", keyword,

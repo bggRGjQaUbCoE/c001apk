@@ -13,14 +13,14 @@ import com.example.c001apk.util.ImageUtil.showIMG
 import com.google.android.material.imageview.ShapeableImageView
 
 class SearchAdapter(
-    private val onClickUser: (String, String) -> Unit,
-    private val onClickTopic: (String) -> Unit
+    private val onClickItem: (String, String) -> Unit
 ) : ListAdapter<HomeFeedResponse.Data, SearchAdapter.ViewHolder>(SearchDiffCallback()) {
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ShapeableImageView = view.findViewById(R.id.logoCover)
         val username: TextView = view.findViewById(R.id.title)
         var avatarUrl: String = ""
+        var id: String = ""
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -30,8 +30,8 @@ class SearchAdapter(
         )
         viewHolder.itemView.setOnClickListener {
             when (currentList[viewHolder.bindingAdapterPosition].entityType) {
-                "user" -> onClickUser(viewHolder.avatarUrl, viewHolder.username.text.toString())
-                "topic" -> onClickTopic(viewHolder.username.text.toString())
+                "user" -> onClickItem(viewHolder.avatarUrl, viewHolder.username.text.toString())
+                "topic" -> onClickItem(viewHolder.username.text.toString(), viewHolder.id)
             }
         }
         return viewHolder
@@ -45,7 +45,9 @@ class SearchAdapter(
                 holder.username.text = data.username
                 showIMG(holder.avatar, data.userAvatar)
             }
+
             "topic" -> {
+                holder.id = data.id.toString()
                 holder.username.text = data.title
                 showIMG(holder.avatar, data.logo)
             }

@@ -40,14 +40,12 @@ class SearchFragment : BaseViewFragment<SearchViewModel>(), OnSearchListener {
     }
 
     override fun initAdapter() {
-        searchAdapter = SearchAdapter(
-            onClickUser = { avatar, username ->
-                (activity as? AtTopicActivity)?.onClickUser(avatar, username)
-            },
-            onClickTopic = {
-                (activity as? AtTopicActivity)?.onClickTopic(it)
-            }
-        )
+        searchAdapter = SearchAdapter { first, second ->
+            if (viewModel.type == "user")
+                (activity as? AtTopicActivity)?.onClickUser(first, second) // avatar, username
+            else
+                (activity as? AtTopicActivity)?.onClickTopic(first, second) // title, id
+        }
         footerAdapter = FooterAdapter(object : FooterAdapter.FooterListener {
             override fun onReLoad() {
                 viewModel.isEnd = false

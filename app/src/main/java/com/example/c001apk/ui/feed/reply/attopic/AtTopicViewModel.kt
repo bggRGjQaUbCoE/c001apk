@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.constant.Constants
-import com.example.c001apk.logic.model.HomeFeedResponse
 import com.example.c001apk.logic.model.RecentAtUser
 import com.example.c001apk.logic.repository.NetworkRepo
 import com.example.c001apk.logic.repository.RecentAtUserRepo
@@ -29,7 +28,6 @@ class AtTopicViewModel @Inject constructor(
     private val uid by lazy { PrefManager.uid }
 
     val followListData = MutableLiveData<List<RecentAtUser>>()
-    val dataList = MutableLiveData<List<HomeFeedResponse.Data>>()
     val footerState = MutableLiveData<FooterState>()
     val toastText = MutableLiveData<Event<String?>>()
 
@@ -48,7 +46,7 @@ class AtTopicViewModel @Inject constructor(
                             footerState.postValue(FooterState.LoadingError(data.message))
                         } else if (!data.data.isNullOrEmpty()) {
                             page++
-                            lastItem = data.data.first().id
+                            lastItem = data.data.last().id
                             data.data.map { user ->
                                 RecentAtUser(
                                     group = "follow",
@@ -96,8 +94,65 @@ class AtTopicViewModel @Inject constructor(
         }
     }
 
+    var firstItem: String? = null
+    private var recentIds: String? = PrefManager.recentIds
     fun getHotTopics() {
-        
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.getSearchTag("", page, recentIds, firstItem, lastItem)
+                .collect { result ->
+                    val data = result.getOrNull()
+                    if (data != null) {
+                        if (data.message != null) {
+                            toastText.postValue(Event(data.message))
+                            footerState.postValue(FooterState.LoadingError(data.message))
+                        } else if (!data.data.isNullOrEmpty()) {
+                            page++
+                            recentIds = null
+                            lastItem = data.data.last().id
+                            if (firstItem == null)
+                                firstItem = data.data.first().id
+
+                            val dataList = ArrayList<RecentAtUser>()
+
+                            data.data[0].entities?.let {
+                                dataList.addAll(it.map { topic ->
+                                    RecentAtUser(
+                                        group = "recentTopic",
+                                        avatar = topic.logo ?: "",
+                                        username = topic.title
+                                    ).also { bean ->
+                                        bean.id = topic.id?.toLong() ?: -1
+                                    }
+                                })
+                            }
+
+                            dataList.addAll(data.data.filter { it.entityType == "topic" }
+                                .map { topic ->
+                                    RecentAtUser(
+                                        group = "hotTopic",
+                                        avatar = topic.logo ?: "",
+                                        username = topic.title ?: ""
+                                    ).also { bean ->
+                                        bean.id = topic.id?.toLong() ?: -1
+                                    }
+                                })
+
+                            followListData.postValue(
+                                (followListData.value ?: emptyList()) + dataList
+                            )
+                            footerState.postValue(FooterState.LoadingDone)
+                        } else if (data.data?.isEmpty() == true) {
+                            isEnd = true
+                            footerState.postValue(FooterState.LoadingEnd(Constants.LOADING_END))
+                        }
+                    } else {
+                        toastText.postValue(Event("response is null"))
+                        footerState.postValue(FooterState.LoadingError(Constants.LOADING_FAILED))
+                    }
+                    isRefreshing = false
+                    isLoadMore = false
+                }
+        }
     }
 
     override fun fetchData() {}

@@ -166,7 +166,8 @@
                 android:layout_weight="1"
                 android:background="?attr/actionBarItemBackground"
                 android:padding="8dp"
-                android:src="@drawable/outline_widgets_24" />
+                android:src="@drawable/outline_widgets_24"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/keyboardBtn"
