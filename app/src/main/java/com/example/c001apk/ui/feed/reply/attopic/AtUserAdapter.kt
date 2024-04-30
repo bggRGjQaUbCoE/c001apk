@@ -16,6 +16,8 @@ class AtUserAdapter(
     private val onClickTopic: (String, String) -> Unit
 ) : ListAdapter<RecentAtUser, AtUserAdapter.ViewHolder>(AtTopicDiffCallback()) {
 
+    private val checkMap = HashMap<Int, Boolean>()
+
     class ViewHolder(val binding: ItemAtUserBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,14 +31,18 @@ class AtUserAdapter(
 
         viewHolder.binding.checkBox.isVisible = type == "user"
 
-        fun onClick() {
+        fun onClick(){
+            checkMap[viewHolder.bindingAdapterPosition] = viewHolder.binding.checkBox.isChecked
             onClickUser(
                 currentList[viewHolder.bindingAdapterPosition],
                 viewHolder.binding.checkBox.isChecked
             )
         }
-        viewHolder.binding.checkBox.setOnClickListener {
-            onClick()
+
+        if (type == "user") {
+            viewHolder.binding.checkBox.setOnClickListener {
+                onClick()
+            }
         }
         viewHolder.itemView.setOnClickListener {
             if (type == "user") {
@@ -58,6 +64,8 @@ class AtUserAdapter(
         if (data.avatar.isNotBlank()) {
             showIMG(holder.binding.avatar, data.avatar)
         }
+        if (type == "user")
+            holder.binding.checkBox.isChecked = checkMap.getOrDefault(position, false)
     }
 
     fun isGroupHead(childPosition: Int): Boolean {

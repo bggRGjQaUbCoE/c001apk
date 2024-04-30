@@ -486,10 +486,10 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         else "回复"
         if (type != "createFeed" && !username.isNullOrEmpty())
             binding.editText.hint = "回复: $username"
+        binding.publish.isClickable = false
         title?.let {
             binding.editText.editableText.append("#${title}# ")
         }
-        binding.publish.isClickable = false
     }
 
     private fun initEmojiPanel() {

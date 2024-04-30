@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -71,11 +72,15 @@ class AtTopicViewModel @Inject constructor(
         }
     }
 
+    val afterUpdateList = MutableLiveData<Event<Boolean>>()
     fun updateList(userList: List<RecentAtUser>) {
         viewModelScope.launch(Dispatchers.IO) {
             userList.forEach {
                 if (recentAtUserRepo.checkUser(it.username)) {
-                    recentAtUserRepo.updateUser(it.username, System.currentTimeMillis())
+                    recentAtUserRepo.updateUser(
+                        it.username,
+                        System.currentTimeMillis()
+                    )
                 } else {
                     recentAtUserRepo.insertUser(
                         RecentAtUser(
@@ -85,6 +90,7 @@ class AtTopicViewModel @Inject constructor(
                     )
                 }
             }
+            afterUpdateList.postValue(Event(true))
         }
     }
 

@@ -93,8 +93,7 @@
         android:layout_gravity="bottom|center|end"
         android:layout_margin="25dp"
         android:src="@drawable/ic_check"
-        android:visibility="gone"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+        android:visibility="gone" />
 
     <include
         android:id="@+id/indicator"

@@ -5,10 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class RecentAtUser(
+    var id: Long = System.currentTimeMillis(),
     val group: String = "recent",
     val avatar: String,
+    @PrimaryKey(autoGenerate = false)
     val username: String,
-) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Long = System.currentTimeMillis()
-}
+)

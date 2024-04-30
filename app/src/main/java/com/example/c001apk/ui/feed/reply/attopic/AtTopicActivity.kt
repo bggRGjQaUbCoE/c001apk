@@ -10,6 +10,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +21,9 @@ import com.example.c001apk.databinding.ActivityAtTopicBinding
 import com.example.c001apk.logic.model.RecentAtUser
 import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.util.PrefManager
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,8 +34,10 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     private lateinit var atUserAdapter: AtUserAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private var atList: MutableList<RecentAtUser> = ArrayList()
+    private val atList: MutableList<RecentAtUser> = ArrayList()
     override var container: OnSearchListener? = null
+    private val fabBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
+    private var isClearRecent = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,15 +83,30 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     private fun initObserve() {
+        viewModel.afterUpdateList.observe(this) { event ->
+            event.getContentIfNotHandledOrReturnNull()?.let {
+                val list = atList.map {
+                    "@${it.username} "
+                }.distinct().joinToString(separator = "")
+
+                val intent = Intent()
+                intent.putExtra("data", list)
+                setResult(RESULT_OK, intent)
+                finish()
+            }
+        }
+
         /*viewModel.footerState.observe(this) {
             footerAdapter.setLoadState(it)
         }*/
 
         if (type == "user") {
             viewModel.recentAtUsersData.observe(this) {
-                if (viewModel.page == 1) {
+                if (viewModel.isInit) {
+                    viewModel.isInit = false
                     viewModel.getFollowList()
-                } else {
+                } else if (isClearRecent) {
+                    isClearRecent = false
                     atUserAdapter.submitList(
                         atUserAdapter.currentList.filterNot {
                             it.group == "recent"
@@ -168,20 +188,23 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     private fun initView() {
+        (binding.fab.layoutParams as CoordinatorLayout.LayoutParams).behavior = fabBehavior
         binding.indicator.parent.apply {
             isIndeterminate = true
             isVisible = true
         }
         binding.clearRecent.setOnClickListener {
-            if (type == "user")
+            if (type == "user") {
+                isClearRecent = true
                 viewModel.clearAll()
-            else {
+            } else {
                 PrefManager.recentIds = ""
                 viewModel.followListData.value =
                     viewModel.followListData.value?.filterNot {
                         it.group == "recentTopic"
                     }
             }
+            slideUpFab()
         }
         binding.toolBar.apply {
             setNavigationIcon(R.drawable.ic_back)
@@ -193,15 +216,6 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
             binding.fab.setOnClickListener {
                 val userList = atList.distinctBy { it.username }
                 viewModel.updateList(userList)
-
-                val list = atList.map {
-                    "@${it.username} "
-                }.distinct().joinToString(separator = "")
-
-                val intent = Intent()
-                intent.putExtra("data", list)
-                setResult(RESULT_OK, intent)
-                finish()
             }
         }
         atUserAdapter = AtUserAdapter(type,
@@ -211,7 +225,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                 else
                     atList.remove(recentAtUser)
                 binding.fab.isVisible = atList.isNotEmpty()
-
+                slideUpFab()
             },
             onClickTopic = { title, id ->
                 onClickTopic(title, id)
@@ -232,6 +246,11 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
         binding.clear.setOnClickListener {
             binding.editText.text = null
         }
+    }
+
+    private fun slideUpFab() {
+        if (type == "user" && fabBehavior.isScrolledDown)
+            fabBehavior.slideUp(binding.fab, true)
     }
 
     private fun loadMore() {
@@ -271,10 +290,10 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
             if (this.isEmpty())
                 PrefManager.recentIds = id
             else {
-                val idList = this.split(",".toRegex())
-                if (!idList.contains(id)) {
-                    PrefManager.recentIds = (idList + listOf(id)).joinToString(separator = ",")
-                }
+                val idList = this.split(",".toRegex()).toMutableList()
+                if (idList.contains(id))
+                    idList.remove(id)
+                PrefManager.recentIds = (listOf(id) + idList).joinToString(separator = ",")
             }
         }
 

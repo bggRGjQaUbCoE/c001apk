@@ -182,7 +182,9 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             RecentAtUserDatabase::class.java, "recent_at_user.db"
-        ).build()
+        )
+            .addMigrations(RecentAtUserDatabase_MIGRATION_1_2)
+            .build()
     }
 
 }
@@ -212,5 +214,12 @@ object HomeMenuDatabase_MIGRATION_2_3 : Migration(2, 3) {
 object HomeMenuDatabase_MIGRATION_3_4 : Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("insert into HomeMenu (position,title,isEnable) values (6,'酷图',1)")
+    }
+}
+
+object RecentAtUserDatabase_MIGRATION_1_2 : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("DROP TABLE RecentAtUser")
+        db.execSQL("CREATE TABLE `RecentAtUser` (`id` INTEGER NOT NULL, `group` TEXT NOT NULL, `avatar` TEXT NOT NULL, `username` TEXT NOT NULL, PRIMARY KEY(`username`))")
     }
 }

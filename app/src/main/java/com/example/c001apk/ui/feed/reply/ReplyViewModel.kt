@@ -124,25 +124,22 @@ class ReplyViewModel @Inject constructor(
         }
     }
 
-    fun updateRecentEmoji(it: String) {
+    fun updateRecentEmoji(data: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            with(StringEntity(it)) {
-                if (recentEmojiRepo.checkEmoji(data)) {
-                    recentEmojiRepo.updateEmoji(data, System.currentTimeMillis())
-                } else {
-                    if (recentEmojiLiveData.value?.size == 27)
-                        recentEmojiLiveData.value?.last()?.data?.let {
-                            recentEmojiRepo.updateEmoji(
-                                it,
-                                data,
-                                System.currentTimeMillis()
-                            )
-                        }
-                    else
-                        recentEmojiRepo.insertEmoji(this)
-                }
+            if (recentEmojiRepo.checkEmoji(data)) {
+                recentEmojiRepo.updateEmoji(data, System.currentTimeMillis())
+            } else {
+                if (recentEmojiLiveData.value?.size == 27)
+                    recentEmojiLiveData.value?.last()?.data?.let {
+                        recentEmojiRepo.updateEmoji(
+                            it,
+                            data,
+                            System.currentTimeMillis()
+                        )
+                    }
+                else
+                    recentEmojiRepo.insertEmoji(StringEntity(data))
             }
-
         }
     }
 
