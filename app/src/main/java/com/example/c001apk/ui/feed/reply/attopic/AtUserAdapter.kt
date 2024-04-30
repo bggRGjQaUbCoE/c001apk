@@ -10,7 +10,7 @@ import com.example.c001apk.logic.model.RecentAtUser
 import com.example.c001apk.util.ImageUtil.showIMG
 
 class AtUserAdapter(
-    private val onClickUser: (Int, Boolean) -> Unit
+    private val onClickUser: (RecentAtUser, Boolean) -> Unit
 ) : ListAdapter<RecentAtUser, AtUserAdapter.ViewHolder>(AtTopicDiffCallback()) {
 
     class ViewHolder(val binding: ItemAtUserBinding) : RecyclerView.ViewHolder(binding.root)
@@ -25,7 +25,7 @@ class AtUserAdapter(
         )
 
         fun onClick() {
-            onClickUser(viewHolder.bindingAdapterPosition, viewHolder.binding.checkBox.isChecked)
+            onClickUser(currentList[viewHolder.bindingAdapterPosition], viewHolder.binding.checkBox.isChecked)
         }
         viewHolder.binding.checkBox.setOnClickListener {
             onClick()

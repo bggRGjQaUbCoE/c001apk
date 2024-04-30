@@ -15,68 +15,39 @@ import com.google.android.material.imageview.ShapeableImageView
 class SearchAdapter(
     private val onClickUser: (String, String) -> Unit,
     private val onClickTopic: (String) -> Unit
-) : ListAdapter<HomeFeedResponse.Data, RecyclerView.ViewHolder>(SearchDiffCallback()) {
+) : ListAdapter<HomeFeedResponse.Data, SearchAdapter.ViewHolder>(SearchDiffCallback()) {
 
-    override fun getItemViewType(position: Int): Int {
-        return when (val type = currentList[position].entityType) {
-            "user" -> 0
-            "topic" -> 1
-            else -> throw IllegalArgumentException("entityType error: $type")
-        }
-    }
-
-    class UserViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ShapeableImageView = view.findViewById(R.id.logoCover)
         val username: TextView = view.findViewById(R.id.title)
         var avatarUrl: String = ""
     }
 
-    class TopicViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val logo: ShapeableImageView = view.findViewById(R.id.logoCover)
-        val title: TextView = view.findViewById(R.id.title)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            0 -> {
-                val viewHolder = UserViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_message_mess, parent, false)
-                )
-                viewHolder.itemView.setOnClickListener {
-                    onClickUser(viewHolder.avatarUrl, viewHolder.username.text.toString())
-                }
-                viewHolder
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val viewHolder = ViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_message_mess, parent, false)
+        )
+        viewHolder.itemView.setOnClickListener {
+            when (currentList[viewHolder.bindingAdapterPosition].entityType) {
+                "user" -> onClickUser(viewHolder.avatarUrl, viewHolder.username.text.toString())
+                "topic" -> onClickTopic(viewHolder.username.text.toString())
             }
-
-            1 -> {
-                val viewHolder = TopicViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_message_mess, parent, false)
-                )
-                viewHolder.itemView.setOnClickListener {
-                    onClickTopic(viewHolder.title.text.toString())
-                }
-                viewHolder
-            }
-
-            else -> throw IllegalArgumentException("viewType error: $viewType")
         }
+        return viewHolder
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is UserViewHolder -> {
-                val user = currentList[position]
-                holder.avatarUrl = user.userAvatar ?: ""
-                holder.username.text = user.username
-                showIMG(holder.avatar, user.userAvatar)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val data = currentList[position]
+        when (data.entityType) {
+            "user" -> {
+                holder.avatarUrl = data.userAvatar ?: ""
+                holder.username.text = data.username
+                showIMG(holder.avatar, data.userAvatar)
             }
-
-            is TopicViewHolder -> {
-                val topic = currentList[position]
-                holder.title.text = topic.title
-                showIMG(holder.logo, topic.logo)
+            "topic" -> {
+                holder.username.text = data.title
+                showIMG(holder.avatar, data.logo)
             }
         }
     }

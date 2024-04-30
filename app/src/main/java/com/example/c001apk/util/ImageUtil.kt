@@ -62,14 +62,14 @@ object ImageUtil {
 
     @SuppressLint("CheckResult")
     fun showIMG(view: ImageView, url: String?, isCover: Boolean = false) {
-        url?.let {
+        if (!url.isNullOrEmpty()) {
             val newUrl = GlideUrl(
-                it.http2https,
+                url.http2https,
                 LazyHeaders.Builder().addHeader("User-Agent", USER_AGENT).build()
             )
             Glide
                 .with(view).apply {
-                    if (it.endsWith(".gif"))
+                    if (url.endsWith(".gif"))
                         asGif()
                 }
                 .load(newUrl).apply {

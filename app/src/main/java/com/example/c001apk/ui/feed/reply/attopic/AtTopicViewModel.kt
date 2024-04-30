@@ -96,5 +96,9 @@ class AtTopicViewModel @Inject constructor(
         }
     }
 
+    fun getHotTopics() {
+        
+    }
+
     override fun fetchData() {}
 }

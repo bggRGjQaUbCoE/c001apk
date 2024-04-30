@@ -30,7 +30,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     private lateinit var atUserAdapter: AtUserAdapter
     private lateinit var footerAdapter: FooterAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
-    private val atList = ArrayList<Int>()
+    private var atList: MutableList<RecentAtUser> = ArrayList()
     override var container: OnSearchListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,7 +105,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
 
             }
         } else {
-            //viewModel.getHotTopics()
+            viewModel.getHotTopics()
         }
     }
 
@@ -173,13 +173,11 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
         }
         if (type == "user") {
             binding.fab.setOnClickListener {
-                val userList = atList.map {
-                    atUserAdapter.currentList[it]
-                }.distinctBy { it.username }
+                val userList = atList.distinctBy { it.username }
                 viewModel.updateList(userList)
 
                 val list = atList.map {
-                    "@${atUserAdapter.currentList[it].username} "
+                    "@${it.username} "
                 }.distinct().joinToString(separator = "")
 
                 val intent = Intent()
@@ -219,9 +217,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     fun onClickUser(avatar: String, username: String) {
-        val userList = atList.map {
-            atUserAdapter.currentList[it]
-        }.toMutableList().also {
+        val userList = atList.also {
             it.add(
                 RecentAtUser(
                     avatar = avatar,
@@ -232,7 +228,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
         viewModel.updateList(userList)
 
         val list = atList.map {
-            "@${atUserAdapter.currentList[it].username} "
+            "@${it.username} "
         }.toMutableList().also {
             it.add("@$username ")
         }.distinct().joinToString(separator = "")
@@ -244,13 +240,13 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     fun onClickTopic(title: String) {
-        val userList = atList.map {
-            atUserAdapter.currentList[it]
-        }.distinctBy { it.username }
+        val userList = atList.distinctBy { it.username }
         viewModel.updateList(userList)
+
         val list = atList.map {
-            "@${atUserAdapter.currentList[it].username} "
+            "@${it.username} "
         }.distinct().joinToString(separator = "")
+
         val intent = Intent()
         intent.putExtra("data", list)
         setResult(RESULT_OK, intent)
