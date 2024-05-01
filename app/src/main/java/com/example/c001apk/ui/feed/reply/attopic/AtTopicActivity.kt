@@ -83,33 +83,35 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     private fun initObserve() {
-        viewModel.afterUpdateList.observe(this) { event ->
-            event.getContentIfNotHandledOrReturnNull()?.let {
-                val list = atList.map {
-                    "@${it.username} "
-                }.distinct().joinToString(separator = "")
-
-                val intent = Intent()
-                intent.putExtra("data", list)
-                setResult(RESULT_OK, intent)
-                finish()
-            }
-        }
-
         /*viewModel.footerState.observe(this) {
             footerAdapter.setLoadState(it)
         }*/
 
         if (type == "user") {
+            viewModel.afterUpdateList.observe(this) { event ->
+                event.getContentIfNotHandledOrReturnNull()?.let {
+                    val list = atList.map {
+                        "@${it.username} "
+                    }.distinct().joinToString(separator = "")
+
+                    val intent = Intent()
+                    intent.putExtra("data", list)
+                    setResult(RESULT_OK, intent)
+                    finish()
+                }
+            }
+
             viewModel.recentAtUsersData.observe(this) {
                 if (viewModel.isInit) {
                     viewModel.isInit = false
+                    viewModel.listSize = it.size
                     viewModel.getFollowList()
                 } else if (isClearRecent) {
                     isClearRecent = false
+                    atUserAdapter.listSize = viewModel.listSize
                     atUserAdapter.submitList(
-                        atUserAdapter.currentList.filterNot {
-                            it.group == "recent"
+                        atUserAdapter.currentList.filterNot { item ->
+                            item.group == "recent"
                         }
                     )
                 }

@@ -151,8 +151,7 @@ class ReplyViewModel @Inject constructor(
 
     val uploadImage = MutableLiveData<Event<OSSUploadPrepareResponse.Data>>()
     private val ossUploadPrepareData: HashMap<String, String> = HashMap()
-    var imageList = ArrayList<OSSUploadPrepareModel>()
-    fun onPostOSSUploadPrepare() {
+    fun onPostOSSUploadPrepare(imageList:List<OSSUploadPrepareModel>) {
         ossUploadPrepareData["uploadBucket"] = "image"
         ossUploadPrepareData["uploadDir"] = "feed"
         ossUploadPrepareData["is_anonymous"] = "0"

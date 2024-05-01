@@ -54,11 +54,12 @@ import com.alibaba.sdk.android.oss.ServiceException
 import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback
 import com.alibaba.sdk.android.oss.common.OSSLog
 import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider
-import com.alibaba.sdk.android.oss.common.utils.BinaryUtil.calculateBase64Md5
+import com.alibaba.sdk.android.oss.common.utils.BinaryUtil
 import com.alibaba.sdk.android.oss.model.ObjectMetadata
 import com.alibaba.sdk.android.oss.model.PutObjectRequest
 import com.alibaba.sdk.android.oss.model.PutObjectResult
-import com.blankj.utilcode.util.FileUtils.getFileMD5ToString
+import com.blankj.utilcode.util.ConvertUtils.bytes2HexString
+import com.blankj.utilcode.util.FileUtils
 import com.blankj.utilcode.util.UriUtils
 import com.bumptech.glide.Glide
 import com.example.c001apk.BuildConfig
@@ -72,6 +73,7 @@ import com.example.c001apk.ui.feed.reply.emoji.EmojiPagerAdapter
 import com.example.c001apk.util.EmojiUtils
 import com.example.c001apk.util.ImageUtil.showIMG
 import com.example.c001apk.util.dp
+import com.example.c001apk.util.makeToast
 import com.example.c001apk.view.CenteredImageSpan
 import com.example.c001apk.view.SmoothInputLayout
 import com.google.android.material.color.MaterialColors
@@ -128,8 +130,9 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private val list = listOf(recentList, emojiList, coolBList)
     private lateinit var pickMultipleMedia: ActivityResultLauncher<PickVisualMediaRequest>
     private var uriList: MutableList<Uri> = ArrayList()
+    private var imageList = ArrayList<OSSUploadPrepareModel>()
     private var typeList = ArrayList<String>()
-    private var pathList = ArrayList<String>()
+    private var md5List = ArrayList<String>()
     private var dialog: AlertDialog? = null
     private lateinit var atTopicResultLauncher: ActivityResultLauncher<Intent>
     private var isFromAt = false
@@ -188,52 +191,61 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         pickMultipleMedia =
             registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(9)) { uris ->
                 if (uris.isNotEmpty()) {
-                    uris.forEach { uri ->
-                        if (uriList.size == 9) {
-                            Toast.makeText(this, "最多选择9张图片", Toast.LENGTH_SHORT).show()
-                            return@registerForActivityResult
-                        }
-                        uriList.add(uri)
-
-                        val file = UriUtils.uri2File(uri)
-                        val path = file.path
-                        val md5 = getFileMD5ToString(file).lowercase()
-                        val options = BitmapFactory.Options()
-                        options.inJustDecodeBounds = true
-                        BitmapFactory.decodeFile(file.path, options)
-                        val width = options.outWidth
-                        val height = options.outHeight
-                        val type = options.outMimeType
-                        typeList.add(type)
-                        pathList.add(path)
-                        viewModel.imageList.add(
-                            OSSUploadPrepareModel(
-                                name = file.name,
-                                resolution = "${width}x${height}",
-                                md5 = md5,
-                            )
-                        )
-
-                        val imageView = ImageView(this).apply {
-                            layoutParams = LinearLayout.LayoutParams(
-                                (55.dp * width.toFloat() / height.toFloat()).toInt(), 55.dp
-                            ).apply {
-                                setMargins(5.dp, 0, 0, 0)
+                    try {
+                        uris.forEach { uri ->
+                            if (uriList.size == 9) {
+                                Toast.makeText(this, "最多选择9张图片", Toast.LENGTH_SHORT).show()
+                                return@registerForActivityResult
                             }
-                            setOnClickListener {
-                                with(binding.imageLayout.indexOfChild(this)) {
-                                    binding.imageLayout.removeViewAt(this)
-                                    uriList.removeAt(this)
-                                    typeList.removeAt(this)
-                                    pathList.removeAt(this)
-                                    viewModel.imageList.removeAt(this)
-                                    binding.imageLayout.isVisible = uriList.isNotEmpty()
+
+                            val file = UriUtils.uri2File(uri)
+                            val md5Byte = FileUtils.getFileMD5(file)
+                            val md5 = bytes2HexString(md5Byte)
+                            val contentMD5 = BinaryUtil.toBase64String(md5Byte)
+
+                            val options = BitmapFactory.Options()
+                            options.inJustDecodeBounds = true
+                            BitmapFactory.decodeFile(file.path, options)
+                            val width = options.outWidth
+                            val height = options.outHeight
+                            val type = options.outMimeType
+
+                            typeList.add(type)
+                            md5List.add(contentMD5)
+                            imageList.add(
+                                OSSUploadPrepareModel(
+                                    name = file.name,
+                                    resolution = "${width}x${height}",
+                                    md5 = md5,
+                                )
+                            )
+                            uriList.add(uri)
+
+                            val imageView = ImageView(this).apply {
+                                layoutParams = LinearLayout.LayoutParams(
+                                    (55.dp * width.toFloat() / height.toFloat()).toInt(), 55.dp
+                                ).apply {
+                                    setMargins(5.dp, 0, 0, 0)
+                                }
+                                setOnClickListener {
+                                    with(binding.imageLayout.indexOfChild(this)) {
+                                        binding.imageLayout.removeViewAt(this)
+                                        uriList.removeAt(this)
+                                        typeList.removeAt(this)
+                                        md5List.removeAt(this)
+                                        imageList.removeAt(this)
+                                        binding.imageLayout.isVisible = uriList.isNotEmpty()
+                                    }
                                 }
                             }
+                            Glide.with(this).load(uri).into(imageView)
+                            binding.imageLayout.addView(imageView)
                         }
-                        Glide.with(this).load(uri).into(imageView)
-                        binding.imageLayout.addView(imageView)
+                    } catch (e: Exception) {
+                        makeToast("获取图片信息失败")
+                        e.printStackTrace()
                     }
+
                 }
                 binding.imageLayout.isVisible = uriList.isNotEmpty()
             }
@@ -317,82 +329,86 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
         viewModel.uploadImage.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let { responseData ->
-
-                viewModel.replyAndFeedData["pic"] =
-                    responseData.fileInfo.joinToString(separator = ",") {
-                        responseData.uploadPrepareInfo.uploadImagePrefix + "/" + it.uploadFileName
-                    }
-
-                val accessKeyId = responseData.uploadPrepareInfo.accessKeyId
-                val accessKeySecret = responseData.uploadPrepareInfo.accessKeySecret
-                val securityToken = responseData.uploadPrepareInfo.securityToken
-
-                val endPoint = responseData.uploadPrepareInfo.endPoint.replace("https://", "")
-                val bucket = responseData.uploadPrepareInfo.bucket
-                val callbackUrl = responseData.uploadPrepareInfo.callbackUrl
-
-                val conf = ClientConfiguration()
-                conf.connectionTimeout = 5 * 60 * 1000
-                conf.socketTimeout = 5 * 60 * 1000
-                conf.maxConcurrentRequest = 5
-                conf.maxErrorRetry = 2
-                OSSLog.enableLog()
-                val credentialProvider = OSSStsTokenCredentialProvider(
-                    accessKeyId,
-                    accessKeySecret,
-                    securityToken
-                )
-                val oss = OSSClient(
-                    this,
-                    endPoint,
-                    credentialProvider,
-                    conf
-                )
-
-                uriList.forEachIndexed { index, uri ->
-                    val put = PutObjectRequest(
-                        bucket,
-                        responseData.fileInfo[index].uploadFileName,
-                        uri
-                    )
-                    val metadata = ObjectMetadata()
-                    metadata.contentType = typeList[index]
-                    metadata.contentMD5 = calculateBase64Md5(pathList[index])
-                    metadata.setHeader(
-                        "x-oss-callback",
-                        "eyJjYWxsYmFja0JvZHlUeXBlIjoiYXBwbGljYXRpb25cL2pzb24iLCJjYWxsYmFja0hvc3QiOiJhcGkuY29vbGFway5jb20iLCJjYWxsYmFja1VybCI6Imh0dHBzOlwvXC9hcGkuY29vbGFway5jb21cL3Y2XC9jYWxsYmFja1wvbW9iaWxlT3NzVXBsb2FkU3VjY2Vzc0NhbGxiYWNrP2NoZWNrQXJ0aWNsZUNvdmVyUmVzb2x1dGlvbj0wJnZlcnNpb25Db2RlPTIxMDIwMzEiLCJjYWxsYmFja0JvZHkiOiJ7XCJidWNrZXRcIjoke2J1Y2tldH0sXCJvYmplY3RcIjoke29iamVjdH0sXCJoYXNQcm9jZXNzXCI6JHt4OnZhcjF9fSJ9"
-                    )
-                    metadata.setHeader("x-oss-callback-var", "eyJ4OnZhcjEiOiJmYWxzZSJ9")
-                    put.metadata = metadata
-                    put.callbackParam = object : HashMap<String?, String?>() {
-                        init {
-                            put("callbackUrl", callbackUrl)
-                            put(
-                                "callbackHost",
-                                Uri.parse(callbackUrl).host ?: "developer.coolapk.com"
-                            )
-                            put("callbackBodyType", "application/json")
-                            put("callbackBody", "filename=${responseData.fileInfo[index].name}")
+                try {
+                    viewModel.replyAndFeedData["pic"] =
+                        responseData.fileInfo.joinToString(separator = ",") {
+                            responseData.uploadPrepareInfo.uploadImagePrefix + "/" + it.uploadFileName
                         }
-                    }
-                    oss.asyncPutObject(put, OSSCallBack(
-                        iOnSuccess = {
-                            Log.i("OSSUpload", "uploadSuccess")
-                            if (index == uriList.lastIndex) {
-                                if (type == "createFeed")
-                                    viewModel.onPostCreateFeed()
-                                else
-                                    viewModel.onPostReply()
-                            }
-                        },
-                        iOnFailure = {
-                            Log.i("OSSUpload", "uploadFailed")
-                            runOnUiThread {
-                                closeDialog()
-                                Toast.makeText(this, "图片上传失败", Toast.LENGTH_SHORT).show()
+
+                    val accessKeyId = responseData.uploadPrepareInfo.accessKeyId
+                    val accessKeySecret = responseData.uploadPrepareInfo.accessKeySecret
+                    val securityToken = responseData.uploadPrepareInfo.securityToken
+
+                    val endPoint = responseData.uploadPrepareInfo.endPoint.replace("https://", "")
+                    val bucket = responseData.uploadPrepareInfo.bucket
+                    val callbackUrl = responseData.uploadPrepareInfo.callbackUrl
+
+                    val conf = ClientConfiguration()
+                    conf.connectionTimeout = 5 * 60 * 1000
+                    conf.socketTimeout = 5 * 60 * 1000
+                    conf.maxConcurrentRequest = 5
+                    conf.maxErrorRetry = 2
+                    OSSLog.enableLog()
+                    val credentialProvider = OSSStsTokenCredentialProvider(
+                        accessKeyId,
+                        accessKeySecret,
+                        securityToken
+                    )
+                    val oss = OSSClient(
+                        this,
+                        endPoint,
+                        credentialProvider,
+                        conf
+                    )
+
+                    uriList.forEachIndexed { index, uri ->
+                        val put = PutObjectRequest(
+                            bucket,
+                            responseData.fileInfo[index].uploadFileName,
+                            uri
+                        )
+                        val metadata = ObjectMetadata()
+                        metadata.contentType = typeList[index]
+                        metadata.contentMD5 = md5List[index]
+                        metadata.setHeader(
+                            "x-oss-callback",
+                            "eyJjYWxsYmFja0JvZHlUeXBlIjoiYXBwbGljYXRpb25cL2pzb24iLCJjYWxsYmFja0hvc3QiOiJhcGkuY29vbGFway5jb20iLCJjYWxsYmFja1VybCI6Imh0dHBzOlwvXC9hcGkuY29vbGFway5jb21cL3Y2XC9jYWxsYmFja1wvbW9iaWxlT3NzVXBsb2FkU3VjY2Vzc0NhbGxiYWNrP2NoZWNrQXJ0aWNsZUNvdmVyUmVzb2x1dGlvbj0wJnZlcnNpb25Db2RlPTIxMDIwMzEiLCJjYWxsYmFja0JvZHkiOiJ7XCJidWNrZXRcIjoke2J1Y2tldH0sXCJvYmplY3RcIjoke29iamVjdH0sXCJoYXNQcm9jZXNzXCI6JHt4OnZhcjF9fSJ9"
+                        )
+                        metadata.setHeader("x-oss-callback-var", "eyJ4OnZhcjEiOiJmYWxzZSJ9")
+                        put.metadata = metadata
+                        put.callbackParam = object : HashMap<String?, String?>() {
+                            init {
+                                put("callbackUrl", callbackUrl)
+                                put(
+                                    "callbackHost",
+                                    Uri.parse(callbackUrl).host ?: "developer.coolapk.com"
+                                )
+                                put("callbackBodyType", "application/json")
+                                put("callbackBody", "filename=${responseData.fileInfo[index].name}")
                             }
                         }
-                    ))
+                        oss.asyncPutObject(put, OSSCallBack(
+                            iOnSuccess = {
+                                Log.i("OSSUpload", "uploadSuccess")
+                                if (index == uriList.lastIndex) {
+                                    if (type == "createFeed")
+                                        viewModel.onPostCreateFeed()
+                                    else
+                                        viewModel.onPostReply()
+                                }
+                            },
+                            iOnFailure = {
+                                Log.i("OSSUpload", "uploadFailed")
+                                runOnUiThread {
+                                    closeDialog()
+                                    Toast.makeText(this, "图片上传失败", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        ))
+                    }
+                } catch (e: Exception) {
+                    makeToast("图片上传失败")
+                    e.printStackTrace()
                 }
 
             }
@@ -846,7 +862,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                     }
 
                     if (uriList.isNotEmpty()) {
-                        viewModel.onPostOSSUploadPrepare()
+                        viewModel.onPostOSSUploadPrepare(imageList)
                     } else {
                         viewModel.onPostCreateFeed()
                     }
@@ -855,7 +871,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                     viewModel.replyAndFeedData["replyAndForward"] =
                         if (binding.checkBox.isChecked) "1" else "0"
                     if (uriList.isNotEmpty()) {
-                        viewModel.onPostOSSUploadPrepare()
+                        viewModel.onPostOSSUploadPrepare(imageList)
                     } else {
                         viewModel.onPostReply()
                     }
