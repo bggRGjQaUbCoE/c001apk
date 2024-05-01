@@ -77,7 +77,7 @@ class HomeTopicContentViewModel @AssistedInject constructor(
                                         topicDataList.add(item.copy(description = "home"))
                                 }
                             }
-                            lastItem = topicDataList.last().id
+                            lastItem = topicDataList.getOrNull(topicDataList.lastIndex)?.id
                         }
                         page++
                         if (listSize <= 0)
