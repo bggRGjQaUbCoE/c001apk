@@ -66,7 +66,9 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             RecentEmojiDatabase::class.java, "recent_emoji.db"
-        ).build()
+        )
+            .addMigrations(StringEntityDatabase_MIGRATION_1_2)
+            .build()
     }
 
     @UserBlackList
@@ -82,7 +84,9 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             UserBlackListDatabase::class.java, "user_blacklist.db"
-        ).build()
+        )
+            .addMigrations(StringEntityDatabase_MIGRATION_1_2)
+            .build()
     }
 
     @TopicBlackList
@@ -98,7 +102,9 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             TopicBlackListDatabase::class.java, "topic_blacklist.db"
-        ).build()
+        )
+            .addMigrations(StringEntityDatabase_MIGRATION_1_2)
+            .build()
     }
 
     @SearchHistory
@@ -114,7 +120,9 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             SearchHistoryDatabase::class.java, "search_history.db"
-        ).build()
+        )
+            .addMigrations(StringEntityDatabase_MIGRATION_1_2)
+            .build()
     }
 
     @BrowseHistory
@@ -223,3 +231,13 @@ object RecentAtUserDatabase_MIGRATION_1_2 : Migration(1, 2) {
         db.execSQL("CREATE TABLE `RecentAtUser` (`id` INTEGER NOT NULL, `group` TEXT NOT NULL, `avatar` TEXT NOT NULL, `username` TEXT NOT NULL, PRIMARY KEY(`username`))")
     }
 }
+
+object StringEntityDatabase_MIGRATION_1_2 : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE `StringEntity_new` (`id` INTEGER NOT NULL, `data` TEXT NOT NULL, PRIMARY KEY(`data`))")
+        db.execSQL("INSERT INTO StringEntity_new (id, data) SELECT id, data FROM StringEntity")
+        db.execSQL("DROP TABLE StringEntity")
+        db.execSQL("ALTER TABLE StringEntity_new RENAME TO StringEntity")
+    }
+}
+

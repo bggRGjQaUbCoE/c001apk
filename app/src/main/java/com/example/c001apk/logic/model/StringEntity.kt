@@ -5,8 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class StringEntity(
-    var data: String
-) {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
+    var data: String,
     var id: Long = System.currentTimeMillis()
-}
+)

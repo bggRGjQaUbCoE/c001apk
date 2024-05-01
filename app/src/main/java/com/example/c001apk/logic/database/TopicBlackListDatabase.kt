@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import com.example.c001apk.logic.dao.StringEntityDao
 import com.example.c001apk.logic.model.StringEntity
 
-@Database(version = 1, entities = [StringEntity::class])
+@Database(version = 2, entities = [StringEntity::class])
 abstract class TopicBlackListDatabase : RoomDatabase() {
     abstract fun topicBlackListDao(): StringEntityDao
 }
