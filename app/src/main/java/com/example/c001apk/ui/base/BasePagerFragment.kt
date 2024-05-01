@@ -65,6 +65,8 @@ abstract class BasePagerFragment : Fragment(), IOnTabClickContainer {
             if (SDK_INT >= 26)
                 tooltipText = getString(R.string.publishFeed)
         }
+        // https://stackoverflow.com/questions/54062834/setonapplywindowinsetslistener-never-called
+        ViewCompat.setOnApplyWindowInsetsListener(binding.collapsingToolbar, null)
         ViewCompat.setOnApplyWindowInsetsListener(fab) { _, insets ->
             val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
             fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
