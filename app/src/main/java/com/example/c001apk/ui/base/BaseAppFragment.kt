@@ -28,6 +28,8 @@ abstract class BaseAppFragment<VM : BaseAppViewModel> : BaseViewFragment<VM>(),
         viewModel.dataList.observe(viewLifecycleOwner) {
             viewModel.listSize = it.size
             appAdapter.submitList(it)
+            if (binding.vfContainer.displayedChild != it.size)
+                binding.vfContainer.displayedChild = it.size
         }
 
     }

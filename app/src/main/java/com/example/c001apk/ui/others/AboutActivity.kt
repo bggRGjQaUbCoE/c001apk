@@ -195,14 +195,6 @@ class AboutActivity : AbsAboutActivity() {
                 "https://github.com/AlexMofer/SmoothInputLayout"
             )
         )
-        items.add(
-            License(
-                "AndroidUtilCode",
-                "Blankj",
-                License.APACHE_2,
-                "https://github.com/Blankj/AndroidUtilCode"
-            )
-        )
 
     }
 

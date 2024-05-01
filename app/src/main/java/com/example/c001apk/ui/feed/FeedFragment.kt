@@ -73,7 +73,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
     private var dialog: AlertDialog? = null
     private var isShowReply = false
-    private var firstVisibleItemPosition = 0
     private lateinit var intentActivityResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,7 +137,10 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
                 )
             )
             setOnRefreshListener {
-                refreshData()
+                if (!viewModel.isLoadMore) {
+                    binding.swipeRefresh.isRefreshing = true
+                    refreshData()
+                }
             }
         }
     }
@@ -176,12 +178,13 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    viewModel.lastVisibleItemPosition =
+                    lastVisibleItemPosition =
                         if (isPortrait) mLayoutManager.findLastVisibleItemPosition()
                         else sLayoutManager.findLastVisibleItemPositions(null).max()
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + viewModel.itemCount + 1
+                    if (lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
+                        && !binding.swipeRefresh.isRefreshing
                     ) {
                         loadMore()
                     }
@@ -263,7 +266,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
 
     private fun refreshData() {
         firstVisibleItemPosition = 0
-        viewModel.lastVisibleItemPosition = 0
+        lastVisibleItemPosition = 0
         viewModel.firstItem = null
         viewModel.lastItem = null
         viewModel.page = 1

@@ -403,25 +403,6 @@ object ImageUtil {
         context.startActivity(Intent.createChooser(intent, title))
     }
 
-    private fun shareVideo(context: Context, file: File, title: String?) {
-        val contentUri = getFileProvider(context, file)
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "video/*"
-        intent.putExtra(Intent.EXTRA_STREAM, contentUri)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        context.startActivity(Intent.createChooser(intent, title))
-    }
-
-    private fun shareFile(context: Context, file: File, title: String?) {
-        val contentUri = getFileProvider(context, file)
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "*/*"
-        intent.putExtra(Intent.EXTRA_STREAM, contentUri)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        context.startActivity(Intent.createChooser(intent, title))
-    }
-
-
     private fun downloadPicture(context: Context, url: String?, fileName: String, isEnd: Boolean) {
         val newUrl = GlideUrl(
             url?.http2https,

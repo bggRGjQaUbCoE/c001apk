@@ -71,10 +71,10 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    viewModel.lastVisibleItemPosition =
+                    lastVisibleItemPosition =
                         sLayoutManager.findLastVisibleItemPositions(null).max()
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize + viewModel.itemCount
+                    if (lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         loadMore()
@@ -99,7 +99,10 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
                 )
             )
             setOnRefreshListener {
-                refreshData()
+                if (!viewModel.isLoadMore) {
+                    binding.swipeRefresh.isRefreshing = true
+                    refreshData()
+                }
             }
         }
     }
@@ -123,7 +126,7 @@ class FeedVoteFragment : BaseFragment<FragmentFeedVoteBinding>() {
     }
 
     private fun refreshData() {
-        viewModel.lastVisibleItemPosition = 0
+        lastVisibleItemPosition = 0
         viewModel.firstItem = null
         viewModel.lastItem = null
         viewModel.page = 1

@@ -1,15 +1,13 @@
 package com.example.c001apk.ui.feed.reply
 
-import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Editable
@@ -17,6 +15,8 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
+import android.util.Base64
+import android.util.Base64.encodeToString
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
@@ -38,9 +38,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.core.view.ViewCompat
@@ -54,13 +52,9 @@ import com.alibaba.sdk.android.oss.ServiceException
 import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback
 import com.alibaba.sdk.android.oss.common.OSSLog
 import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider
-import com.alibaba.sdk.android.oss.common.utils.BinaryUtil
 import com.alibaba.sdk.android.oss.model.ObjectMetadata
 import com.alibaba.sdk.android.oss.model.PutObjectRequest
 import com.alibaba.sdk.android.oss.model.PutObjectResult
-import com.blankj.utilcode.util.ConvertUtils.bytes2HexString
-import com.blankj.utilcode.util.FileUtils
-import com.blankj.utilcode.util.UriUtils
 import com.bumptech.glide.Glide
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
@@ -84,6 +78,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.InputStream
+import java.security.MessageDigest
+import java.util.UUID
 import java.util.regex.Pattern
 
 
@@ -132,7 +129,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
     private var uriList: MutableList<Uri> = ArrayList()
     private var imageList = ArrayList<OSSUploadPrepareModel>()
     private var typeList = ArrayList<String>()
-    private var md5List = ArrayList<String>()
+    private var md5List = ArrayList<ByteArray?>()
     private var dialog: AlertDialog? = null
     private lateinit var atTopicResultLauncher: ActivityResultLauncher<Intent>
     private var isFromAt = false
@@ -187,34 +184,71 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         }
     }
 
+    private fun ByteArray.toHex(): String {
+        val hexString = StringBuilder()
+        for (byte in this) {
+            hexString.append(String.format("%02x", byte))
+        }
+        return hexString.toString()
+    }
+
+    private fun getImageDimensionsAndMD5(uri: Uri): Pair<Triple<Int, Int, String>?, ByteArray?> {
+        var dimensions: Triple<Int, Int, String>? = null
+        var md5Hash: ByteArray? = null
+
+        try {
+            dimensions = contentResolver.openInputStream(uri)?.use { inputStream ->
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeStream(inputStream, null, options)
+                Triple(options.outWidth, options.outHeight, options.outMimeType)
+            }
+            md5Hash = contentResolver.openInputStream(uri)?.use { inputStream ->
+                calculateMD5(inputStream)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(dimensions, md5Hash)
+    }
+
+    private fun calculateMD5(input: InputStream): ByteArray {
+        val md = MessageDigest.getInstance("MD5")
+        val buffer = ByteArray(8192)
+        var bytesRead = input.read(buffer)
+        while (bytesRead > 0) {
+            md.update(buffer, 0, bytesRead)
+            bytesRead = input.read(buffer)
+        }
+        return md.digest()
+    }
+
     private fun initPhotoPick() {
         pickMultipleMedia =
             registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(9)) { uris ->
                 if (uris.isNotEmpty()) {
-                    try {
+                    runCatching {
                         uris.forEach { uri ->
                             if (uriList.size == 9) {
                                 Toast.makeText(this, "最多选择9张图片", Toast.LENGTH_SHORT).show()
                                 return@registerForActivityResult
                             }
 
-                            val file = UriUtils.uri2File(uri)
-                            val md5Byte = FileUtils.getFileMD5(file)
-                            val md5 = bytes2HexString(md5Byte)
-                            val contentMD5 = BinaryUtil.toBase64String(md5Byte)
-
-                            val options = BitmapFactory.Options()
-                            options.inJustDecodeBounds = true
-                            BitmapFactory.decodeFile(file.path, options)
-                            val width = options.outWidth
-                            val height = options.outHeight
-                            val type = options.outMimeType
+                            val result = getImageDimensionsAndMD5(uri)
+                            val md5Byte = result.second
+                            val md5 = md5Byte?.toHex() ?: ""
+                            val width = result.first?.first ?: 0
+                            val height = result.first?.second ?: 0
+                            val type = result.first?.third ?: ""
 
                             typeList.add(type)
-                            md5List.add(contentMD5)
+                            md5List.add(md5Byte)
                             imageList.add(
                                 OSSUploadPrepareModel(
-                                    name = file.name,
+                                    name = "${
+                                        UUID.randomUUID().toString().replace("-", "")
+                                    }.${if (type.startsWith("image/")) type.substring(6) else type}",
                                     resolution = "${width}x${height}",
                                     md5 = md5,
                                 )
@@ -223,7 +257,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
                             val imageView = ImageView(this).apply {
                                 layoutParams = LinearLayout.LayoutParams(
-                                    (55.dp * width.toFloat() / height.toFloat()).toInt(), 55.dp
+                                    (65.dp * width.toFloat() / height.toFloat()).toInt(), 65.dp
                                 ).apply {
                                     setMargins(5.dp, 0, 0, 0)
                                 }
@@ -241,11 +275,20 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                             Glide.with(this).load(uri).into(imageView)
                             binding.imageLayout.addView(imageView)
                         }
-                    } catch (e: Exception) {
-                        makeToast("获取图片信息失败")
-                        e.printStackTrace()
+                    }.onFailure {
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("获取图片信息失败")
+                            .setMessage(it.message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .setNegativeButton("Log") { _, _ ->
+                                MaterialAlertDialogBuilder(this)
+                                    .setTitle("Log")
+                                    .setMessage(it.stackTraceToString())
+                                    .setPositiveButton(android.R.string.ok, null)
+                                    .show()
+                            }
+                            .show()
                     }
-
                 }
                 binding.imageLayout.isVisible = uriList.isNotEmpty()
             }
@@ -329,7 +372,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
         viewModel.uploadImage.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let { responseData ->
-                try {
+                runCatching {
                     viewModel.replyAndFeedData["pic"] =
                         responseData.fileInfo.joinToString(separator = ",") {
                             responseData.uploadPrepareInfo.uploadImagePrefix + "/" + it.uploadFileName
@@ -369,7 +412,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                         )
                         val metadata = ObjectMetadata()
                         metadata.contentType = typeList[index]
-                        metadata.contentMD5 = md5List[index]
+                        metadata.contentMD5 = encodeToString(md5List[index], Base64.DEFAULT).trim()
                         metadata.setHeader(
                             "x-oss-callback",
                             "eyJjYWxsYmFja0JvZHlUeXBlIjoiYXBwbGljYXRpb25cL2pzb24iLCJjYWxsYmFja0hvc3QiOiJhcGkuY29vbGFway5jb20iLCJjYWxsYmFja1VybCI6Imh0dHBzOlwvXC9hcGkuY29vbGFway5jb21cL3Y2XC9jYWxsYmFja1wvbW9iaWxlT3NzVXBsb2FkU3VjY2Vzc0NhbGxiYWNrP2NoZWNrQXJ0aWNsZUNvdmVyUmVzb2x1dGlvbj0wJnZlcnNpb25Db2RlPTIxMDIwMzEiLCJjYWxsYmFja0JvZHkiOiJ7XCJidWNrZXRcIjoke2J1Y2tldH0sXCJvYmplY3RcIjoke29iamVjdH0sXCJoYXNQcm9jZXNzXCI6JHt4OnZhcjF9fSJ9"
@@ -406,9 +449,19 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                             }
                         ))
                     }
-                } catch (e: Exception) {
-                    makeToast("图片上传失败")
-                    e.printStackTrace()
+                }.onFailure {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("图片上传失败")
+                        .setMessage(it.message)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .setNegativeButton("Log") { _, _ ->
+                            MaterialAlertDialogBuilder(this)
+                                .setTitle("Log")
+                                .setMessage(it.stackTraceToString())
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show()
+                        }
+                        .show()
                 }
 
             }
@@ -788,35 +841,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
             R.id.imageBtn -> {
                 ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONFIRM)
-                if (SDK_INT in listOf(24, 25)) {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                                this,
-                                Manifest.permission.READ_EXTERNAL_STORAGE
-                            )
-                        ) {
-                            Toast.makeText(this, "未授予存储权限", Toast.LENGTH_SHORT).show()
-                        } else {
-                            ActivityCompat
-                                .requestPermissions(
-                                    this,
-                                    arrayOf(
-                                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                                    ), 1
-                                )
-
-                        }
-                    } else {
-                        launchPick()
-                    }
-                } else {
-                    launchPick()
-                }
+                launchPick()
             }
 
             R.id.keyboardBtn -> {
@@ -919,10 +944,15 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         val options = ActivityOptionsCompat.makeCustomAnimation(
             this, R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
         )
-        pickMultipleMedia.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-            options
-        )
+        try {
+            pickMultipleMedia.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                options
+            )
+        } catch (e: ActivityNotFoundException) {
+            makeToast("Activity Not Found")
+            e.printStackTrace()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

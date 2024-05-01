@@ -137,12 +137,12 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    viewModel.lastVisibleItemPosition = if (isPortrait)
+                    lastVisibleItemPosition = if (isPortrait)
                         mLayoutManager.findLastVisibleItemPosition()
                     else
                         sLayoutManager.findLastVisibleItemPositions(null).max()
 
-                    if (viewModel.lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
+                    if (lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                         && !binding.swipeRefresh.isRefreshing && PrefManager.isLogin
                     ) {
@@ -208,9 +208,12 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 )
             )
             setOnRefreshListener {
-                if (PrefManager.isLogin)
-                    getData()
-                else
+                if (PrefManager.isLogin) {
+                    if (!viewModel.isLoadMore) {
+                        binding.swipeRefresh.isRefreshing = true
+                        getData()
+                    }
+                } else
                     binding.swipeRefresh.isRefreshing = false
             }
         }

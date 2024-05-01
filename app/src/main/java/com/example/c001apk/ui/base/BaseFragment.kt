@@ -13,6 +13,8 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
     private var _binding: VB? = null
     val binding get() = _binding!!
+    var firstVisibleItemPosition = 0
+    var lastVisibleItemPosition = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,

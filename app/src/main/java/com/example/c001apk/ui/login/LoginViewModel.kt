@@ -34,7 +34,6 @@ class LoginViewModel @Inject constructor(
     var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
 
     var requestHash: String? = null
     val footerState = MutableLiveData<FooterState>()
@@ -90,7 +89,6 @@ class LoginViewModel @Inject constructor(
                         } catch (e: Exception) {
                             toastText.postValue(Event("无法获取cookie"))
                             e.printStackTrace()
-                            return@collect
                         }
                     }
                 }

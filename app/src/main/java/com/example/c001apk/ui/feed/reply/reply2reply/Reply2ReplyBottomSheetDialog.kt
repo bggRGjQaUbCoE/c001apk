@@ -56,6 +56,7 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
     private lateinit var intentActivityResultLauncher: ActivityResultLauncher<Intent>
+    var lastVisibleItemPosition: Int = 0
 
     companion object {
         fun newInstance(
@@ -184,12 +185,12 @@ class Reply2ReplyBottomSheetDialog : BottomSheetDialogFragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    viewModel.lastVisibleItemPosition = if (isPortrait)
+                    lastVisibleItemPosition = if (isPortrait)
                         mLayoutManager.findLastVisibleItemPosition()
                     else
                         sLayoutManager.findLastVisibleItemPositions(null).max()
 
-                    if (viewModel.lastVisibleItemPosition == viewModel.listSize
+                    if (lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         loadMore()

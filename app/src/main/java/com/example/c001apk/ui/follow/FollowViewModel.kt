@@ -97,8 +97,25 @@ class FollowViewModel @AssistedInject constructor(
                                             && !blackListRepo.checkTopic(
                                                 it.tags + it.ttitle + it.relationRows?.getOrNull(0)?.title
                                             )
-                                        )
+                                        ) {
+                                            if (it.entityType == "feed" && !it.replyRows.isNullOrEmpty()) {
+                                                if (!blackListRepo.checkUid(
+                                                        it.replyRows?.getOrNull(0)?.uid.toString()
+                                                    )
+                                                ) {
+                                                    it.replyRows?.getOrNull(0)?.let { reply ->
+                                                        val pic =
+                                                            if (reply.picArr.isNullOrEmpty()) ""
+                                                            else " ${if (reply.message == "[图片]") "" else "[图片] "}<a class=\"feed-forward-pic\" href=${reply.pic}>查看图片(${reply.picArr.size})</a>"
+
+                                                        reply.message =
+                                                            "<a class=\"feed-link-uname\" href=\"/u/${reply.uid}\">${reply.userInfo?.username}</a>: ${reply.message}$pic"
+                                                    }
+                                                } else it.replyRows = null
+                                            }
                                             list.add(it)
+                                        }
+
                                 }
                             }
                             page++

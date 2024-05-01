@@ -19,6 +19,7 @@ import androidx.fragment.app.viewModels
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterState
 import com.example.c001apk.adapter.LoadingState
+import com.example.c001apk.adapter.PlaceHolderAdapter
 import com.example.c001apk.constant.Constants.SZLM_ID
 import com.example.c001apk.databinding.BaseRefreshRecyclerviewBinding
 import com.example.c001apk.ui.base.BaseAppFragment
@@ -31,6 +32,7 @@ import com.example.c001apk.ui.main.IOnBottomClickListener
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
 import com.example.c001apk.util.dp
+import com.example.c001apk.util.setSpaceFooterView
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -51,6 +53,7 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
     }
     private lateinit var fab: FloatingActionButton
     private val fabViewBehavior by lazy { HideBottomViewOnScrollBehavior<FloatingActionButton>() }
+    private val placeHolderAdapter by lazy { PlaceHolderAdapter() }
 
     companion object {
         @JvmStatic
@@ -121,6 +124,14 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
             }
         }
 
+    }
+
+    override fun initView() {
+        super.initView()
+
+        binding.vfContainer.setOnDisplayedChildChangedListener {
+            binding.recyclerView.setSpaceFooterView(placeHolderAdapter)
+        }
     }
 
     override fun initObserve() {

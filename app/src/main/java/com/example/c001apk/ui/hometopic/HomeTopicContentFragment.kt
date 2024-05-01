@@ -2,8 +2,10 @@ package com.example.c001apk.ui.hometopic
 
 import android.os.Bundle
 import androidx.fragment.app.viewModels
+import com.example.c001apk.adapter.PlaceHolderAdapter
 import com.example.c001apk.ui.base.BaseAppFragment
 import com.example.c001apk.ui.main.INavViewContainer
+import com.example.c001apk.util.setSpaceFooterView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -19,6 +21,7 @@ class HomeTopicContentFragment : BaseAppFragment<HomeTopicContentViewModel>() {
             arguments?.getString("title").orEmpty(),
         )
     }
+    private val placeHolderAdapter by lazy { PlaceHolderAdapter() }
 
     companion object {
         @JvmStatic
@@ -27,6 +30,14 @@ class HomeTopicContentFragment : BaseAppFragment<HomeTopicContentViewModel>() {
                 putString("url", url)
                 putString("title", title)
             }
+        }
+    }
+
+    override fun initView() {
+        super.initView()
+
+        binding.vfContainer.setOnDisplayedChildChangedListener {
+            binding.recyclerView.setSpaceFooterView(placeHolderAdapter)
         }
     }
 

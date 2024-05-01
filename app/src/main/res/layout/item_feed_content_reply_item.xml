@@ -22,163 +22,145 @@
 
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/replyItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:onLongClick="@{(view) -> listener.onCopyText(view, data.message)}"
-        android:orientation="horizontal">
+        android:padding="10dp">
 
-        <LinearLayout
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/avatar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@color/cover"
+            android:foreground="@drawable/selector_bg_avatar"
+            android:onClick="@{(view) -> listener.onViewUser(view, data.uid)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:setImage="@{data.userAvatar}"
+            app:shapeAppearance="@style/circleImageStyle" />
+
+        <com.example.c001apk.view.LinkTextView
+            android:id="@+id/uname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:text="@{data.username}"
+            app:layout_constraintEnd_toStartOf="@id/expand"
+            app:layout_constraintStart_toEndOf="@id/avatar"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/expand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:background="?actionBarItemBackground"
+            android:src="@drawable/ic_expand_more"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/avatar"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@color/cover"
-                android:foreground="@drawable/selector_bg_avatar"
-                android:onClick="@{(view) -> listener.onViewUser(view, data.uid)}"
-                app:setImage="@{data.userAvatar}"
-                app:shapeAppearance="@style/circleImageStyle" />
-
-            <TextView
-                android:id="@+id/vote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:textColor="?attr/colorPrimary"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <com.example.c001apk.view.LinkTextView
+            android:id="@+id/message"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp">
+            android:layout_marginTop="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:lineSpacingMultiplier="1.2"
+            android:text="@{data.message}"
+            android:textSize="15sp"
+            android:visibility="@{data.message == null || data.message.isEmpty ? View.GONE : View.VISIBLE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/uname"
+            app:layout_constraintTop_toBottomOf="@id/uname" />
 
-            <com.example.c001apk.view.LinkTextView
-                android:id="@+id/uname"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:text="@{data.username}"
-                app:layout_constraintEnd_toStartOf="@id/expand"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.example.c001apk.view.ninegridimageview.NineGridImageView
+            android:id="@+id/multiImage"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="10dp"
+            app:feedType="@{`reply`}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/uname"
+            app:layout_constraintTop_toBottomOf="@id/message"
+            app:pic="@{data.pic}"
+            app:picArr="@{data.picArr}" />
 
-            <ImageView
-                android:id="@+id/expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?actionBarItemBackground"
-                android:src="@drawable/ic_expand_more"
-                app:layout_constraintDimensionRatio="1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/pubDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@{DateUtils.fromToday(data.dateline)}"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintStart_toStartOf="@id/uname"
+            app:layout_constraintTop_toBottomOf="@id/multiImage" />
 
-            <com.example.c001apk.view.LinkTextView
-                android:id="@+id/message"
+        <TextView
+            android:id="@+id/like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/actionBarItemBackground"
+            android:onClick="@{() -> listener.onLikeClick(data.entityType, data.id, likeData.isLike())}"
+            android:text="@{likeData.likeNum}"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:setLike="@{likeData.isLike}" />
+
+        <TextView
+            android:id="@+id/reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:textColor="@android:color/darker_gray"
+            app:customText="@{data.replynum}"
+            app:icon="@{@drawable/ic_message}"
+            app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
+            app:layout_constraintEnd_toStartOf="@id/like" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/replyLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/home_card_background_color"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/uname"
+            app:layout_constraintTop_toBottomOf="@id/pubDate"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:lineSpacingMultiplier="1.2"
-                android:text="@{data.message}"
-                android:textSize="15sp"
-                android:visibility="@{data.message == null || data.message.isEmpty ? View.GONE : View.VISIBLE}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/uname" />
-
-            <TextView
-                android:id="@+id/pubDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@{DateUtils.fromToday(data.dateline)}"
-                android:textColor="@android:color/darker_gray"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/multiImage" />
-
-            <TextView
-                android:id="@+id/like"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/actionBarItemBackground"
-                android:onClick="@{() -> listener.onLikeClick(data.entityType, data.id, likeData.isLike())}"
-                android:text="@{likeData.likeNum}"
-                android:textColor="@android:color/darker_gray"
-                app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:setLike="@{likeData.isLike}" />
-
-            <TextView
-                android:id="@+id/reply"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:textColor="@android:color/darker_gray"
-                app:customText="@{data.replynum}"
-                app:icon="@{@drawable/ic_message}"
-                app:layout_constraintBaseline_toBaselineOf="@id/pubDate"
-                app:layout_constraintEnd_toStartOf="@id/like" />
-
-            <com.example.c001apk.view.ninegridimageview.NineGridImageView
-                android:id="@+id/multiImage"
-                android:layout_width="match_parent"
-                android:layout_height="10dp"
-                android:layout_marginTop="10dp"
-                app:feedType="@{`reply`}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/message"
-                app:pic="@{data.pic}"
-                app:picArr="@{data.picArr}" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/replyLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="@color/home_card_background_color"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pubDate"
-                app:strokeWidth="0dp">
+                android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/linearLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical" />
 
-                    <LinearLayout
-                        android:id="@+id/linearLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                <TextView
+                    android:id="@+id/totalReply"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingStart="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="4dp"
+                    android:textColor="?attr/colorPrimary" />
 
-                    <TextView
-                        android:id="@+id/totalReply"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
-                        android:paddingStart="10dp"
-                        android:paddingTop="4dp"
-                        android:paddingEnd="10dp"
-                        android:paddingBottom="4dp"
-                        android:textColor="?attr/colorPrimary" />
+            </LinearLayout>
 
-                </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            </com.google.android.material.card.MaterialCardView>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

@@ -6,7 +6,6 @@ import android.text.InputFilter.LengthFilter
 import android.text.InputType
 import android.text.Spanned
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
@@ -47,48 +46,12 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         isPreGetLoginParam = true
         viewModel.onPreGetLoginParam()
 
-        /*viewModel.smsLoginParamData.observe(this) { result ->
-            val response = result.getOrNull()
-            val body = response?.body()?.string()
-            body?.apply {
-                viewModel.requestHash = Jsoup.parse(this).createRequestHash()
-            }
-            response?.apply {
-                try {
-                    val cookies = response.headers().values("Set-Cookie")
-                    val session = cookies[0]
-                    val sessionID = session.substring(0, session.indexOf(";"))
-                    SESSID = sessionID
-                } catch (e: Exception) {
-                    Toast.makeText(this@LoginActivity, "无法获取cookie", Toast.LENGTH_SHORT).show()
-                    e.printStackTrace()
-                }
-            }
-        }*/
-
-        /*viewModel.getSmsTokenData.observe(this) { result ->
-            val response = result.getOrNull()
-            response?.apply {
-                viewModel.key = response.headers().values("Location").toString()
-            }
-        }*/
-
         binding.apply {
             account.filters = arrayOf(filter)
             password.filters = arrayOf(filter)
             sms.filters = arrayOf(filter)
             captchaText.filters = arrayOf(filter)
         }
-
-
-        /*binding.getSMS.setOnClickListener {
-            if (binding.account.text.toString() == "")
-                Toast.makeText(this, "手机号不能为空", Toast.LENGTH_SHORT).show()
-            else if (binding.account.text.toString().length != 11)
-                Toast.makeText(this, "手机号不合规", Toast.LENGTH_SHORT).show()
-            else
-                getSMS()
-        }*/
 
         binding.login.setOnClickListener {
             if (isLoginPass) {
@@ -117,14 +80,15 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
                 when (it) {
                     "图形验证码不能为空" -> {
-                        binding.captcha.isVisible = true
+                        binding.captchaImg.isVisible = true
+                        binding.captchaLayout.isVisible = true
                         viewModel.onGetCaptcha()
                     }
 
                     "图形验证码错误" -> viewModel.onGetCaptcha()
 
                     "密码错误" -> {
-                        if (binding.captcha.visibility == View.VISIBLE)
+                        if (binding.captchaImg.isVisible)
                             viewModel.onGetCaptcha()
                     }
                 }
@@ -163,11 +127,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         viewModel.onTryLogin()
     }
 
-    /*override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.login_menu, menu)
-        return true
-    }*/
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
@@ -194,17 +153,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         }
         return true
     }
-
-    /*private fun getSMS() {
-        isGetSmsToken = true
-        viewModel.getSmsData["submit"] = "1"
-        viewModel.getSmsData["requestHash"] = viewModel.requestHash
-        viewModel.getSmsData["country"] = "86"
-        viewModel.getSmsData["mobile"] = binding.account.text.toString()
-        viewModel.getSmsData["captcha"] = binding.captchaText.text.toString()
-        viewModel.getSmsData["randomNumber"] = createRandomNumber()
-        viewModel.getSmsToken()
-    }*/
 
     private fun getCaptcha() {
         isGetCaptcha = true

@@ -18,13 +18,13 @@
 
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:onClick="@{(view) -> listener.onMessClicked(view, data.note)}"
-        android:orientation="horizontal">
+        android:padding="10dp">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/avatar"
@@ -33,60 +33,56 @@
             android:background="@color/cover"
             android:foreground="@drawable/selector_bg_avatar"
             android:onClick="@{(view) -> listener.onViewUser(view, data.fromuid)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:setImage="@{data.fromUserAvatar}"
             app:shapeAppearance="@style/circleImageStyle" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/uname"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp">
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:text="@{data.fromusername}"
+            app:layout_constraintEnd_toStartOf="@id/expand"
+            app:layout_constraintStart_toEndOf="@id/avatar"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/uname"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:text="@{data.fromusername}"
-                app:layout_constraintEnd_toStartOf="@id/expand"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/expand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?actionBarItemBackground"
+            android:src="@drawable/ic_expand_more"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?actionBarItemBackground"
-                android:src="@drawable/ic_expand_more"
-                app:layout_constraintDimensionRatio="1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.example.c001apk.view.LinkTextView
+            android:id="@+id/message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:lineSpacingMultiplier="1.2"
+            android:text="@{data.note}"
+            android:textSize="15sp"
+            android:visibility="@{data.note == null || data.note.isEmpty ? View.GONE : View.VISIBLE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/uname"
+            app:layout_constraintTop_toBottomOf="@id/uname" />
 
-            <com.example.c001apk.view.LinkTextView
-                android:id="@+id/message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:lineSpacingMultiplier="1.2"
-                android:text="@{data.note}"
-                android:textSize="15sp"
-                android:visibility="@{data.note == null || data.note.isEmpty ? View.GONE : View.VISIBLE}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/uname" />
+        <TextView
+            android:id="@+id/pubDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@{DateUtils.fromToday(data.dateline)}"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintStart_toStartOf="@id/uname"
+            app:layout_constraintTop_toBottomOf="@id/message" />
 
-            <TextView
-                android:id="@+id/pubDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@{DateUtils.fromToday(data.dateline)}"
-                android:textColor="@android:color/darker_gray"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/message" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

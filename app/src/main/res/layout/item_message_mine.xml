@@ -4,8 +4,6 @@
 
     <data>
 
-
-
     </data>
 
     <com.google.android.material.card.MaterialCardView
@@ -15,212 +13,239 @@
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/localFavLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:baselineAligned="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toTopOf="@id/favLayout"
+                app:layout_constraintEnd_toStartOf="@id/line1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <LinearLayout
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:id="@+id/localFavLayout"
-                    android:layout_width="0dp"
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_archive"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical">
+                    android:gravity="center"
+                    android:text="@string/local_favorite" />
 
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:src="@drawable/ic_archive"
-                        android:tint="?attr/colorPrimary" />
+            </LinearLayout>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/local_favorite" />
+            <View
+                android:id="@+id/line1"
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider"
+                app:layout_constraintBottom_toBottomOf="@id/localFavLayout"
+                app:layout_constraintEnd_toStartOf="@id/historyLayout"
+                app:layout_constraintStart_toEndOf="@id/localFavLayout"
+                app:layout_constraintTop_toTopOf="@id/localFavLayout" />
 
-                </LinearLayout>
+            <LinearLayout
+                android:id="@+id/historyLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toTopOf="@id/likeLayout"
+                app:layout_constraintEnd_toStartOf="@id/line2"
+                app:layout_constraintStart_toEndOf="@id/line1"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <View
-                    android:layout_width="1px"
-                    android:layout_height="20dp"
-                    android:background="?attr/actionBarDivider" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_history"
+                    android:tint="?attr/colorPrimary" />
 
-                <LinearLayout
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:id="@+id/historyLayout"
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical">
+                    android:gravity="center"
+                    android:text="@string/history" />
 
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:src="@drawable/ic_history"
-                        android:tint="?attr/colorPrimary" />
+            </LinearLayout>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/history" />
+            <View
+                android:id="@+id/line2"
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider"
+                app:layout_constraintBottom_toBottomOf="@id/freqLayout"
+                app:layout_constraintEnd_toStartOf="@id/freqLayout"
+                app:layout_constraintStart_toEndOf="@id/historyLayout"
+                app:layout_constraintTop_toTopOf="@id/freqLayout" />
 
-                </LinearLayout>
+            <LinearLayout
+                android:id="@+id/freqLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toTopOf="@id/replyLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/line2"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <View
-                    android:layout_width="1px"
-                    android:layout_height="20dp"
-                    android:background="?attr/actionBarDivider" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_freq"
+                    android:tint="?attr/colorPrimary" />
 
-                <LinearLayout
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:id="@+id/freqLayout"
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:src="@drawable/ic_freq"
-                        android:tint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/my_freq" />
-
-                </LinearLayout>
+                    android:gravity="center"
+                    android:text="@string/my_freq" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/favLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:baselineAligned="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/line3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/localFavLayout">
 
-                <LinearLayout
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:id="@+id/favLayout"
-                    android:layout_width="0dp"
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_star"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:src="@drawable/ic_star"
-                        android:tint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/my_fav" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1px"
-                    android:layout_height="20dp"
-                    android:background="?attr/actionBarDivider" />
-
-                <LinearLayout
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:id="@+id/likeLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:src="@drawable/ic_fav"
-                        android:tint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/my_like" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1px"
-                    android:layout_height="20dp"
-                    android:background="?attr/actionBarDivider" />
-
-                <LinearLayout
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:id="@+id/replyLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:src="@drawable/ic_chat"
-                        android:tint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/my_reply" />
-
-                </LinearLayout>
+                    android:gravity="center"
+                    android:text="@string/my_fav" />
 
             </LinearLayout>
 
-        </LinearLayout>
+            <View
+                android:id="@+id/line3"
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider"
+                app:layout_constraintBottom_toBottomOf="@id/favLayout"
+                app:layout_constraintEnd_toStartOf="@id/likeLayout"
+                app:layout_constraintStart_toEndOf="@id/favLayout"
+                app:layout_constraintTop_toTopOf="@id/favLayout" />
+
+            <LinearLayout
+                android:id="@+id/likeLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/line4"
+                app:layout_constraintStart_toEndOf="@id/line3"
+                app:layout_constraintTop_toBottomOf="@id/historyLayout">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_fav"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/my_like" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/line4"
+                android:layout_width="1px"
+                android:layout_height="20dp"
+                android:background="?attr/actionBarDivider"
+                app:layout_constraintBottom_toBottomOf="@id/replyLayout"
+                app:layout_constraintEnd_toStartOf="@id/replyLayout"
+                app:layout_constraintStart_toEndOf="@id/likeLayout"
+                app:layout_constraintTop_toTopOf="@id/replyLayout" />
+
+            <LinearLayout
+                android:id="@+id/replyLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/line4"
+                app:layout_constraintTop_toBottomOf="@id/freqLayout">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:src="@drawable/ic_chat"
+                    android:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/my_reply" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
 </layout>

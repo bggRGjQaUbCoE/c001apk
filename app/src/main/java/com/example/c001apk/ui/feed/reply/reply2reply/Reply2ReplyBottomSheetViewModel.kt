@@ -38,7 +38,6 @@ class Reply2ReplyBottomSheetViewModel @Inject constructor(
     var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
 
     val footerState = MutableLiveData<FooterState>()
     val totalReplyData = MutableLiveData<List<TotalReplyResponse.Data>>()

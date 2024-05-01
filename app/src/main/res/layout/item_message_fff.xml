@@ -14,24 +14,24 @@
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:id="@+id/feedLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/line1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/feedCount"
@@ -52,9 +52,14 @@
             </LinearLayout>
 
             <View
+                android:id="@+id/line1"
                 android:layout_width="1px"
                 android:layout_height="20dp"
-                android:background="?attr/actionBarDivider" />
+                android:background="?attr/actionBarDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/followLayout"
+                app:layout_constraintStart_toEndOf="@id/feedLayout"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/followLayout"
@@ -64,7 +69,13 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/line2"
+                app:layout_constraintStart_toEndOf="@id/line1"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/followCount"
@@ -85,9 +96,14 @@
             </LinearLayout>
 
             <View
+                android:id="@+id/line2"
                 android:layout_width="1px"
                 android:layout_height="20dp"
-                android:background="?attr/actionBarDivider" />
+                android:background="?attr/actionBarDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/fansLayout"
+                app:layout_constraintStart_toEndOf="@id/followLayout"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/fansLayout"
@@ -97,7 +113,13 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/line2"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/fansCount"
@@ -117,7 +139,8 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
 </layout>

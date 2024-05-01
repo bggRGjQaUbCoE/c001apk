@@ -12,7 +12,6 @@ abstract class BaseViewModel : ViewModel() {
     var isRefreshing: Boolean = false
     var isLoadMore: Boolean = false
     var isEnd: Boolean = false
-    var lastVisibleItemPosition: Int = 0
     var page: Int = 1
 
     val activityState = MutableLiveData<LoadingState>()
