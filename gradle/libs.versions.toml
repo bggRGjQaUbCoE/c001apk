@@ -39,7 +39,7 @@ swiperefreshlayout = "1.1.0"
 utilcode = "1.30.7"
 utils = "1.1.5.4"
 viewpager2 = "1.0.0"
-webkit = "1.10.0"
+webkit = "1.11.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
