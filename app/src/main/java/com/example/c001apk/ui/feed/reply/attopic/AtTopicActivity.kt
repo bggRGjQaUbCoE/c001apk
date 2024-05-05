@@ -13,10 +13,13 @@ import androidx.activity.viewModels
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.R
 import com.example.c001apk.adapter.FooterAdapter
+import com.example.c001apk.adapter.FooterState
+import com.example.c001apk.adapter.HeaderAdapter
 import com.example.c001apk.databinding.ActivityAtTopicBinding
 import com.example.c001apk.logic.model.RecentAtUser
 import com.example.c001apk.ui.base.BaseActivity
@@ -59,10 +62,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                     val lastVisibleItemPosition =
                         mLayoutManager.findLastVisibleItemPosition()
 
-                    if (lastVisibleItemPosition ==
-                        (if (type == "user")
-                            viewModel.listSize + (viewModel.recentAtUsersData.value?.size ?: 0) - 1
-                        else viewModel.listSize - 1)
+                    if (lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
                     ) {
                         loadMore()
@@ -83,9 +83,13 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
     }
 
     private fun initObserve() {
-        /*viewModel.footerState.observe(this) {
+        viewModel.footerState.observe(this) {
             footerAdapter.setLoadState(it)
-        }*/
+            if (it !is FooterState.Loading) {
+                binding.indicator.parent.isIndeterminate = false
+                binding.indicator.parent.isVisible = false
+            }
+        }
 
         if (type == "user") {
             viewModel.afterUpdateList.observe(this) { event ->
@@ -233,8 +237,7 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
         mLayoutManager = LinearLayoutManager(this)
         binding.recyclerView.apply {
             layoutManager = mLayoutManager
-            adapter = atUserAdapter
-            // ConcatAdapter(/*HeaderAdapter(), */atUserAdapter, footerAdapter)
+            adapter = ConcatAdapter(HeaderAdapter(), atUserAdapter, footerAdapter)
             addItemDecoration(UserItemDecoration(this@AtTopicActivity))
         }
         binding.clear.setOnClickListener {

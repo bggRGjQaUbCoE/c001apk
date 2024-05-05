@@ -104,6 +104,10 @@ class AtTopicViewModel @Inject constructor(
     fun getHotTopics() {
         viewModelScope.launch(Dispatchers.IO) {
             networkRepo.getSearchTag("", page, recentIds, firstItem, lastItem)
+                .onStart {
+                    if (isLoadMore)
+                        footerState.postValue(FooterState.Loading)
+                }
                 .collect { result ->
                     val data = result.getOrNull()
                     if (data != null) {

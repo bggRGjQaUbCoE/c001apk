@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.util.dp
@@ -125,51 +126,49 @@ class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
      */
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(c, parent, state)
-        if (parent.adapter is AtUserAdapter) {
-            val adapter = parent.adapter as AtUserAdapter
-            val count = parent.childCount
-            val left = parent.paddingLeft
-            val right = parent.width - parent.paddingRight
+        val adapter = (parent.adapter as ConcatAdapter).adapters[1] as AtUserAdapter
+        val count = parent.childCount
+        val left = parent.paddingLeft
+        val right = parent.width - parent.paddingRight
 
-            //遍历所有子view
-            for (i in 0 until count) {
-                val view = parent.getChildAt(i)
-                val childPosition = parent.getChildAdapterPosition(view)
+        //遍历所有子view
+        for (i in 0 until count) {
+            val view = parent.getChildAt(i)
+            val childPosition = parent.getChildAdapterPosition(view)
 
-                if (childPosition != -1) {
-                    //在paddingTop范围内绘制
-                    if (view.top - headHeight >= parent.paddingTop) {
-                        //如果是分组的头部
-                        if (adapter.isGroupHead(childPosition)) {
-                            val groupName = adapter.getGroupName(childPosition)
+            if (childPosition != -1) {
+                //在paddingTop范围内绘制
+                if (view.top - headHeight >= parent.paddingTop) {
+                    //如果是分组的头部
+                    if (adapter.isGroupHead(childPosition)) {
+                        val groupName = adapter.getGroupName(childPosition)
 
-                            //绘制头部的背景
-                            val rect = Rect(left, view.top - headHeight, right, view.top)
-                            c.drawRect(rect, headPaint)
+                        //绘制头部的背景
+                        val rect = Rect(left, view.top - headHeight, right, view.top)
+                        c.drawRect(rect, headPaint)
 
-                            //绘制头部文字
-                            headTextPaint.getTextBounds(
-                                groupName,
-                                0,
-                                groupName.length,
-                                headTextRect
-                            )
-                            c.drawText(
-                                groupName,
-                                (left + headTextPadding).toFloat(),
-                                (view.top - (headHeight - headTextRect.height()) / 2).toFloat(),
-                                headTextPaint
-                            )
-                        }
-                        //如果不是头部，就绘制分隔线
-                        else {
-                            val rect = Rect(left, view.top - 1, right, view.top)
-                            c.drawRect(rect, mPaint)
-                        }
+                        //绘制头部文字
+                        headTextPaint.getTextBounds(
+                            groupName,
+                            0,
+                            groupName.length,
+                            headTextRect
+                        )
+                        c.drawText(
+                            groupName,
+                            (left + headTextPadding).toFloat(),
+                            (view.top - (headHeight - headTextRect.height()) / 2).toFloat(),
+                            headTextPaint
+                        )
+                    }
+                    //如果不是头部，就绘制分隔线
+                    else {
+                        val rect = Rect(left, view.top - 1, right, view.top)
+                        c.drawRect(rect, mPaint)
                     }
                 }
-
             }
+
         }
     }
 
@@ -178,61 +177,57 @@ class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
      */
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDrawOver(c, parent, state)
-        if (parent.adapter is AtUserAdapter) {
-            val adapter = parent.adapter as AtUserAdapter
-            val layoutManager = parent.layoutManager
-            //只考虑LinearLayoutManager
-            if (layoutManager is LinearLayoutManager) {
-                //找到RecyclerView第一个显示的view的position
-                val position = layoutManager.findFirstVisibleItemPosition()
-                //通过viewHolder获取itemView
-                val childView = parent.findViewHolderForAdapterPosition(position)?.itemView
+        val adapter = (parent.adapter as ConcatAdapter).adapters[1] as AtUserAdapter
+        val layoutManager = parent.layoutManager as LinearLayoutManager
+        //只考虑LinearLayoutManager
+        //找到RecyclerView第一个显示的view的position
+        val position = layoutManager.findFirstVisibleItemPosition()
+        //通过viewHolder获取itemView
+        val childView = parent.findViewHolderForAdapterPosition(position)?.itemView
 
-                val left = parent.paddingLeft
-                val right = parent.width - parent.paddingRight
-                val top = parent.paddingTop
+        val left = parent.paddingLeft
+        val right = parent.width - parent.paddingRight
+        val top = parent.paddingTop
 
-                childView?.let {
-                    //如果第一个可见itemView的下一个是组的头部，就把吸顶的顶上去
-                    if (adapter.isGroupHead(position + 1)) {
-                        //绘制吸顶头部的背景,bottom会随着上滑越来越小
-                        val bottom = topHeight.coerceAtMost(childView.bottom - top)
-                        val rect = Rect(left, top, right, top + bottom)
-                        c.drawRect(rect, topPaint)
+        childView?.let {
+            //如果第一个可见itemView的下一个是组的头部，就把吸顶的顶上去
+            if (adapter.isGroupHead(position + 1)) {
+                //绘制吸顶头部的背景,bottom会随着上滑越来越小
+                val bottom = topHeight.coerceAtMost(childView.bottom - top)
+                val rect = Rect(left, top, right, top + bottom)
+                c.drawRect(rect, topPaint)
 
-                        //绘制吸顶的头部文字
-                        val groupName = adapter.getGroupName(position)
-                        topTextPaint.getTextBounds(groupName, 0, groupName.length, topTextRect)
+                //绘制吸顶的头部文字
+                val groupName = adapter.getGroupName(position)
+                topTextPaint.getTextBounds(groupName, 0, groupName.length, topTextRect)
 
-                        //将超出的挡住裁掉
-                        val clipRect = Rect(left, top + bottom, right, top)
-                        c.clipRect(clipRect)
+                //将超出的挡住裁掉
+                val clipRect = Rect(left, top + bottom, right, top)
+                c.clipRect(clipRect)
 
-                        c.drawText(
-                            groupName,
-                            (left + topTextPadding).toFloat(),
-                            (top + bottom - (topHeight - topTextRect.height()) / 2).toFloat(),
-                            topTextPaint
-                        )
-                    }
-                    //如果第一个可见itemView的下一个不是组的头部，就直接绘制吸顶头部
-                    else {
-                        //绘制吸顶头部的背景
-                        val rect = Rect(left, top, right, top + topHeight)
-                        c.drawRect(rect, topPaint)
+                c.drawText(
+                    groupName,
+                    (left + topTextPadding).toFloat(),
+                    (top + bottom - (topHeight - topTextRect.height()) / 2).toFloat(),
+                    topTextPaint
+                )
+            }
+            //如果第一个可见itemView的下一个不是组的头部，就直接绘制吸顶头部
+            else {
+                //绘制吸顶头部的背景
+                val rect = Rect(left, top, right, top + topHeight)
+                c.drawRect(rect, topPaint)
 
-                        //绘制吸顶的头部文字
-                        val groupName = adapter.getGroupName(position)
-                        topTextPaint.getTextBounds(groupName, 0, groupName.length, topTextRect)
+                //绘制吸顶的头部文字
+                val groupName = adapter.getGroupName(position)
+                topTextPaint.getTextBounds(groupName, 0, groupName.length, topTextRect)
 
-                        c.drawText(
-                            groupName,
-                            (left + topTextPadding).toFloat(),
-                            (top + topHeight - (topHeight - topTextRect.height()) / 2).toFloat(),
-                            topTextPaint
-                        )
-                    }
-                }
+                c.drawText(
+                    groupName,
+                    (left + topTextPadding).toFloat(),
+                    (top + topHeight - (topHeight - topTextRect.height()) / 2).toFloat(),
+                    topTextPaint
+                )
             }
         }
     }
@@ -247,21 +242,19 @@ class UserItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
         state: RecyclerView.State
     ) {
         super.getItemOffsets(outRect, view, parent, state)
-        if (parent.adapter is AtUserAdapter) {
-            val adapter = parent.adapter as AtUserAdapter
-            //RecyclerView的LayoutParams，是有viewHolder的，所以可以通过View 获取LayoutParams,再拿到ViewHolder
-            //获取当前view对应的position
-            val position = parent.getChildAdapterPosition(view)
+        val adapter = (parent.adapter as ConcatAdapter).adapters[1] as AtUserAdapter
+        //RecyclerView的LayoutParams，是有viewHolder的，所以可以通过View 获取LayoutParams,再拿到ViewHolder
+        //获取当前view对应的position
+        val position = parent.getChildAdapterPosition(view)
 
-            if (position != -1) {
-                //判断分组头
-                if (adapter.isGroupHead(position)) {
-                    outRect.set(0, headHeight, 0, 0)
-                }
-                //分隔线
-                else {
-                    outRect.set(0, 1, 0, 0)
-                }
+        if (position != -1) {
+            //判断分组头
+            if (adapter.isGroupHead(position)) {
+                outRect.set(0, headHeight, 0, 0)
+            }
+            //分隔线
+            else {
+                outRect.set(0, 1, 0, 0)
             }
         }
     }

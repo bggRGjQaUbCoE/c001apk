@@ -71,22 +71,26 @@ class AtUserAdapter(
     }
 
     fun isGroupHead(childPosition: Int): Boolean {
-        return if (childPosition == 0) {
-            true
-        } else {
-            val thisGroup = currentList[childPosition].group
-            val lastGroup = currentList[childPosition - 1].group
-            thisGroup != lastGroup
+        return when (childPosition) {
+            0 -> false
+
+            1 -> currentList.getOrNull(0)?.username != null
+
+            else -> {
+                val thisGroup = currentList.getOrNull(childPosition - 1)?.group
+                val lastGroup = currentList.getOrNull(childPosition - 2)?.group
+                thisGroup != lastGroup && thisGroup != null && lastGroup != null
+            }
         }
     }
 
     fun getGroupName(childPosition: Int): String {
-        return when (val group = currentList[childPosition].group) {
+        return when (currentList.getOrNull(childPosition - 1)?.group) {
             "recent" -> "最近联系人"
             "follow" -> "好友"
             "recentTopic" -> "最近参与"
             "hotTopic" -> "热门话题"
-            else -> group
+            else -> ""
         }
     }
 
