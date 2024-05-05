@@ -70,25 +70,6 @@ class Reply2ReplyTotalAdapter(
         }
 
         fun bind(reply: TotalReplyResponse.Data) {
-            binding.root.apply {
-                if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-                    if (absoluteAdapterPosition == 0) {
-                        setBackgroundColor(Color.TRANSPARENT)
-                    } else {
-                        background = itemView.context.getDrawable(R.drawable.text_card_bg)
-                        foreground = itemView.context.getDrawable(R.drawable.selector_bg_12_trans)
-                        setPadding(10.dp)
-                    }
-                } else {
-                    if (absoluteAdapterPosition == 0) {
-                        setBackgroundColor(Color.TRANSPARENT)
-                    } else {
-                        setBackgroundColor(itemView.context.getColor(R.color.home_card_background_color))
-                    }
-                    foreground = itemView.context.getDrawable(R.drawable.selector_bg_trans)
-                    setPadding(15.dp, 12.dp, 15.dp, 12.dp)
-                }
-            }
 
             rId = reply.id
             rUid = reply.uid
@@ -107,12 +88,33 @@ class Reply2ReplyTotalAdapter(
         }
     }
 
+    override fun getItemViewType(position: Int) = position
+
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ReplyViewHolder {
         val binding = ItemReplyToReplyItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
+        binding.root.apply {
+            if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+                if (position == 0) {
+                    setBackgroundColor(Color.TRANSPARENT)
+                } else {
+                    background = parent.context.getDrawable(R.drawable.text_card_bg)
+                    foreground = parent.context.getDrawable(R.drawable.selector_bg_12_trans)
+                    setPadding(10.dp)
+                }
+            } else {
+                if (position == 0) {
+                    setBackgroundColor(Color.TRANSPARENT)
+                } else {
+                    setBackgroundColor(parent.context.getColor(R.color.home_card_background_color))
+                }
+                foreground = parent.context.getDrawable(R.drawable.selector_bg_trans)
+                setPadding(15.dp, 12.dp, 15.dp, 12.dp)
+            }
+        }
         return ReplyViewHolder(binding, listener)
     }
 

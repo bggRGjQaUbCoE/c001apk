@@ -121,20 +121,12 @@ class AtTopicActivity : BaseActivity<ActivityAtTopicBinding>(), OnSearchContaine
                 atUserAdapter.submitList(
                     (viewModel.recentAtUsersData.value ?: emptyList()) + it
                 )
-                binding.indicator.parent.apply {
-                    isIndeterminate = false
-                    isVisible = false
-                }
             }
         } else {
             viewModel.getHotTopics()
             viewModel.followListData.observe(this) {
                 viewModel.listSize = it.size
                 atUserAdapter.submitList(it)
-                binding.indicator.parent.apply {
-                    isIndeterminate = false
-                    isVisible = false
-                }
             }
         }
     }

@@ -24,13 +24,6 @@ class FeedDataAdapter(
     class FeedViewHolder(val binding: ItemFeedContentBinding, val listener: ItemListener) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(data: HomeFeedResponse.Data?) {
-            with(itemView.layoutParams) {
-                if (itemView.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-                    && this is StaggeredGridLayoutManager.LayoutParams
-                )
-                    isFullSpan = true
-            }
-
             binding.setVariable(BR.data, data)
             binding.setVariable(BR.listener, listener)
             binding.setVariable(
@@ -82,13 +75,20 @@ class FeedDataAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
 
-            0 -> FeedViewHolder(
-                ItemFeedContentBinding.inflate(
+            0 -> {
+                val binding = ItemFeedContentBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                ), listener
-            )
+                )
+                with(binding.root.layoutParams) {
+                    if (parent.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                        && this is StaggeredGridLayoutManager.LayoutParams
+                    )
+                        isFullSpan = true
+                }
+                FeedViewHolder(binding, listener)
+            }
 
             1 -> TextViewHolder(
                 ItemFeedArticleTextBinding.inflate(
