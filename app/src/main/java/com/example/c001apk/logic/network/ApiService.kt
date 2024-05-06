@@ -1,5 +1,6 @@
 package com.example.c001apk.logic.network
 
+import com.example.c001apk.logic.model.CheckCountResponse
 import com.example.c001apk.logic.model.CheckResponse
 import com.example.c001apk.logic.model.CreateFeedResponse
 import com.example.c001apk.logic.model.FeedContentResponse
@@ -298,5 +299,8 @@ interface ApiService {
         @Query("url") url: String,
         @Query("packageName") packageName: String = "",
     ): Call<LoadUrlResponse>
+
+    @GET("/v6/notification/checkCount")
+    fun checkCount(): Call<CheckCountResponse>
 
 }

@@ -12,7 +12,7 @@ import com.example.c001apk.adapter.LoadingState
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.databinding.FragmentHomeTopicBinding
 import com.example.c001apk.ui.base.BaseFragment
-import com.example.c001apk.ui.main.INavViewContainer
+import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.view.MyLinearSmoothScroller
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -81,9 +81,9 @@ class HomeTopicFragment : BaseFragment<FragmentHomeTopicBinding>(),
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy > 0) {
-                    (activity as INavViewContainer).hideNavigationView()
+                    (activity as? MainActivity)?.hideNavigationView()
                 } else if (dy < 0) {
-                    (activity as INavViewContainer).showNavigationView()
+                    (activity as? MainActivity)?.showNavigationView()
                 }
             }
         })

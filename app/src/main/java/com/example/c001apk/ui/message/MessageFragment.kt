@@ -20,13 +20,12 @@ import com.example.c001apk.adapter.PlaceHolderAdapter
 import com.example.c001apk.databinding.FragmentMessageBinding
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.login.LoginActivity
-import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.MainActivity
+import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.CookieUtil.atcommentme
 import com.example.c001apk.util.CookieUtil.atme
 import com.example.c001apk.util.CookieUtil.contacts_follow
 import com.example.c001apk.util.CookieUtil.feedlike
-import com.example.c001apk.util.Event
 import com.example.c001apk.util.ImageUtil
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.PrefManager
@@ -52,24 +51,27 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     private lateinit var sLayoutManager: StaggeredGridLayoutManager
     private val placeHolderAdapter by lazy { PlaceHolderAdapter() }
     private val isPortrait by lazy { resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
+    private val isLogin by lazy { PrefManager.isLogin }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initLogin()
-        initView()
-        initScroll()
-        initRefresh()
-        initObserve()
+        if (!viewModel.isInit) {
+            initView()
+            initLogin()
+            initScroll()
+            initRefresh()
+            initObserve()
+        }
 
     }
 
     private fun initLogin() {
-        binding.isLogin = PrefManager.isLogin
-        if (PrefManager.isLogin) {
-            viewModel.messCountList.value = Event(Unit)
-            if (viewModel.isInit) {
-                viewModel.isInit = false
+        binding.isLogin = isLogin
+        if (isLogin) {
+            viewModel.messCountList.value = true
+            if (viewModel.initLogin) {
+                viewModel.initLogin = false
                 showProfile()
                 getData()
             }
@@ -144,7 +146,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
 
                     if (lastVisibleItemPosition + 1 == binding.recyclerView.adapter?.itemCount
                         && !viewModel.isEnd && !viewModel.isRefreshing && !viewModel.isLoadMore
-                        && !binding.swipeRefresh.isRefreshing && PrefManager.isLogin
+                        && !binding.swipeRefresh.isRefreshing && isLogin
                     ) {
                         loadMore()
                     }
@@ -154,9 +156,9 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy > 0) {
-                    (activity as? INavViewContainer)?.hideNavigationView()
+                    (activity as? MainActivity)?.hideNavigationView()
                 } else if (dy < 0) {
-                    (activity as? INavViewContainer)?.showNavigationView()
+                    (activity as? MainActivity)?.showNavigationView()
                 }
             }
         })
@@ -208,7 +210,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                 )
             )
             setOnRefreshListener {
-                if (PrefManager.isLogin) {
+                if (isLogin) {
                     if (!viewModel.isLoadMore) {
                         binding.swipeRefresh.isRefreshing = true
                         getData()
@@ -225,10 +227,31 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         viewModel.isEnd = false
         viewModel.isRefreshing = true
         viewModel.isLoadMore = false
-        viewModel.fetchCheckLoginInfo()
+        viewModel.onCheckCount()
         viewModel.fetchProfile()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (viewModel.isInit) {
+            viewModel.isInit = false
+            initView()
+            initLogin()
+            initScroll()
+            initRefresh()
+            initObserve()
+        }
+        if (!viewModel.isInit && isLogin) {
+            if (CookieUtil.badge != 0) {
+                CookieUtil.badge = 0
+                viewModel.messCountList.value = true
+                if (CookieUtil.notification != 0) {
+                    CookieUtil.notification = 0
+                    viewModel.refreshMessage()
+                }
+            }
+        }
+    }
 
     private fun initMenu() {
         binding.toolBar.apply {
@@ -245,7 +268,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                                 atcommentme = null
                                 feedlike = null
                                 contacts_follow = null
-                                viewModel.messCountList.value = Event(Unit)
+                                viewModel.messCountList.value = true
                                 viewModel.footerState.value = FooterState.LoadingDone
                                 viewModel.messageData.postValue(emptyList())
                                 viewModel.isInit = true

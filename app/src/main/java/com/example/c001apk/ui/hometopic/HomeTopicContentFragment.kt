@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.viewModels
 import com.example.c001apk.adapter.PlaceHolderAdapter
 import com.example.c001apk.ui.base.BaseAppFragment
-import com.example.c001apk.ui.main.INavViewContainer
+import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.util.setSpaceFooterView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -43,9 +43,9 @@ class HomeTopicContentFragment : BaseAppFragment<HomeTopicContentViewModel>() {
 
     override fun onScrolled(dy: Int) {
         if (dy > 0) {
-            (activity as? INavViewContainer)?.hideNavigationView()
+            (activity as? MainActivity)?.hideNavigationView()
         } else if (dy < 0) {
-            (activity as? INavViewContainer)?.showNavigationView()
+            (activity as? MainActivity)?.showNavigationView()
         }
     }
 }

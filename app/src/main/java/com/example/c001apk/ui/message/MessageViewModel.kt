@@ -11,10 +11,7 @@ import com.example.c001apk.logic.model.MessageResponse
 import com.example.c001apk.logic.repository.BlackListRepo
 import com.example.c001apk.logic.repository.HistoryFavoriteRepo
 import com.example.c001apk.logic.repository.NetworkRepo
-import com.example.c001apk.util.CookieUtil.atcommentme
-import com.example.c001apk.util.CookieUtil.atme
-import com.example.c001apk.util.CookieUtil.contacts_follow
-import com.example.c001apk.util.CookieUtil.feedlike
+import com.example.c001apk.util.CookieUtil
 import com.example.c001apk.util.Event
 import com.example.c001apk.util.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +29,7 @@ class MessageViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
+    var initLogin: Boolean = true
     var isInit: Boolean = true
     var listSize: Int = -1
     var page = 1
@@ -41,7 +39,7 @@ class MessageViewModel @Inject constructor(
     var isEnd: Boolean = false
 
     var countList = MutableLiveData<List<String>>()
-    var messCountList = MutableLiveData<Event<Unit>>()
+    var messCountList = MutableLiveData<Boolean>()
     val footerState = MutableLiveData<FooterState>()
     val messageData = MutableLiveData<List<MessageResponse.Data>>()
     val toastText = MutableLiveData<Event<String>>()
@@ -81,24 +79,6 @@ class MessageViewModel @Inject constructor(
                 }
         }
     }
-
-
-    fun fetchCheckLoginInfo() {
-        viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.checkLoginInfo()
-                .collect { result ->
-                    val response = result.getOrNull()
-                    response?.body()?.data?.let {
-                        atme = it.notifyCount.atme
-                        atcommentme = it.notifyCount.atcommentme
-                        feedlike = it.notifyCount.feedlike
-                        contacts_follow = it.notifyCount.contactsFollow
-                        messCountList.postValue(Event(Unit))
-                    }
-                }
-        }
-    }
-
 
     fun fetchMessage(url: String = "/v6/notification/list") {
         viewModelScope.launch(Dispatchers.IO) {
@@ -192,6 +172,31 @@ class MessageViewModel @Inject constructor(
                 dateline,
             )
         }
+    }
+
+    fun onCheckCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.checkCount()
+                .collect { result ->
+                    val response = result.getOrNull()
+                    response?.data?.let {
+                        CookieUtil.atme = it.atme
+                        CookieUtil.atcommentme = it.atcommentme
+                        CookieUtil.feedlike = it.feedlike
+                        CookieUtil.contacts_follow = it.contactsFollow
+                        messCountList.postValue(true)
+                    }
+                }
+        }
+    }
+
+    fun refreshMessage() {
+        lastItem = null
+        page = 1
+        isEnd = false
+        isRefreshing = true
+        isLoadMore = false
+        fetchMessage()
     }
 
 }

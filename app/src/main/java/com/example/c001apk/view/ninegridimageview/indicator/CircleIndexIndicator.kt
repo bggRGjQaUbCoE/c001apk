@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import androidx.viewpager.widget.ViewPager
+import com.example.c001apk.view.circleindicator.CircleIndicator
 import net.mikaelzero.mojito.interfaces.IIndicator
 import net.mikaelzero.mojito.tools.Utils
 

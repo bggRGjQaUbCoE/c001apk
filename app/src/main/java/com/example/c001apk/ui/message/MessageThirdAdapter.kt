@@ -76,9 +76,7 @@ class MessageThirdAdapter : RecyclerView.Adapter<MessageThirdAdapter.ThirdViewHo
                 badgeList.let {
                     if (it[bindingAdapterPosition] > 0) {
                         binding.badge.isVisible = true
-                        binding.badge.text =
-                            if (it[bindingAdapterPosition] > 99) "99+"
-                            else it[bindingAdapterPosition].toString()
+                        binding.badge.text = it[bindingAdapterPosition].toString()
                     } else
                         binding.badge.isVisible = false
                 }

@@ -21,9 +21,9 @@ import com.example.c001apk.ui.appupdate.AppUpdateActivity
 import com.example.c001apk.ui.base.BaseViewFragment
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
-import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
+import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.util.IntentUtil
 import com.example.c001apk.util.dp
 import com.example.c001apk.util.setSpaceFooterView
@@ -116,9 +116,9 @@ class AppListFragment : BaseViewFragment<AppListViewModel>(), IOnTabClickListene
 
     override fun onScrolled(dy: Int) {
         if (dy > 0) {
-            (activity as? INavViewContainer)?.hideNavigationView()
+            (activity as? MainActivity)?.hideNavigationView()
         } else if (dy < 0) {
-            (activity as? INavViewContainer)?.showNavigationView()
+            (activity as? MainActivity)?.showNavigationView()
         }
     }
 

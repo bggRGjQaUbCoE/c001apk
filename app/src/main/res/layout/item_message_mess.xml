@@ -56,22 +56,19 @@
                 tools:ignore="RtlSymmetry"
                 tools:text="私信" />
 
-            <TextView
+            <com.example.c001apk.view.BadgeTextView
                 android:id="@+id/badge"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="@drawable/shape_oval_primary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?colorPrimary"
                 android:gravity="center"
-                android:includeFontPadding="false"
-                android:singleLine="true"
+                android:lines="1"
                 android:textColor="?colorOnPrimary"
                 android:textSize="12sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@id/title"
-                app:layout_constraintDimensionRatio="1"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/title"
-                app:layout_constraintTop_toTopOf="@id/title"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="99+" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

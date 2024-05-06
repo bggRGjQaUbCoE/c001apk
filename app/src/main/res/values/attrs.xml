@@ -162,4 +162,29 @@
         <attr name="silAutoSaveKeyboardHeight" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="BadgeTextView">
+
+        <attr name="android:background" />
+
+        <attr name="badge_circle_threshold" format="integer" />
+        <attr name="badge_count" format="integer" />
+        <attr name="badge_max_number" format="integer" />
+
+        <attr name="badge_round_corner_ratio" format="float"/>
+
+        <attr name="badge_padding_horizontal" format="dimension" />
+        <attr name="badge_padding_vertical" format="dimension" />
+
+        <attr name="badge_border_width" format="dimension" />
+        <attr name="badge_border_color" format="color" />
+
+        <attr name="badge_shadow_radius" format="dimension" />
+        <attr name="badge_shadow_offset_x" format="dimension" />
+        <attr name="badge_shadow_offset_y" format="dimension" />
+        <attr name="badge_shadow_color" format="color" />
+
+        <attr name="debug" format="boolean" />
+
+    </declare-styleable>
+
 </resources>

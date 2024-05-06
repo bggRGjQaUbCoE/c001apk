@@ -10,7 +10,7 @@ import com.example.c001apk.ui.applist.AppListFragment
 import com.example.c001apk.ui.base.BaseFragment
 import com.example.c001apk.ui.homefeed.HomeFeedFragment
 import com.example.c001apk.ui.hometopic.HomeTopicFragment
-import com.example.c001apk.ui.main.INavViewContainer
+import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.ui.others.CopyActivity
 import com.example.c001apk.ui.search.SearchActivity
 import com.example.c001apk.util.IntentUtil
@@ -43,7 +43,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), IOnTabClickContainer {
                     tabController?.onReturnTop(false)
                 else {
                     tabController?.onReturnTop(true)
-                    (activity as? INavViewContainer)?.showNavigationView()
+                    (activity as? MainActivity)?.showNavigationView()
                 }
             }
         })

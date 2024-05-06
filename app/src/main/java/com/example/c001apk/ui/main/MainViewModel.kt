@@ -20,7 +20,7 @@ class MainViewModel @Inject constructor(
     private val networkRepo: NetworkRepo
 ) : ViewModel() {
 
-    var badge: Int = 0
+    var lastCheck = System.currentTimeMillis()
     var isInit: Boolean = true
     val setBadge = MutableLiveData<Event<Boolean>>()
 
@@ -55,7 +55,7 @@ class MainViewModel @Inject constructor(
                         response.body()?.let {
                             if (response.body()?.data?.token != null) {
                                 response.body()?.data?.let { login ->
-                                    badge = login.notifyCount.badge
+                                    CookieUtil.badge = login.notifyCount.badge
                                     CookieUtil.atme = login.notifyCount.atme
                                     CookieUtil.atcommentme = login.notifyCount.atcommentme
                                     CookieUtil.feedlike = login.notifyCount.feedlike
@@ -87,10 +87,29 @@ class MainViewModel @Inject constructor(
                                 e.printStackTrace()
                             }
 
-                            if (badge != 0)
+                            if (CookieUtil.badge != 0)
                                 setBadge.postValue(Event(true))
 
                         }
+                    }
+                }
+        }
+    }
+
+    fun onCheckCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            networkRepo.checkCount()
+                .collect { result ->
+                    val response = result.getOrNull()
+                    response?.data?.let {
+                        CookieUtil.atme = it.atme
+                        CookieUtil.atcommentme = it.atcommentme
+                        CookieUtil.feedlike = it.feedlike
+                        CookieUtil.contacts_follow = it.contactsFollow
+                        CookieUtil.badge = it.badge
+                        CookieUtil.notification = it.notification
+                        if (CookieUtil.badge != 0)
+                            setBadge.postValue(Event(true))
                     }
                 }
         }

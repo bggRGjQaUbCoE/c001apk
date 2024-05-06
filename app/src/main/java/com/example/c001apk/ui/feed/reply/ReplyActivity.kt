@@ -4,19 +4,11 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.text.Editable
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
-import android.util.Base64
-import android.util.Base64.encodeToString
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
@@ -27,7 +19,6 @@ import android.view.View.OnTouchListener
 import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -45,16 +36,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import com.alibaba.sdk.android.oss.ClientConfiguration
-import com.alibaba.sdk.android.oss.ClientException
-import com.alibaba.sdk.android.oss.OSSClient
-import com.alibaba.sdk.android.oss.ServiceException
-import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback
-import com.alibaba.sdk.android.oss.common.OSSLog
-import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider
-import com.alibaba.sdk.android.oss.model.ObjectMetadata
-import com.alibaba.sdk.android.oss.model.PutObjectRequest
-import com.alibaba.sdk.android.oss.model.PutObjectResult
 import com.bumptech.glide.Glide
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
@@ -65,10 +46,15 @@ import com.example.c001apk.ui.base.BaseActivity
 import com.example.c001apk.ui.feed.reply.attopic.AtTopicActivity
 import com.example.c001apk.ui.feed.reply.emoji.EmojiPagerAdapter
 import com.example.c001apk.util.EmojiUtils
+import com.example.c001apk.util.ImageUtil.getImageDimensionsAndMD5
 import com.example.c001apk.util.ImageUtil.showIMG
+import com.example.c001apk.util.ImageUtil.toHex
 import com.example.c001apk.util.dp
 import com.example.c001apk.util.makeToast
-import com.example.c001apk.view.CenteredImageSpan
+import com.example.c001apk.util.ossUpload
+import com.example.c001apk.view.EmojiTextWatcher
+import com.example.c001apk.view.FastDeleteAtUserKeyListener
+import com.example.c001apk.view.OnTextInputListener
 import com.example.c001apk.view.SmoothInputLayout
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -78,10 +64,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.InputStream
-import java.security.MessageDigest
 import java.util.UUID
-import java.util.regex.Pattern
 
 
 /*
@@ -184,46 +167,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         }
     }
 
-    private fun ByteArray.toHex(): String {
-        val hexString = StringBuilder()
-        for (byte in this) {
-            hexString.append(String.format("%02x", byte))
-        }
-        return hexString.toString()
-    }
-
-    private fun getImageDimensionsAndMD5(uri: Uri): Pair<Triple<Int, Int, String>?, ByteArray?> {
-        var dimensions: Triple<Int, Int, String>? = null
-        var md5Hash: ByteArray? = null
-
-        try {
-            dimensions = contentResolver.openInputStream(uri)?.use { inputStream ->
-                val options = BitmapFactory.Options().apply {
-                    inJustDecodeBounds = true
-                }
-                BitmapFactory.decodeStream(inputStream, null, options)
-                Triple(options.outWidth, options.outHeight, options.outMimeType)
-            }
-            md5Hash = contentResolver.openInputStream(uri)?.use { inputStream ->
-                calculateMD5(inputStream)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return Pair(dimensions, md5Hash)
-    }
-
-    private fun calculateMD5(input: InputStream): ByteArray {
-        val md = MessageDigest.getInstance("MD5")
-        val buffer = ByteArray(8192)
-        var bytesRead = input.read(buffer)
-        while (bytesRead > 0) {
-            md.update(buffer, 0, bytesRead)
-            bytesRead = input.read(buffer)
-        }
-        return md.digest()
-    }
-
     private fun initPhotoPick() {
         pickMultipleMedia =
             registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(9)) { uris ->
@@ -235,7 +178,7 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                                 return@registerForActivityResult
                             }
 
-                            val result = getImageDimensionsAndMD5(uri)
+                            val result = getImageDimensionsAndMD5(contentResolver, uri)
                             val md5Byte = result.second
                             val md5 = md5Byte?.toHex() ?: ""
                             val width = result.first?.first ?: 0
@@ -372,98 +315,35 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
 
         viewModel.uploadImage.observe(this) { event ->
             event.getContentIfNotHandledOrReturnNull()?.let { responseData ->
-                runCatching {
-                    viewModel.replyAndFeedData["pic"] =
-                        responseData.fileInfo.joinToString(separator = ",") {
-                            responseData.uploadPrepareInfo.uploadImagePrefix + "/" + it.uploadFileName
-                        }
-
-                    val accessKeyId = responseData.uploadPrepareInfo.accessKeyId
-                    val accessKeySecret = responseData.uploadPrepareInfo.accessKeySecret
-                    val securityToken = responseData.uploadPrepareInfo.securityToken
-
-                    val endPoint = responseData.uploadPrepareInfo.endPoint.replace("https://", "")
-                    val bucket = responseData.uploadPrepareInfo.bucket
-                    val callbackUrl = responseData.uploadPrepareInfo.callbackUrl
-
-                    val conf = ClientConfiguration()
-                    conf.connectionTimeout = 5 * 60 * 1000
-                    conf.socketTimeout = 5 * 60 * 1000
-                    conf.maxConcurrentRequest = 5
-                    conf.maxErrorRetry = 2
-                    OSSLog.enableLog()
-                    val credentialProvider = OSSStsTokenCredentialProvider(
-                        accessKeyId,
-                        accessKeySecret,
-                        securityToken
-                    )
-                    val oss = OSSClient(
-                        this,
-                        endPoint,
-                        credentialProvider,
-                        conf
-                    )
-
-                    uriList.forEachIndexed { index, uri ->
-                        val put = PutObjectRequest(
-                            bucket,
-                            responseData.fileInfo[index].uploadFileName,
-                            uri
-                        )
-                        val metadata = ObjectMetadata()
-                        metadata.contentType = typeList[index]
-                        metadata.contentMD5 = encodeToString(md5List[index], Base64.DEFAULT).trim()
-                        metadata.setHeader(
-                            "x-oss-callback",
-                            "eyJjYWxsYmFja0JvZHlUeXBlIjoiYXBwbGljYXRpb25cL2pzb24iLCJjYWxsYmFja0hvc3QiOiJhcGkuY29vbGFway5jb20iLCJjYWxsYmFja1VybCI6Imh0dHBzOlwvXC9hcGkuY29vbGFway5jb21cL3Y2XC9jYWxsYmFja1wvbW9iaWxlT3NzVXBsb2FkU3VjY2Vzc0NhbGxiYWNrP2NoZWNrQXJ0aWNsZUNvdmVyUmVzb2x1dGlvbj0wJnZlcnNpb25Db2RlPTIxMDIwMzEiLCJjYWxsYmFja0JvZHkiOiJ7XCJidWNrZXRcIjoke2J1Y2tldH0sXCJvYmplY3RcIjoke29iamVjdH0sXCJoYXNQcm9jZXNzXCI6JHt4OnZhcjF9fSJ9"
-                        )
-                        metadata.setHeader("x-oss-callback-var", "eyJ4OnZhcjEiOiJmYWxzZSJ9")
-                        put.metadata = metadata
-                        put.callbackParam = object : HashMap<String?, String?>() {
-                            init {
-                                put("callbackUrl", callbackUrl)
-                                put(
-                                    "callbackHost",
-                                    Uri.parse(callbackUrl).host ?: "developer.coolapk.com"
-                                )
-                                put("callbackBodyType", "application/json")
-                                put("callbackBody", "filename=${responseData.fileInfo[index].name}")
-                            }
-                        }
-                        oss.asyncPutObject(put, OSSCallBack(
-                            iOnSuccess = {
-                                Log.i("OSSUpload", "uploadSuccess")
-                                if (index == uriList.lastIndex) {
-                                    if (type == "createFeed")
-                                        viewModel.onPostCreateFeed()
-                                    else
-                                        viewModel.onPostReply()
-                                }
-                            },
-                            iOnFailure = {
-                                Log.i("OSSUpload", "uploadFailed")
-                                runOnUiThread {
-                                    closeDialog()
-                                    Toast.makeText(this, "图片上传失败", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        ))
+                viewModel.replyAndFeedData["pic"] =
+                    responseData.fileInfo.joinToString(separator = ",") {
+                        responseData.uploadPrepareInfo.uploadImagePrefix + "/" + it.uploadFileName
                     }
-                }.onFailure {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle("图片上传失败")
-                        .setMessage(it.message)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .setNegativeButton("Log") { _, _ ->
-                            MaterialAlertDialogBuilder(this)
-                                .setTitle("Log")
-                                .setMessage(it.stackTraceToString())
-                                .setPositiveButton(android.R.string.ok, null)
-                                .show()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    ossUpload(
+                        this@ReplyActivity, responseData, uriList, typeList, md5List,
+                        iOnSuccess = { index ->
+                            Log.i("OSSUpload", "uploadSuccess")
+                            if (index == uriList.lastIndex) {
+                                if (type == "createFeed")
+                                    viewModel.onPostCreateFeed()
+                                else
+                                    viewModel.onPostReply()
+                            }
+                        },
+                        iOnFailure = {
+                            Log.i("OSSUpload", "uploadFailed")
+                            runOnUiThread {
+                                closeDialog()
+                                Toast.makeText(this@ReplyActivity, "图片上传失败", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        },
+                        closeDialog = {
+                            closeDialog()
                         }
-                        .show()
+                    )
                 }
-
             }
         }
 
@@ -673,7 +553,21 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
                     0
                 ), 128
             )
-            addTextChangedListener(textWatcher)
+            addTextChangedListener(EmojiTextWatcher(this@ReplyActivity, binding.editText.textSize) {
+                if (binding.editText.text.toString().trim().isBlank()) {
+                    binding.publish.isClickable = false
+                    binding.publish.setTextColor(getColor(android.R.color.darker_gray))
+                } else {
+                    binding.publish.isClickable = true
+                    binding.publish.setTextColor(
+                        MaterialColors.getColor(
+                            this@ReplyActivity,
+                            com.google.android.material.R.attr.colorPrimary,
+                            0
+                        )
+                    )
+                }
+            })
             addTextChangedListener(OnTextInputListener("@") {
                 isFromAt = true
                 launchAtTopic("user")
@@ -686,87 +580,6 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         super.onDestroy()
         closeDialog()
         countDownTimer.cancel()
-        binding.editText.removeTextChangedListener(textWatcher)
-    }
-
-    private val textWatcher = object : TextWatcher {
-
-        private val AT_PATTERN = Pattern.compile("@[\\w\\-._]+")
-        private val TAG_PATTERN = Pattern.compile("#[^# @]+#")
-        private val EMOJI_PATTERN = Pattern.compile("\\[[^\\]]+\\]")
-
-        override fun afterTextChanged(editable: Editable) {
-            if (binding.editText.text.toString().trim().isBlank()) {
-                binding.publish.isClickable = false
-                binding.publish.setTextColor(getColor(android.R.color.darker_gray))
-            } else {
-                binding.publish.isClickable = true
-                binding.publish.setTextColor(
-                    MaterialColors.getColor(
-                        this@ReplyActivity,
-                        com.google.android.material.R.attr.colorPrimary,
-                        0
-                    )
-                )
-            }
-        }
-
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(
-            charSequence: CharSequence,
-            start: Int,
-            before: Int,
-            count: Int
-        ) {
-            val spannable = charSequence as Spannable
-            val total = start + count
-            setEmoticonSpan(spannable, EMOJI_PATTERN, start, total)
-            tintPatternColor(spannable, AT_PATTERN, start, total)
-            tintPatternColor(spannable, TAG_PATTERN, start, total)
-        }
-    }
-
-    private fun tintPatternColor(spannable: Spannable, pattern: Pattern, start: Int, total: Int) {
-        val region = pattern.matcher(spannable).region(start, total)
-        while (region.find()) {
-            val group = region.group()
-            spannable.setSpan(
-                ForegroundColorSpan(
-                    MaterialColors.getColor(
-                        this@ReplyActivity,
-                        com.google.android.material.R.attr.colorPrimary,
-                        0
-                    )
-                ),
-                region.start(),
-                region.start() + group.length,
-                33
-            )
-        }
-    }
-
-    private fun setEmoticonSpan(spannable: Spannable, pattern: Pattern, start: Int, total: Int) {
-        val matcher = pattern.matcher(spannable).region(start, total)
-        while (matcher.find()) {
-            val group = matcher.group()
-            EmojiUtils.emojiMap[group]?.let {
-                getDrawable(it)?.let { emoji ->
-                    val size = binding.editText.textSize
-                    if (group in listOf("[楼主]", "[层主]", "[置顶]"))
-                        emoji.setBounds(0, 0, (size * 2).toInt(), size.toInt())
-                    else
-                        emoji.setBounds(0, 0, (size * 1.4).toInt(), (size * 1.4).toInt())
-                    val imageSpan = CenteredImageSpan(emoji, (size * 1.4).toInt(), group)
-                    spannable.setSpan(
-                        imageSpan,
-                        matcher.start(),
-                        matcher.end(),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-
-            }
-        }
     }
 
     override fun onAttachedToWindow() {
@@ -992,168 +805,4 @@ class ReplyActivity : BaseActivity<ActivityReplyBinding>(),
         )
     }
 
-}
-
-class FastDeleteAtUserKeyListener : View.OnKeyListener {
-    override fun onKey(view: View, keyCode: Int, keyEvent: KeyEvent): Boolean {
-        val editText = view as EditText
-        if (keyCode == KeyEvent.KEYCODE_DEL && keyEvent.action == KeyEvent.ACTION_DOWN) {
-            if (removeFastDelete(editText)) {
-                return true
-            }
-
-            val text = editText.text
-            val selectionStart = editText.selectionStart
-            if (selectionStart <= 0) {
-                return false
-            }
-            val charAt = text[selectionStart - 1]
-            if (charAt != ' ' && charAt != ':' || selectionStart != editText.selectionEnd) {
-                return false
-            }
-            val lastIndexOfAt = lastIndexOfAt(text, selectionStart)
-            val lastIndexOfTopicStart = lastIndexOfTopicStart(text, selectionStart)
-            if (lastIndexOfAt >= 0 && lastIndexOfAt > lastIndexOfTopicStart) {
-                val cArr = CharArray(selectionStart - lastIndexOfAt)
-                text.getChars(lastIndexOfAt, selectionStart, cArr, 0)
-                if (!AT_PATTERN.matcher(String(cArr)).matches()) {
-                    return false
-                }
-                text.delete(lastIndexOfAt, selectionStart)
-                return true
-            }
-            if (lastIndexOfTopicStart >= 0 && lastIndexOfTopicStart > lastIndexOfAt) {
-                val cArr2 = CharArray(selectionStart - lastIndexOfTopicStart)
-                text.getChars(lastIndexOfTopicStart, selectionStart, cArr2, 0)
-                if (TAG_PATTERN.matcher(String(cArr2)).matches()) {
-                    text.delete(lastIndexOfTopicStart, selectionStart)
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    private fun lastIndexOfAt(editable: Editable, i: Int): Int {
-        for (i2 in i - 1 downTo 0) {
-            if (editable[i2] == '@') {
-                return i2
-            }
-        }
-        return -1
-    }
-
-    private fun lastIndexOfTopicStart(editable: Editable, i: Int): Int {
-        var i2 = 0
-        for (i3 in i - 1 downTo 0) {
-            if (editable[i3] == '#') {
-                i2++
-            }
-            if (i2 == 2) {
-                return i3
-            }
-        }
-        return -1
-    }
-
-    private fun removeFastDelete(editText: EditText): Boolean {
-        val spannableStringBuilder = editText.text as SpannableStringBuilder
-        var selectionStart = editText.selectionStart
-        val selectionEnd = editText.selectionEnd
-        if (selectionEnd == selectionStart && selectionStart > 0) {
-            selectionStart--
-        }
-        var z = false
-        for (fastDeleteSpan in
-        spannableStringBuilder.getSpans(
-            selectionStart, selectionEnd, FastDeleteSpan::class.java
-        ) as Array<FastDeleteSpan?>) {
-            val spanStart = spannableStringBuilder.getSpanStart(fastDeleteSpan)
-            val spanEnd = spannableStringBuilder.getSpanEnd(fastDeleteSpan)
-            spannableStringBuilder.delete(spanStart, spanEnd)
-            spannableStringBuilder.removeSpan(fastDeleteSpan)
-            if (spanEnd == selectionEnd) {
-                z = true
-            }
-        }
-        return z
-    }
-
-    companion object {
-        private val AT_PATTERN = Pattern.compile("@[\\w\\-._]+[\\s:]")
-        private val TAG_PATTERN = Pattern.compile("#[^# @]+#\\s")
-    }
-
-    class FastDeleteSpan
-
-}
-
-class OnTextInputListener(
-    private val text: String,
-    private val onTextChange: () -> Unit
-) :
-    TextWatcher {
-    override fun afterTextChanged(editable: Editable) {}
-    override fun beforeTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-        if (before == 0 && count == text.length
-            && s.subSequence(start, start + count).toString() == text
-        ) {
-            onTextChange()
-        }
-    }
-}
-
-class OSSCallBack(
-    private val iOnSuccess: () -> Unit,
-    private val iOnFailure: () -> Unit,
-) : OSSCompletedCallback<PutObjectRequest?, PutObjectResult?> {
-    override fun onSuccess(
-        request: PutObjectRequest?,
-        result: PutObjectResult?
-    ) {
-        iOnSuccess()
-    }
-
-    override fun onFailure(
-        request: PutObjectRequest?,
-        clientException: ClientException?,
-        serviceException: ServiceException?
-    ) {
-
-        iOnFailure()
-
-        // Request exception
-        if (clientException != null) {
-            // Local exception, such as a network exception
-            Log.i(
-                "OSSUpload",
-                "uploadFailed: clientException: ${clientException.message}"
-            )
-            clientException.printStackTrace()
-        }
-        if (serviceException != null) {
-            // Service exception
-            Log.i(
-                "OSSUpload",
-                "OSSUpload: serviceException: ${serviceException.message}"
-            )
-            Log.i(
-                "OSSUpload",
-                "ErrorCode=" + serviceException.errorCode
-            )
-            Log.i(
-                "OSSUpload",
-                "RequestId=" + serviceException.requestId
-            )
-            Log.i(
-                "OSSUpload",
-                "HostId=" + serviceException.hostId
-            )
-            Log.i(
-                "OSSUpload",
-                "RawMessage=" + serviceException.rawMessage
-            )
-        }
-    }
 }

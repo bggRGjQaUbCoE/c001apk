@@ -1,6 +1,7 @@
 package com.example.c001apk.util
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
@@ -51,7 +52,9 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
 import java.io.OutputStream
+import java.security.MessageDigest
 
 
 object ImageUtil {
@@ -511,6 +514,49 @@ object ImageUtil {
             imgHeight = url.substring(x + 1, dot).toInt()
         }
         return Pair(imgWidth, imgHeight)
+    }
+
+    fun ByteArray.toHex(): String {
+        val hexString = StringBuilder()
+        for (byte in this) {
+            hexString.append(String.format("%02x", byte))
+        }
+        return hexString.toString()
+    }
+
+    fun getImageDimensionsAndMD5(
+        contentResolver: ContentResolver,
+        uri: Uri
+    ): Pair<Triple<Int, Int, String>?, ByteArray?> {
+        var dimensions: Triple<Int, Int, String>? = null
+        var md5Hash: ByteArray? = null
+
+        try {
+            dimensions = contentResolver.openInputStream(uri)?.use { inputStream ->
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeStream(inputStream, null, options)
+                Triple(options.outWidth, options.outHeight, options.outMimeType)
+            }
+            md5Hash = contentResolver.openInputStream(uri)?.use { inputStream ->
+                calculateMD5(inputStream)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(dimensions, md5Hash)
+    }
+
+    private fun calculateMD5(input: InputStream): ByteArray {
+        val md = MessageDigest.getInstance("MD5")
+        val buffer = ByteArray(8192)
+        var bytesRead = input.read(buffer)
+        while (bytesRead > 0) {
+            md.update(buffer, 0, bytesRead)
+            bytesRead = input.read(buffer)
+        }
+        return md.digest()
     }
 
 }

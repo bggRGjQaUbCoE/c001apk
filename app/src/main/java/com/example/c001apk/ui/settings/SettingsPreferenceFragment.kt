@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.c001apk.BuildConfig
 import com.example.c001apk.R
 import com.example.c001apk.ui.blacklist.BlackListActivity
-import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.ui.others.AboutActivity
 import com.example.c001apk.ui.settings.params.ParamsActivity
@@ -53,9 +52,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     if (dy > 0) {
-                        (activity as? INavViewContainer)?.hideNavigationView()
+                        (activity as? MainActivity)?.hideNavigationView()
                     } else if (dy < 0) {
-                        (activity as? INavViewContainer)?.showNavigationView()
+                        (activity as? MainActivity)?.showNavigationView()
                     }
                 }
             })

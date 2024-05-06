@@ -22,5 +22,7 @@ object CookieUtil {
     var atcommentme: Int? = null
     var feedlike: Int? = null
     var contacts_follow: Int? = null
+    var badge: Int = 0
+    var notification: Int = 0
 
 }

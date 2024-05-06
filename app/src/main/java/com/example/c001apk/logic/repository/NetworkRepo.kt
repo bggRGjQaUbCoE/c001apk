@@ -257,6 +257,10 @@ class NetworkRepo @Inject constructor(
         Result.success(apiService.loadShareUrl(url).await())
     }
 
+    suspend fun checkCount() = fire {
+        Result.success(apiService.checkCount().await())
+    }
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

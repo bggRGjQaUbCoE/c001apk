@@ -26,9 +26,9 @@ import com.example.c001apk.ui.base.BaseAppFragment
 import com.example.c001apk.ui.feed.reply.ReplyActivity
 import com.example.c001apk.ui.home.IOnTabClickContainer
 import com.example.c001apk.ui.home.IOnTabClickListener
-import com.example.c001apk.ui.main.INavViewContainer
 import com.example.c001apk.ui.main.IOnBottomClickContainer
 import com.example.c001apk.ui.main.IOnBottomClickListener
+import com.example.c001apk.ui.main.MainActivity
 import com.example.c001apk.util.PrefManager
 import com.example.c001apk.util.TokenDeviceUtils.getLastingInstallTime
 import com.example.c001apk.util.dp
@@ -184,9 +184,9 @@ class HomeFeedFragment : BaseAppFragment<HomeFeedViewModel>(), IOnTabClickListen
 
     override fun onScrolled(dy: Int) {
         if (dy > 0) {
-            (activity as? INavViewContainer)?.hideNavigationView()
+            (activity as? MainActivity)?.hideNavigationView()
         } else if (dy < 0) {
-            (activity as? INavViewContainer)?.showNavigationView()
+            (activity as? MainActivity)?.showNavigationView()
         }
     }
 

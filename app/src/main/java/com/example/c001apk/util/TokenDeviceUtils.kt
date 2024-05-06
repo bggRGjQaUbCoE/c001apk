@@ -1,7 +1,6 @@
 package com.example.c001apk.util
 
 import android.content.Context
-import com.example.c001apk.MyApplication.Companion.context
 import com.example.c001apk.constant.Constants
 import com.example.c001apk.util.Utils.getBase64
 import com.example.c001apk.util.Utils.getMD5
