@@ -175,6 +175,7 @@ object DatabaseModule {
             .addMigrations(HomeMenuDatabase_MIGRATION_1_2)
             .addMigrations(HomeMenuDatabase_MIGRATION_2_3)
             .addMigrations(HomeMenuDatabase_MIGRATION_3_4)
+            .addMigrations(HomeMenuDatabase_MIGRATION_4_5)
             .build()
     }
 
@@ -222,6 +223,15 @@ object HomeMenuDatabase_MIGRATION_2_3 : Migration(2, 3) {
 object HomeMenuDatabase_MIGRATION_3_4 : Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("insert into HomeMenu (position,title,isEnable) values (6,'酷图',1)")
+    }
+}
+
+object HomeMenuDatabase_MIGRATION_4_5 : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `HomeMenu_new` (`position` INTEGER NOT NULL, `title` TEXT NOT NULL, `isEnable` INTEGER NOT NULL, PRIMARY KEY(`title`))")
+        db.execSQL("INSERT INTO HomeMenu_new (position, title, isEnable) SELECT position, title, isEnable FROM HomeMenu")
+        db.execSQL("DROP TABLE HomeMenu")
+        db.execSQL("ALTER TABLE HomeMenu_new RENAME TO HomeMenu")
     }
 }
 

@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class HomeMenu(
-    @PrimaryKey
     var position: Int,
+    @PrimaryKey
     var title: String,
     var isEnable: Boolean
 )
