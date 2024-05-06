@@ -26,14 +26,14 @@
         android:title="@string/share" />
 
     <item
-        android:id="@+id/copyLink"
-        android:showAsAction="never"
-        android:title="@string/copyLink" />
-
-    <item
         android:id="@+id/report"
         android:showAsAction="never"
         android:title="@string/report" />
+
+    <item
+        android:id="@+id/copyLink"
+        android:showAsAction="never"
+        android:title="@string/copyLink" />
 
     <item
         android:id="@+id/block"

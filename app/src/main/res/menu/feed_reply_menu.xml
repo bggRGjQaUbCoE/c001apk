@@ -12,14 +12,14 @@
         android:title="@string/copyText" />
 
     <item
-        android:id="@+id/show"
-        android:showAsAction="never"
-        android:title="@string/show_reply_1" />
-
-    <item
         android:id="@+id/report"
         android:showAsAction="never"
         android:title="@string/report" />
+
+    <item
+        android:id="@+id/show"
+        android:showAsAction="never"
+        android:title="@string/show_reply_1" />
 
     <item
         android:id="@+id/block"

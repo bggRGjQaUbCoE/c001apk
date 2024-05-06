@@ -197,7 +197,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>() {
                     if (isPortrait) mLayoutManager.findFirstVisibleItemPosition()
                     else sLayoutManager.findFirstVisibleItemPositions(null).min()
                 val shouldShow =
-                    if (firstVisibleItemPosition <= 1) scrollYDistance >= 40.dp
+                    if (firstVisibleItemPosition in (0..1)) scrollYDistance >= 40.dp
                     else true
                 binding.toolBar.title = if (shouldShow) null else viewModel.feedTypeName
                 if (shouldShow && !binding.titleProfile.isVisible) {

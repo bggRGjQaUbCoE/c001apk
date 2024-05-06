@@ -3,6 +3,7 @@ package com.example.c001apk.ui.settings
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -229,10 +230,10 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             }
             slider.addOnChangeListener { _, value, _ ->
                 fontScale.text = "字体大小: ${String.format("%.2f", value)}"
-                fontScale.textSize = 16f * value
+                fontScale.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f * value)
             }
             fontScale.text = "字体大小: ${PrefManager.FONTSCALE}"
-            fontScale.textSize = 16f * PrefManager.FONTSCALE.toFloat()
+            fontScale.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f * PrefManager.FONTSCALE.toFloat())
             MaterialAlertDialogBuilder(requireContext()).apply {
                 setView(view)
                 setTitle(R.string.font_scale)
