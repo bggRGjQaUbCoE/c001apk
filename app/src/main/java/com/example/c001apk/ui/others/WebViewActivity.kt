@@ -239,6 +239,10 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                     }
                 }
                 webChromeClient = object : WebChromeClient() {
+                    override fun onCloseWindow(window: WebView?) {
+                        super.onCloseWindow(window)
+                        finish()
+                    }
                     override fun onProgressChanged(view: WebView?, newProgress: Int) {
                         if (newProgress == 100) {
                             binding.progressBar.isVisible = false
