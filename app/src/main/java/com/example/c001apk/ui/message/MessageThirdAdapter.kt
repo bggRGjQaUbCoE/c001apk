@@ -25,17 +25,13 @@ class MessageThirdAdapter : RecyclerView.Adapter<MessageThirdAdapter.ThirdViewHo
         R.drawable.ic_at, R.drawable.ic_comment, R.drawable.ic_thumb,
         R.drawable.ic_add, R.drawable.ic_message1
     )
-    private var badgeList: List<Int>? = null
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setBadgeList(badgeList: List<Int>) {
-        if (badgeList.isNotEmpty()) {
-            this.badgeList = badgeList
-            notifyDataSetChanged()
-        }
+    fun updateBadge() {
+        notifyDataSetChanged()
     }
 
-    class ThirdViewHolder(val binding: ItemMessageMessBinding) :
+    inner class ThirdViewHolder(val binding: ItemMessageMessBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
@@ -71,16 +67,19 @@ class MessageThirdAdapter : RecyclerView.Adapter<MessageThirdAdapter.ThirdViewHo
             }
         }
 
-        fun bind(badgeList: List<Int>?) {
-            if (!badgeList.isNullOrEmpty())
-                badgeList.let {
-                    if (it[bindingAdapterPosition] > 0) {
-                        binding.badge.isVisible = true
-                        binding.badge.text = it[bindingAdapterPosition].toString()
-                    } else
-                        binding.badge.isVisible = false
+        fun bind() {
+            binding.apply {
+                val count = when (bindingAdapterPosition) {
+                    0 -> atme ?: 0
+                    1 -> atcommentme ?: 0
+                    2 -> feedlike ?: 0
+                    3 -> contacts_follow ?: 0
+                    else -> 0
                 }
-            binding.executePendingBindings()
+                binding.badge.text = count.toString()
+                binding.badge.isVisible = count > 0
+                binding.executePendingBindings()
+            }
         }
     }
 
@@ -98,6 +97,6 @@ class MessageThirdAdapter : RecyclerView.Adapter<MessageThirdAdapter.ThirdViewHo
     override fun getItemCount() = 4
 
     override fun onBindViewHolder(holder: ThirdViewHolder, position: Int) {
-        holder.bind(badgeList)
+        holder.bind()
     }
 }

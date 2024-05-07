@@ -89,14 +89,7 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         }
 
         viewModel.messCountList.observe(viewLifecycleOwner) {
-            messageThirdAdapter.setBadgeList(
-                listOf(
-                    atme ?: 0,
-                    atcommentme ?: 0,
-                    feedlike ?: 0,
-                    contacts_follow ?: 0,
-                )
-            )
+            messageThirdAdapter.updateBadge()
         }
 
         viewModel.toastText.observe(viewLifecycleOwner) { event ->
