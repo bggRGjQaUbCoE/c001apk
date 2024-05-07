@@ -82,14 +82,14 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     "图形验证码不能为空" -> {
                         binding.captchaImg.isVisible = true
                         binding.captchaLayout.isVisible = true
-                        viewModel.onGetCaptcha()
+                        getCaptcha()
                     }
 
-                    "图形验证码错误" -> viewModel.onGetCaptcha()
+                    "图形验证码错误" -> getCaptcha()
 
                     "密码错误" -> {
                         if (binding.captchaImg.isVisible)
-                            viewModel.onGetCaptcha()
+                            getCaptcha()
                     }
                 }
             }
